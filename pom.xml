@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.increff.omni</groupId>
+    <artifactId>omni-reporting</artifactId>
+    <version>1.0-SNAPSHOT</version>
+
+    <properties>
+        <!-- Maven Properties -->
+        <java.version>1.8</java.version>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+        <!-- Jetty -->
+        <jetty.version>9.3.7.v20160115</jetty.version>
+        <jetty.http.port>9000</jetty.http.port>
+        <jetty.http.host>0.0.0.0</jetty.http.host>
+        <jetty.context>/omni-reporting/</jetty.context>
+        <failOnMissingWebXml>false</failOnMissingWebXml>
+
+        <!-- Increff Dependencies -->
+        <nextscm-commons-spring.version>2.1</nextscm-commons-spring.version>
+        <increff-commons-logging.version>1.5</increff-commons-logging.version>
+        <lombok.version>1.18.22</lombok.version>
+        <swagger.version>2.7.0</swagger.version>
+        <log4j.version>1.2.17</log4j.version>
+
+        <!-- Runtime/Test depdendencies -->
+        <javax.servlet.version>3.1.0</javax.servlet.version>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.nextscm.commons</groupId>
+            <artifactId>commons-spring-server</artifactId>
+            <version>${nextscm-commons-spring.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.increff.commons</groupId>
+            <artifactId>commons-logging</artifactId>
+            <version>${increff-commons-logging.version}</version>
+        </dependency>
+
+
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <version>${javax.servlet.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>${lombok.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.nextscm.commons</groupId>
+            <artifactId>commons-spring-test</artifactId>
+            <version>${nextscm-commons-spring.version}</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <!-- Jetty plugin, for web application testing -->
+            <plugin>
+                <groupId>org.eclipse.jetty</groupId>
+                <artifactId>jetty-maven-plugin</artifactId>
+                <version>${jetty.version}</version>
+                <configuration>
+                    <scanIntervalSeconds>5</scanIntervalSeconds>
+                    <useTestClasspath>false</useTestClasspath>
+                    <systemProperties>
+                        <systemProperty>
+                            <name>log4j.configuration</name>
+                            <value>file:./log4j.properties</value>
+                        </systemProperty>
+                    </systemProperties>
+                    <httpConnector>
+                        <port>${jetty.http.port}</port>
+                    </httpConnector>
+                    <webApp>
+                        <contextPath>${jetty.context}</contextPath>
+                    </webApp>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <repositories>
+        <!-- For NextSCM -->
+        <repository>
+            <id>increff-release</id>
+            <url>https://one.increff.com/artifactory/libs-release-local</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+        </repository>
+        <repository>
+            <id>increff-snapshot</id>
+            <url>https://one.increff.com/artifactory/libs-snapshot-local</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+        </repository>
+
+        <repository>
+            <id>jcenter-snapshots</id>
+            <name>jcenter</name>
+            <url>https://jcenter.bintray.com/</url>
+        </repository>
+    </repositories>
+
+    <distributionManagement>
+        <repository>
+            <id>increff-release</id>
+            <url>https://one.increff.com/artifactory/libs-release-local</url>
+        </repository>
+        <snapshotRepository>
+            <id>increff-snapshot</id>
+            <url>https://one.increff.com/artifactory/libs-snapshot-local</url>
+        </snapshotRepository>
+    </distributionManagement>
+
+    <scm>
+        <url>https://bitbucket.org/increff/crossdoc/src</url>
+        <connection>scm:git:https://nextscm_jenkins@bitbucket.org/increff/omni-reporting.git</connection>
+        <developerConnection>scm:git:https://nextscm_jenkins@bitbucket.org/increff/omni-reporting.git</developerConnection>
+        <tag>HEAD</tag>
+    </scm>
+
+    
+</project>

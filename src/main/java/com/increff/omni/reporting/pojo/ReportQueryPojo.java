@@ -1,0 +1,24 @@
+package com.increff.omni.reporting.pojo;
+
+import lombok.Getter;
+import lombok.Setter;
+
+import javax.persistence.*;
+
+@Entity
+@Setter
+@Getter
+@Table(name = "report_query")
+public class ReportQueryPojo {
+
+    @Id
+    @TableGenerator(name = "report_query", pkColumnValue = "report_query", allocationSize = 1,initialValue = 100000)
+    @GeneratedValue(strategy = GenerationType.TABLE, generator = "report_query")
+    private Integer id;
+
+    private Integer reportId;
+
+    @Lob
+    private String value;
+
+}
