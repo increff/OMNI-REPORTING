@@ -15,9 +15,8 @@ public class ConnectionPojo extends AbstractVersionedPojo{
     @TableGenerator(name = "connection", pkColumnValue = "connection", allocationSize = 1,initialValue = 100000)
     @GeneratedValue(strategy = GenerationType.TABLE, generator = "connection")
     private Integer id;
-
     private String name;
-    private String url;
+    private String host;
     private String username;
     private String password;
 }

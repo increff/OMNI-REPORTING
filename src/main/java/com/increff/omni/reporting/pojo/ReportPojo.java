@@ -23,4 +23,6 @@ public class ReportPojo extends AbstractVersionedPojo{
     private ReportType type;
 
     private Integer directoryId;
+
+    private Integer schemaId;
 }

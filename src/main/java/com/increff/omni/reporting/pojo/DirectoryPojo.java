@@ -16,9 +16,7 @@ public class DirectoryPojo extends AbstractVersionedPojo{
     @TableGenerator(name = "directory", pkColumnValue = "directory", allocationSize = 1,initialValue = 100000)
     @GeneratedValue(strategy = GenerationType.TABLE, generator = "directory")
     private Integer id;
-
     private String directoryName;
-
     private Integer parentId;
 
 }

@@ -15,7 +15,6 @@ public class SchemaPojo extends AbstractVersionedPojo{
     @TableGenerator(name = "schema", pkColumnValue = "schema", allocationSize = 1,initialValue = 100000)
     @GeneratedValue(strategy = GenerationType.TABLE, generator = "schema")
     private Integer id;
-
     private String name;
 
 }
