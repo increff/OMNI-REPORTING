@@ -1,7 +1,7 @@
 package com.increff.omni.reporting.pojo;
 
-import com.increff.omni.reporting.constants.InputControlScope;
-import com.increff.omni.reporting.constants.InputControlType;
+import com.increff.omni.reporting.model.constants.InputControlScope;
+import com.increff.omni.reporting.model.constants.InputControlType;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -32,10 +32,5 @@ public class InputControlPojo extends AbstractVersionedPojo{
     @Enumerated(EnumType.STRING)
     private InputControlType type;
 
-    @Column(nullable = false)
-    private Boolean mandatory;
-
-    //Dataset for select
-    //Validations ??
 
 }

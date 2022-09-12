@@ -1,6 +1,6 @@
 package com.increff.omni.reporting.api;
 
-import com.increff.omni.reporting.constants.ReportType;
+import com.increff.omni.reporting.model.constants.ReportType;
 import com.increff.omni.reporting.dao.ReportDao;
 import com.increff.omni.reporting.pojo.ReportPojo;
 import com.nextscm.commons.spring.common.ApiException;

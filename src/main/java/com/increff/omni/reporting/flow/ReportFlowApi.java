@@ -1,7 +1,7 @@
 package com.increff.omni.reporting.flow;
 
 import com.increff.omni.reporting.api.*;
-import com.increff.omni.reporting.constants.ReportType;
+import com.increff.omni.reporting.model.constants.ReportType;
 import com.increff.omni.reporting.pojo.CustomReportAccessPojo;
 import com.increff.omni.reporting.pojo.OrgSchemaPojo;
 import com.increff.omni.reporting.pojo.ReportPojo;

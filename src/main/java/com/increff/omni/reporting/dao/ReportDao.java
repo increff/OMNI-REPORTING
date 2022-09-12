@@ -1,7 +1,6 @@
 package com.increff.omni.reporting.dao;
 
-import com.increff.omni.reporting.constants.ReportType;
-import com.increff.omni.reporting.pojo.InputControlPojo;
+import com.increff.omni.reporting.model.constants.ReportType;
 import com.increff.omni.reporting.pojo.ReportPojo;
 import com.nextscm.commons.spring.db.AbstractDao;
 import org.springframework.stereotype.Repository;

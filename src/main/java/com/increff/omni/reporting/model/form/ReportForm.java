@@ -1,12 +1,9 @@
 package com.increff.omni.reporting.model.form;
 
-import com.increff.omni.reporting.constants.ReportType;
+import com.increff.omni.reporting.model.constants.ReportType;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.stereotype.Service;
 
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.validation.constraints.NotNull;
 
 @Setter

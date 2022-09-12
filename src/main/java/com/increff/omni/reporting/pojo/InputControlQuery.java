@@ -12,9 +12,12 @@ import javax.persistence.*;
 public class InputControlQuery extends AbstractVersionedPojo{
 
     @Id
-    @TableGenerator(name = "organization", pkColumnValue = "organization", allocationSize = 1,initialValue = 100000)
-    @GeneratedValue(strategy = GenerationType.TABLE, generator = "organization")
+    @TableGenerator(name = "input_control_query", pkColumnValue = "input_control_query", allocationSize = 1,
+            initialValue = 100000)
+    @GeneratedValue(strategy = GenerationType.TABLE, generator = "input_control_query")
     private Integer id;
+
+    private Integer controlId;
 
     @Lob
     private String query;
