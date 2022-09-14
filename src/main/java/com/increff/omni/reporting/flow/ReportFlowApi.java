@@ -1,11 +1,9 @@
 package com.increff.omni.reporting.flow;
 
 import com.increff.omni.reporting.api.*;
+import com.increff.omni.reporting.model.constants.InputControlScope;
 import com.increff.omni.reporting.model.constants.ReportType;
-import com.increff.omni.reporting.pojo.CustomReportAccessPojo;
-import com.increff.omni.reporting.pojo.OrgSchemaPojo;
-import com.increff.omni.reporting.pojo.ReportPojo;
-import com.increff.omni.reporting.pojo.ReportQueryPojo;
+import com.increff.omni.reporting.pojo.*;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
 import com.nextscm.commons.spring.server.AbstractApi;
@@ -38,6 +36,12 @@ public class ReportFlowApi extends AbstractApi {
     @Autowired
     private ReportQueryApi queryApi;
 
+    @Autowired
+    private ReportControlsApi reportControlsApi;
+
+    @Autowired
+    private InputControlApi inputControlApi;
+
     public ReportPojo addReport(ReportPojo pojo) throws ApiException {
         validate(pojo);
         return api.add(pojo);
@@ -51,6 +55,20 @@ public class ReportFlowApi extends AbstractApi {
     public ReportQueryPojo upsertQuery(ReportQueryPojo pojo) throws ApiException {
         api.getCheck(pojo.getId());
         return queryApi.upsertQuery(pojo);
+    }
+
+    public ReportControlsPojo mapControlToReport(ReportControlsPojo pojo) throws ApiException {
+        validateControlReportMapping(pojo);
+        return reportControlsApi.add(pojo);
+    }
+
+    private void validateControlReportMapping(ReportControlsPojo pojo) throws ApiException {
+        //valid report
+        api.getCheck(pojo.getReportId());
+        //valid control - Global
+        InputControlPojo icPojo = inputControlApi.getCheck(pojo.getControlId());
+        if(icPojo.getScope().equals(InputControlScope.LOCAL))
+            throw new ApiException(ApiStatus.BAD_DATA, "Only Global Control can be mapped to a report");
     }
 
     private void validateForEdit(ReportPojo pojo) throws ApiException {

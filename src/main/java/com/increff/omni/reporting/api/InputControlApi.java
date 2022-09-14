@@ -70,6 +70,11 @@ public class InputControlApi extends AbstractApi {
         return null;
     }
 
+    public InputControlPojo getCheck(Integer id) throws ApiException {
+        InputControlPojo pojo = dao.select(id);
+        checkNotNull(pojo, "No control present for id : " + id);
+        return pojo;
+    }
 
     public List<InputControlQuery> selectControlQueries(List<Integer> controlIds){
         if(CollectionUtils.isEmpty(controlIds))

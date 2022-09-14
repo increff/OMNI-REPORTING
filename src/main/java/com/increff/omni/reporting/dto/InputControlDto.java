@@ -95,7 +95,7 @@ public class InputControlDto extends AbstractDtoApi {
         }).collect(Collectors.toList());
     }
 
-    public void validate(InputControlForm form) throws ApiException {
+    private void validate(InputControlForm form) throws ApiException {
         checkValid(form);
         validateForControlType(form);
         validateForControlScope(form);

@@ -50,4 +50,11 @@ public class ReportController {
         return dto.upsertQuery(reportId, form);
     }
 
+    @ApiOperation(value = "Map control to a report")
+    @ApiErrorResponses
+    @RequestMapping(value = "/{reportId}/controls/{controlId}", method = RequestMethod.POST)
+    public void mapReportToControl(@PathVariable Integer reportId, @PathVariable Integer controlId) throws ApiException {
+        dto.mapToControl(reportId, controlId);
+    }
+
 }

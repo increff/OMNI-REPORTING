@@ -5,9 +5,11 @@ import com.increff.omni.reporting.model.data.ReportData;
 import com.increff.omni.reporting.model.data.ReportQueryData;
 import com.increff.omni.reporting.model.form.ReportForm;
 import com.increff.omni.reporting.model.form.ReportQueryForm;
+import com.increff.omni.reporting.pojo.ReportControlsPojo;
 import com.increff.omni.reporting.pojo.ReportPojo;
 import com.increff.omni.reporting.pojo.ReportQueryPojo;
 import com.nextscm.commons.spring.common.ApiException;
+import com.nextscm.commons.spring.common.ApiStatus;
 import com.nextscm.commons.spring.common.ConvertUtil;
 import com.nextscm.commons.spring.server.AbstractDtoApi;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,6 +50,16 @@ public class ReportDto extends AbstractDtoApi {
     public List<ReportData> selectAll(Integer orgId) throws ApiException {
         List<ReportPojo> pojos = flowApi.getAll(orgId);
         return ConvertUtil.convert(pojos, ReportData.class);
+    }
+    
+    public void mapToControl(Integer reportId, Integer controlId) throws ApiException {
+        if(reportId == null || controlId == null)
+            throw new ApiException(ApiStatus.BAD_DATA, "Report id or control id cannot be null");
+
+        ReportControlsPojo pojo = new ReportControlsPojo();
+        pojo.setControlId(controlId);
+        pojo.setReportId(reportId);
+        flowApi.mapControlToReport(pojo);
     }
 
 
