@@ -4,11 +4,13 @@ import com.increff.omni.reporting.model.constants.ReportType;
 import com.increff.omni.reporting.pojo.ReportPojo;
 import com.nextscm.commons.spring.db.AbstractDao;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.TypedQuery;
 import java.util.List;
 
 @Repository
+@Transactional
 public class ReportDao extends AbstractDao<ReportPojo> {
 
     private static final String selectByTypeAndSchema = "SELECT r FROM ReportPojo r" //

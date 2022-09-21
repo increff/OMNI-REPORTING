@@ -11,7 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 @Service
-@Transactional(rollbackFor = ApiException.class)
+@Transactional(rollbackFor = Exception.class)
 public class SchemaApi extends AbstractApi {
 
     @Autowired

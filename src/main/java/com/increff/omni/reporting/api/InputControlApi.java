@@ -19,7 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
-@Transactional(rollbackFor = ApiException.class)
+@Transactional(rollbackFor = Exception.class)
 public class InputControlApi extends AbstractApi {
 
     @Autowired
