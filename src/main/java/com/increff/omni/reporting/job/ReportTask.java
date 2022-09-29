@@ -1,34 +1,121 @@
 package com.increff.omni.reporting.job;
 
-import com.increff.omni.reporting.api.ReportRequestApi;
-import com.increff.omni.reporting.pojo.ReportRequestPojo;
+import com.increff.omni.reporting.api.*;
+import com.increff.omni.reporting.config.ApplicationProperties;
+import com.increff.omni.reporting.model.SqlParams;
+import com.increff.omni.reporting.model.constants.ReportRequestStatus;
+import com.increff.omni.reporting.pojo.*;
+import com.increff.omni.reporting.util.FileUtil;
+import com.increff.omni.reporting.util.SqlCmd;
+import com.nextscm.commons.fileclient.FileClient;
+import com.nextscm.commons.fileclient.FileClientException;
+import com.nextscm.commons.spring.common.ApiException;
+import com.nextscm.commons.spring.common.ApiStatus;
+import lombok.extern.log4j.Log4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import java.io.*;
+import java.util.*;
+
 @Service
+@Log4j
 public class ReportTask {
 
     @Autowired
     private ReportRequestApi api;
+    @Autowired
+    private ReportApi reportApi;
+    @Autowired
+    private ReportQueryApi reportQueryApi;
+    @Autowired
+    private ReportInputParamsApi reportInputParamsApi;
+    @Autowired
+    private OrgConnectionApi orgConnectionApi;
+    @Autowired
+    private ConnectionApi connectionApi;
+    @Autowired
+    private FolderApi folderApi;
+    @Autowired
+    private FileClient fileClient;
+    @Autowired
+    private ApplicationProperties properties;
 
-    @Async
-    public void runAsync(ReportRequestPojo pojo){
+    @Async("jobExecutor")
+    public void runAsync(ReportRequestPojo pojo) {
         Integer id = pojo.getId();
-        try{
+        try {
+            boolean isRunRequired = checkLock(id);
+            if (!isRunRequired)
+                return;
+            // mark as processing
             api.markProcessingIfEligible(id);
-            //mark as processing
+            //process
+            SqlParams sqlParams = runReportRequest(id);
+            File outFile = sqlParams.getOutFile();
+            File errFile = sqlParams.getErrFile();
+            // upload result to cloud
+            if (outFile.length() > 0) {
+                uploadFile(outFile, "SUCCESS_REPORTS", pojo);
+                // update status to completed
+                api.updateStatus(id, ReportRequestStatus.COMPLETED);
+            } else if (errFile.length() > 0) {
+                uploadFile(errFile, "ERROR_REPORTS", pojo);
+                // update status to failed as error file is having some content
+                api.updateStatus(id, ReportRequestStatus.FAILED);
+            }
+            deleteFiles(outFile, errFile);
         } catch (Exception e) {
-            //log as error and can be tried next time
-            return;//
+            // log as error and mark fail
+            log.error("Report ID : " + id + " failed");
+            api.updateStatus(id, ReportRequestStatus.FAILED);
         }
+    }
 
-        //process - TODO code from webget
+    private void deleteFiles(File outFile, File errFile) {
+        if (outFile.exists() && !FileUtil.delete(outFile))
+            log.debug("File deletion failed, name : " + outFile.getName());
+        if (errFile.exists() && !FileUtil.delete(errFile))
+            log.debug("File deletion failed, name : " + errFile.getName());
+    }
 
-        //mark as completed TODO
-        /* upload result to cloud
-           update status to completed
-        * */
+    private void uploadFile(File file, String folder, ReportRequestPojo pojo) throws FileNotFoundException, ApiException {
+        InputStream inputStream = new FileInputStream(file);
+        String filePath = properties.getGcpBaseUrl() + "/" + properties.getGcpBucketName() + "/"
+                + pojo.getOrgId() + "/" + folder + "/" + pojo.getId() + "_" + UUID.randomUUID() + ".tsv";
+        try {
+            fileClient.create(filePath, inputStream);
+        } catch (FileClientException e) {
+            throw new ApiException(ApiStatus.BAD_DATA, "Error in uploading Report File to Gcp for report : " +
+                    pojo.getId());
+        }
+    }
+
+    private SqlParams runReportRequest(Integer id) throws ApiException, IOException {
+        ReportRequestPojo reportRequestPojo = api.getById(id);
+        List<ReportInputParamsPojo> reportInputParamsPojoList = reportInputParamsApi.getInputParamsForReportRequest(reportRequestPojo.getReportId());
+        ReportPojo reportPojo = reportApi.getCheck(reportRequestPojo.getReportId());
+        ReportQueryPojo reportQueryPojo = reportQueryApi.getByReportId(reportPojo.getId());
+        OrgConnectionPojo orgConnectionPojo = orgConnectionApi.getCheckByOrgId(reportRequestPojo.getOrgId());
+        ConnectionPojo connectionPojo = connectionApi.getCheck(orgConnectionPojo.getConnectionId());
+        File file = folderApi.getFileForExtension(reportRequestPojo.getId(), ".tsv");
+        File errorFile = folderApi.getErrFile(reportRequestPojo.getId(), ".txt");
+        Map<String, String> inputParamMap = getInputParamMapFromPojoList(reportInputParamsPojoList);
+        SqlParams sqlParams = ReportTaskHelper.convert(connectionPojo, reportQueryPojo, inputParamMap, file, errorFile);
+        SqlCmd.processToTsv(sqlParams);
+        return sqlParams;
+    }
+
+    private Map<String, String> getInputParamMapFromPojoList(List<ReportInputParamsPojo> reportInputParamsPojoList) {
+        Map<String, String> inputParamMap = new HashMap<>();
+        reportInputParamsPojoList.forEach(r -> inputParamMap.put(r.getParamKey(), r.getParamValue()));
+        return inputParamMap;
+    }
+
+    private boolean checkLock(Integer id) {
+        ReportRequestPojo reportRequestPojo = api.getById(id);
+        return Arrays.asList(ReportRequestStatus.NEW, ReportRequestStatus.STUCK).contains(reportRequestPojo.getStatus());
     }
 
 }

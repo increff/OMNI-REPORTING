@@ -33,11 +33,9 @@ public class ConnectionDto extends AbstractDtoApi {
         return ConvertUtil.convert(pojo, ConnectionData.class);
     }
 
-    public List<ConnectionData> selectAll(){
+    public List<ConnectionData> selectAll() {
         List<ConnectionPojo> pojos = api.selectAll();
         return ConvertUtil.convert(pojos, ConnectionData.class);
     }
-
-
 
 }

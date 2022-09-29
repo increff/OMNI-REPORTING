@@ -1,32 +1,45 @@
 package com.increff.omni.reporting.dto;
 
 import com.increff.omni.reporting.flow.ReportRequestFlow;
+import com.increff.omni.reporting.model.constants.ReportRequestStatus;
 import com.increff.omni.reporting.model.form.ReportRequestForm;
+import com.increff.omni.reporting.pojo.ReportInputParamsPojo;
 import com.increff.omni.reporting.pojo.ReportRequestPojo;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.server.AbstractDtoApi;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import static com.increff.omni.reporting.dto.ReportRequestDtoHelper.getReportRequestPojo;
+
 @Service
-public class ReportRequestDto extends AbstractDtoApi {
+public class ReportRequestDto extends AbstractDto {
 
     @Autowired
     private ReportRequestFlow flow;
 
     public void requestReport(ReportRequestForm form) throws ApiException {
         checkValid(form);
+        ReportRequestPojo pojo = getReportRequestPojo(form);
+        List<ReportInputParamsPojo> reportInputParamsPojoList = getReportInputParamsPojoList(form.getParamMap());
+        flow.requestReport(pojo, form.getParamMap(), reportInputParamsPojoList);
+    }
 
-
-        //TODO populate correctly
-        Map<String, String> params  = new HashMap<>();
-        ReportRequestPojo pojo = new ReportRequestPojo();
-
-        flow.requestReport(pojo, params);
-
+    private List<ReportInputParamsPojo> getReportInputParamsPojoList(Map<String, String> paramMap) {
+        // TODO null check on param value required?
+        List<ReportInputParamsPojo> reportInputParamsPojoList = new ArrayList<>();
+        paramMap.forEach((k, v) -> {
+            ReportInputParamsPojo reportInputParamsPojo = new ReportInputParamsPojo();
+            reportInputParamsPojo.setParamKey(k);
+            reportInputParamsPojo.setParamValue(v);
+            reportInputParamsPojoList.add(reportInputParamsPojo);
+        });
+        return reportInputParamsPojoList;
     }
 
 }

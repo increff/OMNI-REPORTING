@@ -35,7 +35,7 @@ public class ConnectionController {
         return dto.update(id, form);
     }
 
-    @ApiOperation(value = "Update Connection")
+    @ApiOperation(value = "Get All Connections")
     @ApiErrorResponses
     @RequestMapping(value = "/selectAll",method = RequestMethod.GET)
     public List<ConnectionData> selectAll(){

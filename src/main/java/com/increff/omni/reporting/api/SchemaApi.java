@@ -17,22 +17,21 @@ public class SchemaApi extends AbstractApi {
     @Autowired
     private SchemaDao dao;
 
-    public SchemaPojo getCheck(Integer id) throws ApiException {
-        SchemaPojo pojo = dao.select(id);
-        checkNotNull(pojo, "No schema present with id : " + id);
-        return pojo;
-    }
-
     public SchemaPojo add(SchemaPojo pojo) throws ApiException{
         validate(pojo);
         dao.persist(pojo);
         return pojo;
     }
 
+    public SchemaPojo getCheck(Integer id) throws ApiException {
+        SchemaPojo pojo = dao.select(id);
+        checkNotNull(pojo, "No schema present with id : " + id);
+        return pojo;
+    }
+
     public List<SchemaPojo> selectAll(){
         return dao.selectAll();
     }
-
 
     private void validate(SchemaPojo pojo) throws ApiException {
         SchemaPojo existing = dao.select("name", pojo.getName());

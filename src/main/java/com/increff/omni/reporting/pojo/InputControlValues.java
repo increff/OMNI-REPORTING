@@ -19,5 +19,4 @@ public class InputControlValues extends AbstractVersionedPojo{
     private Integer controlId;
 
     private String value;
-
 }

@@ -22,9 +22,13 @@ public class ReportRequestApi extends AbstractMethodError{
         return pojo;
     }
 
-    public List<ReportRequestPojo> getPendingByUserId(String userId){
+    public List<ReportRequestPojo> getPendingByUserId(Integer userId){
         return dao.getByUserIdAndStatuses(userId,
                 Arrays.asList(ReportRequestStatus.NEW, ReportRequestStatus.IN_PROGRESS));
+    }
+
+    public ReportRequestPojo getById(Integer reportId){
+        return dao.select(reportId);
     }
 
     public List<ReportRequestPojo> getEligibleRequests(){
@@ -39,11 +43,15 @@ public class ReportRequestApi extends AbstractMethodError{
         }
     }
 
-    public void markStuck(){
-        List<ReportRequestPojo> stuck = dao.getStuckReports();
+    public void markStuck(Integer stuckReportTime){
+        List<ReportRequestPojo> stuck = dao.getStuckReports(stuckReportTime);
         stuck.forEach(s -> {
             s.setStatus(ReportRequestStatus.STUCK);
         });
     }
 
+    public void updateStatus(Integer id, ReportRequestStatus status) {
+        ReportRequestPojo reportRequestPojo = getById(id);
+        reportRequestPojo.setStatus(status);
+    }
 }

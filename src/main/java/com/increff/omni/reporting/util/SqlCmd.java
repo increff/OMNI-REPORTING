@@ -18,8 +18,8 @@ public class SqlCmd {
 
     public static void processToTsv(SqlParams sp) throws ApiException {
         String[] cmd = getQueryCmd(sp);
-        Redirect redirectAll = Redirect.appendTo(sp.tsvFile);
-        Redirect errRedirect = Redirect.appendTo(sp.errFile);
+        Redirect redirectAll = Redirect.appendTo(sp.getOutFile());
+        Redirect errRedirect = Redirect.appendTo(sp.getErrFile());
         try {
             CmdUtil.runCmd(cmd, redirectAll, errRedirect);
         } catch (IOException | InterruptedException e) {
@@ -33,13 +33,13 @@ public class SqlCmd {
                 "mysql", //
                 "--quick", //
                 "--connect-timeout=5", //
-                "--host=" + sp.host, //
-                "--user=" + sp.username, //
-                "--password=" + sp.password, //
+                "--host=" + sp.getHost(), //
+                "--user=" + sp.getUsername(), //
+                "--password=" + sp.getPassword(), //
                 "-e", //
-                escape(sp.query) //
+                escape(sp.getQuery()) //
         };
-        logger.info("Query formed =" +sp.query);
+        logger.debug("Query formed =" +sp.getQuery());
         return cmd;
     }
 
@@ -53,7 +53,7 @@ public class SqlCmd {
 
     public static String getOs() {
         String os = System.getProperty("os.name").toLowerCase();
-        if (os.indexOf("win") >= 0) {
+        if (os.contains("win")) {
             return "windows";
         } else {
             return "linux";

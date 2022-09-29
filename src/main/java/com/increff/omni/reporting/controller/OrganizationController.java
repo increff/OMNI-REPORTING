@@ -1,6 +1,7 @@
 package com.increff.omni.reporting.controller;
 
 import com.increff.omni.reporting.dto.OrganizationDto;
+import com.increff.omni.reporting.model.data.OrgConnectionData;
 import com.increff.omni.reporting.model.data.OrgSchemaData;
 import com.increff.omni.reporting.model.data.OrganizationData;
 import com.increff.omni.reporting.model.form.OrganizationForm;
@@ -45,10 +46,16 @@ public class OrganizationController {
     @ApiOperation(value = "Map organization to a schema")
     @ApiErrorResponses
     @RequestMapping(value = "/{orgId}/schema/", method = RequestMethod.POST)
-    public OrgSchemaData addMapping(@PathVariable Integer orgId, @RequestBody Integer schemaId) throws ApiException {
+    public OrgSchemaData addSchemaMapping(@PathVariable Integer orgId, @RequestBody Integer schemaId) throws ApiException {
         return dto.mapToSchema(orgId, schemaId);
     }
 
+    @ApiOperation(value = "Map organization to a connection")
+    @ApiErrorResponses
+    @RequestMapping(value = "/{orgId}/connection/", method = RequestMethod.POST)
+    public OrgConnectionData addConnectionMapping(@PathVariable Integer orgId, @RequestBody Integer connectionId) throws ApiException {
+        return dto.mapToConnection(orgId, connectionId);
+    }
 
     @ApiOperation(value = "Get all org schema mapping")
     @ApiErrorResponses
@@ -57,9 +64,11 @@ public class OrganizationController {
         return dto.selectAllOrgSchema();
     }
 
-
-
-
-
+    @ApiOperation(value = "Get all org connection mapping")
+    @ApiErrorResponses
+    @RequestMapping(value = "/connectionMappings/", method = RequestMethod.GET)
+    public List<OrgConnectionData> selectAllConnectionMapping(){
+        return dto.selectAllOrgConnections();
+    }
 
 }
