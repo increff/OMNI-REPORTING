@@ -63,11 +63,11 @@ public class InputControlApi extends AbstractApi {
     }
 
     public InputControlPojo getByScopeAndDisplayName(InputControlScope scope, String displayName){
-        return null;
+        return dao.selectByScopeAndDisplayName(scope, displayName);
     }
 
-    public InputControlPojo getByScopeAndParamName(InputControlScope scope, String displayName){
-        return null;
+    public InputControlPojo getByScopeAndParamName(InputControlScope scope, String paramName){
+        return dao.selectByScopeAndParamName(scope, paramName);
     }
 
     public InputControlPojo getCheck(Integer id) throws ApiException {

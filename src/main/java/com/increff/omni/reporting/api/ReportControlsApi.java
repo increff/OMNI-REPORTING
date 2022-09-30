@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @Transactional(rollbackFor = Exception.class)
@@ -17,18 +18,20 @@ public class ReportControlsApi extends AbstractApi {
     @Autowired
     private ReportControlsDao dao;
 
-    public List<ReportControlsPojo> getByReportId(Integer reportId){
+    public List<ReportControlsPojo> getByReportId(Integer reportId) {
         return dao.selectMultiple("reportId", reportId);
     }
 
-    public ReportControlsPojo add(ReportControlsPojo pojo) throws ApiException {
+    public void add(ReportControlsPojo pojo) throws ApiException {
         ReportControlsPojo existing = select(pojo.getReportId(), pojo.getControlId());
-        checkNull(existing, "This control already present for selected report");
-        dao.persist(pojo);
-        return pojo;
+        // checkNull(existing, "This control already present for selected report");
+        if (Objects.isNull(existing))
+            dao.persist(pojo);
+        else
+            existing.setValidationType(pojo.getValidationType());
     }
 
-    public ReportControlsPojo select(Integer reportId, Integer controlId){
+    public ReportControlsPojo select(Integer reportId, Integer controlId) {
         return dao.select(reportId, controlId);
     }
 

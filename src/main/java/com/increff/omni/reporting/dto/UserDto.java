@@ -14,11 +14,9 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class UserDto extends AbstractDtoApi {
-
+    // Todo how BI team will have access to do admin operations as we will have only one deployment around it?
     @Autowired
     private ReportRequestDto reportRequestDto;
-
-
 
     public void requestReport(ReportRequestForm form) throws ApiException {
         //Some validation around auth if needed

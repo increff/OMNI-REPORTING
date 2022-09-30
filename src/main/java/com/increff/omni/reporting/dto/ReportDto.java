@@ -1,6 +1,8 @@
 package com.increff.omni.reporting.dto;
 
+import com.increff.omni.reporting.flow.FlowApiHelper;
 import com.increff.omni.reporting.flow.ReportFlowApi;
+import com.increff.omni.reporting.model.constants.ValidationType;
 import com.increff.omni.reporting.model.data.ReportData;
 import com.increff.omni.reporting.model.data.ReportQueryData;
 import com.increff.omni.reporting.model.form.ReportForm;
@@ -52,13 +54,10 @@ public class ReportDto extends AbstractDtoApi {
         return ConvertUtil.convert(pojos, ReportData.class);
     }
     
-    public void mapToControl(Integer reportId, Integer controlId) throws ApiException {
+    public void mapToControl(Integer reportId, Integer controlId, ValidationType validationType) throws ApiException {
         if(reportId == null || controlId == null)
             throw new ApiException(ApiStatus.BAD_DATA, "Report id or control id cannot be null");
-
-        ReportControlsPojo pojo = new ReportControlsPojo();
-        pojo.setControlId(controlId);
-        pojo.setReportId(reportId);
+        ReportControlsPojo pojo = FlowApiHelper.getReportControlPojo(reportId, controlId, validationType);
         flowApi.mapControlToReport(pojo);
     }
 

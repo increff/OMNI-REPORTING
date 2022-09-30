@@ -1,5 +1,6 @@
 package com.increff.omni.reporting.pojo;
 
+import com.increff.omni.reporting.model.constants.ValidationType;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -19,4 +20,8 @@ public class ReportControlsPojo extends AbstractVersionedPojo{
     private Integer reportId;
 
     private Integer controlId;
+
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private ValidationType validationType;
 }

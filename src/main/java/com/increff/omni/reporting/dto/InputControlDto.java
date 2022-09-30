@@ -36,8 +36,7 @@ public class InputControlDto extends AbstractDtoApi {
     public InputControlData add(InputControlForm form) throws ApiException {
         validate(form);
         InputControlPojo pojo = ConvertUtil.convert(form, InputControlPojo.class);
-        pojo = flowApi.add(pojo, form.getQuery(), form.getValues(), form.getReportId());
-
+        pojo = flowApi.add(pojo, form.getQuery(), form.getValues(), form.getReportId(), form.getValidationType());
         return getInputControlData(pojo);
     }
 
@@ -103,7 +102,7 @@ public class InputControlDto extends AbstractDtoApi {
 
     private void validateForControlScope(InputControlForm form) throws ApiException {
         if(form.getScope().equals(InputControlScope.LOCAL) && form.getReportId() == null)
-            throw new ApiException(ApiStatus.BAD_DATA, "Report mandatory for Local Scope Control");
+            throw new ApiException(ApiStatus.BAD_DATA, "Report is mandatory for Local Scope Control");
     }
 
     private void validateForControlType(InputControlForm form) throws ApiException {
@@ -118,9 +117,9 @@ public class InputControlDto extends AbstractDtoApi {
                 if(form.getValues() == null && form.getQuery() == null)
                     throw new ApiException(ApiStatus.BAD_DATA, "For Select, either query or value is mandatory");
                 break;
+            default:
+                throw new ApiException(ApiStatus.BAD_DATA, "Unknown input control type");
         }
-
-
     }
 
 }

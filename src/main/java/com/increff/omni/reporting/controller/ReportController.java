@@ -1,6 +1,7 @@
 package com.increff.omni.reporting.controller;
 
 import com.increff.omni.reporting.dto.ReportDto;
+import com.increff.omni.reporting.model.constants.ValidationType;
 import com.increff.omni.reporting.model.data.ReportData;
 import com.increff.omni.reporting.model.data.ReportQueryData;
 import com.increff.omni.reporting.model.form.ReportForm;
@@ -53,8 +54,8 @@ public class ReportController {
     @ApiOperation(value = "Map control to a report")
     @ApiErrorResponses
     @RequestMapping(value = "/{reportId}/controls/{controlId}", method = RequestMethod.POST)
-    public void mapReportToControl(@PathVariable Integer reportId, @PathVariable Integer controlId) throws ApiException {
-        dto.mapToControl(reportId, controlId);
+    public void mapReportToControl(@PathVariable Integer reportId, @PathVariable Integer controlId, @RequestParam(name = "validationType") ValidationType validationType) throws ApiException {
+        dto.mapToControl(reportId, controlId, validationType);
     }
 
 }

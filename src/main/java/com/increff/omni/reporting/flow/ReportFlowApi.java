@@ -14,6 +14,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.increff.omni.reporting.flow.FlowApiHelper.validateValidationType;
+
 @Service
 @Transactional(rollbackFor = ApiException.class)
 public class ReportFlowApi extends AbstractApi {
@@ -57,9 +59,9 @@ public class ReportFlowApi extends AbstractApi {
         return queryApi.upsertQuery(pojo);
     }
 
-    public ReportControlsPojo mapControlToReport(ReportControlsPojo pojo) throws ApiException {
+    public void mapControlToReport(ReportControlsPojo pojo) throws ApiException {
         validateControlReportMapping(pojo);
-        return reportControlsApi.add(pojo);
+        reportControlsApi.add(pojo);
     }
 
     private void validateControlReportMapping(ReportControlsPojo pojo) throws ApiException {
@@ -67,6 +69,7 @@ public class ReportFlowApi extends AbstractApi {
         api.getCheck(pojo.getReportId());
         //valid control - Global
         InputControlPojo icPojo = inputControlApi.getCheck(pojo.getControlId());
+        validateValidationType(icPojo.getType(), pojo.getValidationType());
         if(icPojo.getScope().equals(InputControlScope.LOCAL))
             throw new ApiException(ApiStatus.BAD_DATA, "Only Global Control can be mapped to a report");
     }
