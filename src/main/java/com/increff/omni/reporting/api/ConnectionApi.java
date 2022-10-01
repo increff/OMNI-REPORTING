@@ -19,7 +19,7 @@ public class ConnectionApi extends AbstractApi {
     @Autowired
     private ConnectionDao dao;
 
-    public ConnectionPojo create(ConnectionPojo pojo) throws ApiException {
+    public ConnectionPojo add(ConnectionPojo pojo) throws ApiException {
         validate(pojo);
         dao.persist(pojo);
         return pojo;

@@ -4,10 +4,12 @@ import com.increff.omni.reporting.model.ValidationModel;
 import com.increff.omni.reporting.model.constants.ValidationType;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
+import org.springframework.stereotype.Component;
 
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeParseException;
 
+@Component
 public class DateValidator extends AbstractValidator{
 
     @Override

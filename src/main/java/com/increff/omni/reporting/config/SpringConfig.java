@@ -19,8 +19,8 @@ import org.springframework.context.annotation.*;
 @Configuration
 @ComponentScan({ "com.increff.omni.reporting"})
 @PropertySources({ //
-		@PropertySource("classpath:com/increff/omni/reporting/config.properties")/*, //
-		@PropertySource(value = "file:./omni-reporting.properties")*///
+		@PropertySource("classpath:com/increff/omni/reporting/config.properties"),
+		@PropertySource(value = "file:./omni-reporting.properties")
 })
 @Import({ WebMvcConfig.class })
 public class SpringConfig {

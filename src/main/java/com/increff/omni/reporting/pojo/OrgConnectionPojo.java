@@ -9,7 +9,7 @@ import javax.persistence.*;
 @Setter
 @Getter
 @Table(name = "org_connection", uniqueConstraints =
-        {@UniqueConstraint(name = "unq_org_connection", columnNames = "orgId, connectionId")})
+        {@UniqueConstraint(name = "unq_org", columnNames = {"orgId"})})
 public class OrgConnectionPojo extends AbstractVersionedPojo {
 
     @Id

@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @Transactional(rollbackFor = Exception.class)
@@ -20,8 +21,15 @@ public class OrgConnectionApi extends AbstractApi {
     private OrgConnectionDao dao;
 
     public OrgConnectionPojo map(OrgConnectionPojo pojo){
-        dao.persist(pojo);
-        return pojo;
+        OrgConnectionPojo existing = getByOrgId(pojo.getOrgId());
+        if (Objects.isNull(existing)) {
+            dao.persist(pojo);
+            return pojo;
+        } else {
+            existing.setConnectionId(pojo.getConnectionId());
+            dao.update(existing);
+            return existing;
+        }
     }
 
     public List<OrgConnectionPojo> selectAll(){
@@ -29,9 +37,13 @@ public class OrgConnectionApi extends AbstractApi {
     }
 
     public OrgConnectionPojo getCheckByOrgId(Integer orgId) throws ApiException {
-        OrgConnectionPojo pojo = dao.select("orgId", orgId);
+        OrgConnectionPojo pojo = getByOrgId(orgId);
         checkNotNull(pojo, "No connection mapped for org : " + orgId);
         return pojo;
+    }
+
+    private OrgConnectionPojo getByOrgId(Integer orgId) {
+        return dao.select("orgId", orgId);
     }
 
 }

@@ -21,7 +21,7 @@ public class ConnectionDto extends AbstractDtoApi {
     public ConnectionData add(ConnectionForm form) throws ApiException {
         checkValid(form);
         ConnectionPojo pojo = ConvertUtil.convert(form, ConnectionPojo.class);
-        pojo = api.create(pojo);
+        pojo = api.add(pojo);
         return ConvertUtil.convert(pojo, ConnectionData.class);
     }
 

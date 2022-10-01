@@ -37,6 +37,7 @@ public class OrganizationDto extends AbstractDtoApi {
     @Autowired
     private ConnectionApi connectionApi;
 
+    // Todo org creation having org id as input?
     public OrganizationData add(OrganizationForm form) throws ApiException {
         checkValid(form);
         OrganizationPojo pojo = ConvertUtil.convert(form, OrganizationPojo.class);
@@ -61,9 +62,9 @@ public class OrganizationDto extends AbstractDtoApi {
         return ConvertUtil.convert(pojoList, OrganizationData.class);
     }
 
-    public OrgSchemaData mapToSchema(Integer orgId, Integer schemaId) throws ApiException {
+    public OrgSchemaData mapToSchema(Integer id, Integer schemaId) throws ApiException {
         //validation
-        OrganizationPojo orgPojo = api.getCheck(orgId);
+        OrganizationPojo orgPojo = api.getCheck(id);
         SchemaPojo schemaPojo = schemaApi.getCheck(schemaId);
 
         OrgSchemaPojo pojo = createPojo(orgPojo, schemaPojo);
@@ -82,9 +83,9 @@ public class OrganizationDto extends AbstractDtoApi {
         return getOrgConnectionDataList(pojos, allPojos);
     }
 
-    public OrgConnectionData mapToConnection(Integer orgId, Integer connectionId) throws ApiException {
+    public OrgConnectionData mapToConnection(Integer id, Integer connectionId) throws ApiException {
         //validation
-        OrganizationPojo orgPojo = api.getCheck(orgId);
+        OrganizationPojo orgPojo = api.getCheck(id);
         ConnectionPojo connectionPojo = connectionApi.getCheck(connectionId);
 
         OrgConnectionPojo pojo = createPojo(orgPojo, connectionPojo);

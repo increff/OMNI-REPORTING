@@ -35,7 +35,7 @@ public class SchemaApi extends AbstractApi {
 
     private void validate(SchemaPojo pojo) throws ApiException {
         SchemaPojo existing = dao.select("name", pojo.getName());
-        checkNotNull(existing, "Schema already present with name : " + pojo.getName());
+        checkNull(existing, "Schema already present with name : " + pojo.getName());
     }
 
 

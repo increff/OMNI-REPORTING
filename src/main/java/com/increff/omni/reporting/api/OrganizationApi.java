@@ -31,7 +31,7 @@ public class OrganizationApi extends AbstractApi {
     }
 
     public OrganizationPojo update(OrganizationPojo pojo) throws ApiException{
-        //validating
+        // validating
         OrganizationPojo existing = getCheck(pojo.getId());
         OrganizationPojo existingWithName = dao.select("name", pojo.getName());
         checkNull(existingWithName, "Organization already present with requested name");
