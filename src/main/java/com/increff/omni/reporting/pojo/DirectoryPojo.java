@@ -18,5 +18,7 @@ public class DirectoryPojo extends AbstractVersionedPojo{
     private Integer id;
     private String directoryName;
     private Integer parentId;
+    // Todo how to enter roots with parentId null? roots here are Standard Reports/ Custom Reports directory
+
 
 }

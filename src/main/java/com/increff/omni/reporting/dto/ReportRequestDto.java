@@ -1,21 +1,18 @@
 package com.increff.omni.reporting.dto;
 
 import com.increff.omni.reporting.flow.ReportRequestFlow;
-import com.increff.omni.reporting.model.constants.ReportRequestStatus;
 import com.increff.omni.reporting.model.form.ReportRequestForm;
 import com.increff.omni.reporting.pojo.ReportInputParamsPojo;
 import com.increff.omni.reporting.pojo.ReportRequestPojo;
 import com.nextscm.commons.spring.common.ApiException;
-import com.nextscm.commons.spring.server.AbstractDtoApi;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.increff.omni.reporting.dto.ReportRequestDtoHelper.getReportRequestPojo;
+import static com.increff.omni.reporting.helper.ReportRequestDtoHelper.getReportRequestPojo;
 
 @Service
 public class ReportRequestDto extends AbstractDto {
@@ -25,7 +22,7 @@ public class ReportRequestDto extends AbstractDto {
 
     public void requestReport(ReportRequestForm form) throws ApiException {
         checkValid(form);
-        ReportRequestPojo pojo = getReportRequestPojo(form);
+        ReportRequestPojo pojo = getReportRequestPojo(form, getOrgId(), getUserId());
         List<ReportInputParamsPojo> reportInputParamsPojoList = getReportInputParamsPojoList(form.getParamMap());
         flow.requestReport(pojo, form.getParamMap(), reportInputParamsPojoList);
     }

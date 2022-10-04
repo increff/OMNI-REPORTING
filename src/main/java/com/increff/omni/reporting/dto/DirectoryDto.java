@@ -10,6 +10,9 @@ import com.nextscm.commons.spring.server.AbstractDtoApi;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Service
 public class DirectoryDto extends AbstractDtoApi {
 
@@ -29,6 +32,13 @@ public class DirectoryDto extends AbstractDtoApi {
         pojo.setId(id);
         pojo = api.update(pojo);
         return ConvertUtil.convert(pojo, DirectoryData.class);
+    }
+
+    public List<DirectoryData> getAllDirectories() {
+        List<DirectoryPojo> directoryPojoList = api.getAll();
+        List<DirectoryData> dataList = new ArrayList<>();
+        directoryPojoList.forEach(p -> dataList.add(ConvertUtil.convert(p, DirectoryData.class)));
+        return dataList;
     }
 
 }

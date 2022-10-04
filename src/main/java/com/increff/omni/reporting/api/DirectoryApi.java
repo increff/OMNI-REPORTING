@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @Transactional(rollbackFor = Exception.class)
 public class DirectoryApi extends AbstractApi {
@@ -19,6 +21,10 @@ public class DirectoryApi extends AbstractApi {
         validate(pojo);
         dao.persist(pojo);
         return pojo;
+    }
+
+    public List<DirectoryPojo> getAll() {
+        return dao.selectAll();
     }
 
     public DirectoryPojo update(DirectoryPojo pojo) throws ApiException {
@@ -34,7 +40,7 @@ public class DirectoryApi extends AbstractApi {
 
     private void validateForEdit(DirectoryPojo pojo) throws ApiException {
         DirectoryPojo existing = getCheck(pojo.getId());
-        DirectoryPojo parent = getCheck(pojo.getParentId());
+        getCheck(pojo.getParentId());
         if(!existing.getDirectoryName().equals(pojo.getDirectoryName())){
             DirectoryPojo sameNamePojo = dao.select("directoryName", pojo.getDirectoryName());
             checkNull(sameNamePojo, "Directory already present with same name");
@@ -44,11 +50,10 @@ public class DirectoryApi extends AbstractApi {
 
     private void validate(DirectoryPojo pojo) throws ApiException {
         //parent id valid
-        DirectoryPojo parent = getCheck(pojo.getParentId());
-        //same name anywhere
+        getCheck(pojo.getParentId());
+        // same name anywhere
         DirectoryPojo sameNamePojo = dao.select("directoryName", pojo.getDirectoryName());
         checkNull(sameNamePojo, "Directory already present with same name");
-
     }
 
     public DirectoryPojo getCheck(Integer id) throws ApiException {

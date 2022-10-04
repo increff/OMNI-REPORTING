@@ -14,7 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.increff.omni.reporting.flow.FlowApiHelper.validateValidationType;
+import static com.increff.omni.reporting.helper.FlowApiHelper.validateValidationType;
 
 @Service
 @Transactional(rollbackFor = ApiException.class)

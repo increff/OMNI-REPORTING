@@ -1,4 +1,4 @@
-package com.increff.omni.reporting.flow;
+package com.increff.omni.reporting.helper;
 
 import com.increff.omni.reporting.model.constants.InputControlType;
 import com.increff.omni.reporting.model.constants.ValidationType;

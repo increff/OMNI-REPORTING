@@ -9,7 +9,7 @@ import javax.persistence.*;
 @Setter
 @Getter
 @Table(name = "input_control_values", indexes = {})
-public class InputControlValues extends AbstractVersionedPojo{
+public class InputControlValuesPojo extends AbstractVersionedPojo{
 
     @Id
     @TableGenerator(name = "organization", pkColumnValue = "organization", allocationSize = 1,initialValue = 100000)

@@ -12,12 +12,9 @@ import com.nextscm.commons.spring.server.AbstractDtoApi;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
-import static com.increff.omni.reporting.dto.OrganizationDtoHelper.*;
+import static com.increff.omni.reporting.helper.OrganizationDtoHelper.*;
 
 @Service
 public class OrganizationDto extends AbstractDtoApi {

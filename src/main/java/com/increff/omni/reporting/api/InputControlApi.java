@@ -5,8 +5,8 @@ import com.increff.omni.reporting.dao.InputControlQueryDao;
 import com.increff.omni.reporting.dao.InputControlValuesDao;
 import com.increff.omni.reporting.model.constants.InputControlScope;
 import com.increff.omni.reporting.pojo.InputControlPojo;
-import com.increff.omni.reporting.pojo.InputControlQuery;
-import com.increff.omni.reporting.pojo.InputControlValues;
+import com.increff.omni.reporting.pojo.InputControlQueryPojo;
+import com.increff.omni.reporting.pojo.InputControlValuesPojo;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
 import com.nextscm.commons.spring.server.AbstractApi;
@@ -17,6 +17,7 @@ import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @Transactional(rollbackFor = Exception.class)
@@ -32,13 +33,13 @@ public class InputControlApi extends AbstractApi {
     private InputControlValuesDao valuesDao;
 
 
-    public InputControlPojo add(InputControlPojo pojo, InputControlQuery queryPojo,
-                                List<InputControlValues> valuesPojo) throws ApiException {
+    public InputControlPojo add(InputControlPojo pojo, InputControlQueryPojo queryPojo,
+                                List<InputControlValuesPojo> valuesPojo) throws ApiException {
 
         validateControlAddition(pojo);
         dao.persist(pojo);
 
-        if(queryPojo != null){
+        if(Objects.nonNull(queryPojo)){
             queryPojo.setControlId(pojo.getId());
             queryDao.persist(queryPojo);
         }
@@ -76,13 +77,13 @@ public class InputControlApi extends AbstractApi {
         return pojo;
     }
 
-    public List<InputControlQuery> selectControlQueries(List<Integer> controlIds){
+    public List<InputControlQueryPojo> selectControlQueries(List<Integer> controlIds){
         if(CollectionUtils.isEmpty(controlIds))
             return new ArrayList<>();
         return queryDao.selectMultiple(controlIds);
     }
 
-    public List<InputControlValues> selectControlValues(List<Integer> controlIds){
+    public List<InputControlValuesPojo> selectControlValues(List<Integer> controlIds){
         if(CollectionUtils.isEmpty(controlIds))
             return new ArrayList<>();
         return valuesDao.selectMultiple(controlIds);

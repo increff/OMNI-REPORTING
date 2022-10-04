@@ -1,4 +1,4 @@
-package com.increff.omni.reporting.dto;
+package com.increff.omni.reporting.helper;
 
 import com.increff.omni.reporting.model.data.OrgConnectionData;
 import com.increff.omni.reporting.model.data.OrgSchemaData;

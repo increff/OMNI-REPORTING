@@ -31,4 +31,7 @@ public class ApplicationProperties {
     @Value("${gcp.filePath}")
     private String gcpFilePath;
 
+    @Value("${root.directory}")
+    private String rootDirectory;
+
 }

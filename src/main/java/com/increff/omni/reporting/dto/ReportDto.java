@@ -1,6 +1,6 @@
 package com.increff.omni.reporting.dto;
 
-import com.increff.omni.reporting.flow.FlowApiHelper;
+import com.increff.omni.reporting.helper.FlowApiHelper;
 import com.increff.omni.reporting.flow.ReportFlowApi;
 import com.increff.omni.reporting.model.constants.ValidationType;
 import com.increff.omni.reporting.model.data.ReportData;

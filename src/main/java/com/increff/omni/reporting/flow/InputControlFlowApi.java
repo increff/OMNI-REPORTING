@@ -4,12 +4,12 @@ import com.increff.omni.reporting.api.InputControlApi;
 import com.increff.omni.reporting.api.ReportApi;
 import com.increff.omni.reporting.api.ReportControlsApi;
 import com.increff.omni.reporting.model.constants.InputControlScope;
-import com.increff.omni.reporting.model.constants.InputControlType;
 import com.increff.omni.reporting.model.constants.ValidationType;
 import com.increff.omni.reporting.pojo.InputControlPojo;
-import com.increff.omni.reporting.pojo.InputControlQuery;
-import com.increff.omni.reporting.pojo.InputControlValues;
+import com.increff.omni.reporting.pojo.InputControlQueryPojo;
+import com.increff.omni.reporting.pojo.InputControlValuesPojo;
 import com.increff.omni.reporting.pojo.ReportControlsPojo;
+import com.nextscm.commons.lang.StringUtil;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
 import com.nextscm.commons.spring.server.AbstractApi;
@@ -19,12 +19,11 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.increff.omni.reporting.flow.FlowApiHelper.getReportControlPojo;
-import static com.increff.omni.reporting.flow.FlowApiHelper.validateValidationType;
+import static com.increff.omni.reporting.helper.FlowApiHelper.getReportControlPojo;
+import static com.increff.omni.reporting.helper.FlowApiHelper.validateValidationType;
 
 @Service
 @Transactional(rollbackFor = ApiException.class)
@@ -46,8 +45,8 @@ public class InputControlFlowApi extends AbstractApi {
             validateLocalControl(reportId, pojo);
         }
 
-        InputControlQuery queryPojo = getQueryPojo(query);
-        List<InputControlValues> valuesList = getValuesPojo(values);
+        InputControlQueryPojo queryPojo = getQueryPojo(query);
+        List<InputControlValuesPojo> valuesList = getValuesPojo(values);
 
         pojo = api.add(pojo, queryPojo, valuesList);
 
@@ -58,20 +57,20 @@ public class InputControlFlowApi extends AbstractApi {
         return pojo;
     }
 
-    private InputControlQuery getQueryPojo(String query) {
-        if (query == null)
+    private InputControlQueryPojo getQueryPojo(String query) {
+        if (StringUtil.isEmpty(query))
             return null;
-        InputControlQuery pojo = new InputControlQuery();
+        InputControlQueryPojo pojo = new InputControlQueryPojo();
         pojo.setQuery(query);
         return pojo;
     }
 
-    private List<InputControlValues> getValuesPojo(List<String> values) {
+    private List<InputControlValuesPojo> getValuesPojo(List<String> values) {
         if (CollectionUtils.isEmpty(values))
             return new ArrayList<>();
 
         return values.stream().map(v -> {
-            InputControlValues pojo = new InputControlValues();
+            InputControlValuesPojo pojo = new InputControlValuesPojo();
             pojo.setValue(v);
             return pojo;
         }).collect(Collectors.toList());

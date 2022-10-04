@@ -7,8 +7,8 @@ import com.increff.omni.reporting.model.constants.InputControlScope;
 import com.increff.omni.reporting.model.data.InputControlData;
 import com.increff.omni.reporting.model.form.InputControlForm;
 import com.increff.omni.reporting.pojo.InputControlPojo;
-import com.increff.omni.reporting.pojo.InputControlQuery;
-import com.increff.omni.reporting.pojo.InputControlValues;
+import com.increff.omni.reporting.pojo.InputControlQueryPojo;
+import com.increff.omni.reporting.pojo.InputControlValuesPojo;
 import com.increff.omni.reporting.pojo.ReportControlsPojo;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
@@ -67,24 +67,24 @@ public class InputControlDto extends AbstractDtoApi {
                 .map(InputControlPojo::getId).collect(Collectors.toList());
 
         //We need queries
-        List<InputControlQuery> queryPojos = api.selectControlQueries(controlIds);
+        List<InputControlQueryPojo> queryPojos = api.selectControlQueries(controlIds);
         Map<Integer, String> controlToQueryMapping;
         if(queryPojos == null)
             controlToQueryMapping = new HashMap<>();
         else
             controlToQueryMapping = queryPojos.stream()
-                .collect(Collectors.toMap(InputControlQuery::getControlId, InputControlQuery::getQuery));
+                .collect(Collectors.toMap(InputControlQueryPojo::getControlId, InputControlQueryPojo::getQuery));
 
         //We need constants
-        List<InputControlValues> valuesList = api.selectControlValues(controlIds);
+        List<InputControlValuesPojo> valuesList = api.selectControlValues(controlIds);
         Map<Integer, List<String>> controlToValuesMapping;
         if(valuesList == null)
             controlToValuesMapping = new HashMap<>();
         else
             controlToValuesMapping = valuesList.stream()
                 .collect(Collectors.groupingBy(
-                        InputControlValues::getControlId,
-                        Collectors.mapping(InputControlValues::getValue, Collectors.toList())));
+                        InputControlValuesPojo::getControlId,
+                        Collectors.mapping(InputControlValuesPojo::getValue, Collectors.toList())));
 
         return pojos.stream().map(p -> {
             InputControlData data = ConvertUtil.convert(p, InputControlData.class);
@@ -116,6 +116,10 @@ public class InputControlDto extends AbstractDtoApi {
             case MULTI_SELECT:
                 if(form.getValues() == null && form.getQuery() == null)
                     throw new ApiException(ApiStatus.BAD_DATA, "For Select, either query or value is mandatory");
+                // Todo check
+                if(form.getValues() != null && form.getQuery() != null)
+                    throw new ApiException(ApiStatus.BAD_DATA, "For Select, either query or value is mandatory");
+
                 break;
             default:
                 throw new ApiException(ApiStatus.BAD_DATA, "Unknown input control type");
