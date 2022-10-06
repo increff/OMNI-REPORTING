@@ -64,6 +64,23 @@ public class ReportFlowApi extends AbstractApi {
         reportControlsApi.add(pojo);
     }
 
+    public List<ReportPojo> getAll(Integer orgId) throws ApiException {
+
+        OrgSchemaPojo orgSchemaPojo = orgSchemaApi.getCheckByOrgId(orgId);
+        //All standard
+        List<ReportPojo> standard = api.getByTypeAndSchema(ReportType.STANDARD, orgSchemaPojo.getSchemaId());
+
+        //All custom
+        List<CustomReportAccessPojo> customAccess = customReportAccessApi.getByOrgId(orgId);
+        List<Integer> customIds = customAccess.stream().map(CustomReportAccessPojo::getReportId).collect(Collectors.toList());
+
+        List<ReportPojo> custom = api.getByIdsAndSchema(customIds, orgSchemaPojo.getSchemaId());
+
+        //combined 2 list
+        standard.addAll(custom);
+        return standard;
+    }
+
     private void validateControlReportMapping(ReportControlsPojo pojo) throws ApiException {
         //valid report
         api.getCheck(pojo.getReportId());
@@ -88,7 +105,6 @@ public class ReportFlowApi extends AbstractApi {
         }
     }
 
-
     private void validate(ReportPojo pojo) throws ApiException {
         directoryApi.getCheck(pojo.getDirectoryId());
         schemaApi.getCheck(pojo.getSchemaId());
@@ -98,24 +114,6 @@ public class ReportFlowApi extends AbstractApi {
         if(existing != null)
             throw new ApiException(ApiStatus.BAD_DATA, "Report already present with same name");
 
-    }
-
-
-    public List<ReportPojo> getAll(Integer orgId) throws ApiException {
-
-        OrgSchemaPojo orgSchemaPojo = orgSchemaApi.getCheckByOrgId(orgId);
-        //All standard
-        List<ReportPojo> standard = api.getByTypeAndSchema(ReportType.STANDARD, orgSchemaPojo.getSchemaId());
-
-        //All custom
-        List<CustomReportAccessPojo> customAccess = customReportAccessApi.getByOrgId(orgId);
-        List<Integer> customIds = customAccess.stream().map(CustomReportAccessPojo::getReportId).collect(Collectors.toList());
-
-        List<ReportPojo> custom = api.getByIdsAndSchema(customIds, orgSchemaPojo.getSchemaId());
-
-        //combined 2 list
-        standard.addAll(custom);
-        return standard;
     }
 
 }

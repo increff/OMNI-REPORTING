@@ -34,7 +34,6 @@ public class OrganizationDto extends AbstractDtoApi {
     @Autowired
     private ConnectionApi connectionApi;
 
-    // Todo org creation having org id as input?
     public OrganizationData add(OrganizationForm form) throws ApiException {
         checkValid(form);
         OrganizationPojo pojo = ConvertUtil.convert(form, OrganizationPojo.class);

@@ -32,6 +32,5 @@ public class InputControlPojo extends AbstractVersionedPojo{
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private InputControlType type;
-// Todo how to solve use case of warehouses and client id having client name as filter on UI
 
 }

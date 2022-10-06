@@ -116,10 +116,8 @@ public class InputControlDto extends AbstractDtoApi {
             case MULTI_SELECT:
                 if(form.getValues() == null && form.getQuery() == null)
                     throw new ApiException(ApiStatus.BAD_DATA, "For Select, either query or value is mandatory");
-                // Todo check
                 if(form.getValues() != null && form.getQuery() != null)
                     throw new ApiException(ApiStatus.BAD_DATA, "For Select, either query or value is mandatory");
-
                 break;
             default:
                 throw new ApiException(ApiStatus.BAD_DATA, "Unknown input control type");

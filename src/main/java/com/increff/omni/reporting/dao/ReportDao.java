@@ -14,10 +14,10 @@ import java.util.List;
 public class ReportDao extends AbstractDao<ReportPojo> {
 
     private static final String selectByTypeAndSchema = "SELECT r FROM ReportPojo r" //
-            + " WHERE r.type = :type and r.schemaId = :id";
+            + " WHERE r.type = :type and r.schemaId = :schemaId";
 
     private static final String selectByIdsAndSchema = "SELECT r FROM ReportPojo r" //
-            + " WHERE r.id in :ids and r.schemaId = :id";
+            + " WHERE r.id in :ids and r.schemaId = :schemaId";
 
     private static final String selectByTypeAndName = "SELECT r FROM ReportPojo r" //
             + " WHERE r.type = :type and r.name = :name";

@@ -28,7 +28,6 @@ public class ReportRequestDto extends AbstractDto {
     }
 
     private List<ReportInputParamsPojo> getReportInputParamsPojoList(Map<String, String> paramMap) {
-        // TODO null check on param value required?
         List<ReportInputParamsPojo> reportInputParamsPojoList = new ArrayList<>();
         paramMap.forEach((k, v) -> {
             ReportInputParamsPojo reportInputParamsPojo = new ReportInputParamsPojo();

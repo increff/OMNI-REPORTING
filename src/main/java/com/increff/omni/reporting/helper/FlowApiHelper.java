@@ -23,14 +23,17 @@ public class FlowApiHelper {
             case DATE:
                 if (!Arrays.asList(ValidationType.DATE, ValidationType.NON_MANDATORY).contains(validationType))
                     throw new ApiException(ApiStatus.BAD_DATA, "Type DATE can have DATE_RANGE or NON_MANDATORY validation type");
+                break;
             case TEXT:
             case NUMBER:
             case MULTI_SELECT:
                 if (!Arrays.asList(ValidationType.MANDATORY, ValidationType.NON_MANDATORY).contains(validationType))
                     throw new ApiException(ApiStatus.BAD_DATA, "Type TEXT, NUMBER or MULTI_SELECT can have MANDATORY or NON_MANDATORY validation type");
+                break;
             case SINGLE_SELECT:
                 if (!Arrays.asList(ValidationType.SINGLE_MANDATORY, ValidationType.NON_MANDATORY).contains(validationType))
                     throw new ApiException(ApiStatus.BAD_DATA, "Type SINGLE_SELECT can have SINGLE_MANDATORY or NON_MANDATORY validation type");
+                break;
         }
     }
 }
