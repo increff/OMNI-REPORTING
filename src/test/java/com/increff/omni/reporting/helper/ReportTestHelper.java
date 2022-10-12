@@ -16,11 +16,10 @@ public class ReportTestHelper {
         return pojo;
     }
 
-    public static ReportControlsPojo getReportControlsPojo(ValidationType validationType, Integer reportId, Integer controlId){
+    public static ReportControlsPojo getReportControlsPojo(Integer reportId, Integer controlId){
         ReportControlsPojo reportControlsPojo = new ReportControlsPojo();
         reportControlsPojo.setReportId(reportId);
         reportControlsPojo.setControlId(controlId);
-        reportControlsPojo.setValidationType(validationType);
         return reportControlsPojo;
     }
 }

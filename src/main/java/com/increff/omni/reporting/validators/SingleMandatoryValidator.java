@@ -1,23 +1,27 @@
 package com.increff.omni.reporting.validators;
 
-import com.increff.omni.reporting.model.ValidationModel;
+import com.increff.omni.reporting.model.constants.InputControlType;
 import com.increff.omni.reporting.model.constants.ValidationType;
+import com.nextscm.commons.lang.StringUtil;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
 import org.springframework.stereotype.Component;
 
-@Component
-public class SingleMandatoryValidator extends AbstractValidator{
-    @Override
-    public void add(ValidationModel validation) {
+import java.util.List;
+import java.util.stream.Collectors;
 
+@Component
+public class SingleMandatoryValidator extends AbstractValidator {
+
+    @Override
+    public void add(List<InputControlType> inputControlTypeList) throws ApiException {
+        // No validation required
     }
 
     @Override
-    public void validate(String displayName, String paramValue, String reportName) throws ApiException {
-        super.validate(displayName, paramValue, reportName);
-        String[] values = paramValue.split(",");
-        if(values.length != 1)
+    public void validate(List<String> displayName, List<String> paramValue, String reportName, Integer validationValue) throws ApiException {
+        List<String> nonEmptyValues = paramValue.stream().filter(p -> !StringUtil.isEmpty(p)).collect(Collectors.toList());
+        if (nonEmptyValues.size() != 1)
             throw new ApiException(ApiStatus.BAD_DATA, getValidationMessage(reportName, displayName, ValidationType.SINGLE_MANDATORY, ""));
     }
 }

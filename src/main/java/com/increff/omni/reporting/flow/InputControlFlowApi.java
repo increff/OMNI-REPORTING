@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.increff.omni.reporting.helper.FlowApiHelper.getReportControlPojo;
-import static com.increff.omni.reporting.helper.FlowApiHelper.validateValidationType;
 
 @Service
 @Transactional(rollbackFor = ApiException.class)
@@ -39,7 +38,7 @@ public class InputControlFlowApi extends AbstractApi {
     private ReportApi reportApi;
 
     public InputControlPojo add(InputControlPojo pojo, String query, List<String> values,
-                                Integer reportId, ValidationType validationType) throws ApiException {
+                                Integer reportId) throws ApiException {
 
         if (pojo.getScope().equals(InputControlScope.LOCAL)) {
             validateLocalControl(reportId, pojo);
@@ -51,8 +50,7 @@ public class InputControlFlowApi extends AbstractApi {
         pojo = api.add(pojo, queryPojo, valuesList);
 
         if (pojo.getScope().equals(InputControlScope.LOCAL)) {
-            validateValidationType(pojo.getType(), validationType);
-            reportControlsApi.add(getReportControlPojo(reportId, pojo.getId(), validationType));
+            reportControlsApi.add(getReportControlPojo(reportId, pojo.getId()));
         }
         return pojo;
     }

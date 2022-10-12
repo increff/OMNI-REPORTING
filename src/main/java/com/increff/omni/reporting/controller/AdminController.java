@@ -1,47 +1,233 @@
 package com.increff.omni.reporting.controller;
 
+import com.increff.omni.reporting.dto.*;
+import com.increff.omni.reporting.model.data.*;
+import com.increff.omni.reporting.model.form.*;
+import com.nextscm.commons.spring.common.ApiException;
+import com.nextscm.commons.spring.server.ApiErrorResponses;
 import io.swagger.annotations.Api;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import io.swagger.annotations.ApiOperation;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Api
 @RestController
 @RequestMapping(value = "/admin")
-public class AdminController extends AbstractRestController  {
+public class AdminController {
+
+    @Autowired
+    private ConnectionDto connectionDto;
+    @Autowired
+    private InputControlDto inputControlDto;
+    @Autowired
+    private SchemaDto schemaDto;
+    @Autowired
+    private ReportDto reportDto;
+    @Autowired
+    private OrganizationDto organizationDto;
+    @Autowired
+    private DirectoryDto directoryDto;
+
+    @ApiOperation(value = "Add Connection")
+    @ApiErrorResponses
+    @RequestMapping(value = "/connections", method = RequestMethod.POST)
+    public ConnectionData add(@RequestBody ConnectionForm form) throws ApiException {
+        return connectionDto.add(form);
+    }
+
+    @ApiOperation(value = "Update Connection")
+    @ApiErrorResponses
+    @RequestMapping(value = "/connections/{id}", method = RequestMethod.PUT)
+    public ConnectionData update(@PathVariable Integer id, @RequestBody ConnectionForm form) throws ApiException {
+        return connectionDto.update(id, form);
+    }
+
+    @ApiOperation(value = "Get All Connections")
+    @ApiErrorResponses
+    @RequestMapping(value = "/connections", method = RequestMethod.GET)
+    public List<ConnectionData> selectAll() {
+        return connectionDto.selectAll();
+    }
+
+    @ApiOperation(value = "Add Input Control")
+    @ApiErrorResponses
+    @RequestMapping(value = "/controls", method = RequestMethod.POST)
+    public InputControlData addInputControl(@RequestBody InputControlForm form) throws ApiException {
+        return inputControlDto.add(form);
+    }
+
+    @ApiOperation(value = "Select all global controls")
+    @ApiErrorResponses
+    @RequestMapping(value = "/controls/global", method = RequestMethod.GET)
+    public List<InputControlData> selectAllGlobal() {
+        return inputControlDto.selectAllGlobal();
+    }
+
+    @ApiOperation(value = "Select controls for a report")
+    @ApiErrorResponses
+    @RequestMapping(value = "/controls", method = RequestMethod.GET)
+    public List<InputControlData> selectByReportId(@RequestParam Integer reportId) {
+        return inputControlDto.selectForReport(reportId);
+    }
+
+    @ApiOperation(value = "Add Schema")
+    @ApiErrorResponses
+    @RequestMapping(value = "/schema", method = RequestMethod.POST)
+    public SchemaData add(@RequestBody SchemaForm form) throws ApiException {
+        return schemaDto.add(form);
+    }
+
+    @ApiOperation(value = "Update Schema")
+    @ApiErrorResponses
+    @RequestMapping(value = "/schema/{schemaId}", method = RequestMethod.PUT)
+    public SchemaData updateSchema(@PathVariable Integer schemaId, @RequestBody SchemaForm form) throws ApiException {
+        return schemaDto.update(schemaId, form);
+    }
+
+    @ApiOperation(value = "Get All Schema")
+    @ApiErrorResponses
+    @RequestMapping(value = "/schema", method = RequestMethod.GET)
+    public List<SchemaData> selectAllSchema() {
+        return schemaDto.selectAll();
+    }
+
+    @ApiOperation(value = "Add Report")
+    @ApiErrorResponses
+    @RequestMapping(value = "/reports", method = RequestMethod.POST)
+    public ReportData add(@RequestBody ReportForm form) throws ApiException {
+        return reportDto.add(form);
+    }
+
+    @ApiOperation(value = "Edit Report")
+    @ApiErrorResponses
+    @RequestMapping(value = "/reports/{reportId}", method = RequestMethod.PUT)
+    public ReportData edit(@PathVariable Integer reportId, @RequestBody ReportForm form) throws ApiException {
+        return reportDto.edit(reportId, form);
+    }
+
+    @ApiOperation(value = "Get Reports")
+    @ApiErrorResponses
+    @RequestMapping(value = "/reports/{orgId}", method = RequestMethod.GET)
+    public List<ReportData> selectByOrgId(@PathVariable Integer orgId) throws ApiException {
+        return reportDto.selectAll(orgId);
+    }
+
+    @ApiOperation(value = "Add/Edit Report Query")
+    @ApiErrorResponses
+    @RequestMapping(value = "/reports/{reportId}/query", method = RequestMethod.POST)
+    public ReportQueryData addQuery(@PathVariable Integer reportId, @RequestBody ReportQueryForm form) throws ApiException {
+        return reportDto.upsertQuery(reportId, form);
+    }
+
+    @ApiOperation(value = "Map control to a report")
+    @ApiErrorResponses
+    @RequestMapping(value = "/reports/{reportId}/controls/{controlId}", method = RequestMethod.POST)
+    public void mapReportToControl(@PathVariable Integer reportId, @PathVariable Integer controlId) throws ApiException {
+        reportDto.mapToControl(reportId, controlId);
+    }
+
+    @ApiOperation(value = "Add validation group")
+    @ApiErrorResponses
+    @RequestMapping(value = "/reports/{reportId}/controls/validations", method = RequestMethod.POST)
+    public void addValidationGroup(@PathVariable Integer reportId, @RequestBody ValidationGroupForm groupForm) throws ApiException {
+        reportDto.addValidationGroup(reportId, groupForm);
+    }
+
+    @ApiOperation(value = "Delete validation group")
+    @ApiErrorResponses
+    @RequestMapping(value = "/reports/{reportId}/controls/validations", method = RequestMethod.DELETE)
+    public void deleteValidationGroup(@PathVariable Integer reportId, @RequestParam String groupName) throws ApiException {
+        reportDto.deleteValidationGroup(reportId, groupName);
+    }
+
+    @ApiOperation(value = "Get validation group")
+    @ApiErrorResponses
+    @RequestMapping(value = "/reports/{reportId}/controls/validations", method = RequestMethod.GET)
+    public List<ValidationGroupData> getValidationGroups(@PathVariable Integer reportId) {
+        return reportDto.getValidationGroups(reportId);
+    }
+
+    @ApiOperation(value = "Add Organization")
+    @ApiErrorResponses
+    @RequestMapping(value = "/orgs", method = RequestMethod.POST)
+    public OrganizationData add(@RequestBody OrganizationForm form) throws ApiException {
+        return organizationDto.add(form);
+    }
+
+    @ApiOperation(value = "Update Organization")
+    @ApiErrorResponses
+    @RequestMapping(value = "/orgs", method = RequestMethod.PUT)
+    public OrganizationData update(@RequestBody OrganizationForm form) throws ApiException {
+        return organizationDto.update(form);
+    }
+
+    @ApiOperation(value = "Get All Organizations")
+    @ApiErrorResponses
+    @RequestMapping(value = "/orgs", method = RequestMethod.GET)
+    public List<OrganizationData> selectAllOrgs() throws ApiException {
+        return organizationDto.selectAll();
+    }
+
+    @ApiOperation(value = "Map organization to a schema")
+    @ApiErrorResponses
+    @RequestMapping(value = "/orgs/{orgId}/schema", method = RequestMethod.POST)
+    public OrgSchemaData addSchemaMapping(@PathVariable Integer orgId, @RequestBody Integer schemaId) throws ApiException {
+        return organizationDto.mapToSchema(orgId, schemaId);
+    }
+
+    @ApiOperation(value = "Map organization to a connection")
+    @ApiErrorResponses
+    @RequestMapping(value = "/orgs/{orgId}/connection", method = RequestMethod.POST)
+    public OrgConnectionData addConnectionMapping(@PathVariable Integer orgId, @RequestBody Integer connectionId) throws ApiException {
+        return organizationDto.mapToConnection(orgId, connectionId);
+    }
+
+    @ApiOperation(value = "Get all org schema mapping")
+    @ApiErrorResponses
+    @RequestMapping(value = "/orgs/schemaMappings/", method = RequestMethod.GET)
+    public List<OrgSchemaData> selectAllSchemaMapping() {
+        return organizationDto.selectAllOrgSchema();
+    }
+
+    @ApiOperation(value = "Get all org connection mapping")
+    @ApiErrorResponses
+    @RequestMapping(value = "/orgs/connectionMappings/", method = RequestMethod.GET)
+    public List<OrgConnectionData> selectAllConnectionMapping() {
+        return organizationDto.selectAllOrgConnections();
+    }
+
+    @ApiOperation(value = "Add Directory")
+    @ApiErrorResponses
+    @RequestMapping(value = "/directories", method = RequestMethod.POST)
+    public DirectoryData add(@RequestBody DirectoryForm form) throws ApiException {
+        return directoryDto.add(form);
+    }
+
+    @ApiOperation(value = "Update Directory")
+    @ApiErrorResponses
+    @RequestMapping(value = "/directories/{directoryId}", method = RequestMethod.PUT)
+    public DirectoryData update(@PathVariable Integer directoryId, @RequestBody DirectoryForm form) throws ApiException {
+        return directoryDto.update(directoryId, form);
+    }
+
+    @ApiOperation(value = "Get All Directories")
+    @ApiErrorResponses
+    @RequestMapping(value = "/directories", method = RequestMethod.GET)
+    public List<DirectoryData> selectAllDirectories() throws ApiException {
+        return directoryDto.getAllDirectories();
+    }
 
     /*
-    * Controllers
-    *
-    * Input Controls
-    *   Add Global
-    *   Add for report
-    *   Modify
-    *
-    * Connections
-    *   New Connection
-    *   Edit Connection
-    *
-    * Schema
-    *   Create
-    *   Edit
-    *
-    * Directory
-    *   Create Directory
-    *
-    * Organization
-    *   Create Organization
-    *   Org to Schema mapping
-    *
-    * Report
-    *   Create Report
-    *   Map reports to controls
-    *
-    * Custom Report Access
-    *
-    * */
-
-
-
+     * todo Controllers
+     *
+     * Input Controls
+     *   Modify
+     *
+     * Custom Report Access
+     *
+     * */
 
 
 }

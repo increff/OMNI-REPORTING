@@ -22,13 +22,21 @@ public class ReportControlsApi extends AbstractApi {
         return dao.selectMultiple("reportId", reportId);
     }
 
+    public List<ReportControlsPojo> getByIds(List<Integer> reportControlIds) {
+        return dao.selectByIds(reportControlIds);
+    }
+
+    public ReportControlsPojo getCheck(Integer id) throws ApiException {
+        ReportControlsPojo pojo = dao.select(id);
+        checkNotNull(pojo, "Report control does not exist for id : " + id);
+        return pojo;
+    }
+
     public void add(ReportControlsPojo pojo) throws ApiException {
         ReportControlsPojo existing = select(pojo.getReportId(), pojo.getControlId());
         // checkNull(existing, "This control already present for selected report");
         if (Objects.isNull(existing))
             dao.persist(pojo);
-        else
-            existing.setValidationType(pojo.getValidationType());
     }
 
     public ReportControlsPojo select(Integer reportId, Integer controlId) {

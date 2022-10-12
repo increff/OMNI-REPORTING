@@ -1,6 +1,7 @@
 package com.increff.omni.reporting.job;
 
 
+import com.increff.omni.reporting.api.FolderApi;
 import com.increff.omni.reporting.api.ReportRequestApi;
 import com.increff.omni.reporting.config.ApplicationProperties;
 import com.increff.omni.reporting.pojo.ReportRequestPojo;
@@ -17,6 +18,8 @@ public class ReportJob {
 
     @Autowired
     private ReportRequestApi api;
+    @Autowired
+    private FolderApi folderApi;
     @Autowired
     private ApplicationProperties properties;
     @Autowired
@@ -56,4 +59,8 @@ public class ReportJob {
         api.markStuck(properties.getStuckReportTime());
     }
 
+    @Scheduled(fixedDelay = 3600 * 1000)
+    public void deleteOldLogsAndFiles() {
+        folderApi.deleteFilesOlderThan1Hr();
+    }
 }

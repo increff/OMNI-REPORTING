@@ -34,4 +34,7 @@ public class ApplicationProperties {
     @Value("${root.directory}")
     private String rootDirectory;
 
+    @Value("${increff.orgId}")
+    private Integer increffOrgId;
+
 }

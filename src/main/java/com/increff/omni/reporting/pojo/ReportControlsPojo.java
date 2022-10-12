@@ -20,8 +20,4 @@ public class ReportControlsPojo extends AbstractVersionedPojo{
     private Integer reportId;
 
     private Integer controlId;
-
-    @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
-    private ValidationType validationType;
 }

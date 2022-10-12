@@ -19,17 +19,10 @@ public class SchedulerConfig {
 
     @Autowired
     private ApplicationProperties properties;
-    @Autowired
-    private FolderApi folderApi;
 
     @Bean
     public Executor getScheduledThreadPool() {
-        return Executors.newScheduledThreadPool(3);
-    }
-
-    @Scheduled(fixedDelay = 3600 * 1000)
-    public void deleteOldLogsAndFiles() {
-        folderApi.deleteFilesOlderThan1Hr();
+        return Executors.newScheduledThreadPool(4);
     }
 
     @Bean(name = "jobExecutor")

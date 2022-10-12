@@ -57,19 +57,23 @@ public class ReportTask {
             File errFile = sqlParams.getErrFile();
             // upload result to cloud
             if (outFile.length() > 0) {
-                uploadFile(outFile, "SUCCESS_REPORTS", pojo);
+                String filePath = uploadFile(outFile, "SUCCESS_REPORTS", pojo);
                 // update status to completed
-                api.updateStatus(id, ReportRequestStatus.COMPLETED);
+                api.updateStatus(id, ReportRequestStatus.COMPLETED, filePath);
             } else if (errFile.length() > 0) {
-                uploadFile(errFile, "ERROR_REPORTS", pojo);
+                String filePath = uploadFile(errFile, "ERROR_REPORTS", pojo);
                 // update status to failed as error file is having some content
-                api.updateStatus(id, ReportRequestStatus.FAILED);
+                api.updateStatus(id, ReportRequestStatus.FAILED, filePath);
             }
             deleteFiles(outFile, errFile);
         } catch (Exception e) {
             // log as error and mark fail
-            log.error("Report ID : " + id + " failed");
-            api.updateStatus(id, ReportRequestStatus.FAILED);
+            log.error("Report ID : " + id + " failed", e);
+            try {
+                api.updateStatus(id, ReportRequestStatus.FAILED, "");
+            } catch (ApiException ex) {
+                log.error("Error while updating the status of request", ex);
+            }
         }
     }
 
@@ -80,7 +84,7 @@ public class ReportTask {
             log.debug("File deletion failed, name : " + errFile.getName());
     }
 
-    private void uploadFile(File file, String folder, ReportRequestPojo pojo) throws FileNotFoundException, ApiException {
+    private String uploadFile(File file, String folder, ReportRequestPojo pojo) throws FileNotFoundException, ApiException {
         InputStream inputStream = new FileInputStream(file);
         String filePath = properties.getGcpBaseUrl() + "/" + properties.getGcpBucketName() + "/"
                 + pojo.getOrgId() + "/" + folder + "/" + pojo.getId() + "_" + UUID.randomUUID() + ".tsv";
@@ -90,10 +94,11 @@ public class ReportTask {
             throw new ApiException(ApiStatus.BAD_DATA, "Error in uploading Report File to Gcp for report : " +
                     pojo.getId());
         }
+        return filePath;
     }
 
     private SqlParams runReportRequest(Integer id) throws ApiException, IOException {
-        ReportRequestPojo reportRequestPojo = api.getById(id);
+        ReportRequestPojo reportRequestPojo = api.getCheck(id);
         List<ReportInputParamsPojo> reportInputParamsPojoList = reportInputParamsApi.getInputParamsForReportRequest(reportRequestPojo.getReportId());
         ReportPojo reportPojo = reportApi.getCheck(reportRequestPojo.getReportId());
         ReportQueryPojo reportQueryPojo = reportQueryApi.getByReportId(reportPojo.getId());
@@ -113,8 +118,8 @@ public class ReportTask {
         return inputParamMap;
     }
 
-    private boolean checkLock(Integer id) {
-        ReportRequestPojo reportRequestPojo = api.getById(id);
+    private boolean checkLock(Integer id) throws ApiException {
+        ReportRequestPojo reportRequestPojo = api.getCheck(id);
         return Arrays.asList(ReportRequestStatus.NEW, ReportRequestStatus.STUCK).contains(reportRequestPojo.getStatus());
     }
 

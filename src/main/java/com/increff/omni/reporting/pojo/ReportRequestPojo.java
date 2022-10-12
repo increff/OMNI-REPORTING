@@ -25,5 +25,5 @@ public class ReportRequestPojo extends AbstractVersionedPojo{
 
     private ReportRequestStatus status;
 
-    //Maps of Params
+    private String url;
 }

@@ -36,4 +36,18 @@ public class FileUtil {
         }
     }
 
+    public static void createFileResponse(File file, HttpServletResponse response) throws IOException {
+        response.setContentType("application/octet-stream");
+        response.setHeader("Content-Disposition", "attachment; filename=" + file.getName());
+
+        OutputStream outputStream = null;
+        try {
+            outputStream = response.getOutputStream();
+            FileUtils.copyFile(file, response.getOutputStream());
+            outputStream.flush();
+        } finally {
+            FileUtil.closeQuietly(outputStream);
+        }
+    }
+
 }

@@ -1,6 +1,7 @@
 package com.increff.omni.reporting.flow;
 
 import com.increff.omni.reporting.api.*;
+import com.increff.omni.reporting.model.constants.ValidationType;
 import com.increff.omni.reporting.pojo.*;
 import com.increff.omni.reporting.validators.DateValidator;
 import com.increff.omni.reporting.validators.MandatoryValidator;
@@ -13,8 +14,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
+import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional(rollbackFor = Exception.class)
@@ -31,43 +35,61 @@ public class ReportRequestFlow extends AbstractApi {
     @Autowired
     private ReportInputParamsApi reportInputParamsApi;
     @Autowired
+    private ConnectionApi connectionApi;
+    @Autowired
+    private OrgConnectionApi orgConnectionApi;
+    @Autowired
     private MandatoryValidator mandatoryValidator;
     @Autowired
     private SingleMandatoryValidator singleMandatoryValidator;
+    @Autowired
+    private ReportValidationGroupApi reportValidationGroupApi;
     @Autowired
     private DateValidator dateValidator;
 
     private final static Integer MAX_OPEN_REPORT_REQUESTS = 5;
 
-    public void requestReport(ReportRequestPojo pojo, Map<String, String> params, List<ReportInputParamsPojo> reportInputParamsPojoList) throws ApiException {
-        validate(pojo, params);
+    public void requestReport(ReportRequestPojo pojo, Map<String, String> params, List<ReportInputParamsPojo> reportInputParamsPojoList, int orgId) throws ApiException {
+        validate(pojo, params, orgId);
         api.add(pojo);
         reportInputParamsApi.add(reportInputParamsPojoList);
     }
 
-    private void validate(ReportRequestPojo pojo, Map<String, String> params) throws ApiException {
+    private void validate(ReportRequestPojo pojo, Map<String, String> params, int orgId) throws ApiException {
         ReportPojo reportPojo = reportApi.getCheck(pojo.getReportId());
-
         // TODO check reports for which this org + user has access
         List<ReportRequestPojo> pendingReports = api.getPendingByUserId(pojo.getUserId());
-        if(!CollectionUtils.isEmpty(pendingReports) && pendingReports.size() > MAX_OPEN_REPORT_REQUESTS)
+        if (!CollectionUtils.isEmpty(pendingReports) && pendingReports.size() > MAX_OPEN_REPORT_REQUESTS)
             throw new ApiException(ApiStatus.BAD_DATA, "Wait for existing reports to get executed");
-        List<ReportControlsPojo> reportControlsPojoList = reportControlsApi.getByReportId(pojo.getReportId());
+        List<ReportValidationGroupPojo> reportValidationGroupPojoList = reportValidationGroupApi.getByReportId(reportPojo.getId());
+        Map<String, List<ReportValidationGroupPojo>> groupedByName = reportValidationGroupPojoList.stream()
+                .collect(Collectors.groupingBy(ReportValidationGroupPojo::getGroupName));
         // TODO Run through all the validators for this report
-        for(ReportControlsPojo reportControlsPojo : reportControlsPojoList) {
-            InputControlPojo inputControlPojo = controlApi.getCheck(reportControlsPojo.getControlId());
-            String paramValue = params.get(inputControlPojo.getParamName());
-            switch (reportControlsPojo.getValidationType()) {
+        for (Map.Entry<String, List<ReportValidationGroupPojo>> validationList : groupedByName.entrySet()) {
+            List<ReportValidationGroupPojo> groupPojoList = validationList.getValue();
+            ValidationType type = groupPojoList.get(0).getType();
+            List<ReportControlsPojo> reportControlsPojoList = reportControlsApi.getByIds(groupPojoList
+                    .stream().map(ReportValidationGroupPojo::getReportControlId).collect(Collectors.toList()));
+            List<InputControlPojo> inputControlPojoList = controlApi.selectMultiple(reportControlsPojoList.stream()
+                    .map(ReportControlsPojo::getControlId).collect(Collectors.toList()));
+            List<String> paramValues = new ArrayList<>();
+            List<String> displayValues = new ArrayList<>();
+
+            inputControlPojoList.forEach(i -> {
+                paramValues.add(params.get(i.getParamName()));
+                displayValues.add(i.getDisplayName());
+            });
+            switch (type) {
                 case NON_MANDATORY:
                     break;
                 case SINGLE_MANDATORY:
-                    singleMandatoryValidator.validate(inputControlPojo.getDisplayName(), paramValue, reportPojo.getName());
+                    singleMandatoryValidator.validate(displayValues, paramValues, reportPojo.getName(), groupPojoList.get(0).getValidationValue());
                     break;
                 case MANDATORY:
-                    mandatoryValidator.validate(inputControlPojo.getDisplayName(), paramValue, reportPojo.getName());
+                    mandatoryValidator.validate(displayValues, paramValues, reportPojo.getName(), groupPojoList.get(0).getValidationValue());
                     break;
-                case DATE:
-                    dateValidator.validate(inputControlPojo.getDisplayName(), paramValue, reportPojo.getName());
+                case DATE_RANGE:
+                    dateValidator.validate(displayValues, paramValues, reportPojo.getName(), groupPojoList.get(0).getValidationValue());
                     break;
                 default:
                     throw new ApiException(ApiStatus.BAD_DATA, "Invalid Validation Type");
@@ -75,6 +97,5 @@ public class ReportRequestFlow extends AbstractApi {
         }
 
     }
-
 
 }

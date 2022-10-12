@@ -2,38 +2,36 @@ package com.increff.omni.reporting.helper;
 
 import com.increff.omni.reporting.model.constants.InputControlType;
 import com.increff.omni.reporting.model.constants.ValidationType;
+import com.increff.omni.reporting.model.form.ValidationGroupForm;
 import com.increff.omni.reporting.pojo.ReportControlsPojo;
+import com.increff.omni.reporting.pojo.ReportValidationGroupPojo;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class FlowApiHelper {
 
-    public static ReportControlsPojo getReportControlPojo(Integer reportId, Integer controlId, ValidationType validationType) {
+    public static ReportControlsPojo getReportControlPojo(Integer reportId, Integer controlId) {
         ReportControlsPojo pojo = new ReportControlsPojo();
         pojo.setReportId(reportId);
         pojo.setControlId(controlId);
-        pojo.setValidationType(validationType);
         return pojo;
     }
 
-    public static void validateValidationType(InputControlType type, ValidationType validationType) throws ApiException {
-        switch (type) {
-            case DATE:
-                if (!Arrays.asList(ValidationType.DATE, ValidationType.NON_MANDATORY).contains(validationType))
-                    throw new ApiException(ApiStatus.BAD_DATA, "Type DATE can have DATE_RANGE or NON_MANDATORY validation type");
-                break;
-            case TEXT:
-            case NUMBER:
-            case MULTI_SELECT:
-                if (!Arrays.asList(ValidationType.MANDATORY, ValidationType.NON_MANDATORY).contains(validationType))
-                    throw new ApiException(ApiStatus.BAD_DATA, "Type TEXT, NUMBER or MULTI_SELECT can have MANDATORY or NON_MANDATORY validation type");
-                break;
-            case SINGLE_SELECT:
-                if (!Arrays.asList(ValidationType.SINGLE_MANDATORY, ValidationType.NON_MANDATORY).contains(validationType))
-                    throw new ApiException(ApiStatus.BAD_DATA, "Type SINGLE_SELECT can have SINGLE_MANDATORY or NON_MANDATORY validation type");
-                break;
-        }
+    public static List<ReportValidationGroupPojo> getValidationGroupPojoList(ValidationGroupForm groupForm, Integer reportId) {
+        List<ReportValidationGroupPojo> groupPojoList = new ArrayList<>();
+        groupForm.getReportControlIds().forEach(c -> {
+            ReportValidationGroupPojo pojo = new ReportValidationGroupPojo();
+            pojo.setGroupName(groupForm.getGroupName());
+            pojo.setReportId(reportId);
+            pojo.setReportControlId(c);
+            pojo.setType(groupForm.getValidationType());
+            pojo.setValidationValue(groupForm.getValidationValue());
+            groupPojoList.add(pojo);
+        });
+        return groupPojoList;
     }
 }

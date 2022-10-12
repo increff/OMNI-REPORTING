@@ -51,13 +51,12 @@ public class ReportControlsApiTest extends AbstractTest {
         schemaApi.add(schemaPojo);
         ReportPojo reportPojo = getReportPojo("CIMS Inventory Exposure Report", ReportType.STANDARD, directoryPojo.getId(), schemaPojo.getId());
         reportApi.add(reportPojo);
-        ReportControlsPojo controlsPojo = getReportControlsPojo(ValidationType.MANDATORY, reportPojo.getId(), inputControlPojo.getId());
+        ReportControlsPojo controlsPojo = getReportControlsPojo(reportPojo.getId(), inputControlPojo.getId());
         api.add(controlsPojo);
         ReportControlsPojo pojo1 = api.select(reportPojo.getId(), inputControlPojo.getId());
         assertNotNull(pojo1);
         assertEquals(reportPojo.getId(), pojo1.getReportId());
         assertEquals(inputControlPojo.getId(), pojo1.getControlId());
-        assertEquals(ValidationType.MANDATORY, pojo1.getValidationType());
         ReportControlsPojo pojo2 = api.select(reportPojo.getId(), inputControlPojo.getId() + 1);
         assertNull(pojo2);
     }
@@ -74,14 +73,13 @@ public class ReportControlsApiTest extends AbstractTest {
         schemaApi.add(schemaPojo);
         ReportPojo reportPojo = getReportPojo("CIMS Inventory Exposure Report", ReportType.STANDARD, directoryPojo.getId(), schemaPojo.getId());
         reportApi.add(reportPojo);
-        ReportControlsPojo controlsPojo = getReportControlsPojo(ValidationType.MANDATORY, reportPojo.getId(), inputControlPojo.getId());
+        ReportControlsPojo controlsPojo = getReportControlsPojo(reportPojo.getId(), inputControlPojo.getId());
         api.add(controlsPojo);
-        controlsPojo = getReportControlsPojo(ValidationType.NON_MANDATORY, reportPojo.getId(), inputControlPojo.getId());
+        controlsPojo = getReportControlsPojo(reportPojo.getId(), inputControlPojo.getId());
         api.add(controlsPojo);
         ReportControlsPojo pojo1 = api.select(reportPojo.getId(), inputControlPojo.getId());
         assertNotNull(pojo1);
         assertEquals(reportPojo.getId(), pojo1.getReportId());
         assertEquals(inputControlPojo.getId(), pojo1.getControlId());
-        assertEquals(ValidationType.NON_MANDATORY, pojo1.getValidationType());
     }
 }

@@ -48,7 +48,7 @@ public class InputControlFlowApiTest extends AbstractTest {
     public void testAddGlobalInputControl() throws ApiException {
         InputControlPojo inputControlPojo = getInputControlPojo("Client ID", "clientId", InputControlScope.GLOBAL, InputControlType.MULTI_SELECT);
         String query = "select * from oms.oms_orders;";
-        flowApi.add(inputControlPojo, query, new ArrayList<>(), null, ValidationType.MANDATORY);
+        flowApi.add(inputControlPojo, query, new ArrayList<>(), null);
         InputControlPojo pojo = api.getCheck(inputControlPojo.getId());
         assertNotNull(pojo);
         assertEquals("Client ID", pojo.getDisplayName());
@@ -65,7 +65,7 @@ public class InputControlFlowApiTest extends AbstractTest {
         InputControlPojo inputControlPojo = getInputControlPojo("Client ID", "clientId", InputControlScope.LOCAL, InputControlType.MULTI_SELECT);
         String query = "select * from oms.oms_orders;";
         try {
-            flowApi.add(inputControlPojo, query, new ArrayList<>(), 1, ValidationType.MANDATORY);
+            flowApi.add(inputControlPojo, query, new ArrayList<>(), 1);
         } catch (ApiException e) {
             assertEquals(ApiStatus.BAD_DATA, e.getStatus());
             assertEquals("No report present with id : 1", e.getMessage());
@@ -84,7 +84,7 @@ public class InputControlFlowApiTest extends AbstractTest {
         reportApi.add(pojo);
         InputControlPojo inputControlPojo = getInputControlPojo("Client ID", "clientId", InputControlScope.LOCAL, InputControlType.MULTI_SELECT);
         String query = "select * from oms.oms_orders;";
-        flowApi.add(inputControlPojo, query, new ArrayList<>(), pojo.getId(), ValidationType.MANDATORY);
+        flowApi.add(inputControlPojo, query, new ArrayList<>(), pojo.getId());
     }
 
     @Test
@@ -101,10 +101,10 @@ public class InputControlFlowApiTest extends AbstractTest {
         InputControlQueryPojo inputControlQueryPojo = getInputControlQueryPojo("select * from oms.oms_orders;", null);
         api.add(inputControlPojo, inputControlQueryPojo, new ArrayList<>());
         String query = "select * from oms.oms_orders;";
-        flowApi.add(inputControlPojo, query, new ArrayList<>(), pojo.getId(), ValidationType.NON_MANDATORY);
+        flowApi.add(inputControlPojo, query, new ArrayList<>(), pojo.getId());
         InputControlPojo inputControlPojo2 = getInputControlPojo("Warehouse ID", "warehouseId", InputControlScope.LOCAL, InputControlType.MULTI_SELECT);
         query = "select * from oms.oms_orders;";
-        flowApi.add(inputControlPojo2, query, new ArrayList<>(), pojo.getId(), ValidationType.NON_MANDATORY);
+        flowApi.add(inputControlPojo2, query, new ArrayList<>(), pojo.getId());
     }
 
     @Test(expected = ApiException.class)
@@ -121,12 +121,12 @@ public class InputControlFlowApiTest extends AbstractTest {
         InputControlQueryPojo inputControlQueryPojo = getInputControlQueryPojo("select * from oms.oms_orders;", null);
         api.add(inputControlPojo, inputControlQueryPojo, new ArrayList<>());
         String query = "select * from oms.oms_orders;";
-        flowApi.add(inputControlPojo, query, new ArrayList<>(), pojo.getId(), ValidationType.NON_MANDATORY);
+        flowApi.add(inputControlPojo, query, new ArrayList<>(), pojo.getId());
 
         InputControlPojo inputControlPojo2 = getInputControlPojo("Client ID", "warehouseId", InputControlScope.LOCAL, InputControlType.MULTI_SELECT);
         query = "select * from oms.oms_orders;";
         try {
-            flowApi.add(inputControlPojo2, query, new ArrayList<>(), pojo.getId(), ValidationType.NON_MANDATORY);
+            flowApi.add(inputControlPojo2, query, new ArrayList<>(), pojo.getId());
         } catch (ApiException e) {
             assertEquals(ApiStatus.BAD_DATA, e.getStatus());
             assertEquals("Another input control present with same display name or param name", e.getMessage());
@@ -148,12 +148,12 @@ public class InputControlFlowApiTest extends AbstractTest {
         InputControlQueryPojo inputControlQueryPojo = getInputControlQueryPojo("select * from oms.oms_orders;", null);
         api.add(inputControlPojo, inputControlQueryPojo, new ArrayList<>());
         String query = "select * from oms.oms_orders;";
-        flowApi.add(inputControlPojo, query, new ArrayList<>(), pojo.getId(), ValidationType.NON_MANDATORY);
+        flowApi.add(inputControlPojo, query, new ArrayList<>(), pojo.getId());
 
         InputControlPojo inputControlPojo2 = getInputControlPojo("Warehouse ID", "clientId", InputControlScope.LOCAL, InputControlType.MULTI_SELECT);
         query = "select * from oms.oms_orders;";
         try {
-            flowApi.add(inputControlPojo2, query, new ArrayList<>(), pojo.getId(), ValidationType.NON_MANDATORY);
+            flowApi.add(inputControlPojo2, query, new ArrayList<>(), pojo.getId());
         } catch (ApiException e) {
             assertEquals(ApiStatus.BAD_DATA, e.getStatus());
             assertEquals("Another input control present with same display name or param name", e.getMessage());
@@ -175,12 +175,12 @@ public class InputControlFlowApiTest extends AbstractTest {
         InputControlQueryPojo inputControlQueryPojo = getInputControlQueryPojo("select * from oms.oms_orders;", null);
         api.add(inputControlPojo, inputControlQueryPojo, new ArrayList<>());
         String query = "select * from oms.oms_orders;";
-        flowApi.add(inputControlPojo, query, new ArrayList<>(), pojo.getId(), ValidationType.NON_MANDATORY);
+        flowApi.add(inputControlPojo, query, new ArrayList<>(), pojo.getId());
 
         InputControlPojo inputControlPojo2 = getInputControlPojo("Warehouse ID", "warehouseId", InputControlScope.LOCAL, InputControlType.MULTI_SELECT);
         query = "select * from oms.oms_orders;";
         try {
-            flowApi.add(inputControlPojo2, query, new ArrayList<>(), pojo.getId(), ValidationType.DATE);
+            flowApi.add(inputControlPojo2, query, new ArrayList<>(), pojo.getId());
         } catch (ApiException e) {
             assertEquals(ApiStatus.BAD_DATA, e.getStatus());
             assertEquals("Type TEXT, NUMBER or MULTI_SELECT can have MANDATORY or NON_MANDATORY validation type", e.getMessage());

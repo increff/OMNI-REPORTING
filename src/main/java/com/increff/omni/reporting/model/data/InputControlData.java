@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.util.List;
+import java.util.Map;
 
 @Setter
 @Getter
@@ -19,5 +20,6 @@ public class InputControlData extends InputControlForm {
     private InputControlType type;
     private String query;
     private List<String> values;
+    private Map<String, String> queryValues;
 
 }
