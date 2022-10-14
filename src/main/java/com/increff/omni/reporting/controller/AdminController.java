@@ -179,6 +179,34 @@ public class AdminController {
         return reportDto.getValidationGroups(reportId);
     }
 
+    @ApiOperation(value = "Add report expression")
+    @ApiErrorResponses
+    @RequestMapping(value = "/reports/expressions", method = RequestMethod.POST)
+    public void addReportExpression(@RequestBody ReportExpressionForm form) throws ApiException {
+        reportDto.addReportExpression(form);
+    }
+
+    @ApiOperation(value = "Edit report expression")
+    @ApiErrorResponses
+    @RequestMapping(value = "/reports/expressions", method = RequestMethod.PUT)
+    public void updateReportExpression(@RequestBody ReportExpressionForm form) throws ApiException {
+        reportDto.updateReportExpression(form);
+    }
+
+    @ApiOperation(value = "Get report expressions")
+    @ApiErrorResponses
+    @RequestMapping(value = "/reports/{reportId}/expressions", method = RequestMethod.GET)
+    public List<ReportExpressionData> getReportExpressions(@PathVariable Integer reportId) {
+        return reportDto.getAllExpressionsByReport(reportId);
+    }
+
+    @ApiOperation(value = "Delete report expression")
+    @ApiErrorResponses
+    @RequestMapping(value = "/reports/expressions/{id}", method = RequestMethod.DELETE)
+    public void deleteReportExpression(@PathVariable Integer id) throws ApiException {
+        reportDto.deleteReportExpression(id);
+    }
+
     @ApiOperation(value = "Add Organization")
     @ApiErrorResponses
     @RequestMapping(value = "/orgs", method = RequestMethod.POST)

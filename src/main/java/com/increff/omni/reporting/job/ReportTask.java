@@ -59,14 +59,13 @@ public class ReportTask {
         OrgConnectionPojo orgConnectionPojo = orgConnectionApi.getCheckByOrgId(reportRequestPojo.getOrgId());
         ConnectionPojo connectionPojo = connectionApi.getCheck(orgConnectionPojo.getConnectionId());
         File file = folderApi.getFileForExtension(reportRequestPojo.getId(), ".xls");
-        File errorFile = folderApi.getErrFile(reportRequestPojo.getId(), ".txt");
+        File errorFile = folderApi.getErrFile(reportRequestPojo.getId(), ".xls");
         Map<String, String> inputParamMap = getInputParamMapFromPojoList(reportInputParamsPojoList);
         SqlParams sqlParams = ReportTaskHelper.convert(connectionPojo, reportQueryPojo, inputParamMap, file, errorFile);
         try {
             SqlCmd.processQuery(sqlParams);
-            File outFile = sqlParams.getOutFile();
             // upload result to cloud
-            String filePath = uploadFile(outFile, "SUCCESS_REPORTS", pojo);
+            String filePath = uploadFile(sqlParams.getOutFile(), "SUCCESS_REPORTS", pojo);
             // update status to completed
             api.updateStatus(id, ReportRequestStatus.COMPLETED, filePath);
         } catch (Exception e) {
