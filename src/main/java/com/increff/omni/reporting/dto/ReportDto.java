@@ -1,9 +1,9 @@
 package com.increff.omni.reporting.dto;
 
 import com.increff.omni.reporting.api.InputControlApi;
+import com.increff.omni.reporting.api.ReportApi;
 import com.increff.omni.reporting.api.ReportControlsApi;
 import com.increff.omni.reporting.api.ReportValidationGroupApi;
-import com.increff.omni.reporting.helper.FlowApiHelper;
 import com.increff.omni.reporting.flow.ReportFlowApi;
 import com.increff.omni.reporting.model.constants.ValidationType;
 import com.increff.omni.reporting.model.data.ReportData;
@@ -36,6 +36,8 @@ public class ReportDto extends AbstractDtoApi {
     private ReportControlsApi reportControlsApi;
     @Autowired
     private InputControlApi inputControlApi;
+    @Autowired
+    private ReportApi reportApi;
 
     public ReportData add(ReportForm form) throws ApiException {
         checkValid(form);
@@ -49,6 +51,11 @@ public class ReportDto extends AbstractDtoApi {
         ReportPojo pojo = ConvertUtil.convert(form, ReportPojo.class);
         pojo.setId(id);
         pojo = flowApi.editReport(pojo);
+        return ConvertUtil.convert(pojo, ReportData.class);
+    }
+
+    public ReportData get(Integer id) throws ApiException {
+        ReportPojo pojo = reportApi.getCheck(id);
         return ConvertUtil.convert(pojo, ReportData.class);
     }
 
@@ -69,9 +76,11 @@ public class ReportDto extends AbstractDtoApi {
     public void mapToControl(Integer reportId, Integer controlId) throws ApiException {
         if (reportId == null || controlId == null)
             throw new ApiException(ApiStatus.BAD_DATA, "Report id or control id cannot be null");
-        ReportControlsPojo pojo = FlowApiHelper.getReportControlPojo(reportId, controlId);
+        ReportControlsPojo pojo = CommonDtoHelper.getReportControlPojo(reportId, controlId);
         flowApi.mapControlToReport(pojo);
     }
+
+    // Todo remove report control flow
 
     public void addValidationGroup(Integer reportId, ValidationGroupForm groupForm) throws ApiException {
         validate(reportId, groupForm);

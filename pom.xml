@@ -17,7 +17,7 @@
 
         <!-- Jetty -->
         <jetty.version>9.3.7.v20160115</jetty.version>
-        <jetty.http.port>9000</jetty.http.port>
+        <jetty.http.port>9001</jetty.http.port>
         <jetty.http.host>0.0.0.0</jetty.http.host>
         <jetty.context>/omni-reporting/</jetty.context>
         <failOnMissingWebXml>false</failOnMissingWebXml>
@@ -34,9 +34,22 @@
         <!-- Runtime/Test depdendencies -->
         <javax.servlet.version>3.1.0</javax.servlet.version>
         <mockito.version>1.9.5</mockito.version>
+
+        <!-- External Dependencies -->
+        <apache-poi.version>4.1.2</apache-poi.version>
     </properties>
 
     <dependencies>
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi</artifactId>
+            <version>${apache-poi.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi-ooxml</artifactId>
+            <version>${apache-poi.version}</version>
+        </dependency>
         <dependency>
             <groupId>com.nextscm.commons</groupId>
             <artifactId>commons-spring-server</artifactId>
@@ -96,12 +109,6 @@
                 <configuration>
                     <scanIntervalSeconds>5</scanIntervalSeconds>
                     <useTestClasspath>false</useTestClasspath>
-                    <systemProperties>
-                        <systemProperty>
-                            <name>log4j.configuration</name>
-                            <value>file:./log4j.properties</value>
-                        </systemProperty>
-                    </systemProperties>
                     <httpConnector>
                         <port>${jetty.http.port}</port>
                     </httpConnector>
@@ -155,11 +162,12 @@
     </distributionManagement>
 
     <scm>
-        <url>https://bitbucket.org/increff/crossdoc/src</url>
+        <url>https://bitbucket.org/increff/omni-reporting/src</url>
         <connection>scm:git:https://nextscm_jenkins@bitbucket.org/increff/omni-reporting.git</connection>
-        <developerConnection>scm:git:https://nextscm_jenkins@bitbucket.org/increff/omni-reporting.git</developerConnection>
+        <developerConnection>scm:git:https://nextscm_jenkins@bitbucket.org/increff/omni-reporting.git
+        </developerConnection>
         <tag>HEAD</tag>
     </scm>
 
-    
+
 </project>

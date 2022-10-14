@@ -2,7 +2,6 @@ package com.increff.omni.reporting.controller;
 
 
 import com.increff.omni.reporting.dto.ReportRequestDto;
-import com.increff.omni.reporting.dto.UserDto;
 import com.increff.omni.reporting.model.data.ReportRequestData;
 import com.increff.omni.reporting.model.form.ReportRequestForm;
 import com.increff.omni.reporting.util.FileUtil;
@@ -24,15 +23,13 @@ import java.util.List;
 public class UserController {
 
     @Autowired
-    private UserDto userDto;
-    @Autowired
     private ReportRequestDto reportRequestDto;
 
     @ApiOperation(value = "Request Report")
     @ApiErrorResponses
     @RequestMapping(value = "/request-report", method = RequestMethod.POST)
     public void requestReport(@RequestBody ReportRequestForm form) throws ApiException {
-        userDto.requestReport(form);
+        reportRequestDto.requestReport(form);
     }
 
     @ApiOperation(value = "Get All Request data")
@@ -48,7 +45,7 @@ public class UserController {
     public void getFile(@PathVariable Integer requestId, HttpServletResponse response) throws ApiException, IOException {
         File file = reportRequestDto.getReportFile(requestId);
         FileUtil.createFileResponse(file,response);
+        FileUtil.delete(file);
     }
 
-    // todo tsv, excel download
 }

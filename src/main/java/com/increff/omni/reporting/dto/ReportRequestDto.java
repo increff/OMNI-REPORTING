@@ -3,26 +3,27 @@ package com.increff.omni.reporting.dto;
 import com.increff.omni.reporting.api.*;
 import com.increff.omni.reporting.client.ReportingClient;
 import com.increff.omni.reporting.flow.ReportRequestFlow;
+import com.increff.omni.reporting.model.constants.ReportRequestStatus;
+import com.increff.omni.reporting.model.constants.ReportType;
 import com.increff.omni.reporting.model.data.ReportRequestData;
 import com.increff.omni.reporting.model.form.ReportRequestForm;
 import com.increff.omni.reporting.pojo.*;
-import com.increff.omni.reporting.util.FileUtil;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
+import lombok.extern.log4j.Log4j;
 import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.increff.omni.reporting.helper.ReportRequestDtoHelper.getReportRequestData;
-import static com.increff.omni.reporting.helper.ReportRequestDtoHelper.getReportRequestPojo;
-
 @Service
+@Log4j
 public class ReportRequestDto extends AbstractDto {
 
     @Autowired
@@ -40,17 +41,20 @@ public class ReportRequestDto extends AbstractDto {
     @Autowired
     private ReportRequestApi reportRequestApi;
     @Autowired
+    private CustomReportAccessApi customReportAccessApi;
+    @Autowired
     private FolderApi folderApi;
     @Autowired
     private ReportingClient client;
 
     public void requestReport(ReportRequestForm form) throws ApiException {
         checkValid(form);
-        ReportRequestPojo pojo = getReportRequestPojo(form, getOrgId(), getUserId());
+        ReportRequestPojo pojo = CommonDtoHelper.getReportRequestPojo(form, 100001, 100001);//Todo change to original
         ReportPojo reportPojo = reportApi.getCheck(pojo.getReportId());
+        validateCustomReportAccess(reportPojo, getOrgId());
         validateInputParamValues(reportPojo, form.getParamMap());
-        List<ReportInputParamsPojo> reportInputParamsPojoList = getReportInputParamsPojoList(form.getParamMap());
-        flow.requestReport(pojo, form.getParamMap(), reportInputParamsPojoList, getOrgId());
+        List<ReportInputParamsPojo> reportInputParamsPojoList = CommonDtoHelper.getReportInputParamsPojoList(form.getParamMap());
+        flow.requestReport(pojo, form.getParamMap(), reportInputParamsPojoList);
     }
 
     public List<ReportRequestData> getAll(Integer days) throws ApiException {
@@ -58,21 +62,36 @@ public class ReportRequestDto extends AbstractDto {
         List<ReportRequestPojo> reportRequestPojoList = reportRequestApi.getByUserId(getUserId(), days);
         for (ReportRequestPojo r : reportRequestPojoList) {
             ReportPojo reportPojo = reportApi.getCheck(r.getReportId());
-            reportRequestDataList.add(getReportRequestData(r, reportPojo));
+            reportRequestDataList.add(CommonDtoHelper.getReportRequestData(r, reportPojo));
         }
         return reportRequestDataList;
     }
 
     public File getReportFile(Integer requestId) throws ApiException, IOException {
         ReportRequestPojo requestPojo = reportRequestApi.getCheck(requestId);
-        if(requestPojo.getUserId() != getUserId()) {
+        ReportPojo reportPojo = reportApi.getCheck(requestPojo.getReportId());
+        // Todo replace with getUserId()
+        if (requestPojo.getUserId() != 100001) {
             throw new ApiException(ApiStatus.BAD_DATA, "Logged in user has not requested the report with id : " + requestId);
         }
-        ReportPojo reportPojo = reportApi.getCheck(requestPojo.getReportId());
-        File file = folderApi.getFile(reportPojo.getName() + " " + requestPojo.getId());
+        if(!Arrays.asList(ReportRequestStatus.COMPLETED, ReportRequestStatus.FAILED).contains(requestPojo.getStatus())) {
+            throw new ApiException(ApiStatus.BAD_DATA, "Report request is still in processing, name : " + reportPojo.getName());
+        }
+        String reportName = reportPojo.getName() + "-" +
+                requestPojo.getUpdatedAt().toInstant().atZone(ZoneId.of("UTC")).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS"));
+        File sourceFile = folderApi.getFile(reportName + ".xls");
         byte[] data = client.getFileFromUrl(requestPojo.getUrl());
-        FileUtils.writeByteArrayToFile(file, data);
-        return file;
+        FileUtils.writeByteArrayToFile(sourceFile, data);
+        return sourceFile;
+    }
+
+    private void validateCustomReportAccess(ReportPojo reportPojo, Integer orgId) throws ApiException {
+        if (reportPojo.getType().equals(ReportType.STANDARD))
+            return;
+        CustomReportAccessPojo customReportAccessPojo = customReportAccessApi.getByReportAndOrg(reportPojo.getId(), orgId);
+        if (Objects.isNull(customReportAccessPojo)) {
+            throw new ApiException(ApiStatus.BAD_DATA, "Organization does not have access to view this report : " + reportPojo.getName());
+        }
     }
 
     private void validateInputParamValues(ReportPojo reportPojo, Map<String, String> params) throws ApiException {
@@ -141,16 +160,5 @@ public class ReportRequestDto extends AbstractDto {
             valuesMap = getValuesFromQuery(queryPojoList.get(0).getQuery());
         }
         return valuesMap;
-    }
-
-    private List<ReportInputParamsPojo> getReportInputParamsPojoList(Map<String, String> paramMap) {
-        List<ReportInputParamsPojo> reportInputParamsPojoList = new ArrayList<>();
-        paramMap.forEach((k, v) -> {
-            ReportInputParamsPojo reportInputParamsPojo = new ReportInputParamsPojo();
-            reportInputParamsPojo.setParamKey(k);
-            reportInputParamsPojo.setParamValue(v);
-            reportInputParamsPojoList.add(reportInputParamsPojo);
-        });
-        return reportInputParamsPojoList;
     }
 }

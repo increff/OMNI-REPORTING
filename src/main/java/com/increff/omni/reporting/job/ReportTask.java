@@ -86,15 +86,14 @@ public class ReportTask {
 
     private String uploadFile(File file, String folder, ReportRequestPojo pojo) throws FileNotFoundException, ApiException {
         InputStream inputStream = new FileInputStream(file);
-        String filePath = properties.getGcpBaseUrl() + "/" + properties.getGcpBucketName() + "/"
-                + pojo.getOrgId() + "/" + folder + "/" + pojo.getId() + "_" + UUID.randomUUID() + ".tsv";
+        String filePath = pojo.getOrgId() + "/" + folder + "/" + pojo.getId() + "_" + UUID.randomUUID() + ".xls";
         try {
             fileClient.create(filePath, inputStream);
         } catch (FileClientException e) {
             throw new ApiException(ApiStatus.BAD_DATA, "Error in uploading Report File to Gcp for report : " +
                     pojo.getId());
         }
-        return filePath;
+        return properties.getGcpBaseUrl() + "/" + properties.getGcpBucketName() + "/" + filePath;
     }
 
     private SqlParams runReportRequest(Integer id) throws ApiException, IOException {
@@ -104,11 +103,11 @@ public class ReportTask {
         ReportQueryPojo reportQueryPojo = reportQueryApi.getByReportId(reportPojo.getId());
         OrgConnectionPojo orgConnectionPojo = orgConnectionApi.getCheckByOrgId(reportRequestPojo.getOrgId());
         ConnectionPojo connectionPojo = connectionApi.getCheck(orgConnectionPojo.getConnectionId());
-        File file = folderApi.getFileForExtension(reportRequestPojo.getId(), ".tsv");
+        File file = folderApi.getFileForExtension(reportRequestPojo.getId(), ".xls");
         File errorFile = folderApi.getErrFile(reportRequestPojo.getId(), ".txt");
         Map<String, String> inputParamMap = getInputParamMapFromPojoList(reportInputParamsPojoList);
         SqlParams sqlParams = ReportTaskHelper.convert(connectionPojo, reportQueryPojo, inputParamMap, file, errorFile);
-        SqlCmd.processToTsv(sqlParams);
+        SqlCmd.processQuery(sqlParams);
         return sqlParams;
     }
 

@@ -14,8 +14,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-import static com.increff.omni.reporting.helper.OrganizationDtoHelper.*;
-
 @Service
 public class OrganizationDto extends AbstractDtoApi {
 
@@ -64,19 +62,19 @@ public class OrganizationDto extends AbstractDtoApi {
         SchemaPojo schemaPojo = schemaApi.getCheck(schemaId);
 
         OrgSchemaPojo pojo = createPojo(orgPojo, schemaPojo);
-        return getOrgSchemaData(pojo, schemaPojo);
+        return CommonDtoHelper.getOrgSchemaData(pojo, schemaPojo);
     }
 
     public List<OrgSchemaData> selectAllOrgSchema(){
         List<OrgSchemaPojo> pojos = orgSchemaApi.selectAll();
         List<SchemaPojo> allPojos = schemaApi.selectAll();
-        return getOrgSchemaDataList(pojos, allPojos);
+        return CommonDtoHelper.getOrgSchemaDataList(pojos, allPojos);
     }
 
     public List<OrgConnectionData> selectAllOrgConnections(){
         List<OrgConnectionPojo> pojos = orgConnectionApi.selectAll();
         List<ConnectionPojo> allPojos = connectionApi.selectAll();
-        return getOrgConnectionDataList(pojos, allPojos);
+        return CommonDtoHelper.getOrgConnectionDataList(pojos, allPojos);
     }
 
     public OrgConnectionData mapToConnection(Integer id, Integer connectionId) throws ApiException {
@@ -85,7 +83,7 @@ public class OrganizationDto extends AbstractDtoApi {
         ConnectionPojo connectionPojo = connectionApi.getCheck(connectionId);
 
         OrgConnectionPojo pojo = createPojo(orgPojo, connectionPojo);
-        return getOrgConnectionData(pojo, connectionPojo);
+        return CommonDtoHelper.getOrgConnectionData(pojo, connectionPojo);
     }
 
     private OrgSchemaPojo createPojo(OrganizationPojo orgPojo, SchemaPojo schemaPojo) {

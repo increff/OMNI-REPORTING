@@ -7,6 +7,7 @@ import com.nextscm.commons.fileclient.GcpFileProvider;
 import com.nextscm.commons.spring.server.WebMvcConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.*;
+import org.springframework.web.client.RestTemplate;
 
 /**
  * TOP-MOST level Spring configuration file, that starts the Spring
@@ -17,7 +18,7 @@ import org.springframework.context.annotation.*;
  * Spring configuration for loading application properties.
  */
 @Configuration
-@ComponentScan({ "com.increff.omni.reporting"})
+@ComponentScan({"com.increff.omni.reporting", "com.increff.account.client"})
 @PropertySources({ //
 		@PropertySource("classpath:com/increff/omni/reporting/config.properties"),
 		@PropertySource(value = "file:./omni-reporting.properties")
@@ -33,6 +34,11 @@ public class SpringConfig {
 		AbstractFileProvider gcpFileProvider = new GcpFileProvider(applicationProperties.getGcpBaseUrl(),
 				applicationProperties.getGcpBucketName(), applicationProperties.getGcpFilePath());
 		return new FileClient(gcpFileProvider);
+	}
+
+	@Bean
+	public RestTemplate getRestTemplate() {
+		return new RestTemplate();
 	}
 
 }

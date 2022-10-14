@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import static com.increff.omni.reporting.helper.FlowApiHelper.getValidationGroupPojoList;
+import static com.increff.omni.reporting.dto.CommonDtoHelper.getValidationGroupPojoList;
 
 @Service
 @Transactional(rollbackFor = ApiException.class)
@@ -69,12 +69,16 @@ public class ReportFlowApi extends AbstractApi {
     }
 
     public ReportPojo editReport(ReportPojo pojo) throws ApiException {
-        validateForEdit(pojo);
+        ReportPojo existing = api.getCheck(pojo.getId());
+        validateForEdit(pojo, existing);
+        // Delete custom report access if transition is happening from CUSTOM to STANDARD
+        if (existing.getType().equals(ReportType.CUSTOM) && pojo.getType().equals(ReportType.STANDARD))
+            customReportAccessApi.deleteByReportId(pojo.getId());
         return api.edit(pojo);
     }
 
     public ReportQueryPojo upsertQuery(ReportQueryPojo pojo) throws ApiException {
-        api.getCheck(pojo.getId());
+        api.getCheck(pojo.getReportId());
         return queryApi.upsertQuery(pojo);
     }
 
@@ -140,11 +144,9 @@ public class ReportFlowApi extends AbstractApi {
             throw new ApiException(ApiStatus.BAD_DATA, "Only Global Control can be mapped to a report");
     }
 
-    private void validateForEdit(ReportPojo pojo) throws ApiException {
+    private void validateForEdit(ReportPojo pojo, ReportPojo existing) throws ApiException {
         directoryApi.getCheck(pojo.getDirectoryId());
         schemaApi.getCheck(pojo.getSchemaId());
-
-        ReportPojo existing = api.getCheck(pojo.getId());
 
         //validating if requested name is already present
         if (!pojo.getName().equals(existing.getName())) {

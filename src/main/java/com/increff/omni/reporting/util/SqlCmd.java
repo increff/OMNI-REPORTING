@@ -4,25 +4,26 @@ import com.increff.omni.reporting.model.SqlParams;
 import com.nextscm.commons.lang.CmdUtil;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
-import org.apache.log4j.Logger;
+import lombok.extern.log4j.Log4j;
 
 import java.io.IOException;
 import java.lang.ProcessBuilder.Redirect;
 
+@Log4j
 public class SqlCmd {
-    public static final Logger logger = Logger.getLogger(SqlCmd.class);
 
     /*
     * https://www.baeldung.com/java-string-formatting-named-placeholders
     * */
 
-    public static void processToTsv(SqlParams sp) throws ApiException {
+    public static void processQuery(SqlParams sp) throws ApiException {
         String[] cmd = getQueryCmd(sp);
         Redirect redirectAll = Redirect.appendTo(sp.getOutFile());
         Redirect errRedirect = Redirect.appendTo(sp.getErrFile());
         try {
             CmdUtil.runCmd(cmd, redirectAll, errRedirect);
         } catch (IOException | InterruptedException e) {
+
             throw new ApiException(ApiStatus.UNKNOWN_ERROR, "Error executing MYSQL query");
         }
     }
@@ -39,7 +40,7 @@ public class SqlCmd {
                 "-e", //
                 escape(sp.getQuery()) //
         };
-        logger.debug("Query formed =" +sp.getQuery());
+        log.info("Query formed =" +sp.getQuery());
         return cmd;
     }
 

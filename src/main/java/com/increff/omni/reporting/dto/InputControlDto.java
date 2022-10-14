@@ -54,6 +54,14 @@ public class InputControlDto extends AbstractDto {
         return getInputControlData(pojo);
     }
 
+    public InputControlData update(Integer id, InputControlForm form) throws ApiException {
+        validate(form);
+        InputControlPojo pojo = ConvertUtil.convert(form, InputControlPojo.class);
+        pojo.setId(id);
+        pojo = flowApi.update(pojo, form.getQuery(), form.getValues(), form.getReportId());
+        return getInputControlData(pojo);
+    }
+
     public List<InputControlData> selectAllGlobal() {
         List<InputControlPojo> pojos = api.getByScope(InputControlScope.GLOBAL);
         return getInputControlDatas(pojos);
@@ -143,6 +151,8 @@ public class InputControlDto extends AbstractDto {
             case TEXT:
             case NUMBER:
             case DATE:
+                if (form.getValues() != null || form.getQuery() != null)
+                    throw new ApiException(ApiStatus.BAD_DATA, "For Text, Number and Date, neither query nor value is needed");
                 break;
 
             case SINGLE_SELECT:

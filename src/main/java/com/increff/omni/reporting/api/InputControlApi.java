@@ -53,6 +53,26 @@ public class InputControlApi extends AbstractApi {
         return pojo;
     }
 
+    public InputControlPojo update(InputControlPojo pojo, InputControlQueryPojo queryPojo, List<InputControlValuesPojo> valuesList) throws ApiException {
+        InputControlPojo ex = getCheck(pojo.getId());
+        validateControlAddition(pojo);
+        copyToExisting(ex, pojo);
+        dao.update(ex);
+
+        if(Objects.nonNull(queryPojo)){
+            queryPojo.setControlId(pojo.getId());
+            queryDao.persist(queryPojo);
+        }
+
+        if(!CollectionUtils.isEmpty(valuesList)){
+            valuesList.forEach(v -> {
+                v.setControlId(pojo.getId());
+                valuesDao.persist(v);
+            });
+        }
+        return pojo;
+    }
+
     public List<InputControlPojo> selectMultiple(List<Integer> ids){
         if(CollectionUtils.isEmpty(ids))
             return new ArrayList<>();
@@ -101,4 +121,10 @@ public class InputControlApi extends AbstractApi {
                     " display name or param name");
     }
 
+    private void copyToExisting(InputControlPojo ex, InputControlPojo pojo) {
+        ex.setScope(pojo.getScope());
+        ex.setType(pojo.getType());
+        ex.setParamName(pojo.getParamName());
+        ex.setDisplayName(pojo.getDisplayName());
+    }
 }

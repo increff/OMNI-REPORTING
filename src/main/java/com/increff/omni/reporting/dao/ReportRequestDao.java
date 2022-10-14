@@ -24,31 +24,40 @@ public class ReportRequestDao extends AbstractDao<ReportRequestPojo> {
     private static final String selectByUserIdAndStatus = "SELECT r FROM ReportRequestPojo r" //
             + " WHERE r.userId = :userId and r.status IN :statuses";
 
-    private static final String selectReportsByStatuses = "SELECT r FROM ReportRequestPojo r " +
-            "where status IN :statuses" +
-            "order by createdAt desc limit 100";
-
     private static final String selectStuckReports = "SELECT r FROM ReportRequestPojo r " +
             "where status = 'IN_PROGRESS' and date_add(updatedAt,interval :stuckReportTime minute)<NOW()" +
             "order by createdAt desc limit 100";
 
-    public List<ReportRequestPojo> getByUserIdAndStatuses(Integer userId, List<ReportRequestStatus> statuses){
+    public List<ReportRequestPojo> getByUserIdAndStatuses(Integer userId, List<ReportRequestStatus> statuses) {
         TypedQuery<ReportRequestPojo> q = createJpqlQuery(selectByUserIdAndStatus);
         q.setParameter("userId", userId);
         q.setParameter("statuses", statuses);
         return selectMultiple(q);
     }
 
-    public List<ReportRequestPojo> getEligibleReports(List<ReportRequestStatus> statuses){
-        TypedQuery<ReportRequestPojo> q = createJpqlQuery(selectReportsByStatuses);
-        q.setParameter("statuses", statuses);
-        return selectMultiple(q);
+    public List<ReportRequestPojo> getEligibleReports(List<ReportRequestStatus> statuses) {
+        CriteriaBuilder cb = this.em.getCriteriaBuilder();
+        CriteriaQuery<ReportRequestPojo> query = cb.createQuery(ReportRequestPojo.class);
+        Root<ReportRequestPojo> root = query.from(ReportRequestPojo.class);
+        query.where(
+                root.get("status").in(statuses)
+        ).orderBy(cb.desc(root.get("createdAt")));
+        TypedQuery<ReportRequestPojo> tQuery = createQuery(query);
+        return tQuery.setMaxResults(100).getResultList();
     }
 
-    public List<ReportRequestPojo> getStuckReports(Integer stuckReportTime){
-        TypedQuery<ReportRequestPojo> q = createJpqlQuery(selectStuckReports);
-        q.setParameter("stuckReportTime", stuckReportTime);
-        return selectMultiple(q);
+    public List<ReportRequestPojo> getStuckReports(Integer stuckReportTime) {
+        CriteriaBuilder cb = this.em.getCriteriaBuilder();
+        CriteriaQuery<ReportRequestPojo> query = cb.createQuery(ReportRequestPojo.class);
+        Root<ReportRequestPojo> root = query.from(ReportRequestPojo.class);
+        query.where(
+                cb.and(
+                        cb.equal(root.get("status"), ReportRequestStatus.IN_PROGRESS),
+                        cb.lessThanOrEqualTo(root.get("updatedAt"), ZonedDateTime.now().minusMinutes(stuckReportTime))
+                )
+        ).orderBy(cb.desc(root.get("createdAt")));
+        TypedQuery<ReportRequestPojo> tQuery = createQuery(query);
+        return tQuery.setMaxResults(100).getResultList();
     }
 
     public List<ReportRequestPojo> selectByUserIdAndDays(int userId, Integer days) {
@@ -59,7 +68,7 @@ public class ReportRequestDao extends AbstractDao<ReportRequestPojo> {
                 cb.and(
                         cb.equal(root.get("userId"), userId),
                         Objects.isNull(days) ? cb.lessThanOrEqualTo(root.get("created_at"), ZonedDateTime.now())
-                        : cb.greaterThanOrEqualTo(root.get("created_at"), ZonedDateTime.now().minusDays(days))
+                                : cb.greaterThanOrEqualTo(root.get("created_at"), ZonedDateTime.now().minusDays(days))
                 )
         );
         TypedQuery<ReportRequestPojo> tQuery = createQuery(query);

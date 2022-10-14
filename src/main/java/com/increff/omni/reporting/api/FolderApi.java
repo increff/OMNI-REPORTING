@@ -45,10 +45,10 @@ public class FolderApi {
     }
 
     public File getFile(String fileName) throws IOException, ApiException {
-        File file = new File(outDir, fileName);
-        if(file.createNewFile())
-            throw new ApiException(ApiStatus.BAD_DATA, "Error while creating file : " + fileName);
-        return file;
+        File directory  = new File(outDir);
+        if(!directory.exists() && !directory.mkdir())
+            throw new ApiException(ApiStatus.BAD_DATA, "Failed to make directory");
+        return new File(outDir, fileName);
     }
 
 

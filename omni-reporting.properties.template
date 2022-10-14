@@ -1,0 +1,22 @@
+jdbc.driverClassName=
+jdbc.url=
+jdbc.username=
+jdbc.password=
+
+hibernate.dialect=
+hibernate.show_sql=
+hibernate.hbm2ddl.auto=
+hibernate.jdbc.batch_size=
+
+# GCP properties
+gcp.baseUrl=
+gcp.bucketName=
+gcp.filePath=
+
+# Account server properties
+auth.baseUrl=
+
+query.outDir=
+stuck.report.time=
+root.directory=
+increff.orgId=

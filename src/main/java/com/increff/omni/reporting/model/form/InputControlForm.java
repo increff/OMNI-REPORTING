@@ -25,8 +25,6 @@ public class InputControlForm {
     @NotNull
     private InputControlType type;
 
-    private ValidationType validationType = ValidationType.MANDATORY;
-
     private Integer reportId;
 
     private String query;

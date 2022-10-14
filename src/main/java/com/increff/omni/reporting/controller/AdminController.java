@@ -29,12 +29,21 @@ public class AdminController {
     private OrganizationDto organizationDto;
     @Autowired
     private DirectoryDto directoryDto;
+    @Autowired
+    private CustomReportAccessDto customReportAccessDto;
 
     @ApiOperation(value = "Add Connection")
     @ApiErrorResponses
     @RequestMapping(value = "/connections", method = RequestMethod.POST)
     public ConnectionData add(@RequestBody ConnectionForm form) throws ApiException {
         return connectionDto.add(form);
+    }
+
+    @ApiOperation(value = "Test DB Connection")
+    @ApiErrorResponses
+    @RequestMapping(value = "/connections/{id}", method = RequestMethod.GET)
+    public void testConnection(@PathVariable Integer id) throws ApiException {
+        connectionDto.testConnection(id);
     }
 
     @ApiOperation(value = "Update Connection")
@@ -56,6 +65,13 @@ public class AdminController {
     @RequestMapping(value = "/controls", method = RequestMethod.POST)
     public InputControlData addInputControl(@RequestBody InputControlForm form) throws ApiException {
         return inputControlDto.add(form);
+    }
+
+    @ApiOperation(value = "Edit Input Control")
+    @ApiErrorResponses
+    @RequestMapping(value = "/controls/{id}", method = RequestMethod.PUT)
+    public InputControlData updateInputControl(@PathVariable Integer id, @RequestBody InputControlForm form) throws ApiException {
+        return inputControlDto.update(id, form);
     }
 
     @ApiOperation(value = "Select all global controls")
@@ -107,9 +123,16 @@ public class AdminController {
         return reportDto.edit(reportId, form);
     }
 
+    @ApiOperation(value = "Get Report")
+    @ApiErrorResponses
+    @RequestMapping(value = "/reports/{reportId}", method = RequestMethod.GET)
+    public ReportData get(@PathVariable Integer reportId) throws ApiException {
+        return reportDto.get(reportId);
+    }
+
     @ApiOperation(value = "Get Reports")
     @ApiErrorResponses
-    @RequestMapping(value = "/reports/{orgId}", method = RequestMethod.GET)
+    @RequestMapping(value = "/reports/orgs/{orgId}", method = RequestMethod.GET)
     public List<ReportData> selectByOrgId(@PathVariable Integer orgId) throws ApiException {
         return reportDto.selectAll(orgId);
     }
@@ -172,28 +195,28 @@ public class AdminController {
 
     @ApiOperation(value = "Map organization to a schema")
     @ApiErrorResponses
-    @RequestMapping(value = "/orgs/{orgId}/schema", method = RequestMethod.POST)
-    public OrgSchemaData addSchemaMapping(@PathVariable Integer orgId, @RequestBody Integer schemaId) throws ApiException {
+    @RequestMapping(value = "/orgs/{orgId}/schema/{schemaId}", method = RequestMethod.POST)
+    public OrgSchemaData addSchemaMapping(@PathVariable Integer orgId, @PathVariable Integer schemaId) throws ApiException {
         return organizationDto.mapToSchema(orgId, schemaId);
     }
 
     @ApiOperation(value = "Map organization to a connection")
     @ApiErrorResponses
-    @RequestMapping(value = "/orgs/{orgId}/connection", method = RequestMethod.POST)
-    public OrgConnectionData addConnectionMapping(@PathVariable Integer orgId, @RequestBody Integer connectionId) throws ApiException {
+    @RequestMapping(value = "/orgs/{orgId}/connections/{connectionId}", method = RequestMethod.POST)
+    public OrgConnectionData addConnectionMapping(@PathVariable Integer orgId, @PathVariable Integer connectionId) throws ApiException {
         return organizationDto.mapToConnection(orgId, connectionId);
     }
 
     @ApiOperation(value = "Get all org schema mapping")
     @ApiErrorResponses
-    @RequestMapping(value = "/orgs/schemaMappings/", method = RequestMethod.GET)
+    @RequestMapping(value = "/orgs/schema/", method = RequestMethod.GET)
     public List<OrgSchemaData> selectAllSchemaMapping() {
         return organizationDto.selectAllOrgSchema();
     }
 
     @ApiOperation(value = "Get all org connection mapping")
     @ApiErrorResponses
-    @RequestMapping(value = "/orgs/connectionMappings/", method = RequestMethod.GET)
+    @RequestMapping(value = "/orgs/connections/", method = RequestMethod.GET)
     public List<OrgConnectionData> selectAllConnectionMapping() {
         return organizationDto.selectAllOrgConnections();
     }
@@ -219,15 +242,25 @@ public class AdminController {
         return directoryDto.getAllDirectories();
     }
 
-    /*
-     * todo Controllers
-     *
-     * Input Controls
-     *   Modify
-     *
-     * Custom Report Access
-     *
-     * */
+    @ApiOperation(value = "Add Custom Report Access")
+    @ApiErrorResponses
+    @RequestMapping(value = "/reports/custom-access", method = RequestMethod.POST)
+    public void addCustomAccess(@RequestBody CustomReportAccessForm form) throws ApiException {
+        customReportAccessDto.addCustomReportAccess(form);
+    }
 
+    @ApiOperation(value = "Delete Custom Report Access")
+    @ApiErrorResponses
+    @RequestMapping(value = "/reports/custom-access/{id}", method = RequestMethod.DELETE)
+    public void deleteCustomAccess(@PathVariable Integer id) throws ApiException {
+        customReportAccessDto.deleteCustomReportAccess(id);
+    }
+
+    @ApiOperation(value = "Get all Custom Report Access")
+    @ApiErrorResponses
+    @RequestMapping(value = "/reports/custom-access", method = RequestMethod.GET)
+    public List<CustomReportAccessData> getAllCustomAccess() throws ApiException {
+        return customReportAccessDto.getAllData();
+    }
 
 }

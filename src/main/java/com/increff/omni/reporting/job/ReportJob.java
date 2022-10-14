@@ -5,15 +5,19 @@ import com.increff.omni.reporting.api.FolderApi;
 import com.increff.omni.reporting.api.ReportRequestApi;
 import com.increff.omni.reporting.config.ApplicationProperties;
 import com.increff.omni.reporting.pojo.ReportRequestPojo;
+import lombok.extern.log4j.Log4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.stereotype.Component;
 
 import java.util.*;
 
 import static com.increff.omni.reporting.job.ReportTaskHelper.groupByOrgID;
 
+@Log4j
+@Component
 public class ReportJob {
 
     @Autowired

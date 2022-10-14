@@ -4,7 +4,6 @@ import com.increff.omni.reporting.api.InputControlApi;
 import com.increff.omni.reporting.api.ReportApi;
 import com.increff.omni.reporting.api.ReportControlsApi;
 import com.increff.omni.reporting.model.constants.InputControlScope;
-import com.increff.omni.reporting.model.constants.ValidationType;
 import com.increff.omni.reporting.pojo.InputControlPojo;
 import com.increff.omni.reporting.pojo.InputControlQueryPojo;
 import com.increff.omni.reporting.pojo.InputControlValuesPojo;
@@ -19,10 +18,11 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.increff.omni.reporting.helper.FlowApiHelper.getReportControlPojo;
+import static com.increff.omni.reporting.dto.CommonDtoHelper.getReportControlPojo;
 
 @Service
 @Transactional(rollbackFor = ApiException.class)
@@ -48,6 +48,22 @@ public class InputControlFlowApi extends AbstractApi {
         List<InputControlValuesPojo> valuesList = getValuesPojo(values);
 
         pojo = api.add(pojo, queryPojo, valuesList);
+
+        if (pojo.getScope().equals(InputControlScope.LOCAL)) {
+            reportControlsApi.add(getReportControlPojo(reportId, pojo.getId()));
+        }
+        return pojo;
+    }
+
+    public InputControlPojo update(InputControlPojo pojo, String query, List<String> values,
+                                   Integer reportId) throws ApiException {
+        if (pojo.getScope().equals(InputControlScope.LOCAL)) {
+            validateLocalControl(reportId, pojo);
+        }
+        InputControlQueryPojo queryPojo = getQueryPojo(query);
+        List<InputControlValuesPojo> valuesList = getValuesPojo(values);
+
+        pojo = api.update(pojo, queryPojo, valuesList);
 
         if (pojo.getScope().equals(InputControlScope.LOCAL)) {
             reportControlsApi.add(getReportControlPojo(reportId, pojo.getId()));
@@ -93,5 +109,4 @@ public class InputControlFlowApi extends AbstractApi {
             throw new ApiException(ApiStatus.BAD_DATA, "Another input control present with same display name" +
                     " or param name");
     }
-
 }

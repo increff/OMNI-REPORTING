@@ -1,4 +1,4 @@
-package com.increff.omni.reporting.security;
+package com.increff.omni.reporting.config;
 
 import org.springframework.security.web.context.AbstractSecurityWebApplicationInitializer;
 

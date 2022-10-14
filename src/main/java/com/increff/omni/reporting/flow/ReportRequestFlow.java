@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -49,13 +48,13 @@ public class ReportRequestFlow extends AbstractApi {
 
     private final static Integer MAX_OPEN_REPORT_REQUESTS = 5;
 
-    public void requestReport(ReportRequestPojo pojo, Map<String, String> params, List<ReportInputParamsPojo> reportInputParamsPojoList, int orgId) throws ApiException {
-        validate(pojo, params, orgId);
+    public void requestReport(ReportRequestPojo pojo, Map<String, String> params, List<ReportInputParamsPojo> reportInputParamsPojoList) throws ApiException {
+        validate(pojo, params);
         api.add(pojo);
         reportInputParamsApi.add(reportInputParamsPojoList);
     }
 
-    private void validate(ReportRequestPojo pojo, Map<String, String> params, int orgId) throws ApiException {
+    private void validate(ReportRequestPojo pojo, Map<String, String> params) throws ApiException {
         ReportPojo reportPojo = reportApi.getCheck(pojo.getReportId());
         // TODO check reports for which this org + user has access
         List<ReportRequestPojo> pendingReports = api.getPendingByUserId(pojo.getUserId());
@@ -64,7 +63,7 @@ public class ReportRequestFlow extends AbstractApi {
         List<ReportValidationGroupPojo> reportValidationGroupPojoList = reportValidationGroupApi.getByReportId(reportPojo.getId());
         Map<String, List<ReportValidationGroupPojo>> groupedByName = reportValidationGroupPojoList.stream()
                 .collect(Collectors.groupingBy(ReportValidationGroupPojo::getGroupName));
-        // TODO Run through all the validators for this report
+        // Run through all the validators for this report
         for (Map.Entry<String, List<ReportValidationGroupPojo>> validationList : groupedByName.entrySet()) {
             List<ReportValidationGroupPojo> groupPojoList = validationList.getValue();
             ValidationType type = groupPojoList.get(0).getType();

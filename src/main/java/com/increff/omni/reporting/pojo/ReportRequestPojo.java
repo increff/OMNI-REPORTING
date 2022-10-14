@@ -23,6 +23,7 @@ public class ReportRequestPojo extends AbstractVersionedPojo{
 
     private Integer reportId;
 
+    @Enumerated(EnumType.STRING)
     private ReportRequestStatus status;
 
     private String url;
