@@ -80,7 +80,9 @@ public class ReportDto extends AbstractDtoApi {
         flowApi.mapControlToReport(pojo);
     }
 
-    // Todo remove report control flow
+    public void deleteReportControl(Integer reportId, Integer reportControlId) throws ApiException {
+        flowApi.deleteReportControl(reportId, reportControlId);
+    }
 
     public void addValidationGroup(Integer reportId, ValidationGroupForm groupForm) throws ApiException {
         validate(reportId, groupForm);

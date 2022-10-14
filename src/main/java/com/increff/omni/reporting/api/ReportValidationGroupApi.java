@@ -19,8 +19,8 @@ public class ReportValidationGroupApi extends AbstractApi {
         return reportValidationGroupDao.selectByNameAndId(reportId, groupName);
     }
 
-    public List<ReportValidationGroupPojo> getByReportIdAndReportControlId(Integer reportId, List<Integer> reportControlIds) {
-        return reportValidationGroupDao.selectByIdAndControlIdList(reportId, reportControlIds);
+    public List<ReportValidationGroupPojo> getByReportIdAndReportControlId(Integer reportId, Integer reportControlId) {
+        return reportValidationGroupDao.selectByIdAndControlId(reportId, reportControlId);
     }
 
     public void addAll(List<ReportValidationGroupPojo> validationGroupPojoList) {
@@ -35,5 +35,9 @@ public class ReportValidationGroupApi extends AbstractApi {
 
     public List<ReportValidationGroupPojo> getByReportId(Integer reportId) {
         return reportValidationGroupDao.selectMultiple("reportId", reportId);
+    }
+
+    public void delete(List<ReportValidationGroupPojo> validationGroupPojoList) {
+        validationGroupPojoList.forEach(v -> reportValidationGroupDao.remove(v));
     }
 }

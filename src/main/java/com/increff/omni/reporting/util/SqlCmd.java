@@ -23,8 +23,7 @@ public class SqlCmd {
         try {
             CmdUtil.runCmd(cmd, redirectAll, errRedirect);
         } catch (IOException | InterruptedException e) {
-
-            throw new ApiException(ApiStatus.UNKNOWN_ERROR, "Error executing MYSQL query");
+            throw new ApiException(ApiStatus.UNKNOWN_ERROR, "Error executing query : " + e.getMessage());
         }
     }
 

@@ -51,12 +51,12 @@ public class ReportRequestFlow extends AbstractApi {
     public void requestReport(ReportRequestPojo pojo, Map<String, String> params, List<ReportInputParamsPojo> reportInputParamsPojoList) throws ApiException {
         validate(pojo, params);
         api.add(pojo);
+        reportInputParamsPojoList.forEach(r -> r.setReportRequestId(pojo.getId()));
         reportInputParamsApi.add(reportInputParamsPojoList);
     }
 
     private void validate(ReportRequestPojo pojo, Map<String, String> params) throws ApiException {
         ReportPojo reportPojo = reportApi.getCheck(pojo.getReportId());
-        // TODO check reports for which this org + user has access
         List<ReportRequestPojo> pendingReports = api.getPendingByUserId(pojo.getUserId());
         if (!CollectionUtils.isEmpty(pendingReports) && pendingReports.size() > MAX_OPEN_REPORT_REQUESTS)
             throw new ApiException(ApiStatus.BAD_DATA, "Wait for existing reports to get executed");

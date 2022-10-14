@@ -17,12 +17,15 @@ import java.util.Map;
 @Log4j
 public abstract class AbstractDto extends AbstractDtoApi {
 
+    // todo change after testing
     protected static int getOrgId() {
-        return getPrincipal().getDomainId();
+        return 100001;
+//        return getPrincipal().getDomainId();
     }
 
     protected static int getUserId() {
-        return getPrincipal().getId();
+//        return getPrincipal().getId();
+        return 100001;
     }
 
     private static UserPrincipal getPrincipal() {
@@ -33,7 +36,7 @@ public abstract class AbstractDto extends AbstractDtoApi {
         Map<String, String> keyValueMap = new HashMap<>();
         try {
             DriverManager.registerDriver(new Driver());
-            Connection connection = DriverManager.getConnection(connectionPojo.getHost(), connectionPojo.getUsername(), connectionPojo.getPassword());
+            Connection connection = DriverManager.getConnection("jdbc:mysql://" + connectionPojo.getHost() + ":3306?useSSL=false", connectionPojo.getUsername(), connectionPojo.getPassword());
             Statement statement = connection.createStatement();
             // Only 2 columns will be there in query
             ResultSet rs = statement.executeQuery(query);

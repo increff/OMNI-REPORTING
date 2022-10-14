@@ -82,6 +82,15 @@ public class ReportFlowApi extends AbstractApi {
         return queryApi.upsertQuery(pojo);
     }
 
+    public void deleteReportControl(Integer reportId, Integer reportControlId) throws ApiException {
+        api.getCheck(reportId);
+        reportControlsApi.getCheck(reportControlId);
+        List<ReportValidationGroupPojo> validationGroupPojoList = reportValidationGroupApi
+                .getByReportIdAndReportControlId(reportId, reportControlId);
+        reportValidationGroupApi.delete(validationGroupPojoList);
+        reportControlsApi.delete(reportControlId);
+    }
+
     public void mapControlToReport(ReportControlsPojo pojo) throws ApiException {
         validateControlReportMapping(pojo);
         reportControlsApi.add(pojo);

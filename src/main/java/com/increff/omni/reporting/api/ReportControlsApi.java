@@ -43,4 +43,7 @@ public class ReportControlsApi extends AbstractApi {
         return dao.select(reportId, controlId);
     }
 
+    public void delete(Integer reportControlId) {
+        dao.remove(reportControlId);
+    }
 }

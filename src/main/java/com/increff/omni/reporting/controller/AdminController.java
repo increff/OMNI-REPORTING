@@ -151,6 +151,13 @@ public class AdminController {
         reportDto.mapToControl(reportId, controlId);
     }
 
+    @ApiOperation(value = "Delete report control")
+    @ApiErrorResponses
+    @RequestMapping(value = "/reports/{reportId}/controls/{controlId}", method = RequestMethod.DELETE)
+    public void deleteReportToControl(@PathVariable Integer reportId, @PathVariable Integer controlId) throws ApiException {
+        reportDto.deleteReportControl(reportId, controlId);
+    }
+
     @ApiOperation(value = "Add validation group")
     @ApiErrorResponses
     @RequestMapping(value = "/reports/{reportId}/controls/validations", method = RequestMethod.POST)

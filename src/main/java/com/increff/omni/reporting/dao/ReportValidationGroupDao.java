@@ -31,14 +31,14 @@ public class ReportValidationGroupDao extends AbstractDao<ReportValidationGroupP
         return selectSingleOrNull(tQuery);
     }
 
-    public List<ReportValidationGroupPojo> selectByIdAndControlIdList(Integer reportId, List<Integer> reportControlIds) {
+    public List<ReportValidationGroupPojo> selectByIdAndControlId(Integer reportId, Integer reportControlId) {
         CriteriaBuilder cb = this.em.getCriteriaBuilder();
         CriteriaQuery<ReportValidationGroupPojo> query = cb.createQuery(ReportValidationGroupPojo.class);
         Root<ReportValidationGroupPojo> root = query.from(ReportValidationGroupPojo.class);
         query.where(
                 cb.and(
                         cb.equal(root.get("reportId"), reportId),
-                        root.get("reportControlId").in(reportControlIds)
+                        cb.equal(root.get("reportControlId"), reportControlId)
                 )
         );
         TypedQuery<ReportValidationGroupPojo> tQuery = createQuery(query);

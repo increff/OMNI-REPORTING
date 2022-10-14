@@ -55,16 +55,20 @@ public class InputControlApi extends AbstractApi {
 
     public InputControlPojo update(InputControlPojo pojo, InputControlQueryPojo queryPojo, List<InputControlValuesPojo> valuesList) throws ApiException {
         InputControlPojo ex = getCheck(pojo.getId());
-        validateControlAddition(pojo);
+        validateControlAdditionForEdit(pojo);
         copyToExisting(ex, pojo);
         dao.update(ex);
 
         if(Objects.nonNull(queryPojo)){
+            List<InputControlQueryPojo> queryPojoList = queryDao.selectMultiple("controlId", pojo.getId());
+            queryPojoList.forEach(q -> queryDao.remove(q));
             queryPojo.setControlId(pojo.getId());
             queryDao.persist(queryPojo);
         }
 
         if(!CollectionUtils.isEmpty(valuesList)){
+            List<InputControlValuesPojo> valuesPojoList = valuesDao.selectMultiple("controlId", pojo.getId());
+            valuesPojoList.forEach(q -> valuesDao.remove(q));
             valuesList.forEach(v -> {
                 v.setControlId(pojo.getId());
                 valuesDao.persist(v);
@@ -117,6 +121,19 @@ public class InputControlApi extends AbstractApi {
                 getByScopeAndParamName(InputControlScope.GLOBAL, pojo.getParamName());
 
         if(existingByName != null || existingByParam != null)
+            throw new ApiException(ApiStatus.BAD_DATA, "Cannot create input control with same" +
+                    " display name or param name");
+    }
+
+    private void validateControlAdditionForEdit(InputControlPojo pojo) throws ApiException {
+        InputControlPojo existingByName =
+                getByScopeAndDisplayName(InputControlScope.GLOBAL, pojo.getDisplayName());
+
+        InputControlPojo existingByParam =
+                getByScopeAndParamName(InputControlScope.GLOBAL, pojo.getParamName());
+
+        if((existingByName != null && !existingByName.getId().equals(pojo.getId())) ||
+                (existingByParam != null && !existingByParam.getId().equals(pojo.getId())))
             throw new ApiException(ApiStatus.BAD_DATA, "Cannot create input control with same" +
                     " display name or param name");
     }

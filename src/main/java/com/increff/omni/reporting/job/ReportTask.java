@@ -17,6 +17,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 @Service
@@ -43,37 +44,42 @@ public class ReportTask {
     private ApplicationProperties properties;
 
     @Async("jobExecutor")
-    public void runAsync(ReportRequestPojo pojo) {
+    public void runAsync(ReportRequestPojo pojo) throws ApiException, IOException {
         Integer id = pojo.getId();
+        boolean isRunRequired = checkLock(id);
+        if (!isRunRequired)
+            return;
+        // mark as processing - locking
+        api.markProcessingIfEligible(id);
+        // process
+        ReportRequestPojo reportRequestPojo = api.getCheck(id);
+        List<ReportInputParamsPojo> reportInputParamsPojoList = reportInputParamsApi.getInputParamsForReportRequest(reportRequestPojo.getId());
+        ReportPojo reportPojo = reportApi.getCheck(reportRequestPojo.getReportId());
+        ReportQueryPojo reportQueryPojo = reportQueryApi.getByReportId(reportPojo.getId());
+        OrgConnectionPojo orgConnectionPojo = orgConnectionApi.getCheckByOrgId(reportRequestPojo.getOrgId());
+        ConnectionPojo connectionPojo = connectionApi.getCheck(orgConnectionPojo.getConnectionId());
+        File file = folderApi.getFileForExtension(reportRequestPojo.getId(), ".xls");
+        File errorFile = folderApi.getErrFile(reportRequestPojo.getId(), ".txt");
+        Map<String, String> inputParamMap = getInputParamMapFromPojoList(reportInputParamsPojoList);
+        SqlParams sqlParams = ReportTaskHelper.convert(connectionPojo, reportQueryPojo, inputParamMap, file, errorFile);
         try {
-            boolean isRunRequired = checkLock(id);
-            if (!isRunRequired)
-                return;
-            // mark as processing
-            api.markProcessingIfEligible(id);
-            //process
-            SqlParams sqlParams = runReportRequest(id);
+            SqlCmd.processQuery(sqlParams);
             File outFile = sqlParams.getOutFile();
-            File errFile = sqlParams.getErrFile();
             // upload result to cloud
-            if (outFile.length() > 0) {
-                String filePath = uploadFile(outFile, "SUCCESS_REPORTS", pojo);
-                // update status to completed
-                api.updateStatus(id, ReportRequestStatus.COMPLETED, filePath);
-            } else if (errFile.length() > 0) {
-                String filePath = uploadFile(errFile, "ERROR_REPORTS", pojo);
-                // update status to failed as error file is having some content
-                api.updateStatus(id, ReportRequestStatus.FAILED, filePath);
-            }
-            deleteFiles(outFile, errFile);
+            String filePath = uploadFile(outFile, "SUCCESS_REPORTS", pojo);
+            // update status to completed
+            api.updateStatus(id, ReportRequestStatus.COMPLETED, filePath);
         } catch (Exception e) {
             // log as error and mark fail
             log.error("Report ID : " + id + " failed", e);
             try {
-                api.updateStatus(id, ReportRequestStatus.FAILED, "");
-            } catch (ApiException ex) {
-                log.error("Error while updating the status of request", ex);
+                String filePath = uploadFile(sqlParams.getErrFile(), "ERROR_REPORTS", pojo);
+                api.updateStatus(id, ReportRequestStatus.FAILED, filePath);
+            } catch (Exception ex) {
+                log.error("Error while updating the status of failed request", ex);
             }
+        } finally {
+            deleteFiles(sqlParams.getOutFile(), sqlParams.getErrFile());
         }
     }
 
@@ -94,21 +100,6 @@ public class ReportTask {
                     pojo.getId());
         }
         return properties.getGcpBaseUrl() + "/" + properties.getGcpBucketName() + "/" + filePath;
-    }
-
-    private SqlParams runReportRequest(Integer id) throws ApiException, IOException {
-        ReportRequestPojo reportRequestPojo = api.getCheck(id);
-        List<ReportInputParamsPojo> reportInputParamsPojoList = reportInputParamsApi.getInputParamsForReportRequest(reportRequestPojo.getReportId());
-        ReportPojo reportPojo = reportApi.getCheck(reportRequestPojo.getReportId());
-        ReportQueryPojo reportQueryPojo = reportQueryApi.getByReportId(reportPojo.getId());
-        OrgConnectionPojo orgConnectionPojo = orgConnectionApi.getCheckByOrgId(reportRequestPojo.getOrgId());
-        ConnectionPojo connectionPojo = connectionApi.getCheck(orgConnectionPojo.getConnectionId());
-        File file = folderApi.getFileForExtension(reportRequestPojo.getId(), ".xls");
-        File errorFile = folderApi.getErrFile(reportRequestPojo.getId(), ".txt");
-        Map<String, String> inputParamMap = getInputParamMapFromPojoList(reportInputParamsPojoList);
-        SqlParams sqlParams = ReportTaskHelper.convert(connectionPojo, reportQueryPojo, inputParamMap, file, errorFile);
-        SqlCmd.processQuery(sqlParams);
-        return sqlParams;
     }
 
     private Map<String, String> getInputParamMapFromPojoList(List<ReportInputParamsPojo> reportInputParamsPojoList) {

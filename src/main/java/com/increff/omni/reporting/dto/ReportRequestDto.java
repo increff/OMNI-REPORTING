@@ -8,6 +8,7 @@ import com.increff.omni.reporting.model.constants.ReportType;
 import com.increff.omni.reporting.model.data.ReportRequestData;
 import com.increff.omni.reporting.model.form.ReportRequestForm;
 import com.increff.omni.reporting.pojo.*;
+import com.nextscm.commons.lang.StringUtil;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
 import lombok.extern.log4j.Log4j;
@@ -49,7 +50,7 @@ public class ReportRequestDto extends AbstractDto {
 
     public void requestReport(ReportRequestForm form) throws ApiException {
         checkValid(form);
-        ReportRequestPojo pojo = CommonDtoHelper.getReportRequestPojo(form, 100001, 100001);//Todo change to original
+        ReportRequestPojo pojo = CommonDtoHelper.getReportRequestPojo(form, getOrgId(), getUserId());
         ReportPojo reportPojo = reportApi.getCheck(pojo.getReportId());
         validateCustomReportAccess(reportPojo, getOrgId());
         validateInputParamValues(reportPojo, form.getParamMap());
@@ -70,11 +71,10 @@ public class ReportRequestDto extends AbstractDto {
     public File getReportFile(Integer requestId) throws ApiException, IOException {
         ReportRequestPojo requestPojo = reportRequestApi.getCheck(requestId);
         ReportPojo reportPojo = reportApi.getCheck(requestPojo.getReportId());
-        // Todo replace with getUserId()
-        if (requestPojo.getUserId() != 100001) {
+        if (requestPojo.getUserId() != getUserId()) {
             throw new ApiException(ApiStatus.BAD_DATA, "Logged in user has not requested the report with id : " + requestId);
         }
-        if(!Arrays.asList(ReportRequestStatus.COMPLETED, ReportRequestStatus.FAILED).contains(requestPojo.getStatus())) {
+        if (!Arrays.asList(ReportRequestStatus.COMPLETED, ReportRequestStatus.FAILED).contains(requestPojo.getStatus())) {
             throw new ApiException(ApiStatus.BAD_DATA, "Report request is still in processing, name : " + reportPojo.getName());
         }
         String reportName = reportPojo.getName() + "-" +
@@ -101,6 +101,8 @@ public class ReportRequestDto extends AbstractDto {
         for (InputControlPojo i : inputControlPojoList) {
             if (params.containsKey(i.getParamName())) {
                 String value = params.get(i.getParamName());
+                if (StringUtil.isEmpty(value))
+                    continue;
                 String[] values;
                 Map<String, String> allowedValuesMap;
                 switch (i.getType()) {
@@ -125,19 +127,25 @@ public class ReportRequestDto extends AbstractDto {
                         allowedValuesMap = checkValidValues(i);
                         if (values.length > 1)
                             throw new ApiException(ApiStatus.BAD_DATA, "Multiple values not allowed for filter : " + i.getDisplayName());
-                        if (!allowedValuesMap.containsKey(values[0]))
+                        String s = values[0].substring(1, values[0].length() - 1);
+                        if (!allowedValuesMap.containsKey(s))
                             throw new ApiException(ApiStatus.BAD_DATA, values[0] + " is not allowed for filter : " + i.getDisplayName());
                         break;
                     case MULTI_SELECT:
                         values = value.split(",");
                         allowedValuesMap = checkValidValues(i);
-                        for (String v : values)
+                        for (String v : values) {
+                            v = v.substring(1, v.length() - 1);
                             if (!allowedValuesMap.containsKey(v))
                                 throw new ApiException(ApiStatus.BAD_DATA, v + " is not allowed for filter : " + i.getDisplayName());
+
+                        }
                         break;
                     default:
                         throw new ApiException(ApiStatus.BAD_DATA, "Invalid Input Control Type");
                 }
+            } else {
+                throw new ApiException(ApiStatus.BAD_DATA, "Param key not present in request : " + i.getDisplayName());
             }
         }
     }
