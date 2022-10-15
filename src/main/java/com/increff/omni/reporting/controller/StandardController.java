@@ -20,7 +20,7 @@ import java.util.List;
 @Api
 @RestController
 @RequestMapping(value = "/standard")
-public class UserController {
+public class StandardController {
 
     @Autowired
     private ReportRequestDto reportRequestDto;

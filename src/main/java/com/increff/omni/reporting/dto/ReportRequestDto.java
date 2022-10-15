@@ -101,7 +101,7 @@ public class ReportRequestDto extends AbstractDto {
         for (InputControlPojo i : inputControlPojoList) {
             if (params.containsKey(i.getParamName())) {
                 String value = params.get(i.getParamName());
-                if (StringUtil.isEmpty(value))
+                if (StringUtil.isEmpty(value) || value.equals("''"))
                     continue;
                 String[] values;
                 Map<String, String> allowedValuesMap;
