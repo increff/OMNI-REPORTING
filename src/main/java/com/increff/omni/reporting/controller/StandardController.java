@@ -1,8 +1,11 @@
 package com.increff.omni.reporting.controller;
 
 
+import com.increff.omni.reporting.dto.DirectoryDto;
+import com.increff.omni.reporting.dto.InputControlDto;
+import com.increff.omni.reporting.dto.ReportDto;
 import com.increff.omni.reporting.dto.ReportRequestDto;
-import com.increff.omni.reporting.model.data.ReportRequestData;
+import com.increff.omni.reporting.model.data.*;
 import com.increff.omni.reporting.model.form.ReportRequestForm;
 import com.increff.omni.reporting.util.FileUtil;
 import com.nextscm.commons.spring.common.ApiException;
@@ -24,6 +27,40 @@ public class StandardController {
 
     @Autowired
     private ReportRequestDto reportRequestDto;
+    @Autowired
+    private InputControlDto inputControlDto;
+    @Autowired
+    private ReportDto reportDto;
+    @Autowired
+    private DirectoryDto directoryDto;
+
+    @ApiOperation(value = "Select controls for a report")
+    @ApiErrorResponses
+    @RequestMapping(value = "/controls", method = RequestMethod.GET)
+    public List<InputControlData> selectByReportId(@RequestParam Integer reportId) {
+        return inputControlDto.selectForReport(reportId);
+    }
+
+    @ApiOperation(value = "Get Reports")
+    @ApiErrorResponses
+    @RequestMapping(value = "/reports/orgs/{orgId}", method = RequestMethod.GET)
+    public List<ReportData> selectByOrgId(@PathVariable Integer orgId) throws ApiException {
+        return reportDto.selectAll(orgId);
+    }
+
+    @ApiOperation(value = "Get validation group")
+    @ApiErrorResponses
+    @RequestMapping(value = "/reports/{reportId}/controls/validations", method = RequestMethod.GET)
+    public List<ValidationGroupData> getValidationGroups(@PathVariable Integer reportId) {
+        return reportDto.getValidationGroups(reportId);
+    }
+
+    @ApiOperation(value = "Get All Directories")
+    @ApiErrorResponses
+    @RequestMapping(value = "/directories", method = RequestMethod.GET)
+    public List<DirectoryData> selectAllDirectories() throws ApiException {
+        return directoryDto.getAllDirectories();
+    }
 
     @ApiOperation(value = "Request Report")
     @ApiErrorResponses

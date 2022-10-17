@@ -2,6 +2,7 @@ package com.increff.omni.reporting.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartResolver;
 import org.springframework.web.multipart.support.StandardServletMultipartResolver;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
@@ -14,6 +15,8 @@ import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
+import java.time.ZonedDateTime;
+
 /**
  * This Spring configuration file enables Swagger and Swagger UI for REST API
  */
@@ -23,14 +26,15 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 @EnableSwagger2
 public class SwaggerConfig extends WebMvcConfigurerAdapter {
 
-    public static final String PACKAGE_CONTROLLER = "com.increff.omni.reporting.controller";
-
     @Bean
     public Docket api() {
         return new Docket(DocumentationType.SWAGGER_2)//
+                .directModelSubstitute(ZonedDateTime.class, String.class)
                 .useDefaultResponseMessages(false)//
-                .select().apis(RequestHandlerSelectors.basePackage(PACKAGE_CONTROLLER))//
-                .paths(PathSelectors.regex("/.*"))//
+                .select()
+                .apis(RequestHandlerSelectors
+                        .withClassAnnotation(RestController.class))//
+                .paths(PathSelectors.regex("/.*"))
                 .build();
     }
 

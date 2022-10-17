@@ -81,13 +81,6 @@ public class AdminController {
         return inputControlDto.selectAllGlobal();
     }
 
-    @ApiOperation(value = "Select controls for a report")
-    @ApiErrorResponses
-    @RequestMapping(value = "/controls", method = RequestMethod.GET)
-    public List<InputControlData> selectByReportId(@RequestParam Integer reportId) {
-        return inputControlDto.selectForReport(reportId);
-    }
-
     @ApiOperation(value = "Add Schema")
     @ApiErrorResponses
     @RequestMapping(value = "/schema", method = RequestMethod.POST)
@@ -130,13 +123,6 @@ public class AdminController {
         return reportDto.get(reportId);
     }
 
-    @ApiOperation(value = "Get Reports")
-    @ApiErrorResponses
-    @RequestMapping(value = "/reports/orgs/{orgId}", method = RequestMethod.GET)
-    public List<ReportData> selectByOrgId(@PathVariable Integer orgId) throws ApiException {
-        return reportDto.selectAll(orgId);
-    }
-
     @ApiOperation(value = "Add/Edit Report Query")
     @ApiErrorResponses
     @RequestMapping(value = "/reports/{reportId}/query", method = RequestMethod.POST)
@@ -170,13 +156,6 @@ public class AdminController {
     @RequestMapping(value = "/reports/{reportId}/controls/validations", method = RequestMethod.DELETE)
     public void deleteValidationGroup(@PathVariable Integer reportId, @RequestParam String groupName) throws ApiException {
         reportDto.deleteValidationGroup(reportId, groupName);
-    }
-
-    @ApiOperation(value = "Get validation group")
-    @ApiErrorResponses
-    @RequestMapping(value = "/reports/{reportId}/controls/validations", method = RequestMethod.GET)
-    public List<ValidationGroupData> getValidationGroups(@PathVariable Integer reportId) {
-        return reportDto.getValidationGroups(reportId);
     }
 
     @ApiOperation(value = "Add report expression")
@@ -268,13 +247,6 @@ public class AdminController {
     @RequestMapping(value = "/directories/{directoryId}", method = RequestMethod.PUT)
     public DirectoryData update(@PathVariable Integer directoryId, @RequestBody DirectoryForm form) throws ApiException {
         return directoryDto.update(directoryId, form);
-    }
-
-    @ApiOperation(value = "Get All Directories")
-    @ApiErrorResponses
-    @RequestMapping(value = "/directories", method = RequestMethod.GET)
-    public List<DirectoryData> selectAllDirectories() throws ApiException {
-        return directoryDto.getAllDirectories();
     }
 
     @ApiOperation(value = "Add Custom Report Access")
