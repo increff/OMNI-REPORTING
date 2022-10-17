@@ -36,8 +36,8 @@ public class ReportRequestApi extends AbstractApi {
         return pojo;
     }
 
-    public List<ReportRequestPojo> getEligibleRequests() {
-        return dao.getEligibleReports(Arrays.asList(ReportRequestStatus.NEW, ReportRequestStatus.STUCK));
+    public List<ReportRequestPojo> getEligibleRequests(int limitForEligibleRequest) {
+        return dao.getEligibleReports(Arrays.asList(ReportRequestStatus.NEW, ReportRequestStatus.STUCK), limitForEligibleRequest);
     }
 
     public void markProcessingIfEligible(Integer id) throws ApiException {
@@ -63,7 +63,7 @@ public class ReportRequestApi extends AbstractApi {
         reportRequestPojo.setUrl(filePath);
     }
 
-    public List<ReportRequestPojo> getByUserId(int userId, Integer days) {
-        return dao.selectByUserIdAndDays(userId, days);
+    public List<ReportRequestPojo> getByUserId(int userId, Integer limit) {
+        return dao.selectByUserId(userId, limit);
     }
 }

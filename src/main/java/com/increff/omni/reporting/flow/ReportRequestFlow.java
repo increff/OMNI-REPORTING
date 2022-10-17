@@ -63,7 +63,6 @@ public class ReportRequestFlow extends AbstractApi {
     }
 
     //TODO - Try option for expression on UI
-    //TODO - Add comment to specify that expression is also getting added to the param list
     private void evaluateExpressions(List<ReportExpressionPojo> reportExpressionPojoList, List<ReportInputParamsPojo> reportInputParamsPojoList, Map<String, String> params) throws ApiException {
         for (ReportExpressionPojo e : reportExpressionPojoList) {
             String fExpression = StringSubstitutor.replace(e.getExpression(), params);
@@ -71,6 +70,7 @@ public class ReportRequestFlow extends AbstractApi {
                 ScriptEngineManager factory = new ScriptEngineManager();
                 ScriptEngine engine = factory.getEngineByName("JavaScript");
                 String result = engine.eval(fExpression).toString();
+                // Add expression also in final param list
                 ReportInputParamsPojo pojo = new ReportInputParamsPojo();
                 pojo.setParamKey(e.getExpressionName());
                 pojo.setParamValue(result);
@@ -81,7 +81,7 @@ public class ReportRequestFlow extends AbstractApi {
             }
         }
     }
-    //TODO make smaller function
+
     private void validate(ReportRequestPojo pojo, Map<String, String> params) throws ApiException {
         ReportPojo reportPojo = reportApi.getCheck(pojo.getReportId());
         List<ReportRequestPojo> pendingReports = api.getPendingByUserId(pojo.getUserId());
@@ -90,6 +90,7 @@ public class ReportRequestFlow extends AbstractApi {
         List<ReportValidationGroupPojo> reportValidationGroupPojoList = reportValidationGroupApi.getByReportId(reportPojo.getId());
         Map<String, List<ReportValidationGroupPojo>> groupedByName = reportValidationGroupPojoList.stream()
                 .collect(Collectors.groupingBy(ReportValidationGroupPojo::getGroupName));
+
         // Run through all the validators for this report
         for (Map.Entry<String, List<ReportValidationGroupPojo>> validationList : groupedByName.entrySet()) {
             List<ReportValidationGroupPojo> groupPojoList = validationList.getValue();
@@ -105,23 +106,27 @@ public class ReportRequestFlow extends AbstractApi {
                 paramValues.add(params.get(i.getParamName()));
                 displayValues.add(i.getDisplayName());
             });
-            switch (type) {
-                case NON_MANDATORY:
-                    break;
-                case SINGLE_MANDATORY:
-                    singleMandatoryValidator.validate(displayValues, paramValues, reportPojo.getName(), groupPojoList.get(0).getValidationValue());
-                    break;
-                case MANDATORY:
-                    mandatoryValidator.validate(displayValues, paramValues, reportPojo.getName(), groupPojoList.get(0).getValidationValue());
-                    break;
-                case DATE_RANGE:
-                    dateValidator.validate(displayValues, paramValues, reportPojo.getName(), groupPojoList.get(0).getValidationValue());
-                    break;
-                default:
-                    throw new ApiException(ApiStatus.BAD_DATA, "Invalid Validation Type");
-            }
+            runValidators(reportPojo, groupPojoList, type, paramValues, displayValues);
         }
 
+    }
+
+    private void runValidators(ReportPojo reportPojo, List<ReportValidationGroupPojo> groupPojoList, ValidationType type, List<String> paramValues, List<String> displayValues) throws ApiException {
+        switch (type) {
+            case NON_MANDATORY:
+                break;
+            case SINGLE_MANDATORY:
+                singleMandatoryValidator.validate(displayValues, paramValues, reportPojo.getName(), groupPojoList.get(0).getValidationValue());
+                break;
+            case MANDATORY:
+                mandatoryValidator.validate(displayValues, paramValues, reportPojo.getName(), groupPojoList.get(0).getValidationValue());
+                break;
+            case DATE_RANGE:
+                dateValidator.validate(displayValues, paramValues, reportPojo.getName(), groupPojoList.get(0).getValidationValue());
+                break;
+            default:
+                throw new ApiException(ApiStatus.BAD_DATA, "Invalid Validation Type");
+        }
     }
 
 }

@@ -23,7 +23,7 @@ public class ReportValidationGroupPojo extends AbstractVersionedPojo {
     @Enumerated(value = EnumType.STRING)
     private ValidationType type;
 
-    // Todo for now it is used for DATE range, in future it can be a key value pair
+    // for now, validation value is used for DATE range, in future it can be a key value pair
     private Integer validationValue = 0;
 
     private Integer reportId;

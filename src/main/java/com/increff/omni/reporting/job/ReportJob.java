@@ -9,12 +9,14 @@ import com.nextscm.commons.spring.common.ApiException;
 import lombok.extern.log4j.Log4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executor;
 
 import static com.increff.omni.reporting.job.ReportTaskHelper.groupByOrgID;
 
@@ -30,33 +32,58 @@ public class ReportJob {
     private ApplicationProperties properties;
     @Autowired
     private ReportTask reportTask;
+    @Autowired
+    private Executor executor;
 
     @Scheduled(fixedDelay = 1000)
     public void run() throws IOException, ApiException {
         // Get all the tasks pending for execution + Tasks that got stuck in processing
-        List<ReportRequestPojo> reportRequestPojoList = api.getEligibleRequests();
-        if(reportRequestPojoList.isEmpty())
+        int limitForEligibleRequest = getLimitForEligibleRequests();
+        List<ReportRequestPojo> reportRequestPojoList = api.getEligibleRequests(limitForEligibleRequest);
+        if (reportRequestPojoList.isEmpty())
             return;
 
         sortBasedOnCreatedAt(reportRequestPojoList);
 
-        //TODO don't add to queue if no task executor pending
-        //TODO Group by orgs
+        // Group by orgs
         Map<Integer, List<ReportRequestPojo>> orgToRequests = groupByOrgID(reportRequestPojoList);
         boolean flag = true;
-        while(flag) {
-            for(Map.Entry<Integer, List<ReportRequestPojo>> e : orgToRequests.entrySet()) {
+        while (flag) {
+            for (Map.Entry<Integer, List<ReportRequestPojo>> e : orgToRequests.entrySet()) {
                 // 1 from an org and then the other org
                 Iterator<ReportRequestPojo> itr = e.getValue().iterator();
-                if(!itr.hasNext())
+                if (!itr.hasNext())
                     orgToRequests.remove(e.getKey());
                 ReportRequestPojo reportRequestPojo = itr.next();
                 reportTask.runAsync(reportRequestPojo);
                 itr.remove();
             }
-            if(orgToRequests.isEmpty())
+            if (orgToRequests.isEmpty())
                 flag = false;
         }
+    }
+
+    @Scheduled(fixedDelay = 1000)
+    public void resetStuckJobs() {
+        api.markStuck(properties.getStuckReportTime());
+    }
+
+    @Scheduled(fixedDelay = 3600 * 1000)
+    public void deleteOldLogsAndFiles() {
+        folderApi.deleteFilesOlderThan1Hr();
+    }
+
+    private int getLimitForEligibleRequests() {
+        ThreadPoolTaskExecutor threadPoolExecutor = (ThreadPoolTaskExecutor) executor;
+        long poolSize = properties.getCorePoolSize() - 10; // Just for safety we kept buffer of 10 to core pool
+        long currentUsedThreads = threadPoolExecutor.getThreadPoolExecutor().getTaskCount() - threadPoolExecutor.getThreadPoolExecutor().getCompletedTaskCount();
+        log.debug("Task Count : " + threadPoolExecutor.getThreadPoolExecutor().getTaskCount());
+        log.debug("Completed Task Count : " + threadPoolExecutor.getThreadPoolExecutor().getCompletedTaskCount());
+        log.debug("Current Used threads : " + currentUsedThreads);
+        if (currentUsedThreads >= poolSize) {
+            log.error("Threshold is Greater than " + poolSize);
+        }
+        return (int) (poolSize - currentUsedThreads);
     }
 
     private void sortBasedOnCreatedAt(List<ReportRequestPojo> reportRequestPojoList) {
@@ -65,15 +92,5 @@ public class ReportJob {
                 return 0;
             return o1.getCreatedAt().isAfter(o2.getCreatedAt()) ? 1 : -1;
         });
-    }
-
-    @Scheduled(fixedDelay = 1000)
-    public void resetStuckJobs(){
-        api.markStuck(properties.getStuckReportTime());
-    }
-
-    @Scheduled(fixedDelay = 3600 * 1000)
-    public void deleteOldLogsAndFiles() {
-        folderApi.deleteFilesOlderThan1Hr();
     }
 }

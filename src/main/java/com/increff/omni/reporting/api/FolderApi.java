@@ -14,7 +14,7 @@ import java.util.Objects;
 @Service
 public class FolderApi {
 
-    @Value("${query.outDir}")
+    @Value("${query.outDir:omni-reporting-files}")
     private String outDir;
 
     public void deleteFilesOlderThan1Hr() {

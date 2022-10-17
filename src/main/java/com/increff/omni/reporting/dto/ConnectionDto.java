@@ -23,7 +23,7 @@ import java.util.List;
 
 @Service
 @Log4j
-public class ConnectionDto extends AbstractDtoApi {
+public class ConnectionDto extends AbstractDto {
 
     @Autowired
     private ConnectionApi api;

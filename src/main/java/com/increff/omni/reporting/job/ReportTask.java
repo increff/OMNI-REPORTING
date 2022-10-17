@@ -42,40 +42,41 @@ public class ReportTask {
     @Autowired
     private ApplicationProperties properties;
 
-    //TODO revisit
     @Async("jobExecutor")
     public void runAsync(ReportRequestPojo pojo) throws ApiException, IOException {
-        Integer id = pojo.getId();
-
         // mark as processing - locking
-        api.markProcessingIfEligible(id);
+        api.markProcessingIfEligible(pojo.getId());
 
         // process
-        ReportRequestPojo reportRequestPojo = api.getCheck(id);
+        ReportRequestPojo reportRequestPojo = api.getCheck(pojo.getId());
         List<ReportInputParamsPojo> reportInputParamsPojoList = reportInputParamsApi.getInputParamsForReportRequest(reportRequestPojo.getId());
         ReportPojo reportPojo = reportApi.getCheck(reportRequestPojo.getReportId());
         ReportQueryPojo reportQueryPojo = reportQueryApi.getByReportId(reportPojo.getId());
         OrgConnectionPojo orgConnectionPojo = orgConnectionApi.getCheckByOrgId(reportRequestPojo.getOrgId());
         ConnectionPojo connectionPojo = connectionApi.getCheck(orgConnectionPojo.getConnectionId());
 
-
-        //creation of file
+        // Creation of file
         File file = folderApi.getFileForExtension(reportRequestPojo.getId(), ".xls");
         File errorFile = folderApi.getErrFile(reportRequestPojo.getId(), ".xls");
         Map<String, String> inputParamMap = getInputParamMapFromPojoList(reportInputParamsPojoList);
         SqlParams sqlParams = ReportTaskHelper.convert(connectionPojo, reportQueryPojo, inputParamMap, file, errorFile);
+        // Execute query and save results
+        saveResultsOnCloud(pojo, sqlParams);
+    }
+
+    private void saveResultsOnCloud(ReportRequestPojo pojo, SqlParams sqlParams) {
         try {
             SqlCmd.processQuery(sqlParams);
             // upload result to cloud
             String filePath = uploadFile(sqlParams.getOutFile(), "SUCCESS_REPORTS", pojo);
             // update status to completed
-            api.updateStatus(id, ReportRequestStatus.COMPLETED, filePath);
+            api.updateStatus(pojo.getId(), ReportRequestStatus.COMPLETED, filePath);
         } catch (Exception e) {
             // log as error and mark fail
-            log.error("Report ID : " + id + " failed", e);
+            log.error("Report ID : " + pojo.getId() + " failed", e);
             try {
                 String filePath = uploadFile(sqlParams.getErrFile(), "ERROR_REPORTS", pojo);
-                api.updateStatus(id, ReportRequestStatus.FAILED, filePath);
+                api.updateStatus(pojo.getId(), ReportRequestStatus.FAILED, filePath);
             } catch (Exception ex) {
                 log.error("Error while updating the status of failed request", ex);
             }
@@ -107,11 +108,6 @@ public class ReportTask {
         Map<String, String> inputParamMap = new HashMap<>();
         reportInputParamsPojoList.forEach(r -> inputParamMap.put(r.getParamKey(), r.getParamValue()));
         return inputParamMap;
-    }
-
-    private boolean checkLock(Integer id) throws ApiException {
-        ReportRequestPojo reportRequestPojo = api.getCheck(id);
-        return Arrays.asList(ReportRequestStatus.NEW, ReportRequestStatus.STUCK).contains(reportRequestPojo.getStatus());
     }
 
 }

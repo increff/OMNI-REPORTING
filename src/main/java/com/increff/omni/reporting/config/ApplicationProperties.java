@@ -19,7 +19,7 @@ public class ApplicationProperties {
     @Value("${async.queueCapacity:1000}")
     private Integer queueCapacity;
 
-    @Value("${stuck.report.time:10}")
+    @Value("${stuck.report.time.minutes:10}")
     private Integer stuckReportTime;
 
     @Value("${gcp.baseUrl}")
@@ -31,7 +31,7 @@ public class ApplicationProperties {
     @Value("${gcp.filePath}")
     private String gcpFilePath;
 
-    @Value("${root.directory}")
+    @Value("${root.directory:root}")
     private String rootDirectory;
 
     @Value("${increff.orgId}")

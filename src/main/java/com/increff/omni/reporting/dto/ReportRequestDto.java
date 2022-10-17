@@ -6,6 +6,7 @@ import com.increff.omni.reporting.flow.ReportRequestFlow;
 import com.increff.omni.reporting.model.constants.ReportRequestStatus;
 import com.increff.omni.reporting.model.constants.ReportType;
 import com.increff.omni.reporting.model.data.ReportRequestData;
+import com.increff.omni.reporting.model.data.TimeZoneData;
 import com.increff.omni.reporting.model.form.ReportRequestForm;
 import com.increff.omni.reporting.pojo.*;
 import com.nextscm.commons.lang.StringUtil;
@@ -22,6 +23,8 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static com.increff.omni.reporting.dto.CommonDtoHelper.convertToTimeZoneData;
 
 @Service
 @Log4j
@@ -48,20 +51,22 @@ public class ReportRequestDto extends AbstractDto {
     @Autowired
     private ReportingClient client;
 
+    private final String TIME_ZONE_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSSxxx";
+
     public void requestReport(ReportRequestForm form) throws ApiException {
         checkValid(form);
         ReportRequestPojo pojo = CommonDtoHelper.getReportRequestPojo(form, getOrgId(), getUserId());
         ReportPojo reportPojo = reportApi.getCheck(pojo.getReportId());
         validateCustomReportAccess(reportPojo, getOrgId());
         validateInputParamValues(reportPojo, form.getParamMap());
-        List<ReportInputParamsPojo> reportInputParamsPojoList = CommonDtoHelper.getReportInputParamsPojoList(form.getParamMap());
+        List<ReportInputParamsPojo> reportInputParamsPojoList = CommonDtoHelper.getReportInputParamsPojoList(form.getParamMap(), form.getTimeZone());
         flow.requestReport(pojo, form.getParamMap(), reportInputParamsPojoList);
     }
 
-    //TODO change to limit number of rows
-    public List<ReportRequestData> getAll(Integer days) throws ApiException {
+    public List<ReportRequestData> getAll(Integer limit) throws ApiException {
+        limit = Math.min(50, limit);
         List<ReportRequestData> reportRequestDataList = new ArrayList<>();
-        List<ReportRequestPojo> reportRequestPojoList = reportRequestApi.getByUserId(getUserId(), days);
+        List<ReportRequestPojo> reportRequestPojoList = reportRequestApi.getByUserId(getUserId(), limit);
         for (ReportRequestPojo r : reportRequestPojoList) {
             ReportPojo reportPojo = reportApi.getCheck(r.getReportId());
             reportRequestDataList.add(CommonDtoHelper.getReportRequestData(r, reportPojo));
@@ -78,12 +83,23 @@ public class ReportRequestDto extends AbstractDto {
         if (!Arrays.asList(ReportRequestStatus.COMPLETED, ReportRequestStatus.FAILED).contains(requestPojo.getStatus())) {
             throw new ApiException(ApiStatus.BAD_DATA, "Report request is still in processing, name : " + reportPojo.getName());
         }
-        String reportName = reportPojo.getName() + "-" +
-                requestPojo.getUpdatedAt().toInstant().atZone(ZoneId.of("UTC")).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS"));
+        String reportName = reportPojo.getName() + "~" +
+                requestPojo.getUpdatedAt().toInstant().atZone(ZoneId.of("UTC"))
+                        .format(DateTimeFormatter.ofPattern(TIME_ZONE_PATTERN));
         File sourceFile = folderApi.getFile(reportName + ".xls");
         byte[] data = client.getFileFromUrl(requestPojo.getUrl());
         FileUtils.writeByteArrayToFile(sourceFile, data);
         return sourceFile;
+    }
+
+    public List<TimeZoneData> getAllAvailableTimeZones() throws ApiException {
+        Set<String> timeZoneIds = ZoneId.getAvailableZoneIds();
+        List<TimeZoneData> dataList = new ArrayList<>();
+        for (String timeZoneId : timeZoneIds) {
+            dataList.add(convertToTimeZoneData(timeZoneId));
+        }
+        dataList.sort(Comparator.comparing(TimeZoneData::getZoneId));
+        return dataList;
     }
 
     private void validateCustomReportAccess(ReportPojo reportPojo, Integer orgId) throws ApiException {

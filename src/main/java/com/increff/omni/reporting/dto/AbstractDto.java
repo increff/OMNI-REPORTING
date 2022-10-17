@@ -17,15 +17,12 @@ import java.util.Map;
 @Log4j
 public abstract class AbstractDto extends AbstractDtoApi {
 
-    // todo change after testing
     protected static int getOrgId() {
-        return 100001;
-//        return getPrincipal().getDomainId();
+        return getPrincipal().getDomainId();
     }
 
     protected static int getUserId() {
-//        return getPrincipal().getId();
-        return 100001;
+        return getPrincipal().getId();
     }
 
     private static UserPrincipal getPrincipal() {

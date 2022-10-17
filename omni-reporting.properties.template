@@ -1,12 +1,10 @@
-jdbc.driverClassName=
+# JDBC Properties
 jdbc.url=
 jdbc.username=
 jdbc.password=
 
-hibernate.dialect=
-hibernate.show_sql=
+# Hibernate properties
 hibernate.hbm2ddl.auto=
-hibernate.jdbc.batch_size=
 
 # GCP properties
 gcp.baseUrl=
@@ -15,9 +13,8 @@ gcp.filePath=
 
 # Account server properties
 auth.baseUrl=
+auth.appToken=
+auth.appName=
 
-#TODO time standard
-query.outDir=
-stuck.report.time=
-root.directory=
+# App properties
 increff.orgId=

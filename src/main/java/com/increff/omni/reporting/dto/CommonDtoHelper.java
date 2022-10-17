@@ -5,11 +5,18 @@ import com.increff.omni.reporting.model.constants.ReportRequestStatus;
 import com.increff.omni.reporting.model.data.OrgConnectionData;
 import com.increff.omni.reporting.model.data.OrgSchemaData;
 import com.increff.omni.reporting.model.data.ReportRequestData;
+import com.increff.omni.reporting.model.data.TimeZoneData;
 import com.increff.omni.reporting.model.form.ReportRequestForm;
 import com.increff.omni.reporting.model.form.ValidationGroupForm;
 import com.increff.omni.reporting.pojo.*;
+import com.nextscm.commons.spring.common.ApiException;
+import com.nextscm.commons.spring.common.ApiStatus;
 
 import java.io.File;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -27,6 +34,25 @@ public class CommonDtoHelper {
         params.setOutFile(file);
         params.setErrFile(errFile);
         return params;
+    }
+
+    //Zone Offset/Abbreviation will be populated based on DST(DayLight Saving Time) in case it is applicable for a Zone at current timestamp
+    public static TimeZoneData convertToTimeZoneData(String timeZoneId) throws ApiException {
+        ZoneId zoneId;
+        try {
+            zoneId = ZoneId.of(timeZoneId); //exception will be thrown here in case of incorrect timezoneId
+        } catch (Exception e) {
+            throw new ApiException(ApiStatus.BAD_DATA, "No timeZone exists for zoneID : " + timeZoneId);
+        }
+        String offSet = LocalDateTime.now().atZone(zoneId).getOffset()
+                .getId().replace("Z", "+00:00");
+        DateTimeFormatter zoneFormatter = DateTimeFormatter.ofPattern("zzz"); //pattern for TextStyle.SHORT
+        String abbreviation = ZonedDateTime.now(zoneId).format(zoneFormatter);
+        TimeZoneData timeZoneData = new TimeZoneData();
+        timeZoneData.setZoneId(timeZoneId);
+        timeZoneData.setZoneOffset(String.format("%s%s", "UTC", offSet));
+        timeZoneData.setZoneAbbreviation(abbreviation);
+        return timeZoneData;
     }
 
     public static ReportControlsPojo getReportControlPojo(Integer reportId, Integer controlId) {
@@ -93,7 +119,7 @@ public class CommonDtoHelper {
         return reportRequestPojo;
     }
 
-    public static List<ReportInputParamsPojo> getReportInputParamsPojoList(Map<String, String> paramMap) {
+    public static List<ReportInputParamsPojo> getReportInputParamsPojoList(Map<String, String> paramMap, String timeZone) {
         List<ReportInputParamsPojo> reportInputParamsPojoList = new ArrayList<>();
         paramMap.forEach((k, v) -> {
             ReportInputParamsPojo reportInputParamsPojo = new ReportInputParamsPojo();
@@ -101,6 +127,10 @@ public class CommonDtoHelper {
             reportInputParamsPojo.setParamValue(v);
             reportInputParamsPojoList.add(reportInputParamsPojo);
         });
+        ReportInputParamsPojo reportInputParamsPojo = new ReportInputParamsPojo();
+        reportInputParamsPojo.setParamKey("timezone");
+        reportInputParamsPojo.setParamValue(timeZone);
+        reportInputParamsPojoList.add(reportInputParamsPojo);
         return reportInputParamsPojoList;
     }
 
