@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @Transactional(rollbackFor = Exception.class)
@@ -18,7 +19,7 @@ public class ConnectionApi extends AbstractApi {
     @Autowired
     private ConnectionDao dao;
 
-    public ConnectionPojo create(ConnectionPojo pojo) throws ApiException {
+    public ConnectionPojo add(ConnectionPojo pojo) throws ApiException {
         validate(pojo);
         dao.persist(pojo);
         return pojo;
@@ -26,7 +27,6 @@ public class ConnectionApi extends AbstractApi {
 
     public ConnectionPojo update(ConnectionPojo pojo) throws ApiException {
         validateForEdit(pojo);
-
         ConnectionPojo existing = getCheck(pojo.getId());
         copyToExisting(pojo, existing);
         dao.update(existing);
@@ -45,7 +45,7 @@ public class ConnectionApi extends AbstractApi {
 
     private void validateForEdit(ConnectionPojo pojo) throws ApiException {
         ConnectionPojo existing = dao.select("name", pojo.getName());
-        if(existing != null && existing.getId() != pojo.getId())
+        if(existing != null && !Objects.equals(existing.getId(), pojo.getId()))
             throw new ApiException(ApiStatus.BAD_DATA, "Connection with same name already present");
     }
 

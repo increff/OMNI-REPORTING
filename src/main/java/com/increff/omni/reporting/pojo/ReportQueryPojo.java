@@ -19,6 +19,6 @@ public class ReportQueryPojo {
     private Integer reportId;
 
     @Lob
-    private String value;
+    private String query;
 
 }

@@ -19,11 +19,12 @@ public class ReportRequestPojo extends AbstractVersionedPojo{
 
     private Integer orgId;
 
-    private String userId;
+    private Integer userId;
 
     private Integer reportId;
 
+    @Enumerated(EnumType.STRING)
     private ReportRequestStatus status;
 
-    //Maps of Params
+    private String url;
 }

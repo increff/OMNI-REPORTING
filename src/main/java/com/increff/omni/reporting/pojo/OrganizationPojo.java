@@ -15,6 +15,6 @@ public class OrganizationPojo extends AbstractVersionedPojo{
     @Id
     private Integer id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String name;
 }

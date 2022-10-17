@@ -1,14 +1,11 @@
 package com.increff.omni.reporting.dto;
 
-import com.increff.omni.reporting.api.OrgSchemaApi;
-import com.increff.omni.reporting.api.OrganizationApi;
-import com.increff.omni.reporting.api.SchemaApi;
+import com.increff.omni.reporting.api.*;
+import com.increff.omni.reporting.model.data.OrgConnectionData;
 import com.increff.omni.reporting.model.data.OrgSchemaData;
 import com.increff.omni.reporting.model.data.OrganizationData;
 import com.increff.omni.reporting.model.form.OrganizationForm;
-import com.increff.omni.reporting.pojo.OrgSchemaPojo;
-import com.increff.omni.reporting.pojo.OrganizationPojo;
-import com.increff.omni.reporting.pojo.SchemaPojo;
+import com.increff.omni.reporting.pojo.*;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ConvertUtil;
 import com.nextscm.commons.spring.server.AbstractDtoApi;
@@ -16,8 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 public class OrganizationDto extends AbstractDtoApi {
@@ -31,13 +26,21 @@ public class OrganizationDto extends AbstractDtoApi {
     @Autowired
     private OrgSchemaApi orgSchemaApi;
 
+    @Autowired
+    private OrgConnectionApi orgConnectionApi;
+
+    @Autowired
+    private ConnectionApi connectionApi;
+
     public OrganizationData add(OrganizationForm form) throws ApiException {
+        checkValid(form);
         OrganizationPojo pojo = ConvertUtil.convert(form, OrganizationPojo.class);
         pojo = api.add(pojo);
         return ConvertUtil.convert(pojo, OrganizationData.class);
     }
 
     public OrganizationData update(OrganizationForm form) throws ApiException {
+        checkValid(form);
         OrganizationPojo pojo = ConvertUtil.convert(form, OrganizationPojo.class);
         pojo = api.update(pojo);
         return ConvertUtil.convert(pojo, OrganizationData.class);
@@ -53,38 +56,34 @@ public class OrganizationDto extends AbstractDtoApi {
         return ConvertUtil.convert(pojoList, OrganizationData.class);
     }
 
-    public OrgSchemaData mapToSchema(Integer orgId, Integer schemaId) throws ApiException {
+    public OrgSchemaData mapToSchema(Integer id, Integer schemaId) throws ApiException {
         //validation
-        OrganizationPojo orgPojo = api.getCheck(orgId);
+        OrganizationPojo orgPojo = api.getCheck(id);
         SchemaPojo schemaPojo = schemaApi.getCheck(schemaId);
 
         OrgSchemaPojo pojo = createPojo(orgPojo, schemaPojo);
-        return getOrgSchemaData(pojo, schemaPojo);
+        return CommonDtoHelper.getOrgSchemaData(pojo, schemaPojo);
     }
 
     public List<OrgSchemaData> selectAllOrgSchema(){
         List<OrgSchemaPojo> pojos = orgSchemaApi.selectAll();
-        return getOrgSchemaData(pojos);
-    }
-
-    private List<OrgSchemaData> getOrgSchemaData(List<OrgSchemaPojo> pojos) {
         List<SchemaPojo> allPojos = schemaApi.selectAll();
-        Map<Integer, String> idToNameMap = allPojos.stream()
-                .collect(Collectors.toMap(SchemaPojo::getId, SchemaPojo::getName));
-
-        return pojos.stream().map(p -> {
-            OrgSchemaData data = ConvertUtil.convert(p, OrgSchemaData.class);
-            data.setSchemaName(idToNameMap.get(p.getSchemaId()));
-            return data;
-        }).collect(Collectors.toList());
+        return CommonDtoHelper.getOrgSchemaDataList(pojos, allPojos);
     }
 
-    private OrgSchemaData getOrgSchemaData(OrgSchemaPojo pojo, SchemaPojo schemaPojo) {
-        OrgSchemaData data = new OrgSchemaData();
-        data.setOrgId(pojo.getOrgId());
-        data.setSchemaId(pojo.getSchemaId());
-        data.setSchemaName(schemaPojo.getName());
-        return data;
+    public List<OrgConnectionData> selectAllOrgConnections(){
+        List<OrgConnectionPojo> pojos = orgConnectionApi.selectAll();
+        List<ConnectionPojo> allPojos = connectionApi.selectAll();
+        return CommonDtoHelper.getOrgConnectionDataList(pojos, allPojos);
+    }
+
+    public OrgConnectionData mapToConnection(Integer id, Integer connectionId) throws ApiException {
+        //validation
+        OrganizationPojo orgPojo = api.getCheck(id);
+        ConnectionPojo connectionPojo = connectionApi.getCheck(connectionId);
+
+        OrgConnectionPojo pojo = createPojo(orgPojo, connectionPojo);
+        return CommonDtoHelper.getOrgConnectionData(pojo, connectionPojo);
     }
 
     private OrgSchemaPojo createPojo(OrganizationPojo orgPojo, SchemaPojo schemaPojo) {
@@ -94,4 +93,10 @@ public class OrganizationDto extends AbstractDtoApi {
         return orgSchemaApi.map(pojo);
     }
 
+    private OrgConnectionPojo createPojo(OrganizationPojo orgPojo, ConnectionPojo connectionPojo) {
+        OrgConnectionPojo pojo = new OrgConnectionPojo();
+        pojo.setOrgId(orgPojo.getId());
+        pojo.setConnectionId(connectionPojo.getId());
+        return orgConnectionApi.map(pojo);
+    }
 }

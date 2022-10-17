@@ -23,7 +23,6 @@ public class DbConfig {
 	private static final int CONNECTION_POOL_SIZE = 12;
 
 	public static final String PACKAGE_POJO = "com.increff.omni.reporting.pojo";
-	private static final Logger logger = Logger.getLogger(DbConfig.class);
 
 	@Value("${jdbc.driverClassName}")
 	private String jdbcDriver;
@@ -45,7 +44,6 @@ public class DbConfig {
 
 	@Bean(name = "dataSource")
 	public DataSource getDataSource() {
-		logger.info("jdbcDriver: " + jdbcDriver + ", jdbcUrl: " + jdbcUrl + ", jdbcUsername: " + jdbcUsername);
 		return DbPoolUtil.initDataSource(jdbcDriver, jdbcUrl, jdbcUsername, jdbcPassword, CONNECTION_POOL_SIZE,
 				(int) (CONNECTION_POOL_SIZE * 1.5));
 	}
@@ -53,7 +51,6 @@ public class DbConfig {
 	@Bean(name = "entityManagerFactory")
 	@Autowired
 	public LocalContainerEntityManagerFactoryBean entityManagerFactory(DataSource dataSource) {
-		logger.info("hibernateDialect: " + jdbcDriver + ", hibernateHbm2ddl: " + hibernateHbm2ddl);
 		LocalContainerEntityManagerFactoryBean bean = new LocalContainerEntityManagerFactoryBean();
 		bean.setDataSource(dataSource);
 		bean.setPackagesToScan(PACKAGE_POJO);

@@ -1,6 +1,6 @@
 package com.increff.omni.reporting.dao;
 
-import com.increff.omni.reporting.pojo.InputControlQuery;
+import com.increff.omni.reporting.pojo.InputControlQueryPojo;
 import com.nextscm.commons.spring.db.AbstractDao;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -10,13 +10,13 @@ import java.util.List;
 
 @Repository
 @Transactional
-public class InputControlQueryDao extends AbstractDao<InputControlQuery> {
+public class InputControlQueryDao extends AbstractDao<InputControlQueryPojo> {
 
-    private static final String selectByIds = "SELECT i FROM InputControlQuery i" //
+    private static final String selectByIds = "SELECT i FROM InputControlQueryPojo i" //
             + " WHERE i.controlId IN :controlIds";
 
-    public List<InputControlQuery> selectMultiple(List<Integer> controlIds){
-        TypedQuery<InputControlQuery> q = createJpqlQuery(selectByIds);
+    public List<InputControlQueryPojo> selectMultiple(List<Integer> controlIds){
+        TypedQuery<InputControlQueryPojo> q = createJpqlQuery(selectByIds);
         q.setParameter("controlIds", controlIds);
         return selectMultiple(q);
     }

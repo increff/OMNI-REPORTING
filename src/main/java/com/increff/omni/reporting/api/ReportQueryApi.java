@@ -21,13 +21,13 @@ public class ReportQueryApi extends AbstractApi {
             return pojo;
         }
         else{
-            existing.setValue(pojo.getValue());
+            existing.setQuery(pojo.getQuery());
             dao.update(existing);
             return existing;
         }
     }
 
-    private ReportQueryPojo getByReportId(Integer reportId) {
+    public ReportQueryPojo getByReportId(Integer reportId) {
         return dao.select("reportId",reportId);
     }
 

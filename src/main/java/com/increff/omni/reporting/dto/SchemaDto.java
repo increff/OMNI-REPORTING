@@ -25,6 +25,14 @@ public class SchemaDto extends AbstractDtoApi {
         return ConvertUtil.convert(pojo, SchemaData.class);
     }
 
+    public SchemaData update(Integer id, SchemaForm form) throws ApiException {
+        checkValid(form);
+        SchemaPojo pojo = ConvertUtil.convert(form, SchemaPojo.class);
+        pojo.setId(id);
+        pojo = api.update(pojo);
+        return ConvertUtil.convert(pojo, SchemaData.class);
+    }
+
     public List<SchemaData> selectAll(){
         List<SchemaPojo> pojos = api.selectAll();
         return ConvertUtil.convert(pojos, SchemaData.class);

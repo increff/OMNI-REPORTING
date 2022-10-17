@@ -31,11 +31,10 @@ public class OrganizationApi extends AbstractApi {
     }
 
     public OrganizationPojo update(OrganizationPojo pojo) throws ApiException{
-        //validating
+        // validating
         OrganizationPojo existing = getCheck(pojo.getId());
         OrganizationPojo existingWithName = dao.select("name", pojo.getName());
-        checkNull(ApiStatus.BAD_DATA, "Organization already present with requested name");
-
+        checkNull(existingWithName, "Organization already present with requested name");
         existing.setName(pojo.getName());
         dao.update(existing);
         return existing;
@@ -47,10 +46,10 @@ public class OrganizationApi extends AbstractApi {
 
     private void validate(OrganizationPojo pojo) throws ApiException {
         OrganizationPojo existing = dao.select(pojo.getId());
-        checkNull(ApiStatus.BAD_DATA, "Organization already present with requested id");
+        checkNull(existing, "Organization already present with requested id");
 
         existing = dao.select("name", pojo.getName());
-        checkNull(ApiStatus.BAD_DATA, "Organization already present with requested name");
+        checkNull(existing, "Organization already present with requested name");
     }
 
 

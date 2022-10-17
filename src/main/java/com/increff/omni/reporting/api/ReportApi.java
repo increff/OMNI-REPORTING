@@ -20,6 +20,11 @@ public class ReportApi extends AbstractApi {
     @Autowired
     private ReportDao dao;
 
+    public ReportPojo add(ReportPojo pojo){
+        dao.persist(pojo);
+        return pojo;
+    }
+
     public ReportPojo getCheck(Integer id) throws ApiException {
         ReportPojo pojo = dao.select(id);
         checkNotNull(pojo, "No report present with id : " + id);
@@ -32,15 +37,6 @@ public class ReportApi extends AbstractApi {
 
     public List<ReportPojo> getByTypeAndSchema(ReportType type, Integer schemaId){
         return dao.getByTypeAndSchema(type, schemaId);
-    }
-
-    public ReportPojo getByTypeAndName(ReportType type, String name){
-        return dao.getByTypeAndName(type, name);
-    }
-
-    public ReportPojo add(ReportPojo pojo){
-        dao.persist(pojo);
-        return pojo;
     }
 
     public ReportPojo edit(ReportPojo pojo) throws ApiException {
