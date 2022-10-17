@@ -62,6 +62,8 @@ public class ReportRequestFlow extends AbstractApi {
         reportInputParamsApi.add(reportInputParamsPojoList);
     }
 
+    //TODO - Try option for expression on UI
+    //TODO - Add comment to specify that expression is also getting added to the param list
     private void evaluateExpressions(List<ReportExpressionPojo> reportExpressionPojoList, List<ReportInputParamsPojo> reportInputParamsPojoList, Map<String, String> params) throws ApiException {
         for (ReportExpressionPojo e : reportExpressionPojoList) {
             String fExpression = StringSubstitutor.replace(e.getExpression(), params);
@@ -79,7 +81,7 @@ public class ReportRequestFlow extends AbstractApi {
             }
         }
     }
-
+    //TODO make smaller function
     private void validate(ReportRequestPojo pojo, Map<String, String> params) throws ApiException {
         ReportPojo reportPojo = reportApi.getCheck(pojo.getReportId());
         List<ReportRequestPojo> pendingReports = api.getPendingByUserId(pojo.getUserId());

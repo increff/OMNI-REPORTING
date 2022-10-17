@@ -2,7 +2,6 @@ package com.increff.omni.reporting.config;
 
 import com.increff.commons.sql.DbPoolUtil;
 import com.nextscm.commons.spring.server.SnakeCaseNamingStrategy;
-import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -24,6 +23,7 @@ public class DbConfig {
 
 	public static final String PACKAGE_POJO = "com.increff.omni.reporting.pojo";
 
+	//TODO follow default values
 	@Value("${jdbc.driverClassName}")
 	private String jdbcDriver;
 	@Value("${jdbc.url}")

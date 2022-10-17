@@ -17,7 +17,6 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 @Service
@@ -43,14 +42,14 @@ public class ReportTask {
     @Autowired
     private ApplicationProperties properties;
 
+    //TODO revisit
     @Async("jobExecutor")
     public void runAsync(ReportRequestPojo pojo) throws ApiException, IOException {
         Integer id = pojo.getId();
-        boolean isRunRequired = checkLock(id);
-        if (!isRunRequired)
-            return;
+
         // mark as processing - locking
         api.markProcessingIfEligible(id);
+
         // process
         ReportRequestPojo reportRequestPojo = api.getCheck(id);
         List<ReportInputParamsPojo> reportInputParamsPojoList = reportInputParamsApi.getInputParamsForReportRequest(reportRequestPojo.getId());
@@ -58,6 +57,9 @@ public class ReportTask {
         ReportQueryPojo reportQueryPojo = reportQueryApi.getByReportId(reportPojo.getId());
         OrgConnectionPojo orgConnectionPojo = orgConnectionApi.getCheckByOrgId(reportRequestPojo.getOrgId());
         ConnectionPojo connectionPojo = connectionApi.getCheck(orgConnectionPojo.getConnectionId());
+
+
+        //creation of file
         File file = folderApi.getFileForExtension(reportRequestPojo.getId(), ".xls");
         File errorFile = folderApi.getErrFile(reportRequestPojo.getId(), ".xls");
         Map<String, String> inputParamMap = getInputParamMapFromPojoList(reportInputParamsPojoList);

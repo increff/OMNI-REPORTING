@@ -58,6 +58,7 @@ public class ReportRequestDto extends AbstractDto {
         flow.requestReport(pojo, form.getParamMap(), reportInputParamsPojoList);
     }
 
+    //TODO change to limit number of rows
     public List<ReportRequestData> getAll(Integer days) throws ApiException {
         List<ReportRequestData> reportRequestDataList = new ArrayList<>();
         List<ReportRequestPojo> reportRequestPojoList = reportRequestApi.getByUserId(getUserId(), days);
@@ -98,6 +99,8 @@ public class ReportRequestDto extends AbstractDto {
         List<ReportControlsPojo> reportControlsPojoList = reportControlsApi.getByReportId(reportPojo.getId());
         List<InputControlPojo> inputControlPojoList = controlApi.selectMultiple(reportControlsPojoList.stream()
                 .map(ReportControlsPojo::getControlId).collect(Collectors.toList()));
+
+        //TODO rethink on null vs single quote
         for (InputControlPojo i : inputControlPojoList) {
             if (params.containsKey(i.getParamName())) {
                 String value = params.get(i.getParamName());
@@ -156,6 +159,7 @@ public class ReportRequestDto extends AbstractDto {
         return getInputParamValueMap(connectionPojo, query);
     }
 
+    //TODO check if this method can be reused
     private Map<String, String> checkValidValues(InputControlPojo p) throws ApiException {
         Map<String, String> valuesMap = new HashMap<>();
         List<InputControlQueryPojo> queryPojoList = controlApi.selectControlQueries(Collections.singletonList(p.getId()));

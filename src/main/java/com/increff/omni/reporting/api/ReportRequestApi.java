@@ -4,6 +4,7 @@ import com.increff.omni.reporting.dao.ReportRequestDao;
 import com.increff.omni.reporting.model.constants.ReportRequestStatus;
 import com.increff.omni.reporting.pojo.ReportRequestPojo;
 import com.nextscm.commons.spring.common.ApiException;
+import com.nextscm.commons.spring.common.ApiStatus;
 import com.nextscm.commons.spring.server.AbstractApi;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -39,12 +40,14 @@ public class ReportRequestApi extends AbstractApi {
         return dao.getEligibleReports(Arrays.asList(ReportRequestStatus.NEW, ReportRequestStatus.STUCK));
     }
 
-    public void markProcessingIfEligible(Integer id) {
+    public void markProcessingIfEligible(Integer id) throws ApiException {
         ReportRequestPojo pojo = dao.select(id);
         if (pojo.getStatus().equals(ReportRequestStatus.NEW) ||
                 (pojo.getStatus().equals(ReportRequestStatus.STUCK))) {
             pojo.setStatus(ReportRequestStatus.IN_PROGRESS);
         }
+        else
+            throw new ApiException(ApiStatus.UNKNOWN_ERROR, "Task not in eligible state");
     }
 
     public void markStuck(Integer stuckReportTime) {

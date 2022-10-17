@@ -10,6 +10,7 @@ import javax.persistence.*;
 @Getter
 @Table(name = "org_schema", uniqueConstraints =
         {@UniqueConstraint(name = "unq_org", columnNames = {"orgId"})})
+//TODO schema should be named as version
 public class OrgSchemaPojo extends AbstractVersionedPojo{
 
     @Id

@@ -16,6 +16,7 @@ gcp.filePath=
 # Account server properties
 auth.baseUrl=
 
+#TODO time standard
 query.outDir=
 stuck.report.time=
 root.directory=
