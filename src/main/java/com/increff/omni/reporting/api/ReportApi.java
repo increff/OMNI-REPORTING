@@ -31,8 +31,8 @@ public class ReportApi extends AbstractApi {
         return pojo;
     }
 
-    public ReportPojo getByName(String name){
-        return dao.select("name",name);
+    public ReportPojo getByNameAndSchema(String name, Integer schemaVersionId){
+        return dao.getByNameAndSchema(name, schemaVersionId);
     }
 
     public List<ReportPojo> getByTypeAndSchema(ReportType type, Integer schemaVersionId){

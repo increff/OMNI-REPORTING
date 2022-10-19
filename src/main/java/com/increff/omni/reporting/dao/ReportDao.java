@@ -2,47 +2,62 @@ package com.increff.omni.reporting.dao;
 
 import com.increff.omni.reporting.model.constants.ReportType;
 import com.increff.omni.reporting.pojo.ReportPojo;
+import com.increff.omni.reporting.pojo.ReportRequestPojo;
 import com.nextscm.commons.spring.db.AbstractDao;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 import java.util.List;
 
 @Repository
 @Transactional
 public class ReportDao extends AbstractDao<ReportPojo> {
 
-    private static final String selectByTypeAndSchema = "SELECT r FROM ReportPojo r" //
-            + " WHERE r.type = :type and r.schemaVersionId = :schemaVersionId";
-
-    private static final String selectByIdsAndSchema = "SELECT r FROM ReportPojo r" //
-            + " WHERE r.id in :ids and r.schemaVersionId = :schemaVersionId";
-
-    private static final String selectByTypeAndName = "SELECT r FROM ReportPojo r" //
-            + " WHERE r.type = :type and r.name = :name";
-
-    public List<ReportPojo> getByTypeAndSchema(ReportType type, Integer schemaVersionId){
-        TypedQuery<ReportPojo> q = createJpqlQuery(selectByTypeAndSchema);
-        q.setParameter("type", type);
-        q.setParameter("schemaVersionId", schemaVersionId);
-        return selectMultiple(q);
+    public List<ReportPojo> getByTypeAndSchema(ReportType type, Integer schemaVersionId) {
+        CriteriaBuilder cb = this.em.getCriteriaBuilder();
+        CriteriaQuery<ReportPojo> query = cb.createQuery(ReportPojo.class);
+        Root<ReportPojo> root = query.from(ReportPojo.class);
+        query.where(
+                cb.and(
+                        cb.equal(root.get("type"), type),
+                        cb.equal(root.get("schemaVersionId"), schemaVersionId)
+                )
+        );
+        TypedQuery<ReportPojo> tQuery = createQuery(query);
+        return selectMultiple(tQuery);
     }
 
-    public List<ReportPojo> getByIdsAndSchema(List<Integer> ids, Integer schemaVersionId){
-        TypedQuery<ReportPojo> q = createJpqlQuery(selectByIdsAndSchema);
-        q.setParameter("ids", ids);
-        q.setParameter("schemaVersionId", schemaVersionId);
-        return selectMultiple(q);
+    public ReportPojo getByNameAndSchema(String name, Integer schemaVersionId) {
+        CriteriaBuilder cb = this.em.getCriteriaBuilder();
+        CriteriaQuery<ReportPojo> query = cb.createQuery(ReportPojo.class);
+        Root<ReportPojo> root = query.from(ReportPojo.class);
+        query.where(
+                cb.and(
+                        cb.equal(root.get("name"), name),
+                        cb.equal(root.get("schemaVersionId"), schemaVersionId)
+                )
+        );
+        TypedQuery<ReportPojo> tQuery = createQuery(query);
+        return selectSingleOrNull(tQuery);
     }
 
-    public ReportPojo getByTypeAndName(ReportType type, String name){
-        TypedQuery<ReportPojo> q = createJpqlQuery(selectByTypeAndName);
-        q.setParameter("type", type);
-        q.setParameter("name", name);
-        return selectSingleOrNull(q);
+    public List<ReportPojo> getByIdsAndSchema(List<Integer> ids, Integer schemaVersionId) {
+        CriteriaBuilder cb = this.em.getCriteriaBuilder();
+        CriteriaQuery<ReportPojo> query = cb.createQuery(ReportPojo.class);
+        Root<ReportPojo> root = query.from(ReportPojo.class);
+        query.where(
+                cb.and(
+                        root.get("id").in(ids),
+                        cb.equal(root.get("schemaVersionId"), schemaVersionId)
+                )
+        );
+        TypedQuery<ReportPojo> tQuery = createQuery(query);
+        return selectMultiple(tQuery);
     }
-
 
 
 }

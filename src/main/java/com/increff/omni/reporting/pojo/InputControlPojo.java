@@ -11,7 +11,8 @@ import javax.persistence.*;
 @Entity
 @Setter
 @Getter
-@Table(name = "input_control", indexes = {})
+@Table(name = "input_control", indexes = {@Index(name = "idx_scope_displayName", columnList = "scope,displayName"),
+        @Index(name = "idx_scope_paramName", columnList = "scope,paramName")})
 public class InputControlPojo extends AbstractVersionedPojo{
 
     @Id

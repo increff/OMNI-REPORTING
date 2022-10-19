@@ -9,7 +9,4 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class ReportQueryDao extends AbstractDao<ReportQueryPojo> {
 
-
-
-
 }

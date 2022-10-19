@@ -1,14 +1,18 @@
 package com.increff.omni.reporting.dto;
 
-import com.increff.omni.reporting.api.*;
+import com.increff.omni.reporting.api.InputControlApi;
+import com.increff.omni.reporting.api.ReportApi;
+import com.increff.omni.reporting.api.ReportControlsApi;
+import com.increff.omni.reporting.api.ReportValidationGroupApi;
 import com.increff.omni.reporting.flow.ReportFlowApi;
 import com.increff.omni.reporting.flow.ReportRequestFlowApi;
 import com.increff.omni.reporting.model.constants.ValidationType;
 import com.increff.omni.reporting.model.data.ReportData;
-import com.increff.omni.reporting.model.data.ReportExpressionData;
 import com.increff.omni.reporting.model.data.ReportQueryData;
 import com.increff.omni.reporting.model.data.ValidationGroupData;
-import com.increff.omni.reporting.model.form.*;
+import com.increff.omni.reporting.model.form.ReportForm;
+import com.increff.omni.reporting.model.form.ReportQueryForm;
+import com.increff.omni.reporting.model.form.ValidationGroupForm;
 import com.increff.omni.reporting.pojo.*;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
@@ -35,8 +39,6 @@ public class ReportDto extends AbstractDtoApi {
     private InputControlApi inputControlApi;
     @Autowired
     private ReportApi reportApi;
-    @Autowired
-    private ReportExpressionApi reportExpressionApi;
     @Autowired
     private ReportRequestFlowApi reportRequestFlowApi;
 
@@ -71,32 +73,6 @@ public class ReportDto extends AbstractDtoApi {
     public List<ReportData> selectAll(Integer orgId) throws ApiException {
         List<ReportPojo> pojos = flowApi.getAll(orgId);
         return ConvertUtil.convert(pojos, ReportData.class);
-    }
-
-    public void addReportExpression(ReportExpressionForm form) throws ApiException {
-        checkValid(form);
-        ReportExpressionPojo pojo = ConvertUtil.convert(form, ReportExpressionPojo.class);
-        reportExpressionApi.addReportExpression(pojo);
-    }
-
-    public String tryReportExpression(TryReportExpressionForm form) throws ApiException {
-        checkValid(form);
-        return reportRequestFlowApi.runExpression(form.getExpression(), form.getParamMap());
-    }
-
-    public void updateReportExpression(ReportExpressionForm form) throws ApiException {
-        checkValid(form);
-        ReportExpressionPojo pojo = ConvertUtil.convert(form, ReportExpressionPojo.class);
-        reportExpressionApi.updateReportExpression(pojo);
-    }
-
-    public void deleteReportExpression(Integer id) throws ApiException {
-        reportExpressionApi.deleteById(id);
-    }
-
-    public List<ReportExpressionData> getAllExpressionsByReport(Integer reportId) {
-        List<ReportExpressionPojo> pojos = reportExpressionApi.getAllByReportId(reportId);
-        return ConvertUtil.convert(pojos, ReportExpressionData.class);
     }
 
     public void mapToControl(Integer reportId, Integer controlId) throws ApiException {

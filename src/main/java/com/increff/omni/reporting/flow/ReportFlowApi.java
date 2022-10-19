@@ -50,7 +50,6 @@ public class ReportFlowApi extends AbstractApi {
     @Autowired
     private SingleMandatoryValidator singleMandatoryValidator;
 
-
     @Autowired
     private ReportApi api;
 
@@ -159,7 +158,7 @@ public class ReportFlowApi extends AbstractApi {
 
         //validating if requested name is already present
         if (!pojo.getName().equals(existing.getName())) {
-            ReportPojo existingByName = api.getByName(pojo.getName());
+            ReportPojo existingByName = api.getByNameAndSchema(pojo.getName(), pojo.getSchemaVersionId());
             if (existingByName != null)
                 throw new ApiException(ApiStatus.BAD_DATA, "Report already present with same name");
         }
@@ -170,7 +169,7 @@ public class ReportFlowApi extends AbstractApi {
         schemaApi.getCheck(pojo.getSchemaVersionId());
 
         //get all
-        ReportPojo existing = api.getByName(pojo.getName());
+        ReportPojo existing = api.getByNameAndSchema(pojo.getName(), pojo.getSchemaVersionId());
         if (existing != null)
             throw new ApiException(ApiStatus.BAD_DATA, "Report already present with same name");
 

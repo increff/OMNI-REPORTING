@@ -139,36 +139,6 @@ public class AdminController {
         reportDto.deleteValidationGroup(reportId, groupName);
     }
 
-    @ApiOperation(value = "Add report expression")
-    @RequestMapping(value = "/reports/expressions", method = RequestMethod.POST)
-    public void addReportExpression(@RequestBody ReportExpressionForm form) throws ApiException {
-        reportDto.addReportExpression(form);
-    }
-
-    @ApiOperation(value = "Try expression")
-    @RequestMapping(value = "/reports/expressions/try", method = RequestMethod.POST)
-    public String tryReportExpression(@RequestBody TryReportExpressionForm form) throws ApiException {
-        return reportDto.tryReportExpression(form);
-    }
-
-    @ApiOperation(value = "Edit report expression")
-    @RequestMapping(value = "/reports/expressions", method = RequestMethod.PUT)
-    public void updateReportExpression(@RequestBody ReportExpressionForm form) throws ApiException {
-        reportDto.updateReportExpression(form);
-    }
-
-    @ApiOperation(value = "Get report expressions")
-    @RequestMapping(value = "/reports/{reportId}/expressions", method = RequestMethod.GET)
-    public List<ReportExpressionData> getReportExpressions(@PathVariable Integer reportId) {
-        return reportDto.getAllExpressionsByReport(reportId);
-    }
-
-    @ApiOperation(value = "Delete report expression")
-    @RequestMapping(value = "/reports/expressions/{id}", method = RequestMethod.DELETE)
-    public void deleteReportExpression(@PathVariable Integer id) throws ApiException {
-        reportDto.deleteReportExpression(id);
-    }
-
     @ApiOperation(value = "Add Organization")
     @RequestMapping(value = "/orgs", method = RequestMethod.POST)
     public OrganizationData add(@RequestBody OrganizationForm form) throws ApiException {

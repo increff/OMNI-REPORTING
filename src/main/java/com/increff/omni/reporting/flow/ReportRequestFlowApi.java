@@ -9,15 +9,11 @@ import com.increff.omni.reporting.validators.SingleMandatoryValidator;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
 import com.nextscm.commons.spring.server.AbstractApi;
-import org.apache.commons.text.StringSubstitutor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
-import javax.script.ScriptException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -49,46 +45,14 @@ public class ReportRequestFlowApi extends AbstractApi {
     private ReportValidationGroupApi reportValidationGroupApi;
     @Autowired
     private DateValidator dateValidator;
-    @Autowired
-    private ReportExpressionApi reportExpressionApi;
 
     private final static Integer MAX_OPEN_REPORT_REQUESTS = 5;
 
     public void requestReport(ReportRequestPojo pojo, Map<String, String> params, List<ReportInputParamsPojo> reportInputParamsPojoList) throws ApiException {
         validate(pojo, params);
-        List<ReportExpressionPojo> reportExpressionPojoList = reportExpressionApi.getAllByReportId(pojo.getReportId());
-        evaluateExpressions(reportExpressionPojoList, reportInputParamsPojoList, params);
         api.add(pojo);
         reportInputParamsPojoList.forEach(r -> r.setReportRequestId(pojo.getId()));
         reportInputParamsApi.add(reportInputParamsPojoList);
-    }
-
-    public String runExpression(String expression, Map<String, String> params) throws ApiException {
-        try {
-            String fExpression = StringSubstitutor.replace(expression, params);
-
-            ScriptEngineManager factory = new ScriptEngineManager();
-            ScriptEngine engine = factory.getEngineByName("JavaScript");
-            return engine.eval(fExpression).toString();
-        } catch (ScriptException e) {
-            throw new ApiException(ApiStatus.BAD_DATA, "Error while running expression : " + e.getMessage());
-        }
-    }
-
-    private void evaluateExpressions(List<ReportExpressionPojo> reportExpressionPojoList, List<ReportInputParamsPojo> reportInputParamsPojoList, Map<String, String> params) throws ApiException {
-        for (ReportExpressionPojo e : reportExpressionPojoList) {
-            try {
-                String result = runExpression(e.getExpression(), params);
-                // Add expression also in final param list
-                ReportInputParamsPojo pojo = new ReportInputParamsPojo();
-                pojo.setParamKey(e.getExpressionName());
-                pojo.setParamValue(result);
-                reportInputParamsPojoList.add(pojo);
-            } catch (Exception ex) {
-                throw new ApiException(ApiStatus.BAD_DATA, "Expression evaluation failed, name : " + e.getExpressionName()
-                    + " reason : " + ex.getMessage());
-            }
-        }
     }
 
     private void validate(ReportRequestPojo pojo, Map<String, String> params) throws ApiException {

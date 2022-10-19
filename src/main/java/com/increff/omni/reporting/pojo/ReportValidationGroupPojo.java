@@ -10,7 +10,10 @@ import javax.persistence.*;
 @Entity
 @Getter
 @Setter
-@Table(name = "reportValidationGroup")
+@Table(name = "reportValidationGroup", indexes = {
+        @Index(name = "idx_reportId_groupName", columnList = "reportId, groupName", unique = true),
+        @Index(name = "idx_reportId_reportControlId", columnList = "reportId, reportControlId")
+})
 public class ReportValidationGroupPojo extends AbstractVersionedPojo {
 
     @Id
@@ -18,15 +21,19 @@ public class ReportValidationGroupPojo extends AbstractVersionedPojo {
     @GeneratedValue(strategy = GenerationType.TABLE, generator = "report_validation_group")
     private Integer id;
 
+    @Column(nullable = false)
     private String groupName;
 
+    @Column(nullable = false)
     @Enumerated(value = EnumType.STRING)
     private ValidationType type;
 
     // for now, validation value is used for DATE range, in future it can be a key value pair
     private Integer validationValue = 0;
 
+    @Column(nullable = false)
     private Integer reportId;
 
+    @Column(nullable = false)
     private Integer reportControlId;
 }

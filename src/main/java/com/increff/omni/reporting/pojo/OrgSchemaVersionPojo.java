@@ -8,15 +8,14 @@ import javax.persistence.*;
 @Entity
 @Setter
 @Getter
-@Table(name = "orgSchemaVersion", uniqueConstraints =
-        {@UniqueConstraint(name = "unq_org", columnNames = {"orgId"})})
+@Table(name = "orgSchemaVersion")
 public class OrgSchemaVersionPojo extends AbstractVersionedPojo {
 
     @Id
     @TableGenerator(name = "org_schema_version", pkColumnValue = "org_schema_version", allocationSize = 1,initialValue = 100000)
     @GeneratedValue(strategy = GenerationType.TABLE, generator = "org_schema_version")
     private Integer id;
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private Integer orgId;
     @Column(nullable = false)
     private Integer schemaVersionId;

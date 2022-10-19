@@ -5,11 +5,13 @@ import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 
 @Entity
 @Setter
 @Getter
-@Table(name = "custom_report_access")
+@Table(name = "custom_report_access", uniqueConstraints =
+                @UniqueConstraint(name = "uq_reportId_orgId", columnNames = {"reportId", "orgId"}))
 public class CustomReportAccessPojo extends AbstractVersionedPojo{
 
     @Id
@@ -17,7 +19,9 @@ public class CustomReportAccessPojo extends AbstractVersionedPojo{
     @GeneratedValue(strategy = GenerationType.TABLE, generator = "custom_report_access")
     private Integer id;
 
+    @Column(nullable = false)
     private Integer reportId;
 
+    @Column(nullable = false)
     private Integer orgId;
 }

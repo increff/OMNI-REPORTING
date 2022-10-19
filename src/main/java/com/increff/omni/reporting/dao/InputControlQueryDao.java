@@ -1,24 +1,30 @@
 package com.increff.omni.reporting.dao;
 
+import com.increff.omni.reporting.pojo.InputControlPojo;
 import com.increff.omni.reporting.pojo.InputControlQueryPojo;
 import com.nextscm.commons.spring.db.AbstractDao;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 import java.util.List;
 
 @Repository
 @Transactional
 public class InputControlQueryDao extends AbstractDao<InputControlQueryPojo> {
 
-    private static final String selectByIds = "SELECT i FROM InputControlQueryPojo i" //
-            + " WHERE i.controlId IN :controlIds";
-
     public List<InputControlQueryPojo> selectMultiple(List<Integer> controlIds){
-        TypedQuery<InputControlQueryPojo> q = createJpqlQuery(selectByIds);
-        q.setParameter("controlIds", controlIds);
-        return selectMultiple(q);
+        CriteriaBuilder cb = this.em.getCriteriaBuilder();
+        CriteriaQuery<InputControlQueryPojo> query = cb.createQuery(InputControlQueryPojo.class);
+        Root<InputControlQueryPojo> root = query.from(InputControlQueryPojo.class);
+        query.where(
+                root.get("controlId").in(controlIds)
+        );
+        TypedQuery<InputControlQueryPojo> tQuery = createQuery(query);
+        return selectMultiple(tQuery);
     }
 
 }

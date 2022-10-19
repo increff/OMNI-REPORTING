@@ -119,12 +119,13 @@ public class ReportRequestDto extends AbstractDto {
         List<InputControlPojo> inputControlPojoList = controlApi.selectMultiple(reportControlsPojoList.stream()
                 .map(ReportControlsPojo::getControlId).collect(Collectors.toList()));
 
-        //TODO rethink on null vs single quote
         for (InputControlPojo i : inputControlPojoList) {
             if (params.containsKey(i.getParamName())) {
                 String value = params.get(i.getParamName());
-                if (StringUtil.isEmpty(value) || value.equals("''"))
+                if (StringUtil.isEmpty(value)) {
+                    params.put(i.getParamName(), null);
                     continue;
+                }
                 String[] values;
                 Map<String, String> allowedValuesMap;
                 switch (i.getType()) {
