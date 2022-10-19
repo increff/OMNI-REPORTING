@@ -18,31 +18,17 @@ import java.util.Map;
 public abstract class AbstractDto extends AbstractDtoApi {
 
     protected static int getOrgId() {
-        return getPrincipal().getDomainId();
+//        return getPrincipal().getDomainId();
+        return 100001;
     }
 
+
     protected static int getUserId() {
-        return getPrincipal().getId();
+//        return getPrincipal().getId();
+        return 100001;
     }
 
     private static UserPrincipal getPrincipal() {
         return SecurityUtil.getPrincipal();
-    }
-
-    protected Map<String, String> getInputParamValueMap(ConnectionPojo connectionPojo, String query) {
-        Map<String, String> keyValueMap = new HashMap<>();
-        try {
-            DriverManager.registerDriver(new Driver());
-            Connection connection = DriverManager.getConnection("jdbc:mysql://" + connectionPojo.getHost() + ":3306?useSSL=false", connectionPojo.getUsername(), connectionPojo.getPassword());
-            Statement statement = connection.createStatement();
-            // Only 2 columns will be there in query
-            ResultSet rs = statement.executeQuery(query);
-            while (rs.next()) {
-                keyValueMap.put(rs.getString(1),rs.getString(2));
-            }
-        } catch (SQLException e) {
-            log.error("Error while getting input param values from query : " + query, e);
-        }
-        return keyValueMap;
     }
 }

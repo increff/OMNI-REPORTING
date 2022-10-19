@@ -11,6 +11,7 @@ import java.time.ZonedDateTime;
 @Setter
 @Getter
 @MappedSuperclass
+// Todo correct constraints
 public class AbstractVersionedPojo {
 
 	@Version

@@ -2,7 +2,8 @@ package com.increff.omni.reporting.dto;
 
 import com.increff.omni.reporting.api.*;
 import com.increff.omni.reporting.client.ReportingClient;
-import com.increff.omni.reporting.flow.ReportRequestFlow;
+import com.increff.omni.reporting.flow.InputControlFlowApi;
+import com.increff.omni.reporting.flow.ReportRequestFlowApi;
 import com.increff.omni.reporting.model.constants.ReportRequestStatus;
 import com.increff.omni.reporting.model.constants.ReportType;
 import com.increff.omni.reporting.model.data.ReportRequestData;
@@ -31,7 +32,7 @@ import static com.increff.omni.reporting.dto.CommonDtoHelper.convertToTimeZoneDa
 public class ReportRequestDto extends AbstractDto {
 
     @Autowired
-    private ReportRequestFlow flow;
+    private ReportRequestFlowApi flow;
     @Autowired
     private ReportApi reportApi;
     @Autowired
@@ -50,6 +51,8 @@ public class ReportRequestDto extends AbstractDto {
     private FolderApi folderApi;
     @Autowired
     private ReportingClient client;
+    @Autowired
+    private InputControlFlowApi inputControlFlowApi;
 
     private final String TIME_ZONE_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSSxxx";
 
@@ -164,18 +167,11 @@ public class ReportRequestDto extends AbstractDto {
                         throw new ApiException(ApiStatus.BAD_DATA, "Invalid Input Control Type");
                 }
             } else {
-                throw new ApiException(ApiStatus.BAD_DATA, "Param key not present in request : " + i.getDisplayName());
+                params.put(i.getParamName(), null);
             }
         }
     }
 
-    private Map<String, String> getValuesFromQuery(String query) throws ApiException {
-        OrgConnectionPojo orgConnectionPojo = orgConnectionApi.getCheckByOrgId(getOrgId());
-        ConnectionPojo connectionPojo = connectionApi.getCheck(orgConnectionPojo.getConnectionId());
-        return getInputParamValueMap(connectionPojo, query);
-    }
-
-    //TODO check if this method can be reused
     private Map<String, String> checkValidValues(InputControlPojo p) throws ApiException {
         Map<String, String> valuesMap = new HashMap<>();
         List<InputControlQueryPojo> queryPojoList = controlApi.selectControlQueries(Collections.singletonList(p.getId()));
@@ -185,7 +181,9 @@ public class ReportRequestDto extends AbstractDto {
                 valuesMap.put(pojo.getValue(), pojo.getValue());
             }
         } else {
-            valuesMap = getValuesFromQuery(queryPojoList.get(0).getQuery());
+            OrgConnectionPojo orgConnectionPojo = orgConnectionApi.getCheckByOrgId(getOrgId());
+            ConnectionPojo connectionPojo = connectionApi.getCheck(orgConnectionPojo.getConnectionId());
+            valuesMap = inputControlFlowApi.getValuesFromQuery(queryPojoList.get(0).getQuery(), connectionPojo);
         }
         return valuesMap;
     }

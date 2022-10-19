@@ -1,7 +1,7 @@
 package com.increff.omni.reporting.api;
 
 import com.increff.omni.reporting.dao.OrgSchemaDao;
-import com.increff.omni.reporting.pojo.OrgSchemaPojo;
+import com.increff.omni.reporting.pojo.OrgSchemaVersionPojo;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.server.AbstractApi;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,29 +18,29 @@ public class OrgSchemaApi extends AbstractApi {
     @Autowired
     private OrgSchemaDao dao;
 
-    public OrgSchemaPojo map(OrgSchemaPojo pojo) {
-        OrgSchemaPojo existing = getByOrgId(pojo.getOrgId());
+    public OrgSchemaVersionPojo map(OrgSchemaVersionPojo pojo) {
+        OrgSchemaVersionPojo existing = getByOrgId(pojo.getOrgId());
         if (Objects.isNull(existing)) {
             dao.persist(pojo);
             return pojo;
         } else {
-            existing.setSchemaId(pojo.getSchemaId());
+            existing.setSchemaVersionId(pojo.getSchemaVersionId());
             dao.update(existing);
             return existing;
         }
     }
 
-    public List<OrgSchemaPojo> selectAll() {
+    public List<OrgSchemaVersionPojo> selectAll() {
         return dao.selectAll();
     }
 
-    public OrgSchemaPojo getCheckByOrgId(Integer orgId) throws ApiException {
-        OrgSchemaPojo pojo = getByOrgId(orgId);
+    public OrgSchemaVersionPojo getCheckByOrgId(Integer orgId) throws ApiException {
+        OrgSchemaVersionPojo pojo = getByOrgId(orgId);
         checkNotNull(pojo, "No schema mapped for org : " + orgId);
         return pojo;
     }
 
-    private OrgSchemaPojo getByOrgId(Integer orgId) {
+    private OrgSchemaVersionPojo getByOrgId(Integer orgId) {
         return dao.select("orgId", orgId);
     }
 

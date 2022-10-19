@@ -2,7 +2,8 @@ package com.increff.omni.reporting.dto;
 
 import com.increff.omni.reporting.api.ConnectionApi;
 import com.increff.omni.reporting.api.FolderApi;
-import com.increff.omni.reporting.model.SqlParams;
+import com.increff.omni.reporting.config.ApplicationProperties;
+import com.increff.omni.reporting.model.form.SqlParams;
 import com.increff.omni.reporting.model.data.ConnectionData;
 import com.increff.omni.reporting.model.form.ConnectionForm;
 import com.increff.omni.reporting.pojo.ConnectionPojo;
@@ -11,7 +12,6 @@ import com.increff.omni.reporting.util.SqlCmd;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
 import com.nextscm.commons.spring.common.ConvertUtil;
-import com.nextscm.commons.spring.server.AbstractDtoApi;
 import lombok.extern.log4j.Log4j;
 import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +29,8 @@ public class ConnectionDto extends AbstractDto {
     private ConnectionApi api;
     @Autowired
     private FolderApi folderApi;
+    @Autowired
+    private ApplicationProperties properties;
 
     public ConnectionData add(ConnectionForm form) throws ApiException {
         checkValid(form);
@@ -66,7 +68,7 @@ public class ConnectionDto extends AbstractDto {
         try {
             file = folderApi.getFile("test-db-success.tsv");
             errFile = folderApi.getFile("test-db-err.txt");
-            SqlParams sqlp = CommonDtoHelper.getSqlParams(connectionPojo, query, file, errFile);
+            SqlParams sqlp = CommonDtoHelper.getSqlParams(connectionPojo, query, file, errFile, properties.getMaxExecutionTime());
             SqlCmd.processQuery(sqlp);
             result = FileUtils.readFileToString(file, "utf-8");
             log.debug("Test File created");

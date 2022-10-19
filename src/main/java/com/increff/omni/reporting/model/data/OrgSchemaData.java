@@ -8,7 +8,7 @@ import lombok.Setter;
 public class OrgSchemaData {
 
     private Integer orgId;
-    private Integer schemaId;
+    private Integer schemaVersionId;
     private String schemaName;
 
 }

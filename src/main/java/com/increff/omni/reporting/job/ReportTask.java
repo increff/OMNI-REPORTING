@@ -2,7 +2,8 @@ package com.increff.omni.reporting.job;
 
 import com.increff.omni.reporting.api.*;
 import com.increff.omni.reporting.config.ApplicationProperties;
-import com.increff.omni.reporting.model.SqlParams;
+import com.increff.omni.reporting.dto.CommonDtoHelper;
+import com.increff.omni.reporting.model.form.SqlParams;
 import com.increff.omni.reporting.model.constants.ReportRequestStatus;
 import com.increff.omni.reporting.pojo.*;
 import com.increff.omni.reporting.util.FileUtil;
@@ -59,7 +60,7 @@ public class ReportTask {
         File file = folderApi.getFileForExtension(reportRequestPojo.getId(), ".xls");
         File errorFile = folderApi.getErrFile(reportRequestPojo.getId(), ".xls");
         Map<String, String> inputParamMap = getInputParamMapFromPojoList(reportInputParamsPojoList);
-        SqlParams sqlParams = ReportTaskHelper.convert(connectionPojo, reportQueryPojo, inputParamMap, file, errorFile);
+        SqlParams sqlParams = CommonDtoHelper.convert(connectionPojo, reportQueryPojo, inputParamMap, file, errorFile, properties.getMaxExecutionTime());
         // Execute query and save results
         saveResultsOnCloud(pojo, sqlParams);
     }

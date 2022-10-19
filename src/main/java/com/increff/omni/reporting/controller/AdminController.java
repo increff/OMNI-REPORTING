@@ -4,7 +4,6 @@ import com.increff.omni.reporting.dto.*;
 import com.increff.omni.reporting.model.data.*;
 import com.increff.omni.reporting.model.form.*;
 import com.nextscm.commons.spring.common.ApiException;
-import com.nextscm.commons.spring.server.ApiErrorResponses;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,25 +69,25 @@ public class AdminController {
 
     @ApiOperation(value = "Select all global controls")
     @RequestMapping(value = "/controls/global", method = RequestMethod.GET)
-    public List<InputControlData> selectAllGlobal() {
+    public List<InputControlData> selectAllGlobal() throws ApiException {
         return inputControlDto.selectAllGlobal();
     }
 
     @ApiOperation(value = "Add Schema")
     @RequestMapping(value = "/schema", method = RequestMethod.POST)
-    public SchemaData add(@RequestBody SchemaForm form) throws ApiException {
+    public SchemaVersionData add(@RequestBody SchemaVersionForm form) throws ApiException {
         return schemaDto.add(form);
     }
 
     @ApiOperation(value = "Update Schema")
-    @RequestMapping(value = "/schema/{schemaId}", method = RequestMethod.PUT)
-    public SchemaData updateSchema(@PathVariable Integer schemaId, @RequestBody SchemaForm form) throws ApiException {
-        return schemaDto.update(schemaId, form);
+    @RequestMapping(value = "/schema/{schemaVersionId}", method = RequestMethod.PUT)
+    public SchemaVersionData updateSchema(@PathVariable Integer schemaVersionId, @RequestBody SchemaVersionForm form) throws ApiException {
+        return schemaDto.update(schemaVersionId, form);
     }
 
     @ApiOperation(value = "Get All Schema")
     @RequestMapping(value = "/schema", method = RequestMethod.GET)
-    public List<SchemaData> selectAllSchema() {
+    public List<SchemaVersionData> selectAllSchema() {
         return schemaDto.selectAll();
     }
 
@@ -146,6 +145,12 @@ public class AdminController {
         reportDto.addReportExpression(form);
     }
 
+    @ApiOperation(value = "Try expression")
+    @RequestMapping(value = "/reports/expressions/try", method = RequestMethod.POST)
+    public String tryReportExpression(@RequestBody TryReportExpressionForm form) throws ApiException {
+        return reportDto.tryReportExpression(form);
+    }
+
     @ApiOperation(value = "Edit report expression")
     @RequestMapping(value = "/reports/expressions", method = RequestMethod.PUT)
     public void updateReportExpression(@RequestBody ReportExpressionForm form) throws ApiException {
@@ -183,9 +188,9 @@ public class AdminController {
     }
 
     @ApiOperation(value = "Map organization to a schema")
-    @RequestMapping(value = "/orgs/{orgId}/schema/{schemaId}", method = RequestMethod.POST)
-    public OrgSchemaData addSchemaMapping(@PathVariable Integer orgId, @PathVariable Integer schemaId) throws ApiException {
-        return organizationDto.mapToSchema(orgId, schemaId);
+    @RequestMapping(value = "/orgs/{orgId}/schema/{schemaVersionId}", method = RequestMethod.POST)
+    public OrgSchemaData addSchemaMapping(@PathVariable Integer orgId, @PathVariable Integer schemaVersionId) throws ApiException {
+        return organizationDto.mapToSchema(orgId, schemaVersionId);
     }
 
     @ApiOperation(value = "Map organization to a connection")

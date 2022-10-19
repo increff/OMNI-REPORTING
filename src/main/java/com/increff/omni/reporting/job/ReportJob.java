@@ -8,6 +8,7 @@ import com.increff.omni.reporting.pojo.ReportRequestPojo;
 import com.nextscm.commons.spring.common.ApiException;
 import lombok.extern.log4j.Log4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
@@ -18,7 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executor;
 
-import static com.increff.omni.reporting.job.ReportTaskHelper.groupByOrgID;
+import static com.increff.omni.reporting.dto.CommonDtoHelper.groupByOrgID;
 
 @Log4j
 @Component
@@ -33,6 +34,7 @@ public class ReportJob {
     @Autowired
     private ReportTask reportTask;
     @Autowired
+    @Qualifier(value = "jobExecutor")
     private Executor executor;
 
     @Scheduled(fixedDelay = 1000)

@@ -22,6 +22,9 @@ public class ApplicationProperties {
     @Value("${stuck.report.time.minutes:10}")
     private Integer stuckReportTime;
 
+    @Value("${max.execution.time.minutes:5}")
+    private Integer maxExecutionTime;
+
     @Value("${gcp.baseUrl}")
     private String gcpBaseUrl;
 

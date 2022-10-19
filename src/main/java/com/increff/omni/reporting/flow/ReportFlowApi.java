@@ -98,15 +98,15 @@ public class ReportFlowApi extends AbstractApi {
 
     public List<ReportPojo> getAll(Integer orgId) throws ApiException {
 
-        OrgSchemaPojo orgSchemaPojo = orgSchemaApi.getCheckByOrgId(orgId);
+        OrgSchemaVersionPojo orgSchemaVersionPojo = orgSchemaApi.getCheckByOrgId(orgId);
         //All standard
-        List<ReportPojo> standard = api.getByTypeAndSchema(ReportType.STANDARD, orgSchemaPojo.getSchemaId());
+        List<ReportPojo> standard = api.getByTypeAndSchema(ReportType.STANDARD, orgSchemaVersionPojo.getSchemaVersionId());
 
         //All custom
         List<CustomReportAccessPojo> customAccess = customReportAccessApi.getByOrgId(orgId);
         List<Integer> customIds = customAccess.stream().map(CustomReportAccessPojo::getReportId).collect(Collectors.toList());
 
-        List<ReportPojo> custom = api.getByIdsAndSchema(customIds, orgSchemaPojo.getSchemaId());
+        List<ReportPojo> custom = api.getByIdsAndSchema(customIds, orgSchemaVersionPojo.getSchemaVersionId());
 
         //combined 2 list
         standard.addAll(custom);
@@ -155,7 +155,7 @@ public class ReportFlowApi extends AbstractApi {
 
     private void validateForEdit(ReportPojo pojo, ReportPojo existing) throws ApiException {
         directoryApi.getCheck(pojo.getDirectoryId());
-        schemaApi.getCheck(pojo.getSchemaId());
+        schemaApi.getCheck(pojo.getSchemaVersionId());
 
         //validating if requested name is already present
         if (!pojo.getName().equals(existing.getName())) {
@@ -167,7 +167,7 @@ public class ReportFlowApi extends AbstractApi {
 
     private void validate(ReportPojo pojo) throws ApiException {
         directoryApi.getCheck(pojo.getDirectoryId());
-        schemaApi.getCheck(pojo.getSchemaId());
+        schemaApi.getCheck(pojo.getSchemaVersionId());
 
         //get all
         ReportPojo existing = api.getByName(pojo.getName());

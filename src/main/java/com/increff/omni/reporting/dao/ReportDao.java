@@ -14,25 +14,25 @@ import java.util.List;
 public class ReportDao extends AbstractDao<ReportPojo> {
 
     private static final String selectByTypeAndSchema = "SELECT r FROM ReportPojo r" //
-            + " WHERE r.type = :type and r.schemaId = :schemaId";
+            + " WHERE r.type = :type and r.schemaVersionId = :schemaVersionId";
 
     private static final String selectByIdsAndSchema = "SELECT r FROM ReportPojo r" //
-            + " WHERE r.id in :ids and r.schemaId = :schemaId";
+            + " WHERE r.id in :ids and r.schemaVersionId = :schemaVersionId";
 
     private static final String selectByTypeAndName = "SELECT r FROM ReportPojo r" //
             + " WHERE r.type = :type and r.name = :name";
 
-    public List<ReportPojo> getByTypeAndSchema(ReportType type, Integer schemaId){
+    public List<ReportPojo> getByTypeAndSchema(ReportType type, Integer schemaVersionId){
         TypedQuery<ReportPojo> q = createJpqlQuery(selectByTypeAndSchema);
         q.setParameter("type", type);
-        q.setParameter("schemaId", schemaId);
+        q.setParameter("schemaVersionId", schemaVersionId);
         return selectMultiple(q);
     }
 
-    public List<ReportPojo> getByIdsAndSchema(List<Integer> ids, Integer schemaId){
+    public List<ReportPojo> getByIdsAndSchema(List<Integer> ids, Integer schemaVersionId){
         TypedQuery<ReportPojo> q = createJpqlQuery(selectByIdsAndSchema);
         q.setParameter("ids", ids);
-        q.setParameter("schemaId", schemaId);
+        q.setParameter("schemaVersionId", schemaVersionId);
         return selectMultiple(q);
     }
 

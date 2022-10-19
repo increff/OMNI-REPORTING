@@ -9,7 +9,7 @@ import javax.persistence.*;
 @Setter
 @Getter
 @Table(name = "schemaVersion")
-public class SchemaPojo extends AbstractVersionedPojo{
+public class SchemaVersionPojo extends AbstractVersionedPojo{
 
     @Id
     @TableGenerator(name = "schema_version", pkColumnValue = "schema_version", allocationSize = 1,initialValue = 100000)

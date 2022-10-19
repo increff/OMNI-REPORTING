@@ -19,26 +19,23 @@ import org.springframework.web.client.RestTemplate;
  */
 @Configuration
 @ComponentScan({"com.increff.omni.reporting", "com.increff.account.client"})
-@PropertySources({ //
-		@PropertySource("classpath:com/increff/omni/reporting/config.properties"),
-		@PropertySource(value = "file:./omni-reporting.properties")
-})
-@Import({ WebMvcConfig.class })
+@PropertySource(value = "file:omni-reporting.properties")
+@Import({WebMvcConfig.class})
 public class SpringConfig {
 
-	@Autowired
-	private ApplicationProperties applicationProperties;
+    @Autowired
+    private ApplicationProperties applicationProperties;
 
-	@Bean
-	public FileClient getFileClient() throws FileClientException {
-		AbstractFileProvider gcpFileProvider = new GcpFileProvider(applicationProperties.getGcpBaseUrl(),
-				applicationProperties.getGcpBucketName(), applicationProperties.getGcpFilePath());
-		return new FileClient(gcpFileProvider);
-	}
+    @Bean
+    public FileClient getFileClient() throws FileClientException {
+        AbstractFileProvider gcpFileProvider = new GcpFileProvider(applicationProperties.getGcpBaseUrl(),
+                applicationProperties.getGcpBucketName(), applicationProperties.getGcpFilePath());
+        return new FileClient(gcpFileProvider);
+    }
 
-	@Bean
-	public RestTemplate getRestTemplate() {
-		return new RestTemplate();
-	}
+    @Bean
+    public RestTemplate getRestTemplate() {
+        return new RestTemplate();
+    }
 
 }

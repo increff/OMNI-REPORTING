@@ -17,6 +17,7 @@ import org.springframework.util.CollectionUtils;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -24,7 +25,7 @@ import java.util.stream.Collectors;
 
 @Service
 @Transactional(rollbackFor = Exception.class)
-public class ReportRequestFlow extends AbstractApi {
+public class ReportRequestFlowApi extends AbstractApi {
 
     @Autowired
     private ReportRequestApi api;
@@ -62,14 +63,22 @@ public class ReportRequestFlow extends AbstractApi {
         reportInputParamsApi.add(reportInputParamsPojoList);
     }
 
-    //TODO - Try option for expression on UI
+    public String runExpression(String expression, Map<String, String> params) throws ApiException {
+        try {
+            String fExpression = StringSubstitutor.replace(expression, params);
+
+            ScriptEngineManager factory = new ScriptEngineManager();
+            ScriptEngine engine = factory.getEngineByName("JavaScript");
+            return engine.eval(fExpression).toString();
+        } catch (ScriptException e) {
+            throw new ApiException(ApiStatus.BAD_DATA, "Error while running expression : " + e.getMessage());
+        }
+    }
+
     private void evaluateExpressions(List<ReportExpressionPojo> reportExpressionPojoList, List<ReportInputParamsPojo> reportInputParamsPojoList, Map<String, String> params) throws ApiException {
         for (ReportExpressionPojo e : reportExpressionPojoList) {
-            String fExpression = StringSubstitutor.replace(e.getExpression(), params);
             try {
-                ScriptEngineManager factory = new ScriptEngineManager();
-                ScriptEngine engine = factory.getEngineByName("JavaScript");
-                String result = engine.eval(fExpression).toString();
+                String result = runExpression(e.getExpression(), params);
                 // Add expression also in final param list
                 ReportInputParamsPojo pojo = new ReportInputParamsPojo();
                 pojo.setParamKey(e.getExpressionName());

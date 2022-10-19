@@ -1,9 +1,7 @@
 package com.increff.omni.reporting.api;
 
 import com.increff.omni.reporting.dao.OrgConnectionDao;
-import com.increff.omni.reporting.dao.OrgSchemaDao;
 import com.increff.omni.reporting.pojo.OrgConnectionPojo;
-import com.increff.omni.reporting.pojo.OrgSchemaPojo;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.server.AbstractApi;
 import org.springframework.beans.factory.annotation.Autowired;

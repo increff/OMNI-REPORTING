@@ -17,6 +17,6 @@ public class ReportForm {
     @NotNull
     private Integer directoryId;
     @NotNull
-    private Integer schemaId;
+    private Integer schemaVersionId;
 
 }

@@ -7,7 +7,6 @@ import com.increff.omni.reporting.dao.DirectoryDao;
 import com.increff.omni.reporting.model.constants.InputControlScope;
 import com.increff.omni.reporting.model.constants.InputControlType;
 import com.increff.omni.reporting.model.constants.ReportType;
-import com.increff.omni.reporting.model.constants.ValidationType;
 import com.increff.omni.reporting.pojo.*;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
@@ -78,9 +77,9 @@ public class InputControlFlowApiTest extends AbstractTest {
         DirectoryPojo rootPojo = directoryDao.select("directoryName", properties.getRootDirectory());
         DirectoryPojo directoryPojo = getDirectoryPojo("Standard Reports", rootPojo.getId());
         directoryApi.add(directoryPojo);
-        SchemaPojo schemaPojo = getSchemaPojo("9.0.1");
-        schemaApi.add(schemaPojo);
-        ReportPojo pojo = getReportPojo("CIMS Inventory Exposure Report", ReportType.STANDARD, directoryPojo.getId(), schemaPojo.getId());
+        SchemaVersionPojo schemaVersionPojo = getSchemaPojo("9.0.1");
+        schemaApi.add(schemaVersionPojo);
+        ReportPojo pojo = getReportPojo("CIMS Inventory Exposure Report", ReportType.STANDARD, directoryPojo.getId(), schemaVersionPojo.getId());
         reportApi.add(pojo);
         InputControlPojo inputControlPojo = getInputControlPojo("Client ID", "clientId", InputControlScope.LOCAL, InputControlType.MULTI_SELECT);
         String query = "select * from oms.oms_orders;";
@@ -92,9 +91,9 @@ public class InputControlFlowApiTest extends AbstractTest {
         DirectoryPojo rootPojo = directoryDao.select("directoryName", properties.getRootDirectory());
         DirectoryPojo directoryPojo = getDirectoryPojo("Standard Reports", rootPojo.getId());
         directoryApi.add(directoryPojo);
-        SchemaPojo schemaPojo = getSchemaPojo("9.0.1");
-        schemaApi.add(schemaPojo);
-        ReportPojo pojo = getReportPojo("CIMS Inventory Exposure Report", ReportType.STANDARD, directoryPojo.getId(), schemaPojo.getId());
+        SchemaVersionPojo schemaVersionPojo = getSchemaPojo("9.0.1");
+        schemaApi.add(schemaVersionPojo);
+        ReportPojo pojo = getReportPojo("CIMS Inventory Exposure Report", ReportType.STANDARD, directoryPojo.getId(), schemaVersionPojo.getId());
         reportApi.add(pojo);
 
         InputControlPojo inputControlPojo = getInputControlPojo("Client ID", "clientId", InputControlScope.LOCAL, InputControlType.MULTI_SELECT);
@@ -112,9 +111,9 @@ public class InputControlFlowApiTest extends AbstractTest {
         DirectoryPojo rootPojo = directoryDao.select("directoryName", properties.getRootDirectory());
         DirectoryPojo directoryPojo = getDirectoryPojo("Standard Reports", rootPojo.getId());
         directoryApi.add(directoryPojo);
-        SchemaPojo schemaPojo = getSchemaPojo("9.0.1");
-        schemaApi.add(schemaPojo);
-        ReportPojo pojo = getReportPojo("CIMS Inventory Exposure Report", ReportType.STANDARD, directoryPojo.getId(), schemaPojo.getId());
+        SchemaVersionPojo schemaVersionPojo = getSchemaPojo("9.0.1");
+        schemaApi.add(schemaVersionPojo);
+        ReportPojo pojo = getReportPojo("CIMS Inventory Exposure Report", ReportType.STANDARD, directoryPojo.getId(), schemaVersionPojo.getId());
         reportApi.add(pojo);
 
         InputControlPojo inputControlPojo = getInputControlPojo("Client ID", "clientId", InputControlScope.LOCAL, InputControlType.MULTI_SELECT);
@@ -139,9 +138,9 @@ public class InputControlFlowApiTest extends AbstractTest {
         DirectoryPojo rootPojo = directoryDao.select("directoryName", properties.getRootDirectory());
         DirectoryPojo directoryPojo = getDirectoryPojo("Standard Reports", rootPojo.getId());
         directoryApi.add(directoryPojo);
-        SchemaPojo schemaPojo = getSchemaPojo("9.0.1");
-        schemaApi.add(schemaPojo);
-        ReportPojo pojo = getReportPojo("CIMS Inventory Exposure Report", ReportType.STANDARD, directoryPojo.getId(), schemaPojo.getId());
+        SchemaVersionPojo schemaVersionPojo = getSchemaPojo("9.0.1");
+        schemaApi.add(schemaVersionPojo);
+        ReportPojo pojo = getReportPojo("CIMS Inventory Exposure Report", ReportType.STANDARD, directoryPojo.getId(), schemaVersionPojo.getId());
         reportApi.add(pojo);
 
         InputControlPojo inputControlPojo = getInputControlPojo("Client ID", "clientId", InputControlScope.LOCAL, InputControlType.MULTI_SELECT);
@@ -166,9 +165,9 @@ public class InputControlFlowApiTest extends AbstractTest {
         DirectoryPojo rootPojo = directoryDao.select("directoryName", properties.getRootDirectory());
         DirectoryPojo directoryPojo = getDirectoryPojo("Standard Reports", rootPojo.getId());
         directoryApi.add(directoryPojo);
-        SchemaPojo schemaPojo = getSchemaPojo("9.0.1");
-        schemaApi.add(schemaPojo);
-        ReportPojo pojo = getReportPojo("CIMS Inventory Exposure Report", ReportType.STANDARD, directoryPojo.getId(), schemaPojo.getId());
+        SchemaVersionPojo schemaVersionPojo = getSchemaPojo("9.0.1");
+        schemaApi.add(schemaVersionPojo);
+        ReportPojo pojo = getReportPojo("CIMS Inventory Exposure Report", ReportType.STANDARD, directoryPojo.getId(), schemaVersionPojo.getId());
         reportApi.add(pojo);
 
         InputControlPojo inputControlPojo = getInputControlPojo("Client ID", "clientId", InputControlScope.LOCAL, InputControlType.MULTI_SELECT);

@@ -22,6 +22,5 @@ public class ReportInputParamsPojo extends AbstractVersionedPojo{
     @Column(nullable = false)
     private String paramKey;
 
-    @Column(nullable = false)
     private String paramValue;
 }

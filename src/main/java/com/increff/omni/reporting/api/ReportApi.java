@@ -35,24 +35,24 @@ public class ReportApi extends AbstractApi {
         return dao.select("name",name);
     }
 
-    public List<ReportPojo> getByTypeAndSchema(ReportType type, Integer schemaId){
-        return dao.getByTypeAndSchema(type, schemaId);
+    public List<ReportPojo> getByTypeAndSchema(ReportType type, Integer schemaVersionId){
+        return dao.getByTypeAndSchema(type, schemaVersionId);
     }
 
     public ReportPojo edit(ReportPojo pojo) throws ApiException {
         ReportPojo existing = getCheck(pojo.getId());
         existing.setDirectoryId(pojo.getDirectoryId());
         existing.setName(pojo.getName());
-        existing.setSchemaId(pojo.getSchemaId());
+        existing.setSchemaVersionId(pojo.getSchemaVersionId());
         existing.setType(pojo.getType());
         dao.update(existing);
         return existing;
     }
 
-    public List<ReportPojo> getByIdsAndSchema(List<Integer> ids, Integer schemaId){
+    public List<ReportPojo> getByIdsAndSchema(List<Integer> ids, Integer schemaVersionId){
         if(CollectionUtils.isEmpty(ids))
             return new ArrayList<>();
-        return dao.getByIdsAndSchema(ids, schemaId);
+        return dao.getByIdsAndSchema(ids, schemaVersionId);
     }
 
 

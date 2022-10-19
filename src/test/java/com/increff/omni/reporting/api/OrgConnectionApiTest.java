@@ -2,7 +2,6 @@ package com.increff.omni.reporting.api;
 
 import com.increff.omni.reporting.config.AbstractTest;
 import com.increff.omni.reporting.pojo.OrgConnectionPojo;
-import com.increff.omni.reporting.pojo.OrgSchemaPojo;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
 import org.junit.Test;
@@ -11,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
 
 import static com.increff.omni.reporting.helper.OrgTestHelper.getOrgConnectionPojo;
-import static com.increff.omni.reporting.helper.OrgTestHelper.getOrgSchemaPojo;
 import static org.junit.Assert.assertEquals;
 
 public class OrgConnectionApiTest extends AbstractTest {

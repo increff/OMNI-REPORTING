@@ -1,7 +1,7 @@
 package com.increff.omni.reporting.api;
 
 import com.increff.omni.reporting.config.AbstractTest;
-import com.increff.omni.reporting.pojo.SchemaPojo;
+import com.increff.omni.reporting.pojo.SchemaVersionPojo;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
 import org.junit.Test;
@@ -19,7 +19,7 @@ public class SchemaApiTest extends AbstractTest {
 
     @Test
     public void testAddSchema() throws ApiException {
-        SchemaPojo pojo = getSchemaPojo("9.0.1");
+        SchemaVersionPojo pojo = getSchemaPojo("9.0.1");
         schemaApi.add(pojo);
         pojo = schemaApi.getCheck(pojo.getId());
         assertEquals("9.0.1", pojo.getName());
@@ -27,7 +27,7 @@ public class SchemaApiTest extends AbstractTest {
 
     @Test(expected = ApiException.class)
     public void testAddSchemaDuplicateName() throws ApiException {
-        SchemaPojo pojo = getSchemaPojo("9.0.1");
+        SchemaVersionPojo pojo = getSchemaPojo("9.0.1");
         schemaApi.add(pojo);
         try {
             schemaApi.add(pojo);
@@ -42,7 +42,7 @@ public class SchemaApiTest extends AbstractTest {
 
     @Test(expected = ApiException.class)
     public void testGetCheckNoOrg() throws ApiException {
-        SchemaPojo pojo = getSchemaPojo("9.0.1");
+        SchemaVersionPojo pojo = getSchemaPojo("9.0.1");
         schemaApi.add(pojo);
         try {
             schemaApi.getCheck(pojo.getId() + 1);
@@ -57,11 +57,11 @@ public class SchemaApiTest extends AbstractTest {
 
     @Test
     public void testGetAll() throws ApiException {
-        SchemaPojo pojo = getSchemaPojo("9.0.1");
+        SchemaVersionPojo pojo = getSchemaPojo("9.0.1");
         schemaApi.add(pojo);
         pojo = getSchemaPojo("9.0.2");
         schemaApi.add(pojo);
-        List<SchemaPojo> pojoList = schemaApi.selectAll();
+        List<SchemaVersionPojo> pojoList = schemaApi.selectAll();
         assertEquals(2, pojoList.size());
         assertEquals("9.0.1", pojoList.get(0).getName());
         assertEquals("9.0.2", pojoList.get(1).getName());

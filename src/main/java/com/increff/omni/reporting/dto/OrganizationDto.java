@@ -56,18 +56,18 @@ public class OrganizationDto extends AbstractDtoApi {
         return ConvertUtil.convert(pojoList, OrganizationData.class);
     }
 
-    public OrgSchemaData mapToSchema(Integer id, Integer schemaId) throws ApiException {
+    public OrgSchemaData mapToSchema(Integer id, Integer schemaVersionId) throws ApiException {
         //validation
         OrganizationPojo orgPojo = api.getCheck(id);
-        SchemaPojo schemaPojo = schemaApi.getCheck(schemaId);
+        SchemaVersionPojo schemaVersionPojo = schemaApi.getCheck(schemaVersionId);
 
-        OrgSchemaPojo pojo = createPojo(orgPojo, schemaPojo);
-        return CommonDtoHelper.getOrgSchemaData(pojo, schemaPojo);
+        OrgSchemaVersionPojo pojo = createPojo(orgPojo, schemaVersionPojo);
+        return CommonDtoHelper.getOrgSchemaData(pojo, schemaVersionPojo);
     }
 
     public List<OrgSchemaData> selectAllOrgSchema(){
-        List<OrgSchemaPojo> pojos = orgSchemaApi.selectAll();
-        List<SchemaPojo> allPojos = schemaApi.selectAll();
+        List<OrgSchemaVersionPojo> pojos = orgSchemaApi.selectAll();
+        List<SchemaVersionPojo> allPojos = schemaApi.selectAll();
         return CommonDtoHelper.getOrgSchemaDataList(pojos, allPojos);
     }
 
@@ -86,10 +86,10 @@ public class OrganizationDto extends AbstractDtoApi {
         return CommonDtoHelper.getOrgConnectionData(pojo, connectionPojo);
     }
 
-    private OrgSchemaPojo createPojo(OrganizationPojo orgPojo, SchemaPojo schemaPojo) {
-        OrgSchemaPojo pojo = new OrgSchemaPojo();
+    private OrgSchemaVersionPojo createPojo(OrganizationPojo orgPojo, SchemaVersionPojo schemaVersionPojo) {
+        OrgSchemaVersionPojo pojo = new OrgSchemaVersionPojo();
         pojo.setOrgId(orgPojo.getId());
-        pojo.setSchemaId(schemaPojo.getId());
+        pojo.setSchemaVersionId(schemaVersionPojo.getId());
         return orgSchemaApi.map(pojo);
     }
 

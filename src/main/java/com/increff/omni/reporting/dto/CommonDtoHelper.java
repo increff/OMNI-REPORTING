@@ -1,6 +1,6 @@
 package com.increff.omni.reporting.dto;
 
-import com.increff.omni.reporting.model.SqlParams;
+import com.increff.omni.reporting.model.form.SqlParams;
 import com.increff.omni.reporting.model.constants.ReportRequestStatus;
 import com.increff.omni.reporting.model.data.OrgConnectionData;
 import com.increff.omni.reporting.model.data.OrgSchemaData;
@@ -11,29 +11,33 @@ import com.increff.omni.reporting.model.form.ValidationGroupForm;
 import com.increff.omni.reporting.pojo.*;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
+import org.apache.commons.text.StringSubstitutor;
 
 import java.io.File;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class CommonDtoHelper {
 
-    public static SqlParams getSqlParams(ConnectionPojo pojo, String query, File file, File errFile) {
+    public static SqlParams getSqlParams(ConnectionPojo pojo, String query, File file, File errFile, Integer maxExecutionTime) {
         SqlParams params = new SqlParams();
         params.setPassword(pojo.getPassword());
         params.setUsername(pojo.getUsername());
         params.setHost(pojo.getHost());
-        params.setQuery(query);
+        params.setQuery(massageQuery(query, maxExecutionTime));
         params.setOutFile(file);
         params.setErrFile(errFile);
         return params;
+    }
+
+    public static String massageQuery(String query, Integer maxExecutionTime) {
+        return "" //
+                + "SET SESSION MAX_EXECUTION_TIME=" + maxExecutionTime * 60 * 1000 + ";\n" //
+                + query;
     }
 
     //Zone Offset/Abbreviation will be populated based on DST(DayLight Saving Time) in case it is applicable for a Zone at current timestamp
@@ -76,11 +80,11 @@ public class CommonDtoHelper {
         return groupPojoList;
     }
 
-    public static List<OrgSchemaData> getOrgSchemaDataList(List<OrgSchemaPojo> pojos, List<SchemaPojo> allPojos) {
-        Map<Integer, SchemaPojo> idToPojoMap = new HashMap<>();
+    public static List<OrgSchemaData> getOrgSchemaDataList(List<OrgSchemaVersionPojo> pojos, List<SchemaVersionPojo> allPojos) {
+        Map<Integer, SchemaVersionPojo> idToPojoMap = new HashMap<>();
         allPojos.forEach(a -> idToPojoMap.put(a.getId(), a));
         return pojos.stream().map(p -> {
-            SchemaPojo pojo = idToPojoMap.get(p.getSchemaId());
+            SchemaVersionPojo pojo = idToPojoMap.get(p.getSchemaVersionId());
             return getOrgSchemaData(p, pojo);
         }).collect(Collectors.toList());
     }
@@ -94,11 +98,11 @@ public class CommonDtoHelper {
         }).collect(Collectors.toList());
     }
 
-    public static OrgSchemaData getOrgSchemaData(OrgSchemaPojo pojo, SchemaPojo schemaPojo) {
+    public static OrgSchemaData getOrgSchemaData(OrgSchemaVersionPojo pojo, SchemaVersionPojo schemaVersionPojo) {
         OrgSchemaData data = new OrgSchemaData();
         data.setOrgId(pojo.getOrgId());
-        data.setSchemaId(pojo.getSchemaId());
-        data.setSchemaName(schemaPojo.getName());
+        data.setSchemaVersionId(pojo.getSchemaVersionId());
+        data.setSchemaName(schemaVersionPojo.getName());
         return data;
     }
 
@@ -143,5 +147,29 @@ public class CommonDtoHelper {
         data.setReportId(reportPojo.getId());
         data.setReportName(reportPojo.getName());
         return data;
+    }
+
+    public static SqlParams convert(ConnectionPojo connectionPojo, ReportQueryPojo reportQueryPojo, Map<String, String> inputParamsMap, File file, File errorFile, Integer maxExecutionTime) {
+        SqlParams sqlParams = new SqlParams();
+        sqlParams.setHost(connectionPojo.getHost());
+        sqlParams.setUsername(connectionPojo.getUsername());
+        sqlParams.setPassword(connectionPojo.getPassword());
+        // Replacing query param with input control values
+        String fQuery = StringSubstitutor.replace(reportQueryPojo.getQuery(), inputParamsMap);
+        sqlParams.setQuery(massageQuery(fQuery, maxExecutionTime));
+        sqlParams.setOutFile(file);
+        sqlParams.setErrFile(errorFile);
+        return sqlParams;
+    }
+
+    public static Map<Integer, List<ReportRequestPojo>> groupByOrgID(List<ReportRequestPojo> reportRequestPojoList) {
+        Map<Integer, List<ReportRequestPojo>> orgToRequests = new HashMap<>();
+        reportRequestPojoList.forEach(r -> {
+            if(orgToRequests.containsKey(r.getOrgId()))
+                orgToRequests.get(r.getOrgId()).add(r);
+            else
+                orgToRequests.put(r.getOrgId(), Collections.singletonList(r));
+        });
+        return orgToRequests;
     }
 }
