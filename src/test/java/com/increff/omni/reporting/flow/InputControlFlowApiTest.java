@@ -14,11 +14,9 @@ import com.nextscm.commons.spring.common.ApiStatus;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
+import static com.increff.omni.reporting.helper.ConnectionTestHelper.getConnectionPojo;
 import static com.increff.omni.reporting.helper.DirectoryTestHelper.getDirectoryPojo;
 import static com.increff.omni.reporting.helper.InputControlTestHelper.getInputControlPojo;
 import static com.increff.omni.reporting.helper.InputControlTestHelper.getInputControlQueryPojo;
@@ -32,6 +30,8 @@ public class InputControlFlowApiTest extends AbstractTest {
     private InputControlFlowApi flowApi;
     @Autowired
     private InputControlApi api;
+    @Autowired
+    private ConnectionApi connectionApi;
     @Autowired
     private ReportControlsApi reportControlsApi;
     @Autowired
@@ -197,5 +197,13 @@ public class InputControlFlowApiTest extends AbstractTest {
         assertEquals(2, valuesPojoList.size());
         assertEquals("LIVE", valuesPojoList.get(0).getValue());
         assertEquals("PACKING", valuesPojoList.get(1).getValue());
+    }
+
+    @Test
+    public void testGetValuesFromQuery() throws ApiException {
+        ConnectionPojo pojo = getConnectionPojo("127.0.0.1", "Dev DB", username, password);
+        connectionApi.add(pojo);
+        Map<String, String> values = flowApi.getValuesFromQuery("select version();", pojo);
+        assertEquals(0, values.size());
     }
 }

@@ -19,7 +19,7 @@ public class CustomReportAccessApi extends AbstractApi {
 
     public void addCustomReportAccessPojo(CustomReportAccessPojo pojo) {
         CustomReportAccessPojo ex = getByReportAndOrg(pojo.getReportId(), pojo.getOrgId());
-        if (Objects.isNull(ex))
+        if (Objects.nonNull(ex))
             return;
         dao.persist(pojo);
     }

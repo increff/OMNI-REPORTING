@@ -8,10 +8,13 @@ import com.increff.omni.reporting.model.constants.InputControlType;
 import com.increff.omni.reporting.model.constants.ReportType;
 import com.increff.omni.reporting.pojo.*;
 import com.nextscm.commons.spring.common.ApiException;
+import com.nextscm.commons.spring.common.ApiStatus;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import static com.increff.omni.reporting.helper.DirectoryTestHelper.getDirectoryPojo;
 import static com.increff.omni.reporting.helper.InputControlTestHelper.getInputControlPojo;
@@ -40,45 +43,61 @@ public class ReportControlsApiTest extends AbstractTest {
 
     @Test
     public void testAddReportControlPojo() throws ApiException {
-        InputControlPojo inputControlPojo = getInputControlPojo("Client ID", "clientId", InputControlScope.GLOBAL, InputControlType.MULTI_SELECT);
-        InputControlQueryPojo inputControlQueryPojo = getInputControlQueryPojo("select * from oms.oms_orders;", null);
-        inputControlApi.add(inputControlPojo, inputControlQueryPojo, new ArrayList<>());
-        DirectoryPojo rootPojo = directoryDao.select("directoryName", properties.getRootDirectory());
-        DirectoryPojo directoryPojo = getDirectoryPojo("Standard Reports", rootPojo.getId());
-        directoryApi.add(directoryPojo);
-        SchemaVersionPojo schemaVersionPojo = getSchemaPojo("9.0.1");
-        schemaVersionApi.add(schemaVersionPojo);
-        ReportPojo reportPojo = getReportPojo("CIMS Inventory Exposure Report", ReportType.STANDARD, directoryPojo.getId(), schemaVersionPojo.getId());
-        reportApi.add(reportPojo);
-        ReportControlsPojo controlsPojo = getReportControlsPojo(reportPojo.getId(), inputControlPojo.getId());
+        ReportControlsPojo controlsPojo = getReportControlsPojo(100001, 100002);
         api.add(controlsPojo);
-        ReportControlsPojo pojo1 = api.select(reportPojo.getId(), inputControlPojo.getId());
+        ReportControlsPojo pojo1 = api.getByReportAndControlId(100001, 100002);
         assertNotNull(pojo1);
-        assertEquals(reportPojo.getId(), pojo1.getReportId());
-        assertEquals(inputControlPojo.getId(), pojo1.getControlId());
-        ReportControlsPojo pojo2 = api.select(reportPojo.getId(), inputControlPojo.getId() + 1);
+        assertEquals(100001, pojo1.getReportId().intValue());
+        assertEquals(100002, pojo1.getControlId().intValue());
+        ReportControlsPojo pojo2 = api.getByReportAndControlId(100001, 100003);
         assertNull(pojo2);
     }
 
     @Test
-    public void testUpdateReportControlPojo() throws ApiException {
-        InputControlPojo inputControlPojo = getInputControlPojo("Client ID", "clientId", InputControlScope.GLOBAL, InputControlType.MULTI_SELECT);
-        InputControlQueryPojo inputControlQueryPojo = getInputControlQueryPojo("select * from oms.oms_orders;", null);
-        inputControlApi.add(inputControlPojo, inputControlQueryPojo, new ArrayList<>());
-        DirectoryPojo rootPojo = directoryDao.select("directoryName", properties.getRootDirectory());
-        DirectoryPojo directoryPojo = getDirectoryPojo("Standard Reports", rootPojo.getId());
-        directoryApi.add(directoryPojo);
-        SchemaVersionPojo schemaVersionPojo = getSchemaPojo("9.0.1");
-        schemaVersionApi.add(schemaVersionPojo);
-        ReportPojo reportPojo = getReportPojo("CIMS Inventory Exposure Report", ReportType.STANDARD, directoryPojo.getId(), schemaVersionPojo.getId());
-        reportApi.add(reportPojo);
-        ReportControlsPojo controlsPojo = getReportControlsPojo(reportPojo.getId(), inputControlPojo.getId());
+    public void testSelectByReportId() throws ApiException {
+        ReportControlsPojo controlsPojo = getReportControlsPojo(100001, 100001);
+        ReportControlsPojo controlsPojo2 = getReportControlsPojo(100001, 100002);
+        ReportControlsPojo controlsPojo3 = getReportControlsPojo(100002, 100001);
         api.add(controlsPojo);
-        controlsPojo = getReportControlsPojo(reportPojo.getId(), inputControlPojo.getId());
-        api.add(controlsPojo);
-        ReportControlsPojo pojo1 = api.select(reportPojo.getId(), inputControlPojo.getId());
-        assertNotNull(pojo1);
-        assertEquals(reportPojo.getId(), pojo1.getReportId());
-        assertEquals(inputControlPojo.getId(), pojo1.getControlId());
+        api.add(controlsPojo2);
+        api.add(controlsPojo3);
+        List<ReportControlsPojo> reportControlsPojoList = api.getByReportId(100001);
+        assertEquals(2, reportControlsPojoList.size());
+        assertEquals(100001, reportControlsPojoList.get(0).getControlId().intValue());
+        assertEquals(100001, reportControlsPojoList.get(0).getReportId().intValue());
+        assertEquals(100002, reportControlsPojoList.get(1).getControlId().intValue());
+        assertEquals(100001, reportControlsPojoList.get(1).getReportId().intValue());
     }
+
+    @Test
+    public void testGetByIds() throws ApiException {
+        ReportControlsPojo controlsPojo = getReportControlsPojo(100001, 100001);
+        ReportControlsPojo controlsPojo2 = getReportControlsPojo(100001, 100002);
+        ReportControlsPojo controlsPojo3 = getReportControlsPojo(100002, 100001);
+        api.add(controlsPojo);
+        api.add(controlsPojo2);
+        api.add(controlsPojo3);
+        List<ReportControlsPojo> reportControlsPojoList = api.getByIds(Arrays.asList(controlsPojo2.getId(),controlsPojo3.getId()));
+        assertEquals(2, reportControlsPojoList.size());
+        assertEquals(100002, reportControlsPojoList.get(0).getControlId().intValue());
+        assertEquals(100001, reportControlsPojoList.get(0).getReportId().intValue());
+        assertEquals(100001, reportControlsPojoList.get(1).getControlId().intValue());
+        assertEquals(100002, reportControlsPojoList.get(1).getReportId().intValue());
+    }
+
+    @Test(expected = ApiException.class)
+    public void testDelete() throws ApiException {
+        ReportControlsPojo controlsPojo = getReportControlsPojo(100001, 100002);
+        api.add(controlsPojo);
+        api.delete(controlsPojo.getId());
+        try {
+            api.getCheck(controlsPojo.getId());
+        } catch (ApiException e) {
+            assertEquals(ApiStatus.BAD_DATA, e.getStatus());
+            assertEquals("Report control does not exist for id : " + controlsPojo.getId(), e.getMessage());
+            throw e;
+        }
+    }
+
+
 }

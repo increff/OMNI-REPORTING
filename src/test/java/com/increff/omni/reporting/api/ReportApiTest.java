@@ -50,7 +50,7 @@ public class ReportApiTest extends AbstractTest {
     }
 
     @Test
-    public void testGetByName() throws ApiException {
+    public void testGetByNameAndSchema() throws ApiException {
         DirectoryPojo rootPojo = directoryDao.select("directoryName", properties.getRootDirectory());
         DirectoryPojo directoryPojo = getDirectoryPojo("Standard Reports", rootPojo.getId());
         directoryApi.add(directoryPojo);

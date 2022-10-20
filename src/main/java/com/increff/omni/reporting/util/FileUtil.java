@@ -1,5 +1,6 @@
 package com.increff.omni.reporting.util;
 
+import lombok.extern.log4j.Log4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 
@@ -9,9 +10,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 
+@Log4j
 public class FileUtil {
-
-    private static Logger logger = Logger.getLogger(FileUtil.class);
 
     public static void closeQuietly(Closeable c) {
         if (c == null) {
@@ -20,7 +20,7 @@ public class FileUtil {
         try {
             c.close();
         } catch (IOException e) {
-            logger.error("Error closing closeable", e);
+            log.error("Error closing closeable", e);
         }
     }
 
@@ -31,7 +31,7 @@ public class FileUtil {
         try {
             return f.delete();
         } catch (SecurityException e) {
-            logger.error("Error deleting file, " + f.getAbsolutePath(), e);
+            log.error("Error deleting file, " + f.getAbsolutePath(), e);
             return false;
         }
     }

@@ -18,12 +18,18 @@ public class ReportControlsApi extends AbstractApi {
     @Autowired
     private ReportControlsDao dao;
 
+    public void add(ReportControlsPojo pojo) throws ApiException {
+        ReportControlsPojo existing = getByReportAndControlId(pojo.getReportId(), pojo.getControlId());
+        if (Objects.isNull(existing))
+            dao.persist(pojo);
+    }
+
     public List<ReportControlsPojo> getByReportId(Integer reportId) {
         return dao.selectMultiple("reportId", reportId);
     }
 
-    public List<ReportControlsPojo> getByIds(List<Integer> reportControlIds) {
-        return dao.selectByIds(reportControlIds);
+    public List<ReportControlsPojo> getByIds(List<Integer> ids) {
+        return dao.selectByIds(ids);
     }
 
     public ReportControlsPojo getCheck(Integer id) throws ApiException {
@@ -32,18 +38,11 @@ public class ReportControlsApi extends AbstractApi {
         return pojo;
     }
 
-    public void add(ReportControlsPojo pojo) throws ApiException {
-        ReportControlsPojo existing = select(pojo.getReportId(), pojo.getControlId());
-        // checkNull(existing, "This control already present for selected report");
-        if (Objects.isNull(existing))
-            dao.persist(pojo);
-    }
-
-    public ReportControlsPojo select(Integer reportId, Integer controlId) {
+    public ReportControlsPojo getByReportAndControlId(Integer reportId, Integer controlId) {
         return dao.select(reportId, controlId);
     }
 
-    public void delete(Integer reportControlId) {
-        dao.remove(reportControlId);
+    public void delete(Integer id) {
+        dao.remove(id);
     }
 }

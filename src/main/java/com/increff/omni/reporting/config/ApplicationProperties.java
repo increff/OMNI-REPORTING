@@ -40,4 +40,7 @@ public class ApplicationProperties {
     @Value("${increff.orgId}")
     private Integer increffOrgId;
 
+    @Value("${query.outDir:omni-reporting-files}")
+    private String outDir;
+
 }
