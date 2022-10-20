@@ -17,7 +17,7 @@ import java.util.List;
 @Transactional
 public class ReportValidationGroupDao extends AbstractDao<ReportValidationGroupPojo> {
 
-    public ReportValidationGroupPojo selectByNameAndId(Integer reportId, String groupName) {
+    public List<ReportValidationGroupPojo> selectByNameAndId(Integer reportId, String groupName) {
         CriteriaBuilder cb = this.em.getCriteriaBuilder();
         CriteriaQuery<ReportValidationGroupPojo> query = cb.createQuery(ReportValidationGroupPojo.class);
         Root<ReportValidationGroupPojo> root = query.from(ReportValidationGroupPojo.class);
@@ -28,7 +28,7 @@ public class ReportValidationGroupDao extends AbstractDao<ReportValidationGroupP
                 )
         );
         TypedQuery<ReportValidationGroupPojo> tQuery = createQuery(query);
-        return selectSingleOrNull(tQuery);
+        return selectMultiple(tQuery);
     }
 
     public List<ReportValidationGroupPojo> selectByIdAndControlId(Integer reportId, Integer reportControlId) {

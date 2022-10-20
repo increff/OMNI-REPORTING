@@ -37,7 +37,7 @@ public class ReportRequestDao extends AbstractDao<ReportRequestPojo> {
         Root<ReportRequestPojo> root = query.from(ReportRequestPojo.class);
         query.where(
                 root.get("status").in(statuses)
-        ).orderBy(cb.desc(root.get("createdAt")));
+        ).orderBy(cb.asc(root.get("createdAt")));
         TypedQuery<ReportRequestPojo> tQuery = createQuery(query);
         return tQuery.setMaxResults(limitForEligibleRequest).getResultList();
     }

@@ -1,6 +1,5 @@
 package com.increff.omni.reporting.pojo;
 
-import com.increff.omni.reporting.model.constants.ReportType;
 import com.increff.omni.reporting.model.constants.ValidationType;
 import lombok.Getter;
 import lombok.Setter;
@@ -11,8 +10,7 @@ import javax.persistence.*;
 @Getter
 @Setter
 @Table(name = "reportValidationGroup", indexes = {
-        @Index(name = "idx_reportId_groupName", columnList = "reportId, groupName", unique = true),
-        @Index(name = "idx_reportId_reportControlId", columnList = "reportId, reportControlId")
+        @Index(name = "idx_reportId_groupName_reportControlId", columnList = "reportId, groupName, reportControlId", unique = true)
 })
 public class ReportValidationGroupPojo extends AbstractVersionedPojo {
 

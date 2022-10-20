@@ -115,7 +115,7 @@ public class InputControlApiTest extends AbstractTest {
         assertEquals("clientId", pojo.getParamName());
         assertEquals(InputControlScope.GLOBAL, pojo.getScope());
         assertEquals(InputControlType.MULTI_SELECT, pojo.getType());
-        InputControlQueryPojo queryPojo = api.selectControlQuery(pojo.getId());
+        InputControlQueryPojo queryPojo = api.selectControlQueries(Collections.singletonList(pojo.getId())).get(0);
         assertEquals("select * from oms.oms_orders;", queryPojo.getQuery());
         assertEquals(pojo.getId(), queryPojo.getControlId());
         InputControlPojo inputControlPojo2 = getInputControlPojo("Client ID 2", "clientId2", InputControlScope.GLOBAL, InputControlType.MULTI_SELECT);

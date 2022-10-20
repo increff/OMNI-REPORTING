@@ -1,10 +1,9 @@
 package com.increff.omni.reporting.helper;
 
+import com.increff.omni.reporting.model.constants.ReportRequestStatus;
 import com.increff.omni.reporting.model.constants.ReportType;
-import com.increff.omni.reporting.pojo.ReportControlsPojo;
-import com.increff.omni.reporting.pojo.ReportInputParamsPojo;
-import com.increff.omni.reporting.pojo.ReportPojo;
-import com.increff.omni.reporting.pojo.ReportQueryPojo;
+import com.increff.omni.reporting.model.constants.ValidationType;
+import com.increff.omni.reporting.pojo.*;
 
 public class ReportTestHelper {
 
@@ -37,5 +36,26 @@ public class ReportTestHelper {
         queryPojo.setQuery(query);
         queryPojo.setReportId(reportId);
         return queryPojo;
+    }
+
+    public static ReportValidationGroupPojo getReportValidationGroupPojo(Integer reportId, String groupName
+            , ValidationType type, Integer validationValue, Integer reportControlId) {
+        ReportValidationGroupPojo pojo = new ReportValidationGroupPojo();
+        pojo.setReportId(reportId);
+        pojo.setGroupName(groupName);
+        pojo.setType(type);
+        pojo.setValidationValue(validationValue);
+        pojo.setReportControlId(reportControlId);
+        return pojo;
+    }
+
+    public static ReportRequestPojo getReportRequestPojo(Integer reportId, ReportRequestStatus status
+            , Integer orgId, Integer userId) {
+        ReportRequestPojo pojo = new ReportRequestPojo();
+        pojo.setReportId(reportId);
+        pojo.setStatus(status);
+        pojo.setOrgId(orgId);
+        pojo.setUserId(userId);
+        return pojo;
     }
 }

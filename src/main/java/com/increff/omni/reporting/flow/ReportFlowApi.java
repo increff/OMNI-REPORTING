@@ -84,9 +84,7 @@ public class ReportFlowApi extends AbstractApi {
     public void deleteReportControl(Integer reportId, Integer reportControlId) throws ApiException {
         api.getCheck(reportId);
         reportControlsApi.getCheck(reportControlId);
-        List<ReportValidationGroupPojo> validationGroupPojoList = reportValidationGroupApi
-                .getByReportIdAndReportControlId(reportId, reportControlId);
-        reportValidationGroupApi.delete(validationGroupPojoList);
+        reportValidationGroupApi.deleteByReportIdAndReportControlId(reportId, reportControlId);
         reportControlsApi.delete(reportControlId);
     }
 
@@ -138,8 +136,8 @@ public class ReportFlowApi extends AbstractApi {
         api.getCheck(reportId);
         for (Integer reportControlId : groupForm.getReportControlIds())
             reportControlsApi.getCheck(reportControlId);
-        ReportValidationGroupPojo pojo = reportValidationGroupApi.getByNameAndReportId(reportId, groupForm.getGroupName());
-        if (Objects.nonNull(pojo))
+        List<ReportValidationGroupPojo> pojoList = reportValidationGroupApi.getByNameAndReportId(reportId, groupForm.getGroupName());
+        if (pojoList.isEmpty())
             throw new ApiException(ApiStatus.BAD_DATA, "Group name already exist for given report, group name : " + groupForm.getGroupName());
     }
 
