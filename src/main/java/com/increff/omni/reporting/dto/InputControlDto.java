@@ -3,23 +3,20 @@ package com.increff.omni.reporting.dto;
 import com.increff.omni.reporting.api.*;
 import com.increff.omni.reporting.flow.InputControlFlowApi;
 import com.increff.omni.reporting.model.constants.InputControlScope;
+import com.increff.omni.reporting.model.constants.InputControlType;
 import com.increff.omni.reporting.model.data.InputControlData;
 import com.increff.omni.reporting.model.form.InputControlForm;
-import com.increff.omni.reporting.model.form.SqlParams;
+import com.increff.omni.reporting.model.form.InputControlUpdateForm;
 import com.increff.omni.reporting.pojo.*;
-import com.increff.omni.reporting.util.FileUtil;
-import com.increff.omni.reporting.util.SqlCmd;
+import com.nextscm.commons.lang.StringUtil;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
 import com.nextscm.commons.spring.common.ConvertUtil;
 import lombok.extern.log4j.Log4j;
-import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -53,11 +50,11 @@ public class InputControlDto extends AbstractDto {
         return getInputControlDatas(Collections.singletonList(pojo)).get(0);
     }
 
-    public InputControlData update(Integer id, InputControlForm form) throws ApiException {
-        validate(form);
+    public InputControlData update(Integer id, InputControlUpdateForm form) throws ApiException {
+        validateForEdit(form);
         InputControlPojo pojo = ConvertUtil.convert(form, InputControlPojo.class);
         pojo.setId(id);
-        pojo = flowApi.update(pojo, form.getQuery(), form.getValues(), form.getReportId());
+        pojo = flowApi.update(pojo, form.getQuery(), form.getValues());
         return getInputControlDatas(Collections.singletonList(pojo)).get(0);
     }
 
@@ -130,8 +127,13 @@ public class InputControlDto extends AbstractDto {
 
     private void validate(InputControlForm form) throws ApiException {
         checkValid(form);
-        validateForControlType(form);
+        validateForControlType(form.getQuery(), form.getType(), form.getValues());
         validateForControlScope(form);
+    }
+
+    private void validateForEdit(InputControlUpdateForm form) throws ApiException {
+        checkValid(form);
+        validateForControlType(form.getQuery(), form.getType(), form.getValues());
     }
 
     private void validateForControlScope(InputControlForm form) throws ApiException {
@@ -139,20 +141,20 @@ public class InputControlDto extends AbstractDto {
             throw new ApiException(ApiStatus.BAD_DATA, "Report is mandatory for Local Scope Control");
     }
 
-    private void validateForControlType(InputControlForm form) throws ApiException {
-        switch (form.getType()) {
+    private void validateForControlType(String query, InputControlType type, List<String> values) throws ApiException {
+        switch (type) {
             case TEXT:
             case NUMBER:
             case DATE:
-                if (form.getValues() != null || form.getQuery() != null)
+                if (values != null || !StringUtil.isEmpty(query))
                     throw new ApiException(ApiStatus.BAD_DATA, "For Text, Number and Date, neither query nor value is needed");
                 break;
 
             case SINGLE_SELECT:
             case MULTI_SELECT:
-                if (form.getValues() == null && form.getQuery() == null)
+                if (values.isEmpty() && StringUtil.isEmpty(query))
                     throw new ApiException(ApiStatus.BAD_DATA, "For Select, either query or value is mandatory");
-                if (form.getValues() != null && form.getQuery() != null)
+                if (!values.isEmpty() && !StringUtil.isEmpty(query))
                     throw new ApiException(ApiStatus.BAD_DATA, "For Select, either query or value is mandatory");
                 break;
             default:

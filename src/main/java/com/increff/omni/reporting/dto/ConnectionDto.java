@@ -52,29 +52,28 @@ public class ConnectionDto extends AbstractDto {
         return ConvertUtil.convert(pojos, ConnectionData.class);
     }
 
-    public void testConnection(Integer id) throws ApiException {
-        ConnectionPojo pojo = api.getCheck(id);
-        String result = execute(pojo, "select version();");
+    public void testConnection(ConnectionForm form) throws ApiException {
+        String result = execute(form, "select version();");
         if (result.contains("ERROR")) {
             throw new ApiException(ApiStatus.BAD_DATA, "Database could not be connected");
         }
     }
 
-    public String execute(ConnectionPojo connectionPojo, String query) throws ApiException {
-        log.debug("Executing the query = " + query);
+    public String execute(ConnectionForm form, String query) throws ApiException {
         String result;
         File file = null;
         File errFile = null;
         try {
             file = folderApi.getFile("test-db-success.tsv");
             errFile = folderApi.getFile("test-db-err.txt");
-            SqlParams sqlp = CommonDtoHelper.getSqlParams(connectionPojo, query, file, errFile, properties.getMaxExecutionTime());
+            ConnectionPojo pojo = ConvertUtil.convert(form, ConnectionPojo.class);
+            SqlParams sqlp = CommonDtoHelper.getSqlParams(pojo, query, file, errFile, properties.getMaxExecutionTime());
             SqlCmd.processQuery(sqlp);
             result = FileUtils.readFileToString(file, "utf-8");
             log.debug("Test File created");
         } catch (IOException | ApiException e) {
             log.error("Error in testing connection ", e);
-            throw new ApiException(ApiStatus.UNKNOWN_ERROR, "Error in testing if database is read-only");
+            throw new ApiException(ApiStatus.UNKNOWN_ERROR, "Error connecting to host : " + e.getMessage());
         } finally {
             FileUtil.delete(file);
             FileUtil.delete(errFile);

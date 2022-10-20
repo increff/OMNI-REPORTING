@@ -21,7 +21,7 @@ public class OrganizationDto extends AbstractDtoApi {
     private OrganizationApi api;
 
     @Autowired
-    private SchemaApi schemaApi;
+    private SchemaVersionApi schemaVersionApi;
 
     @Autowired
     private OrgSchemaApi orgSchemaApi;
@@ -59,7 +59,7 @@ public class OrganizationDto extends AbstractDtoApi {
     public OrgSchemaData mapToSchema(Integer id, Integer schemaVersionId) throws ApiException {
         //validation
         OrganizationPojo orgPojo = api.getCheck(id);
-        SchemaVersionPojo schemaVersionPojo = schemaApi.getCheck(schemaVersionId);
+        SchemaVersionPojo schemaVersionPojo = schemaVersionApi.getCheck(schemaVersionId);
 
         OrgSchemaVersionPojo pojo = createPojo(orgPojo, schemaVersionPojo);
         return CommonDtoHelper.getOrgSchemaData(pojo, schemaVersionPojo);
@@ -67,7 +67,7 @@ public class OrganizationDto extends AbstractDtoApi {
 
     public List<OrgSchemaData> selectAllOrgSchema(){
         List<OrgSchemaVersionPojo> pojos = orgSchemaApi.selectAll();
-        List<SchemaVersionPojo> allPojos = schemaApi.selectAll();
+        List<SchemaVersionPojo> allPojos = schemaVersionApi.selectAll();
         return CommonDtoHelper.getOrgSchemaDataList(pojos, allPojos);
     }
 

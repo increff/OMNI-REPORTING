@@ -70,19 +70,11 @@ public class InputControlFlowApi extends AbstractApi {
         return pojo;
     }
 
-    public InputControlPojo update(InputControlPojo pojo, String query, List<String> values,
-                                   Integer reportId) throws ApiException {
-        if (pojo.getScope().equals(InputControlScope.LOCAL)) {
-            validateLocalControlForEdit(reportId, pojo);
-        }
+    public InputControlPojo update(InputControlPojo pojo, String query, List<String> values) throws ApiException {
+
         InputControlQueryPojo queryPojo = getQueryPojo(query);
         List<InputControlValuesPojo> valuesList = getValuesPojo(values);
-
         pojo = api.update(pojo, queryPojo, valuesList);
-
-        if (pojo.getScope().equals(InputControlScope.LOCAL)) {
-            reportControlsApi.add(getReportControlPojo(reportId, pojo.getId()));
-        }
         return pojo;
     }
 
@@ -137,26 +129,6 @@ public class InputControlFlowApi extends AbstractApi {
         List<InputControlPojo> duplicate = controlPojos.stream()
                 .filter(i -> (i.getDisplayName().equals(pojo.getDisplayName()) ||
                         i.getParamName().equals(pojo.getParamName())))
-                .collect(Collectors.toList());
-
-        if (!CollectionUtils.isEmpty(duplicate))
-            throw new ApiException(ApiStatus.BAD_DATA, "Another input control present with same display name" +
-                    " or param name");
-    }
-
-    private void validateLocalControlForEdit(Integer reportId, InputControlPojo pojo) throws ApiException {
-        reportApi.getCheck(reportId);
-
-        // Validating if any other control exists with same display or param name
-        List<ReportControlsPojo> existingPojos = reportControlsApi.getByReportId(reportId);
-        List<Integer> controlIds = existingPojos.stream().map(ReportControlsPojo::getControlId)
-                .collect(Collectors.toList());
-
-        List<InputControlPojo> controlPojos = api.selectMultiple(controlIds);
-
-        List<InputControlPojo> duplicate = controlPojos.stream()
-                .filter(i -> ((i.getDisplayName().equals(pojo.getDisplayName()) ||
-                        i.getParamName().equals(pojo.getParamName())) && !i.getId().equals(pojo.getId())))
                 .collect(Collectors.toList());
 
         if (!CollectionUtils.isEmpty(duplicate))

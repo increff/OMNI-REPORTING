@@ -4,14 +4,20 @@ import com.increff.omni.reporting.config.AbstractTest;
 import com.increff.omni.reporting.model.data.ConnectionData;
 import com.increff.omni.reporting.model.form.ConnectionForm;
 import com.nextscm.commons.spring.common.ApiException;
+import com.nextscm.commons.spring.common.ApiStatus;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
+import org.springframework.jdbc.datasource.init.ScriptUtils;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.util.List;
 
 import static com.increff.omni.reporting.helper.ConnectionTestHelper.getConnectionForm;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 
 public class ConnectionDtoTest extends AbstractTest {
 
@@ -27,6 +33,24 @@ public class ConnectionDtoTest extends AbstractTest {
         assertEquals("Dev DB", data.getName());
         assertEquals("db.user", data.getUsername());
         assertEquals("db.password", data.getPassword());
+    }
+
+    @Test
+    public void testConnection() throws ApiException {
+        ConnectionForm form = getConnectionForm("127.0.0.1", "Test DB", username, password);
+        dto.testConnection(form);
+    }
+
+    @Test(expected = ApiException.class)
+    public void testConnectionWrongPassword() throws ApiException, ClassNotFoundException, SQLException {
+        ConnectionForm form = getConnectionForm("127.0.0.1", "Test DB", username, "wrong_password");
+        try {
+            dto.testConnection(form);
+        } catch (ApiException e) {
+            assertEquals(ApiStatus.UNKNOWN_ERROR, e.getStatus());
+            assertTrue(e.getMessage().contains("Error connecting to host : "));
+            throw e;
+        }
     }
 
     @Test

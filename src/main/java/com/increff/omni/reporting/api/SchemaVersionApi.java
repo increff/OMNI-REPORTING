@@ -1,6 +1,6 @@
 package com.increff.omni.reporting.api;
 
-import com.increff.omni.reporting.dao.SchemaDao;
+import com.increff.omni.reporting.dao.SchemaVersionDao;
 import com.increff.omni.reporting.pojo.SchemaVersionPojo;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
@@ -14,10 +14,10 @@ import java.util.Objects;
 
 @Service
 @Transactional(rollbackFor = Exception.class)
-public class SchemaApi extends AbstractApi {
+public class SchemaVersionApi extends AbstractApi {
 
     @Autowired
-    private SchemaDao dao;
+    private SchemaVersionDao dao;
 
     public SchemaVersionPojo add(SchemaVersionPojo pojo) throws ApiException {
         validate(pojo);

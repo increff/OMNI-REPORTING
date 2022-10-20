@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+// Todo internationalization
 @Api
 @RestController
 @RequestMapping(value = "/admin")
@@ -38,9 +39,9 @@ public class AdminController {
     }
 
     @ApiOperation(value = "Test DB Connection")
-    @RequestMapping(value = "/connections/{id}", method = RequestMethod.GET)
-    public void testConnection(@PathVariable Integer id) throws ApiException {
-        connectionDto.testConnection(id);
+    @RequestMapping(value = "/connections/test", method = RequestMethod.POST)
+    public void testConnection(@RequestBody ConnectionForm form) throws ApiException {
+        connectionDto.testConnection(form);
     }
 
     @ApiOperation(value = "Update Connection")
@@ -63,7 +64,7 @@ public class AdminController {
 
     @ApiOperation(value = "Edit Input Control")
     @RequestMapping(value = "/controls/{id}", method = RequestMethod.PUT)
-    public InputControlData updateInputControl(@PathVariable Integer id, @RequestBody InputControlForm form) throws ApiException {
+    public InputControlData updateInputControl(@PathVariable Integer id, @RequestBody InputControlUpdateForm form) throws ApiException {
         return inputControlDto.update(id, form);
     }
 

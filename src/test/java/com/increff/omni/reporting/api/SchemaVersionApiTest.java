@@ -12,27 +12,27 @@ import java.util.List;
 import static com.increff.omni.reporting.helper.SchemaTestHelper.getSchemaPojo;
 import static org.junit.Assert.assertEquals;
 
-public class SchemaApiTest extends AbstractTest {
+public class SchemaVersionApiTest extends AbstractTest {
 
     @Autowired
-    private SchemaApi schemaApi;
+    private SchemaVersionApi schemaVersionApi;
 
     @Test
     public void testAddSchema() throws ApiException {
         SchemaVersionPojo pojo = getSchemaPojo("9.0.1");
-        schemaApi.add(pojo);
-        pojo = schemaApi.getCheck(pojo.getId());
+        schemaVersionApi.add(pojo);
+        pojo = schemaVersionApi.getCheck(pojo.getId());
         assertEquals("9.0.1", pojo.getName());
     }
 
     @Test(expected = ApiException.class)
     public void testAddSchemaDuplicateName() throws ApiException {
         SchemaVersionPojo pojo = getSchemaPojo("9.0.1");
-        schemaApi.add(pojo);
+        schemaVersionApi.add(pojo);
         try {
-            schemaApi.add(pojo);
+            schemaVersionApi.add(pojo);
         } catch (ApiException e) {
-            pojo = schemaApi.getCheck(pojo.getId());
+            pojo = schemaVersionApi.getCheck(pojo.getId());
             assertEquals("9.0.1", pojo.getName());
             assertEquals(ApiStatus.BAD_DATA, e.getStatus());
             assertEquals("Schema already present with name : 9.0.1", e.getMessage());
@@ -43,11 +43,11 @@ public class SchemaApiTest extends AbstractTest {
     @Test(expected = ApiException.class)
     public void testGetCheckNoOrg() throws ApiException {
         SchemaVersionPojo pojo = getSchemaPojo("9.0.1");
-        schemaApi.add(pojo);
+        schemaVersionApi.add(pojo);
         try {
-            schemaApi.getCheck(pojo.getId() + 1);
+            schemaVersionApi.getCheck(pojo.getId() + 1);
         } catch (ApiException e) {
-            pojo = schemaApi.getCheck(pojo.getId());
+            pojo = schemaVersionApi.getCheck(pojo.getId());
             assertEquals("9.0.1", pojo.getName());
             assertEquals(ApiStatus.BAD_DATA, e.getStatus());
             assertEquals("No schema present with id : " + (pojo.getId() + 1), e.getMessage());
@@ -58,10 +58,10 @@ public class SchemaApiTest extends AbstractTest {
     @Test
     public void testGetAll() throws ApiException {
         SchemaVersionPojo pojo = getSchemaPojo("9.0.1");
-        schemaApi.add(pojo);
+        schemaVersionApi.add(pojo);
         pojo = getSchemaPojo("9.0.2");
-        schemaApi.add(pojo);
-        List<SchemaVersionPojo> pojoList = schemaApi.selectAll();
+        schemaVersionApi.add(pojo);
+        List<SchemaVersionPojo> pojoList = schemaVersionApi.selectAll();
         assertEquals(2, pojoList.size());
         assertEquals("9.0.1", pojoList.get(0).getName());
         assertEquals("9.0.2", pojoList.get(1).getName());

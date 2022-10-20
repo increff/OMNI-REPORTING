@@ -23,6 +23,12 @@ public class DirectoryApi extends AbstractApi {
         return pojo;
     }
 
+    public DirectoryPojo getCheck(Integer id) throws ApiException {
+        DirectoryPojo pojo = dao.select(id);
+        checkNotNull(pojo, "No directory with id : " + id);
+        return pojo;
+    }
+
     public List<DirectoryPojo> getAll() {
         return dao.selectAll();
     }
@@ -54,12 +60,6 @@ public class DirectoryApi extends AbstractApi {
         // same name anywhere
         DirectoryPojo sameNamePojo = dao.select("directoryName", pojo.getDirectoryName());
         checkNull(sameNamePojo, "Directory already present with same name");
-    }
-
-    public DirectoryPojo getCheck(Integer id) throws ApiException {
-        DirectoryPojo pojo = dao.select(id);
-        checkNotNull(pojo, "No directory with id : " + id);
-        return pojo;
     }
 
 }

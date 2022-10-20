@@ -7,5 +7,5 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Repository
 @Transactional
-public class SchemaDao extends AbstractDao<SchemaVersionPojo> {
+public class SchemaVersionDao extends AbstractDao<SchemaVersionPojo> {
 }

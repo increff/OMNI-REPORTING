@@ -12,7 +12,7 @@ import java.util.List;
 import static com.increff.omni.reporting.helper.OrgTestHelper.getOrgSchemaPojo;
 import static org.junit.Assert.assertEquals;
 
-public class OrgSchemaApiTest extends AbstractTest {
+public class OrgSchemaVersionApiTest extends AbstractTest {
 
     @Autowired
     private OrgSchemaApi api;

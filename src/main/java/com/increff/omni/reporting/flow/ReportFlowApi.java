@@ -27,7 +27,7 @@ import static com.increff.omni.reporting.dto.CommonDtoHelper.getValidationGroupP
 public class ReportFlowApi extends AbstractApi {
 
     @Autowired
-    private SchemaApi schemaApi;
+    private SchemaVersionApi schemaVersionApi;
 
     @Autowired
     private OrgSchemaApi orgSchemaApi;
@@ -154,7 +154,7 @@ public class ReportFlowApi extends AbstractApi {
 
     private void validateForEdit(ReportPojo pojo, ReportPojo existing) throws ApiException {
         directoryApi.getCheck(pojo.getDirectoryId());
-        schemaApi.getCheck(pojo.getSchemaVersionId());
+        schemaVersionApi.getCheck(pojo.getSchemaVersionId());
 
         //validating if requested name is already present
         if (!pojo.getName().equals(existing.getName())) {
@@ -166,7 +166,7 @@ public class ReportFlowApi extends AbstractApi {
 
     private void validate(ReportPojo pojo) throws ApiException {
         directoryApi.getCheck(pojo.getDirectoryId());
-        schemaApi.getCheck(pojo.getSchemaVersionId());
+        schemaVersionApi.getCheck(pojo.getSchemaVersionId());
 
         //get all
         ReportPojo existing = api.getByNameAndSchema(pojo.getName(), pojo.getSchemaVersionId());

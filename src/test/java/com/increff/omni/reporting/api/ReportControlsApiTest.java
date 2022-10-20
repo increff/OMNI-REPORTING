@@ -34,7 +34,7 @@ public class ReportControlsApiTest extends AbstractTest {
     @Autowired
     private DirectoryDao directoryDao;
     @Autowired
-    private SchemaApi schemaApi;
+    private SchemaVersionApi schemaVersionApi;
     @Autowired
     private ApplicationProperties properties;
 
@@ -47,7 +47,7 @@ public class ReportControlsApiTest extends AbstractTest {
         DirectoryPojo directoryPojo = getDirectoryPojo("Standard Reports", rootPojo.getId());
         directoryApi.add(directoryPojo);
         SchemaVersionPojo schemaVersionPojo = getSchemaPojo("9.0.1");
-        schemaApi.add(schemaVersionPojo);
+        schemaVersionApi.add(schemaVersionPojo);
         ReportPojo reportPojo = getReportPojo("CIMS Inventory Exposure Report", ReportType.STANDARD, directoryPojo.getId(), schemaVersionPojo.getId());
         reportApi.add(reportPojo);
         ReportControlsPojo controlsPojo = getReportControlsPojo(reportPojo.getId(), inputControlPojo.getId());
@@ -69,7 +69,7 @@ public class ReportControlsApiTest extends AbstractTest {
         DirectoryPojo directoryPojo = getDirectoryPojo("Standard Reports", rootPojo.getId());
         directoryApi.add(directoryPojo);
         SchemaVersionPojo schemaVersionPojo = getSchemaPojo("9.0.1");
-        schemaApi.add(schemaVersionPojo);
+        schemaVersionApi.add(schemaVersionPojo);
         ReportPojo reportPojo = getReportPojo("CIMS Inventory Exposure Report", ReportType.STANDARD, directoryPojo.getId(), schemaVersionPojo.getId());
         reportApi.add(reportPojo);
         ReportControlsPojo controlsPojo = getReportControlsPojo(reportPojo.getId(), inputControlPojo.getId());

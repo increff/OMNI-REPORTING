@@ -39,6 +39,29 @@ public class SchemaDtoTest extends AbstractTest {
     }
 
     @Test
+    public void testUpdateSchema() throws ApiException {
+        SchemaVersionForm form = getSchemaForm("9.0.1");
+        dto.add(form);
+        SchemaVersionData data = dto.selectAll().get(0);
+        form.setName("9.0.2");
+        dto.update(data.getId() ,form);
+        data = dto.selectAll().get(0);
+        assertEquals("9.0.2", data.getName());
+    }
+
+    @Test(expected = ApiException.class)
+    public void testUpdateSchemaValidationFail() throws ApiException {
+        SchemaVersionForm form = getSchemaForm(null);
+        try {
+            dto.update(1, form);
+        } catch (ApiException e) {
+            assertEquals(ApiStatus.BAD_DATA, e.getStatus());
+            assertEquals("Input validation failed", e.getMessage());
+            throw e;
+        }
+    }
+
+    @Test
     public void testGetAllSchema() throws ApiException {
         SchemaVersionForm form = getSchemaForm("9.0.1");
         dto.add(form);

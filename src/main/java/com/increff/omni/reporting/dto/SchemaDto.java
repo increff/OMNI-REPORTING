@@ -1,6 +1,6 @@
 package com.increff.omni.reporting.dto;
 
-import com.increff.omni.reporting.api.SchemaApi;
+import com.increff.omni.reporting.api.SchemaVersionApi;
 import com.increff.omni.reporting.model.data.SchemaVersionData;
 import com.increff.omni.reporting.model.form.SchemaVersionForm;
 import com.increff.omni.reporting.pojo.SchemaVersionPojo;
@@ -16,7 +16,7 @@ import java.util.List;
 public class SchemaDto extends AbstractDtoApi {
 
     @Autowired
-    private SchemaApi api;
+    private SchemaVersionApi api;
 
     public SchemaVersionData add(SchemaVersionForm form) throws ApiException {
         checkValid(form);

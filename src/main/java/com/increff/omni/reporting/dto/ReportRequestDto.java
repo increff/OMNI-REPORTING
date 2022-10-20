@@ -175,8 +175,8 @@ public class ReportRequestDto extends AbstractDto {
 
     private Map<String, String> checkValidValues(InputControlPojo p) throws ApiException {
         Map<String, String> valuesMap = new HashMap<>();
-        List<InputControlQueryPojo> queryPojoList = controlApi.selectControlQueries(Collections.singletonList(p.getId()));
-        if (queryPojoList.isEmpty()) {
+        InputControlQueryPojo queryPojo = controlApi.selectControlQuery(p.getId());
+        if (Objects.isNull(queryPojo)) {
             List<InputControlValuesPojo> valuesPojoList = controlApi.selectControlValues(Collections.singletonList(p.getId()));
             for (InputControlValuesPojo pojo : valuesPojoList) {
                 valuesMap.put(pojo.getValue(), pojo.getValue());
@@ -184,7 +184,7 @@ public class ReportRequestDto extends AbstractDto {
         } else {
             OrgConnectionPojo orgConnectionPojo = orgConnectionApi.getCheckByOrgId(getOrgId());
             ConnectionPojo connectionPojo = connectionApi.getCheck(orgConnectionPojo.getConnectionId());
-            valuesMap = inputControlFlowApi.getValuesFromQuery(queryPojoList.get(0).getQuery(), connectionPojo);
+            valuesMap = inputControlFlowApi.getValuesFromQuery(queryPojo.getQuery(), connectionPojo);
         }
         return valuesMap;
     }

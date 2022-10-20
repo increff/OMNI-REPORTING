@@ -28,7 +28,7 @@ public class ReportApiTest extends AbstractTest {
     @Autowired
     private DirectoryDao directoryDao;
     @Autowired
-    private SchemaApi schemaApi;
+    private SchemaVersionApi schemaVersionApi;
     @Autowired
     private ApplicationProperties properties;
 
@@ -38,7 +38,7 @@ public class ReportApiTest extends AbstractTest {
         DirectoryPojo directoryPojo = getDirectoryPojo("Standard Reports", rootPojo.getId());
         directoryApi.add(directoryPojo);
         SchemaVersionPojo schemaVersionPojo = getSchemaPojo("9.0.1");
-        schemaApi.add(schemaVersionPojo);
+        schemaVersionApi.add(schemaVersionPojo);
         ReportPojo pojo = getReportPojo("CIMS Inventory Exposure Report", ReportType.STANDARD, directoryPojo.getId(), schemaVersionPojo.getId());
         api.add(pojo);
         ReportPojo r = api.getCheck(pojo.getId());
@@ -55,7 +55,7 @@ public class ReportApiTest extends AbstractTest {
         DirectoryPojo directoryPojo = getDirectoryPojo("Standard Reports", rootPojo.getId());
         directoryApi.add(directoryPojo);
         SchemaVersionPojo schemaVersionPojo = getSchemaPojo("9.0.1");
-        schemaApi.add(schemaVersionPojo);
+        schemaVersionApi.add(schemaVersionPojo);
         ReportPojo pojo = getReportPojo("CIMS Inventory Exposure Report", ReportType.STANDARD, directoryPojo.getId(), schemaVersionPojo.getId());
         api.add(pojo);
         ReportPojo r = api.getByNameAndSchema("CIMS Inventory Exposure Report", schemaVersionPojo.getId());
@@ -74,7 +74,7 @@ public class ReportApiTest extends AbstractTest {
         DirectoryPojo directoryPojo = getDirectoryPojo("Standard Reports", rootPojo.getId());
         directoryApi.add(directoryPojo);
         SchemaVersionPojo schemaVersionPojo = getSchemaPojo("9.0.1");
-        schemaApi.add(schemaVersionPojo);
+        schemaVersionApi.add(schemaVersionPojo);
         ReportPojo pojo = getReportPojo("CIMS Inventory Exposure Report", ReportType.STANDARD, directoryPojo.getId(), schemaVersionPojo.getId());
         api.add(pojo);
         List<ReportPojo> r = api.getByTypeAndSchema(ReportType.CUSTOM, schemaVersionPojo.getId());
@@ -93,7 +93,7 @@ public class ReportApiTest extends AbstractTest {
         DirectoryPojo directoryPojo = getDirectoryPojo("Standard Reports", rootPojo.getId());
         directoryApi.add(directoryPojo);
         SchemaVersionPojo schemaVersionPojo = getSchemaPojo("9.0.1");
-        schemaApi.add(schemaVersionPojo);
+        schemaVersionApi.add(schemaVersionPojo);
         ReportPojo pojo = getReportPojo("CIMS Inventory Exposure Report", ReportType.STANDARD, directoryPojo.getId(), schemaVersionPojo.getId());
         api.add(pojo);
         List<ReportPojo> r = api.getByIdsAndSchema(Collections.singletonList(pojo.getId()), schemaVersionPojo.getId());
@@ -110,7 +110,7 @@ public class ReportApiTest extends AbstractTest {
         DirectoryPojo directoryPojo = getDirectoryPojo("Standard Reports", rootPojo.getId());
         directoryApi.add(directoryPojo);
         SchemaVersionPojo schemaVersionPojo = getSchemaPojo("9.0.1");
-        schemaApi.add(schemaVersionPojo);
+        schemaVersionApi.add(schemaVersionPojo);
         ReportPojo pojo = getReportPojo("CIMS Inventory Exposure Report", ReportType.STANDARD, directoryPojo.getId(), schemaVersionPojo.getId());
         api.add(pojo);
         List<ReportPojo> r = api.getByIdsAndSchema(Collections.emptyList(), schemaVersionPojo.getId());
@@ -123,7 +123,7 @@ public class ReportApiTest extends AbstractTest {
         DirectoryPojo directoryPojo = getDirectoryPojo("Standard Reports", rootPojo.getId());
         directoryApi.add(directoryPojo);
         SchemaVersionPojo schemaVersionPojo = getSchemaPojo("9.0.1");
-        schemaApi.add(schemaVersionPojo);
+        schemaVersionApi.add(schemaVersionPojo);
         ReportPojo pojo = getReportPojo("CIMS Inventory Exposure Report", ReportType.STANDARD, directoryPojo.getId(), schemaVersionPojo.getId());
         api.add(pojo);
         ReportPojo updatePojo = getReportPojo("Client CIMS Inventory Exposure Report", ReportType.CUSTOM, rootPojo.getId(), schemaVersionPojo.getId());
