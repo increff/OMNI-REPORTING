@@ -48,14 +48,14 @@ public class ReportRequestFlowApi extends AbstractApi {
 
     private final static Integer MAX_OPEN_REPORT_REQUESTS = 5;
 
-    public void requestReport(ReportRequestPojo pojo, Map<String, String> params, List<ReportInputParamsPojo> reportInputParamsPojoList) throws ApiException {
-        validate(pojo, params);
+    public void requestReport(ReportRequestPojo pojo, List<ReportInputParamsPojo> reportInputParamsPojoList) throws ApiException {
+        validate(pojo, reportInputParamsPojoList);
         api.add(pojo);
         reportInputParamsPojoList.forEach(r -> r.setReportRequestId(pojo.getId()));
         reportInputParamsApi.add(reportInputParamsPojoList);
     }
 
-    private void validate(ReportRequestPojo pojo, Map<String, String> params) throws ApiException {
+    private void validate(ReportRequestPojo pojo, List<ReportInputParamsPojo> reportInputParamsPojoList) throws ApiException {
         ReportPojo reportPojo = reportApi.getCheck(pojo.getReportId());
         List<ReportRequestPojo> pendingReports = api.getPendingByUserId(pojo.getUserId());
         if (!CollectionUtils.isEmpty(pendingReports) && pendingReports.size() > MAX_OPEN_REPORT_REQUESTS)
@@ -76,7 +76,9 @@ public class ReportRequestFlowApi extends AbstractApi {
             List<String> displayValues = new ArrayList<>();
 
             inputControlPojoList.forEach(i -> {
-                paramValues.add(params.get(i.getParamName()));
+                ReportInputParamsPojo p = reportInputParamsPojoList.stream().filter(r -> r.getParamKey()
+                        .equals(i.getParamName())).collect(Collectors.toList()).get(0);
+                paramValues.add(p.getParamValue());
                 displayValues.add(i.getDisplayName());
             });
             runValidators(reportPojo, groupPojoList, type, paramValues, displayValues);
@@ -86,8 +88,6 @@ public class ReportRequestFlowApi extends AbstractApi {
 
     private void runValidators(ReportPojo reportPojo, List<ReportValidationGroupPojo> groupPojoList, ValidationType type, List<String> paramValues, List<String> displayValues) throws ApiException {
         switch (type) {
-            case NON_MANDATORY:
-                break;
             case SINGLE_MANDATORY:
                 singleMandatoryValidator.validate(displayValues, paramValues, reportPojo.getName(), groupPojoList.get(0).getValidationValue());
                 break;

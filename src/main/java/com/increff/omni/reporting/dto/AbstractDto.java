@@ -18,14 +18,11 @@ import java.util.Map;
 public abstract class AbstractDto extends AbstractDtoApi {
 
     protected static int getOrgId() {
-//        return getPrincipal().getDomainId();
-        return 100001;
+        return getPrincipal().getDomainId();
     }
 
-
     protected static int getUserId() {
-//        return getPrincipal().getId();
-        return 100001;
+        return getPrincipal().getId();
     }
 
     private static UserPrincipal getPrincipal() {

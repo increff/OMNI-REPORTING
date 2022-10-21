@@ -1,7 +1,6 @@
 package com.increff.omni.reporting.dto;
 
 import com.increff.omni.reporting.api.*;
-import com.increff.omni.reporting.client.ReportingClient;
 import com.increff.omni.reporting.flow.InputControlFlowApi;
 import com.increff.omni.reporting.flow.ReportRequestFlowApi;
 import com.increff.omni.reporting.model.constants.ReportRequestStatus;
@@ -16,15 +15,21 @@ import com.nextscm.commons.spring.common.ApiStatus;
 import lombok.extern.log4j.Log4j;
 import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.increff.omni.reporting.dto.CommonDtoHelper.TIME_ZONE_PATTERN;
 import static com.increff.omni.reporting.dto.CommonDtoHelper.convertToTimeZoneData;
 
 @Service
@@ -50,11 +55,10 @@ public class ReportRequestDto extends AbstractDto {
     @Autowired
     private FolderApi folderApi;
     @Autowired
-    private ReportingClient client;
-    @Autowired
     private InputControlFlowApi inputControlFlowApi;
+    @Autowired
+    private RestTemplate restTemplate;
 
-    private final String TIME_ZONE_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSSxxx";
 
     public void requestReport(ReportRequestForm form) throws ApiException {
         checkValid(form);
@@ -63,7 +67,7 @@ public class ReportRequestDto extends AbstractDto {
         validateCustomReportAccess(reportPojo, getOrgId());
         validateInputParamValues(reportPojo, form.getParamMap());
         List<ReportInputParamsPojo> reportInputParamsPojoList = CommonDtoHelper.getReportInputParamsPojoList(form.getParamMap(), form.getTimeZone());
-        flow.requestReport(pojo, form.getParamMap(), reportInputParamsPojoList);
+        flow.requestReport(pojo, reportInputParamsPojoList);
     }
 
     public List<ReportRequestData> getAll(Integer limit) throws ApiException {
@@ -90,7 +94,7 @@ public class ReportRequestDto extends AbstractDto {
                 requestPojo.getUpdatedAt().toInstant().atZone(ZoneId.of("UTC"))
                         .format(DateTimeFormatter.ofPattern(TIME_ZONE_PATTERN));
         File sourceFile = folderApi.getFile(reportName + ".xls");
-        byte[] data = client.getFileFromUrl(requestPojo.getUrl());
+        byte[] data = getFileFromUrl(requestPojo.getUrl());
         FileUtils.writeByteArrayToFile(sourceFile, data);
         return sourceFile;
     }
@@ -122,7 +126,7 @@ public class ReportRequestDto extends AbstractDto {
         for (InputControlPojo i : inputControlPojoList) {
             if (params.containsKey(i.getParamName())) {
                 String value = params.get(i.getParamName());
-                if (StringUtil.isEmpty(value)) {
+                if (StringUtil.isEmpty(value) || value.equals("''")) {
                     params.put(i.getParamName(), null);
                     continue;
                 }
@@ -133,6 +137,7 @@ public class ReportRequestDto extends AbstractDto {
                         break;
                     case NUMBER:
                         try {
+                            value = getValueFromQuotes(value);
                             Integer.parseInt(value);
                         } catch (Exception e) {
                             throw new ApiException(ApiStatus.BAD_DATA, value + " is not a number for filter : " + i.getDisplayName());
@@ -140,6 +145,7 @@ public class ReportRequestDto extends AbstractDto {
                         break;
                     case DATE:
                         try {
+                            value = getValueFromQuotes(value);
                             ZonedDateTime.parse(value);
                         } catch (Exception e) {
                             throw new ApiException(ApiStatus.BAD_DATA, value + " is not in valid date format for filter : " + i.getDisplayName());
@@ -150,7 +156,7 @@ public class ReportRequestDto extends AbstractDto {
                         allowedValuesMap = checkValidValues(i);
                         if (values.length > 1)
                             throw new ApiException(ApiStatus.BAD_DATA, "Multiple values not allowed for filter : " + i.getDisplayName());
-                        String s = values[0].substring(1, values[0].length() - 1);
+                        String s = getValueFromQuotes(values[0]);
                         if (!allowedValuesMap.containsKey(s))
                             throw new ApiException(ApiStatus.BAD_DATA, values[0] + " is not allowed for filter : " + i.getDisplayName());
                         break;
@@ -158,7 +164,7 @@ public class ReportRequestDto extends AbstractDto {
                         values = value.split(",");
                         allowedValuesMap = checkValidValues(i);
                         for (String v : values) {
-                            v = v.substring(1, v.length() - 1);
+                            v = getValueFromQuotes(v);
                             if (!allowedValuesMap.containsKey(v))
                                 throw new ApiException(ApiStatus.BAD_DATA, v + " is not allowed for filter : " + i.getDisplayName());
 
@@ -171,6 +177,11 @@ public class ReportRequestDto extends AbstractDto {
                 params.put(i.getParamName(), null);
             }
         }
+    }
+
+    private byte[] getFileFromUrl(String url) {
+        HttpEntity<?> entity = new HttpEntity<>(new HttpHeaders());
+        return restTemplate.exchange(url, HttpMethod.GET, entity, byte[].class).getBody();
     }
 
     private Map<String, String> checkValidValues(InputControlPojo p) throws ApiException {
@@ -187,5 +198,9 @@ public class ReportRequestDto extends AbstractDto {
             valuesMap = inputControlFlowApi.getValuesFromQuery(queryPojo.getQuery(), connectionPojo);
         }
         return valuesMap;
+    }
+
+    private String getValueFromQuotes(String value) {
+        return value.substring(1, value.length()-1);
     }
 }

@@ -3,7 +3,10 @@ package com.increff.omni.reporting.helper;
 import com.increff.omni.reporting.model.constants.ReportRequestStatus;
 import com.increff.omni.reporting.model.constants.ReportType;
 import com.increff.omni.reporting.model.constants.ValidationType;
+import com.increff.omni.reporting.model.form.ValidationGroupForm;
 import com.increff.omni.reporting.pojo.*;
+
+import java.util.List;
 
 public class ReportTestHelper {
 
@@ -21,6 +24,15 @@ public class ReportTestHelper {
         reportControlsPojo.setReportId(reportId);
         reportControlsPojo.setControlId(controlId);
         return reportControlsPojo;
+    }
+
+    public static ValidationGroupForm getValidationGroupForm(String groupName, Integer validationValue, ValidationType validationType, List<Integer> reportControlIds) {
+        ValidationGroupForm groupForm = new ValidationGroupForm();
+        groupForm.setGroupName(groupName);
+        groupForm.setValidationValue(validationValue);
+        groupForm.setValidationType(validationType);
+        groupForm.setReportControlIds(reportControlIds);
+        return groupForm;
     }
 
     public static ReportInputParamsPojo getReportInputParamsPojo(Integer reportRequestId, String paramKey, String paramValue) {

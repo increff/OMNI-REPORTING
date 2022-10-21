@@ -28,7 +28,7 @@ public class OrgTestHelper {
         return pojo;
     }
 
-    public static OrgConnectionPojo getOrgConnectionPojo(int orgId, int connectionId) {
+    public static OrgConnectionPojo getOrgConnectionPojo(Integer orgId, Integer connectionId) {
         OrgConnectionPojo pojo = new OrgConnectionPojo();
         pojo.setConnectionId(connectionId);
         pojo.setOrgId(orgId);

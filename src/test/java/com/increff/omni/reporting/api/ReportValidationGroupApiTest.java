@@ -4,7 +4,6 @@ import com.increff.omni.reporting.config.AbstractTest;
 import com.increff.omni.reporting.model.constants.ValidationType;
 import com.increff.omni.reporting.pojo.ReportValidationGroupPojo;
 import com.nextscm.commons.spring.common.ApiException;
-import org.jcp.xml.dsig.internal.dom.ApacheOctetStreamData;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -26,7 +25,7 @@ public class ReportValidationGroupApiTest extends AbstractTest {
         ReportValidationGroupPojo pojo2 = getReportValidationGroupPojo(100001, "group1"
                 , ValidationType.MANDATORY, 0, 100002);
         ReportValidationGroupPojo pojo3 = getReportValidationGroupPojo(100002, "group1"
-                , ValidationType.NON_MANDATORY, 0, 100001);
+                , ValidationType.SINGLE_MANDATORY, 0, 100001);
         List<ReportValidationGroupPojo> pojoList = Arrays.asList(pojo1, pojo2, pojo3);
         api.addAll(pojoList);
         List<ReportValidationGroupPojo> pojos = api.getByReportId(100001);
@@ -48,7 +47,7 @@ public class ReportValidationGroupApiTest extends AbstractTest {
         ReportValidationGroupPojo pojo3 = getReportValidationGroupPojo(100001, "group2"
                 , ValidationType.MANDATORY, 0, 100001);
         ReportValidationGroupPojo pojo4 = getReportValidationGroupPojo(100002, "group1"
-                , ValidationType.NON_MANDATORY, 0, 100002);
+                , ValidationType.SINGLE_MANDATORY, 0, 100002);
         List<ReportValidationGroupPojo> pojoList = Arrays.asList(pojo1, pojo2, pojo3, pojo4);
         api.addAll(pojoList);
         api.deleteByReportIdAndGroupName(100001, "group1");
@@ -73,7 +72,7 @@ public class ReportValidationGroupApiTest extends AbstractTest {
         ReportValidationGroupPojo pojo3 = getReportValidationGroupPojo(100001, "group2"
                 , ValidationType.MANDATORY, 0, 100001);
         ReportValidationGroupPojo pojo4 = getReportValidationGroupPojo(100002, "group1"
-                , ValidationType.NON_MANDATORY, 0, 100001);
+                , ValidationType.SINGLE_MANDATORY, 0, 100001);
         List<ReportValidationGroupPojo> pojoList = Arrays.asList(pojo1, pojo2, pojo3, pojo4);
         api.addAll(pojoList);
         api.deleteByReportIdAndReportControlId(100001, 100001);

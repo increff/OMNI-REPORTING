@@ -20,7 +20,7 @@ public class MandatoryValidator extends AbstractValidator {
     @Override
     public void validate(List<String> displayNames, List<String> paramValues, String reportName, Integer validationValue) throws ApiException {
         for(String p : paramValues){
-            if(StringUtil.isEmpty(p))
+            if(StringUtil.isEmpty(p) || p.equals("''"))
                 throw new ApiException(ApiStatus.BAD_DATA, getValidationMessage(reportName, displayNames, ValidationType.MANDATORY, ""));
         }
     }
