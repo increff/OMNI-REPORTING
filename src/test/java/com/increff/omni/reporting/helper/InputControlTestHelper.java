@@ -4,6 +4,7 @@ import com.increff.omni.reporting.model.constants.InputControlScope;
 import com.increff.omni.reporting.model.constants.InputControlType;
 import com.increff.omni.reporting.model.constants.ValidationType;
 import com.increff.omni.reporting.model.form.InputControlForm;
+import com.increff.omni.reporting.model.form.InputControlUpdateForm;
 import com.increff.omni.reporting.pojo.InputControlPojo;
 import com.increff.omni.reporting.pojo.InputControlQueryPojo;
 import com.increff.omni.reporting.pojo.InputControlValuesPojo;
@@ -39,6 +40,17 @@ public class InputControlTestHelper {
         inputControlForm.setQuery(query);
         inputControlForm.setReportId(reportId);
         return inputControlForm;
+    }
+
+    public static InputControlUpdateForm getInputControlUpdateForm(String displayName, String paramName
+            , InputControlType type, List<String> values, String query) {
+        InputControlUpdateForm updateForm = new InputControlUpdateForm();
+        updateForm.setQuery(query);
+        updateForm.setDisplayName(displayName);
+        updateForm.setType(type);
+        updateForm.setValues(values);
+        updateForm.setParamName(paramName);
+        return updateForm;
     }
 
     public static List<InputControlValuesPojo> getInputControlValuesPojo(List<String> values, Integer controlId) {

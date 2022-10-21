@@ -58,6 +58,11 @@ public class InputControlDto extends AbstractDto {
         return getInputControlDatas(Collections.singletonList(pojo)).get(0);
     }
 
+    public InputControlData getById(Integer id) throws ApiException {
+        InputControlPojo pojo = api.getCheck(id);
+        return getInputControlDatas(Collections.singletonList(pojo)).get(0);
+    }
+
     public List<InputControlData> selectAllGlobal() throws ApiException {
         List<InputControlPojo> pojos = api.getByScope(InputControlScope.GLOBAL);
         return getInputControlDatas(pojos);
@@ -104,12 +109,12 @@ public class InputControlDto extends AbstractDto {
 
         return pojos.stream().map(p -> {
             InputControlData data = ConvertUtil.convert(p, InputControlData.class);
-            data.setQuery(controlToQueryMapping.getOrDefault(p.getId(), null));
+            data.setQuery(controlToQueryMapping.getOrDefault(p.getId(), ""));
             if (Objects.nonNull(data.getQuery())) {
                 try {
                     data.setQueryValues(flowApi.getValuesFromQuery(data.getQuery(), connectionPojo));
                 } catch (ApiException e) {
-                    e.printStackTrace();
+                    log.error("Error while getting values from query : ", e);
                 }
             } else {
                 List<String> values = controlToValuesMapping.getOrDefault(p.getId(), null);
@@ -137,7 +142,7 @@ public class InputControlDto extends AbstractDto {
     }
 
     private void validateForControlScope(InputControlForm form) throws ApiException {
-        if (form.getScope().equals(InputControlScope.LOCAL) && form.getReportId() == null)
+        if (form.getScope().equals(InputControlScope.LOCAL) && Objects.isNull(form.getReportId()))
             throw new ApiException(ApiStatus.BAD_DATA, "Report is mandatory for Local Scope Control");
     }
 
@@ -146,7 +151,7 @@ public class InputControlDto extends AbstractDto {
             case TEXT:
             case NUMBER:
             case DATE:
-                if (values != null || !StringUtil.isEmpty(query))
+                if (!values.isEmpty() || !StringUtil.isEmpty(query))
                     throw new ApiException(ApiStatus.BAD_DATA, "For Text, Number and Date, neither query nor value is needed");
                 break;
 
@@ -155,7 +160,7 @@ public class InputControlDto extends AbstractDto {
                 if (values.isEmpty() && StringUtil.isEmpty(query))
                     throw new ApiException(ApiStatus.BAD_DATA, "For Select, either query or value is mandatory");
                 if (!values.isEmpty() && !StringUtil.isEmpty(query))
-                    throw new ApiException(ApiStatus.BAD_DATA, "For Select, either query or value is mandatory");
+                    throw new ApiException(ApiStatus.BAD_DATA, "For Select, either query or value one is mandatory");
                 break;
             default:
                 throw new ApiException(ApiStatus.BAD_DATA, "Unknown input control type");

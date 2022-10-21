@@ -68,6 +68,12 @@ public class AdminController {
         return inputControlDto.update(id, form);
     }
 
+    @ApiOperation(value = "Get Input Control")
+    @RequestMapping(value = "/controls/{id}", method = RequestMethod.GET)
+    public InputControlData updateInputControl(@PathVariable Integer id) throws ApiException {
+        return inputControlDto.getById(id);
+    }
+
     @ApiOperation(value = "Select all global controls")
     @RequestMapping(value = "/controls/global", method = RequestMethod.GET)
     public List<InputControlData> selectAllGlobal() throws ApiException {
@@ -114,6 +120,12 @@ public class AdminController {
     @RequestMapping(value = "/reports/{reportId}/query", method = RequestMethod.POST)
     public ReportQueryData addQuery(@PathVariable Integer reportId, @RequestBody ReportQueryForm form) throws ApiException {
         return reportDto.upsertQuery(reportId, form);
+    }
+
+    @ApiOperation(value = "Get Report Query")
+    @RequestMapping(value = "/reports/{reportId}/query", method = RequestMethod.GET)
+    public ReportQueryData getQuery(@PathVariable Integer reportId) throws ApiException {
+        return reportDto.getQuery(reportId);
     }
 
     @ApiOperation(value = "Map control to a report")

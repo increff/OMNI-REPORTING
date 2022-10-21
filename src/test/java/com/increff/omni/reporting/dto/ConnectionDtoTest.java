@@ -42,13 +42,13 @@ public class ConnectionDtoTest extends AbstractTest {
     }
 
     @Test(expected = ApiException.class)
-    public void testConnectionWrongPassword() throws ApiException, ClassNotFoundException, SQLException {
+    public void testConnectionWrongPassword() throws ApiException {
         ConnectionForm form = getConnectionForm("127.0.0.1", "Test DB", username, "wrong_password");
         try {
             dto.testConnection(form);
         } catch (ApiException e) {
             assertEquals(ApiStatus.UNKNOWN_ERROR, e.getStatus());
-            assertTrue(e.getMessage().contains("Error connecting to host : "));
+            assertTrue(e.getMessage().contains("Database could not be connected"));
             throw e;
         }
     }

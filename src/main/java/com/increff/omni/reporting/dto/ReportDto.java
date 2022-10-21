@@ -1,9 +1,6 @@
 package com.increff.omni.reporting.dto;
 
-import com.increff.omni.reporting.api.InputControlApi;
-import com.increff.omni.reporting.api.ReportApi;
-import com.increff.omni.reporting.api.ReportControlsApi;
-import com.increff.omni.reporting.api.ReportValidationGroupApi;
+import com.increff.omni.reporting.api.*;
 import com.increff.omni.reporting.flow.ReportFlowApi;
 import com.increff.omni.reporting.flow.ReportRequestFlowApi;
 import com.increff.omni.reporting.model.constants.ValidationType;
@@ -41,6 +38,8 @@ public class ReportDto extends AbstractDtoApi {
     private ReportApi reportApi;
     @Autowired
     private ReportRequestFlowApi reportRequestFlowApi;
+    @Autowired
+    private ReportQueryApi reportQueryApi;
 
     public ReportData add(ReportForm form) throws ApiException {
         checkValid(form);
@@ -68,6 +67,14 @@ public class ReportDto extends AbstractDtoApi {
         pojo.setReportId(reportId);
         pojo = flowApi.upsertQuery(pojo);
         return ConvertUtil.convert(pojo, ReportQueryData.class);
+    }
+
+    public ReportQueryData getQuery(Integer reportId) throws ApiException {
+        reportApi.getCheck(reportId);
+        ReportQueryData data = new ReportQueryData();
+        ReportQueryPojo queryPojo = reportQueryApi.getByReportId(reportId);
+        data.setQuery(Objects.isNull(queryPojo) ? "" : queryPojo.getQuery());
+        return data;
     }
 
     public List<ReportData> selectAll(Integer orgId) throws ApiException {

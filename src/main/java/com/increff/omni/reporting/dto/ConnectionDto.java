@@ -55,11 +55,11 @@ public class ConnectionDto extends AbstractDto {
     public void testConnection(ConnectionForm form) throws ApiException {
         String result = execute(form, "select version();");
         if (result.contains("ERROR")) {
-            throw new ApiException(ApiStatus.BAD_DATA, "Database could not be connected");
+            throw new ApiException(ApiStatus.UNKNOWN_ERROR, "Database could not be connected");
         }
     }
 
-    public String execute(ConnectionForm form, String query) throws ApiException {
+    private String execute(ConnectionForm form, String query) throws ApiException {
         String result;
         File file = null;
         File errFile = null;
@@ -73,7 +73,11 @@ public class ConnectionDto extends AbstractDto {
             log.debug("Test File created");
         } catch (IOException | ApiException e) {
             log.error("Error in testing connection ", e);
-            throw new ApiException(ApiStatus.UNKNOWN_ERROR, "Error connecting to host : " + e.getMessage());
+            try {
+                result = FileUtils.readFileToString(errFile, "utf-8");
+            } catch (IOException ex) {
+                throw new ApiException(ApiStatus.UNKNOWN_ERROR, ex.getMessage());
+            }
         } finally {
             FileUtil.delete(file);
             FileUtil.delete(errFile);

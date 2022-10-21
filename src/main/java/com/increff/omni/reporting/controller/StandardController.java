@@ -46,8 +46,8 @@ public class StandardController {
     }
 
     @ApiOperation(value = "Select controls for a report")
-    @RequestMapping(value = "/controls", method = RequestMethod.GET)
-    public List<InputControlData> selectByReportId(@RequestParam Integer reportId) throws ApiException {
+    @RequestMapping(value = "/reports/{reportId}/controls", method = RequestMethod.GET)
+    public List<InputControlData> selectByReportId(@PathVariable Integer reportId) throws ApiException {
         return inputControlDto.selectForReport(reportId);
     }
 

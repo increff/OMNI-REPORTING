@@ -37,9 +37,9 @@ public abstract class AbstractTest {
     private void setSecurityContext() {
         Authentication authentication = Mockito.mock(Authentication.class);
         UserPrincipal principal = new UserPrincipal();
-        principal.setDomainId(1);
+        principal.setDomainId(100001);
         principal.setDomainName("increff");
-        principal.setId(1);
+        principal.setId(100001);
         principal.setUsername("test_user");
         principal.setAppName("saas");
         principal.setEmail("test_email@increff.com");

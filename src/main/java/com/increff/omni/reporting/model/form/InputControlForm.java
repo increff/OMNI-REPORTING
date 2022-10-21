@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import javax.validation.constraints.NotNull;
+import java.util.ArrayList;
 import java.util.List;
 
 @Setter
@@ -29,6 +30,6 @@ public class InputControlForm {
 
     private String query;
 
-    private List<String> values;
+    private List<String> values = new ArrayList<>();
 
 }

@@ -3,6 +3,8 @@ package com.increff.omni.reporting.helper;
 import com.increff.omni.reporting.model.constants.ReportRequestStatus;
 import com.increff.omni.reporting.model.constants.ReportType;
 import com.increff.omni.reporting.model.constants.ValidationType;
+import com.increff.omni.reporting.model.form.ReportForm;
+import com.increff.omni.reporting.model.form.ReportQueryForm;
 import com.increff.omni.reporting.model.form.ValidationGroupForm;
 import com.increff.omni.reporting.pojo.*;
 
@@ -33,6 +35,15 @@ public class ReportTestHelper {
         groupForm.setValidationType(validationType);
         groupForm.setReportControlIds(reportControlIds);
         return groupForm;
+    }
+
+    public static ReportForm getReportForm(String name, ReportType type, Integer directoryId, Integer schemaVersionId) {
+        ReportForm form = new ReportForm();
+        form.setDirectoryId(directoryId);
+        form.setSchemaVersionId(schemaVersionId);
+        form.setName(name);
+        form.setType(type);
+        return form;
     }
 
     public static ReportInputParamsPojo getReportInputParamsPojo(Integer reportRequestId, String paramKey, String paramValue) {
@@ -69,5 +80,11 @@ public class ReportTestHelper {
         pojo.setOrgId(orgId);
         pojo.setUserId(userId);
         return pojo;
+    }
+
+    public static ReportQueryForm getReportQueryForm(String query) {
+        ReportQueryForm queryForm = new ReportQueryForm();
+        queryForm.setQuery(query);
+        return queryForm;
     }
 }
