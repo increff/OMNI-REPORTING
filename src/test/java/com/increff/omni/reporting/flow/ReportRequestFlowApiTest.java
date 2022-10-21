@@ -118,11 +118,20 @@ public class ReportRequestFlowApiTest extends AbstractTest {
                 , "endDate", "'2022-05-10T12:00:00.000+05:30'");
         List<ReportInputParamsPojo> reportInputParamsPojoList = Arrays.asList(reportInputParamsPojo, reportInputParamsPojo1, reportInputParamsPojo2);
         flowApi.requestReport(reportRequestPojo, reportInputParamsPojoList);
+        reportRequestPojo = getReportRequestPojo(reportPojo.getId(), ReportRequestStatus.NEW
+                ,100001, 100001);
         flowApi.requestReport(reportRequestPojo, reportInputParamsPojoList);
+        reportRequestPojo = getReportRequestPojo(reportPojo.getId(), ReportRequestStatus.NEW
+                ,100001, 100001);
         flowApi.requestReport(reportRequestPojo, reportInputParamsPojoList);
+        reportRequestPojo = getReportRequestPojo(reportPojo.getId(), ReportRequestStatus.NEW
+                ,100001, 100001);
         flowApi.requestReport(reportRequestPojo, reportInputParamsPojoList);
+        reportRequestPojo = getReportRequestPojo(reportPojo.getId(), ReportRequestStatus.NEW
+                ,100001, 100001);
         flowApi.requestReport(reportRequestPojo, reportInputParamsPojoList);
-        flowApi.requestReport(reportRequestPojo, reportInputParamsPojoList);
+        reportRequestPojo = getReportRequestPojo(reportPojo.getId(), ReportRequestStatus.NEW
+                ,100001, 100001);
         try {
             flowApi.requestReport(reportRequestPojo, reportInputParamsPojoList);
         } catch (ApiException e) {

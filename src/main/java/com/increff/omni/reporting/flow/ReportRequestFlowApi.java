@@ -58,7 +58,7 @@ public class ReportRequestFlowApi extends AbstractApi {
     private void validate(ReportRequestPojo pojo, List<ReportInputParamsPojo> reportInputParamsPojoList) throws ApiException {
         ReportPojo reportPojo = reportApi.getCheck(pojo.getReportId());
         List<ReportRequestPojo> pendingReports = api.getPendingByUserId(pojo.getUserId());
-        if (!CollectionUtils.isEmpty(pendingReports) && pendingReports.size() > MAX_OPEN_REPORT_REQUESTS)
+        if (!CollectionUtils.isEmpty(pendingReports) && pendingReports.size() >= MAX_OPEN_REPORT_REQUESTS)
             throw new ApiException(ApiStatus.BAD_DATA, "Wait for existing reports to get executed");
         List<ReportValidationGroupPojo> reportValidationGroupPojoList = reportValidationGroupApi.getByReportId(reportPojo.getId());
         Map<String, List<ReportValidationGroupPojo>> groupedByName = reportValidationGroupPojoList.stream()
