@@ -66,7 +66,7 @@ public class ReportRequestDto extends AbstractDto {
         ReportPojo reportPojo = reportApi.getCheck(pojo.getReportId());
         validateCustomReportAccess(reportPojo, getOrgId());
         validateInputParamValues(reportPojo, form.getParamMap());
-        List<ReportInputParamsPojo> reportInputParamsPojoList = CommonDtoHelper.getReportInputParamsPojoList(form.getParamMap(), form.getTimeZone());
+        List<ReportInputParamsPojo> reportInputParamsPojoList = CommonDtoHelper.getReportInputParamsPojoList(form.getParamMap(), form.getTimezone());
         flow.requestReport(pojo, reportInputParamsPojoList);
     }
 

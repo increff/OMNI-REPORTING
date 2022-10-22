@@ -5,10 +5,12 @@ import com.increff.omni.reporting.model.constants.ReportType;
 import com.increff.omni.reporting.model.constants.ValidationType;
 import com.increff.omni.reporting.model.form.ReportForm;
 import com.increff.omni.reporting.model.form.ReportQueryForm;
+import com.increff.omni.reporting.model.form.ReportRequestForm;
 import com.increff.omni.reporting.model.form.ValidationGroupForm;
 import com.increff.omni.reporting.pojo.*;
 
 import java.util.List;
+import java.util.Map;
 
 public class ReportTestHelper {
 
@@ -70,6 +72,14 @@ public class ReportTestHelper {
         pojo.setValidationValue(validationValue);
         pojo.setReportControlId(reportControlId);
         return pojo;
+    }
+
+    public static ReportRequestForm getReportRequestForm(Integer reportId, Map<String, String> params, String timezone) {
+        ReportRequestForm form = new ReportRequestForm();
+        form.setReportId(reportId);
+        form.setParamMap(params);
+        form.setTimezone(timezone);
+        return form;
     }
 
     public static ReportRequestPojo getReportRequestPojo(Integer reportId, ReportRequestStatus status

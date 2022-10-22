@@ -46,7 +46,7 @@ public class CommonDtoHelper {
     public static TimeZoneData convertToTimeZoneData(String timeZoneId) throws ApiException {
         ZoneId zoneId;
         try {
-            zoneId = ZoneId.of(timeZoneId); //exception will be thrown here in case of incorrect timezoneId
+            zoneId = ZoneId.of(timeZoneId); // exception will be thrown here in case of incorrect timezoneId
         } catch (Exception e) {
             throw new ApiException(ApiStatus.BAD_DATA, "No timeZone exists for zoneID : " + timeZoneId);
         }

@@ -10,7 +10,7 @@ import java.util.Map;
 public class ReportRequestForm {
 
     private Integer reportId;
-    private String timeZone = "UTC";
+    private String timezone = "UTC";
     private Map<String, String> paramMap;
 
 }
