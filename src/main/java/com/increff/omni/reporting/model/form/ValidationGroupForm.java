@@ -5,8 +5,6 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.validator.constraints.NotEmpty;
 
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,5 +19,5 @@ public class ValidationGroupForm {
     private ValidationType validationType;
     private Integer validationValue = 0; // For Date range, this value specifies how many days a range can have
     @NotEmpty
-    private List<Integer> reportControlIds = new ArrayList<>();
+    private List<Integer> controlIds = new ArrayList<>();
 }

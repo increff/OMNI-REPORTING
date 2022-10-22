@@ -68,20 +68,6 @@ public class CommonDtoHelper {
         return pojo;
     }
 
-    public static List<ReportValidationGroupPojo> getValidationGroupPojoList(ValidationGroupForm groupForm, Integer reportId) {
-        List<ReportValidationGroupPojo> groupPojoList = new ArrayList<>();
-        groupForm.getReportControlIds().forEach(c -> {
-            ReportValidationGroupPojo pojo = new ReportValidationGroupPojo();
-            pojo.setGroupName(groupForm.getGroupName());
-            pojo.setReportId(reportId);
-            pojo.setReportControlId(c);
-            pojo.setType(groupForm.getValidationType());
-            pojo.setValidationValue(groupForm.getValidationValue());
-            groupPojoList.add(pojo);
-        });
-        return groupPojoList;
-    }
-
     public static List<OrgSchemaData> getOrgSchemaDataList(List<OrgSchemaVersionPojo> pojos, List<SchemaVersionPojo> allPojos) {
         Map<Integer, SchemaVersionPojo> idToPojoMap = new HashMap<>();
         allPojos.forEach(a -> idToPojoMap.put(a.getId(), a));

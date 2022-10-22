@@ -120,7 +120,7 @@ public class ReportRequestDto extends AbstractDto {
 
     private void validateInputParamValues(ReportPojo reportPojo, Map<String, String> params) throws ApiException {
         List<ReportControlsPojo> reportControlsPojoList = reportControlsApi.getByReportId(reportPojo.getId());
-        List<InputControlPojo> inputControlPojoList = controlApi.selectMultiple(reportControlsPojoList.stream()
+        List<InputControlPojo> inputControlPojoList = controlApi.selectByIds(reportControlsPojoList.stream()
                 .map(ReportControlsPojo::getControlId).collect(Collectors.toList()));
 
         for (InputControlPojo i : inputControlPojoList) {

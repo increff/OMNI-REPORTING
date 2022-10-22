@@ -16,11 +16,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
-
-import static com.increff.omni.reporting.dto.CommonDtoHelper.getValidationGroupPojoList;
 
 @Service
 @Transactional(rollbackFor = ApiException.class)
@@ -105,10 +104,7 @@ public class ReportFlowApi extends AbstractApi {
 
     public void addValidationGroup(Integer reportId, ValidationGroupForm groupForm) throws ApiException {
         validate(reportId, groupForm);
-        List<ReportControlsPojo> reportControlsPojoList = reportControlsApi.getByIds(groupForm.getReportControlIds());
-        List<InputControlPojo> inputControlPojoList = inputControlApi.selectMultiple(
-                reportControlsPojoList.stream().map(ReportControlsPojo::getControlId).collect(Collectors.toList())
-        );
+        List<InputControlPojo> inputControlPojoList = inputControlApi.selectByIds(groupForm.getControlIds());
         List<InputControlType> controlTypeList = inputControlPojoList.stream().map(InputControlPojo::getType).collect(Collectors.toList());
         switch (groupForm.getValidationType()) {
             case MANDATORY:
@@ -127,17 +123,20 @@ public class ReportFlowApi extends AbstractApi {
         reportValidationGroupApi.addAll(validationGroupPojoList);
     }
 
-    public void deleteReportControl(Integer reportId, Integer reportControlId) throws ApiException {
+    public void deleteReportControl(Integer reportId, Integer controlId) throws ApiException {
         api.getCheck(reportId);
-        reportControlsApi.getCheck(reportControlId);
-        reportValidationGroupApi.deleteByReportIdAndReportControlId(reportId, reportControlId);
-        reportControlsApi.delete(reportControlId);
+        ReportControlsPojo pojo = reportControlsApi.getByReportAndControlId(reportId, controlId);
+        checkNotNull(pojo, "No report control exist with control id : " + controlId);
+        reportValidationGroupApi.deleteByReportIdAndReportControlId(reportId, pojo.getId());
+        reportControlsApi.delete(pojo.getId());
     }
 
     private void validate(Integer reportId, ValidationGroupForm groupForm) throws ApiException {
         api.getCheck(reportId);
-        for (Integer reportControlId : groupForm.getReportControlIds())
-            reportControlsApi.getCheck(reportControlId);
+        for (Integer controlId : groupForm.getControlIds()) {
+            ReportControlsPojo pojo = reportControlsApi.getByReportAndControlId(reportId, controlId);
+            checkNotNull(pojo, "No report control exist with control id : " + controlId);
+        }
         List<ReportValidationGroupPojo> pojoList = reportValidationGroupApi.getByNameAndReportId(reportId, groupForm.getGroupName());
         if (!pojoList.isEmpty())
             throw new ApiException(ApiStatus.BAD_DATA, "Group name already exist for given report, group name : " + groupForm.getGroupName());
@@ -170,6 +169,21 @@ public class ReportFlowApi extends AbstractApi {
         if (existing != null)
             throw new ApiException(ApiStatus.BAD_DATA, "Report already present with same name and schema version");
 
+    }
+
+    private List<ReportValidationGroupPojo> getValidationGroupPojoList(ValidationGroupForm groupForm, Integer reportId) {
+        List<ReportValidationGroupPojo> groupPojoList = new ArrayList<>();
+        for(Integer controlId : groupForm.getControlIds()) {
+            ReportValidationGroupPojo pojo = new ReportValidationGroupPojo();
+            pojo.setGroupName(groupForm.getGroupName());
+            pojo.setReportId(reportId);
+            ReportControlsPojo controlsPojo = reportControlsApi.getByReportAndControlId(reportId, controlId);
+            pojo.setReportControlId(controlsPojo.getId());
+            pojo.setType(groupForm.getValidationType());
+            pojo.setValidationValue(groupForm.getValidationValue());
+            groupPojoList.add(pojo);
+        }
+        return groupPojoList;
     }
 
 }

@@ -70,7 +70,7 @@ public class ReportRequestFlowApi extends AbstractApi {
             ValidationType type = groupPojoList.get(0).getType();
             List<ReportControlsPojo> reportControlsPojoList = reportControlsApi.getByIds(groupPojoList
                     .stream().map(ReportValidationGroupPojo::getReportControlId).collect(Collectors.toList()));
-            List<InputControlPojo> inputControlPojoList = controlApi.selectMultiple(reportControlsPojoList.stream()
+            List<InputControlPojo> inputControlPojoList = controlApi.selectByIds(reportControlsPojoList.stream()
                     .map(ReportControlsPojo::getControlId).collect(Collectors.toList()));
             List<String> paramValues = new ArrayList<>();
             List<String> displayValues = new ArrayList<>();

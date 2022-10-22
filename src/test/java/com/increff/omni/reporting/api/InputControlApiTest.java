@@ -244,7 +244,7 @@ public class InputControlApiTest extends AbstractTest {
         InputControlPojo inputControlPojo2 = getInputControlPojo("Warehouse ID", "warehouseId", InputControlScope.GLOBAL, InputControlType.MULTI_SELECT);
         InputControlQueryPojo inputControlQueryPojo2 = getInputControlQueryPojo("select * from oms.oms_orders;", null);
         api.add(inputControlPojo2, inputControlQueryPojo2, new ArrayList<>());
-        List<InputControlPojo> inputControlPojoList = api.selectMultiple(Arrays.asList(inputControlPojo1.getId(), inputControlPojo2.getId()));
+        List<InputControlPojo> inputControlPojoList = api.selectByIds(Arrays.asList(inputControlPojo1.getId(), inputControlPojo2.getId()));
         assertEquals(2, inputControlPojoList.size());
         assertEquals("Client ID", inputControlPojoList.get(0).getDisplayName());
         assertEquals("clientId", inputControlPojoList.get(0).getParamName());
@@ -254,7 +254,7 @@ public class InputControlApiTest extends AbstractTest {
         assertEquals("warehouseId", inputControlPojoList.get(1).getParamName());
         assertEquals(InputControlScope.GLOBAL, inputControlPojoList.get(1).getScope());
         assertEquals(InputControlType.MULTI_SELECT, inputControlPojoList.get(1).getType());
-        List<InputControlPojo> inputControlPojoList1 = api.selectMultiple(new ArrayList<>());
+        List<InputControlPojo> inputControlPojoList1 = api.selectByIds(new ArrayList<>());
         assertEquals(0, inputControlPojoList1.size());
     }
 

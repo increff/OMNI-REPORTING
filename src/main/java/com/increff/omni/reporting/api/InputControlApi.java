@@ -61,7 +61,7 @@ public class InputControlApi extends AbstractApi {
         return pojo;
     }
 
-    public List<InputControlPojo> selectMultiple(List<Integer> ids){
+    public List<InputControlPojo> selectByIds(List<Integer> ids){
         if(CollectionUtils.isEmpty(ids))
             return new ArrayList<>();
         return dao.selectMultiple(ids);

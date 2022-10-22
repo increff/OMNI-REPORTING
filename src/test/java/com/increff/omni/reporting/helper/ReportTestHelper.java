@@ -33,7 +33,7 @@ public class ReportTestHelper {
         groupForm.setGroupName(groupName);
         groupForm.setValidationValue(validationValue);
         groupForm.setValidationType(validationType);
-        groupForm.setReportControlIds(reportControlIds);
+        groupForm.setControlIds(reportControlIds);
         return groupForm;
     }
 

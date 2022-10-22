@@ -14,11 +14,6 @@ import java.util.stream.Collectors;
 public class SingleMandatoryValidator extends AbstractValidator {
 
     @Override
-    public void add(List<InputControlType> inputControlTypeList) throws ApiException {
-        // No validation required
-    }
-
-    @Override
     public void validate(List<String> displayName, List<String> paramValue, String reportName, Integer validationValue) throws ApiException {
         List<String> nonEmptyValues = paramValue.stream().filter(p -> !StringUtil.isEmpty(p)).collect(Collectors.toList());
         if (nonEmptyValues.size() != 1)

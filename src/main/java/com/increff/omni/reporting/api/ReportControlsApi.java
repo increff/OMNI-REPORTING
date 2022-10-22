@@ -20,8 +20,8 @@ public class ReportControlsApi extends AbstractApi {
 
     public void add(ReportControlsPojo pojo) throws ApiException {
         ReportControlsPojo existing = getByReportAndControlId(pojo.getReportId(), pojo.getControlId());
-        if (Objects.isNull(existing))
-            dao.persist(pojo);
+        checkNull(existing, "Report control already exists with control id : " + pojo.getControlId());
+        dao.persist(pojo);
     }
 
     public List<ReportControlsPojo> getByReportId(Integer reportId) {

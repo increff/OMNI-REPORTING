@@ -18,7 +18,6 @@ import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
 import com.nextscm.commons.spring.server.AbstractApi;
 import lombok.extern.log4j.Log4j;
-import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -124,7 +123,7 @@ public class InputControlFlowApi extends AbstractApi {
         List<Integer> controlIds = existingPojos.stream().map(ReportControlsPojo::getControlId)
                 .collect(Collectors.toList());
 
-        List<InputControlPojo> controlPojos = api.selectMultiple(controlIds);
+        List<InputControlPojo> controlPojos = api.selectByIds(controlIds);
 
         List<InputControlPojo> duplicate = controlPojos.stream()
                 .filter(i -> (i.getDisplayName().equals(pojo.getDisplayName()) ||

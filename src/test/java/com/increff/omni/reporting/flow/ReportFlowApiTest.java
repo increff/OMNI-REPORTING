@@ -199,7 +199,7 @@ public class ReportFlowApiTest extends AbstractTest {
         ReportControlsPojo controlsPojo = getReportControlsPojo(reportPojo.getId(), inputControlPojo.getId());
         flowApi.mapControlToReport(controlsPojo);
         ValidationGroupForm groupForm = getValidationGroupForm("group1", 0
-                , ValidationType.MANDATORY, Collections.singletonList(controlsPojo.getId()));
+                , ValidationType.MANDATORY, Collections.singletonList(inputControlPojo.getId()));
         flowApi.addValidationGroup(reportPojo.getId(), groupForm);
     }
 
@@ -216,7 +216,7 @@ public class ReportFlowApiTest extends AbstractTest {
         ReportControlsPojo controlsPojo = getReportControlsPojo(reportPojo.getId(), inputControlPojo.getId());
         flowApi.mapControlToReport(controlsPojo);
         ValidationGroupForm groupForm = getValidationGroupForm("group1", 0
-                , ValidationType.MANDATORY, Collections.singletonList(controlsPojo.getId()));
+                , ValidationType.MANDATORY, Collections.singletonList(inputControlPojo.getId()));
         flowApi.addValidationGroup(reportPojo.getId(), groupForm);
         try {
             flowApi.addValidationGroup(reportPojo.getId(), groupForm);
@@ -240,7 +240,7 @@ public class ReportFlowApiTest extends AbstractTest {
         ReportControlsPojo controlsPojo = getReportControlsPojo(reportPojo.getId(), inputControlPojo.getId());
         flowApi.mapControlToReport(controlsPojo);
         ValidationGroupForm groupForm = getValidationGroupForm("group1", 0
-                , ValidationType.SINGLE_MANDATORY, Collections.singletonList(controlsPojo.getId()));
+                , ValidationType.SINGLE_MANDATORY, Collections.singletonList(inputControlPojo.getId()));
         flowApi.addValidationGroup(reportPojo.getId(), groupForm);
     }
 
@@ -257,7 +257,7 @@ public class ReportFlowApiTest extends AbstractTest {
         ReportControlsPojo controlsPojo = getReportControlsPojo(reportPojo.getId(), inputControlPojo.getId());
         flowApi.mapControlToReport(controlsPojo);
         ValidationGroupForm groupForm = getValidationGroupForm("group1", 0
-                , ValidationType.DATE_RANGE, Collections.singletonList(controlsPojo.getId()));
+                , ValidationType.DATE_RANGE, Collections.singletonList(inputControlPojo.getId()));
         try {
             flowApi.addValidationGroup(reportPojo.getId(), groupForm);
         } catch (ApiException e) {
@@ -280,7 +280,7 @@ public class ReportFlowApiTest extends AbstractTest {
         ReportControlsPojo controlsPojo = getReportControlsPojo(reportPojo.getId(), inputControlPojo.getId());
         flowApi.mapControlToReport(controlsPojo);
         ValidationGroupForm groupForm = getValidationGroupForm("group1", 0
-                , ValidationType.DATE_RANGE, Collections.singletonList(controlsPojo.getId()));
+                , ValidationType.DATE_RANGE, Collections.singletonList(inputControlPojo.getId()));
         try {
             flowApi.addValidationGroup(reportPojo.getId(), groupForm);
         } catch (ApiException e) {
@@ -306,7 +306,7 @@ public class ReportFlowApiTest extends AbstractTest {
         ReportControlsPojo controlsPojo2 = getReportControlsPojo(reportPojo.getId(), inputControlPojo2.getId());
         flowApi.mapControlToReport(controlsPojo2);
         ValidationGroupForm groupForm = getValidationGroupForm("group1", 90
-                , ValidationType.DATE_RANGE, Arrays.asList(controlsPojo.getId(), controlsPojo2.getId()));
+                , ValidationType.DATE_RANGE, Arrays.asList(inputControlPojo.getId(), inputControlPojo2.getId()));
         flowApi.addValidationGroup(reportPojo.getId(), groupForm);
     }
 
@@ -326,9 +326,9 @@ public class ReportFlowApiTest extends AbstractTest {
         ReportControlsPojo controlsPojo2 = getReportControlsPojo(reportPojo.getId(), inputControlPojo2.getId());
         flowApi.mapControlToReport(controlsPojo2);
         ValidationGroupForm groupForm = getValidationGroupForm("group1", 90
-                , ValidationType.DATE_RANGE, Arrays.asList(controlsPojo.getId(), controlsPojo2.getId()));
+                , ValidationType.DATE_RANGE, Arrays.asList(inputControlPojo.getId(), inputControlPojo2.getId()));
         flowApi.addValidationGroup(reportPojo.getId(), groupForm);
-        flowApi.deleteReportControl(reportPojo.getId(), controlsPojo2.getId());
+        flowApi.deleteReportControl(reportPojo.getId(), inputControlPojo2.getId());
     }
 
 }

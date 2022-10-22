@@ -73,7 +73,7 @@ public class InputControlDto extends AbstractDto {
         List<Integer> controlIds = reportControlsPojos.stream()
                 .map(ReportControlsPojo::getControlId).collect(Collectors.toList());
 
-        List<InputControlPojo> pojos = api.selectMultiple(controlIds);
+        List<InputControlPojo> pojos = api.selectByIds(controlIds);
 
         return getInputControlDatas(pojos);
     }

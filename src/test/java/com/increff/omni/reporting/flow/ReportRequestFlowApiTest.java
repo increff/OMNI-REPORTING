@@ -84,10 +84,10 @@ public class ReportRequestFlowApiTest extends AbstractTest {
         ReportControlsPojo controlsPojo2 = getReportControlsPojo(reportPojo.getId(), inputControlPojo2.getId());
         reportFlowApi.mapControlToReport(controlsPojo2);
         ValidationGroupForm groupForm = getValidationGroupForm("group1", 90
-                , ValidationType.DATE_RANGE, Arrays.asList(controlsPojo.getId(), controlsPojo2.getId()));
+                , ValidationType.DATE_RANGE, Arrays.asList(inputControlPojo1.getId(), inputControlPojo2.getId()));
         reportFlowApi.addValidationGroup(reportPojo.getId(), groupForm);
         ValidationGroupForm groupForm1 = getValidationGroupForm("group2", 0
-                , ValidationType.SINGLE_MANDATORY, Collections.singletonList(controlsPojo1.getId()));
+                , ValidationType.SINGLE_MANDATORY, Collections.singletonList(inputControlPojo.getId()));
         reportFlowApi.addValidationGroup(reportPojo.getId(), groupForm1);
         return reportPojo;
     }

@@ -10,9 +10,11 @@ import java.util.List;
 
 public abstract class AbstractValidator {
 
-    public abstract void add(List<InputControlType> validation) throws ApiException;
+    public void add(List<InputControlType> validation) throws ApiException {
+        // No validation required
+    }
 
-    //Parameter to be list of input controls with input
+    // Parameter to be list of input controls with input
     public abstract void validate(List<String> displayName, List<String> paramValue, String reportName, Integer validationValue) throws ApiException;
 
     public String getValidationMessage(String reportName, List<String> displayNames, ValidationType validationType, String extraMessage) {
