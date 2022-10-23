@@ -53,6 +53,8 @@ public class ReportTask {
         List<ReportInputParamsPojo> reportInputParamsPojoList = reportInputParamsApi.getInputParamsForReportRequest(reportRequestPojo.getId());
         ReportPojo reportPojo = reportApi.getCheck(reportRequestPojo.getReportId());
         ReportQueryPojo reportQueryPojo = reportQueryApi.getByReportId(reportPojo.getId());
+        if(Objects.isNull(reportQueryPojo))
+            throw new ApiException(ApiStatus.BAD_DATA, "Query is not defined for requested report : " + reportPojo.getName());
         OrgConnectionPojo orgConnectionPojo = orgConnectionApi.getCheckByOrgId(reportRequestPojo.getOrgId());
         ConnectionPojo connectionPojo = connectionApi.getCheck(orgConnectionPojo.getConnectionId());
 

@@ -6,6 +6,7 @@ import com.increff.omni.reporting.model.constants.ValidationType;
 import com.nextscm.commons.lang.StringUtil;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
+import com.nextscm.commons.spring.common.JsonUtil;
 import org.springframework.stereotype.Component;
 
 import java.time.ZonedDateTime;
@@ -28,11 +29,12 @@ public class DateValidator extends AbstractValidator {
 
     @Override
     public void validate(List<String> displayName, List<String> paramValue, String reportName, Integer validationValue) throws ApiException {
-        List<String> nonEmptyValues = paramValue.stream().filter(p -> !StringUtil.isEmpty(p)).collect(Collectors.toList());
-        if(nonEmptyValues.isEmpty())
-            return;
-        if(nonEmptyValues.size()!=2)
+        if(paramValue.size() != 2)
             throw new ApiException(ApiStatus.BAD_DATA, "Exactly 2 Date inputs are required to validate");
+        List<String> nonEmptyValues = paramValue.stream().filter(p -> !StringUtil.isEmpty(getValueFromQuotes(p)))
+                .collect(Collectors.toList());
+        if(nonEmptyValues.size()!=2)
+            return;
         try {
             // We can't define which one is exactly the start date
             ZonedDateTime date1 = ZonedDateTime.parse(getValueFromQuotes(paramValue.get(0))
@@ -49,11 +51,7 @@ public class DateValidator extends AbstractValidator {
             } else
                 throw new ApiException(ApiStatus.BAD_DATA, getValidationMessage(reportName, displayName, ValidationType.DATE_RANGE, "Both dates can't be equal"));
         } catch (DateTimeParseException e) {
-            throw new ApiException(ApiStatus.BAD_DATA, getValidationMessage(reportName, displayName, ValidationType.DATE_RANGE, "Date is not in correct format : " + paramValue));
+            throw new ApiException(ApiStatus.BAD_DATA, getValidationMessage(reportName, displayName, ValidationType.DATE_RANGE, "Date is not in correct format : " + JsonUtil.serialize(paramValue)));
         }
-    }
-
-    private String getValueFromQuotes(String value) {
-        return value.substring(1, value.length()-1);
     }
 }

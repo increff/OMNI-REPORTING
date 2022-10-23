@@ -21,4 +21,8 @@ public abstract class AbstractValidator {
         return reportName + " failed in validation for key / keys : " + JsonUtil.serialize(displayNames) + " , validation type : " + validationType
                 + (!StringUtil.isEmpty(extraMessage) ? " message : " + extraMessage : extraMessage);
     }
+
+    protected String getValueFromQuotes(String value) {
+        return value.substring(1, value.length()-1);
+    }
 }

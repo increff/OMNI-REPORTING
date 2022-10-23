@@ -7,6 +7,8 @@ import com.nextscm.commons.fileclient.GcpFileProvider;
 import com.nextscm.commons.spring.server.WebMvcConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.*;
+import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.client.RestTemplate;
 
 /**
@@ -18,6 +20,8 @@ import org.springframework.web.client.RestTemplate;
  * Spring configuration for loading application properties.
  */
 @Configuration
+@EnableScheduling
+@EnableAsync
 @ComponentScan({"com.increff.omni.reporting", "com.increff.account.client"})
 @PropertySource(value = "file:omni-reporting.properties")
 @Import({WebMvcConfig.class})

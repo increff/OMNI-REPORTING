@@ -14,6 +14,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -38,7 +39,7 @@ public class ReportJob {
     private Executor executor;
 
     @Scheduled(fixedDelay = 1000)
-    public void run() throws IOException, ApiException {
+    public void runReports() throws IOException, ApiException {
         // Get all the tasks pending for execution + Tasks that got stuck in processing
         int limitForEligibleRequest = getLimitForEligibleRequests();
         List<ReportRequestPojo> reportRequestPojoList = api.getEligibleRequests(limitForEligibleRequest);
@@ -53,12 +54,16 @@ public class ReportJob {
         while (flag) {
             for (Map.Entry<Integer, List<ReportRequestPojo>> e : orgToRequests.entrySet()) {
                 // 1 from an org and then the other org
-                Iterator<ReportRequestPojo> itr = e.getValue().iterator();
-                if (!itr.hasNext())
+                List<ReportRequestPojo> pojoList = new ArrayList<>(e.getValue());
+                Iterator<ReportRequestPojo> itr = pojoList.iterator();
+                if (!itr.hasNext()) {
                     orgToRequests.remove(e.getKey());
+                    continue;
+                }
                 ReportRequestPojo reportRequestPojo = itr.next();
                 reportTask.runAsync(reportRequestPojo);
                 itr.remove();
+                orgToRequests.put(e.getKey(), pojoList);
             }
             if (orgToRequests.isEmpty())
                 flag = false;
@@ -66,12 +71,12 @@ public class ReportJob {
     }
 
     @Scheduled(fixedDelay = 1000)
-    public void resetStuckJobs() {
+    public void markJobsStuck() {
         api.markStuck(properties.getStuckReportTime());
     }
 
     @Scheduled(fixedDelay = 3600 * 1000)
-    public void deleteOldLogsAndFiles() {
+    public void deleteOldFiles() {
         folderApi.deleteFilesOlderThan1Hr();
     }
 
