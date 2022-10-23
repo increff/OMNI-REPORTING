@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 // Todo internationalization
+// Todo version management for reports
 @Api
 @RestController
 @RequestMapping(value = "/admin")

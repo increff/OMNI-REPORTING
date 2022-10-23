@@ -11,7 +11,6 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
-// Todo complete tests
 @Configuration
 @EnableWebMvc
 @ComponentScan(value = {"com.increff.omni.reporting", "com.increff.account.client"},
