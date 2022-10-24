@@ -5,6 +5,7 @@ import com.increff.omni.reporting.model.data.ConnectionData;
 import com.increff.omni.reporting.model.form.ConnectionForm;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
+import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
@@ -24,6 +25,15 @@ public class ConnectionDtoTest extends AbstractTest {
     @Autowired
     private ConnectionDto dto;
 
+    @Before
+    public void init() throws ClassNotFoundException, SQLException {
+        Class.forName("com.mysql.jdbc.Driver");
+        Connection con = DriverManager.getConnection(
+                "jdbc:mysql://localhost:3306?useSSL=false", username, password);
+        Resource resource = new ClassPathResource("/com/increff/omni/reporting/readonly-user.sql");
+        ScriptUtils.executeSqlScript(con, resource);
+    }
+
     @Test
     public void testAddConnection() throws ApiException {
         ConnectionForm form = getConnectionForm("dev-db.increff.com", "Dev DB", "db.user", "db.password");
@@ -36,11 +46,11 @@ public class ConnectionDtoTest extends AbstractTest {
     }
 
     // Todo commenting this test as it is not working with jenkins build because of db connection
-//    @Test
-//    public void testConnection() throws ApiException {
-//        ConnectionForm form = getConnectionForm("127.0.0.1", "Test DB", username, password);
-//        dto.testConnection(form);
-//    }
+    @Test
+    public void testConnection() throws ApiException {
+        ConnectionForm form = getConnectionForm("127.0.0.1", "Test DB", "readonly_random", "password");
+        dto.testConnection(form);
+    }
 
     @Test(expected = ApiException.class)
     public void testConnectionWrongPassword() throws ApiException {
