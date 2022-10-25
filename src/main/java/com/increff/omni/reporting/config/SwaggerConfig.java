@@ -62,9 +62,7 @@ public class SwaggerConfig extends WebMvcConfigurerAdapter {
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/**").allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD")
-                .allowedOrigins("*")
-                .allowCredentials(true);
+        registry.addMapping("/**").allowedMethods("*");
     }
 
     @Bean
