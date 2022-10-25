@@ -13,7 +13,7 @@ import java.util.List;
 
 // Todo internationalization
 // Todo version management for reports
-//@CrossOrigin
+@CrossOrigin
 @Api
 @RestController
 @RequestMapping(value = "/admin")

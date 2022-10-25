@@ -24,7 +24,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 
-//@CrossOrigin
+@CrossOrigin
 @Api
 @RestController
 @RequestMapping(value = "/standard")

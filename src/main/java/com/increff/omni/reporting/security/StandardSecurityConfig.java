@@ -35,9 +35,10 @@ public class StandardSecurityConfig extends WebSecurityConfigurerAdapter {
                 .requestMatchers()//
                 .antMatchers("/standard/**").and().authorizeRequests()//
                 .antMatchers("/standard/**").hasAnyAuthority(APP_ADMIN, APP_STANDARD)//
-                .and().cors().and().csrf().disable()
+                .and().csrf().disable()
                 .addFilterBefore(authTokenFilter, BasicAuthenticationFilter.class)
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+        http.cors();
     }
 
     @Override

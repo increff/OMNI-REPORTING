@@ -38,10 +38,11 @@ public class AdminSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/admin/**")
                 .and().authorizeRequests()//
                 .antMatchers("/admin/**").hasAnyAuthority(APP_ADMIN)//
-                .and().cors().and().csrf().disable()
+                .and().csrf().disable()
                 .addFilterBefore(authTokenFilter, BasicAuthenticationFilter.class)
                 .addFilterBefore(adminFilter, BasicAuthenticationFilter.class)
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+        http.cors();
     }
 
     @Override
