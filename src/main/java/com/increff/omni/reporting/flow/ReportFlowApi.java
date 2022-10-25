@@ -85,6 +85,10 @@ public class ReportFlowApi extends AbstractApi {
         reportControlsApi.add(pojo);
     }
 
+    public List<ReportPojo> getAll() {
+        return api.selectAll();
+    }
+
     public List<ReportPojo> getAll(Integer orgId) throws ApiException {
 
         OrgSchemaVersionPojo orgSchemaVersionPojo = orgSchemaApi.getCheckByOrgId(orgId);

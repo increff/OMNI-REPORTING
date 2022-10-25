@@ -2,6 +2,7 @@ package com.increff.omni.reporting.model.form;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.validation.constraints.NotNull;
 
@@ -12,7 +13,7 @@ public class OrganizationForm {
     @NotNull
     private Integer id;
 
-    @NotNull
+    @NotEmpty
     private String name;
 
 }

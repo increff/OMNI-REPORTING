@@ -117,6 +117,12 @@ public class AdminController {
         return reportDto.get(reportId);
     }
 
+    @ApiOperation(value = "Get All Report")
+    @RequestMapping(value = "/reports", method = RequestMethod.GET)
+    public List<ReportData> getAll() throws ApiException {
+        return reportDto.selectAll();
+    }
+
     @ApiOperation(value = "Add/Edit Report Query")
     @RequestMapping(value = "/reports/{reportId}/query", method = RequestMethod.POST)
     public ReportQueryData addQuery(@PathVariable Integer reportId, @RequestBody ReportQueryForm form) throws ApiException {

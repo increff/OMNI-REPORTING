@@ -39,8 +39,10 @@ public class AdminFilter extends GenericFilterBean {
             return;
         }
         if (!properties.getIncreffOrgId().equals(userPrincipal.getDomainId())) {
-            if (userPrincipal.getRoles().contains(APP_ADMIN))
+            if (userPrincipal.getRoles().contains(APP_ADMIN)) {
                 unAuthenticateCall(HttpStatus.FORBIDDEN, httpResponse, "This request is only accessible by Increff Admins");
+                return;
+            }
         }
         chain.doFilter(request, response);
     }

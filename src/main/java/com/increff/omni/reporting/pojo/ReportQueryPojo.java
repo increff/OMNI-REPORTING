@@ -9,7 +9,7 @@ import javax.persistence.*;
 @Setter
 @Getter
 @Table(name = "report_query")
-public class ReportQueryPojo {
+public class ReportQueryPojo extends AbstractVersionedPojo{
 
     @Id
     @TableGenerator(name = "report_query", pkColumnValue = "report_query", allocationSize = 1,initialValue = 100000)

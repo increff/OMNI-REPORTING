@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -40,12 +41,16 @@ public class ReportDto extends AbstractDtoApi {
     private ReportRequestFlowApi reportRequestFlowApi;
     @Autowired
     private ReportQueryApi reportQueryApi;
+    @Autowired
+    private SchemaVersionApi schemaVersionApi;
+    @Autowired
+    private DirectoryApi directoryApi;
 
     public ReportData add(ReportForm form) throws ApiException {
         checkValid(form);
         ReportPojo pojo = ConvertUtil.convert(form, ReportPojo.class);
         pojo = flowApi.addReport(pojo);
-        return ConvertUtil.convert(pojo, ReportData.class);
+        return convertToReportData(Collections.singletonList(pojo)).get(0);
     }
 
     public ReportData edit(Integer id, ReportForm form) throws ApiException {
@@ -53,12 +58,12 @@ public class ReportDto extends AbstractDtoApi {
         ReportPojo pojo = ConvertUtil.convert(form, ReportPojo.class);
         pojo.setId(id);
         pojo = flowApi.editReport(pojo);
-        return ConvertUtil.convert(pojo, ReportData.class);
+        return convertToReportData(Collections.singletonList(pojo)).get(0);
     }
 
     public ReportData get(Integer id) throws ApiException {
         ReportPojo pojo = reportApi.getCheck(id);
-        return ConvertUtil.convert(pojo, ReportData.class);
+        return convertToReportData(Collections.singletonList(pojo)).get(0);
     }
 
     public ReportQueryData upsertQuery(Integer reportId, ReportQueryForm form) throws ApiException {
@@ -74,12 +79,18 @@ public class ReportDto extends AbstractDtoApi {
         ReportQueryData data = new ReportQueryData();
         ReportQueryPojo queryPojo = reportQueryApi.getByReportId(reportId);
         data.setQuery(Objects.isNull(queryPojo) ? "" : queryPojo.getQuery());
+        data.setUpdatedAt(Objects.isNull(queryPojo) ? null : queryPojo.getUpdatedAt());
         return data;
     }
 
     public List<ReportData> selectAll(Integer orgId) throws ApiException {
         List<ReportPojo> pojos = flowApi.getAll(orgId);
-        return ConvertUtil.convert(pojos, ReportData.class);
+        return convertToReportData(pojos);
+    }
+
+    public List<ReportData> selectAll() throws ApiException {
+        List<ReportPojo> pojos = flowApi.getAll();
+        return convertToReportData(pojos);
     }
 
     public void mapToControl(Integer reportId, Integer controlId) throws ApiException {
@@ -129,5 +140,19 @@ public class ReportDto extends AbstractDtoApi {
             throw new ApiException(ApiStatus.BAD_DATA, "Validation group contains duplicate control ids");
         if (groupForm.getValidationType().equals(ValidationType.DATE_RANGE) && groupForm.getValidationValue() <= 0)
             throw new ApiException(ApiStatus.BAD_DATA, "Date range validation should have positive validation value");
+    }
+
+    private List<ReportData> convertToReportData(List<ReportPojo> pojos) throws ApiException {
+        List<ReportData> dataList = new ArrayList<>();
+        for(ReportPojo p : pojos) {
+            ReportData data = ConvertUtil.convert(p, ReportData.class);
+            SchemaVersionPojo schemaVersionPojo = schemaVersionApi.getCheck(data.getSchemaVersionId());
+            DirectoryPojo directoryPojo = directoryApi.getCheck(data.getDirectoryId());
+            data.setDirectoryName(directoryPojo.getDirectoryName());
+            data.setDirectoryPath(directoryApi.getDirectoryPath(directoryPojo.getId()));
+            data.setSchemaVersionName(schemaVersionPojo.getName());
+            dataList.add(data);
+        }
+        return dataList;
     }
 }

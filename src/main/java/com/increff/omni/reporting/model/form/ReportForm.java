@@ -3,6 +3,7 @@ package com.increff.omni.reporting.model.form;
 import com.increff.omni.reporting.model.constants.ReportType;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.validation.constraints.NotNull;
 
@@ -10,7 +11,7 @@ import javax.validation.constraints.NotNull;
 @Getter
 public class ReportForm {
 
-    @NotNull
+    @NotEmpty
     private String name;
     @NotNull
     private ReportType type;

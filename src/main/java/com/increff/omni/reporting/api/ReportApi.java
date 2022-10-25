@@ -56,5 +56,7 @@ public class ReportApi extends AbstractApi {
     }
 
 
-
+    public List<ReportPojo> selectAll() {
+        return dao.selectAll();
+    }
 }

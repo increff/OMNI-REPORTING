@@ -29,6 +29,18 @@ public class DirectoryApi extends AbstractApi {
         return pojo;
     }
 
+    public String getDirectoryPath(Integer id) throws ApiException {
+        DirectoryPojo directoryPojo = getCheck(id);
+        StringBuilder directoryPath = new StringBuilder(directoryPojo.getDirectoryName());
+        Integer parentId = directoryPojo.getParentId();
+        while (parentId != 0) {
+            DirectoryPojo p = getCheck(parentId);
+            directoryPath.insert(0, p.getDirectoryName() + "/");
+            parentId = p.getParentId();
+        }
+        return directoryPath.toString();
+    }
+
     public List<DirectoryPojo> getAll() {
         return dao.selectAll();
     }
@@ -47,7 +59,7 @@ public class DirectoryApi extends AbstractApi {
     private void validateForEdit(DirectoryPojo pojo) throws ApiException {
         DirectoryPojo existing = getCheck(pojo.getId());
         getCheck(pojo.getParentId());
-        if(!existing.getDirectoryName().equals(pojo.getDirectoryName())){
+        if (!existing.getDirectoryName().equals(pojo.getDirectoryName())) {
             DirectoryPojo sameNamePojo = dao.select("directoryName", pojo.getDirectoryName());
             checkNull(sameNamePojo, "Directory already present with same name");
         }
