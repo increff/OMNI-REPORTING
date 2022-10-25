@@ -31,14 +31,14 @@ public class DirectoryApi extends AbstractApi {
 
     public String getDirectoryPath(Integer id) throws ApiException {
         DirectoryPojo directoryPojo = getCheck(id);
-        StringBuilder directoryPath = new StringBuilder(directoryPojo.getDirectoryName());
+        String directoryPath = directoryPojo.getDirectoryName();
         Integer parentId = directoryPojo.getParentId();
         while (parentId != 0) {
             DirectoryPojo p = getCheck(parentId);
-            directoryPath.insert(0, p.getDirectoryName() + "/");
+            directoryPath = p.getDirectoryName().concat("/").concat(directoryPath);
             parentId = p.getParentId();
         }
-        return directoryPath.toString();
+        return directoryPath;
     }
 
     public List<DirectoryPojo> getAll() {
