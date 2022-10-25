@@ -9,20 +9,28 @@ import javax.persistence.*;
 @Entity
 @Setter
 @Getter
-@Table(name = "report_request")
-public class ReportRequestPojo extends AbstractVersionedPojo{
+@Table(name = "report_request", indexes = {
+        @Index(name = "idx_status_updatedAt", columnList = "status, updatedAt"),
+        @Index(name = "idx_userId", columnList = "userId"),
+        @Index(name = "idx_createdAt", columnList = "createdAt")
+})
+public class ReportRequestPojo extends AbstractVersionedPojo {
 
     @Id
-    @TableGenerator(name = "report_request", pkColumnValue = "report_request", allocationSize = 1,initialValue = 100000)
+    @TableGenerator(name = "report_request", pkColumnValue = "report_request", allocationSize = 1, initialValue = 100000)
     @GeneratedValue(strategy = GenerationType.TABLE, generator = "report_request")
     private Integer id;
 
+    @Column(nullable = false)
     private Integer orgId;
 
+    @Column(nullable = false)
     private Integer userId;
 
+    @Column(nullable = false)
     private Integer reportId;
 
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private ReportRequestStatus status;
 

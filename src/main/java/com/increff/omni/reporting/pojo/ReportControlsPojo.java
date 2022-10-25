@@ -9,7 +9,8 @@ import javax.persistence.*;
 @Entity
 @Setter
 @Getter
-@Table(name = "report_controls")
+@Table(name = "report_controls", uniqueConstraints = @UniqueConstraint(name = "uq_reportId_controlId",
+        columnNames = {"reportId", "controlId"}))
 public class ReportControlsPojo extends AbstractVersionedPojo{
 
     @Id
@@ -17,7 +18,9 @@ public class ReportControlsPojo extends AbstractVersionedPojo{
     @GeneratedValue(strategy = GenerationType.TABLE, generator = "report_controls")
     private Integer id;
 
+    @Column(nullable = false)
     private Integer reportId;
 
+    @Column(nullable = false)
     private Integer controlId;
 }

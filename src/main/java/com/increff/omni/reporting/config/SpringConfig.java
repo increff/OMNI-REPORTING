@@ -7,6 +7,8 @@ import com.nextscm.commons.fileclient.GcpFileProvider;
 import com.nextscm.commons.spring.server.WebMvcConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.*;
+import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.client.RestTemplate;
 
 /**
@@ -18,27 +20,26 @@ import org.springframework.web.client.RestTemplate;
  * Spring configuration for loading application properties.
  */
 @Configuration
+@EnableScheduling
+@EnableAsync
 @ComponentScan({"com.increff.omni.reporting", "com.increff.account.client"})
-@PropertySources({ //
-		@PropertySource("classpath:com/increff/omni/reporting/config.properties"),
-		@PropertySource(value = "file:./omni-reporting.properties")
-})
-@Import({ WebMvcConfig.class })
+@PropertySource(value = "file:omni-reporting.properties")
+@Import({WebMvcConfig.class})
 public class SpringConfig {
 
-	@Autowired
-	private ApplicationProperties applicationProperties;
+    @Autowired
+    private ApplicationProperties applicationProperties;
 
-	@Bean
-	public FileClient getFileClient() throws FileClientException {
-		AbstractFileProvider gcpFileProvider = new GcpFileProvider(applicationProperties.getGcpBaseUrl(),
-				applicationProperties.getGcpBucketName(), applicationProperties.getGcpFilePath());
-		return new FileClient(gcpFileProvider);
-	}
+    @Bean
+    public FileClient getFileClient() throws FileClientException {
+        AbstractFileProvider gcpFileProvider = new GcpFileProvider(applicationProperties.getGcpBaseUrl(),
+                applicationProperties.getGcpBucketName(), applicationProperties.getGcpFilePath());
+        return new FileClient(gcpFileProvider);
+    }
 
-	@Bean
-	public RestTemplate getRestTemplate() {
-		return new RestTemplate();
-	}
+    @Bean
+    public RestTemplate getRestTemplate() {
+        return new RestTemplate();
+    }
 
 }

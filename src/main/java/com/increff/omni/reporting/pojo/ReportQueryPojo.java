@@ -16,9 +16,11 @@ public class ReportQueryPojo {
     @GeneratedValue(strategy = GenerationType.TABLE, generator = "report_query")
     private Integer id;
 
+    @Column(nullable = false, unique = true)
     private Integer reportId;
 
     @Lob
+    @Column(nullable = false)
     private String query;
 
 }

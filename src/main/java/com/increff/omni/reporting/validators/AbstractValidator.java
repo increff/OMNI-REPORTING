@@ -10,13 +10,19 @@ import java.util.List;
 
 public abstract class AbstractValidator {
 
-    public abstract void add(List<InputControlType> validation) throws ApiException;
+    public void add(List<InputControlType> validation) throws ApiException {
+        // No validation required
+    }
 
-    //Parameter to be list of input controls with input
+    // Parameter to be list of input controls with input
     public abstract void validate(List<String> displayName, List<String> paramValue, String reportName, Integer validationValue) throws ApiException;
 
     public String getValidationMessage(String reportName, List<String> displayNames, ValidationType validationType, String extraMessage) {
         return reportName + " failed in validation for key / keys : " + JsonUtil.serialize(displayNames) + " , validation type : " + validationType
                 + (!StringUtil.isEmpty(extraMessage) ? " message : " + extraMessage : extraMessage);
+    }
+
+    protected String getValueFromQuotes(String value) {
+        return value.substring(1, value.length()-1);
     }
 }

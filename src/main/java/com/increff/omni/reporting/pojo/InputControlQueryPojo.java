@@ -8,7 +8,7 @@ import javax.persistence.*;
 @Entity
 @Setter
 @Getter
-@Table(name = "input_control_query", indexes = {})
+@Table(name = "input_control_query")
 public class InputControlQueryPojo extends AbstractVersionedPojo{
 
     @Id
@@ -17,9 +17,11 @@ public class InputControlQueryPojo extends AbstractVersionedPojo{
     @GeneratedValue(strategy = GenerationType.TABLE, generator = "input_control_query")
     private Integer id;
 
+    @Column(nullable = false, unique = true)
     private Integer controlId;
 
     @Lob
+    @Column(nullable = false)
     private String query;
 
 }

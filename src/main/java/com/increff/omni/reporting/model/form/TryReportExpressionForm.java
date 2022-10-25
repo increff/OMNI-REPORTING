@@ -4,16 +4,12 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.validator.constraints.NotEmpty;
 
-import javax.validation.constraints.NotNull;
+import java.util.Map;
 
 @Getter
 @Setter
-public class ReportExpressionForm {
-
-    @NotNull
-    private Integer reportId;
+public class TryReportExpressionForm {
     @NotEmpty
     private String expression;
-    @NotEmpty
-    private String expressionName;
+    private Map<String, String> paramMap;
 }

@@ -1,6 +1,6 @@
 package com.increff.omni.reporting.util;
 
-import com.increff.omni.reporting.model.SqlParams;
+import com.increff.omni.reporting.model.form.SqlParams;
 import com.nextscm.commons.lang.CmdUtil;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;

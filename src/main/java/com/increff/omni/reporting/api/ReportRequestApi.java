@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -36,8 +37,10 @@ public class ReportRequestApi extends AbstractApi {
         return pojo;
     }
 
-    public List<ReportRequestPojo> getEligibleRequests() {
-        return dao.getEligibleReports(Arrays.asList(ReportRequestStatus.NEW, ReportRequestStatus.STUCK));
+    public List<ReportRequestPojo> getEligibleRequests(int limitForEligibleRequest) {
+        if(limitForEligibleRequest <= 0)
+            return new ArrayList<>();
+        return dao.getEligibleReports(Arrays.asList(ReportRequestStatus.NEW, ReportRequestStatus.STUCK), limitForEligibleRequest);
     }
 
     public void markProcessingIfEligible(Integer id) throws ApiException {
@@ -52,18 +55,17 @@ public class ReportRequestApi extends AbstractApi {
 
     public void markStuck(Integer stuckReportTime) {
         List<ReportRequestPojo> stuck = dao.getStuckReports(stuckReportTime);
-        stuck.forEach(s -> {
-            s.setStatus(ReportRequestStatus.STUCK);
-        });
+        stuck.forEach(s -> s.setStatus(ReportRequestStatus.STUCK));
     }
 
     public void updateStatus(Integer id, ReportRequestStatus status, String filePath) throws ApiException {
         ReportRequestPojo reportRequestPojo = getCheck(id);
         reportRequestPojo.setStatus(status);
         reportRequestPojo.setUrl(filePath);
+        dao.update(reportRequestPojo);
     }
 
-    public List<ReportRequestPojo> getByUserId(int userId, Integer days) {
-        return dao.selectByUserIdAndDays(userId, days);
+    public List<ReportRequestPojo> getByUserId(int userId, Integer limit) {
+        return dao.selectByUserId(userId, limit);
     }
 }

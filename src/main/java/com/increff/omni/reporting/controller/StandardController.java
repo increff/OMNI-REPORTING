@@ -18,10 +18,13 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
+import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 
 
-//TODO handle timezone
 @Api
 @RestController
 @RequestMapping(value = "/standard")
@@ -36,50 +39,49 @@ public class StandardController {
     @Autowired
     private DirectoryDto directoryDto;
 
+    @ApiOperation(value = "Get all available timezones")
+    @RequestMapping(value = "/timeZones", method = RequestMethod.GET)
+    public List<TimeZoneData> getAllAvailableTimeZones() throws ApiException {
+        return reportRequestDto.getAllAvailableTimeZones();
+    }
+
     @ApiOperation(value = "Select controls for a report")
-    @ApiErrorResponses
-    @RequestMapping(value = "/controls", method = RequestMethod.GET)
-    public List<InputControlData> selectByReportId(@RequestParam Integer reportId) {
+    @RequestMapping(value = "/reports/{reportId}/controls", method = RequestMethod.GET)
+    public List<InputControlData> selectByReportId(@PathVariable Integer reportId) throws ApiException {
         return inputControlDto.selectForReport(reportId);
     }
 
     @ApiOperation(value = "Get Reports")
-    @ApiErrorResponses
     @RequestMapping(value = "/reports/orgs/{orgId}", method = RequestMethod.GET)
     public List<ReportData> selectByOrgId(@PathVariable Integer orgId) throws ApiException {
         return reportDto.selectAll(orgId);
     }
 
     @ApiOperation(value = "Get validation group")
-    @ApiErrorResponses
     @RequestMapping(value = "/reports/{reportId}/controls/validations", method = RequestMethod.GET)
     public List<ValidationGroupData> getValidationGroups(@PathVariable Integer reportId) {
         return reportDto.getValidationGroups(reportId);
     }
 
     @ApiOperation(value = "Get All Directories")
-    @ApiErrorResponses
     @RequestMapping(value = "/directories", method = RequestMethod.GET)
     public List<DirectoryData> selectAllDirectories() throws ApiException {
         return directoryDto.getAllDirectories();
     }
 
     @ApiOperation(value = "Request Report")
-    @ApiErrorResponses
     @RequestMapping(value = "/request-report", method = RequestMethod.POST)
     public void requestReport(@RequestBody ReportRequestForm form) throws ApiException {
         reportRequestDto.requestReport(form);
     }
 
     @ApiOperation(value = "Get All Request data")
-    @ApiErrorResponses
     @RequestMapping(value = "/request-report", method = RequestMethod.GET)
-    public List<ReportRequestData> getAll(@RequestParam(required = false) Integer days) throws ApiException {
-        return reportRequestDto.getAll(days);
+    public List<ReportRequestData> getAll(@RequestParam Integer limit) throws ApiException {
+        return reportRequestDto.getAll(limit);
     }
 
     @ApiOperation(value = "Get Result of Request")
-    @ApiErrorResponses
     @RequestMapping(value = "/request-report/{requestId}",method = RequestMethod.GET)
     public void getFile(@PathVariable Integer requestId, HttpServletResponse response) throws ApiException, IOException {
         File file = reportRequestDto.getReportFile(requestId);

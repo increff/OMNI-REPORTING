@@ -4,7 +4,7 @@ import com.increff.omni.reporting.config.AbstractTest;
 import com.increff.omni.reporting.model.data.*;
 import com.increff.omni.reporting.model.form.ConnectionForm;
 import com.increff.omni.reporting.model.form.OrganizationForm;
-import com.increff.omni.reporting.model.form.SchemaForm;
+import com.increff.omni.reporting.model.form.SchemaVersionForm;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
 import org.junit.Test;
@@ -75,12 +75,12 @@ public class OrgDtoTest extends AbstractTest {
     public void testMapToSchema() throws ApiException {
         OrganizationForm form = getOrganizationForm(1, "increff");
         OrganizationData organizationData = dto.add(form);
-        SchemaForm schemaForm = getSchemaForm("9.0.1");
-        SchemaData schemaData = schemaDto.add(schemaForm);
+        SchemaVersionForm schemaVersionForm = getSchemaForm("9.0.1");
+        SchemaVersionData schemaData = schemaDto.add(schemaVersionForm);
         OrgSchemaData data = dto.mapToSchema(organizationData.getId(), schemaData.getId());
         assertNotNull(data);
         assertEquals("9.0.1", data.getSchemaName());
-        assertEquals(schemaData.getId(), data.getSchemaId());
+        assertEquals(schemaData.getId(), data.getSchemaVersionId());
         assertEquals(1, data.getOrgId().intValue());
     }
 
@@ -88,24 +88,24 @@ public class OrgDtoTest extends AbstractTest {
     public void testGetOrgSchemaData() throws ApiException {
         OrganizationForm form = getOrganizationForm(1, "increff");
         OrganizationData organizationData = dto.add(form);
-        SchemaForm schemaForm = getSchemaForm("9.0.1");
-        SchemaData schemaData = schemaDto.add(schemaForm);
+        SchemaVersionForm schemaVersionForm = getSchemaForm("9.0.1");
+        SchemaVersionData schemaData = schemaDto.add(schemaVersionForm);
         OrganizationForm form2 = getOrganizationForm(2, "increff2");
         OrganizationData organizationData2 = dto.add(form2);
-        SchemaForm schemaForm2 = getSchemaForm("9.0.2");
-        SchemaData schemaData2 = schemaDto.add(schemaForm2);
+        SchemaVersionForm schemaVersionForm2 = getSchemaForm("9.0.2");
+        SchemaVersionData schemaData2 = schemaDto.add(schemaVersionForm2);
         dto.mapToSchema(organizationData.getId(), schemaData.getId());
         dto.mapToSchema(organizationData2.getId(), schemaData2.getId());
         List<OrgSchemaData> orgSchemaDataList = dto.selectAllOrgSchema();
         assertEquals(2, orgSchemaDataList.size());
         assertEquals(1, orgSchemaDataList.get(0).getOrgId().intValue());
         assertEquals("9.0.1", orgSchemaDataList.get(0).getSchemaName());
-        assertEquals(schemaData.getId(), orgSchemaDataList.get(0).getSchemaId());
-        assertNotEquals(schemaData2.getId(), orgSchemaDataList.get(0).getSchemaId());
+        assertEquals(schemaData.getId(), orgSchemaDataList.get(0).getSchemaVersionId());
+        assertNotEquals(schemaData2.getId(), orgSchemaDataList.get(0).getSchemaVersionId());
         assertEquals(2, orgSchemaDataList.get(1).getOrgId().intValue());
         assertEquals("9.0.2", orgSchemaDataList.get(1).getSchemaName());
-        assertEquals(schemaData2.getId(), orgSchemaDataList.get(1).getSchemaId());
-        assertNotEquals(schemaData.getId(), orgSchemaDataList.get(1).getSchemaId());
+        assertEquals(schemaData2.getId(), orgSchemaDataList.get(1).getSchemaVersionId());
+        assertNotEquals(schemaData.getId(), orgSchemaDataList.get(1).getSchemaVersionId());
     }
 
     @Test

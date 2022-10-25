@@ -12,9 +12,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 @Configuration
-@EnableScheduling
 @EnableWebMvc
-@EnableAsync
 @ComponentScan(value = {"com.increff.omni.reporting", "com.increff.account.client"},
         excludeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, value = {SpringConfig.class}))
 @PropertySource("classpath:com/increff/omni/reporting/test.properties")

@@ -8,11 +8,12 @@ import javax.persistence.*;
 @Entity
 @Setter
 @Getter
-@Table(name = "report_input_params")
-public class ReportInputParamsPojo extends AbstractVersionedPojo{
+@Table(name = "report_input_params", uniqueConstraints = {
+        @UniqueConstraint(name = "idx_reportRequestId_paramKey", columnNames = {"reportRequestId", "paramKey"})})
+public class ReportInputParamsPojo extends AbstractVersionedPojo {
 
     @Id
-    @TableGenerator(name = "report_input_params", pkColumnValue = "report_input_params", allocationSize = 1,initialValue = 100000)
+    @TableGenerator(name = "report_input_params", pkColumnValue = "report_input_params", allocationSize = 1, initialValue = 100000)
     @GeneratedValue(strategy = GenerationType.TABLE, generator = "report_input_params")
     private Integer id;
 
@@ -22,6 +23,5 @@ public class ReportInputParamsPojo extends AbstractVersionedPojo{
     @Column(nullable = false)
     private String paramKey;
 
-    @Column(nullable = false)
     private String paramValue;
 }

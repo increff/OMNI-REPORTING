@@ -1,18 +1,18 @@
 package com.increff.omni.reporting.helper;
 
-import com.increff.omni.reporting.model.form.SchemaForm;
-import com.increff.omni.reporting.pojo.SchemaPojo;
+import com.increff.omni.reporting.model.form.SchemaVersionForm;
+import com.increff.omni.reporting.pojo.SchemaVersionPojo;
 
 public class SchemaTestHelper {
 
-    public static SchemaForm getSchemaForm(String name) {
-        SchemaForm form = new SchemaForm();
+    public static SchemaVersionForm getSchemaForm(String name) {
+        SchemaVersionForm form = new SchemaVersionForm();
         form.setName(name);
         return form;
     }
 
-    public static SchemaPojo getSchemaPojo(String name) {
-        SchemaPojo pojo = new SchemaPojo();
+    public static SchemaVersionPojo getSchemaPojo(String name) {
+        SchemaVersionPojo pojo = new SchemaVersionPojo();
         pojo.setName(name);
         return pojo;
     }

@@ -1,29 +1,22 @@
 package com.increff.omni.reporting.dto;
 
-import com.increff.omni.reporting.api.ConnectionApi;
-import com.increff.omni.reporting.api.InputControlApi;
-import com.increff.omni.reporting.api.OrgConnectionApi;
-import com.increff.omni.reporting.api.ReportControlsApi;
+import com.increff.omni.reporting.api.*;
 import com.increff.omni.reporting.flow.InputControlFlowApi;
-import com.increff.omni.reporting.job.ReportTaskHelper;
-import com.increff.omni.reporting.model.SqlParams;
 import com.increff.omni.reporting.model.constants.InputControlScope;
+import com.increff.omni.reporting.model.constants.InputControlType;
 import com.increff.omni.reporting.model.data.InputControlData;
 import com.increff.omni.reporting.model.form.InputControlForm;
+import com.increff.omni.reporting.model.form.InputControlUpdateForm;
 import com.increff.omni.reporting.pojo.*;
-import com.increff.omni.reporting.util.SqlCmd;
-import com.mysql.jdbc.Driver;
+import com.nextscm.commons.lang.StringUtil;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
 import com.nextscm.commons.spring.common.ConvertUtil;
-import com.nextscm.commons.spring.server.AbstractDtoApi;
 import lombok.extern.log4j.Log4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import java.io.File;
-import java.sql.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -33,6 +26,9 @@ public class InputControlDto extends AbstractDto {
 
     @Autowired
     private InputControlApi api;
+
+    @Autowired
+    private FolderApi folderApi;
 
     @Autowired
     private InputControlFlowApi flowApi;
@@ -51,43 +47,46 @@ public class InputControlDto extends AbstractDto {
         validate(form);
         InputControlPojo pojo = ConvertUtil.convert(form, InputControlPojo.class);
         pojo = flowApi.add(pojo, form.getQuery(), form.getValues(), form.getReportId());
-        return getInputControlData(pojo);
+        return getInputControlDatas(Collections.singletonList(pojo)).get(0);
     }
 
-    public InputControlData update(Integer id, InputControlForm form) throws ApiException {
-        validate(form);
+    public InputControlData update(Integer id, InputControlUpdateForm form) throws ApiException {
+        validateForEdit(form);
         InputControlPojo pojo = ConvertUtil.convert(form, InputControlPojo.class);
         pojo.setId(id);
-        pojo = flowApi.update(pojo, form.getQuery(), form.getValues(), form.getReportId());
-        return getInputControlData(pojo);
+        pojo = flowApi.update(pojo, form.getQuery(), form.getValues());
+        return getInputControlDatas(Collections.singletonList(pojo)).get(0);
     }
 
-    public List<InputControlData> selectAllGlobal() {
+    public InputControlData getById(Integer id) throws ApiException {
+        InputControlPojo pojo = api.getCheck(id);
+        return getInputControlDatas(Collections.singletonList(pojo)).get(0);
+    }
+
+    public List<InputControlData> selectAllGlobal() throws ApiException {
         List<InputControlPojo> pojos = api.getByScope(InputControlScope.GLOBAL);
         return getInputControlDatas(pojos);
     }
 
-    public List<InputControlData> selectForReport(Integer reportId) {
+    public List<InputControlData> selectForReport(Integer reportId) throws ApiException {
         List<ReportControlsPojo> reportControlsPojos = reportControlsApi.getByReportId(reportId);
         List<Integer> controlIds = reportControlsPojos.stream()
                 .map(ReportControlsPojo::getControlId).collect(Collectors.toList());
 
-        List<InputControlPojo> pojos = api.selectMultiple(controlIds);
+        List<InputControlPojo> pojos = api.selectByIds(controlIds);
 
         return getInputControlDatas(pojos);
     }
 
-    private InputControlData getInputControlData(InputControlPojo pojo) {
-        return getInputControlDatas(Collections.singletonList(pojo)).get(0);
-    }
-
-    private List<InputControlData> getInputControlDatas(List<InputControlPojo> pojos) {
+    private List<InputControlData> getInputControlDatas(List<InputControlPojo> pojos) throws ApiException {
         if (CollectionUtils.isEmpty(pojos))
             return new ArrayList<>();
 
         List<Integer> controlIds = pojos.stream()
                 .map(InputControlPojo::getId).collect(Collectors.toList());
 
+        OrgConnectionPojo orgConnectionPojo = orgConnectionApi.getCheckByOrgId(getOrgId());
+        ConnectionPojo connectionPojo = connectionApi.getCheck(orgConnectionPojo.getConnectionId());
         //We need queries
         List<InputControlQueryPojo> queryPojos = api.selectControlQueries(controlIds);
         Map<Integer, String> controlToQueryMapping;
@@ -110,57 +109,58 @@ public class InputControlDto extends AbstractDto {
 
         return pojos.stream().map(p -> {
             InputControlData data = ConvertUtil.convert(p, InputControlData.class);
-            data.setQuery(controlToQueryMapping.getOrDefault(p.getId(), null));
-            data.setValues(controlToValuesMapping.getOrDefault(p.getId(), null));
+            data.setQuery(controlToQueryMapping.getOrDefault(p.getId(), ""));
             if (Objects.nonNull(data.getQuery())) {
                 try {
-                    data.setQueryValues(getValuesFromQuery(data.getQuery()));
+                    data.setQueryValues(flowApi.getValuesFromQuery(data.getQuery(), connectionPojo));
                 } catch (ApiException e) {
-                    e.printStackTrace();
+                    log.error("Error while getting values from query : ", e);
                 }
             } else {
-                Map<String, String> valuesMap = new HashMap<>();
-                data.getValues().forEach(m -> {
-                    valuesMap.put(m, m);
-                });
-                data.setQueryValues(valuesMap);
+                List<String> values = controlToValuesMapping.getOrDefault(p.getId(), null);
+                if (Objects.isNull(values) || values.isEmpty()) {
+                    data.setQueryValues(new HashMap<>());
+                } else {
+                    Map<String, String> valuesMap = new HashMap<>();
+                    values.forEach(m -> valuesMap.put(m, m));
+                    data.setQueryValues(valuesMap);
+                }
             }
             return data;
         }).collect(Collectors.toList());
     }
 
-    private Map<String, String> getValuesFromQuery(String query) throws ApiException {
-        OrgConnectionPojo orgConnectionPojo = orgConnectionApi.getCheckByOrgId(getOrgId());
-        ConnectionPojo connectionPojo = connectionApi.getCheck(orgConnectionPojo.getConnectionId());
-        return getInputParamValueMap(connectionPojo, query);
-    }
-
     private void validate(InputControlForm form) throws ApiException {
         checkValid(form);
-        validateForControlType(form);
+        validateForControlType(form.getQuery(), form.getType(), form.getValues());
         validateForControlScope(form);
     }
 
+    private void validateForEdit(InputControlUpdateForm form) throws ApiException {
+        checkValid(form);
+        validateForControlType(form.getQuery(), form.getType(), form.getValues());
+    }
+
     private void validateForControlScope(InputControlForm form) throws ApiException {
-        if (form.getScope().equals(InputControlScope.LOCAL) && form.getReportId() == null)
+        if (form.getScope().equals(InputControlScope.LOCAL) && Objects.isNull(form.getReportId()))
             throw new ApiException(ApiStatus.BAD_DATA, "Report is mandatory for Local Scope Control");
     }
 
-    private void validateForControlType(InputControlForm form) throws ApiException {
-        switch (form.getType()) {
+    private void validateForControlType(String query, InputControlType type, List<String> values) throws ApiException {
+        switch (type) {
             case TEXT:
             case NUMBER:
             case DATE:
-                if (form.getValues() != null || form.getQuery() != null)
+                if (!values.isEmpty() || !StringUtil.isEmpty(query))
                     throw new ApiException(ApiStatus.BAD_DATA, "For Text, Number and Date, neither query nor value is needed");
                 break;
 
             case SINGLE_SELECT:
             case MULTI_SELECT:
-                if (form.getValues() == null && form.getQuery() == null)
+                if (values.isEmpty() && StringUtil.isEmpty(query))
                     throw new ApiException(ApiStatus.BAD_DATA, "For Select, either query or value is mandatory");
-                if (form.getValues() != null && form.getQuery() != null)
-                    throw new ApiException(ApiStatus.BAD_DATA, "For Select, either query or value is mandatory");
+                if (!values.isEmpty() && !StringUtil.isEmpty(query))
+                    throw new ApiException(ApiStatus.BAD_DATA, "For Select, either query or value one is mandatory");
                 break;
             default:
                 throw new ApiException(ApiStatus.BAD_DATA, "Unknown input control type");

@@ -16,18 +16,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
-
-import static com.increff.omni.reporting.dto.CommonDtoHelper.getValidationGroupPojoList;
 
 @Service
 @Transactional(rollbackFor = ApiException.class)
 public class ReportFlowApi extends AbstractApi {
 
     @Autowired
-    private SchemaApi schemaApi;
+    private SchemaVersionApi schemaVersionApi;
 
     @Autowired
     private OrgSchemaApi orgSchemaApi;
@@ -50,7 +49,6 @@ public class ReportFlowApi extends AbstractApi {
     @Autowired
     private SingleMandatoryValidator singleMandatoryValidator;
 
-
     @Autowired
     private ReportApi api;
 
@@ -70,7 +68,7 @@ public class ReportFlowApi extends AbstractApi {
 
     public ReportPojo editReport(ReportPojo pojo) throws ApiException {
         ReportPojo existing = api.getCheck(pojo.getId());
-        validateForEdit(pojo, existing);
+        validateForEdit(pojo);
         // Delete custom report access if transition is happening from CUSTOM to STANDARD
         if (existing.getType().equals(ReportType.CUSTOM) && pojo.getType().equals(ReportType.STANDARD))
             customReportAccessApi.deleteByReportId(pojo.getId());
@@ -82,15 +80,6 @@ public class ReportFlowApi extends AbstractApi {
         return queryApi.upsertQuery(pojo);
     }
 
-    public void deleteReportControl(Integer reportId, Integer reportControlId) throws ApiException {
-        api.getCheck(reportId);
-        reportControlsApi.getCheck(reportControlId);
-        List<ReportValidationGroupPojo> validationGroupPojoList = reportValidationGroupApi
-                .getByReportIdAndReportControlId(reportId, reportControlId);
-        reportValidationGroupApi.delete(validationGroupPojoList);
-        reportControlsApi.delete(reportControlId);
-    }
-
     public void mapControlToReport(ReportControlsPojo pojo) throws ApiException {
         validateControlReportMapping(pojo);
         reportControlsApi.add(pojo);
@@ -98,15 +87,15 @@ public class ReportFlowApi extends AbstractApi {
 
     public List<ReportPojo> getAll(Integer orgId) throws ApiException {
 
-        OrgSchemaPojo orgSchemaPojo = orgSchemaApi.getCheckByOrgId(orgId);
+        OrgSchemaVersionPojo orgSchemaVersionPojo = orgSchemaApi.getCheckByOrgId(orgId);
         //All standard
-        List<ReportPojo> standard = api.getByTypeAndSchema(ReportType.STANDARD, orgSchemaPojo.getSchemaId());
+        List<ReportPojo> standard = api.getByTypeAndSchema(ReportType.STANDARD, orgSchemaVersionPojo.getSchemaVersionId());
 
         //All custom
         List<CustomReportAccessPojo> customAccess = customReportAccessApi.getByOrgId(orgId);
         List<Integer> customIds = customAccess.stream().map(CustomReportAccessPojo::getReportId).collect(Collectors.toList());
 
-        List<ReportPojo> custom = api.getByIdsAndSchema(customIds, orgSchemaPojo.getSchemaId());
+        List<ReportPojo> custom = api.getByIdsAndSchema(customIds, orgSchemaVersionPojo.getSchemaVersionId());
 
         //combined 2 list
         standard.addAll(custom);
@@ -115,12 +104,9 @@ public class ReportFlowApi extends AbstractApi {
 
     public void addValidationGroup(Integer reportId, ValidationGroupForm groupForm) throws ApiException {
         validate(reportId, groupForm);
-        List<InputControlPojo> inputControlPojoList = inputControlApi.selectMultiple(groupForm.getReportControlIds());
-        List<InputControlType> controlTypeList = inputControlPojoList.stream().map(InputControlPojo::getType)
-                .collect(Collectors.toList());
+        List<InputControlPojo> inputControlPojoList = inputControlApi.selectByIds(groupForm.getControlIds());
+        List<InputControlType> controlTypeList = inputControlPojoList.stream().map(InputControlPojo::getType).collect(Collectors.toList());
         switch (groupForm.getValidationType()) {
-            case NON_MANDATORY:
-                break;
             case MANDATORY:
                 mandatoryValidator.add(controlTypeList);
                 break;
@@ -130,17 +116,29 @@ public class ReportFlowApi extends AbstractApi {
             case SINGLE_MANDATORY:
                 singleMandatoryValidator.add(controlTypeList);
                 break;
+            default:
+                throw new ApiException(ApiStatus.BAD_DATA, "Invalid Validation Type");
         }
         List<ReportValidationGroupPojo> validationGroupPojoList = getValidationGroupPojoList(groupForm, reportId);
         reportValidationGroupApi.addAll(validationGroupPojoList);
     }
 
+    public void deleteReportControl(Integer reportId, Integer controlId) throws ApiException {
+        api.getCheck(reportId);
+        ReportControlsPojo pojo = reportControlsApi.getByReportAndControlId(reportId, controlId);
+        checkNotNull(pojo, "No report control exist with control id : " + controlId);
+        reportValidationGroupApi.deleteByReportIdAndReportControlId(reportId, pojo.getId());
+        reportControlsApi.delete(pojo.getId());
+    }
+
     private void validate(Integer reportId, ValidationGroupForm groupForm) throws ApiException {
         api.getCheck(reportId);
-        for (Integer reportControlId : groupForm.getReportControlIds())
-            reportControlsApi.getCheck(reportControlId);
-        ReportValidationGroupPojo pojo = reportValidationGroupApi.getByNameAndReportId(reportId, groupForm.getGroupName());
-        if (Objects.nonNull(pojo))
+        for (Integer controlId : groupForm.getControlIds()) {
+            ReportControlsPojo pojo = reportControlsApi.getByReportAndControlId(reportId, controlId);
+            checkNotNull(pojo, "No report control exist with control id : " + controlId);
+        }
+        List<ReportValidationGroupPojo> pojoList = reportValidationGroupApi.getByNameAndReportId(reportId, groupForm.getGroupName());
+        if (!pojoList.isEmpty())
             throw new ApiException(ApiStatus.BAD_DATA, "Group name already exist for given report, group name : " + groupForm.getGroupName());
     }
 
@@ -153,26 +151,39 @@ public class ReportFlowApi extends AbstractApi {
             throw new ApiException(ApiStatus.BAD_DATA, "Only Global Control can be mapped to a report");
     }
 
-    private void validateForEdit(ReportPojo pojo, ReportPojo existing) throws ApiException {
+    private void validateForEdit(ReportPojo pojo) throws ApiException {
         directoryApi.getCheck(pojo.getDirectoryId());
-        schemaApi.getCheck(pojo.getSchemaId());
+        schemaVersionApi.getCheck(pojo.getSchemaVersionId());
 
-        //validating if requested name is already present
-        if (!pojo.getName().equals(existing.getName())) {
-            ReportPojo existingByName = api.getByName(pojo.getName());
-            if (existingByName != null)
-                throw new ApiException(ApiStatus.BAD_DATA, "Report already present with same name");
-        }
+        // validating if requested name is already present
+        ReportPojo existingByName = api.getByNameAndSchema(pojo.getName(), pojo.getSchemaVersionId());
+        if (Objects.nonNull(existingByName) && !existingByName.getId().equals(pojo.getId()))
+            throw new ApiException(ApiStatus.BAD_DATA, "Report already present with same name and schema version");
     }
 
     private void validate(ReportPojo pojo) throws ApiException {
         directoryApi.getCheck(pojo.getDirectoryId());
-        schemaApi.getCheck(pojo.getSchemaId());
+        schemaVersionApi.getCheck(pojo.getSchemaVersionId());
 
-        //get all
-        ReportPojo existing = api.getByName(pojo.getName());
+        ReportPojo existing = api.getByNameAndSchema(pojo.getName(), pojo.getSchemaVersionId());
         if (existing != null)
-            throw new ApiException(ApiStatus.BAD_DATA, "Report already present with same name");
+            throw new ApiException(ApiStatus.BAD_DATA, "Report already present with same name and schema version");
 
     }
+
+    private List<ReportValidationGroupPojo> getValidationGroupPojoList(ValidationGroupForm groupForm, Integer reportId) {
+        List<ReportValidationGroupPojo> groupPojoList = new ArrayList<>();
+        for(Integer controlId : groupForm.getControlIds()) {
+            ReportValidationGroupPojo pojo = new ReportValidationGroupPojo();
+            pojo.setGroupName(groupForm.getGroupName());
+            pojo.setReportId(reportId);
+            ReportControlsPojo controlsPojo = reportControlsApi.getByReportAndControlId(reportId, controlId);
+            pojo.setReportControlId(controlsPojo.getId());
+            pojo.setType(groupForm.getValidationType());
+            pojo.setValidationValue(groupForm.getValidationValue());
+            groupPojoList.add(pojo);
+        }
+        return groupPojoList;
+    }
+
 }

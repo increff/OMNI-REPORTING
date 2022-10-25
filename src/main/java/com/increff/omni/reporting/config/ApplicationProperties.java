@@ -16,11 +16,16 @@ public class ApplicationProperties {
     @Value("${async.maxPoolSize:200}")
     private Integer maxPoolSize;
 
-    @Value("${async.queueCapacity:1000}")
+    // Reason for default queue capacity 0 is we have implemented report job in such
+    // a way that if we have free core pool then only we will assign a thread
+    @Value("${async.queueCapacity:0}")
     private Integer queueCapacity;
 
-    @Value("${stuck.report.time:10}")
+    @Value("${stuck.report.time.minutes:10}")
     private Integer stuckReportTime;
+
+    @Value("${max.execution.time.minutes:5}")
+    private Integer maxExecutionTime;
 
     @Value("${gcp.baseUrl}")
     private String gcpBaseUrl;
@@ -31,10 +36,13 @@ public class ApplicationProperties {
     @Value("${gcp.filePath}")
     private String gcpFilePath;
 
-    @Value("${root.directory}")
+    @Value("${root.directory:root}")
     private String rootDirectory;
 
     @Value("${increff.orgId}")
     private Integer increffOrgId;
+
+    @Value("${query.outDir:omni-reporting-files}")
+    private String outDir;
 
 }

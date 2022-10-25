@@ -1,5 +1,6 @@
 package com.increff.omni.reporting.dao;
 
+import com.increff.omni.reporting.pojo.InputControlPojo;
 import com.increff.omni.reporting.pojo.ReportControlsPojo;
 import com.increff.omni.reporting.pojo.ReportValidationGroupPojo;
 import com.nextscm.commons.spring.db.AbstractDao;
@@ -16,14 +17,18 @@ import java.util.List;
 @Transactional
 public class ReportControlsDao extends AbstractDao<ReportControlsPojo> {
 
-    private static final String selectByReportAndControl = "SELECT r FROM ReportControlsPojo r" //
-            + " WHERE r.reportId = :reportId and r.controlId = :controlId";
-
     public ReportControlsPojo select(Integer reportId, Integer controlId) {
-        TypedQuery<ReportControlsPojo> q = createJpqlQuery(selectByReportAndControl);
-        q.setParameter("reportId", reportId);
-        q.setParameter("controlId", controlId);
-        return selectSingleOrNull(q);
+        CriteriaBuilder cb = this.em.getCriteriaBuilder();
+        CriteriaQuery<ReportControlsPojo> query = cb.createQuery(ReportControlsPojo.class);
+        Root<ReportControlsPojo> root = query.from(ReportControlsPojo.class);
+        query.where(
+                cb.and(
+                        cb.equal(root.get("reportId"), reportId),
+                        cb.equal(root.get("controlId"), controlId)
+                )
+        );
+        TypedQuery<ReportControlsPojo> tQuery = createQuery(query);
+        return selectSingleOrNull(tQuery);
     }
 
     public List<ReportControlsPojo> selectByIds(List<Integer> reportControlIds) {

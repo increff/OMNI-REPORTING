@@ -1,14 +1,12 @@
 package com.increff.omni.reporting.dto;
 
 import com.increff.omni.reporting.api.*;
-import com.increff.omni.reporting.dao.ReportExpressionDao;
 import com.increff.omni.reporting.flow.ReportFlowApi;
+import com.increff.omni.reporting.flow.ReportRequestFlowApi;
 import com.increff.omni.reporting.model.constants.ValidationType;
 import com.increff.omni.reporting.model.data.ReportData;
-import com.increff.omni.reporting.model.data.ReportExpressionData;
 import com.increff.omni.reporting.model.data.ReportQueryData;
 import com.increff.omni.reporting.model.data.ValidationGroupData;
-import com.increff.omni.reporting.model.form.ReportExpressionForm;
 import com.increff.omni.reporting.model.form.ReportForm;
 import com.increff.omni.reporting.model.form.ReportQueryForm;
 import com.increff.omni.reporting.model.form.ValidationGroupForm;
@@ -39,7 +37,9 @@ public class ReportDto extends AbstractDtoApi {
     @Autowired
     private ReportApi reportApi;
     @Autowired
-    private ReportExpressionApi reportExpressionApi;
+    private ReportRequestFlowApi reportRequestFlowApi;
+    @Autowired
+    private ReportQueryApi reportQueryApi;
 
     public ReportData add(ReportForm form) throws ApiException {
         checkValid(form);
@@ -69,30 +69,17 @@ public class ReportDto extends AbstractDtoApi {
         return ConvertUtil.convert(pojo, ReportQueryData.class);
     }
 
+    public ReportQueryData getQuery(Integer reportId) throws ApiException {
+        reportApi.getCheck(reportId);
+        ReportQueryData data = new ReportQueryData();
+        ReportQueryPojo queryPojo = reportQueryApi.getByReportId(reportId);
+        data.setQuery(Objects.isNull(queryPojo) ? "" : queryPojo.getQuery());
+        return data;
+    }
+
     public List<ReportData> selectAll(Integer orgId) throws ApiException {
         List<ReportPojo> pojos = flowApi.getAll(orgId);
         return ConvertUtil.convert(pojos, ReportData.class);
-    }
-
-    public void addReportExpression(ReportExpressionForm form) throws ApiException {
-        checkValid(form);
-        ReportExpressionPojo pojo = ConvertUtil.convert(form, ReportExpressionPojo.class);
-        reportExpressionApi.addReportExpression(pojo);
-    }
-
-    public void updateReportExpression(ReportExpressionForm form) throws ApiException {
-        checkValid(form);
-        ReportExpressionPojo pojo = ConvertUtil.convert(form, ReportExpressionPojo.class);
-        reportExpressionApi.updateReportExpression(pojo);
-    }
-
-    public void deleteReportExpression(Integer id) throws ApiException {
-        reportExpressionApi.deleteById(id);
-    }
-
-    public List<ReportExpressionData> getAllExpressionsByReport(Integer reportId) {
-        List<ReportExpressionPojo> pojos = reportExpressionApi.getAllByReportId(reportId);
-        return ConvertUtil.convert(pojos, ReportExpressionData.class);
     }
 
     public void mapToControl(Integer reportId, Integer controlId) throws ApiException {
@@ -102,8 +89,8 @@ public class ReportDto extends AbstractDtoApi {
         flowApi.mapControlToReport(pojo);
     }
 
-    public void deleteReportControl(Integer reportId, Integer reportControlId) throws ApiException {
-        flowApi.deleteReportControl(reportId, reportControlId);
+    public void deleteReportControl(Integer reportId, Integer controlId) throws ApiException {
+        flowApi.deleteReportControl(reportId, controlId);
     }
 
     public void addValidationGroup(Integer reportId, ValidationGroupForm groupForm) throws ApiException {
@@ -124,7 +111,7 @@ public class ReportDto extends AbstractDtoApi {
                     .map(ReportValidationGroupPojo::getReportControlId).collect(Collectors.toList()));
             List<Integer> controlIds = reportControlsPojoList.stream()
                     .map(ReportControlsPojo::getControlId).collect(Collectors.toList());
-            List<InputControlPojo> pojos = inputControlApi.selectMultiple(controlIds);
+            List<InputControlPojo> pojos = inputControlApi.selectByIds(controlIds);
             data.setValidationValue(v.getValidationValue());
             data.setGroupName(v.getGroupName());
             data.setValidationType(v.getType());
@@ -138,8 +125,8 @@ public class ReportDto extends AbstractDtoApi {
         checkValid(groupForm);
         if (Objects.isNull(reportId))
             throw new ApiException(ApiStatus.BAD_DATA, "Report id cannot be null");
-        if (groupForm.getReportControlIds().stream().distinct().count() != groupForm.getReportControlIds().size())
-            throw new ApiException(ApiStatus.BAD_DATA, "Validation group contains duplicate report control ids");
+        if (groupForm.getControlIds().stream().distinct().count() != groupForm.getControlIds().size())
+            throw new ApiException(ApiStatus.BAD_DATA, "Validation group contains duplicate control ids");
         if (groupForm.getValidationType().equals(ValidationType.DATE_RANGE) && groupForm.getValidationValue() <= 0)
             throw new ApiException(ApiStatus.BAD_DATA, "Date range validation should have positive validation value");
     }

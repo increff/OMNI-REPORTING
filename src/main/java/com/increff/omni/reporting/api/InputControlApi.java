@@ -38,18 +38,7 @@ public class InputControlApi extends AbstractApi {
 
         validateControlAddition(pojo);
         dao.persist(pojo);
-
-        if(Objects.nonNull(queryPojo)){
-            queryPojo.setControlId(pojo.getId());
-            queryDao.persist(queryPojo);
-        }
-
-        if(!CollectionUtils.isEmpty(valuesPojo)){
-            valuesPojo.forEach(v -> {
-                v.setControlId(pojo.getId());
-                valuesDao.persist(v);
-            });
-        }
+        addQueryOrValues(queryPojo, pojo, valuesPojo);
         return pojo;
     }
 
@@ -58,26 +47,21 @@ public class InputControlApi extends AbstractApi {
         validateControlAdditionForEdit(pojo);
         copyToExisting(ex, pojo);
         dao.update(ex);
-
-        if(Objects.nonNull(queryPojo)){
-            List<InputControlQueryPojo> queryPojoList = queryDao.selectMultiple("controlId", pojo.getId());
-            queryPojoList.forEach(q -> queryDao.remove(q));
-            queryPojo.setControlId(pojo.getId());
-            queryDao.persist(queryPojo);
+        InputControlQueryPojo exQuery = selectControlQuery(pojo.getId());
+        if(Objects.nonNull(exQuery)) {
+            queryDao.remove(exQuery.getId());
+            queryDao.flush();
         }
-
-        if(!CollectionUtils.isEmpty(valuesList)){
-            List<InputControlValuesPojo> valuesPojoList = valuesDao.selectMultiple("controlId", pojo.getId());
-            valuesPojoList.forEach(q -> valuesDao.remove(q));
-            valuesList.forEach(v -> {
-                v.setControlId(pojo.getId());
-                valuesDao.persist(v);
-            });
-        }
+        List<InputControlValuesPojo> valuesPojoList = valuesDao.selectMultiple("controlId", pojo.getId());
+        valuesPojoList.forEach(v -> {
+            valuesDao.remove(v.getId());
+        });
+        valuesDao.flush();
+        addQueryOrValues(queryPojo, pojo, valuesList);
         return pojo;
     }
 
-    public List<InputControlPojo> selectMultiple(List<Integer> ids){
+    public List<InputControlPojo> selectByIds(List<Integer> ids){
         if(CollectionUtils.isEmpty(ids))
             return new ArrayList<>();
         return dao.selectMultiple(ids);
@@ -107,6 +91,10 @@ public class InputControlApi extends AbstractApi {
         return queryDao.selectMultiple(controlIds);
     }
 
+    public InputControlQueryPojo selectControlQuery(Integer controlId) {
+        return queryDao.select("controlId", controlId);
+    }
+
     public List<InputControlValuesPojo> selectControlValues(List<Integer> controlIds){
         if(CollectionUtils.isEmpty(controlIds))
             return new ArrayList<>();
@@ -125,6 +113,20 @@ public class InputControlApi extends AbstractApi {
                     " display name or param name");
     }
 
+    private void addQueryOrValues(InputControlQueryPojo queryPojo, InputControlPojo pojo, List<InputControlValuesPojo> valuesList) {
+        if(Objects.nonNull(queryPojo)){
+            queryPojo.setControlId(pojo.getId());
+            queryDao.persist(queryPojo);
+        }
+
+        if(!CollectionUtils.isEmpty(valuesList)){
+            valuesList.forEach(v -> {
+                v.setControlId(pojo.getId());
+                valuesDao.persist(v);
+            });
+        }
+    }
+
     private void validateControlAdditionForEdit(InputControlPojo pojo) throws ApiException {
         InputControlPojo existingByName =
                 getByScopeAndDisplayName(InputControlScope.GLOBAL, pojo.getDisplayName());
@@ -139,7 +141,6 @@ public class InputControlApi extends AbstractApi {
     }
 
     private void copyToExisting(InputControlPojo ex, InputControlPojo pojo) {
-        ex.setScope(pojo.getScope());
         ex.setType(pojo.getType());
         ex.setParamName(pojo.getParamName());
         ex.setDisplayName(pojo.getDisplayName());

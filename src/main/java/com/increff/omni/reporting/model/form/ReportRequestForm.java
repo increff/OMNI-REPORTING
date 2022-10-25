@@ -9,7 +9,8 @@ import java.util.Map;
 @Getter
 public class ReportRequestForm {
 
-    Integer reportId;
-    Map<String, String> paramMap;
+    private Integer reportId;
+    private String timezone = "UTC";
+    private Map<String, String> paramMap;
 
 }

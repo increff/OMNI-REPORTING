@@ -29,7 +29,7 @@ public class AdminSecurityConfig extends WebSecurityConfigurerAdapter {
 
         http// Match only these URLs
                 .requestMatchers()//
-                .antMatchers("/admin/**")
+                .antMatchers("/admin1/**")
                 .and().authorizeRequests()//
                 .antMatchers("/admin/**").hasAnyAuthority(APP_ADMIN)//
                 // Ignore CSRF and CORS

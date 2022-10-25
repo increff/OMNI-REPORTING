@@ -5,6 +5,7 @@ import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -21,6 +22,11 @@ import java.util.Collections;
 @Transactional
 public abstract class AbstractTest {
 
+    @Value("${testdb.username}")
+    protected String username;
+
+    @Value("${testdb.password}")
+    protected String password;
 
     @Before
     public void setUp() {
@@ -31,9 +37,9 @@ public abstract class AbstractTest {
     private void setSecurityContext() {
         Authentication authentication = Mockito.mock(Authentication.class);
         UserPrincipal principal = new UserPrincipal();
-        principal.setDomainId(1);
+        principal.setDomainId(100001);
         principal.setDomainName("increff");
-        principal.setId(1);
+        principal.setId(100001);
         principal.setUsername("test_user");
         principal.setAppName("saas");
         principal.setEmail("test_email@increff.com");

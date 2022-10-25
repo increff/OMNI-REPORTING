@@ -23,8 +23,7 @@ public class DbConfig {
 
 	public static final String PACKAGE_POJO = "com.increff.omni.reporting.pojo";
 
-	//TODO follow default values
-	@Value("${jdbc.driverClassName}")
+	@Value("${jdbc.driverClassName:com.mysql.jdbc.Driver}")
 	private String jdbcDriver;
 	@Value("${jdbc.url}")
 	private String jdbcUrl;
@@ -32,10 +31,12 @@ public class DbConfig {
 	private String jdbcUsername;
 	@Value("${jdbc.password}")
 	private String jdbcPassword;
-	@Value("${hibernate.dialect}")
+	@Value("${hibernate.dialect:org.hibernate.dialect.MySQLDialect}")
 	private String hibernateDialect;
-	@Value("${hibernate.show_sql}")
+	@Value("${hibernate.show_sql:false}")
 	private String hibernateShowSql;
+	@Value("${hibernate.jdbc.batch_size:50}")
+	private String hibernateJdbcBatchSize;
 	@Value("${hibernate.hbm2ddl.auto}")
 	private String hibernateHbm2ddl;
 	@Value("${hibernate.jdbc.time_zone}")
@@ -61,6 +62,8 @@ public class DbConfig {
 		jpaProperties.put("hibernate.show_sql", hibernateShowSql);
 		jpaProperties.put("hibernate.hbm2ddl.auto", hibernateHbm2ddl);
 		jpaProperties.put("hibernate.jdbc.time_zone", hibernateTimezone);
+		jpaProperties.put("hibernate.jdbc.batch_size", hibernateJdbcBatchSize);
+		jpaProperties.put("hibernate.cache.use_second_level_cache", false);
 		jpaProperties.put("hibernate.physical_naming_strategy", new SnakeCaseNamingStrategy(""));
 		bean.setJpaProperties(jpaProperties);
 		return bean;

@@ -8,14 +8,14 @@ import javax.persistence.*;
 @Entity
 @Setter
 @Getter
-@Table(name = "connection", indexes = {})
+@Table(name = "connection")
 public class ConnectionPojo extends AbstractVersionedPojo{
 
     @Id
     @TableGenerator(name = "connection", pkColumnValue = "connection", allocationSize = 1,initialValue = 100000)
     @GeneratedValue(strategy = GenerationType.TABLE, generator = "connection")
     private Integer id;
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String name;
     @Column(nullable = false)
     private String host;

@@ -1,25 +1,172 @@
 package com.increff.omni.reporting.dto;
 
+import com.increff.omni.reporting.api.ReportApi;
 import com.increff.omni.reporting.config.AbstractTest;
 import com.increff.omni.reporting.model.constants.InputControlScope;
 import com.increff.omni.reporting.model.constants.InputControlType;
-import com.increff.omni.reporting.model.constants.ValidationType;
+import com.increff.omni.reporting.model.constants.ReportType;
+import com.increff.omni.reporting.model.data.ConnectionData;
+import com.increff.omni.reporting.model.data.InputControlData;
+import com.increff.omni.reporting.model.data.OrgConnectionData;
+import com.increff.omni.reporting.model.data.OrganizationData;
+import com.increff.omni.reporting.model.form.ConnectionForm;
 import com.increff.omni.reporting.model.form.InputControlForm;
+import com.increff.omni.reporting.model.form.InputControlUpdateForm;
+import com.increff.omni.reporting.model.form.OrganizationForm;
+import com.increff.omni.reporting.pojo.ReportPojo;
 import com.nextscm.commons.spring.common.ApiException;
+import com.nextscm.commons.spring.common.ApiStatus;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
+import static com.increff.omni.reporting.helper.ConnectionTestHelper.getConnectionForm;
 import static com.increff.omni.reporting.helper.InputControlTestHelper.getInputControlForm;
+import static com.increff.omni.reporting.helper.InputControlTestHelper.getInputControlUpdateForm;
+import static com.increff.omni.reporting.helper.OrgTestHelper.getOrganizationForm;
+import static com.increff.omni.reporting.helper.ReportTestHelper.getReportPojo;
+import static org.junit.Assert.assertEquals;
 
 public class InputControlDtoTest extends AbstractTest {
 
     @Autowired
     private InputControlDto dto;
+    @Autowired
+    private OrganizationDto organizationDto;
+    @Autowired
+    private ConnectionDto connectionDto;
+    @Autowired
+    private ReportApi reportApi;
+
+    private void commonSetup() throws ApiException {
+        OrganizationForm organizationForm = getOrganizationForm(100001, "increff");
+        OrganizationData organizationData = organizationDto.add(organizationForm);
+        ConnectionForm connectionForm = getConnectionForm("dev-db.increff.com", "Dev DB", "db.user", "db.password");
+        ConnectionData connectionData = connectionDto.add(connectionForm);
+        organizationDto.mapToConnection(organizationData.getId(), connectionData.getId());
+    }
 
     @Test
     public void testAddInputControl() throws ApiException {
+        commonSetup();
+        InputControlForm form = getInputControlForm("Client Id", "clientId", InputControlScope.GLOBAL
+                , InputControlType.TEXT, new ArrayList<>(), null, null);
+        InputControlData data = dto.add(form);
+        assertEquals("Client Id", data.getDisplayName());
+        assertEquals("clientId", data.getParamName());
+        assertEquals(InputControlScope.GLOBAL, data.getScope());
+        assertEquals(InputControlType.TEXT, data.getType());
+        assertEquals("", data.getQuery());
+        assertEquals(new HashMap<>(), data.getQueryValues());
+    }
+
+    @Test(expected = ApiException.class)
+    public void testAddInputControlForInvalidQuery() throws ApiException {
+        commonSetup();
+        InputControlForm form = getInputControlForm("Client Id", "clientId", InputControlScope.GLOBAL
+                , InputControlType.TEXT, new ArrayList<>(), "select version();", null);
+        try {
+            dto.add(form);
+        } catch (ApiException e) {
+            assertEquals(ApiStatus.BAD_DATA, e.getStatus());
+            assertEquals("For Text, Number and Date, neither query nor value is needed", e.getMessage());
+            throw e;
+        }
+    }
+
+    @Test(expected = ApiException.class)
+    public void testAddInputControlForWrongMultiSelectCase1() throws ApiException {
+        commonSetup();
+        InputControlForm form = getInputControlForm("Client Id", "clientId", InputControlScope.GLOBAL
+                , InputControlType.MULTI_SELECT, new ArrayList<>(), "", null);
+        try {
+            dto.add(form);
+        } catch (ApiException e) {
+            assertEquals(ApiStatus.BAD_DATA, e.getStatus());
+            assertEquals("For Select, either query or value is mandatory", e.getMessage());
+            throw e;
+        }
+    }
+
+    @Test(expected = ApiException.class)
+    public void testAddInputControlForWrongMultiSelectCase2() throws ApiException {
+        commonSetup();
+        InputControlForm form = getInputControlForm("Client Id", "clientId", InputControlScope.GLOBAL
+                , InputControlType.MULTI_SELECT, Arrays.asList("Live", "Packed"), "select version();", null);
+        try {
+            dto.add(form);
+        } catch (ApiException e) {
+            assertEquals(ApiStatus.BAD_DATA, e.getStatus());
+            assertEquals("For Select, either query or value one is mandatory", e.getMessage());
+            throw e;
+        }
+    }
+
+    @Test(expected = ApiException.class)
+    public void testAddLocalInputControl() throws ApiException {
+        commonSetup();
+        InputControlForm form = getInputControlForm("Client Id", "clientId", InputControlScope.LOCAL
+                , InputControlType.MULTI_SELECT, new ArrayList<>(), "select version();", null);
+        try {
+            dto.add(form);
+        } catch (ApiException e) {
+            assertEquals(ApiStatus.BAD_DATA, e.getStatus());
+            assertEquals("Report is mandatory for Local Scope Control", e.getMessage());
+            throw e;
+        }
+    }
+
+    @Test
+    public void testUpdateControl() throws ApiException {
+        commonSetup();
+        InputControlForm form = getInputControlForm("Client Id", "clientId", InputControlScope.GLOBAL
+                , InputControlType.TEXT, new ArrayList<>(), null, null);
+        InputControlData data1 = dto.add(form);
+        InputControlUpdateForm updateForm = getInputControlUpdateForm("Client id 2", "clientId2"
+        , InputControlType.NUMBER, new ArrayList<>(), null);
+        dto.update(data1.getId(), updateForm);
+        InputControlData data = dto.getById(data1.getId());
+        assertEquals("Client id 2", data.getDisplayName());
+        assertEquals("clientId2", data.getParamName());
+        assertEquals(InputControlScope.GLOBAL, data.getScope());
+        assertEquals(InputControlType.NUMBER, data.getType());
+        assertEquals("", data.getQuery());
+        assertEquals(new HashMap<>(), data.getQueryValues());
+    }
+
+    @Test
+    public void testSelect() throws ApiException {
+        commonSetup();
+        InputControlForm form = getInputControlForm("Client Id", "clientId", InputControlScope.GLOBAL
+                , InputControlType.DATE, new ArrayList<>(), null, null);
+        dto.add(form);
+        ReportPojo pojo = getReportPojo("report 1", ReportType.STANDARD, 100001, 100001);
+        reportApi.add(pojo);
+        form = getInputControlForm("Client Id 2", "clientId2", InputControlScope.LOCAL
+                , InputControlType.DATE, new ArrayList<>(), null, pojo.getId());
+        dto.add(form);
+        List<InputControlData> inputControlDataList = dto.selectAllGlobal();
+        assertEquals(1, inputControlDataList.size());
+        InputControlData data = inputControlDataList.get(0);
+        assertEquals("Client Id", data.getDisplayName());
+        assertEquals("clientId", data.getParamName());
+        assertEquals(InputControlScope.GLOBAL, data.getScope());
+        assertEquals(InputControlType.DATE, data.getType());
+        assertEquals("", data.getQuery());
+        assertEquals(new HashMap<>(), data.getQueryValues());
+        inputControlDataList = dto.selectForReport(pojo.getId());
+        assertEquals(1, inputControlDataList.size());
+        data = inputControlDataList.get(0);
+        assertEquals("Client Id 2", data.getDisplayName());
+        assertEquals("clientId2", data.getParamName());
+        assertEquals(InputControlScope.LOCAL, data.getScope());
+        assertEquals(InputControlType.DATE, data.getType());
+        assertEquals("", data.getQuery());
+        assertEquals(new HashMap<>(), data.getQueryValues());
 
     }
 }

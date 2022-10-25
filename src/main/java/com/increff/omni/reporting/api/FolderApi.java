@@ -1,8 +1,10 @@
 package com.increff.omni.reporting.api;
 
+import com.increff.omni.reporting.config.ApplicationProperties;
 import com.increff.omni.reporting.util.FileUtil;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -14,11 +16,11 @@ import java.util.Objects;
 @Service
 public class FolderApi {
 
-    @Value("${query.outDir}")
-    private String outDir;
+    @Autowired
+    private ApplicationProperties properties;
 
     public void deleteFilesOlderThan1Hr() {
-        File directory = new File(outDir);
+        File directory = new File(properties.getOutDir());
         if (!directory.exists()) {
             return;
         }
@@ -45,10 +47,12 @@ public class FolderApi {
     }
 
     public File getFile(String fileName) throws IOException, ApiException {
-        File directory  = new File(outDir);
+        File directory  = new File(properties.getOutDir());
         if(!directory.exists() && !directory.mkdir())
             throw new ApiException(ApiStatus.BAD_DATA, "Failed to make directory");
-        return new File(outDir, fileName);
+        File file = new File(properties.getOutDir(), fileName);
+        file.createNewFile();
+        return file;
     }
 
 
