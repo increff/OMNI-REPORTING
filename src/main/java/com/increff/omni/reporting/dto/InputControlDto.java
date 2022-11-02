@@ -109,25 +109,34 @@ public class InputControlDto extends AbstractDto {
 
         return pojos.stream().map(p -> {
             InputControlData data = ConvertUtil.convert(p, InputControlData.class);
-            data.setQuery(controlToQueryMapping.getOrDefault(p.getId(), ""));
+            data.setQuery(controlToQueryMapping.getOrDefault(p.getId(), null));
+            data.setValues(controlToValuesMapping.getOrDefault(p.getId(), null));
             if (Objects.nonNull(data.getQuery())) {
                 try {
-                    data.setQueryValues(flowApi.getValuesFromQuery(data.getQuery(), connectionPojo));
+                    setInputControlOptions(data, flowApi.getValuesFromQuery(data.getQuery(), connectionPojo));
                 } catch (ApiException e) {
+                    //TODO : This should throw Runtime exception
                     log.error("Error while getting values from query : ", e);
                 }
             } else {
                 List<String> values = controlToValuesMapping.getOrDefault(p.getId(), null);
-                if (Objects.isNull(values) || values.isEmpty()) {
-                    data.setQueryValues(new HashMap<>());
-                } else {
+                if (!CollectionUtils.isEmpty(values)) {
                     Map<String, String> valuesMap = new HashMap<>();
                     values.forEach(m -> valuesMap.put(m, m));
-                    data.setQueryValues(valuesMap);
+                    setInputControlOptions(data, valuesMap);
                 }
             }
             return data;
         }).collect(Collectors.toList());
+    }
+
+    private void setInputControlOptions(InputControlData data, Map<String,String> values){
+        values.keySet().forEach(k -> {
+            InputControlData.InputControlDataValue value = new InputControlData.InputControlDataValue();
+            value.setLabelName(k);
+            value.setDisplayName(values.get(k));
+            data.getOptions().add(value);
+        });
     }
 
     private void validate(InputControlForm form) throws ApiException {
