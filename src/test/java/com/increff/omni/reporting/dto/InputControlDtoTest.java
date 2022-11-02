@@ -7,7 +7,6 @@ import com.increff.omni.reporting.model.constants.InputControlType;
 import com.increff.omni.reporting.model.constants.ReportType;
 import com.increff.omni.reporting.model.data.ConnectionData;
 import com.increff.omni.reporting.model.data.InputControlData;
-import com.increff.omni.reporting.model.data.OrgConnectionData;
 import com.increff.omni.reporting.model.data.OrganizationData;
 import com.increff.omni.reporting.model.form.ConnectionForm;
 import com.increff.omni.reporting.model.form.InputControlForm;
@@ -21,7 +20,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 
 import static com.increff.omni.reporting.helper.ConnectionTestHelper.getConnectionForm;
@@ -60,8 +58,8 @@ public class InputControlDtoTest extends AbstractTest {
         assertEquals("clientId", data.getParamName());
         assertEquals(InputControlScope.GLOBAL, data.getScope());
         assertEquals(InputControlType.TEXT, data.getType());
-        assertEquals("", data.getQuery());
-        assertEquals(new HashMap<>(), data.getQueryValues());
+        assertEquals(null, data.getQuery());
+        assertEquals(0, data.getOptions().size());
     }
 
     @Test(expected = ApiException.class)
@@ -134,8 +132,8 @@ public class InputControlDtoTest extends AbstractTest {
         assertEquals("clientId2", data.getParamName());
         assertEquals(InputControlScope.GLOBAL, data.getScope());
         assertEquals(InputControlType.NUMBER, data.getType());
-        assertEquals("", data.getQuery());
-        assertEquals(new HashMap<>(), data.getQueryValues());
+        assertEquals(null, data.getQuery());
+        assertEquals(0, data.getOptions().size());
     }
 
     @Test
@@ -156,8 +154,8 @@ public class InputControlDtoTest extends AbstractTest {
         assertEquals("clientId", data.getParamName());
         assertEquals(InputControlScope.GLOBAL, data.getScope());
         assertEquals(InputControlType.DATE, data.getType());
-        assertEquals("", data.getQuery());
-        assertEquals(new HashMap<>(), data.getQueryValues());
+        assertEquals(null, data.getQuery());
+        assertEquals(0, data.getOptions().size());
         inputControlDataList = dto.selectForReport(pojo.getId());
         assertEquals(1, inputControlDataList.size());
         data = inputControlDataList.get(0);
@@ -165,8 +163,8 @@ public class InputControlDtoTest extends AbstractTest {
         assertEquals("clientId2", data.getParamName());
         assertEquals(InputControlScope.LOCAL, data.getScope());
         assertEquals(InputControlType.DATE, data.getType());
-        assertEquals("", data.getQuery());
-        assertEquals(new HashMap<>(), data.getQueryValues());
+        assertEquals(null, data.getQuery());
+        assertEquals(0, data.getOptions().size());
 
     }
 }
