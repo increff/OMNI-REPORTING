@@ -9,6 +9,7 @@ import com.increff.omni.reporting.model.data.ReportQueryData;
 import com.increff.omni.reporting.model.data.ValidationGroupData;
 import com.increff.omni.reporting.model.form.ReportForm;
 import com.increff.omni.reporting.model.form.ReportQueryForm;
+import com.increff.omni.reporting.model.form.ReportQueryTestForm;
 import com.increff.omni.reporting.model.form.ValidationGroupForm;
 import com.increff.omni.reporting.pojo.*;
 import com.nextscm.commons.spring.common.ApiException;
@@ -72,6 +73,10 @@ public class ReportDto extends AbstractDtoApi {
         pojo.setReportId(reportId);
         pojo = flowApi.upsertQuery(pojo);
         return ConvertUtil.convert(pojo, ReportQueryData.class);
+    }
+
+    public ReportQueryData getTransformedQuery(ReportQueryTestForm form) {
+        return new ReportQueryData();
     }
 
     public ReportQueryData getQuery(Integer reportId) throws ApiException {

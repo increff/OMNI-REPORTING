@@ -130,6 +130,12 @@ public class AdminController {
         return reportDto.upsertQuery(reportId, form);
     }
 
+    @ApiOperation(value = "Get transformed report query")
+    @RequestMapping(value = "/reports/query/try", method = RequestMethod.POST)
+    public ReportQueryData getTransformedQuery(@RequestBody ReportQueryTestForm form) throws ApiException {
+        return reportDto.getTransformedQuery(form);
+    }
+
     @ApiOperation(value = "Get Report Query")
     @RequestMapping(value = "/reports/{reportId}/query", method = RequestMethod.GET)
     public ReportQueryData getQuery(@PathVariable Integer reportId) throws ApiException {
