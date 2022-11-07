@@ -122,7 +122,7 @@ public class InputControlDto extends AbstractDto {
         InputControlData data = ConvertUtil.convert(p, InputControlData.class);
         data.setQuery(controlToQueryMapping.getOrDefault(p.getId(), null));
         data.setValues(controlToValuesMapping.getOrDefault(p.getId(), null));
-        if (StringUtil.isEmpty(data.getQuery())) {
+        if (!StringUtil.isEmpty(data.getQuery())) {
             setInputControlOptions(data, flowApi.getValuesFromQuery(data.getQuery(), connectionPojo));
         } else {
             List<String> values = controlToValuesMapping.getOrDefault(p.getId(), null);
