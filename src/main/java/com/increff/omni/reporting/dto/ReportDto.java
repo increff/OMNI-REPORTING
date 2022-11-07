@@ -19,10 +19,7 @@ import com.nextscm.commons.spring.server.AbstractDtoApi;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -121,16 +118,18 @@ public class ReportDto extends AbstractDtoApi {
     public List<ValidationGroupData> getValidationGroups(Integer reportId) {
         List<ValidationGroupData> validationGroupDataList = new ArrayList<>();
         List<ReportValidationGroupPojo> validationGroupPojoList = reportValidationGroupApi.getByReportId(reportId);
-        validationGroupPojoList.forEach(v -> {
+        Map<String, List<ReportValidationGroupPojo>> groupedByName = validationGroupPojoList.stream()
+                .collect(Collectors.groupingBy(ReportValidationGroupPojo::getGroupName));
+        groupedByName.forEach((k, v) -> {
             ValidationGroupData data = new ValidationGroupData();
-            List<ReportControlsPojo> reportControlsPojoList = reportControlsApi.getByIds(validationGroupPojoList.stream()
+            List<ReportControlsPojo> reportControlsPojoList = reportControlsApi.getByIds(v.stream()
                     .map(ReportValidationGroupPojo::getReportControlId).collect(Collectors.toList()));
             List<Integer> controlIds = reportControlsPojoList.stream()
                     .map(ReportControlsPojo::getControlId).collect(Collectors.toList());
             List<InputControlPojo> pojos = inputControlApi.selectByIds(controlIds);
-            data.setValidationValue(v.getValidationValue());
-            data.setGroupName(v.getGroupName());
-            data.setValidationType(v.getType());
+            data.setValidationValue(v.get(0).getValidationValue());
+            data.setGroupName(k);
+            data.setValidationType(v.get(0).getType());
             data.setControls(pojos.stream().map(InputControlPojo::getDisplayName).collect(Collectors.toList()));
             validationGroupDataList.add(data);
         });
