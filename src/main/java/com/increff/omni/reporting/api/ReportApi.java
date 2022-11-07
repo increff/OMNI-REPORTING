@@ -45,6 +45,7 @@ public class ReportApi extends AbstractApi {
         existing.setName(pojo.getName());
         existing.setSchemaVersionId(pojo.getSchemaVersionId());
         existing.setType(pojo.getType());
+        existing.setIsEnabled(pojo.getIsEnabled());
         dao.update(existing);
         return existing;
     }
