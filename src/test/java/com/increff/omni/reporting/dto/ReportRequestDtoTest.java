@@ -11,6 +11,7 @@ import com.nextscm.commons.spring.common.ApiException;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -58,7 +59,7 @@ public class ReportRequestDtoTest extends AbstractTest {
     }
 
     @Test
-    public void testAddReportRequest() throws ApiException {
+    public void testAddReportRequest() throws ApiException, IOException {
         ReportForm reportForm = commonSetup("Report 2", ReportType.STANDARD);
         ReportData reportData = reportDto.add(reportForm);
         InputControlForm inputControlForm = getInputControlForm("Client Id", "clientId", InputControlScope.GLOBAL

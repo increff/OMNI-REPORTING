@@ -9,6 +9,7 @@ import com.increff.omni.reporting.model.data.ReportRequestData;
 import com.increff.omni.reporting.model.data.TimeZoneData;
 import com.increff.omni.reporting.model.form.ReportRequestForm;
 import com.increff.omni.reporting.pojo.*;
+import com.increff.omni.reporting.util.FileUtil;
 import com.nextscm.commons.lang.StringUtil;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
@@ -70,13 +71,13 @@ public class ReportRequestDto extends AbstractDto {
         flow.requestReport(pojo, reportInputParamsPojoList);
     }
 
-    public List<ReportRequestData> getAll(Integer limit) throws ApiException {
+    public List<ReportRequestData> getAll(Integer limit) throws ApiException, IOException {
         limit = Math.min(50, limit);
         List<ReportRequestData> reportRequestDataList = new ArrayList<>();
         List<ReportRequestPojo> reportRequestPojoList = reportRequestApi.getByUserId(getUserId(), limit);
         for (ReportRequestPojo r : reportRequestPojoList) {
             ReportPojo reportPojo = reportApi.getCheck(r.getReportId());
-            reportRequestDataList.add(CommonDtoHelper.getReportRequestData(r, reportPojo));
+            reportRequestDataList.add(getReportRequestData(r, reportPojo));
         }
         return reportRequestDataList;
     }
@@ -116,6 +117,28 @@ public class ReportRequestDto extends AbstractDto {
         if (Objects.isNull(customReportAccessPojo)) {
             throw new ApiException(ApiStatus.BAD_DATA, "Organization does not have access to view this report : " + reportPojo.getName());
         }
+    }
+
+    private ReportRequestData getReportRequestData(ReportRequestPojo pojo, ReportPojo reportPojo) throws IOException, ApiException {
+        ReportRequestData data = new ReportRequestData();
+        data.setRequestCreationTime(pojo.getCreatedAt());
+        data.setRequestUpdatedTime(pojo.getUpdatedAt());
+        data.setStatus(pojo.getStatus());
+        data.setRequestId(pojo.getId());
+        data.setReportId(reportPojo.getId());
+        data.setReportName(reportPojo.getName());
+        data.setFileSize(getFileSizeFromUrl(pojo.getUrl(), pojo.getId()));
+        return data;
+    }
+
+    private Double getFileSizeFromUrl(String url, Integer id) throws IOException, ApiException {
+        if(StringUtil.isEmpty(url))
+            return 0.0;
+        String reportName =  id + ZonedDateTime.now().toString();
+        File sourceFile = folderApi.getFile(reportName + ".xls");
+        byte[] data = getFileFromUrl(url);
+        FileUtils.writeByteArrayToFile(sourceFile, data);
+        return FileUtil.getSizeInMb(sourceFile.length());
     }
 
     private void validateInputParamValues(ReportPojo reportPojo, Map<String, String> params) throws ApiException {

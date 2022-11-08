@@ -126,17 +126,6 @@ public class CommonDtoHelper {
         return reportInputParamsPojoList;
     }
 
-    public static ReportRequestData getReportRequestData(ReportRequestPojo pojo, ReportPojo reportPojo) {
-        ReportRequestData data = new ReportRequestData();
-        data.setRequestCreationTime(pojo.getCreatedAt());
-        data.setRequestUpdatedTime(pojo.getUpdatedAt());
-        data.setStatus(pojo.getStatus());
-        data.setRequestId(pojo.getId());
-        data.setReportId(reportPojo.getId());
-        data.setReportName(reportPojo.getName());
-        return data;
-    }
-
     public static SqlParams convert(ConnectionPojo connectionPojo, ReportQueryPojo reportQueryPojo, Map<String, String> inputParamsMap, File file, File errorFile, Integer maxExecutionTime) {
         SqlParams sqlParams = new SqlParams();
         sqlParams.setHost(connectionPojo.getHost());

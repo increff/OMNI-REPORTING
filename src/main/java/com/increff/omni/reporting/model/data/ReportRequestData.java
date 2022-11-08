@@ -16,4 +16,5 @@ public class ReportRequestData {
     private ReportRequestStatus status;
     private ZonedDateTime requestCreationTime;
     private ZonedDateTime requestUpdatedTime;
+    private Double fileSize;
 }

@@ -5,13 +5,12 @@ import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 
 import javax.servlet.http.HttpServletResponse;
-import java.io.Closeable;
-import java.io.File;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
 
 @Log4j
 public class FileUtil {
+
+    private static final double MB = 1024 * 1024;
 
     public static void closeQuietly(Closeable c) {
         if (c == null) {
@@ -48,6 +47,14 @@ public class FileUtil {
         } finally {
             FileUtil.closeQuietly(outputStream);
         }
+    }
+
+    public static double getSizeInMb(long size) {
+        return roundOff(size / MB);
+    }
+
+    public static double roundOff(double value) {
+        return Math.round(value * 100.0) / 100.0;
     }
 
 }
