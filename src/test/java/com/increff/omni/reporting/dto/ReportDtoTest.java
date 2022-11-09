@@ -7,6 +7,7 @@ import com.increff.omni.reporting.model.constants.ReportType;
 import com.increff.omni.reporting.model.constants.ValidationType;
 import com.increff.omni.reporting.model.data.*;
 import com.increff.omni.reporting.model.form.*;
+import com.increff.omni.reporting.pojo.ReportPojo;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
 import org.junit.Test;
@@ -121,6 +122,33 @@ public class ReportDtoTest extends AbstractTest {
         dto.deleteValidationGroup(data.getId(), "group1");
         dataList = dto.getValidationGroups(data.getId());
         assertEquals(0, dataList.size());
+    }
+
+    @Test
+    public void testCopyReports() throws ApiException {
+        ReportForm form = commonSetup("Report 2", ReportType.STANDARD);
+        ReportData data = dto.add(form);
+        InputControlForm inputControlForm = getInputControlForm("Client Id", "clientId", InputControlScope.GLOBAL
+                , InputControlType.TEXT, new ArrayList<>(), null, null);
+        InputControlData inputControlData = inputControlDto.add(inputControlForm);
+        dto.mapToControl(data.getId(), inputControlData.getId());
+        ValidationGroupForm groupForm = getValidationGroupForm("group1", 10, ValidationType.MANDATORY
+                , Collections.singletonList(inputControlData.getId()));
+        dto.addValidationGroup(data.getId(), groupForm);
+        List<ValidationGroupData> dataList = dto.getValidationGroups(data.getId());
+        assertEquals(1, dataList.size());
+        assertEquals("Client Id", dataList.get(0).getControls().get(0));
+        assertEquals(ValidationType.MANDATORY, dataList.get(0).getValidationType());
+        assertEquals(10, dataList.get(0).getValidationValue().intValue());
+        assertEquals("group1", dataList.get(0).getGroupName());
+        SchemaVersionForm schemaVersionForm = getSchemaForm("9.0.2");
+        SchemaVersionData schemaData = schemaDto.add(schemaVersionForm);
+        CopyReportsForm copyReportsForm = new CopyReportsForm();
+        copyReportsForm.setOldSchemaVersionId(data.getSchemaVersionId());
+        copyReportsForm.setNewSchemaVersionId(schemaData.getId());
+        dto.copyReports(copyReportsForm);
+        List<ReportData> reportDataList = dto.selectAll();
+        assertEquals(2, reportDataList.size());
     }
 
     @Test(expected = ApiException.class)

@@ -7,10 +7,7 @@ import com.increff.omni.reporting.model.constants.ValidationType;
 import com.increff.omni.reporting.model.data.ReportData;
 import com.increff.omni.reporting.model.data.ReportQueryData;
 import com.increff.omni.reporting.model.data.ValidationGroupData;
-import com.increff.omni.reporting.model.form.ReportForm;
-import com.increff.omni.reporting.model.form.ReportQueryForm;
-import com.increff.omni.reporting.model.form.ReportQueryTestForm;
-import com.increff.omni.reporting.model.form.ValidationGroupForm;
+import com.increff.omni.reporting.model.form.*;
 import com.increff.omni.reporting.pojo.*;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
@@ -23,7 +20,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
-public class ReportDto extends AbstractDtoApi {
+public class ReportDto extends AbstractDto {
 
     @Autowired
     private ReportFlowApi flowApi;
@@ -85,13 +82,13 @@ public class ReportDto extends AbstractDtoApi {
         return data;
     }
 
-    public List<ReportData> selectAll(Integer orgId) throws ApiException {
-        List<ReportPojo> pojos = flowApi.getAll(orgId);
+    public List<ReportData> selectByOrg() throws ApiException {
+        List<ReportPojo> pojos = flowApi.getAll(getOrgId());
         return convertToReportData(pojos);
     }
 
-    public List<ReportData> selectAll() throws ApiException {
-        List<ReportPojo> pojos = flowApi.getAll();
+    public List<ReportData> selectAllBySchemaVersion(Integer schemaVersionId) throws ApiException {
+        List<ReportPojo> pojos = flowApi.getAllBySchemaVersionId(schemaVersionId);
         return convertToReportData(pojos);
     }
 
@@ -113,6 +110,10 @@ public class ReportDto extends AbstractDtoApi {
 
     public void deleteValidationGroup(Integer reportId, String groupName) throws ApiException {
         reportValidationGroupApi.deleteByReportIdAndGroupName(reportId, groupName);
+    }
+
+    public void copyReports(CopyReportsForm form) throws ApiException {
+        flowApi.copyReports(form.getOldSchemaVersionId(), form.getNewSchemaVersionId());
     }
 
     public List<ValidationGroupData> getValidationGroups(Integer reportId) {

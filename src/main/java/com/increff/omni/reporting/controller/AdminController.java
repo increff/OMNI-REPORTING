@@ -119,10 +119,18 @@ public class AdminController {
     }
 
     @ApiOperation(value = "Get All Report")
-    @RequestMapping(value = "/reports", method = RequestMethod.GET)
-    public List<ReportData> getAll() throws ApiException {
-        return reportDto.selectAll();
+    @RequestMapping(value = "/reports/schema-versions/{schemaVersionId}", method = RequestMethod.GET)
+    public List<ReportData> getAll(@PathVariable Integer schemaVersionId) throws ApiException {
+        return reportDto.selectAllBySchemaVersion(schemaVersionId);
     }
+
+    @ApiOperation(value = "Copy Schema Reports")
+    @RequestMapping(value = "/copy-reports", method = RequestMethod.POST)
+    public void copyReports(@RequestBody CopyReportsForm form) throws ApiException {
+        reportDto.copyReports(form);
+    }
+
+
 
     @ApiOperation(value = "Add/Edit Report Query")
     @RequestMapping(value = "/reports/{reportId}/query", method = RequestMethod.POST)

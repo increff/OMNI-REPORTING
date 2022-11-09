@@ -47,9 +47,9 @@ public class StandardController {
     }
 
     @ApiOperation(value = "Get Reports")
-    @RequestMapping(value = "/reports/orgs/{orgId}", method = RequestMethod.GET)
-    public List<ReportData> selectByOrgId(@PathVariable Integer orgId) throws ApiException {
-        return reportDto.selectAll(orgId);
+    @RequestMapping(value = "/reports", method = RequestMethod.GET)
+    public List<ReportData> selectByOrgId() throws ApiException {
+        return reportDto.selectByOrg();
     }
 
     @ApiOperation(value = "Get validation group")

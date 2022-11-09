@@ -139,6 +139,27 @@ public class CommonDtoHelper {
         return sqlParams;
     }
 
+    public static ReportValidationGroupPojo getValidationGroupPojoFromExistingPojo(ReportValidationGroupPojo v) {
+        ReportValidationGroupPojo validationGroupPojo = new ReportValidationGroupPojo();
+        validationGroupPojo.setValidationValue(v.getValidationValue());
+        validationGroupPojo.setGroupName(v.getGroupName());
+        validationGroupPojo.setReportId(v.getReportId());
+        validationGroupPojo.setReportControlId(v.getReportControlId());
+        validationGroupPojo.setType(v.getType());
+        return validationGroupPojo;
+    }
+
+    public static ReportPojo getReportPojoFromExistingPojo(ReportPojo oldReport) {
+        ReportPojo reportPojo = new ReportPojo();
+        reportPojo.setIsEnabled(oldReport.getIsEnabled());
+        reportPojo.setDirectoryId(oldReport.getDirectoryId());
+        reportPojo.setName(oldReport.getName());
+        reportPojo.setType(oldReport.getType());
+        reportPojo.setSchemaVersionId(oldReport.getSchemaVersionId());
+        return reportPojo;
+    }
+
+
     public static Map<Integer, List<ReportRequestPojo>> groupByOrgID(List<ReportRequestPojo> reportRequestPojoList) {
         Map<Integer, List<ReportRequestPojo>> orgToRequests = new HashMap<>();
         for (ReportRequestPojo r : reportRequestPojoList) {

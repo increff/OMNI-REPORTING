@@ -60,4 +60,8 @@ public class ReportApi extends AbstractApi {
     public List<ReportPojo> selectAll() {
         return dao.selectAll();
     }
+
+    public List<ReportPojo> getBySchemaVersion(Integer schemaVersionId) {
+        return dao.selectMultiple("schemaVersionId", schemaVersionId);
+    }
 }

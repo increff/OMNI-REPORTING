@@ -56,6 +56,8 @@ public class ReportRequestDto extends AbstractDto {
     @Autowired
     private FolderApi folderApi;
     @Autowired
+    private ReportQueryApi queryApi;
+    @Autowired
     private InputControlFlowApi inputControlFlowApi;
     @Autowired
     private RestTemplate restTemplate;
@@ -65,6 +67,9 @@ public class ReportRequestDto extends AbstractDto {
         checkValid(form);
         ReportRequestPojo pojo = CommonDtoHelper.getReportRequestPojo(form, getOrgId(), getUserId());
         ReportPojo reportPojo = reportApi.getCheck(pojo.getReportId());
+        ReportQueryPojo reportQueryPojo = queryApi.getByReportId(reportPojo.getId());
+        if(Objects.isNull(reportQueryPojo))
+            throw new ApiException(ApiStatus.BAD_DATA, "No query defined for report : " + reportPojo.getName());
         validateCustomReportAccess(reportPojo, getOrgId());
         validateInputParamValues(reportPojo, form.getParamMap());
         List<ReportInputParamsPojo> reportInputParamsPojoList = CommonDtoHelper.getReportInputParamsPojoList(form.getParamMap(), form.getTimezone());
