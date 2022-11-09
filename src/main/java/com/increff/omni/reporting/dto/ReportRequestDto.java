@@ -134,11 +134,13 @@ public class ReportRequestDto extends AbstractDto {
     private Double getFileSizeFromUrl(String url, Integer id) throws IOException, ApiException {
         if(StringUtil.isEmpty(url))
             return 0.0;
-        String reportName =  id + ZonedDateTime.now().toString();
+        String reportName =  id + "-file-size";
         File sourceFile = folderApi.getFile(reportName + ".xls");
         byte[] data = getFileFromUrl(url);
         FileUtils.writeByteArrayToFile(sourceFile, data);
-        return FileUtil.getSizeInMb(sourceFile.length());
+        Double fileSize = FileUtil.getSizeInMb(sourceFile.length());
+        FileUtil.delete(sourceFile);
+        return fileSize;
     }
 
     private void validateInputParamValues(ReportPojo reportPojo, Map<String, String> params) throws ApiException {

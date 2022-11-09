@@ -50,13 +50,7 @@ public class FolderApi {
         File directory  = new File(properties.getOutDir());
         if(!directory.exists() && !directory.mkdir())
             throw new ApiException(ApiStatus.BAD_DATA, "Failed to make directory");
-        File file = new File(properties.getOutDir(), fileName);
-        try {
-            file.createNewFile();
-        } catch (Exception e) {
-            throw new ApiException(ApiStatus.UNKNOWN_ERROR, "Error while creating file : " + e.getMessage());
-        }
-        return file;
+        return new File(properties.getOutDir(), fileName);
     }
 
 
