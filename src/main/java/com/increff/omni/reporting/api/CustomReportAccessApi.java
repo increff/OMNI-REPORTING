@@ -28,8 +28,8 @@ public class CustomReportAccessApi extends AbstractApi {
         return dao.selectMultiple("orgId", orgId);
     }
 
-    public List<CustomReportAccessPojo> getAll() {
-        return dao.selectAll();
+    public List<CustomReportAccessPojo> getAllByReportId(Integer reportId) {
+        return dao.selectMultiple("reportId", reportId);
     }
 
     public CustomReportAccessPojo getByReportAndOrg(Integer reportId, Integer orgId) {

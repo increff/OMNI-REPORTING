@@ -241,9 +241,9 @@ public class AdminController {
     }
 
     @ApiOperation(value = "Get all Custom Report Access")
-    @RequestMapping(value = "/reports/custom-access", method = RequestMethod.GET)
-    public List<CustomReportAccessData> getAllCustomAccess() throws ApiException {
-        return customReportAccessDto.getAllData();
+    @RequestMapping(value = "/reports/{reportId}/custom-access", method = RequestMethod.GET)
+    public List<CustomReportAccessData> getAllCustomAccess(@PathVariable Integer reportId) throws ApiException {
+        return customReportAccessDto.getAllDataByReport(reportId);
     }
 
 }

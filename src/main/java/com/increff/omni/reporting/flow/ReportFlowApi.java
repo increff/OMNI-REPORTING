@@ -182,6 +182,13 @@ public class ReportFlowApi extends AbstractApi {
             // Add custom report access
             if(oldReport.getType().equals(ReportType.STANDARD))
                 continue;
+            List<CustomReportAccessPojo> customReportAccessPojoList = customReportAccessApi.getAllByReportId(oldReport.getId());
+            customReportAccessPojoList.forEach(c -> {
+                CustomReportAccessPojo customReportAccessPojo = new CustomReportAccessPojo();
+                customReportAccessPojo.setOrgId(c.getOrgId());
+                customReportAccessPojo.setReportId(pojo.getId());
+                customReportAccessApi.addCustomReportAccessPojo(customReportAccessPojo);
+            });
         }
     }
 
