@@ -20,7 +20,8 @@ public class StandardSecurityConfig extends WebSecurityConfigurerAdapter {
     private AuthTokenFilter authTokenFilter;
 
     private static final String APP_ADMIN = "app.admin";
-    public static final String APP_STANDARD = "app.standard";
+    private static final String REPORT_ADMIN = "report.admin";
+    private static final String REPORT_STANDARD = "report.standard";
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -28,7 +29,7 @@ public class StandardSecurityConfig extends WebSecurityConfigurerAdapter {
         http// Match only these URLs
                 .requestMatchers()//
                 .antMatchers("/standard/**").and().authorizeRequests()//
-                .antMatchers("/standard/**").hasAnyAuthority(APP_ADMIN, APP_STANDARD)//
+                .antMatchers("/standard/**").hasAnyAuthority(APP_ADMIN, REPORT_ADMIN, REPORT_STANDARD)//
                 .and().cors().and().csrf().disable()
                 .addFilterBefore(authTokenFilter, BasicAuthenticationFilter.class)
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);

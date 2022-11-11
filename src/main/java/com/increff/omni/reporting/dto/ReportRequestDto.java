@@ -10,6 +10,7 @@ import com.increff.omni.reporting.model.data.TimeZoneData;
 import com.increff.omni.reporting.model.form.ReportRequestForm;
 import com.increff.omni.reporting.pojo.*;
 import com.increff.omni.reporting.util.FileUtil;
+import com.increff.omni.reporting.util.UserPrincipalUtil;
 import com.nextscm.commons.lang.StringUtil;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
@@ -65,14 +66,15 @@ public class ReportRequestDto extends AbstractDto {
 
     public void requestReport(ReportRequestForm form) throws ApiException {
         checkValid(form);
+        Map<String, String> inputParamsMap = UserPrincipalUtil.getCompleteMapWithAccessControl(form.getParamMap());
         ReportRequestPojo pojo = CommonDtoHelper.getReportRequestPojo(form, getOrgId(), getUserId());
         ReportPojo reportPojo = reportApi.getCheck(pojo.getReportId());
         ReportQueryPojo reportQueryPojo = queryApi.getByReportId(reportPojo.getId());
         if(Objects.isNull(reportQueryPojo))
             throw new ApiException(ApiStatus.BAD_DATA, "No query defined for report : " + reportPojo.getName());
         validateCustomReportAccess(reportPojo, getOrgId());
-        validateInputParamValues(reportPojo, form.getParamMap());
-        List<ReportInputParamsPojo> reportInputParamsPojoList = CommonDtoHelper.getReportInputParamsPojoList(form.getParamMap(), form.getTimezone());
+        validateInputParamValues(reportPojo, inputParamsMap);
+        List<ReportInputParamsPojo> reportInputParamsPojoList = CommonDtoHelper.getReportInputParamsPojoList(inputParamsMap, form.getTimezone());
         flow.requestReport(pojo, reportInputParamsPojoList);
     }
 

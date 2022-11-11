@@ -69,7 +69,7 @@ public class ReportTask {
 
     private void saveResultsOnCloud(ReportRequestPojo pojo, SqlParams sqlParams) {
         try {
-            SqlCmd.processQuery(sqlParams);
+            SqlCmd.processQuery(sqlParams, false);
             // upload result to cloud
             String filePath = uploadFile(sqlParams.getOutFile(), "SUCCESS_REPORTS", pojo);
             // update status to completed

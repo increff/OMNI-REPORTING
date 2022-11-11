@@ -46,11 +46,13 @@ public class FolderApi {
         return getFile(fileName);
     }
 
-    public File getFile(String fileName) throws ApiException {
+    public File getFile(String fileName) throws ApiException, IOException {
         File directory  = new File(properties.getOutDir());
         if(!directory.exists() && !directory.mkdir())
             throw new ApiException(ApiStatus.BAD_DATA, "Failed to make directory");
-        return new File(properties.getOutDir(), fileName);
+        File file = new File(properties.getOutDir(), fileName);
+        file.createNewFile();
+        return file;
     }
 
 

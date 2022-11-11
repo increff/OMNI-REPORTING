@@ -74,7 +74,7 @@ public class ReportTestHelper {
         return pojo;
     }
 
-    public static ReportRequestForm getReportRequestForm(Integer reportId, Map<String, String> params, String timezone) {
+    public static ReportRequestForm getReportRequestForm(Integer reportId, Map<String, List<String>> params, String timezone) {
         ReportRequestForm form = new ReportRequestForm();
         form.setReportId(reportId);
         form.setParamMap(params);

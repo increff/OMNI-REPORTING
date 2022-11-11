@@ -23,6 +23,8 @@ public class AdminSecurityConfig extends WebSecurityConfigurerAdapter {
     private AdminFilter adminFilter;
 
     private static final String APP_ADMIN = "app.admin";
+    private static final String REPORT_ADMIN = "report.admin";
+
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -31,7 +33,7 @@ public class AdminSecurityConfig extends WebSecurityConfigurerAdapter {
                 .requestMatchers()//
                 .antMatchers("/admin/**")
                 .and().authorizeRequests()//
-                .antMatchers("/admin/**").hasAnyAuthority(APP_ADMIN)//
+                .antMatchers("/admin/**").hasAnyAuthority(APP_ADMIN, REPORT_ADMIN)//
                 .and().cors().and().csrf().disable()
                 .addFilterBefore(authTokenFilter, BasicAuthenticationFilter.class)
                 .addFilterBefore(adminFilter, BasicAuthenticationFilter.class)

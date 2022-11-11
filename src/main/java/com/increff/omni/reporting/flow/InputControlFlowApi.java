@@ -87,7 +87,7 @@ public class InputControlFlowApi extends AbstractApi {
             SqlParams sqlp = CommonDtoHelper.getSqlParams(connectionPojo, query, file, errFile, properties.getMaxExecutionTime());
             SqlCmd.processQuery(sqlp);
             return getMapFromTsv(file);
-        } catch (ApiException e) {
+        } catch (ApiException | IOException e) {
             log.error("Error while getting input control values ", e);
         } finally {
             FileUtil.delete(file);
