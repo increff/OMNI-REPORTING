@@ -112,6 +112,12 @@ public class AdminController {
         return reportDto.edit(reportId, form);
     }
 
+    @ApiOperation(value = "Enable / Disable Report")
+    @RequestMapping(value = "/reports/{reportId}/status", method = RequestMethod.PUT)
+    public void editStatus(@PathVariable Integer reportId, @RequestParam Boolean isEnabled) throws ApiException {
+         reportDto.updateStatus(reportId, isEnabled);
+    }
+
     @ApiOperation(value = "Get Report")
     @RequestMapping(value = "/reports/{reportId}", method = RequestMethod.GET)
     public ReportData get(@PathVariable Integer reportId) throws ApiException {
@@ -129,8 +135,6 @@ public class AdminController {
     public void copyReports(@RequestBody CopyReportsForm form) throws ApiException {
         reportDto.copyReports(form);
     }
-
-
 
     @ApiOperation(value = "Add/Edit Report Query")
     @RequestMapping(value = "/reports/{reportId}/query", method = RequestMethod.POST)

@@ -56,6 +56,12 @@ public class ReportDto extends AbstractDto {
         return convertToReportData(Collections.singletonList(pojo)).get(0);
     }
 
+    public void updateStatus(Integer reportId, Boolean isEnabled) throws ApiException {
+        ReportPojo pojo = reportApi.getCheck(reportId);
+        pojo.setIsEnabled(isEnabled);
+        reportApi.edit(pojo);
+    }
+
     public ReportData get(Integer id) throws ApiException {
         ReportPojo pojo = reportApi.getCheck(id);
         return convertToReportData(Collections.singletonList(pojo)).get(0);

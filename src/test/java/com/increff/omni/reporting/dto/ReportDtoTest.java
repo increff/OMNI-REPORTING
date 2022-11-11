@@ -80,6 +80,18 @@ public class ReportDtoTest extends AbstractTest {
     }
 
     @Test
+    public void testUpdateStatus() throws ApiException {
+        ReportForm form = commonSetup("Report 2", ReportType.CUSTOM);
+        ReportData data = dto.add(form);
+        assertEquals(true, data.getIsEnabled());
+        dto.updateStatus(data.getId(), false);
+        ReportData fData = dto.get(data.getId());
+        assertNotNull(fData);
+        assertEquals(ReportType.CUSTOM, fData.getType());
+        assertEquals(false, fData.getIsEnabled());
+    }
+
+    @Test
     public void testUpsertQuery() throws ApiException {
         ReportForm form = commonSetup("Report 2", ReportType.CUSTOM);
         ReportData data = dto.add(form);
