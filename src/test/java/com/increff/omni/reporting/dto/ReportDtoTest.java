@@ -108,6 +108,14 @@ public class ReportDtoTest extends AbstractTest {
     }
 
     @Test
+    public void testTransformedQueryWithWrongParam() throws ApiException {
+        ReportQueryTestForm testForm = getQueryTestForm();
+        testForm.setParamMap(new HashMap<>());
+        ReportQueryData queryData = dto.getTransformedQuery(testForm);
+        assertEquals("select * from table where id = id;", queryData.getQuery());
+    }
+
+    @Test
     public void testMapToControlAndDelete() throws ApiException {
         ReportForm form = commonSetup("Report 2", ReportType.CUSTOM);
         ReportData data = dto.add(form);

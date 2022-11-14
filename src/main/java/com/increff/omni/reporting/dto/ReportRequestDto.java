@@ -166,6 +166,7 @@ public class ReportRequestDto extends AbstractDto {
                 Map<String, String> allowedValuesMap;
                 switch (i.getType()) {
                     case TEXT:
+                    case MULTI_TEXT:
                         break;
                     case NUMBER:
                         try {

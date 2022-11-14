@@ -163,6 +163,7 @@ public class InputControlDto extends AbstractDto {
     private void validateForControlType(String query, InputControlType type, List<String> values) throws ApiException {
         switch (type) {
             case TEXT:
+            case MULTI_TEXT:
             case NUMBER:
             case DATE:
             case DATE_TIME:
