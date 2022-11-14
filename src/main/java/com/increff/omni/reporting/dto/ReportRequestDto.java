@@ -61,18 +61,24 @@ public class ReportRequestDto extends AbstractDto {
     @Autowired
     private InputControlFlowApi inputControlFlowApi;
     @Autowired
+    private OrganizationApi organizationApi;
+    @Autowired
     private RestTemplate restTemplate;
 
 
     public void requestReport(ReportRequestForm form) throws ApiException {
+        requestReportForAnyOrg(form, getOrgId());
+    }
+
+    public void requestReportForAnyOrg(ReportRequestForm form, Integer orgId) throws ApiException {
         checkValid(form);
         Map<String, String> inputParamsMap = UserPrincipalUtil.getCompleteMapWithAccessControl(form.getParamMap());
-        ReportRequestPojo pojo = CommonDtoHelper.getReportRequestPojo(form, getOrgId(), getUserId());
+        ReportRequestPojo pojo = CommonDtoHelper.getReportRequestPojo(form, orgId, getUserId());
         ReportPojo reportPojo = reportApi.getCheck(pojo.getReportId());
         ReportQueryPojo reportQueryPojo = queryApi.getByReportId(reportPojo.getId());
         if(Objects.isNull(reportQueryPojo))
             throw new ApiException(ApiStatus.BAD_DATA, "No query defined for report : " + reportPojo.getName());
-        validateCustomReportAccess(reportPojo, getOrgId());
+        validateCustomReportAccess(reportPojo, orgId);
         validateInputParamValues(reportPojo, inputParamsMap);
         List<ReportInputParamsPojo> reportInputParamsPojoList = CommonDtoHelper.getReportInputParamsPojoList(inputParamsMap, form.getTimezone());
         flow.requestReport(pojo, reportInputParamsPojoList);
@@ -134,6 +140,8 @@ public class ReportRequestDto extends AbstractDto {
         data.setRequestId(pojo.getId());
         data.setReportId(reportPojo.getId());
         data.setReportName(reportPojo.getName());
+        OrganizationPojo organizationPojo = organizationApi.getCheck(pojo.getOrgId());
+        data.setOrgName(organizationPojo.getName());
         data.setFileSize(getFileSizeFromUrl(pojo.getUrl(), pojo.getId()));
         return data;
     }
@@ -237,4 +245,5 @@ public class ReportRequestDto extends AbstractDto {
     private String getValueFromQuotes(String value) {
         return value.substring(1, value.length()-1);
     }
+
 }

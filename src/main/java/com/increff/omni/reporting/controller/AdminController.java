@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 // Todo internationalization
-// Todo version management for reports
 @CrossOrigin
 @Api
 @RestController
@@ -33,6 +32,8 @@ public class AdminController {
     private DirectoryDto directoryDto;
     @Autowired
     private CustomReportAccessDto customReportAccessDto;
+    @Autowired
+    private ReportRequestDto reportRequestDto;
 
     @ApiOperation(value = "Add Connection")
     @RequestMapping(value = "/connections", method = RequestMethod.POST)
@@ -154,6 +155,12 @@ public class AdminController {
         return reportDto.getQuery(reportId);
     }
 
+    @ApiOperation(value = "Get Reports")
+    @RequestMapping(value = "/reports/orgs/{orgId}", method = RequestMethod.GET)
+    public List<ReportData> selectByOrgId(@PathVariable Integer orgId) throws ApiException {
+        return reportDto.selectByOrg(orgId);
+    }
+
     @ApiOperation(value = "Map control to a report")
     @RequestMapping(value = "/reports/{reportId}/controls/{controlId}", method = RequestMethod.POST)
     public void mapReportToControl(@PathVariable Integer reportId, @PathVariable Integer controlId) throws ApiException {
@@ -248,6 +255,12 @@ public class AdminController {
     @RequestMapping(value = "/reports/{reportId}/custom-access", method = RequestMethod.GET)
     public List<CustomReportAccessData> getAllCustomAccess(@PathVariable Integer reportId) throws ApiException {
         return customReportAccessDto.getAllDataByReport(reportId);
+    }
+
+    @ApiOperation(value = "Request Report")
+    @RequestMapping(value = "/request-report/orgs/{orgId}", method = RequestMethod.POST)
+    public void requestReport(@RequestBody ReportRequestForm form, @PathVariable Integer orgId) throws ApiException {
+        reportRequestDto.requestReportForAnyOrg(form, orgId);
     }
 
 }

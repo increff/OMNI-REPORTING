@@ -28,6 +28,8 @@ public class ReportDto extends AbstractDto {
     @Autowired
     private ReportFlowApi flowApi;
     @Autowired
+    private OrganizationApi organizationApi;
+    @Autowired
     private ReportValidationGroupApi reportValidationGroupApi;
     @Autowired
     private ReportControlsApi reportControlsApi;
@@ -95,7 +97,12 @@ public class ReportDto extends AbstractDto {
     }
 
     public List<ReportData> selectByOrg() throws ApiException {
-        List<ReportPojo> pojos = flowApi.getAll(getOrgId());
+        return selectByOrg(getOrgId());
+    }
+
+    public List<ReportData> selectByOrg(Integer orgId) throws ApiException {
+        organizationApi.getCheck(orgId);
+        List<ReportPojo> pojos = flowApi.getAll(orgId);
         return convertToReportData(pojos);
     }
 
