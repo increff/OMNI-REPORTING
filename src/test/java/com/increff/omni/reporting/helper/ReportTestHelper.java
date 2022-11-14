@@ -3,12 +3,11 @@ package com.increff.omni.reporting.helper;
 import com.increff.omni.reporting.model.constants.ReportRequestStatus;
 import com.increff.omni.reporting.model.constants.ReportType;
 import com.increff.omni.reporting.model.constants.ValidationType;
-import com.increff.omni.reporting.model.form.ReportForm;
-import com.increff.omni.reporting.model.form.ReportQueryForm;
-import com.increff.omni.reporting.model.form.ReportRequestForm;
-import com.increff.omni.reporting.model.form.ValidationGroupForm;
+import com.increff.omni.reporting.model.form.*;
 import com.increff.omni.reporting.pojo.*;
 
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -80,6 +79,16 @@ public class ReportTestHelper {
         form.setParamMap(params);
         form.setTimezone(timezone);
         return form;
+    }
+
+    public static ReportQueryTestForm getQueryTestForm() {
+        ReportQueryTestForm queryTestForm = new ReportQueryTestForm();
+        queryTestForm.setQuery("select * from table where id = ${id:-id};");
+        Map<String, List<String>> paramMap = new HashMap<>();
+        paramMap.put("id", Arrays.asList("1"));
+        queryTestForm.setParamMap(paramMap);
+        queryTestForm.setTimezone("Asia/Kolkata");
+        return queryTestForm;
     }
 
     public static ReportRequestPojo getReportRequestPojo(Integer reportId, ReportRequestStatus status

@@ -9,13 +9,16 @@ import com.increff.omni.reporting.model.data.ReportQueryData;
 import com.increff.omni.reporting.model.data.ValidationGroupData;
 import com.increff.omni.reporting.model.form.*;
 import com.increff.omni.reporting.pojo.*;
+import com.increff.omni.reporting.util.UserPrincipalUtil;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
 import com.nextscm.commons.spring.common.ConvertUtil;
 import com.nextscm.commons.spring.server.AbstractDtoApi;
+import org.apache.commons.text.StringSubstitutor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -76,7 +79,10 @@ public class ReportDto extends AbstractDto {
     }
 
     public ReportQueryData getTransformedQuery(ReportQueryTestForm form) {
-        return new ReportQueryData();
+        Map<String, String> paramsMap = UserPrincipalUtil.getCompleteMapWithAccessControl(form.getParamMap());
+        ReportQueryData data = new ReportQueryData();
+        data.setQuery(StringSubstitutor.replace(form.getQuery(), paramsMap));
+        return data;
     }
 
     public ReportQueryData getQuery(Integer reportId) throws ApiException {

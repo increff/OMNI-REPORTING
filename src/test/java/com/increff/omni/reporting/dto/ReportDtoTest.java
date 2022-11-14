@@ -13,10 +13,7 @@ import com.nextscm.commons.spring.common.ApiStatus;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 import static com.increff.omni.reporting.helper.ConnectionTestHelper.getConnectionForm;
 import static com.increff.omni.reporting.helper.DirectoryTestHelper.getDirectoryForm;
@@ -101,6 +98,13 @@ public class ReportDtoTest extends AbstractTest {
         dto.upsertQuery(data.getId(), queryForm);
         queryData = dto.getQuery(data.getId());
         assertEquals("select version();", queryData.getQuery());
+    }
+
+    @Test
+    public void testTransformedQuery() throws ApiException {
+        ReportQueryTestForm testForm = getQueryTestForm();
+        ReportQueryData queryData = dto.getTransformedQuery(testForm);
+        assertEquals("select * from table where id = '1';", queryData.getQuery());
     }
 
     @Test
