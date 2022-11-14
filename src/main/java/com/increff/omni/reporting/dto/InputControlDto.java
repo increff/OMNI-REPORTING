@@ -21,6 +21,8 @@ import org.springframework.util.CollectionUtils;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.increff.omni.reporting.dto.CommonDtoHelper.updateValidationTypes;
+
 @Service
 @Log4j
 public class InputControlDto extends AbstractDto {
@@ -36,6 +38,9 @@ public class InputControlDto extends AbstractDto {
 
     @Autowired
     private ReportControlsApi reportControlsApi;
+
+    @Autowired
+    private ReportValidationGroupApi reportValidationGroupApi;
 
     @Autowired
     private OrgConnectionApi orgConnectionApi;
@@ -74,12 +79,16 @@ public class InputControlDto extends AbstractDto {
 
     public List<InputControlData> selectForReport(Integer reportId) throws ApiException {
         List<ReportControlsPojo> reportControlsPojos = reportControlsApi.getByReportId(reportId);
+        List<ReportValidationGroupPojo> validationGroupPojoList = reportValidationGroupApi.getByReportId(reportId);
+
         List<Integer> controlIds = reportControlsPojos.stream()
                 .map(ReportControlsPojo::getControlId).collect(Collectors.toList());
 
         List<InputControlPojo> pojos = api.selectByIds(controlIds);
 
-        return getInputControlDatas(pojos);
+        List<InputControlData> inputControlDataList = getInputControlDatas(pojos);
+        updateValidationTypes(inputControlDataList, validationGroupPojoList, reportControlsPojos);
+        return inputControlDataList;
     }
 
     private List<InputControlData> getInputControlDatas(List<InputControlPojo> pojos) throws ApiException {

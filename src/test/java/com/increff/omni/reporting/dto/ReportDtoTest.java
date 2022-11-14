@@ -101,14 +101,14 @@ public class ReportDtoTest extends AbstractTest {
     }
 
     @Test
-    public void testTransformedQuery() throws ApiException {
+    public void testTransformedQuery() {
         ReportQueryTestForm testForm = getQueryTestForm();
         ReportQueryData queryData = dto.getTransformedQuery(testForm);
         assertEquals("select * from table where id = '1';", queryData.getQuery());
     }
 
     @Test
-    public void testTransformedQueryWithWrongParam() throws ApiException {
+    public void testTransformedQueryWithWrongParam() {
         ReportQueryTestForm testForm = getQueryTestForm();
         testForm.setParamMap(new HashMap<>());
         ReportQueryData queryData = dto.getTransformedQuery(testForm);

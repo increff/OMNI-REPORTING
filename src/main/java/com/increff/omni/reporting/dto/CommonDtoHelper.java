@@ -1,16 +1,15 @@
 package com.increff.omni.reporting.dto;
 
+import com.increff.omni.reporting.model.constants.ValidationType;
+import com.increff.omni.reporting.model.data.*;
 import com.increff.omni.reporting.model.form.SqlParams;
 import com.increff.omni.reporting.model.constants.ReportRequestStatus;
-import com.increff.omni.reporting.model.data.OrgConnectionData;
-import com.increff.omni.reporting.model.data.OrgSchemaData;
-import com.increff.omni.reporting.model.data.ReportRequestData;
-import com.increff.omni.reporting.model.data.TimeZoneData;
 import com.increff.omni.reporting.model.form.ReportRequestForm;
 import com.increff.omni.reporting.model.form.ValidationGroupForm;
 import com.increff.omni.reporting.pojo.*;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
+import io.swagger.models.auth.In;
 import org.apache.commons.text.StringSubstitutor;
 
 import java.io.File;
@@ -109,6 +108,29 @@ public class CommonDtoHelper {
         reportRequestPojo.setStatus(ReportRequestStatus.NEW);
         reportRequestPojo.setUserId(userId);
         return reportRequestPojo;
+    }
+
+    public static void updateValidationTypes(List<InputControlData> inputControlDataList, List<ReportValidationGroupPojo> validationGroupPojoList, List<ReportControlsPojo> reportControlsPojos) {
+        // Generate map of report control id to validation types
+        Map<Integer, List<ValidationType>> reportControlToValidationTypeMap = new HashMap<>();
+        validationGroupPojoList.forEach(v -> {
+            if (reportControlToValidationTypeMap.containsKey(v.getReportControlId())) {
+                List<ValidationType> ex = reportControlToValidationTypeMap.get(v.getReportControlId());
+                ex.add(v.getType());
+                reportControlToValidationTypeMap.put(v.getReportControlId(), ex);
+            } else
+                reportControlToValidationTypeMap.put(v.getReportControlId(),
+                        new ArrayList<>(Collections.singletonList(v.getType())));
+        });
+        // Generate map of input control id to report control id
+        Map<Integer, Integer> inputControlToReportControl = reportControlsPojos.stream().collect(Collectors
+                .toMap(ReportControlsPojo::getControlId, ReportControlsPojo::getId));
+        inputControlDataList.forEach(d -> {
+            List<ValidationType> validationTypeList = reportControlToValidationTypeMap.getOrDefault(
+                    inputControlToReportControl.get(d.getId()), new ArrayList<>()
+            );
+            d.setValidationTypes(validationTypeList);
+        });
     }
 
     public static List<ReportInputParamsPojo> getReportInputParamsPojoList(Map<String, String> paramMap, String timeZone) {
