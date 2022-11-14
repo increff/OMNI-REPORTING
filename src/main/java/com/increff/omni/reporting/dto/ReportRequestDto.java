@@ -176,6 +176,7 @@ public class ReportRequestDto extends AbstractDto {
                         }
                         break;
                     case DATE:
+                    case DATE_TIME:
                         try {
                             value = getValueFromQuotes(value);
                             ZonedDateTime.parse(value);
