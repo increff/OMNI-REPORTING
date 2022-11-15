@@ -18,6 +18,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
+import java.time.ZonedDateTime;
 import java.util.*;
 
 @Service
@@ -59,8 +60,8 @@ public class ReportTask {
         ConnectionPojo connectionPojo = connectionApi.getCheck(orgConnectionPojo.getConnectionId());
 
         // Creation of file
-        File file = folderApi.getFileForExtension(reportRequestPojo.getId(), ".xls");
-        File errorFile = folderApi.getErrFile(reportRequestPojo.getId(), ".xls");
+        File file = folderApi.getFileForExtension(reportRequestPojo.getId(), ".tsv");
+        File errorFile = folderApi.getErrFile(reportRequestPojo.getId(), ".tsv");
         Map<String, String> inputParamMap = getInputParamMapFromPojoList(reportInputParamsPojoList);
         SqlParams sqlParams = CommonDtoHelper.convert(connectionPojo, reportQueryPojo, inputParamMap, file, errorFile, properties.getMaxExecutionTime());
         // Execute query and save results
@@ -70,16 +71,27 @@ public class ReportTask {
     private void saveResultsOnCloud(ReportRequestPojo pojo, SqlParams sqlParams) {
         try {
             SqlCmd.processQuery(sqlParams, false);
+            log.info("Start time : " + ZonedDateTime.now());
+            String name = sqlParams.getOutFile().getName().split(".tsv")[0] + ".csv";
+            File csvFile = folderApi.getFile(name);
+            FileUtil.getCsvFromTsv(sqlParams.getOutFile(), csvFile);
+            log.info("End time : " + ZonedDateTime.now());
+
             // upload result to cloud
-            String filePath = uploadFile(sqlParams.getOutFile(), "SUCCESS_REPORTS", pojo);
+            String filePath = uploadFile(csvFile, "SUCCESS_REPORTS", pojo);
             // update status to completed
             api.updateStatus(pojo.getId(), ReportRequestStatus.COMPLETED, filePath);
+            FileUtil.delete(csvFile);
         } catch (Exception e) {
             // log as error and mark fail
             log.error("Report ID : " + pojo.getId() + " failed", e);
             try {
-                String filePath = uploadFile(sqlParams.getErrFile(), "ERROR_REPORTS", pojo);
+                String name = sqlParams.getErrFile().getName().split(".tsv")[0] + ".csv";
+                File csvFile = folderApi.getFile(name);
+                FileUtil.getCsvFromTsv(sqlParams.getErrFile(), csvFile);
+                String filePath = uploadFile(csvFile, "ERROR_REPORTS", pojo);
                 api.updateStatus(pojo.getId(), ReportRequestStatus.FAILED, filePath);
+                FileUtil.delete(csvFile);
             } catch (Exception ex) {
                 log.error("Error while updating the status of failed request", ex);
             }
@@ -97,7 +109,7 @@ public class ReportTask {
 
     private String uploadFile(File file, String folder, ReportRequestPojo pojo) throws FileNotFoundException, ApiException {
         InputStream inputStream = new FileInputStream(file);
-        String filePath = pojo.getOrgId() + "/" + folder + "/" + pojo.getId() + "_" + UUID.randomUUID() + ".xls";
+        String filePath = pojo.getOrgId() + "/" + folder + "/" + pojo.getId() + "_" + UUID.randomUUID() + ".csv";
         try {
             fileClient.create(filePath, inputStream);
         } catch (FileClientException e) {
