@@ -19,10 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.increff.omni.reporting.dto.CommonDtoHelper.getReportPojoFromExistingPojo;
@@ -163,12 +160,14 @@ public class ReportFlowApi extends AbstractApi {
                 queryApi.upsertQuery(queryPojo);
             }
             // Add Report Controls
+            Map<Integer, Integer> reportControlIdMap = new HashMap<>();
             List<ReportControlsPojo> controlsPojos = reportControlsApi.getByReportId(oldReport.getId());
             for (ReportControlsPojo c : controlsPojos) {
                 ReportControlsPojo p = new ReportControlsPojo();
                 p.setControlId(c.getControlId());
                 p.setReportId(pojo.getId());
                 reportControlsApi.add(p);
+                reportControlIdMap.put(c.getId(), p.getId());
             }
             // Add Report Validation Groups
             List<ReportValidationGroupPojo> groupPojoList = reportValidationGroupApi.getByReportId(oldReport.getId());
@@ -176,6 +175,7 @@ public class ReportFlowApi extends AbstractApi {
             for (ReportValidationGroupPojo v : groupPojoList) {
                 ReportValidationGroupPojo p = getValidationGroupPojoFromExistingPojo(v);
                 p.setReportId(pojo.getId());
+                p.setReportControlId(reportControlIdMap.get(v.getReportControlId()));
                 newGroupPojoList.add(p);
             }
             reportValidationGroupApi.addAll(newGroupPojoList);
