@@ -2,10 +2,13 @@ package com.increff.omni.reporting.util;
 
 import lombok.extern.log4j.Log4j;
 import org.apache.commons.io.FileUtils;
-import org.apache.log4j.Logger;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ListIterator;
 
 @Log4j
 public class FileUtil {
@@ -33,6 +36,29 @@ public class FileUtil {
             log.error("Error deleting file, " + f.getAbsolutePath(), e);
             return false;
         }
+    }
+
+    public static void getCsvFromTsv(File file, File csvFile) throws IOException {
+        BufferedReader TSVFile =
+                new BufferedReader(new FileReader(file));
+        PrintWriter printer = new PrintWriter(csvFile);
+        String dataRow = TSVFile.readLine(); // Read first line.
+        while (dataRow != null) {
+            List<String> values = Arrays.asList(dataRow.split("\t"));
+            ListIterator<String> it = values.listIterator();
+            while (it.hasNext()) {
+                String v = it.next();
+                if(v.contains(","))
+                    it.set("\"" + v + "\"");
+            }
+            dataRow = String.join("\t", values);
+            String csvRow = dataRow.replaceAll("\t",",");
+            printer.write(csvRow);
+            printer.write("\n");
+            dataRow = TSVFile.readLine(); // Read next line of data.
+        }
+        printer.close();
+        TSVFile.close();
     }
 
     public static void createFileResponse(File file, HttpServletResponse response) throws IOException {
