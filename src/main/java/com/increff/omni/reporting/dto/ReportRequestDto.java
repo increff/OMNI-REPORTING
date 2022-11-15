@@ -104,10 +104,8 @@ public class ReportRequestDto extends AbstractDto {
         if (!Arrays.asList(ReportRequestStatus.COMPLETED, ReportRequestStatus.FAILED).contains(requestPojo.getStatus())) {
             throw new ApiException(ApiStatus.BAD_DATA, "Report request is still in processing, name : " + reportPojo.getName());
         }
-        String reportName = reportPojo.getName() + "~" +
-                requestPojo.getUpdatedAt().toInstant().atZone(ZoneId.of("UTC"))
-                        .format(DateTimeFormatter.ofPattern(TIME_ZONE_PATTERN));
-        File sourceFile = folderApi.getFile(reportName + ".xls");
+        String reportName = requestId + "-download";
+        File sourceFile = folderApi.getFile(reportName + ".csv");
         byte[] data = getFileFromUrl(requestPojo.getUrl());
         FileUtils.writeByteArrayToFile(sourceFile, data);
         return sourceFile;

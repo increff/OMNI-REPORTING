@@ -70,12 +70,11 @@ public class ReportTask {
 
     private void saveResultsOnCloud(ReportRequestPojo pojo, SqlParams sqlParams) {
         try {
+            // Process data
             SqlCmd.processQuery(sqlParams, false);
-            log.info("Start time : " + ZonedDateTime.now());
             String name = sqlParams.getOutFile().getName().split(".tsv")[0] + ".csv";
             File csvFile = folderApi.getFile(name);
             FileUtil.getCsvFromTsv(sqlParams.getOutFile(), csvFile);
-            log.info("End time : " + ZonedDateTime.now());
 
             // upload result to cloud
             String filePath = uploadFile(csvFile, "SUCCESS_REPORTS", pojo);
