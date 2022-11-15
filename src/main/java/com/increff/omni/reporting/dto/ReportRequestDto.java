@@ -104,7 +104,7 @@ public class ReportRequestDto extends AbstractDto {
         if (!Arrays.asList(ReportRequestStatus.COMPLETED, ReportRequestStatus.FAILED).contains(requestPojo.getStatus())) {
             throw new ApiException(ApiStatus.BAD_DATA, "Report request is still in processing, name : " + reportPojo.getName());
         }
-        String reportName = requestId + "-download";
+        String reportName = requestId + "_" + UUID.randomUUID();
         File sourceFile = folderApi.getFile(reportName + ".csv");
         byte[] data = getFileFromUrl(requestPojo.getUrl());
         FileUtils.writeByteArrayToFile(sourceFile, data);
