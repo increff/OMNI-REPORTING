@@ -18,6 +18,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 @CrossOrigin
 @Api
@@ -82,6 +83,12 @@ public class StandardController {
         File file = reportRequestDto.getReportFile(requestId);
         FileUtil.createFileResponse(file,response);
         FileUtil.delete(file);
+    }
+
+    @ApiOperation(value = "View CSV of Request")
+    @RequestMapping(value = "/request-report/{requestId}/view",method = RequestMethod.GET)
+    public List<Map<String, String>> viewFile(@PathVariable Integer requestId) throws ApiException, IOException {
+        return reportRequestDto.getJsonFromCsv(requestId);
     }
 
 }

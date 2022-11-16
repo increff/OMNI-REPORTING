@@ -40,6 +40,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-csv</artifactId>
+            <version>1.9.0</version>
+        </dependency>
+        <dependency>
             <groupId>com.nextscm.commons</groupId>
             <artifactId>commons-spring-server</artifactId>
             <version>${nextscm-commons-spring.version}</version>

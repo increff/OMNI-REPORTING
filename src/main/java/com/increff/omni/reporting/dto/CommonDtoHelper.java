@@ -5,11 +5,9 @@ import com.increff.omni.reporting.model.data.*;
 import com.increff.omni.reporting.model.form.SqlParams;
 import com.increff.omni.reporting.model.constants.ReportRequestStatus;
 import com.increff.omni.reporting.model.form.ReportRequestForm;
-import com.increff.omni.reporting.model.form.ValidationGroupForm;
 import com.increff.omni.reporting.pojo.*;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
-import io.swagger.models.auth.In;
 import org.apache.commons.text.StringSubstitutor;
 
 import java.io.File;
@@ -159,6 +157,15 @@ public class CommonDtoHelper {
         sqlParams.setOutFile(file);
         sqlParams.setErrFile(errorFile);
         return sqlParams;
+    }
+
+    public static void validate(ReportRequestPojo requestPojo, Integer requestId, ReportPojo reportPojo, int userId) throws ApiException {
+        if (requestPojo.getUserId() != userId) {
+            throw new ApiException(ApiStatus.BAD_DATA, "Logged in user has not requested the report with id : " + requestId);
+        }
+        if (!Arrays.asList(ReportRequestStatus.COMPLETED, ReportRequestStatus.FAILED).contains(requestPojo.getStatus())) {
+            throw new ApiException(ApiStatus.BAD_DATA, "Report request is still in processing, name : " + reportPojo.getName());
+        }
     }
 
     public static ReportValidationGroupPojo getValidationGroupPojoFromExistingPojo(ReportValidationGroupPojo v) {

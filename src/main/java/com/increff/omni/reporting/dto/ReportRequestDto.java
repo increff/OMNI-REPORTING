@@ -3,7 +3,6 @@ package com.increff.omni.reporting.dto;
 import com.increff.omni.reporting.api.*;
 import com.increff.omni.reporting.flow.InputControlFlowApi;
 import com.increff.omni.reporting.flow.ReportRequestFlowApi;
-import com.increff.omni.reporting.model.constants.ReportRequestStatus;
 import com.increff.omni.reporting.model.constants.ReportType;
 import com.increff.omni.reporting.model.data.ReportRequestData;
 import com.increff.omni.reporting.model.data.TimeZoneData;
@@ -15,6 +14,8 @@ import com.nextscm.commons.lang.StringUtil;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
 import lombok.extern.log4j.Log4j;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
@@ -24,15 +25,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
+import java.io.Reader;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.increff.omni.reporting.dto.CommonDtoHelper.TIME_ZONE_PATTERN;
-import static com.increff.omni.reporting.dto.CommonDtoHelper.convertToTimeZoneData;
+import static com.increff.omni.reporting.dto.CommonDtoHelper.*;
 
 @Service
 @Log4j
@@ -64,6 +65,8 @@ public class ReportRequestDto extends AbstractDto {
     private OrganizationApi organizationApi;
     @Autowired
     private RestTemplate restTemplate;
+
+    private final Integer MAX_NUMBER_OF_ROWS = 50;
 
 
     public void requestReport(ReportRequestForm form) throws ApiException {
@@ -98,17 +101,34 @@ public class ReportRequestDto extends AbstractDto {
     public File getReportFile(Integer requestId) throws ApiException, IOException {
         ReportRequestPojo requestPojo = reportRequestApi.getCheck(requestId);
         ReportPojo reportPojo = reportApi.getCheck(requestPojo.getReportId());
-        if (requestPojo.getUserId() != getUserId()) {
-            throw new ApiException(ApiStatus.BAD_DATA, "Logged in user has not requested the report with id : " + requestId);
-        }
-        if (!Arrays.asList(ReportRequestStatus.COMPLETED, ReportRequestStatus.FAILED).contains(requestPojo.getStatus())) {
-            throw new ApiException(ApiStatus.BAD_DATA, "Report request is still in processing, name : " + reportPojo.getName());
-        }
+        validate(requestPojo, requestId, reportPojo, getUserId());
         String reportName = requestId + "_" + UUID.randomUUID();
         File sourceFile = folderApi.getFile(reportName + ".csv");
         byte[] data = getFileFromUrl(requestPojo.getUrl());
         FileUtils.writeByteArrayToFile(sourceFile, data);
         return sourceFile;
+    }
+
+    public List<Map<String, String>> getJsonFromCsv(Integer requestId) throws ApiException, IOException {
+        ReportRequestPojo requestPojo = reportRequestApi.getCheck(requestId);
+        ReportPojo reportPojo = reportApi.getCheck(requestPojo.getReportId());
+        validate(requestPojo, requestId, reportPojo, getUserId());
+        if(requestPojo.getNoOfRows() >= MAX_NUMBER_OF_ROWS)
+            throw new ApiException(ApiStatus.BAD_DATA, "Data contains more than 50 rows. View option is restricted");
+        List<Map<String, String>> data = new ArrayList<>();
+        String reportName = requestId + "_" + UUID.randomUUID();
+        File sourceFile = folderApi.getFile(reportName + ".csv");
+        byte[] bytes = getFileFromUrl(requestPojo.getUrl());
+        FileUtils.writeByteArrayToFile(sourceFile, bytes);
+        Reader in = new FileReader(sourceFile);
+        Iterable<CSVRecord> records = CSVFormat.DEFAULT.builder().setHeader().setSkipHeaderRecord(true).build().parse(in);
+        for (CSVRecord record : records) {
+            Map<String, String> value = record.toMap();
+            data.add(value);
+        }
+        in.close();
+        FileUtil.delete(sourceFile);
+        return data;
     }
 
     public List<TimeZoneData> getAllAvailableTimeZones() throws ApiException {
