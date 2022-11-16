@@ -58,10 +58,12 @@ public class ReportRequestApi extends AbstractApi {
         stuck.forEach(s -> s.setStatus(ReportRequestStatus.STUCK));
     }
 
-    public void updateStatus(Integer id, ReportRequestStatus status, String filePath) throws ApiException {
+    public void updateStatus(Integer id, ReportRequestStatus status, String filePath, Integer noOfRows, Double fileSize) throws ApiException {
         ReportRequestPojo reportRequestPojo = getCheck(id);
         reportRequestPojo.setStatus(status);
         reportRequestPojo.setUrl(filePath);
+        reportRequestPojo.setFileSize(fileSize);
+        reportRequestPojo.setNoOfRows(noOfRows);
         dao.update(reportRequestPojo);
     }
 

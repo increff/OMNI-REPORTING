@@ -140,7 +140,8 @@ public class ReportRequestDto extends AbstractDto {
         data.setReportName(reportPojo.getName());
         OrganizationPojo organizationPojo = organizationApi.getCheck(pojo.getOrgId());
         data.setOrgName(organizationPojo.getName());
-        data.setFileSize(getFileSizeFromUrl(pojo.getUrl(), pojo.getId()));
+        data.setFileSize(pojo.getFileSize());
+        data.setNoOfRows(pojo.getNoOfRows());
         return data;
     }
 

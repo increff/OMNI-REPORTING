@@ -34,5 +34,9 @@ public class ReportRequestPojo extends AbstractVersionedPojo {
     @Enumerated(EnumType.STRING)
     private ReportRequestStatus status;
 
+    private Integer noOfRows;
+
+    private Double fileSize;
+
     private String url;
 }

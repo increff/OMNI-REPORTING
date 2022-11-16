@@ -18,4 +18,5 @@ public class ReportRequestData {
     private ZonedDateTime requestCreationTime;
     private ZonedDateTime requestUpdatedTime;
     private Double fileSize;
+    private Integer noOfRows;
 }

@@ -38,12 +38,14 @@ public class FileUtil {
         }
     }
 
-    public static void getCsvFromTsv(File file, File csvFile) throws IOException {
+    public static Integer getCsvFromTsv(File file, File csvFile) throws IOException {
+        Integer noOfRows = 0;
         BufferedReader TSVFile =
                 new BufferedReader(new FileReader(file));
         PrintWriter printer = new PrintWriter(csvFile);
         String dataRow = TSVFile.readLine(); // Read first line.
         while (dataRow != null) {
+            noOfRows++;
             List<String> values = Arrays.asList(dataRow.split("\t"));
             ListIterator<String> it = values.listIterator();
             while (it.hasNext()) {
@@ -59,6 +61,7 @@ public class FileUtil {
         }
         printer.close();
         TSVFile.close();
+        return noOfRows;
     }
 
     public static void createFileResponse(File file, HttpServletResponse response) throws IOException {

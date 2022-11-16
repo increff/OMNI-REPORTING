@@ -74,12 +74,13 @@ public class ReportTask {
             SqlCmd.processQuery(sqlParams, false);
             String name = sqlParams.getOutFile().getName().split(".tsv")[0] + ".csv";
             File csvFile = folderApi.getFile(name);
-            FileUtil.getCsvFromTsv(sqlParams.getOutFile(), csvFile);
+            Integer noOfRows = FileUtil.getCsvFromTsv(sqlParams.getOutFile(), csvFile);
 
             // upload result to cloud
             String filePath = uploadFile(csvFile, "SUCCESS_REPORTS", pojo);
             // update status to completed
-            api.updateStatus(pojo.getId(), ReportRequestStatus.COMPLETED, filePath);
+            Double fileSize = FileUtil.getSizeInMb(csvFile.length());
+            api.updateStatus(pojo.getId(), ReportRequestStatus.COMPLETED, filePath, noOfRows, fileSize);
             FileUtil.delete(csvFile);
         } catch (Exception e) {
             // log as error and mark fail
@@ -87,9 +88,10 @@ public class ReportTask {
             try {
                 String name = sqlParams.getErrFile().getName().split(".tsv")[0] + ".csv";
                 File csvFile = folderApi.getFile(name);
-                FileUtil.getCsvFromTsv(sqlParams.getErrFile(), csvFile);
+                Integer noOfRows = FileUtil.getCsvFromTsv(sqlParams.getErrFile(), csvFile);
                 String filePath = uploadFile(csvFile, "ERROR_REPORTS", pojo);
-                api.updateStatus(pojo.getId(), ReportRequestStatus.FAILED, filePath);
+                Double fileSize = FileUtil.getSizeInMb(csvFile.length());
+                api.updateStatus(pojo.getId(), ReportRequestStatus.FAILED, filePath, noOfRows, fileSize);
                 FileUtil.delete(csvFile);
             } catch (Exception ex) {
                 log.error("Error while updating the status of failed request", ex);

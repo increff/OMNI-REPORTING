@@ -12,6 +12,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Date;
 import java.util.Objects;
+import java.util.UUID;
 
 @Service
 public class FolderApi {
@@ -37,12 +38,12 @@ public class FolderApi {
     }
 
     public File getFileForExtension(Integer id, String extension) throws IOException, ApiException {
-        String fileName = "report-" + id + (new Date()).getTime() + extension;
+        String fileName = "report-" + id + "_" + UUID.randomUUID() + extension;
         return getFile(fileName);
     }
 
     public File getErrFile(Integer id, String extension) throws IOException, ApiException {
-        String fileName = "report-err-" + id + (new Date()).getTime() + extension;
+        String fileName = "report-err-" + id + "_" + UUID.randomUUID() + extension;
         return getFile(fileName);
     }
 
