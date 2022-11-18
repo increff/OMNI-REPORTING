@@ -70,7 +70,7 @@ public class ReportRequestDtoTest extends AbstractTest {
         params.put("clientId", Collections.singletonList("1100007455"));
         ReportRequestForm form = getReportRequestForm(reportData.getId(), params, "Asia/Kolkata");
         dto.requestReport(form);
-        List<ReportRequestData> dataList = dto.getAll(1);
+        List<ReportRequestData> dataList = dto.getAll();
         assertEquals(1, dataList.size());
         assertEquals(reportData.getId(), dataList.get(0).getReportId());
         assertEquals(reportData.getName(), dataList.get(0).getReportName());

@@ -68,6 +68,7 @@ public class ReportRequestDto extends AbstractDto {
 
     private final Integer MAX_NUMBER_OF_ROWS = 50;
 
+    private final Integer MAX_LIMIT = 50;
 
     public void requestReport(ReportRequestForm form) throws ApiException {
         requestReportForAnyOrg(form, getOrgId());
@@ -87,10 +88,9 @@ public class ReportRequestDto extends AbstractDto {
         flow.requestReport(pojo, reportInputParamsPojoList);
     }
 
-    public List<ReportRequestData> getAll(Integer limit) throws ApiException, IOException {
-        limit = Math.min(50, limit);
+    public List<ReportRequestData> getAll() throws ApiException, IOException {
         List<ReportRequestData> reportRequestDataList = new ArrayList<>();
-        List<ReportRequestPojo> reportRequestPojoList = reportRequestApi.getByUserId(getUserId(), limit);
+        List<ReportRequestPojo> reportRequestPojoList = reportRequestApi.getByUserId(getUserId(), MAX_LIMIT);
         for (ReportRequestPojo r : reportRequestPojoList) {
             ReportPojo reportPojo = reportApi.getCheck(r.getReportId());
             reportRequestDataList.add(getReportRequestData(r, reportPojo));
