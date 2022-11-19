@@ -6,6 +6,8 @@ import com.increff.omni.reporting.model.form.*;
 import com.nextscm.commons.spring.common.ApiException;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.apache.log4j.Level;
+import org.apache.log4j.LogManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -262,6 +264,12 @@ public class AdminController {
     @RequestMapping(value = "/request-report/orgs/{orgId}", method = RequestMethod.POST)
     public void requestReport(@RequestBody ReportRequestForm form, @PathVariable Integer orgId) throws ApiException {
         reportRequestDto.requestReportForAnyOrg(form, orgId);
+    }
+
+    @ApiOperation(value = "Change Log Level")
+    @RequestMapping(value = "/log", method = RequestMethod.PUT)
+    public void changeLogLevel(@RequestParam Level level) {
+        LogManager.getRootLogger().setLevel(level);
     }
 
 }
