@@ -3,6 +3,7 @@ package com.increff.omni.reporting.dto;
 import com.increff.omni.reporting.api.*;
 import com.increff.omni.reporting.flow.InputControlFlowApi;
 import com.increff.omni.reporting.flow.ReportRequestFlowApi;
+import com.increff.omni.reporting.model.constants.AuditActions;
 import com.increff.omni.reporting.model.constants.ReportType;
 import com.increff.omni.reporting.model.data.ReportRequestData;
 import com.increff.omni.reporting.model.data.TimeZoneData;
@@ -76,6 +77,7 @@ public class ReportRequestDto extends AbstractDto {
 
     public void requestReportForAnyOrg(ReportRequestForm form, Integer orgId) throws ApiException {
         checkValid(form);
+        OrganizationPojo organizationPojo = organizationApi.getCheck(orgId);
         Map<String, String> inputParamsMap = UserPrincipalUtil.getCompleteMapWithAccessControl(form.getParamMap());
         ReportRequestPojo pojo = CommonDtoHelper.getReportRequestPojo(form, orgId, getUserId());
         ReportPojo reportPojo = reportApi.getCheck(pojo.getReportId());
@@ -86,6 +88,8 @@ public class ReportRequestDto extends AbstractDto {
         validateInputParamValues(reportPojo, inputParamsMap);
         List<ReportInputParamsPojo> reportInputParamsPojoList = CommonDtoHelper.getReportInputParamsPojoList(inputParamsMap, form.getTimezone());
         flow.requestReport(pojo, reportInputParamsPojoList);
+        flow.saveAudit(reportPojo.getId().toString(), AuditActions.REQUEST_REPORT.toString(), "Request Report",
+                "Report request submitted for organization : " + organizationPojo.getName(), getUserName());
     }
 
     public List<ReportRequestData> getAll() throws ApiException, IOException {

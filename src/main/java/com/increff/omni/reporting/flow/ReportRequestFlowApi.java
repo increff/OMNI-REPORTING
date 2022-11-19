@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 
 @Service
 @Transactional(rollbackFor = Exception.class)
-public class ReportRequestFlowApi extends AbstractApi {
+public class ReportRequestFlowApi extends AbstractAuditApi {
 
     @Autowired
     private ReportRequestApi api;

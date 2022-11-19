@@ -25,6 +25,10 @@ public abstract class AbstractDto extends AbstractDtoApi {
         return getPrincipal().getId();
     }
 
+    protected static String getUserName() {
+        return getPrincipal().getUsername();
+    }
+
     private static UserPrincipal getPrincipal() {
         return SecurityUtil.getPrincipal();
     }

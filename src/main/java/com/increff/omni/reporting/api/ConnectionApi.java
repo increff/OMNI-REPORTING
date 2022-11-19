@@ -14,7 +14,7 @@ import java.util.Objects;
 
 @Service
 @Transactional(rollbackFor = Exception.class)
-public class ConnectionApi extends AbstractApi {
+public class ConnectionApi extends AbstractAuditApi {
 
     @Autowired
     private ConnectionDao dao;

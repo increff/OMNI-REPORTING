@@ -3,6 +3,7 @@ package com.increff.omni.reporting.dto;
 import com.increff.omni.reporting.api.ConnectionApi;
 import com.increff.omni.reporting.api.FolderApi;
 import com.increff.omni.reporting.config.ApplicationProperties;
+import com.increff.omni.reporting.model.constants.AuditActions;
 import com.increff.omni.reporting.model.form.SqlParams;
 import com.increff.omni.reporting.model.data.ConnectionData;
 import com.increff.omni.reporting.model.form.ConnectionForm;
@@ -43,6 +44,8 @@ public class ConnectionDto extends AbstractDto {
         checkValid(form);
         ConnectionPojo pojo = ConvertUtil.convert(form, ConnectionPojo.class);
         pojo.setId(id);
+        api.saveAudit(id.toString(), AuditActions.EDIT_CONNECTION.toString(), "Edit Connection"
+                , "Edit Connection", getUserName());
         pojo = api.update(pojo);
         return ConvertUtil.convert(pojo, ConnectionData.class);
     }

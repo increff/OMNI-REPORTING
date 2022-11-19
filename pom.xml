@@ -50,6 +50,11 @@
             <version>${nextscm-commons-spring.version}</version>
         </dependency>
         <dependency>
+            <groupId>com.nextscm.commons</groupId>
+            <artifactId>commons-spring-audit</artifactId>
+            <version>${nextscm-commons-spring.version}</version>
+        </dependency>
+        <dependency>
             <groupId>com.increff.account</groupId>
             <artifactId>account-client</artifactId>
             <version>${increff-account.version}</version>

@@ -15,7 +15,7 @@ import java.util.List;
 
 @Service
 @Transactional(rollbackFor = Exception.class)
-public class ReportApi extends AbstractApi {
+public class ReportApi extends AbstractAuditApi {
 
     @Autowired
     private ReportDao dao;

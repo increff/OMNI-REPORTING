@@ -11,6 +11,9 @@ import com.nextscm.commons.fileclient.AbstractFileProvider;
 import com.nextscm.commons.fileclient.FileClient;
 import com.nextscm.commons.fileclient.FileClientException;
 import com.nextscm.commons.fileclient.GcpFileProvider;
+import com.nextscm.commons.spring.audit.api.AuditApi;
+import com.nextscm.commons.spring.audit.dao.AuditDao;
+import com.nextscm.commons.spring.audit.dao.DaoProvider;
 import com.nextscm.commons.spring.server.WebMvcConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.*;
@@ -64,6 +67,19 @@ public class SpringConfig {
         javaTimeModule.addDeserializer(LocalDateTime.class, new LocalDateTimeDeserializer(DateTimeFormatter.ISO_DATE_TIME));
         return Jackson2ObjectMapperBuilder.json().featuresToDisable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS) // ISODate
                 .modules(javaTimeModule).build();
+    }
+
+    @Bean
+    public AuditDao auditDao() {
+        return new AuditDao();
+    }
+
+    @Bean
+    @Autowired
+    public AuditApi auditApi(DaoProvider daoProvider) {
+        AuditApi auditApi = new AuditApi();
+        auditApi.setProvider(daoProvider);
+        return auditApi;
     }
 
 }

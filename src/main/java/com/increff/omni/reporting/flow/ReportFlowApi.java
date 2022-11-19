@@ -1,6 +1,7 @@
 package com.increff.omni.reporting.flow;
 
 import com.increff.omni.reporting.api.*;
+import com.increff.omni.reporting.model.constants.AuditActions;
 import com.increff.omni.reporting.model.constants.InputControlScope;
 import com.increff.omni.reporting.model.constants.InputControlType;
 import com.increff.omni.reporting.model.constants.ReportType;
@@ -27,7 +28,7 @@ import static com.increff.omni.reporting.dto.CommonDtoHelper.getValidationGroupP
 
 @Service
 @Transactional(rollbackFor = ApiException.class)
-public class ReportFlowApi extends AbstractApi {
+public class ReportFlowApi extends AbstractAuditApi {
 
     @Autowired
     private SchemaVersionApi schemaVersionApi;

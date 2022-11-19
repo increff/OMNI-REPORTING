@@ -3,6 +3,7 @@ package com.increff.omni.reporting.dto;
 import com.increff.omni.reporting.api.*;
 import com.increff.omni.reporting.flow.ReportFlowApi;
 import com.increff.omni.reporting.flow.ReportRequestFlowApi;
+import com.increff.omni.reporting.model.constants.AuditActions;
 import com.increff.omni.reporting.model.constants.ValidationType;
 import com.increff.omni.reporting.model.data.ReportData;
 import com.increff.omni.reporting.model.data.ReportQueryData;
@@ -50,6 +51,8 @@ public class ReportDto extends AbstractDto {
         checkValid(form);
         ReportPojo pojo = ConvertUtil.convert(form, ReportPojo.class);
         pojo = flowApi.addReport(pojo);
+        flowApi.saveAudit(pojo.getId().toString(), AuditActions.CREATE_REPORT.toString(), "Create Report", "Report : "
+                + pojo.getName() + " created", getUserName());
         return convertToReportData(Collections.singletonList(pojo)).get(0);
     }
 
@@ -58,6 +61,8 @@ public class ReportDto extends AbstractDto {
         ReportPojo pojo = ConvertUtil.convert(form, ReportPojo.class);
         pojo.setId(id);
         pojo = flowApi.editReport(pojo);
+        flowApi.saveAudit(pojo.getId().toString(), AuditActions.EDIT_REPORT.toString(), "Update Report", "Report : "
+                + pojo.getName() + " updated", getUserName());
         return convertToReportData(Collections.singletonList(pojo)).get(0);
     }
 
@@ -77,6 +82,8 @@ public class ReportDto extends AbstractDto {
         ReportQueryPojo pojo = ConvertUtil.convert(form, ReportQueryPojo.class);
         pojo.setReportId(reportId);
         pojo = flowApi.upsertQuery(pojo);
+        flowApi.saveAudit(reportId.toString(), AuditActions.UPSERT_REPORT_QUERY.toString(), "Upsert Report Query"
+                , "Report query updated", getUserName());
         return ConvertUtil.convert(pojo, ReportQueryData.class);
     }
 
