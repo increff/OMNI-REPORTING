@@ -3,6 +3,7 @@ package com.increff.omni.reporting.controller;
 
 import com.increff.account.client.AuthClient;
 import com.increff.account.client.Params;
+import com.increff.account.model.QueryUserData;
 import com.increff.omni.reporting.config.ApplicationProperties;
 import com.increff.omni.reporting.dto.*;
 import com.increff.omni.reporting.model.data.*;
@@ -22,6 +23,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @CrossOrigin
 @Api
@@ -52,12 +54,16 @@ public class StandardController {
     @RequestMapping(value = "/jump", method = RequestMethod.GET)
     public RedirectView setCookie(@RequestParam String authToken) {
         try {
-            authClient.veriftyToken(authToken);
-        } catch (AppClientException e) {
-            return new RedirectView(properties.getUiHomePagePath(), false);
+            QueryUserData data = authClient.veriftyToken(authToken);
+            if (Objects.nonNull(data) && data.isStatus()) {
+                Cookie c = new Cookie(Params.AUTH_TOKEN, authToken);
+                HttpDto.setCookie(c);
+                return new RedirectView(properties.getUiHomePagePath(), false);
+            }
+
+        } catch (AppClientException ignored) {
+
         }
-        Cookie c = new Cookie(Params.AUTH_TOKEN, authToken);
-        HttpDto.setCookie(c);
         return new RedirectView(properties.getUiHomePagePath(), false);
     }
 
@@ -98,15 +104,16 @@ public class StandardController {
     }
 
     @ApiOperation(value = "Get Result of Request")
-    @RequestMapping(value = "/request-report/{requestId}",method = RequestMethod.GET)
-    public void getFile(@PathVariable Integer requestId, HttpServletResponse response) throws ApiException, IOException {
+    @RequestMapping(value = "/request-report/{requestId}", method = RequestMethod.GET)
+    public void getFile(@PathVariable Integer requestId, HttpServletResponse response) throws
+            ApiException, IOException {
         File file = reportRequestDto.getReportFile(requestId);
-        FileUtil.createFileResponse(file,response);
+        FileUtil.createFileResponse(file, response);
         FileUtil.delete(file);
     }
 
     @ApiOperation(value = "View CSV of Request")
-    @RequestMapping(value = "/request-report/{requestId}/view",method = RequestMethod.GET)
+    @RequestMapping(value = "/request-report/{requestId}/view", method = RequestMethod.GET)
     public List<Map<String, String>> viewFile(@PathVariable Integer requestId) throws ApiException, IOException {
         return reportRequestDto.getJsonFromCsv(requestId);
     }
