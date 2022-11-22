@@ -1,19 +1,22 @@
 package com.increff.omni.reporting.controller;
 
 
-import com.increff.omni.reporting.dto.DirectoryDto;
-import com.increff.omni.reporting.dto.InputControlDto;
-import com.increff.omni.reporting.dto.ReportDto;
-import com.increff.omni.reporting.dto.ReportRequestDto;
+import com.increff.account.client.AuthClient;
+import com.increff.account.client.Params;
+import com.increff.omni.reporting.config.ApplicationProperties;
+import com.increff.omni.reporting.dto.*;
 import com.increff.omni.reporting.model.data.*;
 import com.increff.omni.reporting.model.form.ReportRequestForm;
 import com.increff.omni.reporting.util.FileUtil;
+import com.nextscm.commons.spring.client.AppClientException;
 import com.nextscm.commons.spring.common.ApiException;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.view.RedirectView;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
@@ -23,7 +26,7 @@ import java.util.Map;
 @CrossOrigin
 @Api
 @RestController
-@RequestMapping(value = "/standard")
+@RequestMapping(value = "/api/standard")
 public class StandardController {
 
     @Autowired
@@ -34,11 +37,28 @@ public class StandardController {
     private ReportDto reportDto;
     @Autowired
     private DirectoryDto directoryDto;
+    @Autowired
+    private ApplicationProperties properties;
+    @Autowired
+    private AuthClient authClient;
 
     @ApiOperation(value = "Get all available timezones")
     @RequestMapping(value = "/timeZones", method = RequestMethod.GET)
     public List<TimeZoneData> getAllAvailableTimeZones() throws ApiException {
         return reportRequestDto.getAllAvailableTimeZones();
+    }
+
+    @ApiOperation(value = "Set Account server cookie")
+    @RequestMapping(value = "/jump", method = RequestMethod.GET)
+    public RedirectView setCookie(@RequestParam String authToken) {
+        try {
+            authClient.veriftyToken(authToken);
+        } catch (AppClientException e) {
+            return new RedirectView(properties.getUiHomePagePath(), true);
+        }
+        Cookie c = new Cookie(Params.AUTH_TOKEN, authToken);
+        HttpDto.setCookie(c);
+        return new RedirectView(properties.getUiHomePagePath(), true);
     }
 
     @ApiOperation(value = "Select controls for a report")

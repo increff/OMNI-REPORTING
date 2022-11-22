@@ -28,8 +28,8 @@ public class StandardSecurityConfig extends WebSecurityConfigurerAdapter {
 
         http// Match only these URLs
                 .requestMatchers()//
-                .antMatchers("/standard/**").and().authorizeRequests()//
-                .antMatchers("/standard/**").hasAnyAuthority(APP_ADMIN, REPORT_ADMIN, REPORT_STANDARD)//
+                .antMatchers("/api/standard/**").and().authorizeRequests()//
+                .antMatchers("/api/standard/**").hasAnyAuthority(APP_ADMIN, REPORT_ADMIN, REPORT_STANDARD)//
                 .and().cors().and().csrf().disable()
                 .addFilterBefore(authTokenFilter, BasicAuthenticationFilter.class)
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
@@ -38,6 +38,7 @@ public class StandardSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     public void configure(WebSecurity web) throws Exception {
-        web.ignoring().antMatchers("/v2/api-docs", "/configuration/ui", "/swagger-resources", "/configuration/security", "/swagger-ui.html", "/webjars/**", "/ui/**", "/session/**");
+        web.ignoring().antMatchers("/v2/api-docs", "/configuration/ui", "/swagger-resources", "/configuration/security", "/swagger-ui.html", "/webjars/**", "/ui/**"
+                , "/session/**","/api/standard/jump");
     }
 }

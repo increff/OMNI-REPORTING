@@ -31,9 +31,9 @@ public class AdminSecurityConfig extends WebSecurityConfigurerAdapter {
 
         http// Match only these URLs
                 .requestMatchers()//
-                .antMatchers("/admin/**")
+                .antMatchers("/api/admin/**")
                 .and().authorizeRequests()//
-                .antMatchers("/admin/**").hasAnyAuthority(APP_ADMIN, REPORT_ADMIN)//
+                .antMatchers("/api/admin/**").hasAnyAuthority(APP_ADMIN, REPORT_ADMIN)//
                 .and().cors().and().csrf().disable()
                 .addFilterBefore(authTokenFilter, BasicAuthenticationFilter.class)
                 .addFilterBefore(adminFilter, BasicAuthenticationFilter.class)
