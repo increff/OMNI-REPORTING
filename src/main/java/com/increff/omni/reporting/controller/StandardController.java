@@ -54,11 +54,11 @@ public class StandardController {
         try {
             authClient.veriftyToken(authToken);
         } catch (AppClientException e) {
-            return new RedirectView(properties.getUiHomePagePath(), true);
+            return new RedirectView(properties.getUiHomePagePath(), false);
         }
         Cookie c = new Cookie(Params.AUTH_TOKEN, authToken);
         HttpDto.setCookie(c);
-        return new RedirectView(properties.getUiHomePagePath(), true);
+        return new RedirectView(properties.getUiHomePagePath(), false);
     }
 
     @ApiOperation(value = "Select controls for a report")
