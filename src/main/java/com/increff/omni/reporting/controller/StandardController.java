@@ -58,9 +58,7 @@ public class StandardController {
             if (Objects.nonNull(data) && data.isStatus()) {
                 Cookie c = new Cookie(Params.AUTH_TOKEN, authToken);
                 HttpDto.setCookie(c);
-                return new RedirectView(properties.getUiHomePagePath(), false);
             }
-
         } catch (AppClientException ignored) {
 
         }
