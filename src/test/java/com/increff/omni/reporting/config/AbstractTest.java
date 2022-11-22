@@ -47,11 +47,11 @@ public abstract class AbstractTest {
         principal.setCountry("India");
         principal.setFullName("TEST USER");
         Map<String, Map<String, List<String>>> resourceRoles = new HashMap<>();
-        Map<String, List<String>> warehouseResourceMap = new HashMap<>();
-        warehouseResourceMap.put("w1", new ArrayList<>());
-        warehouseResourceMap.put("w2", new ArrayList<>());
-        resourceRoles.put(AppResourceKeys.warehouseKey, warehouseResourceMap);
-        resourceRoles.put(AppResourceKeys.clientKey, warehouseResourceMap);
+        Map<String, List<String>> fulfillmentLocationResourceMap = new HashMap<>();
+        fulfillmentLocationResourceMap.put("w1", new ArrayList<>());
+        fulfillmentLocationResourceMap.put("w2", new ArrayList<>());
+        resourceRoles.put(AppResourceKeys.fulfillmentLocationKey, fulfillmentLocationResourceMap);
+        resourceRoles.put(AppResourceKeys.clientKey, fulfillmentLocationResourceMap);
         principal.setResourceRoles(resourceRoles);
         principal.setRoles(Arrays.asList("app.admin", "report.admin"));
         SecurityContext securityContext = Mockito.mock(SecurityContext.class, Mockito.withSettings().serializable());
