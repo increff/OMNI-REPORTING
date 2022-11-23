@@ -1,13 +1,10 @@
 package com.increff.omni.reporting.dto;
 
+import com.increff.omni.reporting.model.constants.ValidationType;
+import com.increff.omni.reporting.model.data.*;
 import com.increff.omni.reporting.model.form.SqlParams;
 import com.increff.omni.reporting.model.constants.ReportRequestStatus;
-import com.increff.omni.reporting.model.data.OrgConnectionData;
-import com.increff.omni.reporting.model.data.OrgSchemaData;
-import com.increff.omni.reporting.model.data.ReportRequestData;
-import com.increff.omni.reporting.model.data.TimeZoneData;
 import com.increff.omni.reporting.model.form.ReportRequestForm;
-import com.increff.omni.reporting.model.form.ValidationGroupForm;
 import com.increff.omni.reporting.pojo.*;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
@@ -111,6 +108,29 @@ public class CommonDtoHelper {
         return reportRequestPojo;
     }
 
+    public static void updateValidationTypes(List<InputControlData> inputControlDataList, List<ReportValidationGroupPojo> validationGroupPojoList, List<ReportControlsPojo> reportControlsPojos) {
+        // Generate map of report control id to validation types
+        Map<Integer, List<ValidationType>> reportControlToValidationTypeMap = new HashMap<>();
+        validationGroupPojoList.forEach(v -> {
+            if (reportControlToValidationTypeMap.containsKey(v.getReportControlId())) {
+                List<ValidationType> ex = reportControlToValidationTypeMap.get(v.getReportControlId());
+                ex.add(v.getType());
+                reportControlToValidationTypeMap.put(v.getReportControlId(), ex);
+            } else
+                reportControlToValidationTypeMap.put(v.getReportControlId(),
+                        new ArrayList<>(Collections.singletonList(v.getType())));
+        });
+        // Generate map of input control id to report control id
+        Map<Integer, Integer> inputControlToReportControl = reportControlsPojos.stream().collect(Collectors
+                .toMap(ReportControlsPojo::getControlId, ReportControlsPojo::getId));
+        inputControlDataList.forEach(d -> {
+            List<ValidationType> validationTypeList = reportControlToValidationTypeMap.getOrDefault(
+                    inputControlToReportControl.get(d.getId()), new ArrayList<>()
+            );
+            d.setValidationTypes(validationTypeList);
+        });
+    }
+
     public static List<ReportInputParamsPojo> getReportInputParamsPojoList(Map<String, String> paramMap, String timeZone) {
         List<ReportInputParamsPojo> reportInputParamsPojoList = new ArrayList<>();
         paramMap.forEach((k, v) -> {
@@ -126,17 +146,6 @@ public class CommonDtoHelper {
         return reportInputParamsPojoList;
     }
 
-    public static ReportRequestData getReportRequestData(ReportRequestPojo pojo, ReportPojo reportPojo) {
-        ReportRequestData data = new ReportRequestData();
-        data.setRequestCreationTime(pojo.getCreatedAt());
-        data.setRequestUpdatedTime(pojo.getUpdatedAt());
-        data.setStatus(pojo.getStatus());
-        data.setRequestId(pojo.getId());
-        data.setReportId(reportPojo.getId());
-        data.setReportName(reportPojo.getName());
-        return data;
-    }
-
     public static SqlParams convert(ConnectionPojo connectionPojo, ReportQueryPojo reportQueryPojo, Map<String, String> inputParamsMap, File file, File errorFile, Integer maxExecutionTime) {
         SqlParams sqlParams = new SqlParams();
         sqlParams.setHost(connectionPojo.getHost());
@@ -150,14 +159,44 @@ public class CommonDtoHelper {
         return sqlParams;
     }
 
+    public static void validate(ReportRequestPojo requestPojo, Integer requestId, ReportPojo reportPojo, int userId) throws ApiException {
+        if (requestPojo.getUserId() != userId) {
+            throw new ApiException(ApiStatus.BAD_DATA, "Logged in user has not requested the report with id : " + requestId);
+        }
+        if (!Arrays.asList(ReportRequestStatus.COMPLETED, ReportRequestStatus.FAILED).contains(requestPojo.getStatus())) {
+            throw new ApiException(ApiStatus.BAD_DATA, "Report request is still in processing, name : " + reportPojo.getName());
+        }
+    }
+
+    public static ReportValidationGroupPojo getValidationGroupPojoFromExistingPojo(ReportValidationGroupPojo v) {
+        ReportValidationGroupPojo validationGroupPojo = new ReportValidationGroupPojo();
+        validationGroupPojo.setValidationValue(v.getValidationValue());
+        validationGroupPojo.setGroupName(v.getGroupName());
+        validationGroupPojo.setReportId(v.getReportId());
+        validationGroupPojo.setReportControlId(v.getReportControlId());
+        validationGroupPojo.setType(v.getType());
+        return validationGroupPojo;
+    }
+
+    public static ReportPojo getReportPojoFromExistingPojo(ReportPojo oldReport) {
+        ReportPojo reportPojo = new ReportPojo();
+        reportPojo.setIsEnabled(oldReport.getIsEnabled());
+        reportPojo.setDirectoryId(oldReport.getDirectoryId());
+        reportPojo.setName(oldReport.getName());
+        reportPojo.setType(oldReport.getType());
+        reportPojo.setSchemaVersionId(oldReport.getSchemaVersionId());
+        return reportPojo;
+    }
+
+
     public static Map<Integer, List<ReportRequestPojo>> groupByOrgID(List<ReportRequestPojo> reportRequestPojoList) {
         Map<Integer, List<ReportRequestPojo>> orgToRequests = new HashMap<>();
-        reportRequestPojoList.forEach(r -> {
-            if(orgToRequests.containsKey(r.getOrgId()))
+        for (ReportRequestPojo r : reportRequestPojoList) {
+            if (orgToRequests.containsKey(r.getOrgId()))
                 orgToRequests.get(r.getOrgId()).add(r);
             else
                 orgToRequests.put(r.getOrgId(), Collections.singletonList(r));
-        });
+        }
         return orgToRequests;
     }
 }

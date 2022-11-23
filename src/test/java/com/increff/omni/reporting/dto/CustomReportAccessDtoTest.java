@@ -57,12 +57,12 @@ public class CustomReportAccessDtoTest extends AbstractTest {
         ReportData reportData = reportDto.add(reportForm);
         CustomReportAccessForm form = getCustomReportAccessForm(reportData.getId(), 100001);
         dto.addCustomReportAccess(form);
-        List<CustomReportAccessData> dataList = dto.getAllData();
+        List<CustomReportAccessData> dataList = dto.getAllDataByReport(reportData.getId());
         assertEquals(1, dataList.size());
         assertEquals(reportData.getName(), dataList.get(0).getReportName());
         assertEquals(100001, dataList.get(0).getOrgId().intValue());
         dto.deleteCustomReportAccess(dataList.get(0).getId());
-        dataList = dto.getAllData();
+        dataList = dto.getAllDataByReport(reportData.getId());
         assertEquals(0, dataList.size());
     }
 

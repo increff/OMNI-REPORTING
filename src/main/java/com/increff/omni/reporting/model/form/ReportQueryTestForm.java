@@ -6,12 +6,9 @@ import lombok.Setter;
 import java.util.List;
 import java.util.Map;
 
-@Setter
 @Getter
-public class ReportRequestForm {
-
-    private Integer reportId;
+@Setter
+public class ReportQueryTestForm extends ReportQueryForm{
     private String timezone = "UTC";
     private Map<String, List<String>> paramMap;
-
 }

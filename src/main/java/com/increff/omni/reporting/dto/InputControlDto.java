@@ -15,10 +15,13 @@ import com.nextscm.commons.spring.common.ConvertUtil;
 import lombok.extern.log4j.Log4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static com.increff.omni.reporting.dto.CommonDtoHelper.updateValidationTypes;
 
 @Service
 @Log4j
@@ -37,12 +40,16 @@ public class InputControlDto extends AbstractDto {
     private ReportControlsApi reportControlsApi;
 
     @Autowired
+    private ReportValidationGroupApi reportValidationGroupApi;
+
+    @Autowired
     private OrgConnectionApi orgConnectionApi;
 
     @Autowired
     private ConnectionApi connectionApi;
 
-
+    // @Transactional is added to rollback on exception happening while getting values from query
+    @Transactional(rollbackFor = ApiException.class)
     public InputControlData add(InputControlForm form) throws ApiException {
         validate(form);
         InputControlPojo pojo = ConvertUtil.convert(form, InputControlPojo.class);
@@ -50,6 +57,8 @@ public class InputControlDto extends AbstractDto {
         return getInputControlDatas(Collections.singletonList(pojo)).get(0);
     }
 
+    // @Transactional is added to rollback on exception happening while getting values from query
+    @Transactional(rollbackFor = ApiException.class)
     public InputControlData update(Integer id, InputControlUpdateForm form) throws ApiException {
         validateForEdit(form);
         InputControlPojo pojo = ConvertUtil.convert(form, InputControlPojo.class);
@@ -70,12 +79,16 @@ public class InputControlDto extends AbstractDto {
 
     public List<InputControlData> selectForReport(Integer reportId) throws ApiException {
         List<ReportControlsPojo> reportControlsPojos = reportControlsApi.getByReportId(reportId);
+        List<ReportValidationGroupPojo> validationGroupPojoList = reportValidationGroupApi.getByReportId(reportId);
+
         List<Integer> controlIds = reportControlsPojos.stream()
                 .map(ReportControlsPojo::getControlId).collect(Collectors.toList());
 
         List<InputControlPojo> pojos = api.selectByIds(controlIds);
 
-        return getInputControlDatas(pojos);
+        List<InputControlData> inputControlDataList = getInputControlDatas(pojos);
+        updateValidationTypes(inputControlDataList, validationGroupPojoList, reportControlsPojos);
+        return inputControlDataList;
     }
 
     private List<InputControlData> getInputControlDatas(List<InputControlPojo> pojos) throws ApiException {
@@ -106,31 +119,32 @@ public class InputControlDto extends AbstractDto {
                     .collect(Collectors.groupingBy(
                             InputControlValuesPojo::getControlId,
                             Collectors.mapping(InputControlValuesPojo::getValue, Collectors.toList())));
-
-        return pojos.stream().map(p -> {
-            InputControlData data = ConvertUtil.convert(p, InputControlData.class);
-            data.setQuery(controlToQueryMapping.getOrDefault(p.getId(), null));
-            data.setValues(controlToValuesMapping.getOrDefault(p.getId(), null));
-            if (Objects.nonNull(data.getQuery())) {
-                try {
-                    setInputControlOptions(data, flowApi.getValuesFromQuery(data.getQuery(), connectionPojo));
-                } catch (ApiException e) {
-                    //TODO : This should throw Runtime exception
-                    log.error("Error while getting values from query : ", e);
-                }
-            } else {
-                List<String> values = controlToValuesMapping.getOrDefault(p.getId(), null);
-                if (!CollectionUtils.isEmpty(values)) {
-                    Map<String, String> valuesMap = new HashMap<>();
-                    values.forEach(m -> valuesMap.put(m, m));
-                    setInputControlOptions(data, valuesMap);
-                }
-            }
-            return data;
-        }).collect(Collectors.toList());
+        List<InputControlData> dataList = new ArrayList<>();
+        for(InputControlPojo p : pojos) {
+            dataList.add(getDataFromPojo(p, controlToValuesMapping, controlToQueryMapping, connectionPojo));
+        }
+        return dataList;
     }
 
-    private void setInputControlOptions(InputControlData data, Map<String,String> values){
+    private InputControlData getDataFromPojo(InputControlPojo p, Map<Integer, List<String>> controlToValuesMapping
+            , Map<Integer, String> controlToQueryMapping, ConnectionPojo connectionPojo) throws ApiException {
+        InputControlData data = ConvertUtil.convert(p, InputControlData.class);
+        data.setQuery(controlToQueryMapping.getOrDefault(p.getId(), null));
+        data.setValues(controlToValuesMapping.getOrDefault(p.getId(), null));
+        if (!StringUtil.isEmpty(data.getQuery())) {
+            setInputControlOptions(data, flowApi.getValuesFromQuery(data.getQuery(), connectionPojo));
+        } else {
+            List<String> values = controlToValuesMapping.getOrDefault(p.getId(), null);
+            if (!CollectionUtils.isEmpty(values)) {
+                Map<String, String> valuesMap = new HashMap<>();
+                values.forEach(m -> valuesMap.put(m, m));
+                setInputControlOptions(data, valuesMap);
+            }
+        }
+        return data;
+    }
+
+    private void setInputControlOptions(InputControlData data, Map<String, String> values) {
         values.keySet().forEach(k -> {
             InputControlData.InputControlDataValue value = new InputControlData.InputControlDataValue();
             value.setLabelName(k);
@@ -158,8 +172,10 @@ public class InputControlDto extends AbstractDto {
     private void validateForControlType(String query, InputControlType type, List<String> values) throws ApiException {
         switch (type) {
             case TEXT:
+            case MULTI_TEXT:
             case NUMBER:
             case DATE:
+            case DATE_TIME:
                 if (!values.isEmpty() || !StringUtil.isEmpty(query))
                     throw new ApiException(ApiStatus.BAD_DATA, "For Text, Number and Date, neither query nor value is needed");
                 break;

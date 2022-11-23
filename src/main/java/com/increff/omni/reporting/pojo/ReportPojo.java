@@ -33,4 +33,7 @@ public class ReportPojo extends AbstractVersionedPojo{
 
     @Column(nullable = false)
     private Integer schemaVersionId;
+
+    @Column(nullable = false)
+    private Boolean isEnabled = true;
 }

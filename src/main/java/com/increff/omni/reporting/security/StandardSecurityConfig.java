@@ -20,21 +20,25 @@ public class StandardSecurityConfig extends WebSecurityConfigurerAdapter {
     private AuthTokenFilter authTokenFilter;
 
     private static final String APP_ADMIN = "app.admin";
-    public static final String APP_STANDARD = "app.standard";
+    private static final String REPORT_ADMIN = "report.admin";
+    private static final String REPORT_STANDARD = "report.standard";
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
 
         http// Match only these URLs
                 .requestMatchers()//
-                .antMatchers("/standard1/**").and().authorizeRequests()//
-                .antMatchers("/standard/**").hasAnyAuthority(APP_ADMIN, APP_STANDARD)//
-                // Ignore CSRF and CORS
-                .and().csrf().disable().cors().disable().addFilterBefore(authTokenFilter, BasicAuthenticationFilter.class).sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+                .antMatchers("/api/standard/**").and().authorizeRequests()//
+                .antMatchers("/api/standard/**").hasAnyAuthority(APP_ADMIN, REPORT_ADMIN, REPORT_STANDARD)//
+                .and().cors().and().csrf().disable()
+                .addFilterBefore(authTokenFilter, BasicAuthenticationFilter.class)
+                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+        http.cors();
     }
 
     @Override
     public void configure(WebSecurity web) throws Exception {
-        web.ignoring().antMatchers("/v2/api-docs", "/configuration/ui", "/swagger-resources", "/configuration/security", "/swagger-ui.html", "/webjars/**", "/ui/**", "/session/**");
+        web.ignoring().antMatchers("/v2/api-docs", "/configuration/ui", "/swagger-resources", "/configuration/security", "/swagger-ui.html", "/webjars/**", "/ui/**"
+                , "/session/**","/api/standard/jump");
     }
 }

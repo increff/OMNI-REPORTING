@@ -3,16 +3,20 @@ package com.increff.omni.reporting.dto;
 import com.increff.omni.reporting.api.*;
 import com.increff.omni.reporting.flow.InputControlFlowApi;
 import com.increff.omni.reporting.flow.ReportRequestFlowApi;
-import com.increff.omni.reporting.model.constants.ReportRequestStatus;
+import com.increff.omni.reporting.model.constants.AuditActions;
 import com.increff.omni.reporting.model.constants.ReportType;
 import com.increff.omni.reporting.model.data.ReportRequestData;
 import com.increff.omni.reporting.model.data.TimeZoneData;
 import com.increff.omni.reporting.model.form.ReportRequestForm;
 import com.increff.omni.reporting.pojo.*;
+import com.increff.omni.reporting.util.FileUtil;
+import com.increff.omni.reporting.util.UserPrincipalUtil;
 import com.nextscm.commons.lang.StringUtil;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
 import lombok.extern.log4j.Log4j;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
@@ -22,15 +26,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
+import java.io.Reader;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.increff.omni.reporting.dto.CommonDtoHelper.TIME_ZONE_PATTERN;
-import static com.increff.omni.reporting.dto.CommonDtoHelper.convertToTimeZoneData;
+import static com.increff.omni.reporting.dto.CommonDtoHelper.*;
 
 @Service
 @Log4j
@@ -55,28 +59,45 @@ public class ReportRequestDto extends AbstractDto {
     @Autowired
     private FolderApi folderApi;
     @Autowired
+    private ReportQueryApi queryApi;
+    @Autowired
     private InputControlFlowApi inputControlFlowApi;
+    @Autowired
+    private OrganizationApi organizationApi;
     @Autowired
     private RestTemplate restTemplate;
 
+    private final Integer MAX_NUMBER_OF_ROWS = 50;
+
+    private final Integer MAX_LIMIT = 50;
 
     public void requestReport(ReportRequestForm form) throws ApiException {
-        checkValid(form);
-        ReportRequestPojo pojo = CommonDtoHelper.getReportRequestPojo(form, getOrgId(), getUserId());
-        ReportPojo reportPojo = reportApi.getCheck(pojo.getReportId());
-        validateCustomReportAccess(reportPojo, getOrgId());
-        validateInputParamValues(reportPojo, form.getParamMap());
-        List<ReportInputParamsPojo> reportInputParamsPojoList = CommonDtoHelper.getReportInputParamsPojoList(form.getParamMap(), form.getTimezone());
-        flow.requestReport(pojo, reportInputParamsPojoList);
+        requestReportForAnyOrg(form, getOrgId());
     }
 
-    public List<ReportRequestData> getAll(Integer limit) throws ApiException {
-        limit = Math.min(50, limit);
+    public void requestReportForAnyOrg(ReportRequestForm form, Integer orgId) throws ApiException {
+        checkValid(form);
+        OrganizationPojo organizationPojo = organizationApi.getCheck(orgId);
+        Map<String, String> inputParamsMap = UserPrincipalUtil.getCompleteMapWithAccessControl(form.getParamMap());
+        ReportRequestPojo pojo = CommonDtoHelper.getReportRequestPojo(form, orgId, getUserId());
+        ReportPojo reportPojo = reportApi.getCheck(pojo.getReportId());
+        ReportQueryPojo reportQueryPojo = queryApi.getByReportId(reportPojo.getId());
+        if(Objects.isNull(reportQueryPojo))
+            throw new ApiException(ApiStatus.BAD_DATA, "No query defined for report : " + reportPojo.getName());
+        validateCustomReportAccess(reportPojo, orgId);
+        validateInputParamValues(reportPojo, inputParamsMap);
+        List<ReportInputParamsPojo> reportInputParamsPojoList = CommonDtoHelper.getReportInputParamsPojoList(inputParamsMap, form.getTimezone());
+        flow.requestReport(pojo, reportInputParamsPojoList);
+        flow.saveAudit(reportPojo.getId().toString(), AuditActions.REQUEST_REPORT.toString(), "Request Report",
+                "Report request submitted for organization : " + organizationPojo.getName(), getUserName());
+    }
+
+    public List<ReportRequestData> getAll() throws ApiException, IOException {
         List<ReportRequestData> reportRequestDataList = new ArrayList<>();
-        List<ReportRequestPojo> reportRequestPojoList = reportRequestApi.getByUserId(getUserId(), limit);
+        List<ReportRequestPojo> reportRequestPojoList = reportRequestApi.getByUserId(getUserId(), MAX_LIMIT);
         for (ReportRequestPojo r : reportRequestPojoList) {
             ReportPojo reportPojo = reportApi.getCheck(r.getReportId());
-            reportRequestDataList.add(CommonDtoHelper.getReportRequestData(r, reportPojo));
+            reportRequestDataList.add(getReportRequestData(r, reportPojo));
         }
         return reportRequestDataList;
     }
@@ -84,19 +105,34 @@ public class ReportRequestDto extends AbstractDto {
     public File getReportFile(Integer requestId) throws ApiException, IOException {
         ReportRequestPojo requestPojo = reportRequestApi.getCheck(requestId);
         ReportPojo reportPojo = reportApi.getCheck(requestPojo.getReportId());
-        if (requestPojo.getUserId() != getUserId()) {
-            throw new ApiException(ApiStatus.BAD_DATA, "Logged in user has not requested the report with id : " + requestId);
-        }
-        if (!Arrays.asList(ReportRequestStatus.COMPLETED, ReportRequestStatus.FAILED).contains(requestPojo.getStatus())) {
-            throw new ApiException(ApiStatus.BAD_DATA, "Report request is still in processing, name : " + reportPojo.getName());
-        }
-        String reportName = reportPojo.getName() + "~" +
-                requestPojo.getUpdatedAt().toInstant().atZone(ZoneId.of("UTC"))
-                        .format(DateTimeFormatter.ofPattern(TIME_ZONE_PATTERN));
-        File sourceFile = folderApi.getFile(reportName + ".xls");
+        validate(requestPojo, requestId, reportPojo, getUserId());
+        String reportName = requestId + "_" + UUID.randomUUID();
+        File sourceFile = folderApi.getFile(reportName + ".csv");
         byte[] data = getFileFromUrl(requestPojo.getUrl());
         FileUtils.writeByteArrayToFile(sourceFile, data);
         return sourceFile;
+    }
+
+    public List<Map<String, String>> getJsonFromCsv(Integer requestId) throws ApiException, IOException {
+        ReportRequestPojo requestPojo = reportRequestApi.getCheck(requestId);
+        ReportPojo reportPojo = reportApi.getCheck(requestPojo.getReportId());
+        validate(requestPojo, requestId, reportPojo, getUserId());
+        if(requestPojo.getNoOfRows() >= MAX_NUMBER_OF_ROWS)
+            throw new ApiException(ApiStatus.BAD_DATA, "Data contains more than 50 rows. View option is restricted");
+        List<Map<String, String>> data = new ArrayList<>();
+        String reportName = requestId + "_" + UUID.randomUUID();
+        File sourceFile = folderApi.getFile(reportName + ".csv");
+        byte[] bytes = getFileFromUrl(requestPojo.getUrl());
+        FileUtils.writeByteArrayToFile(sourceFile, bytes);
+        Reader in = new FileReader(sourceFile);
+        Iterable<CSVRecord> records = CSVFormat.DEFAULT.builder().setHeader().setSkipHeaderRecord(true).build().parse(in);
+        for (CSVRecord record : records) {
+            Map<String, String> value = record.toMap();
+            data.add(value);
+        }
+        in.close();
+        FileUtil.delete(sourceFile);
+        return data;
     }
 
     public List<TimeZoneData> getAllAvailableTimeZones() throws ApiException {
@@ -118,6 +154,33 @@ public class ReportRequestDto extends AbstractDto {
         }
     }
 
+    private ReportRequestData getReportRequestData(ReportRequestPojo pojo, ReportPojo reportPojo) throws IOException, ApiException {
+        ReportRequestData data = new ReportRequestData();
+        data.setRequestCreationTime(pojo.getCreatedAt());
+        data.setRequestUpdatedTime(pojo.getUpdatedAt());
+        data.setStatus(pojo.getStatus());
+        data.setRequestId(pojo.getId());
+        data.setReportId(reportPojo.getId());
+        data.setReportName(reportPojo.getName());
+        OrganizationPojo organizationPojo = organizationApi.getCheck(pojo.getOrgId());
+        data.setOrgName(organizationPojo.getName());
+        data.setFileSize(pojo.getFileSize());
+        data.setNoOfRows(pojo.getNoOfRows());
+        return data;
+    }
+
+    private Double getFileSizeFromUrl(String url, Integer id) throws IOException, ApiException {
+        if(StringUtil.isEmpty(url))
+            return 0.0;
+        String reportName =  id + "-file-size";
+        File sourceFile = folderApi.getFile(reportName + ".xls");
+        byte[] data = getFileFromUrl(url);
+        FileUtils.writeByteArrayToFile(sourceFile, data);
+        Double fileSize = FileUtil.getSizeInMb(sourceFile.length());
+        FileUtil.delete(sourceFile);
+        return fileSize;
+    }
+
     private void validateInputParamValues(ReportPojo reportPojo, Map<String, String> params) throws ApiException {
         List<ReportControlsPojo> reportControlsPojoList = reportControlsApi.getByReportId(reportPojo.getId());
         List<InputControlPojo> inputControlPojoList = controlApi.selectByIds(reportControlsPojoList.stream()
@@ -134,6 +197,7 @@ public class ReportRequestDto extends AbstractDto {
                 Map<String, String> allowedValuesMap;
                 switch (i.getType()) {
                     case TEXT:
+                    case MULTI_TEXT:
                         break;
                     case NUMBER:
                         try {
@@ -144,6 +208,7 @@ public class ReportRequestDto extends AbstractDto {
                         }
                         break;
                     case DATE:
+                    case DATE_TIME:
                         try {
                             value = getValueFromQuotes(value);
                             ZonedDateTime.parse(value);
@@ -203,4 +268,5 @@ public class ReportRequestDto extends AbstractDto {
     private String getValueFromQuotes(String value) {
         return value.substring(1, value.length()-1);
     }
+
 }

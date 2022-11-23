@@ -23,20 +23,22 @@ public class AdminSecurityConfig extends WebSecurityConfigurerAdapter {
     private AdminFilter adminFilter;
 
     private static final String APP_ADMIN = "app.admin";
+    private static final String REPORT_ADMIN = "report.admin";
+
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
 
         http// Match only these URLs
                 .requestMatchers()//
-                .antMatchers("/admin1/**")
+                .antMatchers("/api/admin/**")
                 .and().authorizeRequests()//
-                .antMatchers("/admin/**").hasAnyAuthority(APP_ADMIN)//
-                // Ignore CSRF and CORS
-                .and().csrf().disable().cors().disable()
+                .antMatchers("/api/admin/**").hasAnyAuthority(APP_ADMIN, REPORT_ADMIN)//
+                .and().cors().and().csrf().disable()
                 .addFilterBefore(authTokenFilter, BasicAuthenticationFilter.class)
                 .addFilterBefore(adminFilter, BasicAuthenticationFilter.class)
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+        http.cors();
     }
 
     @Override

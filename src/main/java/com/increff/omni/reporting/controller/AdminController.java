@@ -6,16 +6,19 @@ import com.increff.omni.reporting.model.form.*;
 import com.nextscm.commons.spring.common.ApiException;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.apache.log4j.Level;
+import org.apache.log4j.LogManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 // Todo internationalization
-// Todo version management for reports
+// Todo auditing
+@CrossOrigin
 @Api
 @RestController
-@RequestMapping(value = "/admin")
+@RequestMapping(value = "/api/admin")
 public class AdminController {
 
     @Autowired
@@ -32,6 +35,8 @@ public class AdminController {
     private DirectoryDto directoryDto;
     @Autowired
     private CustomReportAccessDto customReportAccessDto;
+    @Autowired
+    private ReportRequestDto reportRequestDto;
 
     @ApiOperation(value = "Add Connection")
     @RequestMapping(value = "/connections", method = RequestMethod.POST)
@@ -111,10 +116,28 @@ public class AdminController {
         return reportDto.edit(reportId, form);
     }
 
+    @ApiOperation(value = "Enable / Disable Report")
+    @RequestMapping(value = "/reports/{reportId}/status", method = RequestMethod.PUT)
+    public void editStatus(@PathVariable Integer reportId, @RequestParam Boolean isEnabled) throws ApiException {
+         reportDto.updateStatus(reportId, isEnabled);
+    }
+
     @ApiOperation(value = "Get Report")
     @RequestMapping(value = "/reports/{reportId}", method = RequestMethod.GET)
     public ReportData get(@PathVariable Integer reportId) throws ApiException {
         return reportDto.get(reportId);
+    }
+
+    @ApiOperation(value = "Get All Report")
+    @RequestMapping(value = "/reports/schema-versions/{schemaVersionId}", method = RequestMethod.GET)
+    public List<ReportData> getAll(@PathVariable Integer schemaVersionId) throws ApiException {
+        return reportDto.selectAllBySchemaVersion(schemaVersionId);
+    }
+
+    @ApiOperation(value = "Copy Schema Reports")
+    @RequestMapping(value = "/copy-reports", method = RequestMethod.POST)
+    public void copyReports(@RequestBody CopyReportsForm form) throws ApiException {
+        reportDto.copyReports(form);
     }
 
     @ApiOperation(value = "Add/Edit Report Query")
@@ -123,10 +146,22 @@ public class AdminController {
         return reportDto.upsertQuery(reportId, form);
     }
 
+    @ApiOperation(value = "Get transformed report query")
+    @RequestMapping(value = "/reports/query/try", method = RequestMethod.POST)
+    public ReportQueryData getTransformedQuery(@RequestBody ReportQueryTestForm form) throws ApiException {
+        return reportDto.getTransformedQuery(form);
+    }
+
     @ApiOperation(value = "Get Report Query")
     @RequestMapping(value = "/reports/{reportId}/query", method = RequestMethod.GET)
     public ReportQueryData getQuery(@PathVariable Integer reportId) throws ApiException {
         return reportDto.getQuery(reportId);
+    }
+
+    @ApiOperation(value = "Get Reports")
+    @RequestMapping(value = "/reports/orgs/{orgId}", method = RequestMethod.GET)
+    public List<ReportData> selectByOrgId(@PathVariable Integer orgId) throws ApiException {
+        return reportDto.selectByOrg(orgId);
     }
 
     @ApiOperation(value = "Map control to a report")
@@ -220,9 +255,21 @@ public class AdminController {
     }
 
     @ApiOperation(value = "Get all Custom Report Access")
-    @RequestMapping(value = "/reports/custom-access", method = RequestMethod.GET)
-    public List<CustomReportAccessData> getAllCustomAccess() throws ApiException {
-        return customReportAccessDto.getAllData();
+    @RequestMapping(value = "/reports/{reportId}/custom-access", method = RequestMethod.GET)
+    public List<CustomReportAccessData> getAllCustomAccess(@PathVariable Integer reportId) throws ApiException {
+        return customReportAccessDto.getAllDataByReport(reportId);
+    }
+
+    @ApiOperation(value = "Request Report")
+    @RequestMapping(value = "/request-report/orgs/{orgId}", method = RequestMethod.POST)
+    public void requestReport(@RequestBody ReportRequestForm form, @PathVariable Integer orgId) throws ApiException {
+        reportRequestDto.requestReportForAnyOrg(form, orgId);
+    }
+
+    @ApiOperation(value = "Change Log Level")
+    @RequestMapping(value = "/log", method = RequestMethod.PUT)
+    public void changeLogLevel(@RequestParam Level level) {
+        LogManager.getRootLogger().setLevel(level);
     }
 
 }

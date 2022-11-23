@@ -15,7 +15,7 @@ import java.util.List;
 
 @Service
 @Transactional(rollbackFor = Exception.class)
-public class ReportApi extends AbstractApi {
+public class ReportApi extends AbstractAuditApi {
 
     @Autowired
     private ReportDao dao;
@@ -45,6 +45,7 @@ public class ReportApi extends AbstractApi {
         existing.setName(pojo.getName());
         existing.setSchemaVersionId(pojo.getSchemaVersionId());
         existing.setType(pojo.getType());
+        existing.setIsEnabled(pojo.getIsEnabled());
         dao.update(existing);
         return existing;
     }
@@ -56,5 +57,11 @@ public class ReportApi extends AbstractApi {
     }
 
 
+    public List<ReportPojo> selectAll() {
+        return dao.selectAll();
+    }
 
+    public List<ReportPojo> getBySchemaVersion(Integer schemaVersionId) {
+        return dao.selectMultiple("schemaVersionId", schemaVersionId);
+    }
 }

@@ -40,9 +40,9 @@ public class CustomReportAccessDto extends AbstractDto {
         api.deleteById(id);
     }
 
-    public List<CustomReportAccessData> getAllData() throws ApiException {
+    public List<CustomReportAccessData> getAllDataByReport(Integer reportId) throws ApiException {
         List<CustomReportAccessData> dataList = new ArrayList<>();
-        List<CustomReportAccessPojo> pojoList = api.getAll();
+        List<CustomReportAccessPojo> pojoList = api.getAllByReportId(reportId);
         for (CustomReportAccessPojo p : pojoList) {
             ReportPojo reportPojo = reportApi.getCheck(p.getReportId());
             OrganizationPojo organizationPojo = organizationApi.getCheck(p.getOrgId());

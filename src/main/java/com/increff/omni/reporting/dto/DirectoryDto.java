@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -23,7 +24,7 @@ public class DirectoryDto extends AbstractDtoApi {
         checkValid(form);
         DirectoryPojo pojo = ConvertUtil.convert(form, DirectoryPojo.class);
         pojo = api.add(pojo);
-        return ConvertUtil.convert(pojo, DirectoryData.class);
+        return convertToDirectoryData(Collections.singletonList(pojo)).get(0);
     }
 
     public DirectoryData update(Integer id, DirectoryForm form) throws ApiException {
@@ -31,13 +32,21 @@ public class DirectoryDto extends AbstractDtoApi {
         DirectoryPojo pojo = ConvertUtil.convert(form, DirectoryPojo.class);
         pojo.setId(id);
         pojo = api.update(pojo);
-        return ConvertUtil.convert(pojo, DirectoryData.class);
+        return convertToDirectoryData(Collections.singletonList(pojo)).get(0);
     }
 
-    public List<DirectoryData> getAllDirectories() {
+    public List<DirectoryData> getAllDirectories() throws ApiException {
         List<DirectoryPojo> directoryPojoList = api.getAll();
+        return convertToDirectoryData(directoryPojoList);
+    }
+
+    private List<DirectoryData> convertToDirectoryData(List<DirectoryPojo> pojos) throws ApiException {
         List<DirectoryData> dataList = new ArrayList<>();
-        directoryPojoList.forEach(p -> dataList.add(ConvertUtil.convert(p, DirectoryData.class)));
+        for(DirectoryPojo pojo : pojos) {
+            DirectoryData data = ConvertUtil.convert(pojo, DirectoryData.class);
+            data.setDirectoryPath(api.getDirectoryPath(pojo.getId()));
+            dataList.add(data);
+        }
         return dataList;
     }
 

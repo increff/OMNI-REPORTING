@@ -24,7 +24,8 @@ public class ReportDao extends AbstractDao<ReportPojo> {
         query.where(
                 cb.and(
                         cb.equal(root.get("type"), type),
-                        cb.equal(root.get("schemaVersionId"), schemaVersionId)
+                        cb.equal(root.get("schemaVersionId"), schemaVersionId),
+                        cb.equal(root.get("isEnabled"), true)
                 )
         );
         TypedQuery<ReportPojo> tQuery = createQuery(query);
@@ -52,7 +53,8 @@ public class ReportDao extends AbstractDao<ReportPojo> {
         query.where(
                 cb.and(
                         root.get("id").in(ids),
-                        cb.equal(root.get("schemaVersionId"), schemaVersionId)
+                        cb.equal(root.get("schemaVersionId"), schemaVersionId),
+                        cb.equal(root.get("isEnabled"), true)
                 )
         );
         TypedQuery<ReportPojo> tQuery = createQuery(query);

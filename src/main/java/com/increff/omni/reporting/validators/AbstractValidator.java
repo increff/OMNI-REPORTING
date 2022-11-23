@@ -23,6 +23,8 @@ public abstract class AbstractValidator {
     }
 
     protected String getValueFromQuotes(String value) {
+        if(StringUtil.isEmpty(value))
+            return null;
         return value.substring(1, value.length()-1);
     }
 }

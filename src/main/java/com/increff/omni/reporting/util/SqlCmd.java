@@ -1,13 +1,18 @@
 package com.increff.omni.reporting.util;
 
+import com.increff.omni.reporting.dto.UserDto;
 import com.increff.omni.reporting.model.form.SqlParams;
 import com.nextscm.commons.lang.CmdUtil;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
 import lombok.extern.log4j.Log4j;
+import org.apache.commons.text.StringSubstitutor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.lang.ProcessBuilder.Redirect;
+import java.util.Map;
 
 @Log4j
 public class SqlCmd {
@@ -17,6 +22,12 @@ public class SqlCmd {
     * */
 
     public static void processQuery(SqlParams sp) throws ApiException {
+        processQuery(sp, true);
+    }
+
+    public static void processQuery(SqlParams sp, Boolean isUserPrincipalAvailable) throws ApiException {
+        if(isUserPrincipalAvailable)
+            addAccessControlMap(sp.getQuery());
         String[] cmd = getQueryCmd(sp);
         Redirect redirectAll = Redirect.appendTo(sp.getOutFile());
         Redirect errRedirect = Redirect.appendTo(sp.getErrFile());
@@ -27,8 +38,13 @@ public class SqlCmd {
         }
     }
 
+    private static void addAccessControlMap(String query) {
+        Map<String, String> accessControlMap = UserPrincipalUtil.getAccessControlMap();
+        StringSubstitutor.replace(query, accessControlMap);
+    }
+
     // Commands
-    public static String[] getQueryCmd(SqlParams sp) {
+    private static String[] getQueryCmd(SqlParams sp) {
         String[] cmd = new String[]{ //
                 "mysql", //
                 "--quick", //
@@ -43,7 +59,7 @@ public class SqlCmd {
         return cmd;
     }
 
-    public static String escape(String str) {
+    private static String escape(String str) {
         String os = getOs();
         if (os.equals("windows")) {
             return "\"" + str + "\"";
@@ -51,7 +67,7 @@ public class SqlCmd {
         return str;
     }
 
-    public static String getOs() {
+    private static String getOs() {
         String os = System.getProperty("os.name").toLowerCase();
         if (os.contains("win")) {
             return "windows";

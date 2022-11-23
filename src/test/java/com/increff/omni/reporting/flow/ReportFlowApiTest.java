@@ -262,7 +262,7 @@ public class ReportFlowApiTest extends AbstractTest {
             flowApi.addValidationGroup(reportPojo.getId(), groupForm);
         } catch (ApiException e) {
             assertEquals(ApiStatus.BAD_DATA, e.getStatus());
-            assertEquals("DATE_RANGE validation can only be applied on DATE input controls", e.getMessage());
+            assertEquals("DATE_RANGE validation can only be applied on DATE / DATE_TIME input controls", e.getMessage());
             throw e;
         }
     }
@@ -285,7 +285,7 @@ public class ReportFlowApiTest extends AbstractTest {
             flowApi.addValidationGroup(reportPojo.getId(), groupForm);
         } catch (ApiException e) {
             assertEquals(ApiStatus.BAD_DATA, e.getStatus());
-            assertEquals("DATE_RANGE validation type should have exactly 2 DATE input controls", e.getMessage());
+            assertEquals("DATE_RANGE validation type should have exactly 2 DATE / DATE_TIME input controls", e.getMessage());
             throw e;
         }
     }

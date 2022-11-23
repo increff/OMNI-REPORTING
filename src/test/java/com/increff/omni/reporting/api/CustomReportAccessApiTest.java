@@ -20,7 +20,7 @@ public class CustomReportAccessApiTest extends AbstractTest {
         CustomReportAccessPojo pojo = getCustomReportAccessPojo(100001, 100002);
         api.addCustomReportAccessPojo(pojo);
         api.addCustomReportAccessPojo(pojo);
-        List<CustomReportAccessPojo> pojoList = api.getAll();
+        List<CustomReportAccessPojo> pojoList = api.getAllByReportId(100002);
         assertEquals(1, pojoList.size());
         assertEquals(100002, pojoList.get(0).getReportId().intValue());
         assertEquals(100001, pojoList.get(0).getOrgId().intValue());
@@ -51,7 +51,7 @@ public class CustomReportAccessApiTest extends AbstractTest {
         api.addCustomReportAccessPojo(pojo2);
         api.addCustomReportAccessPojo(pojo3);
         api.deleteByReportId(100002);
-        List<CustomReportAccessPojo> pojoList = api.getAll();
+        List<CustomReportAccessPojo> pojoList = api.getAllByReportId(100003);
         assertEquals(1, pojoList.size());
         assertEquals(100003, pojoList.get(0).getReportId().intValue());
         assertEquals(100001, pojoList.get(0).getOrgId().intValue());
@@ -66,7 +66,7 @@ public class CustomReportAccessApiTest extends AbstractTest {
         api.addCustomReportAccessPojo(pojo2);
         api.addCustomReportAccessPojo(pojo3);
         api.deleteById(pojo2.getId());
-        List<CustomReportAccessPojo> pojoList = api.getAll();
+        List<CustomReportAccessPojo> pojoList = api.getAllByReportId(100002);
         assertEquals(2, pojoList.size());
         assertEquals(100002, pojoList.get(0).getReportId().intValue());
         assertEquals(100001, pojoList.get(0).getOrgId().intValue());
@@ -83,15 +83,8 @@ public class CustomReportAccessApiTest extends AbstractTest {
         api.addCustomReportAccessPojo(pojo2);
         api.addCustomReportAccessPojo(pojo3);
         api.deleteById(pojo2.getId() + 10);
-        List<CustomReportAccessPojo> pojoList = api.getAll();
-        assertEquals(3, pojoList.size());
-        assertEquals(100002, pojoList.get(0).getReportId().intValue());
-        assertEquals(100001, pojoList.get(0).getOrgId().intValue());
-        assertEquals(100003, pojoList.get(1).getReportId().intValue());
-        assertEquals(100001, pojoList.get(1).getOrgId().intValue());
-        assertEquals(100002, pojoList.get(2).getReportId().intValue());
-        assertEquals(100002, pojoList.get(2).getOrgId().intValue());
-
+        List<CustomReportAccessPojo> pojoList = api.getAllByReportId(100001);
+        assertEquals(0, pojoList.size());
     }
 
 }

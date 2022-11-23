@@ -1,33 +1,34 @@
 package com.increff.omni.reporting.controller;
 
 
-import com.increff.omni.reporting.dto.DirectoryDto;
-import com.increff.omni.reporting.dto.InputControlDto;
-import com.increff.omni.reporting.dto.ReportDto;
-import com.increff.omni.reporting.dto.ReportRequestDto;
+import com.increff.account.client.AuthClient;
+import com.increff.account.client.Params;
+import com.increff.account.model.QueryUserData;
+import com.increff.omni.reporting.config.ApplicationProperties;
+import com.increff.omni.reporting.dto.*;
 import com.increff.omni.reporting.model.data.*;
 import com.increff.omni.reporting.model.form.ReportRequestForm;
 import com.increff.omni.reporting.util.FileUtil;
+import com.nextscm.commons.spring.client.AppClientException;
 import com.nextscm.commons.spring.common.ApiException;
-import com.nextscm.commons.spring.server.ApiErrorResponses;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.view.RedirectView;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
-import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
+import java.util.Objects;
 
-
+@CrossOrigin
 @Api
 @RestController
-@RequestMapping(value = "/standard")
+@RequestMapping(value = "/api/standard")
 public class StandardController {
 
     @Autowired
@@ -38,11 +39,30 @@ public class StandardController {
     private ReportDto reportDto;
     @Autowired
     private DirectoryDto directoryDto;
+    @Autowired
+    private ApplicationProperties properties;
+    @Autowired
+    private AuthClient authClient;
 
     @ApiOperation(value = "Get all available timezones")
     @RequestMapping(value = "/timeZones", method = RequestMethod.GET)
     public List<TimeZoneData> getAllAvailableTimeZones() throws ApiException {
         return reportRequestDto.getAllAvailableTimeZones();
+    }
+
+    @ApiOperation(value = "Set Account server cookie")
+    @RequestMapping(value = "/jump", method = RequestMethod.GET)
+    public RedirectView setCookie(@RequestParam String authToken) {
+        try {
+            QueryUserData data = authClient.veriftyToken(authToken);
+            if (Objects.nonNull(data) && data.isStatus()) {
+                Cookie c = new Cookie(Params.AUTH_TOKEN, authToken);
+                HttpDto.setCookie(c);
+            }
+        } catch (AppClientException ignored) {
+
+        }
+        return new RedirectView(properties.getUiHomePagePath(), false);
     }
 
     @ApiOperation(value = "Select controls for a report")
@@ -52,9 +72,9 @@ public class StandardController {
     }
 
     @ApiOperation(value = "Get Reports")
-    @RequestMapping(value = "/reports/orgs/{orgId}", method = RequestMethod.GET)
-    public List<ReportData> selectByOrgId(@PathVariable Integer orgId) throws ApiException {
-        return reportDto.selectAll(orgId);
+    @RequestMapping(value = "/reports", method = RequestMethod.GET)
+    public List<ReportData> selectByOrgId() throws ApiException {
+        return reportDto.selectByOrg();
     }
 
     @ApiOperation(value = "Get validation group")
@@ -77,16 +97,23 @@ public class StandardController {
 
     @ApiOperation(value = "Get All Request data")
     @RequestMapping(value = "/request-report", method = RequestMethod.GET)
-    public List<ReportRequestData> getAll(@RequestParam Integer limit) throws ApiException {
-        return reportRequestDto.getAll(limit);
+    public List<ReportRequestData> getAll() throws ApiException, IOException {
+        return reportRequestDto.getAll();
     }
 
     @ApiOperation(value = "Get Result of Request")
-    @RequestMapping(value = "/request-report/{requestId}",method = RequestMethod.GET)
-    public void getFile(@PathVariable Integer requestId, HttpServletResponse response) throws ApiException, IOException {
+    @RequestMapping(value = "/request-report/{requestId}", method = RequestMethod.GET)
+    public void getFile(@PathVariable Integer requestId, HttpServletResponse response) throws
+            ApiException, IOException {
         File file = reportRequestDto.getReportFile(requestId);
-        FileUtil.createFileResponse(file,response);
+        FileUtil.createFileResponse(file, response);
         FileUtil.delete(file);
+    }
+
+    @ApiOperation(value = "View CSV of Request")
+    @RequestMapping(value = "/request-report/{requestId}/view", method = RequestMethod.GET)
+    public List<Map<String, String>> viewFile(@PathVariable Integer requestId) throws ApiException, IOException {
+        return reportRequestDto.getJsonFromCsv(requestId);
     }
 
 }

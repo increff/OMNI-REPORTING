@@ -7,15 +7,13 @@ import com.increff.omni.reporting.model.constants.ReportType;
 import com.increff.omni.reporting.model.constants.ValidationType;
 import com.increff.omni.reporting.model.data.*;
 import com.increff.omni.reporting.model.form.*;
+import com.increff.omni.reporting.pojo.ReportPojo;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 import static com.increff.omni.reporting.helper.ConnectionTestHelper.getConnectionForm;
 import static com.increff.omni.reporting.helper.DirectoryTestHelper.getDirectoryForm;
@@ -59,8 +57,8 @@ public class ReportDtoTest extends AbstractTest {
     @Test
     public void testAdd() throws ApiException {
         ReportForm form = commonSetup("Report 1", ReportType.STANDARD);
-        dto.add(form);
-        List<ReportData> reportDataList = dto.selectAll(100001);
+        ReportData data = dto.add(form);
+        List<ReportData> reportDataList = dto.selectAllBySchemaVersion(data.getSchemaVersionId());
         assertEquals(1, reportDataList.size());
         assertEquals("Report 1", reportDataList.get(0).getName());
         assertEquals(ReportType.STANDARD, reportDataList.get(0).getType());
@@ -79,6 +77,18 @@ public class ReportDtoTest extends AbstractTest {
     }
 
     @Test
+    public void testUpdateStatus() throws ApiException {
+        ReportForm form = commonSetup("Report 2", ReportType.CUSTOM);
+        ReportData data = dto.add(form);
+        assertEquals(true, data.getIsEnabled());
+        dto.updateStatus(data.getId(), false);
+        ReportData fData = dto.get(data.getId());
+        assertNotNull(fData);
+        assertEquals(ReportType.CUSTOM, fData.getType());
+        assertEquals(false, fData.getIsEnabled());
+    }
+
+    @Test
     public void testUpsertQuery() throws ApiException {
         ReportForm form = commonSetup("Report 2", ReportType.CUSTOM);
         ReportData data = dto.add(form);
@@ -88,6 +98,21 @@ public class ReportDtoTest extends AbstractTest {
         dto.upsertQuery(data.getId(), queryForm);
         queryData = dto.getQuery(data.getId());
         assertEquals("select version();", queryData.getQuery());
+    }
+
+    @Test
+    public void testTransformedQuery() {
+        ReportQueryTestForm testForm = getQueryTestForm();
+        ReportQueryData queryData = dto.getTransformedQuery(testForm);
+        assertEquals("select * from table where id = '1';", queryData.getQuery());
+    }
+
+    @Test
+    public void testTransformedQueryWithWrongParam() {
+        ReportQueryTestForm testForm = getQueryTestForm();
+        testForm.setParamMap(new HashMap<>());
+        ReportQueryData queryData = dto.getTransformedQuery(testForm);
+        assertEquals("select * from table where id = id;", queryData.getQuery());
     }
 
     @Test
@@ -121,6 +146,33 @@ public class ReportDtoTest extends AbstractTest {
         dto.deleteValidationGroup(data.getId(), "group1");
         dataList = dto.getValidationGroups(data.getId());
         assertEquals(0, dataList.size());
+    }
+
+    @Test
+    public void testCopyReports() throws ApiException {
+        ReportForm form = commonSetup("Report 2", ReportType.STANDARD);
+        ReportData data = dto.add(form);
+        InputControlForm inputControlForm = getInputControlForm("Client Id", "clientId", InputControlScope.GLOBAL
+                , InputControlType.TEXT, new ArrayList<>(), null, null);
+        InputControlData inputControlData = inputControlDto.add(inputControlForm);
+        dto.mapToControl(data.getId(), inputControlData.getId());
+        ValidationGroupForm groupForm = getValidationGroupForm("group1", 10, ValidationType.MANDATORY
+                , Collections.singletonList(inputControlData.getId()));
+        dto.addValidationGroup(data.getId(), groupForm);
+        List<ValidationGroupData> dataList = dto.getValidationGroups(data.getId());
+        assertEquals(1, dataList.size());
+        assertEquals("Client Id", dataList.get(0).getControls().get(0));
+        assertEquals(ValidationType.MANDATORY, dataList.get(0).getValidationType());
+        assertEquals(10, dataList.get(0).getValidationValue().intValue());
+        assertEquals("group1", dataList.get(0).getGroupName());
+        SchemaVersionForm schemaVersionForm = getSchemaForm("9.0.2");
+        SchemaVersionData schemaData = schemaDto.add(schemaVersionForm);
+        CopyReportsForm copyReportsForm = new CopyReportsForm();
+        copyReportsForm.setOldSchemaVersionId(data.getSchemaVersionId());
+        copyReportsForm.setNewSchemaVersionId(schemaData.getId());
+        dto.copyReports(copyReportsForm);
+        List<ReportData> reportDataList = dto.selectAllBySchemaVersion(schemaData.getId());
+        assertEquals(1, reportDataList.size());
     }
 
     @Test(expected = ApiException.class)

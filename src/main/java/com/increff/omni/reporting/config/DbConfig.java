@@ -22,6 +22,7 @@ public class DbConfig {
 	private static final int CONNECTION_POOL_SIZE = 12;
 
 	public static final String PACKAGE_POJO = "com.increff.omni.reporting.pojo";
+	public static final String AUDIT_POJO = "com.nextscm.commons.spring.audit.pojo";
 
 	@Value("${jdbc.driverClassName:com.mysql.jdbc.Driver}")
 	private String jdbcDriver;
@@ -54,7 +55,7 @@ public class DbConfig {
 	public LocalContainerEntityManagerFactoryBean entityManagerFactory(DataSource dataSource) {
 		LocalContainerEntityManagerFactoryBean bean = new LocalContainerEntityManagerFactoryBean();
 		bean.setDataSource(dataSource);
-		bean.setPackagesToScan(PACKAGE_POJO);
+		bean.setPackagesToScan(PACKAGE_POJO, AUDIT_POJO);
 		HibernateJpaVendorAdapter jpaAdapter = new HibernateJpaVendorAdapter();
 		bean.setJpaVendorAdapter(jpaAdapter);
 		Properties jpaProperties = new Properties();

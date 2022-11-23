@@ -13,7 +13,10 @@ public class ReportRequestData {
     private Integer requestId;
     private Integer reportId;
     private String reportName;
+    private String orgName;
     private ReportRequestStatus status;
     private ZonedDateTime requestCreationTime;
     private ZonedDateTime requestUpdatedTime;
+    private Double fileSize;
+    private Integer noOfRows;
 }

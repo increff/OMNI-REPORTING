@@ -23,9 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -87,7 +85,7 @@ public class InputControlFlowApi extends AbstractApi {
             SqlParams sqlp = CommonDtoHelper.getSqlParams(connectionPojo, query, file, errFile, properties.getMaxExecutionTime());
             SqlCmd.processQuery(sqlp);
             return getMapFromTsv(file);
-        } catch (IOException | ApiException e) {
+        } catch (ApiException | IOException e) {
             log.error("Error while getting input control values ", e);
         } finally {
             FileUtil.delete(file);
@@ -135,20 +133,20 @@ public class InputControlFlowApi extends AbstractApi {
                     " or param name");
     }
 
-    private Map<String, String> getMapFromTsv(File file) {
-        try (FileInputStream in = new FileInputStream(file)){
-            Map<String, String> fMap = new HashMap<>();
-            TsvFile tsvFile = new TsvFile();
-            tsvFile.read(in);
-            ArrayList<DataRow> list = tsvFile.getData();
-            for (DataRow d : list) {
-                fMap.put(d.getValue(0), d.getValue(1));
-            }
-            return fMap;
-        } catch (Exception e) {
-            log.error("Error while converting file to map ", e);
+    private Map<String, String> getMapFromTsv(File file) throws IOException {
+        Map<String, String> fMap = new HashMap<>();
+        BufferedReader tsvfile =
+                new BufferedReader(new FileReader(file));
+        String dataRow = tsvfile.readLine();
+        if(dataRow != null)
+            dataRow = tsvfile.readLine();
+        while (dataRow != null) {
+            List<String> values = Arrays.asList(dataRow.split("\t"));
+            fMap.put(values.get(0), values.get(1));
+            dataRow = tsvfile.readLine(); // Read next line of data.
         }
-        return new HashMap<>();
+        tsvfile.close();
+        return fMap;
     }
 
 }

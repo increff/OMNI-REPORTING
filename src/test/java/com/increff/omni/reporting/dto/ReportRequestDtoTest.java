@@ -11,17 +11,14 @@ import com.nextscm.commons.spring.common.ApiException;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.io.IOException;
+import java.util.*;
 
 import static com.increff.omni.reporting.helper.ConnectionTestHelper.getConnectionForm;
 import static com.increff.omni.reporting.helper.DirectoryTestHelper.getDirectoryForm;
 import static com.increff.omni.reporting.helper.InputControlTestHelper.getInputControlForm;
 import static com.increff.omni.reporting.helper.OrgTestHelper.getOrganizationForm;
-import static com.increff.omni.reporting.helper.ReportTestHelper.getReportForm;
-import static com.increff.omni.reporting.helper.ReportTestHelper.getReportRequestForm;
+import static com.increff.omni.reporting.helper.ReportTestHelper.*;
 import static com.increff.omni.reporting.helper.SchemaTestHelper.getSchemaForm;
 import static org.junit.Assert.assertEquals;
 
@@ -58,18 +55,22 @@ public class ReportRequestDtoTest extends AbstractTest {
     }
 
     @Test
-    public void testAddReportRequest() throws ApiException {
+    public void testAddReportRequest() throws ApiException, IOException {
         ReportForm reportForm = commonSetup("Report 2", ReportType.STANDARD);
         ReportData reportData = reportDto.add(reportForm);
+        ReportQueryData queryData = reportDto.getQuery(reportData.getId());
+        assertEquals("", queryData.getQuery());
+        ReportQueryForm queryForm = getReportQueryForm("select version();");
+        reportDto.upsertQuery(reportData.getId(), queryForm);
         InputControlForm inputControlForm = getInputControlForm("Client Id", "clientId", InputControlScope.GLOBAL
                 , InputControlType.NUMBER, new ArrayList<>(), null, null);
         InputControlData inputControlData = inputControlDto.add(inputControlForm);
         reportDto.mapToControl(reportData.getId(), inputControlData.getId());
-        Map<String, String> params = new HashMap<>();
-        params.put("clientId", "'1100001111'");
+        Map<String, List<String>> params = new HashMap<>();
+        params.put("clientId", Collections.singletonList("1100007455"));
         ReportRequestForm form = getReportRequestForm(reportData.getId(), params, "Asia/Kolkata");
         dto.requestReport(form);
-        List<ReportRequestData> dataList = dto.getAll(1);
+        List<ReportRequestData> dataList = dto.getAll();
         assertEquals(1, dataList.size());
         assertEquals(reportData.getId(), dataList.get(0).getReportId());
         assertEquals(reportData.getName(), dataList.get(0).getReportName());

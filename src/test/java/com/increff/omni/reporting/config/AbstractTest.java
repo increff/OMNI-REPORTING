@@ -1,6 +1,7 @@
 package com.increff.omni.reporting.config;
 
 import com.increff.account.client.UserPrincipal;
+import com.increff.omni.reporting.model.constants.AppResourceKeys;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -14,7 +15,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
+import java.util.*;
 
 @ContextConfiguration(classes = {TestConfig.class})
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -45,7 +46,14 @@ public abstract class AbstractTest {
         principal.setEmail("test_email@increff.com");
         principal.setCountry("India");
         principal.setFullName("TEST USER");
-        principal.setRoles(Collections.singletonList("app.admin"));
+        Map<String, Map<String, List<String>>> resourceRoles = new HashMap<>();
+        Map<String, List<String>> fulfillmentLocationResourceMap = new HashMap<>();
+        fulfillmentLocationResourceMap.put("w1", new ArrayList<>());
+        fulfillmentLocationResourceMap.put("w2", new ArrayList<>());
+        resourceRoles.put(AppResourceKeys.fulfillmentLocationKey, fulfillmentLocationResourceMap);
+        resourceRoles.put(AppResourceKeys.clientKey, fulfillmentLocationResourceMap);
+        principal.setResourceRoles(resourceRoles);
+        principal.setRoles(Arrays.asList("app.admin", "report.admin"));
         SecurityContext securityContext = Mockito.mock(SecurityContext.class, Mockito.withSettings().serializable());
         Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
         Mockito.when(securityContext.getAuthentication().getPrincipal()).thenReturn(principal);

@@ -12,10 +12,7 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static com.increff.omni.reporting.helper.ConnectionTestHelper.getConnectionForm;
 import static com.increff.omni.reporting.helper.DirectoryTestHelper.getDirectoryForm;
@@ -78,8 +75,8 @@ public class ReportJobTest extends AbstractTest {
                 , InputControlType.NUMBER, new ArrayList<>(), null, null);
         InputControlData inputControlData = inputControlDto.add(inputControlForm);
         reportDto.mapToControl(reportData.getId(), inputControlData.getId());
-        Map<String, String> params = new HashMap<>();
-        params.put("clientId", "'1100001111'");
+        Map<String, List<String>> params = new HashMap<>();
+        params.put("clientId", Collections.singletonList("1100007455"));
         ReportRequestForm form = getReportRequestForm(reportData.getId(), params, "Asia/Kolkata");
         dto.requestReport(form);
         reportJob.runReports();

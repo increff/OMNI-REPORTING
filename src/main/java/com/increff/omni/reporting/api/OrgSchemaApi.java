@@ -13,7 +13,7 @@ import java.util.Objects;
 
 @Service
 @Transactional(rollbackFor = Exception.class)
-public class OrgSchemaApi extends AbstractApi {
+public class OrgSchemaApi extends AbstractAuditApi {
 
     @Autowired
     private OrgSchemaDao dao;
