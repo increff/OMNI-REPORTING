@@ -14,11 +14,10 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 // Todo internationalization
-// Todo auditing
 @CrossOrigin
 @Api
 @RestController
-@RequestMapping(value = "/api/admin")
+@RequestMapping(value = "/admin")
 public class AdminController {
 
     @Autowired

@@ -28,7 +28,7 @@ import java.util.Objects;
 @CrossOrigin
 @Api
 @RestController
-@RequestMapping(value = "/api/standard")
+@RequestMapping(value = "/standard")
 public class StandardController {
 
     @Autowired
