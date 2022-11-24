@@ -203,7 +203,6 @@ public class InputControlFlowApiTest extends AbstractTest {
     public void testGetValuesFromQuery() throws ApiException {
         ConnectionPojo pojo = getConnectionPojo("127.0.0.1", "Dev DB", username, password);
         connectionApi.add(pojo);
-        Map<String, String> values = flowApi.getValuesFromQuery("select version(),version();", pojo);
-        assertEquals(1, values.size());
+        flowApi.getValuesFromQuery("select version(),version();", pojo);
     }
 }
