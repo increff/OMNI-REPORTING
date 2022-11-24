@@ -40,6 +40,8 @@ public class ReportJob {
 
     @Scheduled(fixedDelay = 1000)
     public void runReports() throws IOException, ApiException {
+        if(!properties.getIsRunScheduler())
+            return;
         // Get all the tasks pending for execution + Tasks that got stuck in processing
         int limitForEligibleRequest = getLimitForEligibleRequests();
         List<ReportRequestPojo> reportRequestPojoList = api.getEligibleRequests(limitForEligibleRequest);
@@ -72,6 +74,8 @@ public class ReportJob {
 
     @Scheduled(fixedDelay = 1000)
     public void markJobsStuck() {
+        if(!properties.getIsRunScheduler())
+            return;
         api.markStuck(properties.getStuckReportTime());
     }
 

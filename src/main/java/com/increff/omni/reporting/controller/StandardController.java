@@ -50,21 +50,6 @@ public class StandardController {
         return reportRequestDto.getAllAvailableTimeZones();
     }
 
-    @ApiOperation(value = "Set Account server cookie")
-    @RequestMapping(value = "/jump", method = RequestMethod.GET)
-    public RedirectView setCookie(@RequestParam String authToken) {
-        try {
-            QueryUserData data = authClient.veriftyToken(authToken);
-            if (Objects.nonNull(data) && data.isStatus()) {
-                Cookie c = new Cookie(Params.AUTH_TOKEN, authToken);
-                HttpDto.setCookie(c);
-            }
-        } catch (AppClientException ignored) {
-
-        }
-        return new RedirectView(properties.getUiHomePagePath(), false);
-    }
-
     @ApiOperation(value = "Select controls for a report")
     @RequestMapping(value = "/reports/{reportId}/controls", method = RequestMethod.GET)
     public List<InputControlData> selectByReportId(@PathVariable Integer reportId) throws ApiException {

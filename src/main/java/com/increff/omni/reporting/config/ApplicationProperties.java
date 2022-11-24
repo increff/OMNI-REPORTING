@@ -45,7 +45,7 @@ public class ApplicationProperties {
     @Value("${query.outDir:omni-reporting-files}")
     private String outDir;
 
-    @Value("${ui.homePagePath}")
-    private String uiHomePagePath;
+    @Value("${scheduler.run}")
+    private Boolean isRunScheduler;
 
 }
