@@ -11,6 +11,8 @@ import com.increff.omni.reporting.model.form.ReportRequestForm;
 import com.increff.omni.reporting.pojo.*;
 import com.increff.omni.reporting.util.FileUtil;
 import com.increff.omni.reporting.util.UserPrincipalUtil;
+import com.nextscm.commons.fileclient.FileClient;
+import com.nextscm.commons.fileclient.GcpFileProvider;
 import com.nextscm.commons.lang.StringUtil;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
@@ -18,12 +20,12 @@ import lombok.extern.log4j.Log4j;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 import java.io.File;
 import java.io.FileReader;
@@ -65,7 +67,7 @@ public class ReportRequestDto extends AbstractDto {
     @Autowired
     private OrganizationApi organizationApi;
     @Autowired
-    private RestTemplate restTemplate;
+    private GcpFileProvider gcpFileProvider;
 
     private final Integer MAX_NUMBER_OF_ROWS = 50;
 
@@ -244,9 +246,8 @@ public class ReportRequestDto extends AbstractDto {
         }
     }
 
-    private byte[] getFileFromUrl(String url) {
-        HttpEntity<?> entity = new HttpEntity<>(new HttpHeaders());
-        return restTemplate.exchange(url, HttpMethod.GET, entity, byte[].class).getBody();
+    private byte[] getFileFromUrl(String url) throws IOException {
+        return IOUtils.toByteArray(gcpFileProvider.get(url));
     }
 
     private Map<String, String> checkValidValues(InputControlPojo p) throws ApiException {

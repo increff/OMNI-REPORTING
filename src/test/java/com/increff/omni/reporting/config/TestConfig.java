@@ -19,7 +19,6 @@ import org.springframework.context.annotation.*;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 import java.time.LocalDateTime;
@@ -38,14 +37,14 @@ public class TestConfig {
 
     @Bean
     public FileClient getFileClient() throws FileClientException {
-        AbstractFileProvider gcpFileProvider = new GcpFileProvider(applicationProperties.getGcpBaseUrl(),
-                applicationProperties.getGcpBucketName(), applicationProperties.getGcpFilePath());
+        AbstractFileProvider gcpFileProvider = getGcpFileProvider();
         return new FileClient(gcpFileProvider);
     }
 
     @Bean
-    public RestTemplate getRestTemplate() {
-        return new RestTemplate();
+    public GcpFileProvider getGcpFileProvider() throws FileClientException {
+        return new GcpFileProvider(applicationProperties.getGcpBaseUrl(),
+                applicationProperties.getGcpBucketName(), applicationProperties.getGcpFilePath());
     }
 
     @Bean(name = "objectMapper")
