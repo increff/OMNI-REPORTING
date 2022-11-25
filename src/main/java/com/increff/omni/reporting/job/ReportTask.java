@@ -117,7 +117,7 @@ public class ReportTask {
             throw new ApiException(ApiStatus.BAD_DATA, "Error in uploading Report File to Gcp for report : " +
                     pojo.getId());
         }
-        return properties.getGcpBaseUrl() + "/" + properties.getGcpBucketName() + "/" + filePath;
+        return filePath;
     }
 
     private Map<String, String> getInputParamMapFromPojoList(List<ReportInputParamsPojo> reportInputParamsPojoList) {

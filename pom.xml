@@ -19,7 +19,7 @@
         <jetty.version>9.3.7.v20160115</jetty.version>
         <jetty.http.port>9001</jetty.http.port>
         <jetty.http.host>0.0.0.0</jetty.http.host>
-        <jetty.context>/omni-reporting/</jetty.context>
+        <jetty.context>/omni-reporting/api/</jetty.context>
         <failOnMissingWebXml>false</failOnMissingWebXml>
 
         <!-- Increff Dependencies -->

@@ -171,18 +171,6 @@ public class ReportRequestDto extends AbstractDto {
         return data;
     }
 
-    private Double getFileSizeFromUrl(String url, Integer id) throws IOException, ApiException {
-        if(StringUtil.isEmpty(url))
-            return 0.0;
-        String reportName =  id + "-file-size";
-        File sourceFile = folderApi.getFile(reportName + ".xls");
-        byte[] data = getFileFromUrl(url);
-        FileUtils.writeByteArrayToFile(sourceFile, data);
-        Double fileSize = FileUtil.getSizeInMb(sourceFile.length());
-        FileUtil.delete(sourceFile);
-        return fileSize;
-    }
-
     private void validateInputParamValues(ReportPojo reportPojo, Map<String, String> params) throws ApiException {
         List<ReportControlsPojo> reportControlsPojoList = reportControlsApi.getByReportId(reportPojo.getId());
         List<InputControlPojo> inputControlPojoList = controlApi.selectByIds(reportControlsPojoList.stream()
