@@ -177,7 +177,8 @@ public class InputControlDto extends AbstractDto {
             case DATE:
             case DATE_TIME:
                 if (!values.isEmpty() || !StringUtil.isEmpty(query))
-                    throw new ApiException(ApiStatus.BAD_DATA, "For Text, Number and Date, neither query nor value is needed");
+                    throw new ApiException(ApiStatus.BAD_DATA, "For Text, Number and Date, neither query nor value is" +
+                            " needed");
                 break;
 
             case SINGLE_SELECT:

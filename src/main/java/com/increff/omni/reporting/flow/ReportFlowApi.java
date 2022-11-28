@@ -1,7 +1,6 @@
 package com.increff.omni.reporting.flow;
 
 import com.increff.omni.reporting.api.*;
-import com.increff.omni.reporting.model.constants.AuditActions;
 import com.increff.omni.reporting.model.constants.InputControlScope;
 import com.increff.omni.reporting.model.constants.InputControlType;
 import com.increff.omni.reporting.model.constants.ReportType;
@@ -12,13 +11,9 @@ import com.increff.omni.reporting.validators.MandatoryValidator;
 import com.increff.omni.reporting.validators.SingleMandatoryValidator;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
-import com.nextscm.commons.spring.common.ConvertUtil;
-import com.nextscm.commons.spring.server.AbstractApi;
-import io.swagger.models.auth.In;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -102,7 +97,8 @@ public class ReportFlowApi extends AbstractAuditApi {
 
         //All custom
         List<CustomReportAccessPojo> customAccess = customReportAccessApi.getByOrgId(orgId);
-        List<Integer> customIds = customAccess.stream().map(CustomReportAccessPojo::getReportId).collect(Collectors.toList());
+        List<Integer> customIds = customAccess.stream().map(CustomReportAccessPojo::getReportId)
+                .collect(Collectors.toList());
 
         List<ReportPojo> custom = api.getByIdsAndSchema(customIds, orgSchemaVersionPojo.getSchemaVersionId());
 
@@ -183,7 +179,8 @@ public class ReportFlowApi extends AbstractAuditApi {
             // Add custom report access
             if(oldReport.getType().equals(ReportType.STANDARD))
                 continue;
-            List<CustomReportAccessPojo> customReportAccessPojoList = customReportAccessApi.getAllByReportId(oldReport.getId());
+            List<CustomReportAccessPojo> customReportAccessPojoList =
+                    customReportAccessApi.getAllByReportId(oldReport.getId());
             customReportAccessPojoList.forEach(c -> {
                 CustomReportAccessPojo customReportAccessPojo = new CustomReportAccessPojo();
                 customReportAccessPojo.setOrgId(c.getOrgId());
@@ -199,9 +196,11 @@ public class ReportFlowApi extends AbstractAuditApi {
             ReportControlsPojo pojo = reportControlsApi.getByReportAndControlId(reportId, controlId);
             checkNotNull(pojo, "No report control exist with control id : " + controlId);
         }
-        List<ReportValidationGroupPojo> pojoList = reportValidationGroupApi.getByNameAndReportId(reportId, groupForm.getGroupName());
+        List<ReportValidationGroupPojo> pojoList = reportValidationGroupApi.getByNameAndReportId(reportId
+                , groupForm.getGroupName());
         if (!pojoList.isEmpty())
-            throw new ApiException(ApiStatus.BAD_DATA, "Group name already exist for given report, group name : " + groupForm.getGroupName());
+            throw new ApiException(ApiStatus.BAD_DATA, "Group name already exist for given report, group name : "
+                    + groupForm.getGroupName());
     }
 
     private void validateControlReportMapping(ReportControlsPojo pojo) throws ApiException {

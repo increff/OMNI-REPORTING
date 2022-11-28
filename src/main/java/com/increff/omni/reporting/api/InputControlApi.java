@@ -35,47 +35,47 @@ public class InputControlApi extends AbstractApi {
 
     public InputControlPojo add(InputControlPojo pojo, InputControlQueryPojo queryPojo,
                                 List<InputControlValuesPojo> valuesPojo) throws ApiException {
-
         validateControlAddition(pojo);
         dao.persist(pojo);
         addQueryOrValues(queryPojo, pojo, valuesPojo);
         return pojo;
     }
 
-    public InputControlPojo update(InputControlPojo pojo, InputControlQueryPojo queryPojo, List<InputControlValuesPojo> valuesList) throws ApiException {
+    public InputControlPojo update(InputControlPojo pojo, InputControlQueryPojo queryPojo,
+                                   List<InputControlValuesPojo> valuesList) throws ApiException {
         InputControlPojo ex = getCheck(pojo.getId());
         validateControlAdditionForEdit(pojo);
         copyToExisting(ex, pojo);
         dao.update(ex);
         InputControlQueryPojo exQuery = selectControlQuery(pojo.getId());
-        if(Objects.nonNull(exQuery)) {
+        if (Objects.nonNull(exQuery)) {
             queryDao.remove(exQuery.getId());
+            // flush is required as in single transaction batch processing, delete and insert immediately fails sometimes
             queryDao.flush();
         }
         List<InputControlValuesPojo> valuesPojoList = valuesDao.selectMultiple("controlId", pojo.getId());
-        valuesPojoList.forEach(v -> {
-            valuesDao.remove(v.getId());
-        });
+        valuesPojoList.forEach(v -> valuesDao.remove(v.getId()));
+        // flush is required as in single transaction batch processing, delete and insert immediately fails sometimes
         valuesDao.flush();
         addQueryOrValues(queryPojo, pojo, valuesList);
         return pojo;
     }
 
-    public List<InputControlPojo> selectByIds(List<Integer> ids){
-        if(CollectionUtils.isEmpty(ids))
+    public List<InputControlPojo> selectByIds(List<Integer> ids) {
+        if (CollectionUtils.isEmpty(ids))
             return new ArrayList<>();
         return dao.selectMultiple(ids);
     }
 
-    public List<InputControlPojo> getByScope(InputControlScope scope){
-        return dao.selectMultiple("scope",scope);
+    public List<InputControlPojo> getByScope(InputControlScope scope) {
+        return dao.selectMultiple("scope", scope);
     }
 
-    public InputControlPojo getByScopeAndDisplayName(InputControlScope scope, String displayName){
+    public InputControlPojo getByScopeAndDisplayName(InputControlScope scope, String displayName) {
         return dao.selectByScopeAndDisplayName(scope, displayName);
     }
 
-    public InputControlPojo getByScopeAndParamName(InputControlScope scope, String paramName){
+    public InputControlPojo getByScopeAndParamName(InputControlScope scope, String paramName) {
         return dao.selectByScopeAndParamName(scope, paramName);
     }
 
@@ -85,8 +85,8 @@ public class InputControlApi extends AbstractApi {
         return pojo;
     }
 
-    public List<InputControlQueryPojo> selectControlQueries(List<Integer> controlIds){
-        if(CollectionUtils.isEmpty(controlIds))
+    public List<InputControlQueryPojo> selectControlQueries(List<Integer> controlIds) {
+        if (CollectionUtils.isEmpty(controlIds))
             return new ArrayList<>();
         return queryDao.selectMultiple(controlIds);
     }
@@ -95,31 +95,28 @@ public class InputControlApi extends AbstractApi {
         return queryDao.select("controlId", controlId);
     }
 
-    public List<InputControlValuesPojo> selectControlValues(List<Integer> controlIds){
-        if(CollectionUtils.isEmpty(controlIds))
+    public List<InputControlValuesPojo> selectControlValues(List<Integer> controlIds) {
+        if (CollectionUtils.isEmpty(controlIds))
             return new ArrayList<>();
         return valuesDao.selectMultiple(controlIds);
     }
 
     private void validateControlAddition(InputControlPojo pojo) throws ApiException {
-        InputControlPojo existingByName =
-                getByScopeAndDisplayName(InputControlScope.GLOBAL, pojo.getDisplayName());
+        InputControlPojo existingByName = getByScopeAndDisplayName(InputControlScope.GLOBAL, pojo.getDisplayName());
 
-        InputControlPojo existingByParam =
-                getByScopeAndParamName(InputControlScope.GLOBAL, pojo.getParamName());
+        InputControlPojo existingByParam = getByScopeAndParamName(InputControlScope.GLOBAL, pojo.getParamName());
 
-        if(existingByName != null || existingByParam != null)
-            throw new ApiException(ApiStatus.BAD_DATA, "Cannot create input control with same" +
-                    " display name or param name");
+        if (existingByName != null || existingByParam != null)
+            throw new ApiException(ApiStatus.BAD_DATA, "Cannot create input control with same" + " display name or param name");
     }
 
     private void addQueryOrValues(InputControlQueryPojo queryPojo, InputControlPojo pojo, List<InputControlValuesPojo> valuesList) {
-        if(Objects.nonNull(queryPojo)){
+        if (Objects.nonNull(queryPojo)) {
             queryPojo.setControlId(pojo.getId());
             queryDao.persist(queryPojo);
         }
 
-        if(!CollectionUtils.isEmpty(valuesList)){
+        if (!CollectionUtils.isEmpty(valuesList)) {
             valuesList.forEach(v -> {
                 v.setControlId(pojo.getId());
                 valuesDao.persist(v);
@@ -128,16 +125,12 @@ public class InputControlApi extends AbstractApi {
     }
 
     private void validateControlAdditionForEdit(InputControlPojo pojo) throws ApiException {
-        InputControlPojo existingByName =
-                getByScopeAndDisplayName(InputControlScope.GLOBAL, pojo.getDisplayName());
+        InputControlPojo existingByName = getByScopeAndDisplayName(InputControlScope.GLOBAL, pojo.getDisplayName());
 
-        InputControlPojo existingByParam =
-                getByScopeAndParamName(InputControlScope.GLOBAL, pojo.getParamName());
+        InputControlPojo existingByParam = getByScopeAndParamName(InputControlScope.GLOBAL, pojo.getParamName());
 
-        if((existingByName != null && !existingByName.getId().equals(pojo.getId())) ||
-                (existingByParam != null && !existingByParam.getId().equals(pojo.getId())))
-            throw new ApiException(ApiStatus.BAD_DATA, "Cannot create input control with same" +
-                    " display name or param name");
+        if ((existingByName != null && !existingByName.getId().equals(pojo.getId())) || (existingByParam != null && !existingByParam.getId().equals(pojo.getId())))
+            throw new ApiException(ApiStatus.BAD_DATA, "Cannot create input control with same" + " display name or param name");
     }
 
     private void copyToExisting(InputControlPojo ex, InputControlPojo pojo) {

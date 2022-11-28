@@ -56,13 +56,13 @@ public class ConnectionDto extends AbstractDto {
     }
 
     public void testConnection(ConnectionForm form) throws ApiException {
-        String result = execute(form, "select version();");
+        String result = execute(form);
         if (result.contains("ERROR")) {
             throw new ApiException(ApiStatus.UNKNOWN_ERROR, "Database could not be connected");
         }
     }
 
-    private String execute(ConnectionForm form, String query) throws ApiException {
+    private String execute(ConnectionForm form) throws ApiException {
         String result;
         File file = null;
         File errFile = null;
@@ -70,13 +70,14 @@ public class ConnectionDto extends AbstractDto {
             file = folderApi.getFile("test-db-success.tsv");
             errFile = folderApi.getFile("test-db-err.txt");
             ConnectionPojo pojo = ConvertUtil.convert(form, ConnectionPojo.class);
-            SqlParams sqlp = CommonDtoHelper.getSqlParams(pojo, query, file, errFile, properties.getMaxExecutionTime());
+            SqlParams sqlp = CommonDtoHelper.getSqlParams(pojo, "select version();", file, errFile, properties.getMaxExecutionTime());
             SqlCmd.processQuery(sqlp);
             result = FileUtils.readFileToString(file, "utf-8");
             log.debug("Test File created");
         } catch (IOException | ApiException e) {
             log.error("Error in testing connection ", e);
             try {
+                assert errFile != null;
                 result = FileUtils.readFileToString(errFile, "utf-8");
             } catch (IOException ex) {
                 throw new ApiException(ApiStatus.UNKNOWN_ERROR, ex.getMessage());

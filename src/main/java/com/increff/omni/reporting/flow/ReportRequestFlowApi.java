@@ -8,7 +8,6 @@ import com.increff.omni.reporting.validators.MandatoryValidator;
 import com.increff.omni.reporting.validators.SingleMandatoryValidator;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
-import com.nextscm.commons.spring.server.AbstractApi;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -48,19 +47,22 @@ public class ReportRequestFlowApi extends AbstractAuditApi {
 
     private final static Integer MAX_OPEN_REPORT_REQUESTS = 5;
 
-    public void requestReport(ReportRequestPojo pojo, List<ReportInputParamsPojo> reportInputParamsPojoList) throws ApiException {
+    public void requestReport(ReportRequestPojo pojo, List<ReportInputParamsPojo> reportInputParamsPojoList)
+            throws ApiException {
         validate(pojo, reportInputParamsPojoList);
         api.add(pojo);
         reportInputParamsPojoList.forEach(r -> r.setReportRequestId(pojo.getId()));
         reportInputParamsApi.add(reportInputParamsPojoList);
     }
 
-    private void validate(ReportRequestPojo pojo, List<ReportInputParamsPojo> reportInputParamsPojoList) throws ApiException {
+    private void validate(ReportRequestPojo pojo, List<ReportInputParamsPojo> reportInputParamsPojoList)
+            throws ApiException {
         ReportPojo reportPojo = reportApi.getCheck(pojo.getReportId());
         List<ReportRequestPojo> pendingReports = api.getPendingByUserId(pojo.getUserId());
         if (!CollectionUtils.isEmpty(pendingReports) && pendingReports.size() >= MAX_OPEN_REPORT_REQUESTS)
             throw new ApiException(ApiStatus.BAD_DATA, "Wait for existing reports to get executed");
-        List<ReportValidationGroupPojo> reportValidationGroupPojoList = reportValidationGroupApi.getByReportId(reportPojo.getId());
+        List<ReportValidationGroupPojo> reportValidationGroupPojoList = reportValidationGroupApi
+                .getByReportId(reportPojo.getId());
         Map<String, List<ReportValidationGroupPojo>> groupedByName = reportValidationGroupPojoList.stream()
                 .collect(Collectors.groupingBy(ReportValidationGroupPojo::getGroupName));
 
@@ -86,16 +88,20 @@ public class ReportRequestFlowApi extends AbstractAuditApi {
 
     }
 
-    private void runValidators(ReportPojo reportPojo, List<ReportValidationGroupPojo> groupPojoList, ValidationType type, List<String> paramValues, List<String> displayValues) throws ApiException {
+    private void runValidators(ReportPojo reportPojo, List<ReportValidationGroupPojo> groupPojoList
+            , ValidationType type, List<String> paramValues, List<String> displayValues) throws ApiException {
         switch (type) {
             case SINGLE_MANDATORY:
-                singleMandatoryValidator.validate(displayValues, paramValues, reportPojo.getName(), groupPojoList.get(0).getValidationValue());
+                singleMandatoryValidator.validate(displayValues, paramValues, reportPojo.getName()
+                        , groupPojoList.get(0).getValidationValue());
                 break;
             case MANDATORY:
-                mandatoryValidator.validate(displayValues, paramValues, reportPojo.getName(), groupPojoList.get(0).getValidationValue());
+                mandatoryValidator.validate(displayValues, paramValues, reportPojo.getName()
+                        , groupPojoList.get(0).getValidationValue());
                 break;
             case DATE_RANGE:
-                dateValidator.validate(displayValues, paramValues, reportPojo.getName(), groupPojoList.get(0).getValidationValue());
+                dateValidator.validate(displayValues, paramValues, reportPojo.getName()
+                        , groupPojoList.get(0).getValidationValue());
                 break;
             default:
                 throw new ApiException(ApiStatus.BAD_DATA, "Invalid Validation Type");

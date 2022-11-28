@@ -3,8 +3,6 @@ package com.increff.omni.reporting.security;
 import com.increff.account.client.SecurityUtil;
 import com.increff.account.client.UserPrincipal;
 import com.increff.omni.reporting.config.ApplicationProperties;
-import com.nextscm.commons.spring.common.ApiException;
-import com.nextscm.commons.spring.common.ApiStatus;
 import com.nextscm.commons.spring.common.FieldErrorData;
 import com.nextscm.commons.spring.common.JsonUtil;
 import lombok.extern.log4j.Log4j;
@@ -17,7 +15,6 @@ import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 

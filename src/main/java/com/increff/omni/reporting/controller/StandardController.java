@@ -2,28 +2,25 @@ package com.increff.omni.reporting.controller;
 
 
 import com.increff.account.client.AuthClient;
-import com.increff.account.client.Params;
-import com.increff.account.model.QueryUserData;
 import com.increff.omni.reporting.config.ApplicationProperties;
-import com.increff.omni.reporting.dto.*;
+import com.increff.omni.reporting.dto.DirectoryDto;
+import com.increff.omni.reporting.dto.InputControlDto;
+import com.increff.omni.reporting.dto.ReportDto;
+import com.increff.omni.reporting.dto.ReportRequestDto;
 import com.increff.omni.reporting.model.data.*;
 import com.increff.omni.reporting.model.form.ReportRequestForm;
 import com.increff.omni.reporting.util.FileUtil;
-import com.nextscm.commons.spring.client.AppClientException;
 import com.nextscm.commons.spring.common.ApiException;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.view.RedirectView;
 
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 @CrossOrigin
 @Api

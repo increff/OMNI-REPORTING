@@ -15,11 +15,14 @@ public abstract class AbstractValidator {
     }
 
     // Parameter to be list of input controls with input
-    public abstract void validate(List<String> displayName, List<String> paramValue, String reportName, Integer validationValue) throws ApiException;
+    public abstract void validate(List<String> displayName, List<String> paramValue, String reportName
+            , Integer validationValue) throws ApiException;
 
-    public String getValidationMessage(String reportName, List<String> displayNames, ValidationType validationType, String extraMessage) {
-        return reportName + " failed in validation for key / keys : " + JsonUtil.serialize(displayNames) + " , validation type : " + validationType
-                + (!StringUtil.isEmpty(extraMessage) ? " message : " + extraMessage : extraMessage);
+    public String getValidationMessage(String reportName, List<String> displayNames, ValidationType validationType
+            , String extraMessage) {
+        return reportName + " failed in validation for key / keys : " + JsonUtil.serialize(displayNames)
+                + " , validation type : " + validationType + (!StringUtil.isEmpty(extraMessage) ? " message : "
+                + extraMessage : extraMessage);
     }
 
     protected String getValueFromQuotes(String value) {

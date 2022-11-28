@@ -3,7 +3,6 @@ package com.increff.omni.reporting.api;
 import com.increff.omni.reporting.dao.OrganizationDao;
 import com.increff.omni.reporting.pojo.OrganizationPojo;
 import com.nextscm.commons.spring.common.ApiException;
-import com.nextscm.commons.spring.common.ApiStatus;
 import com.nextscm.commons.spring.server.AbstractApi;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -30,7 +29,7 @@ public class OrganizationApi extends AbstractApi {
         return pojo;
     }
 
-    public OrganizationPojo update(OrganizationPojo pojo) throws ApiException{
+    public OrganizationPojo update(OrganizationPojo pojo) throws ApiException {
         // validating
         OrganizationPojo existing = getCheck(pojo.getId());
         OrganizationPojo existingWithName = dao.select("name", pojo.getName());
@@ -40,7 +39,7 @@ public class OrganizationApi extends AbstractApi {
         return existing;
     }
 
-    public List<OrganizationPojo> getAll(){
+    public List<OrganizationPojo> getAll() {
         return dao.selectAll();
     }
 

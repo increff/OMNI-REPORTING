@@ -1,7 +1,5 @@
 package com.increff.omni.reporting.dao;
 
-import com.increff.omni.reporting.model.constants.ReportRequestStatus;
-import com.increff.omni.reporting.pojo.ReportRequestPojo;
 import com.increff.omni.reporting.pojo.ReportValidationGroupPojo;
 import com.nextscm.commons.spring.db.AbstractDao;
 import org.springframework.stereotype.Repository;

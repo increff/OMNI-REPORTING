@@ -30,10 +30,12 @@ public class UserPrincipalUtil {
         if(!accessRoles.isEmpty())
             return getStringToStringParamMap(accessControlMap);
         Map<String, Map<String, List<String>>> resourceRoles = principal.getResourceRoles();
-        accessControlMap.put(ResourceQueryParamKeys.fulfillmentLocationQueryParamKey, new ArrayList<>(Collections.singletonList("")));
+        accessControlMap.put(ResourceQueryParamKeys.fulfillmentLocationQueryParamKey
+                , new ArrayList<>(Collections.singletonList("")));
         accessControlMap.put(ResourceQueryParamKeys.clientQueryParam, new ArrayList<>(Collections.singletonList("")));
         if(resourceRoles.containsKey(AppResourceKeys.fulfillmentLocationKey)) {
-            List<String> resourceValues = new ArrayList<>(resourceRoles.get(AppResourceKeys.fulfillmentLocationKey).keySet());
+            List<String> resourceValues = new ArrayList<>(resourceRoles.get(AppResourceKeys.fulfillmentLocationKey)
+                    .keySet());
             accessControlMap.put(ResourceQueryParamKeys.fulfillmentLocationQueryParamKey, resourceValues);
         }
         if(resourceRoles.containsKey(AppResourceKeys.clientKey)) {

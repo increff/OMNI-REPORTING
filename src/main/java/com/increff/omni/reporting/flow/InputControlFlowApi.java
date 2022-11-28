@@ -1,7 +1,5 @@
 package com.increff.omni.reporting.flow;
 
-import com.increff.commons.sheet.DataRow;
-import com.increff.commons.sheet.TsvFile;
 import com.increff.omni.reporting.api.FolderApi;
 import com.increff.omni.reporting.api.InputControlApi;
 import com.increff.omni.reporting.api.ReportApi;
@@ -23,7 +21,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -82,7 +83,8 @@ public class InputControlFlowApi extends AbstractApi {
             String fileName = UUID.randomUUID().toString();
             file = folderApi.getFile(fileName + ".tsv");
             errFile = folderApi.getFile(fileName + "-err.txt");
-            SqlParams sqlp = CommonDtoHelper.getSqlParams(connectionPojo, query, file, errFile, properties.getMaxExecutionTime());
+            SqlParams sqlp = CommonDtoHelper.getSqlParams(connectionPojo, query, file, errFile
+                    , properties.getMaxExecutionTime());
             SqlCmd.processQuery(sqlp);
             return getMapFromTsv(file);
         } catch (ApiException | IOException e) {

@@ -87,7 +87,8 @@ public class ReportJob {
     private int getLimitForEligibleRequests() {
         ThreadPoolTaskExecutor threadPoolExecutor = (ThreadPoolTaskExecutor) executor;
         long poolSize = properties.getCorePoolSize() - 10; // Just for safety we kept buffer of 10 to core pool
-        long currentUsedThreads = threadPoolExecutor.getThreadPoolExecutor().getTaskCount() - threadPoolExecutor.getThreadPoolExecutor().getCompletedTaskCount();
+        long currentUsedThreads = threadPoolExecutor.getThreadPoolExecutor().getTaskCount()
+                - threadPoolExecutor.getThreadPoolExecutor().getCompletedTaskCount();
         log.debug("Task Count : " + threadPoolExecutor.getThreadPoolExecutor().getTaskCount());
         log.debug("Completed Task Count : " + threadPoolExecutor.getThreadPoolExecutor().getCompletedTaskCount());
         log.debug("Current Used threads : " + currentUsedThreads);

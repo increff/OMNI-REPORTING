@@ -61,7 +61,8 @@ public class OrganizationDto extends AbstractDto {
         OrganizationPojo orgPojo = api.getCheck(id);
         SchemaVersionPojo schemaVersionPojo = schemaVersionApi.getCheck(schemaVersionId);
         orgSchemaApi.saveAudit(id.toString(), AuditActions.ORGANIZATION_SCHEMA_VERSION_MAPPING.toString(),
-                "Map Org to Schema Version", "Mapping org : " + orgPojo.getName() + " to schema version : " + schemaVersionPojo.getName(),
+                "Map Org to Schema Version", "Mapping org : " + orgPojo.getName() + " to schema " +
+                        "version : " + schemaVersionPojo.getName(),
                 getUserName());
         OrgSchemaVersionPojo pojo = createPojo(orgPojo, schemaVersionPojo);
         return CommonDtoHelper.getOrgSchemaData(pojo, schemaVersionPojo);
@@ -84,7 +85,8 @@ public class OrganizationDto extends AbstractDto {
         OrganizationPojo orgPojo = api.getCheck(id);
         ConnectionPojo connectionPojo = connectionApi.getCheck(connectionId);
         orgConnectionApi.saveAudit(id.toString(), AuditActions.ORGANIZATION_CONNECTION_MAPPING.toString(),
-                "Map Org to Connection", "Mapping org : " + orgPojo.getName() + " to connection : " + connectionPojo.getName(),
+                "Map Org to Connection", "Mapping org : " + orgPojo.getName() +
+                        " to connection : " + connectionPojo.getName(),
                 getUserName());
         OrgConnectionPojo pojo = createPojo(orgPojo, connectionPojo);
         return CommonDtoHelper.getOrgConnectionData(pojo, connectionPojo);

@@ -48,7 +48,7 @@ public class ReportJobTest extends AbstractTest {
         DirectoryData directoryData = directoryDto.add(directoryForm);
         SchemaVersionForm schemaVersionForm = getSchemaForm("9.0.1");
         SchemaVersionData schemaData = schemaDto.add(schemaVersionForm);
-        ConnectionForm connectionForm = getConnectionForm("dev-db.increff.com", "Dev DB", "db.user", "db.password");
+        ConnectionForm connectionForm = getConnectionForm("127.0.0.1", "Test DB", username, password);
         ConnectionData connectionData = connectionDto.add(connectionForm);
         organizationDto.mapToConnection(organizationData.getId(), connectionData.getId());
         organizationDto.mapToSchema(organizationData.getId(), schemaData.getId());

@@ -20,7 +20,8 @@ public class ConnectionApiTest extends AbstractTest {
 
     @Test
     public void testAddConnection() throws ApiException {
-        ConnectionPojo pojo = getConnectionPojo("dev-db.increff.com", "Dev DB", "db.user", "db.password");
+        ConnectionPojo pojo = getConnectionPojo("dev-db.increff.com", "Dev DB", "db.user"
+                , "db.password");
         pojo = api.add(pojo);
         assertNotNull(pojo);
         assertEquals("dev-db.increff.com", pojo.getHost());
@@ -31,10 +32,12 @@ public class ConnectionApiTest extends AbstractTest {
 
     @Test(expected = ApiException.class)
     public void testAddConnectionAlreadyExists() throws ApiException {
-        ConnectionPojo pojo = getConnectionPojo("dev-db.increff.com", "Dev DB", "db.user", "db.password");
+        ConnectionPojo pojo = getConnectionPojo("dev-db.increff.com", "Dev DB", "db.user"
+                , "db.password");
         api.add(pojo);
         try {
-            ConnectionPojo pojo2 = getConnectionPojo("dev-db-2.increff.com", "Dev DB", "db.user2", "db.password2");
+            ConnectionPojo pojo2 = getConnectionPojo("dev-db-2.increff.com", "Dev DB", "db.user2"
+                    , "db.password2");
             api.add(pojo2);
         } catch (ApiException e) {
             assertEquals(ApiStatus.BAD_DATA, e.getStatus());
@@ -45,9 +48,11 @@ public class ConnectionApiTest extends AbstractTest {
 
     @Test
     public void testUpdateConnection() throws ApiException {
-        ConnectionPojo pojo = getConnectionPojo("dev-db.increff.com", "Dev DB", "db.user", "db.password");
+        ConnectionPojo pojo = getConnectionPojo("dev-db.increff.com", "Dev DB", "db.user"
+                , "db.password");
         api.add(pojo);
-        ConnectionPojo pojo2 = getConnectionPojo("dev-db-2.increff.com", "Dev DB", "db.user2", "db.password2");
+        ConnectionPojo pojo2 = getConnectionPojo("dev-db-2.increff.com", "Dev DB", "db.user2"
+                , "db.password2");
         pojo2.setId(pojo.getId());
         api.update(pojo2);
         List<ConnectionPojo> pojoList = api.selectAll();
@@ -60,9 +65,11 @@ public class ConnectionApiTest extends AbstractTest {
 
     @Test(expected = ApiException.class)
     public void testUpdateConnectionNameExistsWithOtherId() throws ApiException {
-        ConnectionPojo pojo = getConnectionPojo("dev-db.increff.com", "Dev DB", "db.user", "db.password");
+        ConnectionPojo pojo = getConnectionPojo("dev-db.increff.com", "Dev DB", "db.user"
+                , "db.password");
         api.add(pojo);
-        ConnectionPojo pojo2 = getConnectionPojo("dev-db-2.increff.com", "Dev DB", "db.user2", "db.password2");
+        ConnectionPojo pojo2 = getConnectionPojo("dev-db-2.increff.com", "Dev DB", "db.user2"
+                , "db.password2");
         pojo2.setId(pojo.getId() + 1);
         try {
             api.update(pojo2);
@@ -81,9 +88,11 @@ public class ConnectionApiTest extends AbstractTest {
 
     @Test
     public void testUpdateConnectionWithDifferentName() throws ApiException {
-        ConnectionPojo pojo = getConnectionPojo("dev-db.increff.com", "Dev DB", "db.user", "db.password");
+        ConnectionPojo pojo = getConnectionPojo("dev-db.increff.com", "Dev DB", "db.user"
+                , "db.password");
         api.add(pojo);
-        ConnectionPojo pojo2 = getConnectionPojo("dev-db-2.increff.com", "Dev DB 2", "db.user2", "db.password2");
+        ConnectionPojo pojo2 = getConnectionPojo("dev-db-2.increff.com", "Dev DB 2", "db.user2"
+                , "db.password2");
         pojo2.setId(pojo.getId());
         api.update(pojo2);
         List<ConnectionPojo> pojoList = api.selectAll();

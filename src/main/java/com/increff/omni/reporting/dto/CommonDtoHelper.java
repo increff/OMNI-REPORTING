@@ -1,10 +1,13 @@
 package com.increff.omni.reporting.dto;
 
-import com.increff.omni.reporting.model.constants.ValidationType;
-import com.increff.omni.reporting.model.data.*;
-import com.increff.omni.reporting.model.form.SqlParams;
 import com.increff.omni.reporting.model.constants.ReportRequestStatus;
+import com.increff.omni.reporting.model.constants.ValidationType;
+import com.increff.omni.reporting.model.data.InputControlData;
+import com.increff.omni.reporting.model.data.OrgConnectionData;
+import com.increff.omni.reporting.model.data.OrgSchemaData;
+import com.increff.omni.reporting.model.data.TimeZoneData;
 import com.increff.omni.reporting.model.form.ReportRequestForm;
+import com.increff.omni.reporting.model.form.SqlParams;
 import com.increff.omni.reporting.pojo.*;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
@@ -22,7 +25,8 @@ public class CommonDtoHelper {
 
     public final static String TIME_ZONE_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSSxxx";
 
-    public static SqlParams getSqlParams(ConnectionPojo pojo, String query, File file, File errFile, Integer maxExecutionTime) {
+    public static SqlParams getSqlParams(ConnectionPojo pojo, String query, File file, File errFile,
+                                         Integer maxExecutionTime) {
         SqlParams params = new SqlParams();
         params.setPassword(pojo.getPassword());
         params.setUsername(pojo.getUsername());
@@ -39,7 +43,8 @@ public class CommonDtoHelper {
                 + query;
     }
 
-    //Zone Offset/Abbreviation will be populated based on DST(DayLight Saving Time) in case it is applicable for a Zone at current timestamp
+    // Zone Offset/Abbreviation will be populated based on DST(DayLight Saving Time) in case it is applicable for a Zone
+    // at current timestamp
     public static TimeZoneData convertToTimeZoneData(String timeZoneId) throws ApiException {
         ZoneId zoneId;
         try {
@@ -65,7 +70,8 @@ public class CommonDtoHelper {
         return pojo;
     }
 
-    public static List<OrgSchemaData> getOrgSchemaDataList(List<OrgSchemaVersionPojo> pojos, List<SchemaVersionPojo> allPojos) {
+    public static List<OrgSchemaData> getOrgSchemaDataList(List<OrgSchemaVersionPojo> pojos,
+                                                           List<SchemaVersionPojo> allPojos) {
         Map<Integer, SchemaVersionPojo> idToPojoMap = new HashMap<>();
         allPojos.forEach(a -> idToPojoMap.put(a.getId(), a));
         return pojos.stream().map(p -> {
@@ -74,7 +80,8 @@ public class CommonDtoHelper {
         }).collect(Collectors.toList());
     }
 
-    public static List<OrgConnectionData> getOrgConnectionDataList(List<OrgConnectionPojo> pojos, List<ConnectionPojo> allPojos) {
+    public static List<OrgConnectionData> getOrgConnectionDataList(List<OrgConnectionPojo> pojos,
+                                                                   List<ConnectionPojo> allPojos) {
         Map<Integer, ConnectionPojo> idToPojoMap = new HashMap<>();
         allPojos.forEach(a -> idToPojoMap.put(a.getId(), a));
         return pojos.stream().map(p -> {
@@ -108,7 +115,8 @@ public class CommonDtoHelper {
         return reportRequestPojo;
     }
 
-    public static void updateValidationTypes(List<InputControlData> inputControlDataList, List<ReportValidationGroupPojo> validationGroupPojoList, List<ReportControlsPojo> reportControlsPojos) {
+    public static void updateValidationTypes(List<InputControlData> inputControlDataList
+            , List<ReportValidationGroupPojo> validationGroupPojoList, List<ReportControlsPojo> reportControlsPojos) {
         // Generate map of report control id to validation types
         Map<Integer, List<ValidationType>> reportControlToValidationTypeMap = new HashMap<>();
         validationGroupPojoList.forEach(v -> {
@@ -131,7 +139,8 @@ public class CommonDtoHelper {
         });
     }
 
-    public static List<ReportInputParamsPojo> getReportInputParamsPojoList(Map<String, String> paramMap, String timeZone) {
+    public static List<ReportInputParamsPojo> getReportInputParamsPojoList(Map<String, String> paramMap
+            , String timeZone) {
         List<ReportInputParamsPojo> reportInputParamsPojoList = new ArrayList<>();
         paramMap.forEach((k, v) -> {
             ReportInputParamsPojo reportInputParamsPojo = new ReportInputParamsPojo();
@@ -146,7 +155,8 @@ public class CommonDtoHelper {
         return reportInputParamsPojoList;
     }
 
-    public static SqlParams convert(ConnectionPojo connectionPojo, ReportQueryPojo reportQueryPojo, Map<String, String> inputParamsMap, File file, File errorFile, Integer maxExecutionTime) {
+    public static SqlParams convert(ConnectionPojo connectionPojo, ReportQueryPojo reportQueryPojo
+            , Map<String, String> inputParamsMap, File file, File errorFile, Integer maxExecutionTime) {
         SqlParams sqlParams = new SqlParams();
         sqlParams.setHost(connectionPojo.getHost());
         sqlParams.setUsername(connectionPojo.getUsername());
@@ -159,7 +169,8 @@ public class CommonDtoHelper {
         return sqlParams;
     }
 
-    public static void validate(ReportRequestPojo requestPojo, Integer requestId, ReportPojo reportPojo, int userId) throws ApiException {
+    public static void validate(ReportRequestPojo requestPojo, Integer requestId, ReportPojo reportPojo
+            , int userId) throws ApiException {
         if (requestPojo.getUserId() != userId) {
             throw new ApiException(ApiStatus.BAD_DATA, "Logged in user has not requested the report with id : " + requestId);
         }

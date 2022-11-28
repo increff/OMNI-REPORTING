@@ -4,7 +4,6 @@ import com.increff.omni.reporting.dao.ConnectionDao;
 import com.increff.omni.reporting.pojo.ConnectionPojo;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
-import com.nextscm.commons.spring.server.AbstractApi;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

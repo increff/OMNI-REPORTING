@@ -1,6 +1,5 @@
 package com.increff.omni.reporting.dao;
 
-import com.increff.omni.reporting.pojo.InputControlQueryPojo;
 import com.increff.omni.reporting.pojo.InputControlValuesPojo;
 import com.nextscm.commons.spring.db.AbstractDao;
 import org.springframework.stereotype.Repository;

@@ -1,6 +1,5 @@
 package com.increff.omni.reporting.validators;
 
-import com.increff.omni.reporting.model.constants.InputControlType;
 import com.increff.omni.reporting.model.constants.ValidationType;
 import com.nextscm.commons.lang.StringUtil;
 import com.nextscm.commons.spring.common.ApiException;
@@ -14,7 +13,8 @@ import java.util.stream.Collectors;
 public class SingleMandatoryValidator extends AbstractValidator {
 
     @Override
-    public void validate(List<String> displayName, List<String> paramValue, String reportName, Integer validationValue) throws ApiException {
+    public void validate(List<String> displayName, List<String> paramValue, String reportName, Integer validationValue)
+            throws ApiException {
         List<String> nonEmptyValues = paramValue.stream().filter(p -> !StringUtil.isEmpty(getValueFromQuotes(p)))
                 .collect(Collectors.toList());
         if (nonEmptyValues.size() != 1)
