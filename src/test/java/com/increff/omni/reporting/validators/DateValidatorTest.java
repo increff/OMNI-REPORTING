@@ -42,8 +42,8 @@ public class DateValidatorTest extends AbstractTest {
         } catch (ApiException e) {
             assertEquals(ApiStatus.BAD_DATA, e.getStatus());
             assertEquals("Report 1 failed in validation for key / keys : " +
-            JsonUtil.serialize(displayNames) + " , validation type : " + ValidationType.DATE_RANGE
-                     + " message : Date range crossed 10 days", e.getMessage());
+                    JsonUtil.serialize(displayNames) + " , validation type : " + ValidationType.DATE_RANGE
+                    + " message : Date range crossed 10 days", e.getMessage());
             throw e;
         }
     }
@@ -114,19 +114,22 @@ public class DateValidatorTest extends AbstractTest {
             validator.add(types);
         } catch (ApiException e) {
             assertEquals(ApiStatus.BAD_DATA, e.getStatus());
-            assertEquals("DATE_RANGE validation can only be applied on DATE / DATE_TIME input controls", e.getMessage());
+            assertEquals("DATE_RANGE validation can only be applied on DATE / DATE_TIME input controls",
+                    e.getMessage());
             throw e;
         }
     }
 
     @Test(expected = ApiException.class)
     public void testAddValidatorErrorCase2() throws ApiException {
-        List<InputControlType> types = Arrays.asList(InputControlType.DATE, InputControlType.DATE, InputControlType.DATE);
+        List<InputControlType> types =
+                Arrays.asList(InputControlType.DATE, InputControlType.DATE, InputControlType.DATE);
         try {
             validator.add(types);
         } catch (ApiException e) {
             assertEquals(ApiStatus.BAD_DATA, e.getStatus());
-            assertEquals("DATE_RANGE validation type should have exactly 2 DATE / DATE_TIME input controls", e.getMessage());
+            assertEquals("DATE_RANGE validation type should have exactly 2 DATE / DATE_TIME input controls",
+                    e.getMessage());
             throw e;
         }
     }

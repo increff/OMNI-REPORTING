@@ -62,7 +62,7 @@ public class ReportRequestApiTest extends AbstractTest {
         assertEquals(1, pojoList.size());
         assertEquals(ReportRequestStatus.NEW, pojoList.get(0).getStatus());
         assertEquals(100001, pojoList.get(0).getOrgId().intValue());
-        assertEquals(100001,pojoList.get(0).getReportId().intValue());
+        assertEquals(100001, pojoList.get(0).getReportId().intValue());
         pojoList = api.getPendingByUserId(100002);
         assertEquals(0, pojoList.size());
     }
@@ -74,7 +74,7 @@ public class ReportRequestApiTest extends AbstractTest {
         assertEquals(1, pojoList.size());
         assertEquals(ReportRequestStatus.STUCK, pojoList.get(0).getStatus());
         assertEquals(100001, pojoList.get(0).getOrgId().intValue());
-        assertEquals(100002,pojoList.get(0).getReportId().intValue());
+        assertEquals(100002, pojoList.get(0).getReportId().intValue());
     }
 
     @Test
@@ -117,7 +117,7 @@ public class ReportRequestApiTest extends AbstractTest {
     @Test
     public void testUpdateStatus() throws ApiException {
         ReportRequestPojo pojo = commonSetup();
-        api.updateStatus(pojo.getId(), ReportRequestStatus.COMPLETED, "https://fileUrl.com", 2,0.01);
+        api.updateStatus(pojo.getId(), ReportRequestStatus.COMPLETED, "https://fileUrl.com", 2, 0.01);
         ReportRequestPojo p = api.getCheck(pojo.getId());
         assertEquals(ReportRequestStatus.COMPLETED, p.getStatus());
         assertEquals(100001, p.getReportId().intValue());

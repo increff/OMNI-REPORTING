@@ -129,7 +129,8 @@ public class OrgDtoTest extends AbstractTest {
         ConnectionData connectionData = connectionDto.add(connectionForm);
         OrganizationForm form2 = getOrganizationForm(2, "increff2");
         OrganizationData organizationData2 = dto.add(form2);
-        ConnectionForm connectionForm2 = getConnectionForm("dev-db-2.increff.com", "Dev DB 2", "db.user2", "db.password2");
+        ConnectionForm connectionForm2 =
+                getConnectionForm("dev-db-2.increff.com", "Dev DB 2", "db.user2", "db.password2");
         ConnectionData connectionData2 = connectionDto.add(connectionForm2);
         dto.mapToConnection(organizationData.getId(), connectionData.getId());
         dto.mapToConnection(organizationData2.getId(), connectionData2.getId());

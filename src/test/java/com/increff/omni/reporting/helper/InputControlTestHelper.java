@@ -2,7 +2,6 @@ package com.increff.omni.reporting.helper;
 
 import com.increff.omni.reporting.model.constants.InputControlScope;
 import com.increff.omni.reporting.model.constants.InputControlType;
-import com.increff.omni.reporting.model.constants.ValidationType;
 import com.increff.omni.reporting.model.form.InputControlForm;
 import com.increff.omni.reporting.model.form.InputControlUpdateForm;
 import com.increff.omni.reporting.pojo.InputControlPojo;
@@ -14,7 +13,8 @@ import java.util.List;
 
 public class InputControlTestHelper {
 
-    public static InputControlPojo getInputControlPojo(String displayName, String paramName, InputControlScope scope, InputControlType type) {
+    public static InputControlPojo getInputControlPojo(String displayName, String paramName, InputControlScope scope,
+                                                       InputControlType type) {
         InputControlPojo inputControlPojo = new InputControlPojo();
         inputControlPojo.setType(type);
         inputControlPojo.setDisplayName(displayName);
@@ -30,7 +30,9 @@ public class InputControlTestHelper {
         return queryPojo;
     }
 
-    public static InputControlForm getInputControlForm(String displayName, String paramName, InputControlScope scope, InputControlType type, List<String> values, String query, Integer reportId) {
+    public static InputControlForm getInputControlForm(String displayName, String paramName, InputControlScope scope,
+                                                       InputControlType type, List<String> values, String query,
+                                                       Integer reportId) {
         InputControlForm inputControlForm = new InputControlForm();
         inputControlForm.setDisplayName(displayName);
         inputControlForm.setParamName(paramName);
