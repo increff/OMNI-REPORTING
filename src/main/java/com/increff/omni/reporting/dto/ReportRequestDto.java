@@ -11,6 +11,7 @@ import com.increff.omni.reporting.model.form.ReportRequestForm;
 import com.increff.omni.reporting.pojo.*;
 import com.increff.omni.reporting.util.FileUtil;
 import com.increff.omni.reporting.util.UserPrincipalUtil;
+import com.nextscm.commons.fileclient.GcpFileProvider;
 import com.nextscm.commons.lang.StringUtil;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
@@ -18,12 +19,9 @@ import lombok.extern.log4j.Log4j;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 import java.io.File;
 import java.io.FileReader;
@@ -34,7 +32,8 @@ import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.increff.omni.reporting.dto.CommonDtoHelper.*;
+import static com.increff.omni.reporting.dto.CommonDtoHelper.convertToTimeZoneData;
+import static com.increff.omni.reporting.dto.CommonDtoHelper.validate;
 
 @Service
 @Log4j
@@ -65,11 +64,11 @@ public class ReportRequestDto extends AbstractDto {
     @Autowired
     private OrganizationApi organizationApi;
     @Autowired
-    private RestTemplate restTemplate;
+    private GcpFileProvider gcpFileProvider;
 
-    private final Integer MAX_NUMBER_OF_ROWS = 50;
+    private static final Integer MAX_NUMBER_OF_ROWS = 50;
 
-    private final Integer MAX_LIMIT = 50;
+    private static final Integer MAX_LIMIT = 50;
 
     public void requestReport(ReportRequestForm form) throws ApiException {
         requestReportForAnyOrg(form, getOrgId());
@@ -86,7 +85,8 @@ public class ReportRequestDto extends AbstractDto {
             throw new ApiException(ApiStatus.BAD_DATA, "No query defined for report : " + reportPojo.getName());
         validateCustomReportAccess(reportPojo, orgId);
         validateInputParamValues(reportPojo, inputParamsMap);
-        List<ReportInputParamsPojo> reportInputParamsPojoList = CommonDtoHelper.getReportInputParamsPojoList(inputParamsMap, form.getTimezone());
+        List<ReportInputParamsPojo> reportInputParamsPojoList =
+                CommonDtoHelper.getReportInputParamsPojoList(inputParamsMap, form.getTimezone());
         flow.requestReport(pojo, reportInputParamsPojoList);
         flow.saveAudit(reportPojo.getId().toString(), AuditActions.REQUEST_REPORT.toString(), "Request Report",
                 "Report request submitted for organization : " + organizationPojo.getName(), getUserName());
@@ -154,7 +154,7 @@ public class ReportRequestDto extends AbstractDto {
         }
     }
 
-    private ReportRequestData getReportRequestData(ReportRequestPojo pojo, ReportPojo reportPojo) throws IOException, ApiException {
+    private ReportRequestData getReportRequestData(ReportRequestPojo pojo, ReportPojo reportPojo) throws ApiException {
         ReportRequestData data = new ReportRequestData();
         data.setRequestCreationTime(pojo.getCreatedAt());
         data.setRequestUpdatedTime(pojo.getUpdatedAt());
@@ -167,18 +167,6 @@ public class ReportRequestDto extends AbstractDto {
         data.setFileSize(pojo.getFileSize());
         data.setNoOfRows(pojo.getNoOfRows());
         return data;
-    }
-
-    private Double getFileSizeFromUrl(String url, Integer id) throws IOException, ApiException {
-        if(StringUtil.isEmpty(url))
-            return 0.0;
-        String reportName =  id + "-file-size";
-        File sourceFile = folderApi.getFile(reportName + ".xls");
-        byte[] data = getFileFromUrl(url);
-        FileUtils.writeByteArrayToFile(sourceFile, data);
-        Double fileSize = FileUtil.getSizeInMb(sourceFile.length());
-        FileUtil.delete(sourceFile);
-        return fileSize;
     }
 
     private void validateInputParamValues(ReportPojo reportPojo, Map<String, String> params) throws ApiException {
@@ -204,7 +192,8 @@ public class ReportRequestDto extends AbstractDto {
                             value = getValueFromQuotes(value);
                             Integer.parseInt(value);
                         } catch (Exception e) {
-                            throw new ApiException(ApiStatus.BAD_DATA, value + " is not a number for filter : " + i.getDisplayName());
+                            throw new ApiException(ApiStatus.BAD_DATA, value + " is not a number for filter : "
+                                    + i.getDisplayName());
                         }
                         break;
                     case DATE:
@@ -220,10 +209,12 @@ public class ReportRequestDto extends AbstractDto {
                         values = value.split(",");
                         allowedValuesMap = checkValidValues(i);
                         if (values.length > 1)
-                            throw new ApiException(ApiStatus.BAD_DATA, "Multiple values not allowed for filter : " + i.getDisplayName());
+                            throw new ApiException(ApiStatus.BAD_DATA, "Multiple values not allowed for filter : "
+                                    + i.getDisplayName());
                         String s = getValueFromQuotes(values[0]);
                         if (!allowedValuesMap.containsKey(s))
-                            throw new ApiException(ApiStatus.BAD_DATA, values[0] + " is not allowed for filter : " + i.getDisplayName());
+                            throw new ApiException(ApiStatus.BAD_DATA, values[0] + " is not allowed for filter : "
+                                    + i.getDisplayName());
                         break;
                     case MULTI_SELECT:
                         values = value.split(",");
@@ -231,7 +222,8 @@ public class ReportRequestDto extends AbstractDto {
                         for (String v : values) {
                             v = getValueFromQuotes(v);
                             if (!allowedValuesMap.containsKey(v))
-                                throw new ApiException(ApiStatus.BAD_DATA, v + " is not allowed for filter : " + i.getDisplayName());
+                                throw new ApiException(ApiStatus.BAD_DATA, v + " is not allowed for filter : "
+                                        + i.getDisplayName());
 
                         }
                         break;
@@ -244,16 +236,16 @@ public class ReportRequestDto extends AbstractDto {
         }
     }
 
-    private byte[] getFileFromUrl(String url) {
-        HttpEntity<?> entity = new HttpEntity<>(new HttpHeaders());
-        return restTemplate.exchange(url, HttpMethod.GET, entity, byte[].class).getBody();
+    private byte[] getFileFromUrl(String url) throws IOException {
+        return IOUtils.toByteArray(gcpFileProvider.get(url));
     }
 
     private Map<String, String> checkValidValues(InputControlPojo p) throws ApiException {
         Map<String, String> valuesMap = new HashMap<>();
         InputControlQueryPojo queryPojo = controlApi.selectControlQuery(p.getId());
         if (Objects.isNull(queryPojo)) {
-            List<InputControlValuesPojo> valuesPojoList = controlApi.selectControlValues(Collections.singletonList(p.getId()));
+            List<InputControlValuesPojo> valuesPojoList =
+                    controlApi.selectControlValues(Collections.singletonList(p.getId()));
             for (InputControlValuesPojo pojo : valuesPojoList) {
                 valuesMap.put(pojo.getValue(), pojo.getValue());
             }

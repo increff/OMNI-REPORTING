@@ -29,8 +29,10 @@ public class InputControlApiTest extends AbstractTest {
 
     @Test
     public void testAddInputControlWithQuery() throws ApiException {
-        InputControlPojo inputControlPojo = getInputControlPojo("Client ID", "clientId", InputControlScope.GLOBAL, InputControlType.MULTI_SELECT);
-        InputControlQueryPojo inputControlQueryPojo = getInputControlQueryPojo("select * from oms.oms_orders;", null);
+        InputControlPojo inputControlPojo = getInputControlPojo("Client ID", "clientId"
+                , InputControlScope.GLOBAL, InputControlType.MULTI_SELECT);
+        InputControlQueryPojo inputControlQueryPojo = getInputControlQueryPojo("select * from oms.oms_orders;"
+                , null);
         api.add(inputControlPojo, inputControlQueryPojo, new ArrayList<>());
         InputControlPojo pojo = api.getCheck(inputControlPojo.getId());
         assertNotNull(pojo);
@@ -45,8 +47,10 @@ public class InputControlApiTest extends AbstractTest {
 
     @Test
     public void testUpdateInputControlWithQuery() throws ApiException {
-        InputControlPojo inputControlPojo = getInputControlPojo("Client ID", "clientId", InputControlScope.GLOBAL, InputControlType.MULTI_SELECT);
-        InputControlQueryPojo inputControlQueryPojo = getInputControlQueryPojo("select * from oms.oms_orders;", null);
+        InputControlPojo inputControlPojo = getInputControlPojo("Client ID", "clientId"
+                , InputControlScope.GLOBAL, InputControlType.MULTI_SELECT);
+        InputControlQueryPojo inputControlQueryPojo = getInputControlQueryPojo("select * from oms.oms_orders;"
+                , null);
         api.add(inputControlPojo, inputControlQueryPojo, new ArrayList<>());
         InputControlPojo pojo = api.getCheck(inputControlPojo.getId());
         assertNotNull(pojo);
@@ -58,7 +62,8 @@ public class InputControlApiTest extends AbstractTest {
         assertEquals("select * from oms.oms_orders;", queryPojo.getQuery());
         assertEquals(pojo.getId(), queryPojo.getControlId());
         Integer id = inputControlPojo.getId();
-        inputControlPojo = getInputControlPojo("Client ID 2", "clientId", InputControlScope.LOCAL, InputControlType.TEXT);
+        inputControlPojo = getInputControlPojo("Client ID 2", "clientId", InputControlScope.LOCAL
+                , InputControlType.TEXT);
         inputControlPojo.setId(id);
         inputControlQueryPojo = getInputControlQueryPojo("select * from oms.oms_order;", null);
         api.update(inputControlPojo, inputControlQueryPojo, new ArrayList<>());
@@ -75,8 +80,10 @@ public class InputControlApiTest extends AbstractTest {
 
     @Test(expected = ApiException.class)
     public void testUpdateInputControlDuplicateDisplayName() throws ApiException {
-        InputControlPojo inputControlPojo = getInputControlPojo("Client ID", "clientId", InputControlScope.GLOBAL, InputControlType.MULTI_SELECT);
-        InputControlQueryPojo inputControlQueryPojo = getInputControlQueryPojo("select * from oms.oms_orders;", null);
+        InputControlPojo inputControlPojo = getInputControlPojo("Client ID", "clientId"
+                , InputControlScope.GLOBAL, InputControlType.MULTI_SELECT);
+        InputControlQueryPojo inputControlQueryPojo = getInputControlQueryPojo("select * from oms.oms_orders;"
+                , null);
         api.add(inputControlPojo, inputControlQueryPojo, new ArrayList<>());
         InputControlPojo pojo = api.getCheck(inputControlPojo.getId());
         assertNotNull(pojo);
@@ -87,12 +94,15 @@ public class InputControlApiTest extends AbstractTest {
         InputControlQueryPojo queryPojo = api.selectControlQuery(pojo.getId());
         assertEquals("select * from oms.oms_orders;", queryPojo.getQuery());
         assertEquals(pojo.getId(), queryPojo.getControlId());
-        InputControlPojo inputControlPojo2 = getInputControlPojo("Client ID 2", "clientId2", InputControlScope.GLOBAL, InputControlType.MULTI_SELECT);
-        InputControlQueryPojo inputControlQueryPojo2 = getInputControlQueryPojo("select * from oms.oms_orders;", null);
+        InputControlPojo inputControlPojo2 = getInputControlPojo("Client ID 2", "clientId2"
+                , InputControlScope.GLOBAL, InputControlType.MULTI_SELECT);
+        InputControlQueryPojo inputControlQueryPojo2 = getInputControlQueryPojo("select * from oms.oms_orders;"
+                , null);
         api.add(inputControlPojo2, inputControlQueryPojo2, new ArrayList<>());
 
         Integer id = inputControlPojo.getId();
-        inputControlPojo = getInputControlPojo("Client ID 2", "clientId", InputControlScope.LOCAL, InputControlType.TEXT);
+        inputControlPojo = getInputControlPojo("Client ID 2", "clientId", InputControlScope.LOCAL
+                , InputControlType.TEXT);
         inputControlPojo.setId(id);
         inputControlQueryPojo = getInputControlQueryPojo("select * from oms.oms_order;", null);
         try {
@@ -106,8 +116,10 @@ public class InputControlApiTest extends AbstractTest {
 
     @Test(expected = ApiException.class)
     public void testUpdateInputControlDuplicateParamName() throws ApiException {
-        InputControlPojo inputControlPojo = getInputControlPojo("Client ID", "clientId", InputControlScope.GLOBAL, InputControlType.MULTI_SELECT);
-        InputControlQueryPojo inputControlQueryPojo = getInputControlQueryPojo("select * from oms.oms_orders;", null);
+        InputControlPojo inputControlPojo = getInputControlPojo("Client ID", "clientId"
+                , InputControlScope.GLOBAL, InputControlType.MULTI_SELECT);
+        InputControlQueryPojo inputControlQueryPojo = getInputControlQueryPojo("select * from oms.oms_orders;"
+                , null);
         api.add(inputControlPojo, inputControlQueryPojo, new ArrayList<>());
         InputControlPojo pojo = api.getCheck(inputControlPojo.getId());
         assertNotNull(pojo);
@@ -118,12 +130,15 @@ public class InputControlApiTest extends AbstractTest {
         InputControlQueryPojo queryPojo = api.selectControlQueries(Collections.singletonList(pojo.getId())).get(0);
         assertEquals("select * from oms.oms_orders;", queryPojo.getQuery());
         assertEquals(pojo.getId(), queryPojo.getControlId());
-        InputControlPojo inputControlPojo2 = getInputControlPojo("Client ID 2", "clientId2", InputControlScope.GLOBAL, InputControlType.MULTI_SELECT);
-        InputControlQueryPojo inputControlQueryPojo2 = getInputControlQueryPojo("select * from oms.oms_orders;", null);
+        InputControlPojo inputControlPojo2 = getInputControlPojo("Client ID 2", "clientId2"
+                , InputControlScope.GLOBAL, InputControlType.MULTI_SELECT);
+        InputControlQueryPojo inputControlQueryPojo2 = getInputControlQueryPojo("select * from oms.oms_orders;"
+                , null);
         api.add(inputControlPojo2, inputControlQueryPojo2, new ArrayList<>());
 
         Integer id = inputControlPojo.getId();
-        inputControlPojo = getInputControlPojo("Client ID", "clientId2", InputControlScope.LOCAL, InputControlType.TEXT);
+        inputControlPojo = getInputControlPojo("Client ID", "clientId2", InputControlScope.LOCAL
+                , InputControlType.TEXT);
         inputControlPojo.setId(id);
         inputControlQueryPojo = getInputControlQueryPojo("select * from oms.oms_order;", null);
         try {
@@ -137,8 +152,10 @@ public class InputControlApiTest extends AbstractTest {
 
     @Test
     public void testUpdateInputControlWithValues() throws ApiException {
-        InputControlPojo inputControlPojo = getInputControlPojo("Item Status", "itemStatus", InputControlScope.GLOBAL, InputControlType.MULTI_SELECT);
-        List<InputControlValuesPojo> valuesPojos = getInputControlValuesPojo(Arrays.asList("LIVE", "NEW", "PACKED"), null);
+        InputControlPojo inputControlPojo = getInputControlPojo("Item Status", "itemStatus"
+                , InputControlScope.GLOBAL, InputControlType.MULTI_SELECT);
+        List<InputControlValuesPojo> valuesPojos = getInputControlValuesPojo(Arrays.asList("LIVE", "NEW", "PACKED")
+                , null);
         api.add(inputControlPojo, null, valuesPojos);
         InputControlPojo pojo = api.getCheck(inputControlPojo.getId());
         assertNotNull(pojo);
@@ -155,7 +172,8 @@ public class InputControlApiTest extends AbstractTest {
         assertEquals("NEW", valuesPojoList.get(1).getValue());
         assertEquals("PACKED", valuesPojoList.get(2).getValue());
         Integer id = inputControlPojo.getId();
-        inputControlPojo = getInputControlPojo("Item Status", "itemStatus2", InputControlScope.GLOBAL, InputControlType.MULTI_SELECT);
+        inputControlPojo = getInputControlPojo("Item Status", "itemStatus2"
+                , InputControlScope.GLOBAL, InputControlType.MULTI_SELECT);
         inputControlPojo.setId(id);
         valuesPojos = getInputControlValuesPojo(Arrays.asList("PACKING", "PACKED"), null);
         api.update(inputControlPojo, null, valuesPojos);
@@ -175,8 +193,10 @@ public class InputControlApiTest extends AbstractTest {
 
     @Test
     public void testAddInputControlWithValues() throws ApiException {
-        InputControlPojo inputControlPojo = getInputControlPojo("Item Status", "itemStatus", InputControlScope.GLOBAL, InputControlType.MULTI_SELECT);
-        List<InputControlValuesPojo> valuesPojos = getInputControlValuesPojo(Arrays.asList("LIVE", "NEW", "PACKED"), null);
+        InputControlPojo inputControlPojo = getInputControlPojo("Item Status", "itemStatus"
+                , InputControlScope.GLOBAL, InputControlType.MULTI_SELECT);
+        List<InputControlValuesPojo> valuesPojos = getInputControlValuesPojo(Arrays.asList("LIVE", "NEW", "PACKED")
+                , null);
         api.add(inputControlPojo, null, valuesPojos);
         InputControlPojo pojo = api.getCheck(inputControlPojo.getId());
         assertNotNull(pojo);
@@ -196,8 +216,10 @@ public class InputControlApiTest extends AbstractTest {
 
     @Test(expected = ApiException.class)
     public void testAddInputControlSameDisplayName() throws ApiException {
-        InputControlPojo inputControlPojo = getInputControlPojo("Item Status", "itemStatus", InputControlScope.GLOBAL, InputControlType.MULTI_SELECT);
-        List<InputControlValuesPojo> valuesPojos = getInputControlValuesPojo(Arrays.asList("LIVE", "NEW", "PACKED"), null);
+        InputControlPojo inputControlPojo = getInputControlPojo("Item Status", "itemStatus"
+                , InputControlScope.GLOBAL, InputControlType.MULTI_SELECT);
+        List<InputControlValuesPojo> valuesPojos = getInputControlValuesPojo(Arrays.asList("LIVE", "NEW", "PACKED")
+                , null);
         api.add(inputControlPojo, null, valuesPojos);
         InputControlPojo pojo = api.getCheck(inputControlPojo.getId());
         assertNotNull(pojo);
@@ -205,7 +227,8 @@ public class InputControlApiTest extends AbstractTest {
         assertEquals("itemStatus", pojo.getParamName());
         assertEquals(InputControlScope.GLOBAL, pojo.getScope());
         assertEquals(InputControlType.MULTI_SELECT, pojo.getType());
-        InputControlPojo inputControlPojo2 = getInputControlPojo("Item Status", "item_Status", InputControlScope.GLOBAL, InputControlType.MULTI_SELECT);
+        InputControlPojo inputControlPojo2 = getInputControlPojo("Item Status", "item_Status"
+                , InputControlScope.GLOBAL, InputControlType.MULTI_SELECT);
         try {
             api.add(inputControlPojo2, null, valuesPojos);
         } catch (ApiException e) {
@@ -217,8 +240,10 @@ public class InputControlApiTest extends AbstractTest {
 
     @Test(expected = ApiException.class)
     public void testAddInputControlSameParamName() throws ApiException {
-        InputControlPojo inputControlPojo = getInputControlPojo("Item-Status", "itemStatus", InputControlScope.GLOBAL, InputControlType.MULTI_SELECT);
-        List<InputControlValuesPojo> valuesPojos = getInputControlValuesPojo(Arrays.asList("LIVE", "NEW", "PACKED"), null);
+        InputControlPojo inputControlPojo = getInputControlPojo("Item-Status", "itemStatus"
+                , InputControlScope.GLOBAL, InputControlType.MULTI_SELECT);
+        List<InputControlValuesPojo> valuesPojos = getInputControlValuesPojo(Arrays.asList("LIVE", "NEW", "PACKED")
+                , null);
         api.add(inputControlPojo, null, valuesPojos);
         InputControlPojo pojo = api.getCheck(inputControlPojo.getId());
         assertNotNull(pojo);
@@ -226,7 +251,8 @@ public class InputControlApiTest extends AbstractTest {
         assertEquals("itemStatus", pojo.getParamName());
         assertEquals(InputControlScope.GLOBAL, pojo.getScope());
         assertEquals(InputControlType.MULTI_SELECT, pojo.getType());
-        InputControlPojo inputControlPojo2 = getInputControlPojo("Item Status", "itemStatus", InputControlScope.GLOBAL, InputControlType.MULTI_SELECT);
+        InputControlPojo inputControlPojo2 = getInputControlPojo("Item Status", "itemStatus"
+                , InputControlScope.GLOBAL, InputControlType.MULTI_SELECT);
         try {
             api.add(inputControlPojo2, null, valuesPojos);
         } catch (ApiException e) {
@@ -238,13 +264,18 @@ public class InputControlApiTest extends AbstractTest {
 
     @Test
     public void testSelectMultiple() throws ApiException {
-        InputControlPojo inputControlPojo1 = getInputControlPojo("Client ID", "clientId", InputControlScope.GLOBAL, InputControlType.MULTI_SELECT);
-        InputControlQueryPojo inputControlQueryPojo1 = getInputControlQueryPojo("select * from oms.oms_orders;", null);
+        InputControlPojo inputControlPojo1 = getInputControlPojo("Client ID", "clientId"
+                , InputControlScope.GLOBAL, InputControlType.MULTI_SELECT);
+        InputControlQueryPojo inputControlQueryPojo1 = getInputControlQueryPojo("select * from oms.oms_orders;"
+                , null);
         api.add(inputControlPojo1, inputControlQueryPojo1, new ArrayList<>());
-        InputControlPojo inputControlPojo2 = getInputControlPojo("Warehouse ID", "warehouseId", InputControlScope.GLOBAL, InputControlType.MULTI_SELECT);
-        InputControlQueryPojo inputControlQueryPojo2 = getInputControlQueryPojo("select * from oms.oms_orders;", null);
+        InputControlPojo inputControlPojo2 = getInputControlPojo("Warehouse ID", "warehouseId"
+                , InputControlScope.GLOBAL, InputControlType.MULTI_SELECT);
+        InputControlQueryPojo inputControlQueryPojo2 = getInputControlQueryPojo("select * from oms.oms_orders;"
+                , null);
         api.add(inputControlPojo2, inputControlQueryPojo2, new ArrayList<>());
-        List<InputControlPojo> inputControlPojoList = api.selectByIds(Arrays.asList(inputControlPojo1.getId(), inputControlPojo2.getId()));
+        List<InputControlPojo> inputControlPojoList = api.selectByIds(Arrays.asList(inputControlPojo1.getId()
+                , inputControlPojo2.getId()));
         assertEquals(2, inputControlPojoList.size());
         assertEquals("Client ID", inputControlPojoList.get(0).getDisplayName());
         assertEquals("clientId", inputControlPojoList.get(0).getParamName());
@@ -260,14 +291,20 @@ public class InputControlApiTest extends AbstractTest {
 
     @Test
     public void testGetByScope() throws ApiException {
-        InputControlPojo inputControlPojo1 = getInputControlPojo("Client ID", "clientId", InputControlScope.GLOBAL, InputControlType.MULTI_SELECT);
-        InputControlQueryPojo inputControlQueryPojo1 = getInputControlQueryPojo("select * from oms.oms_orders;", null);
+        InputControlPojo inputControlPojo1 = getInputControlPojo("Client ID", "clientId"
+                , InputControlScope.GLOBAL, InputControlType.MULTI_SELECT);
+        InputControlQueryPojo inputControlQueryPojo1 = getInputControlQueryPojo("select * from oms.oms_orders;"
+                , null);
         api.add(inputControlPojo1, inputControlQueryPojo1, new ArrayList<>());
-        InputControlPojo inputControlPojo2 = getInputControlPojo("Warehouse ID", "warehouseId", InputControlScope.GLOBAL, InputControlType.MULTI_SELECT);
-        InputControlQueryPojo inputControlQueryPojo2 = getInputControlQueryPojo("select * from oms.oms_orders;", null);
+        InputControlPojo inputControlPojo2 = getInputControlPojo("Warehouse ID", "warehouseId"
+                , InputControlScope.GLOBAL, InputControlType.MULTI_SELECT);
+        InputControlQueryPojo inputControlQueryPojo2 = getInputControlQueryPojo("select * from oms.oms_orders;"
+                , null);
         api.add(inputControlPojo2, inputControlQueryPojo2, new ArrayList<>());
-        InputControlPojo inputControlPojo3 = getInputControlPojo("Channel ID", "channelId", InputControlScope.LOCAL, InputControlType.MULTI_SELECT);
-        InputControlQueryPojo inputControlQueryPojo3 = getInputControlQueryPojo("select * from oms.oms_orders;", null);
+        InputControlPojo inputControlPojo3 = getInputControlPojo("Channel ID", "channelId"
+                , InputControlScope.LOCAL, InputControlType.MULTI_SELECT);
+        InputControlQueryPojo inputControlQueryPojo3 = getInputControlQueryPojo("select * from oms.oms_orders;"
+                , null);
         api.add(inputControlPojo3, inputControlQueryPojo3, new ArrayList<>());
 
         List<InputControlPojo> inputControlPojoList = api.getByScope(InputControlScope.GLOBAL);
@@ -284,14 +321,20 @@ public class InputControlApiTest extends AbstractTest {
 
     @Test
     public void testGetByScopeAndDisplayName() throws ApiException {
-        InputControlPojo inputControlPojo1 = getInputControlPojo("Client ID", "clientId", InputControlScope.GLOBAL, InputControlType.MULTI_SELECT);
-        InputControlQueryPojo inputControlQueryPojo1 = getInputControlQueryPojo("select * from oms.oms_orders;", null);
+        InputControlPojo inputControlPojo1 = getInputControlPojo("Client ID", "clientId"
+                , InputControlScope.GLOBAL, InputControlType.MULTI_SELECT);
+        InputControlQueryPojo inputControlQueryPojo1 = getInputControlQueryPojo("select * from oms.oms_orders;"
+                , null);
         api.add(inputControlPojo1, inputControlQueryPojo1, new ArrayList<>());
-        InputControlPojo inputControlPojo2 = getInputControlPojo("Warehouse ID", "warehouseId", InputControlScope.GLOBAL, InputControlType.MULTI_SELECT);
-        InputControlQueryPojo inputControlQueryPojo2 = getInputControlQueryPojo("select * from oms.oms_orders;", null);
+        InputControlPojo inputControlPojo2 = getInputControlPojo("Warehouse ID", "warehouseId"
+                , InputControlScope.GLOBAL, InputControlType.MULTI_SELECT);
+        InputControlQueryPojo inputControlQueryPojo2 = getInputControlQueryPojo("select * from oms.oms_orders;"
+                , null);
         api.add(inputControlPojo2, inputControlQueryPojo2, new ArrayList<>());
-        InputControlPojo inputControlPojo3 = getInputControlPojo("Channel ID", "channelId", InputControlScope.LOCAL, InputControlType.SINGLE_SELECT);
-        InputControlQueryPojo inputControlQueryPojo3 = getInputControlQueryPojo("select * from oms.oms_orders;", null);
+        InputControlPojo inputControlPojo3 = getInputControlPojo("Channel ID", "channelId"
+                , InputControlScope.LOCAL, InputControlType.SINGLE_SELECT);
+        InputControlQueryPojo inputControlQueryPojo3 = getInputControlQueryPojo("select * from oms.oms_orders;"
+                , null);
         api.add(inputControlPojo3, inputControlQueryPojo3, new ArrayList<>());
         InputControlPojo pojo = api.getByScopeAndDisplayName(InputControlScope.LOCAL, "Channel ID");
         assertNotNull(pojo);
@@ -303,14 +346,20 @@ public class InputControlApiTest extends AbstractTest {
 
     @Test
     public void testGetByScopeAndDisplayNameNullObject() throws ApiException {
-        InputControlPojo inputControlPojo1 = getInputControlPojo("Client ID", "clientId", InputControlScope.GLOBAL, InputControlType.MULTI_SELECT);
-        InputControlQueryPojo inputControlQueryPojo1 = getInputControlQueryPojo("select * from oms.oms_orders;", null);
+        InputControlPojo inputControlPojo1 = getInputControlPojo("Client ID", "clientId"
+                , InputControlScope.GLOBAL, InputControlType.MULTI_SELECT);
+        InputControlQueryPojo inputControlQueryPojo1 = getInputControlQueryPojo("select * from oms.oms_orders;"
+                , null);
         api.add(inputControlPojo1, inputControlQueryPojo1, new ArrayList<>());
-        InputControlPojo inputControlPojo2 = getInputControlPojo("Warehouse ID", "warehouseId", InputControlScope.GLOBAL, InputControlType.MULTI_SELECT);
-        InputControlQueryPojo inputControlQueryPojo2 = getInputControlQueryPojo("select * from oms.oms_orders;", null);
+        InputControlPojo inputControlPojo2 = getInputControlPojo("Warehouse ID", "warehouseId"
+                , InputControlScope.GLOBAL, InputControlType.MULTI_SELECT);
+        InputControlQueryPojo inputControlQueryPojo2 = getInputControlQueryPojo("select * from oms.oms_orders;"
+                , null);
         api.add(inputControlPojo2, inputControlQueryPojo2, new ArrayList<>());
-        InputControlPojo inputControlPojo3 = getInputControlPojo("Channel ID", "channelId", InputControlScope.LOCAL, InputControlType.SINGLE_SELECT);
-        InputControlQueryPojo inputControlQueryPojo3 = getInputControlQueryPojo("select * from oms.oms_orders;", null);
+        InputControlPojo inputControlPojo3 = getInputControlPojo("Channel ID", "channelId"
+                , InputControlScope.LOCAL, InputControlType.SINGLE_SELECT);
+        InputControlQueryPojo inputControlQueryPojo3 = getInputControlQueryPojo("select * from oms.oms_orders;"
+                , null);
         api.add(inputControlPojo3, inputControlQueryPojo3, new ArrayList<>());
         InputControlPojo pojo = api.getByScopeAndDisplayName(InputControlScope.LOCAL, "Client ID");
         assertNull(pojo);
@@ -318,14 +367,20 @@ public class InputControlApiTest extends AbstractTest {
 
     @Test
     public void testGetByScopeAndParamName() throws ApiException {
-        InputControlPojo inputControlPojo1 = getInputControlPojo("Client ID", "clientId", InputControlScope.GLOBAL, InputControlType.MULTI_SELECT);
-        InputControlQueryPojo inputControlQueryPojo1 = getInputControlQueryPojo("select * from oms.oms_orders;", null);
+        InputControlPojo inputControlPojo1 = getInputControlPojo("Client ID", "clientId"
+                , InputControlScope.GLOBAL, InputControlType.MULTI_SELECT);
+        InputControlQueryPojo inputControlQueryPojo1 = getInputControlQueryPojo("select * from oms.oms_orders;"
+                , null);
         api.add(inputControlPojo1, inputControlQueryPojo1, new ArrayList<>());
-        InputControlPojo inputControlPojo2 = getInputControlPojo("Warehouse ID", "warehouseId", InputControlScope.GLOBAL, InputControlType.MULTI_SELECT);
-        InputControlQueryPojo inputControlQueryPojo2 = getInputControlQueryPojo("select * from oms.oms_orders;", null);
+        InputControlPojo inputControlPojo2 = getInputControlPojo("Warehouse ID", "warehouseId"
+                , InputControlScope.GLOBAL, InputControlType.MULTI_SELECT);
+        InputControlQueryPojo inputControlQueryPojo2 = getInputControlQueryPojo("select * from oms.oms_orders;"
+                , null);
         api.add(inputControlPojo2, inputControlQueryPojo2, new ArrayList<>());
-        InputControlPojo inputControlPojo3 = getInputControlPojo("Channel ID", "channelId", InputControlScope.LOCAL, InputControlType.SINGLE_SELECT);
-        InputControlQueryPojo inputControlQueryPojo3 = getInputControlQueryPojo("select * from oms.oms_orders;", null);
+        InputControlPojo inputControlPojo3 = getInputControlPojo("Channel ID", "channelId"
+                , InputControlScope.LOCAL, InputControlType.SINGLE_SELECT);
+        InputControlQueryPojo inputControlQueryPojo3 = getInputControlQueryPojo("select * from oms.oms_orders;"
+                , null);
         api.add(inputControlPojo3, inputControlQueryPojo3, new ArrayList<>());
         InputControlPojo pojo = api.getByScopeAndParamName(InputControlScope.LOCAL, "channelId");
         assertNotNull(pojo);

@@ -3,25 +3,16 @@ package com.increff.omni.reporting.api;
 import com.increff.omni.reporting.config.AbstractTest;
 import com.increff.omni.reporting.config.ApplicationProperties;
 import com.increff.omni.reporting.dao.DirectoryDao;
-import com.increff.omni.reporting.model.constants.InputControlScope;
-import com.increff.omni.reporting.model.constants.InputControlType;
-import com.increff.omni.reporting.model.constants.ReportType;
-import com.increff.omni.reporting.pojo.*;
+import com.increff.omni.reporting.pojo.ReportControlsPojo;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static com.increff.omni.reporting.helper.DirectoryTestHelper.getDirectoryPojo;
-import static com.increff.omni.reporting.helper.InputControlTestHelper.getInputControlPojo;
-import static com.increff.omni.reporting.helper.InputControlTestHelper.getInputControlQueryPojo;
 import static com.increff.omni.reporting.helper.ReportTestHelper.getReportControlsPojo;
-import static com.increff.omni.reporting.helper.ReportTestHelper.getReportPojo;
-import static com.increff.omni.reporting.helper.SchemaTestHelper.getSchemaPojo;
 import static org.junit.Assert.*;
 
 public class ReportControlsApiTest extends AbstractTest {
@@ -77,7 +68,8 @@ public class ReportControlsApiTest extends AbstractTest {
         api.add(controlsPojo);
         api.add(controlsPojo2);
         api.add(controlsPojo3);
-        List<ReportControlsPojo> reportControlsPojoList = api.getByIds(Arrays.asList(controlsPojo2.getId(),controlsPojo3.getId()));
+        List<ReportControlsPojo> reportControlsPojoList =
+                api.getByIds(Arrays.asList(controlsPojo2.getId(), controlsPojo3.getId()));
         assertEquals(2, reportControlsPojoList.size());
         assertEquals(100002, reportControlsPojoList.get(0).getControlId().intValue());
         assertEquals(100001, reportControlsPojoList.get(0).getReportId().intValue());

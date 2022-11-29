@@ -3,13 +3,16 @@ package com.increff.omni.reporting.pojo;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
 
 @Entity
 @Setter
 @Getter
 @Table(name = "organization")
-public class OrganizationPojo extends AbstractVersionedPojo{
+public class OrganizationPojo extends AbstractVersionedPojo {
 
 
     @Id

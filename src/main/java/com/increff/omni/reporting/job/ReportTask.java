@@ -3,8 +3,8 @@ package com.increff.omni.reporting.job;
 import com.increff.omni.reporting.api.*;
 import com.increff.omni.reporting.config.ApplicationProperties;
 import com.increff.omni.reporting.dto.CommonDtoHelper;
-import com.increff.omni.reporting.model.form.SqlParams;
 import com.increff.omni.reporting.model.constants.ReportRequestStatus;
+import com.increff.omni.reporting.model.form.SqlParams;
 import com.increff.omni.reporting.pojo.*;
 import com.increff.omni.reporting.util.FileUtil;
 import com.increff.omni.reporting.util.SqlCmd;
@@ -18,7 +18,6 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
-import java.time.ZonedDateTime;
 import java.util.*;
 
 @Service
@@ -51,11 +50,13 @@ public class ReportTask {
 
         // process
         ReportRequestPojo reportRequestPojo = api.getCheck(pojo.getId());
-        List<ReportInputParamsPojo> reportInputParamsPojoList = reportInputParamsApi.getInputParamsForReportRequest(reportRequestPojo.getId());
+        List<ReportInputParamsPojo> reportInputParamsPojoList = reportInputParamsApi
+                .getInputParamsForReportRequest(reportRequestPojo.getId());
         ReportPojo reportPojo = reportApi.getCheck(reportRequestPojo.getReportId());
         ReportQueryPojo reportQueryPojo = reportQueryApi.getByReportId(reportPojo.getId());
         if(Objects.isNull(reportQueryPojo))
-            throw new ApiException(ApiStatus.BAD_DATA, "Query is not defined for requested report : " + reportPojo.getName());
+            throw new ApiException(ApiStatus.BAD_DATA, "Query is not defined for requested report : "
+                    + reportPojo.getName());
         OrgConnectionPojo orgConnectionPojo = orgConnectionApi.getCheckByOrgId(reportRequestPojo.getOrgId());
         ConnectionPojo connectionPojo = connectionApi.getCheck(orgConnectionPojo.getConnectionId());
 
@@ -117,7 +118,7 @@ public class ReportTask {
             throw new ApiException(ApiStatus.BAD_DATA, "Error in uploading Report File to Gcp for report : " +
                     pojo.getId());
         }
-        return properties.getGcpBaseUrl() + "/" + properties.getGcpBucketName() + "/" + filePath;
+        return filePath;
     }
 
     private Map<String, String> getInputParamMapFromPojoList(List<ReportInputParamsPojo> reportInputParamsPojoList) {

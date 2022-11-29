@@ -28,7 +28,8 @@ public class SingleMandatoryValidatorTest extends AbstractTest {
         } catch (ApiException e) {
             assertEquals(ApiStatus.BAD_DATA, e.getStatus());
             assertEquals("Report 1 failed in validation for key / keys : " +
-                    JsonUtil.serialize(displayNames) + " , validation type : " + ValidationType.SINGLE_MANDATORY, e.getMessage());
+                            JsonUtil.serialize(displayNames) + " , validation type : " + ValidationType.SINGLE_MANDATORY,
+                    e.getMessage());
             throw e;
         }
     }
@@ -42,7 +43,8 @@ public class SingleMandatoryValidatorTest extends AbstractTest {
         } catch (ApiException e) {
             assertEquals(ApiStatus.BAD_DATA, e.getStatus());
             assertEquals("Report 1 failed in validation for key / keys : " +
-                    JsonUtil.serialize(displayNames) + " , validation type : " + ValidationType.SINGLE_MANDATORY, e.getMessage());
+                            JsonUtil.serialize(displayNames) + " , validation type : " + ValidationType.SINGLE_MANDATORY,
+                    e.getMessage());
             throw e;
         }
     }

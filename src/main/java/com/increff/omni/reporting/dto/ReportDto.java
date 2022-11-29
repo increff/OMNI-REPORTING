@@ -14,12 +14,10 @@ import com.increff.omni.reporting.util.UserPrincipalUtil;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
 import com.nextscm.commons.spring.common.ConvertUtil;
-import com.nextscm.commons.spring.server.AbstractDtoApi;
 import org.apache.commons.text.StringSubstitutor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -51,8 +49,8 @@ public class ReportDto extends AbstractDto {
         checkValid(form);
         ReportPojo pojo = ConvertUtil.convert(form, ReportPojo.class);
         pojo = flowApi.addReport(pojo);
-        flowApi.saveAudit(pojo.getId().toString(), AuditActions.CREATE_REPORT.toString(), "Create Report", "Report : "
-                + pojo.getName() + " created", getUserName());
+        flowApi.saveAudit(pojo.getId().toString(), AuditActions.CREATE_REPORT.toString()
+                , "Create Report", "Report : " + pojo.getName() + " created", getUserName());
         return convertToReportData(Collections.singletonList(pojo)).get(0);
     }
 
@@ -61,8 +59,8 @@ public class ReportDto extends AbstractDto {
         ReportPojo pojo = ConvertUtil.convert(form, ReportPojo.class);
         pojo.setId(id);
         pojo = flowApi.editReport(pojo);
-        flowApi.saveAudit(pojo.getId().toString(), AuditActions.EDIT_REPORT.toString(), "Update Report", "Report : "
-                + pojo.getName() + " updated", getUserName());
+        flowApi.saveAudit(pojo.getId().toString(), AuditActions.EDIT_REPORT.toString()
+                , "Update Report", "Report : " + pojo.getName() + " updated", getUserName());
         return convertToReportData(Collections.singletonList(pojo)).get(0);
     }
 

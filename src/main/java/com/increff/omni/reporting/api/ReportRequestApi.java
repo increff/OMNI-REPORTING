@@ -40,7 +40,8 @@ public class ReportRequestApi extends AbstractApi {
     public List<ReportRequestPojo> getEligibleRequests(int limitForEligibleRequest) {
         if(limitForEligibleRequest <= 0)
             return new ArrayList<>();
-        return dao.getEligibleReports(Arrays.asList(ReportRequestStatus.NEW, ReportRequestStatus.STUCK), limitForEligibleRequest);
+        return dao.getEligibleReports(Arrays.asList(ReportRequestStatus.NEW, ReportRequestStatus.STUCK)
+                , limitForEligibleRequest);
     }
 
     public void markProcessingIfEligible(Integer id) throws ApiException {
@@ -58,7 +59,8 @@ public class ReportRequestApi extends AbstractApi {
         stuck.forEach(s -> s.setStatus(ReportRequestStatus.STUCK));
     }
 
-    public void updateStatus(Integer id, ReportRequestStatus status, String filePath, Integer noOfRows, Double fileSize) throws ApiException {
+    public void updateStatus(Integer id, ReportRequestStatus status, String filePath, Integer noOfRows, Double fileSize)
+            throws ApiException {
         ReportRequestPojo reportRequestPojo = getCheck(id);
         reportRequestPojo.setStatus(status);
         reportRequestPojo.setUrl(filePath);

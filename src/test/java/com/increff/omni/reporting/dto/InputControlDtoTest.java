@@ -28,6 +28,7 @@ import static com.increff.omni.reporting.helper.InputControlTestHelper.getInputC
 import static com.increff.omni.reporting.helper.OrgTestHelper.getOrganizationForm;
 import static com.increff.omni.reporting.helper.ReportTestHelper.getReportPojo;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 public class InputControlDtoTest extends AbstractTest {
 
@@ -132,7 +133,7 @@ public class InputControlDtoTest extends AbstractTest {
         assertEquals("clientId2", data.getParamName());
         assertEquals(InputControlScope.GLOBAL, data.getScope());
         assertEquals(InputControlType.NUMBER, data.getType());
-        assertEquals(null, data.getQuery());
+        assertNull(data.getQuery());
         assertEquals(0, data.getOptions().size());
     }
 
@@ -154,7 +155,7 @@ public class InputControlDtoTest extends AbstractTest {
         assertEquals("clientId", data.getParamName());
         assertEquals(InputControlScope.GLOBAL, data.getScope());
         assertEquals(InputControlType.DATE, data.getType());
-        assertEquals(null, data.getQuery());
+        assertNull(data.getQuery());
         assertEquals(0, data.getOptions().size());
         inputControlDataList = dto.selectForReport(pojo.getId());
         assertEquals(1, inputControlDataList.size());
@@ -163,7 +164,7 @@ public class InputControlDtoTest extends AbstractTest {
         assertEquals("clientId2", data.getParamName());
         assertEquals(InputControlScope.LOCAL, data.getScope());
         assertEquals(InputControlType.DATE, data.getType());
-        assertEquals(null, data.getQuery());
+        assertNull(data.getQuery());
         assertEquals(0, data.getOptions().size());
 
     }

@@ -40,7 +40,7 @@ public class ReportJobTest extends AbstractTest {
     @Autowired
     private InputControlDto inputControlDto;
 
-    private ReportForm commonSetup(String name, ReportType type) throws ApiException {
+    private ReportForm commonSetup() throws ApiException {
         OrganizationForm form = getOrganizationForm(100001, "increff");
         OrganizationData organizationData = organizationDto.add(form);
         List<DirectoryData> data = directoryDto.getAllDirectories();
@@ -48,11 +48,11 @@ public class ReportJobTest extends AbstractTest {
         DirectoryData directoryData = directoryDto.add(directoryForm);
         SchemaVersionForm schemaVersionForm = getSchemaForm("9.0.1");
         SchemaVersionData schemaData = schemaDto.add(schemaVersionForm);
-        ConnectionForm connectionForm = getConnectionForm("dev-db.increff.com", "Dev DB", "db.user", "db.password");
+        ConnectionForm connectionForm = getConnectionForm("127.0.0.1", "Test DB", username, password);
         ConnectionData connectionData = connectionDto.add(connectionForm);
         organizationDto.mapToConnection(organizationData.getId(), connectionData.getId());
         organizationDto.mapToSchema(organizationData.getId(), schemaData.getId());
-        return getReportForm(name, type, directoryData.getId(), schemaData.getId());
+        return getReportForm("Report 2", ReportType.STANDARD, directoryData.getId(), schemaData.getId());
     }
 
     @Test
@@ -67,7 +67,7 @@ public class ReportJobTest extends AbstractTest {
 
     @Test
     public void testRunReport() throws IOException, ApiException {
-        ReportForm reportForm = commonSetup("Report 2", ReportType.STANDARD);
+        ReportForm reportForm = commonSetup();
         ReportData reportData = reportDto.add(reportForm);
         ReportQueryForm queryForm = getReportQueryForm("select version();");
         reportDto.upsertQuery(reportData.getId(), queryForm);

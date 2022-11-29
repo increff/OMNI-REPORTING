@@ -65,9 +65,8 @@ public class DirectoryApi extends AbstractApi {
         }
     }
 
-
     private void validate(DirectoryPojo pojo) throws ApiException {
-        //parent id valid
+        // parent id valid
         getCheck(pojo.getParentId());
         // same name anywhere
         DirectoryPojo sameNamePojo = dao.select("directoryName", pojo.getDirectoryName());

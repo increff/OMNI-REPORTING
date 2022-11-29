@@ -40,6 +40,8 @@ public class ReportJob {
 
     @Scheduled(fixedDelay = 1000)
     public void runReports() throws IOException, ApiException {
+        if(!properties.getIsRunScheduler())
+            return;
         // Get all the tasks pending for execution + Tasks that got stuck in processing
         int limitForEligibleRequest = getLimitForEligibleRequests();
         List<ReportRequestPojo> reportRequestPojoList = api.getEligibleRequests(limitForEligibleRequest);
@@ -72,6 +74,8 @@ public class ReportJob {
 
     @Scheduled(fixedDelay = 1000)
     public void markJobsStuck() {
+        if(!properties.getIsRunScheduler())
+            return;
         api.markStuck(properties.getStuckReportTime());
     }
 
@@ -83,7 +87,8 @@ public class ReportJob {
     private int getLimitForEligibleRequests() {
         ThreadPoolTaskExecutor threadPoolExecutor = (ThreadPoolTaskExecutor) executor;
         long poolSize = properties.getCorePoolSize() - 10; // Just for safety we kept buffer of 10 to core pool
-        long currentUsedThreads = threadPoolExecutor.getThreadPoolExecutor().getTaskCount() - threadPoolExecutor.getThreadPoolExecutor().getCompletedTaskCount();
+        long currentUsedThreads = threadPoolExecutor.getThreadPoolExecutor().getTaskCount()
+                - threadPoolExecutor.getThreadPoolExecutor().getCompletedTaskCount();
         log.debug("Task Count : " + threadPoolExecutor.getThreadPoolExecutor().getTaskCount());
         log.debug("Completed Task Count : " + threadPoolExecutor.getThreadPoolExecutor().getCompletedTaskCount());
         log.debug("Current Used threads : " + currentUsedThreads);

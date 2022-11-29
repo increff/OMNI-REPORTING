@@ -1,6 +1,5 @@
 package com.increff.omni.reporting.pojo;
 
-import com.increff.omni.reporting.model.constants.ValidationType;
 import lombok.Getter;
 import lombok.Setter;
 

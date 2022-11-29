@@ -1,8 +1,6 @@
 package com.increff.omni.reporting.dao;
 
-import com.increff.omni.reporting.model.constants.ReportRequestStatus;
 import com.increff.omni.reporting.pojo.CustomReportAccessPojo;
-import com.increff.omni.reporting.pojo.ReportRequestPojo;
 import com.nextscm.commons.spring.db.AbstractDao;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,7 +9,6 @@ import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
-import java.time.ZonedDateTime;
 
 @Repository
 @Transactional

@@ -4,6 +4,7 @@ import com.increff.omni.reporting.config.AbstractTest;
 import com.increff.omni.reporting.config.ApplicationProperties;
 import com.increff.omni.reporting.util.FileUtil;
 import com.nextscm.commons.spring.common.ApiException;
+import lombok.extern.log4j.Log4j;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +16,7 @@ import java.util.Objects;
 
 import static org.junit.Assert.*;
 
+@Log4j
 public class FolderApiTest extends AbstractTest {
 
     @Autowired
@@ -26,7 +28,9 @@ public class FolderApiTest extends AbstractTest {
     public void createDir(){
         File dir = new File(properties.getOutDir());
         if(!dir.exists()){
-            dir.mkdir();
+            if(!dir.mkdir()) {
+                log.error("Error in creating directory");
+            }
         }
     }
 
@@ -48,7 +52,8 @@ public class FolderApiTest extends AbstractTest {
         assertEquals(10, Objects.requireNonNull(file.listFiles()).length);
         //modify last modified of all files
         for (File t : Objects.requireNonNull(file.listFiles())) {
-            t.setLastModified(System.currentTimeMillis() - 61 * 60 * 1000);
+            if(!t.setLastModified(System.currentTimeMillis() - 61 * 60 * 1000))
+                log.error("Error in modifying last modified time");
         }
         folderApi.deleteFilesOlderThan1Hr();
         assertEquals(0, Objects.requireNonNull(file.listFiles()).length);

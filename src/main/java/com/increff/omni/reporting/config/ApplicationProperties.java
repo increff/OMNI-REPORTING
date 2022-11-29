@@ -27,7 +27,7 @@ public class ApplicationProperties {
     @Value("${max.execution.time.minutes:5}")
     private Integer maxExecutionTime;
 
-    @Value("${gcp.baseUrl}")
+    @Value("${gcp.baseUrl:dummy}")
     private String gcpBaseUrl;
 
     @Value("${gcp.bucketName}")
@@ -45,7 +45,7 @@ public class ApplicationProperties {
     @Value("${query.outDir:omni-reporting-files}")
     private String outDir;
 
-    @Value("${ui.homePagePath}")
-    private String uiHomePagePath;
+    @Value("${scheduler.run}")
+    private Boolean isRunScheduler;
 
 }

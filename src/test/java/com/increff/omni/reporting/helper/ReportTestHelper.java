@@ -13,7 +13,8 @@ import java.util.Map;
 
 public class ReportTestHelper {
 
-    public static ReportPojo getReportPojo(String reportName, ReportType reportType, Integer directoryId, Integer schemaVersionId) {
+    public static ReportPojo getReportPojo(String reportName, ReportType reportType, Integer directoryId,
+                                           Integer schemaVersionId) {
         ReportPojo pojo = new ReportPojo();
         pojo.setName(reportName);
         pojo.setType(reportType);
@@ -22,14 +23,16 @@ public class ReportTestHelper {
         return pojo;
     }
 
-    public static ReportControlsPojo getReportControlsPojo(Integer reportId, Integer controlId){
+    public static ReportControlsPojo getReportControlsPojo(Integer reportId, Integer controlId) {
         ReportControlsPojo reportControlsPojo = new ReportControlsPojo();
         reportControlsPojo.setReportId(reportId);
         reportControlsPojo.setControlId(controlId);
         return reportControlsPojo;
     }
 
-    public static ValidationGroupForm getValidationGroupForm(String groupName, Integer validationValue, ValidationType validationType, List<Integer> reportControlIds) {
+    public static ValidationGroupForm getValidationGroupForm(String groupName, Integer validationValue,
+                                                             ValidationType validationType,
+                                                             List<Integer> reportControlIds) {
         ValidationGroupForm groupForm = new ValidationGroupForm();
         groupForm.setGroupName(groupName);
         groupForm.setValidationValue(validationValue);
@@ -47,7 +50,8 @@ public class ReportTestHelper {
         return form;
     }
 
-    public static ReportInputParamsPojo getReportInputParamsPojo(Integer reportRequestId, String paramKey, String paramValue) {
+    public static ReportInputParamsPojo getReportInputParamsPojo(Integer reportRequestId, String paramKey,
+                                                                 String paramValue) {
         ReportInputParamsPojo pojo = new ReportInputParamsPojo();
         pojo.setReportRequestId(reportRequestId);
         pojo.setParamKey(paramKey);
@@ -73,7 +77,8 @@ public class ReportTestHelper {
         return pojo;
     }
 
-    public static ReportRequestForm getReportRequestForm(Integer reportId, Map<String, List<String>> params, String timezone) {
+    public static ReportRequestForm getReportRequestForm(Integer reportId, Map<String, List<String>> params,
+                                                         String timezone) {
         ReportRequestForm form = new ReportRequestForm();
         form.setReportId(reportId);
         form.setParamMap(params);

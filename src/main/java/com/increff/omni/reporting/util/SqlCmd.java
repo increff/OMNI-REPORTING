@@ -1,14 +1,11 @@
 package com.increff.omni.reporting.util;
 
-import com.increff.omni.reporting.dto.UserDto;
 import com.increff.omni.reporting.model.form.SqlParams;
 import com.nextscm.commons.lang.CmdUtil;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
 import lombok.extern.log4j.Log4j;
 import org.apache.commons.text.StringSubstitutor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.lang.ProcessBuilder.Redirect;
@@ -55,7 +52,7 @@ public class SqlCmd {
                 "-e", //
                 escape(sp.getQuery()) //
         };
-        log.info("Query formed =" +sp.getQuery());
+        log.debug("Query formed : " +sp.getQuery());
         return cmd;
     }
 

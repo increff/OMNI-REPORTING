@@ -14,11 +14,10 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 // Todo internationalization
-// Todo auditing
 @CrossOrigin
 @Api
 @RestController
-@RequestMapping(value = "/api/admin")
+@RequestMapping(value = "/admin")
 public class AdminController {
 
     @Autowired
@@ -148,7 +147,7 @@ public class AdminController {
 
     @ApiOperation(value = "Get transformed report query")
     @RequestMapping(value = "/reports/query/try", method = RequestMethod.POST)
-    public ReportQueryData getTransformedQuery(@RequestBody ReportQueryTestForm form) throws ApiException {
+    public ReportQueryData getTransformedQuery(@RequestBody ReportQueryTestForm form) {
         return reportDto.getTransformedQuery(form);
     }
 
@@ -202,7 +201,7 @@ public class AdminController {
 
     @ApiOperation(value = "Get All Organizations")
     @RequestMapping(value = "/orgs", method = RequestMethod.GET)
-    public List<OrganizationData> selectAllOrgs() throws ApiException {
+    public List<OrganizationData> selectAllOrgs() {
         return organizationDto.selectAll();
     }
 
@@ -250,7 +249,7 @@ public class AdminController {
 
     @ApiOperation(value = "Delete Custom Report Access")
     @RequestMapping(value = "/reports/custom-access/{id}", method = RequestMethod.DELETE)
-    public void deleteCustomAccess(@PathVariable Integer id) throws ApiException {
+    public void deleteCustomAccess(@PathVariable Integer id) {
         customReportAccessDto.deleteCustomReportAccess(id);
     }
 

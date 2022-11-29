@@ -2,7 +2,6 @@ package com.increff.omni.reporting.model.form;
 
 import com.increff.omni.reporting.model.constants.InputControlScope;
 import com.increff.omni.reporting.model.constants.InputControlType;
-import com.increff.omni.reporting.model.constants.ValidationType;
 import lombok.Getter;
 import lombok.Setter;
 
