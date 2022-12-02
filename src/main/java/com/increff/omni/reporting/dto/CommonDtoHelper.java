@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 
 public class CommonDtoHelper {
 
-    public final static String TIME_ZONE_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSSxxx";
+    public final static String TIME_ZONE_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX";
 
     public static SqlParams getSqlParams(ConnectionPojo pojo, String query, File file, File errFile,
                                          Integer maxExecutionTime) {
@@ -140,7 +140,7 @@ public class CommonDtoHelper {
     }
 
     public static List<ReportInputParamsPojo> getReportInputParamsPojoList(Map<String, String> paramMap
-            , String timeZone) {
+            , String timeZone, Integer orgId) {
         List<ReportInputParamsPojo> reportInputParamsPojoList = new ArrayList<>();
         paramMap.forEach((k, v) -> {
             ReportInputParamsPojo reportInputParamsPojo = new ReportInputParamsPojo();
@@ -148,10 +148,14 @@ public class CommonDtoHelper {
             reportInputParamsPojo.setParamValue(v);
             reportInputParamsPojoList.add(reportInputParamsPojo);
         });
-        ReportInputParamsPojo reportInputParamsPojo = new ReportInputParamsPojo();
-        reportInputParamsPojo.setParamKey("timezone");
-        reportInputParamsPojo.setParamValue(timeZone);
-        reportInputParamsPojoList.add(reportInputParamsPojo);
+        ReportInputParamsPojo timeZoneParam = new ReportInputParamsPojo();
+        timeZoneParam.setParamKey("timezone");
+        timeZoneParam.setParamValue(timeZone);
+        reportInputParamsPojoList.add(timeZoneParam);
+        ReportInputParamsPojo orgIdParam = new ReportInputParamsPojo();
+        orgIdParam.setParamKey("orgId");
+        orgIdParam.setParamValue(orgId.toString());
+        reportInputParamsPojoList.add(orgIdParam);
         return reportInputParamsPojoList;
     }
 

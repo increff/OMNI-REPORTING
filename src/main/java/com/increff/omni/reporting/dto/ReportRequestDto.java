@@ -86,7 +86,7 @@ public class ReportRequestDto extends AbstractDto {
         validateCustomReportAccess(reportPojo, orgId);
         validateInputParamValues(reportPojo, inputParamsMap);
         List<ReportInputParamsPojo> reportInputParamsPojoList =
-                CommonDtoHelper.getReportInputParamsPojoList(inputParamsMap, form.getTimezone());
+                CommonDtoHelper.getReportInputParamsPojoList(inputParamsMap, form.getTimezone(), orgId);
         flow.requestReport(pojo, reportInputParamsPojoList);
         flow.saveAudit(reportPojo.getId().toString(), AuditActions.REQUEST_REPORT.toString(), "Request Report",
                 "Report request submitted for organization : " + organizationPojo.getName(), getUserName());
