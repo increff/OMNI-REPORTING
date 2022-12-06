@@ -150,11 +150,11 @@ public class CommonDtoHelper {
         });
         ReportInputParamsPojo timeZoneParam = new ReportInputParamsPojo();
         timeZoneParam.setParamKey("timezone");
-        timeZoneParam.setParamValue(timeZone);
+        timeZoneParam.setParamValue("'" + timeZone + "'");
         reportInputParamsPojoList.add(timeZoneParam);
         ReportInputParamsPojo orgIdParam = new ReportInputParamsPojo();
         orgIdParam.setParamKey("orgId");
-        orgIdParam.setParamValue(orgId.toString());
+        orgIdParam.setParamValue("'" + orgId.toString() + "'");
         reportInputParamsPojoList.add(orgIdParam);
         return reportInputParamsPojoList;
     }
