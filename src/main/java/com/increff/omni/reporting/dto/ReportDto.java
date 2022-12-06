@@ -87,6 +87,7 @@ public class ReportDto extends AbstractDto {
 
     public ReportQueryData getTransformedQuery(ReportQueryTestForm form) {
         Map<String, String> paramsMap = UserPrincipalUtil.getCompleteMapWithAccessControl(form.getParamMap());
+        paramsMap.put("timezone", "'" + form.getTimezone() + "'");
         ReportQueryData data = new ReportQueryData();
         data.setQuery(StringSubstitutor.replace(form.getQuery(), paramsMap));
         return data;
