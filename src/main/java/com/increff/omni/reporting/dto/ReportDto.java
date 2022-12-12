@@ -10,6 +10,7 @@ import com.increff.omni.reporting.model.data.ReportQueryData;
 import com.increff.omni.reporting.model.data.ValidationGroupData;
 import com.increff.omni.reporting.model.form.*;
 import com.increff.omni.reporting.pojo.*;
+import com.increff.omni.reporting.util.SqlCmd;
 import com.increff.omni.reporting.util.UserPrincipalUtil;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
@@ -89,7 +90,7 @@ public class ReportDto extends AbstractDto {
         Map<String, String> paramsMap = UserPrincipalUtil.getCompleteMapWithAccessControl(form.getParamMap());
         paramsMap.put("timezone", "'" + form.getTimezone() + "'");
         ReportQueryData data = new ReportQueryData();
-        data.setQuery(StringSubstitutor.replace(form.getQuery(), paramsMap));
+        data.setQuery(SqlCmd.getSubstitutedString(form.getQuery(), paramsMap));
         return data;
     }
 

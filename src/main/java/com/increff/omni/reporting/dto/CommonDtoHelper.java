@@ -9,6 +9,7 @@ import com.increff.omni.reporting.model.data.TimeZoneData;
 import com.increff.omni.reporting.model.form.ReportRequestForm;
 import com.increff.omni.reporting.model.form.SqlParams;
 import com.increff.omni.reporting.pojo.*;
+import com.increff.omni.reporting.util.SqlCmd;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
 import org.apache.commons.text.StringSubstitutor;
@@ -166,7 +167,7 @@ public class CommonDtoHelper {
         sqlParams.setUsername(connectionPojo.getUsername());
         sqlParams.setPassword(connectionPojo.getPassword());
         // Replacing query param with input control values
-        String fQuery = StringSubstitutor.replace(reportQueryPojo.getQuery(), inputParamsMap);
+        String fQuery = SqlCmd.getSubstitutedString(reportQueryPojo.getQuery(), inputParamsMap);
         sqlParams.setQuery(massageQuery(fQuery, maxExecutionTime));
         sqlParams.setOutFile(file);
         sqlParams.setErrFile(errorFile);
