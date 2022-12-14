@@ -155,6 +155,7 @@ public class ReportDto extends AbstractDto {
                     .map(ReportControlsPojo::getControlId).collect(Collectors.toList());
             List<InputControlPojo> pojos = inputControlApi.selectByIds(controlIds);
             data.setValidationValue(v.get(0).getValidationValue());
+            data.setIsSystemValidation(v.get(0).getIsSystemValidation());
             data.setGroupName(k);
             data.setValidationType(v.get(0).getType());
             data.setControls(pojos.stream().map(InputControlPojo::getDisplayName).collect(Collectors.toList()));

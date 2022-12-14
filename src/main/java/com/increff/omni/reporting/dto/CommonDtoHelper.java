@@ -191,6 +191,7 @@ public class CommonDtoHelper {
         validationGroupPojo.setReportId(v.getReportId());
         validationGroupPojo.setReportControlId(v.getReportControlId());
         validationGroupPojo.setType(v.getType());
+        validationGroupPojo.setIsSystemValidation(v.getIsSystemValidation());
         return validationGroupPojo;
     }
 

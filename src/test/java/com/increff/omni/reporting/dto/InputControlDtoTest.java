@@ -8,6 +8,7 @@ import com.increff.omni.reporting.model.constants.ReportType;
 import com.increff.omni.reporting.model.data.ConnectionData;
 import com.increff.omni.reporting.model.data.InputControlData;
 import com.increff.omni.reporting.model.data.OrganizationData;
+import com.increff.omni.reporting.model.data.ValidationGroupData;
 import com.increff.omni.reporting.model.form.ConnectionForm;
 import com.increff.omni.reporting.model.form.InputControlForm;
 import com.increff.omni.reporting.model.form.InputControlUpdateForm;
@@ -27,8 +28,7 @@ import static com.increff.omni.reporting.helper.InputControlTestHelper.getInputC
 import static com.increff.omni.reporting.helper.InputControlTestHelper.getInputControlUpdateForm;
 import static com.increff.omni.reporting.helper.OrgTestHelper.getOrganizationForm;
 import static com.increff.omni.reporting.helper.ReportTestHelper.getReportPojo;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.*;
 
 public class InputControlDtoTest extends AbstractTest {
 
@@ -40,6 +40,8 @@ public class InputControlDtoTest extends AbstractTest {
     private ConnectionDto connectionDto;
     @Autowired
     private ReportApi reportApi;
+    @Autowired
+    private ReportDto reportDto;
 
     private void commonSetup() throws ApiException {
         OrganizationForm organizationForm = getOrganizationForm(100001, "increff");
@@ -59,7 +61,7 @@ public class InputControlDtoTest extends AbstractTest {
         assertEquals("clientId", data.getParamName());
         assertEquals(InputControlScope.GLOBAL, data.getScope());
         assertEquals(InputControlType.TEXT, data.getType());
-        assertEquals(null, data.getQuery());
+        assertNull(data.getQuery());
         assertEquals(0, data.getOptions().size());
     }
 
@@ -146,8 +148,11 @@ public class InputControlDtoTest extends AbstractTest {
         ReportPojo pojo = getReportPojo("report 1", ReportType.STANDARD, 100001, 100001);
         reportApi.add(pojo);
         form = getInputControlForm("Client Id 2", "clientId2", InputControlScope.LOCAL
-                , InputControlType.DATE, new ArrayList<>(), null, pojo.getId());
+                , InputControlType.SINGLE_SELECT, Arrays.asList("IGNORE", "SENT"), null, pojo.getId());
         dto.add(form);
+        List<ValidationGroupData> validationGroupData = reportDto.getValidationGroups(pojo.getId());
+        assertEquals(1, validationGroupData.size());
+        assertTrue(validationGroupData.get(0).getIsSystemValidation());
         List<InputControlData> inputControlDataList = dto.selectAllGlobal();
         assertEquals(1, inputControlDataList.size());
         InputControlData data = inputControlDataList.get(0);
@@ -163,9 +168,9 @@ public class InputControlDtoTest extends AbstractTest {
         assertEquals("Client Id 2", data.getDisplayName());
         assertEquals("clientId2", data.getParamName());
         assertEquals(InputControlScope.LOCAL, data.getScope());
-        assertEquals(InputControlType.DATE, data.getType());
+        assertEquals(InputControlType.SINGLE_SELECT, data.getType());
         assertNull(data.getQuery());
-        assertEquals(0, data.getOptions().size());
+        assertEquals(2, data.getOptions().size());
 
     }
 }

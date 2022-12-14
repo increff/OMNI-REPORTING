@@ -13,5 +13,6 @@ public class ValidationGroupData {
     private String groupName;
     private ValidationType validationType;
     private Integer validationValue;
+    private Boolean isSystemValidation;
     private List<String> controls;
 }

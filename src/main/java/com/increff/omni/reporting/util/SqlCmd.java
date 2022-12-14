@@ -18,10 +18,8 @@ public class SqlCmd {
      * https://www.baeldung.com/java-string-formatting-named-placeholders
      * */
 
-    public static String getSubstitutedString(String query, Map<String, String> paramsMap) {
-        StringSubstitutor stringSubstitutor = new StringSubstitutor();
-        stringSubstitutor.setEnableSubstitutionInVariables(true);
-        return stringSubstitutor.replace(query, paramsMap);
+    public static synchronized String getSubstitutedString(String query, Map<String, String> paramsMap) {
+        return StringSubstitutor.replace(query, paramsMap);
     }
 
     public static void processQuery(SqlParams sp) throws ApiException {
