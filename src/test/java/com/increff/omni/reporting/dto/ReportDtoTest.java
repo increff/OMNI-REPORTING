@@ -21,8 +21,7 @@ import static com.increff.omni.reporting.helper.InputControlTestHelper.getInputC
 import static com.increff.omni.reporting.helper.OrgTestHelper.getOrganizationForm;
 import static com.increff.omni.reporting.helper.ReportTestHelper.*;
 import static com.increff.omni.reporting.helper.SchemaTestHelper.getSchemaForm;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 
 public class ReportDtoTest extends AbstractTest {
 
@@ -143,6 +142,7 @@ public class ReportDtoTest extends AbstractTest {
         assertEquals(ValidationType.MANDATORY, dataList.get(0).getValidationType());
         assertEquals(10, dataList.get(0).getValidationValue().intValue());
         assertEquals("group1", dataList.get(0).getGroupName());
+        assertFalse(dataList.get(0).getIsSystemValidation());
         dto.deleteValidationGroup(data.getId(), "group1");
         dataList = dto.getValidationGroups(data.getId());
         assertEquals(0, dataList.size());
@@ -230,5 +230,18 @@ public class ReportDtoTest extends AbstractTest {
             assertEquals("Date range validation should have positive validation value", e.getMessage());
             throw e;
         }
+    }
+
+    @Test
+    public void testAutoValidationGroupAddition() throws ApiException {
+        ReportForm form = commonSetup("Report 2", ReportType.CUSTOM);
+        ReportData data = dto.add(form);
+        InputControlForm inputControlForm = getInputControlForm("Client Id", "clientId", InputControlScope.GLOBAL
+                , InputControlType.MULTI_SELECT, Arrays.asList("IGNORE", "SENT"), null, null);
+        InputControlData inputControlData = inputControlDto.add(inputControlForm);
+        dto.mapToControl(data.getId(), inputControlData.getId());
+        List<ValidationGroupData> validationGroupData = dto.getValidationGroups(data.getId());
+        assertEquals(1, validationGroupData.size());
+        assertTrue(validationGroupData.get(0).getIsSystemValidation());
     }
 }

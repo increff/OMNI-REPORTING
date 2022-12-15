@@ -48,6 +48,9 @@ public class InputControlFlowApi extends AbstractApi {
     private FolderApi folderApi;
 
     @Autowired
+    private ReportFlowApi reportFlowApi;
+
+    @Autowired
     private ApplicationProperties properties;
 
     public InputControlPojo add(InputControlPojo pojo, String query, List<String> values,
@@ -63,7 +66,9 @@ public class InputControlFlowApi extends AbstractApi {
         pojo = api.add(pojo, queryPojo, valuesList);
 
         if (pojo.getScope().equals(InputControlScope.LOCAL)) {
-            reportControlsApi.add(getReportControlPojo(reportId, pojo.getId()));
+            ReportControlsPojo reportControlsPojo = getReportControlPojo(reportId, pojo.getId());
+            reportControlsApi.add(reportControlsPojo);
+            reportFlowApi.checkAndAddValidationGroup(reportControlsPojo);
         }
         return pojo;
     }

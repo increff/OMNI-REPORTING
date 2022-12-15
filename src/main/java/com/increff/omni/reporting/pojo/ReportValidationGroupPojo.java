@@ -33,5 +33,8 @@ public class ReportValidationGroupPojo extends AbstractVersionedPojo {
     private Integer reportId;
 
     @Column(nullable = false)
+    private Boolean isSystemValidation = false;
+
+    @Column(nullable = false)
     private Integer reportControlId;
 }

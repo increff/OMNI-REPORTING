@@ -18,13 +18,16 @@ public class SqlCmd {
      * https://www.baeldung.com/java-string-formatting-named-placeholders
      * */
 
+    public static synchronized String getSubstitutedString(String query, Map<String, String> paramsMap) {
+        return StringSubstitutor.replace(query, paramsMap);
+    }
+
     public static void processQuery(SqlParams sp) throws ApiException {
         processQuery(sp, true);
     }
 
     public static void processQuery(SqlParams sp, Boolean isUserPrincipalAvailable) throws ApiException {
-        if(isUserPrincipalAvailable)
-            addAccessControlMap(sp);
+        if (isUserPrincipalAvailable) addAccessControlMap(sp);
         String[] cmd = getQueryCmd(sp);
         Redirect redirectAll = Redirect.appendTo(sp.getOutFile());
         Redirect errRedirect = Redirect.appendTo(sp.getErrFile());
@@ -37,7 +40,7 @@ public class SqlCmd {
 
     private static void addAccessControlMap(SqlParams sp) {
         Map<String, String> accessControlMap = UserPrincipalUtil.getAccessControlMap();
-        String nQuery = StringSubstitutor.replace(sp.getQuery(), accessControlMap);
+        String nQuery = getSubstitutedString(sp.getQuery(), accessControlMap);
         sp.setQuery(nQuery);
     }
 
@@ -53,7 +56,7 @@ public class SqlCmd {
                 "-e", //
                 escape(sp.getQuery()) //
         };
-        log.debug("Query formed : " +sp.getQuery());
+        log.debug("Query formed : " + sp.getQuery());
         return cmd;
     }
 

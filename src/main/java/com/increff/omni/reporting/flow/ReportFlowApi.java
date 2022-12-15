@@ -4,6 +4,7 @@ import com.increff.omni.reporting.api.*;
 import com.increff.omni.reporting.model.constants.InputControlScope;
 import com.increff.omni.reporting.model.constants.InputControlType;
 import com.increff.omni.reporting.model.constants.ReportType;
+import com.increff.omni.reporting.model.constants.ValidationType;
 import com.increff.omni.reporting.model.form.ValidationGroupForm;
 import com.increff.omni.reporting.pojo.*;
 import com.increff.omni.reporting.validators.DateValidator;
@@ -83,6 +84,7 @@ public class ReportFlowApi extends AbstractAuditApi {
     public void mapControlToReport(ReportControlsPojo pojo) throws ApiException {
         validateControlReportMapping(pojo);
         reportControlsApi.add(pojo);
+        checkAndAddValidationGroup(pojo);
     }
 
     public List<ReportPojo> getAllBySchemaVersionId(Integer schemaVersionId) {
@@ -93,7 +95,8 @@ public class ReportFlowApi extends AbstractAuditApi {
 
         OrgSchemaVersionPojo orgSchemaVersionPojo = orgSchemaApi.getCheckByOrgId(orgId);
         //All standard
-        List<ReportPojo> standard = api.getByTypeAndSchema(ReportType.STANDARD, orgSchemaVersionPojo.getSchemaVersionId());
+        List<ReportPojo> standard =
+                api.getByTypeAndSchema(ReportType.STANDARD, orgSchemaVersionPojo.getSchemaVersionId());
 
         //All custom
         List<CustomReportAccessPojo> customAccess = customReportAccessApi.getByOrgId(orgId);
@@ -110,7 +113,8 @@ public class ReportFlowApi extends AbstractAuditApi {
     public void addValidationGroup(Integer reportId, ValidationGroupForm groupForm) throws ApiException {
         validate(reportId, groupForm);
         List<InputControlPojo> inputControlPojoList = inputControlApi.selectByIds(groupForm.getControlIds());
-        List<InputControlType> controlTypeList = inputControlPojoList.stream().map(InputControlPojo::getType).collect(Collectors.toList());
+        List<InputControlType> controlTypeList =
+                inputControlPojoList.stream().map(InputControlPojo::getType).collect(Collectors.toList());
         switch (groupForm.getValidationType()) {
             case MANDATORY:
                 mandatoryValidator.add(controlTypeList);
@@ -125,6 +129,7 @@ public class ReportFlowApi extends AbstractAuditApi {
                 throw new ApiException(ApiStatus.BAD_DATA, "Invalid Validation Type");
         }
         List<ReportValidationGroupPojo> validationGroupPojoList = getValidationGroupPojoList(groupForm, reportId);
+        validationGroupPojoList.forEach(v -> v.setIsSystemValidation(false));
         reportValidationGroupApi.addAll(validationGroupPojoList);
     }
 
@@ -177,7 +182,7 @@ public class ReportFlowApi extends AbstractAuditApi {
             }
             reportValidationGroupApi.addAll(newGroupPojoList);
             // Add custom report access
-            if(oldReport.getType().equals(ReportType.STANDARD))
+            if (oldReport.getType().equals(ReportType.STANDARD))
                 continue;
             List<CustomReportAccessPojo> customReportAccessPojoList =
                     customReportAccessApi.getAllByReportId(oldReport.getId());
@@ -187,6 +192,22 @@ public class ReportFlowApi extends AbstractAuditApi {
                 customReportAccessPojo.setReportId(pojo.getId());
                 customReportAccessApi.addCustomReportAccessPojo(customReportAccessPojo);
             });
+        }
+    }
+
+    public void checkAndAddValidationGroup(ReportControlsPojo pojo) throws ApiException {
+        InputControlPojo inputControlPojo = inputControlApi.getCheck(pojo.getControlId());
+        if (Arrays.asList(InputControlType.MULTI_SELECT, InputControlType.SINGLE_SELECT)
+                .contains(inputControlPojo.getType())) {
+            ReportValidationGroupPojo validationGroupPojo = new ReportValidationGroupPojo();
+            validationGroupPojo.setGroupName(inputControlPojo.getDisplayName() + " " +
+                    ValidationType.MANDATORY.toString().toLowerCase());
+            validationGroupPojo.setValidationValue(0);
+            validationGroupPojo.setIsSystemValidation(true);
+            validationGroupPojo.setReportId(pojo.getReportId());
+            validationGroupPojo.setReportControlId(pojo.getId());
+            validationGroupPojo.setType(ValidationType.MANDATORY);
+            reportValidationGroupApi.addAll(Collections.singletonList(validationGroupPojo));
         }
     }
 
@@ -232,7 +253,8 @@ public class ReportFlowApi extends AbstractAuditApi {
 
     }
 
-    private List<ReportValidationGroupPojo> getValidationGroupPojoList(ValidationGroupForm groupForm, Integer reportId) {
+    private List<ReportValidationGroupPojo> getValidationGroupPojoList(ValidationGroupForm groupForm,
+                                                                       Integer reportId) {
         List<ReportValidationGroupPojo> groupPojoList = new ArrayList<>();
         for (Integer controlId : groupForm.getControlIds()) {
             ReportValidationGroupPojo pojo = new ReportValidationGroupPojo();
