@@ -54,7 +54,7 @@ public class InputControlDto extends AbstractDto {
         validate(form);
         InputControlPojo pojo = ConvertUtil.convert(form, InputControlPojo.class);
         pojo = flowApi.add(pojo, form.getQuery(), form.getValues(), form.getReportId());
-        return getInputControlDatas(Collections.singletonList(pojo)).get(0);
+        return getInputControlDatas(Collections.singletonList(pojo), getOrgId()).get(0);
     }
 
     // @Transactional is added to rollback on exception happening while getting values from query
@@ -64,20 +64,24 @@ public class InputControlDto extends AbstractDto {
         InputControlPojo pojo = ConvertUtil.convert(form, InputControlPojo.class);
         pojo.setId(id);
         pojo = flowApi.update(pojo, form.getQuery(), form.getValues());
-        return getInputControlDatas(Collections.singletonList(pojo)).get(0);
+        return getInputControlDatas(Collections.singletonList(pojo), getOrgId()).get(0);
     }
 
     public InputControlData getById(Integer id) throws ApiException {
         InputControlPojo pojo = api.getCheck(id);
-        return getInputControlDatas(Collections.singletonList(pojo)).get(0);
+        return getInputControlDatas(Collections.singletonList(pojo), getOrgId()).get(0);
     }
 
     public List<InputControlData> selectAllGlobal() throws ApiException {
         List<InputControlPojo> pojos = api.getByScope(InputControlScope.GLOBAL);
-        return getInputControlDatas(pojos);
+        return getInputControlDatas(pojos, getOrgId());
     }
 
     public List<InputControlData> selectForReport(Integer reportId) throws ApiException {
+        return selectForReport(reportId, getOrgId());
+    }
+
+    public List<InputControlData> selectForReport(Integer reportId, Integer orgId) throws ApiException {
         List<ReportControlsPojo> reportControlsPojos = reportControlsApi.getByReportId(reportId);
         List<ReportValidationGroupPojo> validationGroupPojoList = reportValidationGroupApi.getByReportId(reportId);
 
@@ -86,19 +90,19 @@ public class InputControlDto extends AbstractDto {
 
         List<InputControlPojo> pojos = api.selectByIds(controlIds);
 
-        List<InputControlData> inputControlDataList = getInputControlDatas(pojos);
+        List<InputControlData> inputControlDataList = getInputControlDatas(pojos, orgId);
         updateValidationTypes(inputControlDataList, validationGroupPojoList, reportControlsPojos);
         return inputControlDataList;
     }
 
-    private List<InputControlData> getInputControlDatas(List<InputControlPojo> pojos) throws ApiException {
+    private List<InputControlData> getInputControlDatas(List<InputControlPojo> pojos, Integer orgId) throws ApiException {
         if (CollectionUtils.isEmpty(pojos))
             return new ArrayList<>();
 
         List<Integer> controlIds = pojos.stream()
                 .map(InputControlPojo::getId).collect(Collectors.toList());
 
-        OrgConnectionPojo orgConnectionPojo = orgConnectionApi.getCheckByOrgId(getOrgId());
+        OrgConnectionPojo orgConnectionPojo = orgConnectionApi.getCheckByOrgId(orgId);
         ConnectionPojo connectionPojo = connectionApi.getCheck(orgConnectionPojo.getConnectionId());
         //We need queries
         List<InputControlQueryPojo> queryPojos = api.selectControlQueries(controlIds);
