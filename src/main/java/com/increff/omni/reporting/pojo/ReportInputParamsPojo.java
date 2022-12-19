@@ -23,5 +23,6 @@ public class ReportInputParamsPojo extends AbstractVersionedPojo {
     @Column(nullable = false)
     private String paramKey;
 
+    @Column(columnDefinition = "LONGTEXT")
     private String paramValue;
 }
