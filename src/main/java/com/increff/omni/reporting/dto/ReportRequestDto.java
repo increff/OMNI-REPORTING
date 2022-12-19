@@ -84,7 +84,7 @@ public class ReportRequestDto extends AbstractDto {
         if(Objects.isNull(reportQueryPojo))
             throw new ApiException(ApiStatus.BAD_DATA, "No query defined for report : " + reportPojo.getName());
         validateCustomReportAccess(reportPojo, orgId);
-        validateInputParamValues(reportPojo, form.getParamMap(), inputParamsMap);
+        validateInputParamValues(reportPojo, form.getParamMap(), inputParamsMap, orgId);
         List<ReportInputParamsPojo> reportInputParamsPojoList =
                 CommonDtoHelper.getReportInputParamsPojoList(inputParamsMap, form.getTimezone(), orgId);
         flow.requestReport(pojo, reportInputParamsPojoList);
@@ -170,7 +170,7 @@ public class ReportRequestDto extends AbstractDto {
     }
 
     private void validateInputParamValues(ReportPojo reportPojo, Map<String, List<String>> inputParams,
-                                          Map<String, String> params) throws ApiException {
+                                          Map<String, String> params, int orgId) throws ApiException {
         List<ReportControlsPojo> reportControlsPojoList = reportControlsApi.getByReportId(reportPojo.getId());
         List<InputControlPojo> inputControlPojoList = controlApi.selectByIds(reportControlsPojoList.stream()
                 .map(ReportControlsPojo::getControlId).collect(Collectors.toList()));
@@ -208,7 +208,7 @@ public class ReportRequestDto extends AbstractDto {
                         break;
                     case SINGLE_SELECT:
                         values = inputParams.get(i.getParamName());
-                        allowedValuesMap = checkValidValues(i);
+                        allowedValuesMap = checkValidValues(i, orgId);
                         if (values.size() > 1)
                             throw new ApiException(ApiStatus.BAD_DATA, "Multiple values not allowed for filter : "
                                     + i.getDisplayName());
@@ -219,7 +219,7 @@ public class ReportRequestDto extends AbstractDto {
                         break;
                     case MULTI_SELECT:
                         values = inputParams.get(i.getParamName());
-                        allowedValuesMap = checkValidValues(i);
+                        allowedValuesMap = checkValidValues(i, orgId);
                         for (String v : values) {
                             if (!allowedValuesMap.containsKey(v))
                                 throw new ApiException(ApiStatus.BAD_DATA, v + " is not allowed for filter : "
@@ -239,7 +239,7 @@ public class ReportRequestDto extends AbstractDto {
         return IOUtils.toByteArray(gcpFileProvider.get(url));
     }
 
-    private Map<String, String> checkValidValues(InputControlPojo p) throws ApiException {
+    private Map<String, String> checkValidValues(InputControlPojo p, int orgId) throws ApiException {
         Map<String, String> valuesMap = new HashMap<>();
         InputControlQueryPojo queryPojo = controlApi.selectControlQuery(p.getId());
         if (Objects.isNull(queryPojo)) {
@@ -249,7 +249,7 @@ public class ReportRequestDto extends AbstractDto {
                 valuesMap.put(pojo.getValue(), pojo.getValue());
             }
         } else {
-            OrgConnectionPojo orgConnectionPojo = orgConnectionApi.getCheckByOrgId(getOrgId());
+            OrgConnectionPojo orgConnectionPojo = orgConnectionApi.getCheckByOrgId(orgId);
             ConnectionPojo connectionPojo = connectionApi.getCheck(orgConnectionPojo.getConnectionId());
             valuesMap = inputControlFlowApi.getValuesFromQuery(queryPojo.getQuery(), connectionPojo);
         }
