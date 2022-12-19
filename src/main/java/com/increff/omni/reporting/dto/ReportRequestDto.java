@@ -84,7 +84,7 @@ public class ReportRequestDto extends AbstractDto {
         if(Objects.isNull(reportQueryPojo))
             throw new ApiException(ApiStatus.BAD_DATA, "No query defined for report : " + reportPojo.getName());
         validateCustomReportAccess(reportPojo, orgId);
-        validateInputParamValues(reportPojo, inputParamsMap);
+        validateInputParamValues(reportPojo, form.getParamMap(), inputParamsMap);
         List<ReportInputParamsPojo> reportInputParamsPojoList =
                 CommonDtoHelper.getReportInputParamsPojoList(inputParamsMap, form.getTimezone(), orgId);
         flow.requestReport(pojo, reportInputParamsPojoList);
@@ -169,7 +169,8 @@ public class ReportRequestDto extends AbstractDto {
         return data;
     }
 
-    private void validateInputParamValues(ReportPojo reportPojo, Map<String, String> params) throws ApiException {
+    private void validateInputParamValues(ReportPojo reportPojo, Map<String, List<String>> inputParams,
+                                          Map<String, String> params) throws ApiException {
         List<ReportControlsPojo> reportControlsPojoList = reportControlsApi.getByReportId(reportPojo.getId());
         List<InputControlPojo> inputControlPojoList = controlApi.selectByIds(reportControlsPojoList.stream()
                 .map(ReportControlsPojo::getControlId).collect(Collectors.toList()));
@@ -181,7 +182,7 @@ public class ReportRequestDto extends AbstractDto {
                     params.put(i.getParamName(), null);
                     continue;
                 }
-                String[] values;
+                List<String> values;
                 Map<String, String> allowedValuesMap;
                 switch (i.getType()) {
                     case TEXT:
@@ -206,25 +207,23 @@ public class ReportRequestDto extends AbstractDto {
                         }
                         break;
                     case SINGLE_SELECT:
-                        values = value.split(",");
+                        values = inputParams.get(i.getParamName());
                         allowedValuesMap = checkValidValues(i);
-                        if (values.length > 1)
+                        if (values.size() > 1)
                             throw new ApiException(ApiStatus.BAD_DATA, "Multiple values not allowed for filter : "
                                     + i.getDisplayName());
-                        String s = getValueFromQuotes(values[0]);
+                        String s = values.get(0);
                         if (!allowedValuesMap.containsKey(s))
-                            throw new ApiException(ApiStatus.BAD_DATA, values[0] + " is not allowed for filter : "
+                            throw new ApiException(ApiStatus.BAD_DATA, values.get(0) + " is not allowed for filter : "
                                     + i.getDisplayName());
                         break;
                     case MULTI_SELECT:
-                        values = value.split(",");
+                        values = inputParams.get(i.getParamName());
                         allowedValuesMap = checkValidValues(i);
                         for (String v : values) {
-                            v = getValueFromQuotes(v);
                             if (!allowedValuesMap.containsKey(v))
                                 throw new ApiException(ApiStatus.BAD_DATA, v + " is not allowed for filter : "
                                         + i.getDisplayName());
-
                         }
                         break;
                     default:
