@@ -212,7 +212,7 @@ public class ReportRequestDto extends AbstractDto {
                         if (values.size() > 1)
                             throw new ApiException(ApiStatus.BAD_DATA, "Multiple values not allowed for filter : "
                                     + i.getDisplayName());
-                        String s = getValueFromQuotes(values.get(0));
+                        String s = values.get(0);
                         if (!allowedValuesMap.containsKey(s))
                             throw new ApiException(ApiStatus.BAD_DATA, values.get(0) + " is not allowed for filter : "
                                     + i.getDisplayName());
@@ -221,11 +221,9 @@ public class ReportRequestDto extends AbstractDto {
                         values = inputParams.get(i.getParamName());
                         allowedValuesMap = checkValidValues(i);
                         for (String v : values) {
-                            v = getValueFromQuotes(v);
                             if (!allowedValuesMap.containsKey(v))
                                 throw new ApiException(ApiStatus.BAD_DATA, v + " is not allowed for filter : "
                                         + i.getDisplayName());
-
                         }
                         break;
                     default:
