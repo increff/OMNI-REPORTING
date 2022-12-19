@@ -265,6 +265,12 @@ public class AdminController {
         reportRequestDto.requestReportForAnyOrg(form, orgId);
     }
 
+    @ApiOperation(value = "Select controls for a report for given organization")
+    @RequestMapping(value = "/orgs/{orgId}/reports/{reportId}/controls", method = RequestMethod.GET)
+    public List<InputControlData> selectByReportId(@PathVariable Integer reportId, @PathVariable Integer orgId) throws ApiException {
+        return inputControlDto.selectForReport(reportId, orgId);
+    }
+
     @ApiOperation(value = "Change Log Level")
     @RequestMapping(value = "/log", method = RequestMethod.PUT)
     public void changeLogLevel(@RequestParam Level level) {
