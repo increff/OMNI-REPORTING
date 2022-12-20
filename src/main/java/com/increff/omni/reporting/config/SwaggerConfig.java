@@ -1,8 +1,6 @@
 package com.increff.omni.reporting.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -35,8 +33,7 @@ import java.util.List;
 public class SwaggerConfig extends WebMvcConfigurerAdapter {
 
     @Autowired
-    @Qualifier("objectMapper")
-    private ObjectMapper mapper;
+    private MappingJackson2HttpMessageConverter converter;
 
     @Bean
     public Docket api() {
@@ -62,16 +59,10 @@ public class SwaggerConfig extends WebMvcConfigurerAdapter {
         return new StandardServletMultipartResolver();
     }
 
-    @Bean
-    public MappingJackson2HttpMessageConverter customJackson2HttpMessageConverter() {
-        MappingJackson2HttpMessageConverter jsonConverter = new MappingJackson2HttpMessageConverter();
-        jsonConverter.setObjectMapper(mapper);
-        return jsonConverter;
-    }
 
     @Override
     public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
-        converters.add(customJackson2HttpMessageConverter());
+        converters.add(converter);
         super.configureMessageConverters(converters);
     }
 

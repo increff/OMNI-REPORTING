@@ -12,6 +12,7 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 import static com.increff.omni.reporting.helper.ConnectionTestHelper.getConnectionForm;
@@ -66,7 +67,8 @@ public class ReportJobTest extends AbstractTest {
     }
 
     @Test
-    public void testRunReport() throws IOException, ApiException {
+    public void testRunReport()
+            throws IOException, ApiException, InvocationTargetException, NoSuchMethodException, IllegalAccessException {
         ReportForm reportForm = commonSetup();
         ReportData reportData = reportDto.add(reportForm);
         ReportQueryForm queryForm = getReportQueryForm("select version();");

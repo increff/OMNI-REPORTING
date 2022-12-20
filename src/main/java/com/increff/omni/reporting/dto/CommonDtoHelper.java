@@ -167,8 +167,8 @@ public class CommonDtoHelper {
         sqlParams.setUsername(connectionPojo.getUsername());
         sqlParams.setPassword(connectionPojo.getPassword());
         // Replacing query param with input control values
-        String fQuery = SqlCmd.getSubstitutedString(reportQueryPojo.getQuery(), inputParamsMap);
-        sqlParams.setQuery(massageQuery(fQuery, maxExecutionTime));
+//        String fQuery = SqlCmd.getSubstitutedString(reportQueryPojo.getQuery(), inputParamsMap);
+//        sqlParams.setQuery(massageQuery(fQuery, maxExecutionTime));
         sqlParams.setOutFile(file);
         sqlParams.setErrFile(errorFile);
         return sqlParams;

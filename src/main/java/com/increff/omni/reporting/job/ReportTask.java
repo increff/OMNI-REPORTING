@@ -3,6 +3,7 @@ package com.increff.omni.reporting.job;
 import com.increff.omni.reporting.api.*;
 import com.increff.omni.reporting.config.ApplicationProperties;
 import com.increff.omni.reporting.dto.CommonDtoHelper;
+import com.increff.omni.reporting.dto.QueryExecutionDto;
 import com.increff.omni.reporting.model.constants.ReportRequestStatus;
 import com.increff.omni.reporting.model.form.SqlParams;
 import com.increff.omni.reporting.pojo.*;
@@ -13,12 +14,17 @@ import com.nextscm.commons.fileclient.FileClientException;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
 import lombok.extern.log4j.Log4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.*;
+
+import static com.increff.omni.reporting.dto.CommonDtoHelper.massageQuery;
 
 @Service
 @Log4j
@@ -42,9 +48,12 @@ public class ReportTask {
     private FileClient fileClient;
     @Autowired
     private ApplicationProperties properties;
+    @Autowired
+    private QueryExecutionDto queryExecutionDto;
 
     @Async("jobExecutor")
-    public void runAsync(ReportRequestPojo pojo) throws ApiException, IOException {
+    public void runAsync(ReportRequestPojo pojo)
+            throws ApiException, IOException {
         // mark as processing - locking
         api.markProcessingIfEligible(pojo.getId());
 
@@ -65,8 +74,40 @@ public class ReportTask {
         File errorFile = folderApi.getErrFile(reportRequestPojo.getId(), ".tsv");
         Map<String, String> inputParamMap = getInputParamMapFromPojoList(reportInputParamsPojoList);
         SqlParams sqlParams = CommonDtoHelper.convert(connectionPojo, reportQueryPojo, inputParamMap, file, errorFile, properties.getMaxExecutionTime());
-        // Execute query and save results
-        saveResultsOnCloud(pojo, sqlParams);
+        try {
+            prepareQuery(sqlParams, inputParamMap, reportQueryPojo.getQuery());
+            // Execute query and save results
+            saveResultsOnCloud(pojo, sqlParams);
+        } catch (Exception e) {
+            log.error("Report ID : " + pojo.getId() + " failed", e);
+            api.updateStatus(pojo.getId(), ReportRequestStatus.FAILED, e.getMessage(), 0, 0.0);
+        }
+    }
+
+    private void prepareQuery(SqlParams sqlParams, Map<String, String> inputParamMap,
+                              String query)
+            throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        String[] matchingFunctions = StringUtils.substringsBetween(query, "{{", "}}");
+        if(Objects.isNull(matchingFunctions)) {
+            sqlParams.setQuery(massageQuery(query, properties.getMaxExecutionTime()));
+            return;
+        }
+        Map<String, String> functionValueMap = new HashMap<>();
+        for(String f : matchingFunctions) {
+            String methodName = f.split("\\(")[0];
+            String paramKey = f.split("\\(")[1].split(",")[0].trim();
+            String columnName = f.split("\\(")[1].split(",")[1].trim();
+            String operator = f.split("\\(")[1].split(",")[2].split("\\)")[0].trim();
+            String paramValue = inputParamMap.get(paramKey);
+            Method method = queryExecutionDto.getClass().getMethod(methodName, String.class,
+                    String.class, String.class);
+            String finalString = (String) method.invoke(queryExecutionDto, columnName, operator, paramValue);
+            functionValueMap.put("{{" + f + "}}", finalString);
+        }
+        for(Map.Entry<String, String> e : functionValueMap.entrySet()) {
+            query = query.replace(e.getKey(), e.getValue());
+        }
+        sqlParams.setQuery(massageQuery(query, properties.getMaxExecutionTime()));
     }
 
     private void saveResultsOnCloud(ReportRequestPojo pojo, SqlParams sqlParams) {
