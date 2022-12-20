@@ -17,14 +17,18 @@ import com.nextscm.commons.spring.audit.dao.DaoProvider;
 import com.nextscm.commons.spring.server.WebMvcConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.*;
+import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 /**
  * TOP-MOST level Spring configuration file, that starts the Spring
@@ -40,7 +44,7 @@ import java.time.format.DateTimeFormatter;
 @ComponentScan({"com.increff.omni.reporting", "com.increff.account.client"})
 @PropertySource(value = "file:omni-reporting.properties")
 @Import({WebMvcConfig.class})
-public class SpringConfig {
+public class SpringConfig extends WebMvcConfigurerAdapter {
 
     @Autowired
     private ApplicationProperties applicationProperties;
@@ -75,6 +79,18 @@ public class SpringConfig {
         jsonConverter.setObjectMapper(getMapper());
         return jsonConverter;
     }
+
+    @Override
+    public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
+        converters.add(customJackson2HttpMessageConverter());
+        super.configureMessageConverters(converters);
+    }
+
+    @Override
+    public void addCorsMappings(CorsRegistry registry) {
+        registry.addMapping("/**").allowedMethods("*");
+    }
+
 
     @Bean
     public AuditDao auditDao() {

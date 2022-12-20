@@ -110,6 +110,9 @@ public class ReportTask {
         sqlParams.setQuery(massageQuery(query, properties.getMaxExecutionTime()));
     }
 
+    // todo NULL check on value while giving quotes
+    //
+
     private void saveResultsOnCloud(ReportRequestPojo pojo, SqlParams sqlParams) {
         try {
             // Process data

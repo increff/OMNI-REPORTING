@@ -30,10 +30,7 @@ import java.util.List;
 @EnableWebMvc
 @EnableSwagger2
 @Profile({"dev","qa"})
-public class SwaggerConfig extends WebMvcConfigurerAdapter {
-
-    @Autowired
-    private MappingJackson2HttpMessageConverter converter;
+public class SwaggerConfig extends WebMvcConfigurerAdapter{
 
     @Bean
     public Docket api() {
@@ -57,18 +54,6 @@ public class SwaggerConfig extends WebMvcConfigurerAdapter {
     @Bean
     public MultipartResolver multipartResolver() {
         return new StandardServletMultipartResolver();
-    }
-
-
-    @Override
-    public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
-        converters.add(converter);
-        super.configureMessageConverters(converters);
-    }
-
-    @Override
-    public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/**").allowedMethods("*");
     }
 
 }
