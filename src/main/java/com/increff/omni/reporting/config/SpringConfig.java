@@ -43,6 +43,10 @@ import java.util.List;
 @EnableAsync
 @ComponentScan({"com.increff.omni.reporting", "com.increff.account.client"})
 @PropertySource(value = "file:omni-reporting.properties")
+@PropertySources({ //
+        @PropertySource(value = "classpath:config.properties"), //
+        @PropertySource(value = "file:omni-reporting.properties")
+})
 @Import({WebMvcConfig.class})
 public class SpringConfig extends WebMvcConfigurerAdapter {
 

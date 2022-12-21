@@ -48,4 +48,7 @@ public class ApplicationProperties {
     @Value("${scheduler.run}")
     private Boolean isRunScheduler;
 
+    @Value("${reporting.version}")
+    private String version;
+
 }
