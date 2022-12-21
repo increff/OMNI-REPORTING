@@ -39,7 +39,7 @@ Thumbs.db
 *.exe
 *.war
 *.json
-*.properties
+omni-reporting.properties
 # Large media files
 *.mp4
 *.tiff
