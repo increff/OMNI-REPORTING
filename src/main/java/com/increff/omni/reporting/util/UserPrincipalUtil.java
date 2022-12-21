@@ -45,18 +45,25 @@ public class UserPrincipalUtil {
         return getStringToStringParamMap(accessControlMap);
     }
 
-    private static Map<String, String> getStringToStringParamMap(Map<String, List<String>> accessControlMap) {
-        if(accessControlMap.isEmpty())
+    private static Map<String, String> getStringToStringParamMap(Map<String, List<String>> params) {
+        if(params.isEmpty())
             return new HashMap<>();
         Map<String, String> finalMap = new HashMap<>();
-        for(Map.Entry<String, List<String>> entry : accessControlMap.entrySet()) {
+        for(Map.Entry<String, List<String>> entry : params.entrySet()) {
             List<String> elements = entry.getValue();
             if(elements.size() == 0) {
                 finalMap.put(entry.getKey(), null);
                 continue;
             }
-            elements = elements.stream().map(s -> "'" + s + "'").collect(Collectors.toList());
-            finalMap.put(entry.getKey(), String.join(",", elements));
+            List<String> fList = new ArrayList<>();
+            for (String s : elements) {
+                if (s.equals("NULL") || s.equals("null")) {
+                    fList.add(s);
+                    continue;
+                }
+                fList.add("'" + s + "'");
+            }
+            finalMap.put(entry.getKey(), String.join(",", fList));
         }
         return finalMap;
     }

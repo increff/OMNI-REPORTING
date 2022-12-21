@@ -67,7 +67,7 @@ public class ReportRequestDto extends AbstractDto {
     private GcpFileProvider gcpFileProvider;
 
     private static final Integer MAX_NUMBER_OF_ROWS = 50;
-
+    private static final Integer MAX_LIST_SIZE = 1000;
     private static final Integer MAX_LIMIT = 50;
 
     public void requestReport(ReportRequestForm form) throws ApiException {
@@ -217,8 +217,21 @@ public class ReportRequestDto extends AbstractDto {
                             throw new ApiException(ApiStatus.BAD_DATA, values.get(0) + " is not allowed for filter : "
                                     + i.getDisplayName());
                         break;
+                    case ACCESS_CONTROLLED_MULTI_SELECT:
+                        values = inputParams.get(i.getParamName());
+                        allowedValuesMap = checkValidValues(i, orgId);
+                        for (String v : values) {
+                            if (!allowedValuesMap.containsKey(v))
+                                throw new ApiException(ApiStatus.BAD_DATA, v + " is not allowed for filter : "
+                                        + i.getDisplayName());
+                        }
+                        break;
                     case MULTI_SELECT:
                         values = inputParams.get(i.getParamName());
+                        if(values.size() > MAX_LIST_SIZE)
+                            throw new ApiException(ApiStatus.BAD_DATA,
+                                    i.getDisplayName() + " can't have more than " + MAX_LIST_SIZE + " values in " +
+                                            "single request");
                         allowedValuesMap = checkValidValues(i, orgId);
                         for (String v : values) {
                             if (!allowedValuesMap.containsKey(v))

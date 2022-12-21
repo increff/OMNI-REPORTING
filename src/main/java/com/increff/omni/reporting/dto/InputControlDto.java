@@ -187,6 +187,7 @@ public class InputControlDto extends AbstractDto {
 
             case SINGLE_SELECT:
             case MULTI_SELECT:
+            case ACCESS_CONTROLLED_MULTI_SELECT:
                 if (values.isEmpty() && StringUtil.isEmpty(query))
                     throw new ApiException(ApiStatus.BAD_DATA, "For Select, either query or value is mandatory");
                 if (!values.isEmpty() && !StringUtil.isEmpty(query))

@@ -237,7 +237,7 @@ public class ReportDtoTest extends AbstractTest {
         ReportForm form = commonSetup("Report 2", ReportType.CUSTOM);
         ReportData data = dto.add(form);
         InputControlForm inputControlForm = getInputControlForm("Client Id", "clientId", InputControlScope.GLOBAL
-                , InputControlType.MULTI_SELECT, Arrays.asList("IGNORE", "SENT"), null, null);
+                , InputControlType.ACCESS_CONTROLLED_MULTI_SELECT, Arrays.asList("IGNORE", "SENT"), null, null);
         InputControlData inputControlData = inputControlDto.add(inputControlForm);
         dto.mapToControl(data.getId(), inputControlData.getId());
         List<ValidationGroupData> validationGroupData = dto.getValidationGroups(data.getId());
