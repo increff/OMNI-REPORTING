@@ -104,6 +104,7 @@ public class ReportTask {
             String finalString = (String) method.invoke(queryExecutionDto, columnName, operator, paramValue);
             functionValueMap.put("{{" + f + "}}", finalString);
         }
+        // todo to check memory leak
         for(Map.Entry<String, String> e : functionValueMap.entrySet()) {
             query = query.replace(e.getKey(), e.getValue());
         }
