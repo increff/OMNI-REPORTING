@@ -32,7 +32,7 @@ public class CommonDtoHelper {
         params.setPassword(pojo.getPassword());
         params.setUsername(pojo.getUsername());
         params.setHost(pojo.getHost());
-        params.setQuery(massageQuery(query, maxExecutionTime));
+        params.setQuery(SqlCmd.massageQuery(query, maxExecutionTime));
         params.setOutFile(file);
         params.setErrFile(errFile);
         return params;

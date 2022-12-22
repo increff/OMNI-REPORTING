@@ -39,4 +39,7 @@ public class ReportRequestPojo extends AbstractVersionedPojo {
     private Double fileSize;
 
     private String url;
+
+    @Column(columnDefinition = "TEXT")
+    private String failureReason;
 }

@@ -4,6 +4,7 @@ import com.increff.omni.reporting.api.*;
 import com.increff.omni.reporting.flow.InputControlFlowApi;
 import com.increff.omni.reporting.flow.ReportRequestFlowApi;
 import com.increff.omni.reporting.model.constants.AuditActions;
+import com.increff.omni.reporting.model.constants.ReportRequestStatus;
 import com.increff.omni.reporting.model.constants.ReportType;
 import com.increff.omni.reporting.model.data.ReportRequestData;
 import com.increff.omni.reporting.model.data.TimeZoneData;
@@ -115,6 +116,8 @@ public class ReportRequestDto extends AbstractDto {
 
     public List<Map<String, String>> getJsonFromCsv(Integer requestId) throws ApiException, IOException {
         ReportRequestPojo requestPojo = reportRequestApi.getCheck(requestId);
+        if(requestPojo.getStatus().equals(ReportRequestStatus.FAILED))
+            throw new ApiException(ApiStatus.BAD_DATA, "Failed report can't be viewed");
         ReportPojo reportPojo = reportApi.getCheck(requestPojo.getReportId());
         validate(requestPojo, requestId, reportPojo, getUserId());
         if(requestPojo.getNoOfRows() >= MAX_NUMBER_OF_ROWS)
@@ -166,6 +169,7 @@ public class ReportRequestDto extends AbstractDto {
         data.setOrgName(organizationPojo.getName());
         data.setFileSize(pojo.getFileSize());
         data.setNoOfRows(pojo.getNoOfRows());
+        data.setFailureReason(pojo.getFailureReason());
         return data;
     }
 

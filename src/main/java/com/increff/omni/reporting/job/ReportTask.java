@@ -18,7 +18,9 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
+import java.nio.file.Files;
 import java.util.*;
+
 
 @Service
 @Log4j
@@ -54,7 +56,7 @@ public class ReportTask {
                 .getInputParamsForReportRequest(reportRequestPojo.getId());
         ReportPojo reportPojo = reportApi.getCheck(reportRequestPojo.getReportId());
         ReportQueryPojo reportQueryPojo = reportQueryApi.getByReportId(reportPojo.getId());
-        if(Objects.isNull(reportQueryPojo))
+        if (Objects.isNull(reportQueryPojo))
             throw new ApiException(ApiStatus.BAD_DATA, "Query is not defined for requested report : "
                     + reportPojo.getName());
         OrgConnectionPojo orgConnectionPojo = orgConnectionApi.getCheckByOrgId(reportRequestPojo.getOrgId());
@@ -64,7 +66,18 @@ public class ReportTask {
         File file = folderApi.getFileForExtension(reportRequestPojo.getId(), ".tsv");
         File errorFile = folderApi.getErrFile(reportRequestPojo.getId(), ".tsv");
         Map<String, String> inputParamMap = getInputParamMapFromPojoList(reportInputParamsPojoList);
-        SqlParams sqlParams = CommonDtoHelper.convert(connectionPojo, reportQueryPojo, inputParamMap, file, errorFile, properties.getMaxExecutionTime());
+        SqlParams sqlParams = CommonDtoHelper.convert(connectionPojo, reportQueryPojo, inputParamMap, file, errorFile,
+                properties.getMaxExecutionTime());
+        try {
+            String fQuery = SqlCmd.prepareQuery(inputParamMap, reportQueryPojo.getQuery(),
+                    properties.getMaxExecutionTime());
+            sqlParams.setQuery(fQuery);
+        } catch (Exception e) {
+            log.error("Report ID : " + pojo.getId() + " failed", e);
+            api.markFailed(pojo.getId(), ReportRequestStatus.FAILED,
+                    "Error while processing query : " + e.getMessage(), 0, 0.0);
+            return;
+        }
         // Execute query and save results
         saveResultsOnCloud(pojo, sqlParams);
     }
@@ -72,13 +85,13 @@ public class ReportTask {
     private void saveResultsOnCloud(ReportRequestPojo pojo, SqlParams sqlParams) {
         try {
             // Process data
-            SqlCmd.processQuery(sqlParams, false);
+            SqlCmd.processQuery(sqlParams, false, properties.getMaxExecutionTime());
             String name = sqlParams.getOutFile().getName().split(".tsv")[0] + ".csv";
             File csvFile = folderApi.getFile(name);
             Integer noOfRows = FileUtil.getCsvFromTsv(sqlParams.getOutFile(), csvFile);
 
             // upload result to cloud
-            String filePath = uploadFile(csvFile, "SUCCESS_REPORTS", pojo);
+            String filePath = uploadFile(csvFile, pojo);
             // update status to completed
             Double fileSize = FileUtil.getSizeInMb(csvFile.length());
             api.updateStatus(pojo.getId(), ReportRequestStatus.COMPLETED, filePath, noOfRows, fileSize);
@@ -87,13 +100,8 @@ public class ReportTask {
             // log as error and mark fail
             log.error("Report ID : " + pojo.getId() + " failed", e);
             try {
-                String name = sqlParams.getErrFile().getName().split(".tsv")[0] + ".csv";
-                File csvFile = folderApi.getFile(name);
-                Integer noOfRows = FileUtil.getCsvFromTsv(sqlParams.getErrFile(), csvFile);
-                String filePath = uploadFile(csvFile, "ERROR_REPORTS", pojo);
-                Double fileSize = FileUtil.getSizeInMb(csvFile.length());
-                api.updateStatus(pojo.getId(), ReportRequestStatus.FAILED, filePath, noOfRows, fileSize);
-                FileUtil.delete(csvFile);
+                String message = String.join("\t", Files.readAllLines(sqlParams.getErrFile().toPath()));
+                api.markFailed(pojo.getId(), ReportRequestStatus.FAILED, message, 0, 0.0);
             } catch (Exception ex) {
                 log.error("Error while updating the status of failed request", ex);
             }
@@ -109,9 +117,9 @@ public class ReportTask {
             log.debug("File deletion failed, name : " + errFile.getName());
     }
 
-    private String uploadFile(File file, String folder, ReportRequestPojo pojo) throws FileNotFoundException, ApiException {
+    private String uploadFile(File file, ReportRequestPojo pojo) throws FileNotFoundException, ApiException {
         InputStream inputStream = new FileInputStream(file);
-        String filePath = pojo.getOrgId() + "/" + folder + "/" + pojo.getId() + "_" + UUID.randomUUID() + ".csv";
+        String filePath = pojo.getOrgId() + "/" + "REPORTS" + "/" + pojo.getId() + "_" + UUID.randomUUID() + ".csv";
         try {
             fileClient.create(filePath, inputStream);
         } catch (FileClientException e) {

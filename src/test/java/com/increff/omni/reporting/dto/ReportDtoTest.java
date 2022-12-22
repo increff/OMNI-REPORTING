@@ -7,7 +7,6 @@ import com.increff.omni.reporting.model.constants.ReportType;
 import com.increff.omni.reporting.model.constants.ValidationType;
 import com.increff.omni.reporting.model.data.*;
 import com.increff.omni.reporting.model.form.*;
-import com.increff.omni.reporting.pojo.ReportPojo;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
 import org.junit.Test;
@@ -67,7 +66,8 @@ public class ReportDtoTest extends AbstractTest {
     public void testUpdate() throws ApiException {
         ReportForm form = commonSetup("Report 2", ReportType.CUSTOM);
         ReportData data = dto.add(form);
-        ReportForm updateForm = getReportForm("Report 3", ReportType.CUSTOM, form.getDirectoryId(), form.getSchemaVersionId());
+        ReportForm updateForm =
+                getReportForm("Report 3", ReportType.CUSTOM, form.getDirectoryId(), form.getSchemaVersionId());
         dto.edit(data.getId(), updateForm);
         ReportData fData = dto.get(data.getId());
         assertNotNull(fData);
@@ -103,7 +103,8 @@ public class ReportDtoTest extends AbstractTest {
     public void testTransformedQuery() {
         ReportQueryTestForm testForm = getQueryTestForm();
         ReportQueryData queryData = dto.getTransformedQuery(testForm);
-        assertEquals("select * from table where id = '1';", queryData.getQuery());
+        assertEquals("SET SESSION MAX_EXECUTION_TIME=300000;\n" +
+                "select * from table where id = '1';", queryData.getQuery());
     }
 
     @Test
@@ -111,7 +112,26 @@ public class ReportDtoTest extends AbstractTest {
         ReportQueryTestForm testForm = getQueryTestForm();
         testForm.setParamMap(new HashMap<>());
         ReportQueryData queryData = dto.getTransformedQuery(testForm);
-        assertEquals("select * from table where id = id;", queryData.getQuery());
+        assertEquals("SET SESSION MAX_EXECUTION_TIME=300000;\n" +
+                "select * from table where id = {{replace(id)}};", queryData.getQuery());
+    }
+
+    @Test
+    public void testTransformedQueryWithWrongParamCase2() {
+        ReportQueryTestForm testForm = getQueryTestForm();
+        testForm.setParamMap(new HashMap<>());
+        ReportQueryData queryData = dto.getTransformedQuery(testForm);
+        assertEquals("SET SESSION MAX_EXECUTION_TIME=300000;\n" +
+                        "select * from table where id = {{replace(id)}};", queryData.getQuery());
+    }
+
+    @Test
+    public void testTransformedQueryCase2() {
+        ReportQueryTestForm testForm = getQueryTestForm();
+        testForm.setQuery("select * from table where {{filter(id,id,<=)}};");
+        ReportQueryData queryData = dto.getTransformedQuery(testForm);
+        assertEquals("SET SESSION MAX_EXECUTION_TIME=300000;\n" +
+                "select * from table where id <= '1';", queryData.getQuery());
     }
 
     @Test
