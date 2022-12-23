@@ -33,6 +33,9 @@ public class QueryExecutionDto extends AbstractDto {
             case EQS:
                 s.append(columnName).append(" ").append(QueryOperator.EQS.getValue()).append(" ").append(paramValue);
                 break;
+            case NE:
+                s.append(columnName).append(" ").append(QueryOperator.NE.getValue()).append(" ").append(paramValue);
+                break;
             case INS:
                 s.append(columnName).append(" ").append(QueryOperator.INS.getValue()).append(" (").append(paramValue).append(")");
                 break;

@@ -4,7 +4,7 @@ import lombok.Getter;
 
 @Getter
 public enum QueryOperator {
-    LT("<"), GT(">"), LE("<="), GE(">="), EQS("="), INS("in");
+    LT("<"), GT(">"), LE("<="), GE(">="), NE("!="), EQS("="), INS("in");
 
     private String value;
 
