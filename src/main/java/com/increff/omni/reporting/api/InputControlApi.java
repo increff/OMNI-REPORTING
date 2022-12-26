@@ -140,7 +140,8 @@ public class InputControlApi extends AbstractApi {
                 !pojo.getType().equals(InputControlType.ACCESS_CONTROLLED_MULTI_SELECT)) {
             throw new ApiException(ApiStatus.BAD_DATA, "Access controlled multi select can't be updated to any other " +
                     "type");
-        } else if(pojo.getType().equals(InputControlType.ACCESS_CONTROLLED_MULTI_SELECT)) {
+        } else if(pojo.getType().equals(InputControlType.ACCESS_CONTROLLED_MULTI_SELECT) &&
+                !ex.getType().equals(InputControlType.ACCESS_CONTROLLED_MULTI_SELECT)) {
             throw new ApiException(ApiStatus.BAD_DATA, "No other control can be migrated to access controlled multi " +
                     "select");
         }
