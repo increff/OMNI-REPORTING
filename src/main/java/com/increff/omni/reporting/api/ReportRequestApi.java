@@ -72,4 +72,14 @@ public class ReportRequestApi extends AbstractApi {
     public List<ReportRequestPojo> getByUserId(int userId, Integer limit) {
         return dao.selectByUserId(userId, limit);
     }
+
+    public void markFailed(Integer id, ReportRequestStatus status, String message, int noOfRows, double fileSize)
+            throws ApiException {
+        ReportRequestPojo reportRequestPojo = getCheck(id);
+        reportRequestPojo.setStatus(status);
+        reportRequestPojo.setFailureReason(message);
+        reportRequestPojo.setFileSize(fileSize);
+        reportRequestPojo.setNoOfRows(noOfRows);
+        dao.update(reportRequestPojo);
+    }
 }

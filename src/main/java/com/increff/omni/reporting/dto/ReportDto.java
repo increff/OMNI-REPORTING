@@ -1,6 +1,7 @@
 package com.increff.omni.reporting.dto;
 
 import com.increff.omni.reporting.api.*;
+import com.increff.omni.reporting.config.ApplicationProperties;
 import com.increff.omni.reporting.flow.ReportFlowApi;
 import com.increff.omni.reporting.flow.ReportRequestFlowApi;
 import com.increff.omni.reporting.model.constants.AuditActions;
@@ -45,6 +46,8 @@ public class ReportDto extends AbstractDto {
     private SchemaVersionApi schemaVersionApi;
     @Autowired
     private DirectoryApi directoryApi;
+    @Autowired
+    private ApplicationProperties properties;
 
     public ReportData add(ReportForm form) throws ApiException {
         checkValid(form);
@@ -90,7 +93,7 @@ public class ReportDto extends AbstractDto {
         Map<String, String> paramsMap = UserPrincipalUtil.getCompleteMapWithAccessControl(form.getParamMap());
         paramsMap.put("timezone", "'" + form.getTimezone() + "'");
         ReportQueryData data = new ReportQueryData();
-        data.setQuery(SqlCmd.getSubstitutedString(form.getQuery(), paramsMap));
+        data.setQuery(SqlCmd.prepareQuery(paramsMap, form.getQuery(), properties.getMaxExecutionTime()));
         return data;
     }
 

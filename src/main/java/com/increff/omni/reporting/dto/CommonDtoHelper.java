@@ -32,7 +32,7 @@ public class CommonDtoHelper {
         params.setPassword(pojo.getPassword());
         params.setUsername(pojo.getUsername());
         params.setHost(pojo.getHost());
-        params.setQuery(massageQuery(query, maxExecutionTime));
+        params.setQuery(SqlCmd.massageQuery(query, maxExecutionTime));
         params.setOutFile(file);
         params.setErrFile(errFile);
         return params;
@@ -167,8 +167,8 @@ public class CommonDtoHelper {
         sqlParams.setUsername(connectionPojo.getUsername());
         sqlParams.setPassword(connectionPojo.getPassword());
         // Replacing query param with input control values
-        String fQuery = SqlCmd.getSubstitutedString(reportQueryPojo.getQuery(), inputParamsMap);
-        sqlParams.setQuery(massageQuery(fQuery, maxExecutionTime));
+//        String fQuery = SqlCmd.getSubstitutedString(reportQueryPojo.getQuery(), inputParamsMap);
+//        sqlParams.setQuery(massageQuery(fQuery, maxExecutionTime));
         sqlParams.setOutFile(file);
         sqlParams.setErrFile(errorFile);
         return sqlParams;

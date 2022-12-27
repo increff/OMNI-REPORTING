@@ -98,4 +98,10 @@ public class StandardController {
         return reportRequestDto.getJsonFromCsv(requestId);
     }
 
+    @ApiOperation(value = "Get Application Version")
+    @RequestMapping(value = "/version", method = RequestMethod.GET)
+    public String getVersion() {
+        return properties.getVersion();
+    }
+
 }

@@ -4,6 +4,7 @@ import com.increff.omni.reporting.dao.InputControlDao;
 import com.increff.omni.reporting.dao.InputControlQueryDao;
 import com.increff.omni.reporting.dao.InputControlValuesDao;
 import com.increff.omni.reporting.model.constants.InputControlScope;
+import com.increff.omni.reporting.model.constants.InputControlType;
 import com.increff.omni.reporting.pojo.InputControlPojo;
 import com.increff.omni.reporting.pojo.InputControlQueryPojo;
 import com.increff.omni.reporting.pojo.InputControlValuesPojo;
@@ -45,6 +46,7 @@ public class InputControlApi extends AbstractApi {
                                    List<InputControlValuesPojo> valuesList) throws ApiException {
         InputControlPojo ex = getCheck(pojo.getId());
         validateControlAdditionForEdit(pojo);
+        validateTypeTransition(ex, pojo);
         copyToExisting(ex, pojo);
         dao.update(ex);
         InputControlQueryPojo exQuery = selectControlQuery(pojo.getId());
@@ -131,6 +133,18 @@ public class InputControlApi extends AbstractApi {
 
         if ((existingByName != null && !existingByName.getId().equals(pojo.getId())) || (existingByParam != null && !existingByParam.getId().equals(pojo.getId())))
             throw new ApiException(ApiStatus.BAD_DATA, "Cannot create input control with same" + " display name or param name");
+    }
+
+    private void validateTypeTransition(InputControlPojo ex, InputControlPojo pojo) throws ApiException {
+        if(ex.getType().equals(InputControlType.ACCESS_CONTROLLED_MULTI_SELECT) &&
+                !pojo.getType().equals(InputControlType.ACCESS_CONTROLLED_MULTI_SELECT)) {
+            throw new ApiException(ApiStatus.BAD_DATA, "Access controlled multi select can't be updated to any other " +
+                    "type");
+        } else if(pojo.getType().equals(InputControlType.ACCESS_CONTROLLED_MULTI_SELECT) &&
+                !ex.getType().equals(InputControlType.ACCESS_CONTROLLED_MULTI_SELECT)) {
+            throw new ApiException(ApiStatus.BAD_DATA, "No other control can be migrated to access controlled multi " +
+                    "select");
+        }
     }
 
     private void copyToExisting(InputControlPojo ex, InputControlPojo pojo) {

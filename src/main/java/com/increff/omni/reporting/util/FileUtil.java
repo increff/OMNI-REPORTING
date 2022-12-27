@@ -49,6 +49,7 @@ public class FileUtil {
             ListIterator<String> it = values.listIterator();
             while (it.hasNext()) {
                 String v = it.next();
+                v = v.replace("\"", "'");
                 if(v.contains(","))
                     it.set("\"" + v + "\"");
             }
@@ -66,7 +67,7 @@ public class FileUtil {
     public static void createFileResponse(File file, HttpServletResponse response) throws IOException {
         response.setContentType("application/octet-stream");
         response.setHeader("Content-Disposition", "attachment; filename=" + file.getName());
-
+        response.setHeader("Content-length", String.valueOf(file.length()));
         OutputStream outputStream = null;
         try {
             outputStream = response.getOutputStream();

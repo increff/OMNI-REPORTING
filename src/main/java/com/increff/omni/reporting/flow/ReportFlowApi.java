@@ -197,7 +197,7 @@ public class ReportFlowApi extends AbstractAuditApi {
 
     public void checkAndAddValidationGroup(ReportControlsPojo pojo) throws ApiException {
         InputControlPojo inputControlPojo = inputControlApi.getCheck(pojo.getControlId());
-        if (Arrays.asList(InputControlType.MULTI_SELECT, InputControlType.SINGLE_SELECT)
+        if (Arrays.asList(InputControlType.ACCESS_CONTROLLED_MULTI_SELECT, InputControlType.SINGLE_SELECT)
                 .contains(inputControlPojo.getType())) {
             ReportValidationGroupPojo validationGroupPojo = new ReportValidationGroupPojo();
             validationGroupPojo.setGroupName(inputControlPojo.getDisplayName() + " " +

@@ -71,7 +71,7 @@ public class ConnectionDto extends AbstractDto {
             errFile = folderApi.getFile("test-db-err.txt");
             ConnectionPojo pojo = ConvertUtil.convert(form, ConnectionPojo.class);
             SqlParams sqlp = CommonDtoHelper.getSqlParams(pojo, "select version();", file, errFile, properties.getMaxExecutionTime());
-            SqlCmd.processQuery(sqlp);
+            SqlCmd.processQuery(sqlp, properties.getMaxExecutionTime());
             result = FileUtils.readFileToString(file, "utf-8");
             log.debug("Test File created");
         } catch (IOException | ApiException e) {

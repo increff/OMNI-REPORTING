@@ -14,6 +14,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -39,7 +40,8 @@ public class ReportJob {
     private Executor executor;
 
     @Scheduled(fixedDelay = 1000)
-    public void runReports() throws IOException, ApiException {
+    public void runReports()
+            throws IOException, ApiException, InvocationTargetException, NoSuchMethodException, IllegalAccessException {
         if(!properties.getIsRunScheduler())
             return;
         // Get all the tasks pending for execution + Tasks that got stuck in processing
