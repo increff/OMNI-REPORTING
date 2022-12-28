@@ -79,7 +79,7 @@ public class StandardController {
 
     @ApiOperation(value = "Get All Request data")
     @RequestMapping(value = "/request-report", method = RequestMethod.GET)
-    public List<ReportRequestData> getAll() throws ApiException, IOException {
+    public List<ReportRequestData> getAllRequests() throws ApiException, IOException {
         return reportRequestDto.getAll();
     }
 
