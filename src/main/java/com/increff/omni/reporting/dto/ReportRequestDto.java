@@ -281,6 +281,8 @@ public class ReportRequestDto extends AbstractDto {
     }
 
     private String getValueFromQuotes(String value) {
+        if(value.isEmpty())
+            return "";
         return value.substring(1, value.length()-1);
     }
 
