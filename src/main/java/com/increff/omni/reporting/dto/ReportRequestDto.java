@@ -307,7 +307,9 @@ public class ReportRequestDto extends AbstractDto {
                 d.setType(controlPojo.get().getType());
                 d.setParamName(controlPojo.get().getParamName());
                 d.setDisplayName(controlPojo.get().getDisplayName());
-                List<String> values = Arrays.stream(reportInputParamsPojo.getParamValue().split(","))
+                List<String> values = Objects.isNull(reportInputParamsPojo.getParamValue()) ? new ArrayList<>() :
+                        Arrays.stream(reportInputParamsPojo.getParamValue().split(
+                        ","))
                         .map(this::getValueFromQuotes).collect(Collectors.toList());
                 d.setValues(values);
                 filterData.add(d);
