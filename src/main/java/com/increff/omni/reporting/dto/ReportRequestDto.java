@@ -6,6 +6,8 @@ import com.increff.omni.reporting.flow.ReportRequestFlowApi;
 import com.increff.omni.reporting.model.constants.AuditActions;
 import com.increff.omni.reporting.model.constants.ReportRequestStatus;
 import com.increff.omni.reporting.model.constants.ReportType;
+import com.increff.omni.reporting.model.constants.ResourceQueryParamKeys;
+import com.increff.omni.reporting.model.data.InputControlFilterData;
 import com.increff.omni.reporting.model.data.ReportRequestData;
 import com.increff.omni.reporting.model.data.TimeZoneData;
 import com.increff.omni.reporting.model.form.ReportRequestForm;
@@ -33,8 +35,7 @@ import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.increff.omni.reporting.dto.CommonDtoHelper.convertToTimeZoneData;
-import static com.increff.omni.reporting.dto.CommonDtoHelper.validate;
+import static com.increff.omni.reporting.dto.CommonDtoHelper.*;
 
 @Service
 @Log4j
@@ -66,10 +67,14 @@ public class ReportRequestDto extends AbstractDto {
     private OrganizationApi organizationApi;
     @Autowired
     private GcpFileProvider gcpFileProvider;
+    @Autowired
+    private ReportInputParamsApi reportInputParamsApi;
 
     private static final Integer MAX_NUMBER_OF_ROWS = 50;
     private static final Integer MAX_LIST_SIZE = 1000;
     private static final Integer MAX_LIMIT = 50;
+    private static final List<String> accessControlledKeys = Arrays.asList(ResourceQueryParamKeys.clientQueryParam,
+            ResourceQueryParamKeys.fulfillmentLocationQueryParamKey);
 
     public void requestReport(ReportRequestForm form) throws ApiException {
         requestReportForAnyOrg(form, getOrgId());
@@ -158,6 +163,8 @@ public class ReportRequestDto extends AbstractDto {
     }
 
     private ReportRequestData getReportRequestData(ReportRequestPojo pojo, ReportPojo reportPojo) throws ApiException {
+        List<ReportInputParamsPojo> paramsPojoList = reportInputParamsApi.getInputParamsForReportRequest(pojo.getId());
+        OrganizationPojo organizationPojo = organizationApi.getCheck(pojo.getOrgId());
         ReportRequestData data = new ReportRequestData();
         data.setRequestCreationTime(pojo.getCreatedAt());
         data.setRequestUpdatedTime(pojo.getUpdatedAt());
@@ -165,11 +172,11 @@ public class ReportRequestDto extends AbstractDto {
         data.setRequestId(pojo.getId());
         data.setReportId(reportPojo.getId());
         data.setReportName(reportPojo.getName());
-        OrganizationPojo organizationPojo = organizationApi.getCheck(pojo.getOrgId());
         data.setOrgName(organizationPojo.getName());
         data.setFileSize(pojo.getFileSize());
         data.setNoOfRows(pojo.getNoOfRows());
         data.setFailureReason(pojo.getFailureReason());
+        setFiltersApplied(paramsPojoList, pojo, data);
         return data;
     }
 
@@ -277,4 +284,37 @@ public class ReportRequestDto extends AbstractDto {
         return value.substring(1, value.length()-1);
     }
 
+    private void setFiltersApplied(List<ReportInputParamsPojo> paramsPojoList,
+                                                           ReportRequestPojo pojo,
+                                                           ReportRequestData data) {
+        List<ReportControlsPojo> reportControlsPojos = reportControlsApi.getByReportId(pojo.getReportId());
+        List<Integer> controlIds = reportControlsPojos.stream()
+                .map(ReportControlsPojo::getControlId).collect(Collectors.toList());
+        List<InputControlPojo> controlPojos = controlApi.selectByIds(controlIds);
+        List<InputControlFilterData> filterData = new ArrayList<>();
+        for(ReportInputParamsPojo reportInputParamsPojo : paramsPojoList) {
+            if(accessControlledKeys.contains(reportInputParamsPojo.getParamKey())
+                    || reportInputParamsPojo.getParamKey().equals("orgId"))
+                continue;
+            if(reportInputParamsPojo.getParamKey().equals("timezone")) {
+                data.setTimezone(getValueFromQuotes(reportInputParamsPojo.getParamValue()));
+                continue;
+            }
+            Optional<InputControlPojo> controlPojo =
+                    controlPojos.stream().filter(c -> c.getParamName().equals(reportInputParamsPojo.getParamKey())).findFirst();
+            if(controlPojo.isPresent()) {
+                InputControlFilterData d = new InputControlFilterData();
+                d.setType(controlPojo.get().getType());
+                d.setParamName(controlPojo.get().getParamName());
+                d.setDisplayName(controlPojo.get().getDisplayName());
+                List<String> values = Objects.isNull(reportInputParamsPojo.getParamValue()) ? new ArrayList<>() :
+                        Arrays.stream(reportInputParamsPojo.getParamValue().split(
+                        ","))
+                        .map(this::getValueFromQuotes).collect(Collectors.toList());
+                d.setValues(values);
+                filterData.add(d);
+            }
+        }
+        data.setFilters(filterData);
+    }
 }

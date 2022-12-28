@@ -2,10 +2,7 @@ package com.increff.omni.reporting.dto;
 
 import com.increff.omni.reporting.model.constants.ReportRequestStatus;
 import com.increff.omni.reporting.model.constants.ValidationType;
-import com.increff.omni.reporting.model.data.InputControlData;
-import com.increff.omni.reporting.model.data.OrgConnectionData;
-import com.increff.omni.reporting.model.data.OrgSchemaData;
-import com.increff.omni.reporting.model.data.TimeZoneData;
+import com.increff.omni.reporting.model.data.*;
 import com.increff.omni.reporting.model.form.ReportRequestForm;
 import com.increff.omni.reporting.model.form.SqlParams;
 import com.increff.omni.reporting.pojo.*;
