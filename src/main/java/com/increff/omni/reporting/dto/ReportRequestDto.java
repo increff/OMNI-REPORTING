@@ -23,6 +23,7 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -35,7 +36,8 @@ import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.increff.omni.reporting.dto.CommonDtoHelper.*;
+import static com.increff.omni.reporting.dto.CommonDtoHelper.convertToTimeZoneData;
+import static com.increff.omni.reporting.dto.CommonDtoHelper.validate;
 
 @Service
 @Log4j
@@ -87,7 +89,7 @@ public class ReportRequestDto extends AbstractDto {
         ReportRequestPojo pojo = CommonDtoHelper.getReportRequestPojo(form, orgId, getUserId());
         ReportPojo reportPojo = reportApi.getCheck(pojo.getReportId());
         ReportQueryPojo reportQueryPojo = queryApi.getByReportId(reportPojo.getId());
-        if(Objects.isNull(reportQueryPojo))
+        if (Objects.isNull(reportQueryPojo))
             throw new ApiException(ApiStatus.BAD_DATA, "No query defined for report : " + reportPojo.getName());
         validateCustomReportAccess(reportPojo, orgId);
         validateInputParamValues(reportPojo, form.getParamMap(), inputParamsMap, orgId);
@@ -121,11 +123,11 @@ public class ReportRequestDto extends AbstractDto {
 
     public List<Map<String, String>> getJsonFromCsv(Integer requestId) throws ApiException, IOException {
         ReportRequestPojo requestPojo = reportRequestApi.getCheck(requestId);
-        if(requestPojo.getStatus().equals(ReportRequestStatus.FAILED))
+        if (requestPojo.getStatus().equals(ReportRequestStatus.FAILED))
             throw new ApiException(ApiStatus.BAD_DATA, "Failed report can't be viewed");
         ReportPojo reportPojo = reportApi.getCheck(requestPojo.getReportId());
         validate(requestPojo, requestId, reportPojo, getUserId());
-        if(requestPojo.getNoOfRows() >= MAX_NUMBER_OF_ROWS)
+        if (requestPojo.getNoOfRows() >= MAX_NUMBER_OF_ROWS)
             throw new ApiException(ApiStatus.BAD_DATA, "Data contains more than 50 rows. View option is restricted");
         List<Map<String, String>> data = new ArrayList<>();
         String reportName = requestId + "_" + UUID.randomUUID();
@@ -133,7 +135,8 @@ public class ReportRequestDto extends AbstractDto {
         byte[] bytes = getFileFromUrl(requestPojo.getUrl());
         FileUtils.writeByteArrayToFile(sourceFile, bytes);
         Reader in = new FileReader(sourceFile);
-        Iterable<CSVRecord> records = CSVFormat.DEFAULT.builder().setHeader().setSkipHeaderRecord(true).build().parse(in);
+        Iterable<CSVRecord> records =
+                CSVFormat.DEFAULT.builder().setHeader().setSkipHeaderRecord(true).build().parse(in);
         for (CSVRecord record : records) {
             Map<String, String> value = record.toMap();
             data.add(value);
@@ -156,9 +159,11 @@ public class ReportRequestDto extends AbstractDto {
     private void validateCustomReportAccess(ReportPojo reportPojo, Integer orgId) throws ApiException {
         if (reportPojo.getType().equals(ReportType.STANDARD))
             return;
-        CustomReportAccessPojo customReportAccessPojo = customReportAccessApi.getByReportAndOrg(reportPojo.getId(), orgId);
+        CustomReportAccessPojo customReportAccessPojo =
+                customReportAccessApi.getByReportAndOrg(reportPojo.getId(), orgId);
         if (Objects.isNull(customReportAccessPojo)) {
-            throw new ApiException(ApiStatus.BAD_DATA, "Organization does not have access to view this report : " + reportPojo.getName());
+            throw new ApiException(ApiStatus.BAD_DATA,
+                    "Organization does not have access to view this report : " + reportPojo.getName());
         }
     }
 
@@ -214,7 +219,8 @@ public class ReportRequestDto extends AbstractDto {
                             value = getValueFromQuotes(value);
                             ZonedDateTime.parse(value);
                         } catch (Exception e) {
-                            throw new ApiException(ApiStatus.BAD_DATA, value + " is not in valid date format for filter : " + i.getDisplayName());
+                            throw new ApiException(ApiStatus.BAD_DATA,
+                                    value + " is not in valid date format for filter : " + i.getDisplayName());
                         }
                         break;
                     case SINGLE_SELECT:
@@ -239,7 +245,7 @@ public class ReportRequestDto extends AbstractDto {
                         break;
                     case MULTI_SELECT:
                         values = inputParams.get(i.getParamName());
-                        if(values.size() > MAX_LIST_SIZE)
+                        if (values.size() > MAX_LIST_SIZE)
                             throw new ApiException(ApiStatus.BAD_DATA,
                                     i.getDisplayName() + " can't have more than " + MAX_LIST_SIZE + " values in " +
                                             "single request");
@@ -281,36 +287,41 @@ public class ReportRequestDto extends AbstractDto {
     }
 
     private String getValueFromQuotes(String value) {
-        return value.substring(1, value.length()-1);
+        try {
+            return value.substring(1, value.length() - 1);
+        } catch (Exception e) {
+            return "";
+        }
     }
 
     private void setFiltersApplied(List<ReportInputParamsPojo> paramsPojoList,
-                                                           ReportRequestPojo pojo,
-                                                           ReportRequestData data) {
+                                   ReportRequestPojo pojo,
+                                   ReportRequestData data) {
         List<ReportControlsPojo> reportControlsPojos = reportControlsApi.getByReportId(pojo.getReportId());
         List<Integer> controlIds = reportControlsPojos.stream()
                 .map(ReportControlsPojo::getControlId).collect(Collectors.toList());
         List<InputControlPojo> controlPojos = controlApi.selectByIds(controlIds);
         List<InputControlFilterData> filterData = new ArrayList<>();
-        for(ReportInputParamsPojo reportInputParamsPojo : paramsPojoList) {
-            if(accessControlledKeys.contains(reportInputParamsPojo.getParamKey())
+        for (ReportInputParamsPojo reportInputParamsPojo : paramsPojoList) {
+            if (accessControlledKeys.contains(reportInputParamsPojo.getParamKey())
                     || reportInputParamsPojo.getParamKey().equals("orgId"))
                 continue;
-            if(reportInputParamsPojo.getParamKey().equals("timezone")) {
+            if (reportInputParamsPojo.getParamKey().equals("timezone")) {
                 data.setTimezone(getValueFromQuotes(reportInputParamsPojo.getParamValue()));
                 continue;
             }
             Optional<InputControlPojo> controlPojo =
-                    controlPojos.stream().filter(c -> c.getParamName().equals(reportInputParamsPojo.getParamKey())).findFirst();
-            if(controlPojo.isPresent()) {
+                    controlPojos.stream().filter(c -> c.getParamName().equals(reportInputParamsPojo.getParamKey()))
+                            .findFirst();
+            if (controlPojo.isPresent()) {
                 InputControlFilterData d = new InputControlFilterData();
                 d.setType(controlPojo.get().getType());
                 d.setParamName(controlPojo.get().getParamName());
                 d.setDisplayName(controlPojo.get().getDisplayName());
                 List<String> values = Objects.isNull(reportInputParamsPojo.getParamValue()) ? new ArrayList<>() :
                         Arrays.stream(reportInputParamsPojo.getParamValue().split(
-                        ","))
-                        .map(this::getValueFromQuotes).collect(Collectors.toList());
+                                        ","))
+                                .map(this::getValueFromQuotes).collect(Collectors.toList());
                 d.setValues(values);
                 filterData.add(d);
             }
