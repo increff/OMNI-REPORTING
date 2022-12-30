@@ -19,8 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.increff.omni.reporting.dto.CommonDtoHelper.getReportPojoFromExistingPojo;
-import static com.increff.omni.reporting.dto.CommonDtoHelper.getValidationGroupPojoFromExistingPojo;
+import static com.increff.omni.reporting.dto.CommonDtoHelper.*;
 
 @Service
 @Transactional(rollbackFor = ApiException.class)
@@ -144,6 +143,9 @@ public class ReportFlowApi extends AbstractAuditApi {
     public void copyReports(Integer oldSchemaVersionId, Integer newSchemaVersionId) throws ApiException {
         schemaVersionApi.getCheck(oldSchemaVersionId);
         schemaVersionApi.getCheck(newSchemaVersionId);
+        // Migrate Input controls
+        Map<Integer, Integer> oldToNewControlIds = migrateInputControls(oldSchemaVersionId, newSchemaVersionId);
+        // Migrate Reports
         List<ReportPojo> oldSchemaReports = api.getBySchemaVersion(oldSchemaVersionId);
         for (ReportPojo oldReport : oldSchemaReports) {
             ReportPojo ex = api.getByNameAndSchema(oldReport.getName(), newSchemaVersionId);
@@ -166,7 +168,7 @@ public class ReportFlowApi extends AbstractAuditApi {
             List<ReportControlsPojo> controlsPojos = reportControlsApi.getByReportId(oldReport.getId());
             for (ReportControlsPojo c : controlsPojos) {
                 ReportControlsPojo p = new ReportControlsPojo();
-                p.setControlId(c.getControlId());
+                p.setControlId(oldToNewControlIds.get(c.getControlId()));
                 p.setReportId(pojo.getId());
                 reportControlsApi.add(p);
                 reportControlIdMap.put(c.getId(), p.getId());
@@ -226,11 +228,14 @@ public class ReportFlowApi extends AbstractAuditApi {
 
     private void validateControlReportMapping(ReportControlsPojo pojo) throws ApiException {
         //valid report
-        api.getCheck(pojo.getReportId());
+        ReportPojo reportPojo = api.getCheck(pojo.getReportId());
         //valid control - Global
         InputControlPojo icPojo = inputControlApi.getCheck(pojo.getControlId());
         if (icPojo.getScope().equals(InputControlScope.LOCAL))
             throw new ApiException(ApiStatus.BAD_DATA, "Only Global Control can be mapped to a report");
+        if(!icPojo.getSchemaVersionId().equals(reportPojo.getSchemaVersionId()))
+            throw new ApiException(ApiStatus.BAD_DATA, "Report Schema version and input control schema version not " +
+                    "matching");
     }
 
     private void validateForEdit(ReportPojo pojo) throws ApiException {
@@ -267,5 +272,33 @@ public class ReportFlowApi extends AbstractAuditApi {
             groupPojoList.add(pojo);
         }
         return groupPojoList;
+    }
+
+    private Map<Integer, Integer> migrateInputControls(Integer oldSchemaVersionId, Integer newSchemaVersionId)
+            throws ApiException {
+        Map<Integer, Integer> oldToNewControls = new HashMap<>();
+        List<InputControlPojo> oldControls = inputControlApi.getBySchemaVersion(oldSchemaVersionId);
+        for(InputControlPojo o : oldControls) {
+            InputControlPojo p = getInputControlPojoFromOldControl(newSchemaVersionId, o);
+            InputControlQueryPojo q = null;
+            List<InputControlValuesPojo> v = new ArrayList<>();
+            InputControlQueryPojo oldQuery = inputControlApi.selectControlQuery(o.getId());
+            if(Objects.nonNull(oldQuery)) {
+                q = new InputControlQueryPojo();
+                q.setQuery(oldQuery.getQuery());
+            }
+            List<InputControlValuesPojo> oldValues =
+                    inputControlApi.selectControlValues(Collections.singletonList(o.getId()));
+            if(!oldValues.isEmpty()) {
+                oldValues.forEach(ov -> {
+                    InputControlValuesPojo valuesPojo = new InputControlValuesPojo();
+                    valuesPojo.setValue(ov.getValue());
+                    v.add(valuesPojo);
+                });
+            }
+            inputControlApi.add(p, q, v);
+            oldToNewControls.put(o.getId(), p.getId());
+        }
+        return oldToNewControls;
     }
 }

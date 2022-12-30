@@ -60,7 +60,7 @@ public class InputControlApi extends AbstractApi {
         // flush is required as in single transaction batch processing, delete and insert immediately fails sometimes
         valuesDao.flush();
         addQueryOrValues(queryPojo, pojo, valuesList);
-        return pojo;
+        return ex;
     }
 
     public List<InputControlPojo> selectByIds(List<Integer> ids) {
@@ -69,16 +69,21 @@ public class InputControlApi extends AbstractApi {
         return dao.selectMultiple(ids);
     }
 
-    public List<InputControlPojo> getByScope(InputControlScope scope) {
-        return dao.selectMultiple("scope", scope);
+    public List<InputControlPojo> getByScopeAndSchema(InputControlScope scope, Integer schemaVersionId) {
+        return dao.selectByScopeAndSchemaVersion(scope, schemaVersionId);
     }
 
-    public InputControlPojo getByScopeAndDisplayName(InputControlScope scope, String displayName) {
-        return dao.selectByScopeAndDisplayName(scope, displayName);
+    public InputControlPojo getByScopeAndDisplayName(InputControlScope scope, String displayName,
+                                                     Integer schemaVersionId) {
+        return dao.selectByScopeAndDisplayName(scope, displayName, schemaVersionId);
     }
 
-    public InputControlPojo getByScopeAndParamName(InputControlScope scope, String paramName) {
-        return dao.selectByScopeAndParamName(scope, paramName);
+    public InputControlPojo getByScopeAndParamName(InputControlScope scope, String paramName, Integer schemaVersionId) {
+        return dao.selectByScopeAndParamName(scope, paramName, schemaVersionId);
+    }
+
+    public List<InputControlPojo> getBySchemaVersion(Integer oldSchemaVersionId) {
+        return dao.selectBySchemaVersion(oldSchemaVersionId);
     }
 
     public InputControlPojo getCheck(Integer id) throws ApiException {
@@ -104,9 +109,11 @@ public class InputControlApi extends AbstractApi {
     }
 
     private void validateControlAddition(InputControlPojo pojo) throws ApiException {
-        InputControlPojo existingByName = getByScopeAndDisplayName(InputControlScope.GLOBAL, pojo.getDisplayName());
+        InputControlPojo existingByName = getByScopeAndDisplayName(InputControlScope.GLOBAL, pojo.getDisplayName(),
+                pojo.getSchemaVersionId());
 
-        InputControlPojo existingByParam = getByScopeAndParamName(InputControlScope.GLOBAL, pojo.getParamName());
+        InputControlPojo existingByParam = getByScopeAndParamName(InputControlScope.GLOBAL, pojo.getParamName(),
+                pojo.getSchemaVersionId());
 
         if (existingByName != null || existingByParam != null)
             throw new ApiException(ApiStatus.BAD_DATA, "Cannot create input control with same" + " display name or param name");
@@ -127,9 +134,11 @@ public class InputControlApi extends AbstractApi {
     }
 
     private void validateControlAdditionForEdit(InputControlPojo pojo) throws ApiException {
-        InputControlPojo existingByName = getByScopeAndDisplayName(InputControlScope.GLOBAL, pojo.getDisplayName());
+        InputControlPojo existingByName = getByScopeAndDisplayName(InputControlScope.GLOBAL, pojo.getDisplayName(),
+                pojo.getSchemaVersionId());
 
-        InputControlPojo existingByParam = getByScopeAndParamName(InputControlScope.GLOBAL, pojo.getParamName());
+        InputControlPojo existingByParam = getByScopeAndParamName(InputControlScope.GLOBAL, pojo.getParamName(),
+                pojo.getSchemaVersionId());
 
         if ((existingByName != null && !existingByName.getId().equals(pojo.getId())) || (existingByParam != null && !existingByParam.getId().equals(pojo.getId())))
             throw new ApiException(ApiStatus.BAD_DATA, "Cannot create input control with same" + " display name or param name");

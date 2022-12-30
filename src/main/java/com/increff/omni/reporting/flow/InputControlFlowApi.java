@@ -121,8 +121,10 @@ public class InputControlFlowApi extends AbstractApi {
     }
 
     private void validateLocalControl(Integer reportId, InputControlPojo pojo) throws ApiException {
-        reportApi.getCheck(reportId);
-
+        ReportPojo reportPojo = reportApi.getCheck(reportId);
+        if(!pojo.getSchemaVersionId().equals(reportPojo.getSchemaVersionId()))
+            throw new ApiException(ApiStatus.BAD_DATA, "Report Schema version and input control schema version not " +
+                    "matching");
         // Validating if any other control exists with same display or param name
         List<ReportControlsPojo> existingPojos = reportControlsApi.getByReportId(reportId);
         List<Integer> controlIds = existingPojos.stream().map(ReportControlsPojo::getControlId)

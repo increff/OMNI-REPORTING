@@ -75,14 +75,14 @@ public class AdminController {
 
     @ApiOperation(value = "Get Input Control")
     @RequestMapping(value = "/controls/{id}", method = RequestMethod.GET)
-    public InputControlData updateInputControl(@PathVariable Integer id) throws ApiException {
+    public InputControlData getInputControl(@PathVariable Integer id) throws ApiException {
         return inputControlDto.getById(id);
     }
 
     @ApiOperation(value = "Select all global controls")
-    @RequestMapping(value = "/controls/global", method = RequestMethod.GET)
-    public List<InputControlData> selectAllGlobal() throws ApiException {
-        return inputControlDto.selectAllGlobal();
+    @RequestMapping(value = "/schemas/{schemaVersionId}/controls/global", method = RequestMethod.GET)
+    public List<InputControlData> selectAllGlobal(@PathVariable Integer schemaVersionId) throws ApiException {
+        return inputControlDto.selectAllGlobal(schemaVersionId);
     }
 
     @ApiOperation(value = "Add Schema")

@@ -137,6 +137,16 @@ public class CommonDtoHelper {
         });
     }
 
+    public static InputControlPojo getInputControlPojoFromOldControl(Integer newSchemaVersionId, InputControlPojo o) {
+        InputControlPojo p = new InputControlPojo();
+        p.setDisplayName(o.getDisplayName());
+        p.setType(o.getType());
+        p.setParamName(o.getParamName());
+        p.setScope(o.getScope());
+        p.setSchemaVersionId(newSchemaVersionId);
+        return p;
+    }
+
     public static List<ReportInputParamsPojo> getReportInputParamsPojoList(Map<String, String> paramMap
             , String timeZone, Integer orgId) {
         List<ReportInputParamsPojo> reportInputParamsPojoList = new ArrayList<>();

@@ -68,17 +68,18 @@ public class ReportRequestFlowApiTest extends AbstractTest {
         DirectoryPojo pojo = getDirectoryPojo("Standard Reports", rootPojo.getId());
         directoryApi.add(pojo);
         InputControlPojo inputControlPojo =
-                getInputControlPojo("Client ID", "clientId", InputControlScope.GLOBAL, InputControlType.MULTI_SELECT);
+                getInputControlPojo("Client ID", "clientId", InputControlScope.GLOBAL, InputControlType.MULTI_SELECT,
+                        schemaPojo.getId());
         InputControlQueryPojo inputControlQueryPojo = getInputControlQueryPojo("select * from oms.oms_orders;", null);
         inputControlApi.add(inputControlPojo, inputControlQueryPojo, new ArrayList<>());
         InputControlPojo inputControlPojo1 = getInputControlPojo("Start Date", "startDate"
-                , InputControlScope.GLOBAL, InputControlType.DATE);
+                , InputControlScope.GLOBAL, InputControlType.DATE, schemaPojo.getId());
         inputControlApi.add(inputControlPojo1, null, new ArrayList<>());
         InputControlPojo inputControlPojo2 = getInputControlPojo("End Date", "endDate"
-                , InputControlScope.GLOBAL, InputControlType.DATE);
+                , InputControlScope.GLOBAL, InputControlType.DATE, schemaPojo.getId());
         inputControlApi.add(inputControlPojo2, null, new ArrayList<>());
         ReportPojo reportPojo = getReportPojo("Report 1", ReportType.STANDARD
-                , 100001, 100001);
+                , 100001, schemaPojo.getId());
         reportApi.add(reportPojo);
         ReportControlsPojo controlsPojo = getReportControlsPojo(reportPojo.getId(), inputControlPojo1.getId());
         reportFlowApi.mapControlToReport(controlsPojo);

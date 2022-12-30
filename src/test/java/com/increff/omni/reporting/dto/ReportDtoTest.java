@@ -139,7 +139,7 @@ public class ReportDtoTest extends AbstractTest {
         ReportForm form = commonSetup("Report 2", ReportType.CUSTOM);
         ReportData data = dto.add(form);
         InputControlForm inputControlForm = getInputControlForm("Client Id", "clientId", InputControlScope.GLOBAL
-                , InputControlType.TEXT, new ArrayList<>(), null, null);
+                , InputControlType.TEXT, new ArrayList<>(), null, null, form.getSchemaVersionId());
         InputControlData inputControlData = inputControlDto.add(inputControlForm);
         dto.mapToControl(data.getId(), inputControlData.getId());
         dto.deleteReportControl(data.getId(), inputControlData.getId());
@@ -150,7 +150,7 @@ public class ReportDtoTest extends AbstractTest {
         ReportForm form = commonSetup("Report 2", ReportType.CUSTOM);
         ReportData data = dto.add(form);
         InputControlForm inputControlForm = getInputControlForm("Client Id", "clientId", InputControlScope.GLOBAL
-                , InputControlType.TEXT, new ArrayList<>(), null, null);
+                , InputControlType.TEXT, new ArrayList<>(), null, null, form.getSchemaVersionId());
         InputControlData inputControlData = inputControlDto.add(inputControlForm);
         dto.mapToControl(data.getId(), inputControlData.getId());
         ValidationGroupForm groupForm = getValidationGroupForm("group1", 10, ValidationType.MANDATORY
@@ -173,7 +173,7 @@ public class ReportDtoTest extends AbstractTest {
         ReportForm form = commonSetup("Report 2", ReportType.STANDARD);
         ReportData data = dto.add(form);
         InputControlForm inputControlForm = getInputControlForm("Client Id", "clientId", InputControlScope.GLOBAL
-                , InputControlType.TEXT, new ArrayList<>(), null, null);
+                , InputControlType.TEXT, new ArrayList<>(), null, null, form.getSchemaVersionId());
         InputControlData inputControlData = inputControlDto.add(inputControlForm);
         dto.mapToControl(data.getId(), inputControlData.getId());
         ValidationGroupForm groupForm = getValidationGroupForm("group1", 10, ValidationType.MANDATORY
@@ -200,7 +200,7 @@ public class ReportDtoTest extends AbstractTest {
         ReportForm form = commonSetup("Report 2", ReportType.CUSTOM);
         ReportData data = dto.add(form);
         InputControlForm inputControlForm = getInputControlForm("Client Id", "clientId", InputControlScope.GLOBAL
-                , InputControlType.TEXT, new ArrayList<>(), null, null);
+                , InputControlType.TEXT, new ArrayList<>(), null, null, form.getSchemaVersionId());
         InputControlData inputControlData = inputControlDto.add(inputControlForm);
         dto.mapToControl(data.getId(), inputControlData.getId());
         ValidationGroupForm groupForm = getValidationGroupForm("group1", 10, ValidationType.MANDATORY
@@ -219,7 +219,7 @@ public class ReportDtoTest extends AbstractTest {
         ReportForm form = commonSetup("Report 2", ReportType.CUSTOM);
         ReportData data = dto.add(form);
         InputControlForm inputControlForm = getInputControlForm("Client Id", "clientId", InputControlScope.GLOBAL
-                , InputControlType.TEXT, new ArrayList<>(), null, null);
+                , InputControlType.TEXT, new ArrayList<>(), null, null, form.getSchemaVersionId());
         InputControlData inputControlData = inputControlDto.add(inputControlForm);
         dto.mapToControl(data.getId(), inputControlData.getId());
         ValidationGroupForm groupForm = getValidationGroupForm("group1", 10, ValidationType.MANDATORY
@@ -238,7 +238,7 @@ public class ReportDtoTest extends AbstractTest {
         ReportForm form = commonSetup("Report 2", ReportType.CUSTOM);
         ReportData data = dto.add(form);
         InputControlForm inputControlForm = getInputControlForm("Client Id", "clientId", InputControlScope.GLOBAL
-                , InputControlType.TEXT, new ArrayList<>(), null, null);
+                , InputControlType.TEXT, new ArrayList<>(), null, null, form.getSchemaVersionId());
         InputControlData inputControlData = inputControlDto.add(inputControlForm);
         dto.mapToControl(data.getId(), inputControlData.getId());
         ValidationGroupForm groupForm = getValidationGroupForm("group1", 0, ValidationType.DATE_RANGE
@@ -257,7 +257,7 @@ public class ReportDtoTest extends AbstractTest {
         ReportForm form = commonSetup("Report 2", ReportType.CUSTOM);
         ReportData data = dto.add(form);
         InputControlForm inputControlForm = getInputControlForm("Client Id", "clientId", InputControlScope.GLOBAL
-                , InputControlType.ACCESS_CONTROLLED_MULTI_SELECT, Arrays.asList("IGNORE", "SENT"), null, null);
+                , InputControlType.ACCESS_CONTROLLED_MULTI_SELECT, Arrays.asList("IGNORE", "SENT"), null, null, form.getSchemaVersionId());
         InputControlData inputControlData = inputControlDto.add(inputControlForm);
         dto.mapToControl(data.getId(), inputControlData.getId());
         List<ValidationGroupData> validationGroupData = dto.getValidationGroups(data.getId());

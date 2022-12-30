@@ -48,6 +48,9 @@ public class InputControlDto extends AbstractDto {
     @Autowired
     private ConnectionApi connectionApi;
 
+    @Autowired
+    private SchemaVersionApi schemaVersionApi;
+
     // @Transactional is added to rollback on exception happening while getting values from query
     @Transactional(rollbackFor = ApiException.class)
     public InputControlData add(InputControlForm form) throws ApiException {
@@ -72,8 +75,8 @@ public class InputControlDto extends AbstractDto {
         return getInputControlDatas(Collections.singletonList(pojo), getOrgId()).get(0);
     }
 
-    public List<InputControlData> selectAllGlobal() throws ApiException {
-        List<InputControlPojo> pojos = api.getByScope(InputControlScope.GLOBAL);
+    public List<InputControlData> selectAllGlobal(Integer schemaVersionId) throws ApiException {
+        List<InputControlPojo> pojos = api.getByScopeAndSchema(InputControlScope.GLOBAL, schemaVersionId);
         return getInputControlDatas(pojos, getOrgId());
     }
 
@@ -125,14 +128,17 @@ public class InputControlDto extends AbstractDto {
                             Collectors.mapping(InputControlValuesPojo::getValue, Collectors.toList())));
         List<InputControlData> dataList = new ArrayList<>();
         for(InputControlPojo p : pojos) {
-            dataList.add(getDataFromPojo(p, controlToValuesMapping, controlToQueryMapping, connectionPojo));
+            SchemaVersionPojo schemaVersionPojo = schemaVersionApi.getCheck(p.getSchemaVersionId());
+            dataList.add(getDataFromPojo(p, controlToValuesMapping, controlToQueryMapping, connectionPojo, schemaVersionPojo));
         }
         return dataList;
     }
 
     private InputControlData getDataFromPojo(InputControlPojo p, Map<Integer, List<String>> controlToValuesMapping
-            , Map<Integer, String> controlToQueryMapping, ConnectionPojo connectionPojo) throws ApiException {
+            , Map<Integer, String> controlToQueryMapping, ConnectionPojo connectionPojo,
+                                             SchemaVersionPojo schemaVersionPojo) throws ApiException {
         InputControlData data = ConvertUtil.convert(p, InputControlData.class);
+        data.setSchemaVersionName(schemaVersionPojo.getName());
         data.setQuery(controlToQueryMapping.getOrDefault(p.getId(), null));
         data.setValues(controlToValuesMapping.getOrDefault(p.getId(), null));
         if (!StringUtil.isEmpty(data.getQuery())) {

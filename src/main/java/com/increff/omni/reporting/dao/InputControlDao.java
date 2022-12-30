@@ -28,32 +28,62 @@ public class InputControlDao extends AbstractDao<InputControlPojo> {
         return selectMultiple(tQuery);
     }
 
-    public InputControlPojo selectByScopeAndDisplayName(InputControlScope scope, String displayName) {
+    public InputControlPojo selectByScopeAndDisplayName(InputControlScope scope, String displayName,
+                                                        Integer schemaVersionId) {
         CriteriaBuilder cb = this.em.getCriteriaBuilder();
         CriteriaQuery<InputControlPojo> query = cb.createQuery(InputControlPojo.class);
         Root<InputControlPojo> root = query.from(InputControlPojo.class);
         query.where(
                 cb.and(
                         cb.equal(root.get("scope"), scope),
-                        cb.equal(root.get("displayName"), displayName)
+                        cb.equal(root.get("displayName"), displayName),
+                        cb.equal(root.get("schemaVersionId"), schemaVersionId)
                 )
         );
         TypedQuery<InputControlPojo> tQuery = createQuery(query);
         return selectSingleOrNull(tQuery);
     }
 
-    public InputControlPojo selectByScopeAndParamName(InputControlScope scope, String paramName) {
+    public InputControlPojo selectByScopeAndParamName(InputControlScope scope, String paramName,
+                                                      Integer schemaVersionId) {
         CriteriaBuilder cb = this.em.getCriteriaBuilder();
         CriteriaQuery<InputControlPojo> query = cb.createQuery(InputControlPojo.class);
         Root<InputControlPojo> root = query.from(InputControlPojo.class);
         query.where(
                 cb.and(
                         cb.equal(root.get("scope"), scope),
-                        cb.equal(root.get("paramName"), paramName)
+                        cb.equal(root.get("paramName"), paramName),
+                        cb.equal(root.get("schemaVersionId"), schemaVersionId)
                 )
         );
         TypedQuery<InputControlPojo> tQuery = createQuery(query);
         return selectSingleOrNull(tQuery);
     }
 
+    public List<InputControlPojo> selectByScopeAndSchemaVersion(InputControlScope scope, Integer schemaVersionId) {
+        CriteriaBuilder cb = this.em.getCriteriaBuilder();
+        CriteriaQuery<InputControlPojo> query = cb.createQuery(InputControlPojo.class);
+        Root<InputControlPojo> root = query.from(InputControlPojo.class);
+        query.where(
+                cb.and(
+                        cb.equal(root.get("scope"), scope),
+                        cb.equal(root.get("schemaVersionId"), schemaVersionId)
+                )
+        );
+        TypedQuery<InputControlPojo> tQuery = createQuery(query);
+        return selectMultiple(tQuery);
+    }
+
+    public List<InputControlPojo> selectBySchemaVersion(Integer schemaVersionId) {
+        CriteriaBuilder cb = this.em.getCriteriaBuilder();
+        CriteriaQuery<InputControlPojo> query = cb.createQuery(InputControlPojo.class);
+        Root<InputControlPojo> root = query.from(InputControlPojo.class);
+        query.where(
+                cb.and(
+                        cb.equal(root.get("schemaVersionId"), schemaVersionId)
+                )
+        );
+        TypedQuery<InputControlPojo> tQuery = createQuery(query);
+        return selectMultiple(tQuery);
+    }
 }
