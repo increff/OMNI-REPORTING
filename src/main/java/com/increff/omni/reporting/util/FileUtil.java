@@ -66,7 +66,7 @@ public class FileUtil {
 
     public static void createFileResponse(File file, HttpServletResponse response) throws IOException {
         response.setContentType("application/octet-stream");
-        response.setHeader("Content-Disposition", "attachment; filename=" + file.getName());
+        response.setHeader("Content-Disposition", "inline");
         response.setHeader("Content-length", String.valueOf(file.length()));
         OutputStream outputStream = null;
         try {
