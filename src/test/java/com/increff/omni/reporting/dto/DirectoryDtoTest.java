@@ -4,7 +4,6 @@ import com.increff.omni.reporting.config.AbstractTest;
 import com.increff.omni.reporting.config.ApplicationProperties;
 import com.increff.omni.reporting.model.data.DirectoryData;
 import com.increff.omni.reporting.model.form.DirectoryForm;
-import com.increff.omni.reporting.pojo.DirectoryPojo;
 import com.nextscm.commons.spring.common.ApiException;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;

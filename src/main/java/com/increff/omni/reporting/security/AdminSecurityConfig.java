@@ -4,6 +4,7 @@ import com.increff.account.client.AuthTokenFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -33,7 +34,12 @@ public class AdminSecurityConfig extends WebSecurityConfigurerAdapter {
                 .requestMatchers()//
                 .antMatchers("/admin/**")
                 .and().authorizeRequests()//
-                .antMatchers("/admin/**").hasAnyAuthority(APP_ADMIN, REPORT_ADMIN)//
+                .antMatchers(HttpMethod.GET,"/admin/orgs").hasAnyAuthority(APP_ADMIN, REPORT_ADMIN)
+                .antMatchers(HttpMethod.POST, "/admin/request-report/orgs/**").hasAnyAuthority(APP_ADMIN,
+                                REPORT_ADMIN)
+                .antMatchers(HttpMethod.GET,"/admin/reports/orgs/**").hasAnyAuthority(APP_ADMIN, REPORT_ADMIN)
+                .antMatchers(HttpMethod.GET,"/admin/orgs/*/reports/*/controls").hasAnyAuthority(APP_ADMIN, REPORT_ADMIN)
+                .antMatchers("/admin/**").hasAnyAuthority(APP_ADMIN)//
                 .and().cors().and().csrf().disable()
                 .addFilterBefore(authTokenFilter, BasicAuthenticationFilter.class)
                 .addFilterBefore(adminFilter, BasicAuthenticationFilter.class)

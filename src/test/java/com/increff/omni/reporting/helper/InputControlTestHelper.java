@@ -14,12 +14,13 @@ import java.util.List;
 public class InputControlTestHelper {
 
     public static InputControlPojo getInputControlPojo(String displayName, String paramName, InputControlScope scope,
-                                                       InputControlType type) {
+                                                       InputControlType type, Integer schemaVersionId) {
         InputControlPojo inputControlPojo = new InputControlPojo();
         inputControlPojo.setType(type);
         inputControlPojo.setDisplayName(displayName);
         inputControlPojo.setScope(scope);
         inputControlPojo.setParamName(paramName);
+        inputControlPojo.setSchemaVersionId(schemaVersionId);
         return inputControlPojo;
     }
 
@@ -32,7 +33,7 @@ public class InputControlTestHelper {
 
     public static InputControlForm getInputControlForm(String displayName, String paramName, InputControlScope scope,
                                                        InputControlType type, List<String> values, String query,
-                                                       Integer reportId) {
+                                                       Integer reportId, Integer schemaVersionId) {
         InputControlForm inputControlForm = new InputControlForm();
         inputControlForm.setDisplayName(displayName);
         inputControlForm.setParamName(paramName);
@@ -41,6 +42,7 @@ public class InputControlTestHelper {
         inputControlForm.setValues(values);
         inputControlForm.setQuery(query);
         inputControlForm.setReportId(reportId);
+        inputControlForm.setSchemaVersionId(schemaVersionId);
         return inputControlForm;
     }
 

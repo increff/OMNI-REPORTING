@@ -19,6 +19,7 @@ public class InputControlData {
     private InputControlScope scope;
     private InputControlType type;
     private String query;
+    private String schemaVersionName;
     private List<String> values;
     private List<ValidationType> validationTypes = new ArrayList<>();
     private List<InputControlDataValue> options = new ArrayList<>();

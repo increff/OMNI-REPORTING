@@ -74,7 +74,7 @@ public class ReportJobTest extends AbstractTest {
         ReportQueryForm queryForm = getReportQueryForm("select version();");
         reportDto.upsertQuery(reportData.getId(), queryForm);
         InputControlForm inputControlForm = getInputControlForm("Client Id", "clientId", InputControlScope.GLOBAL
-                , InputControlType.NUMBER, new ArrayList<>(), null, null);
+                , InputControlType.NUMBER, new ArrayList<>(), null, null, reportForm.getSchemaVersionId());
         InputControlData inputControlData = inputControlDto.add(inputControlForm);
         reportDto.mapToControl(reportData.getId(), inputControlData.getId());
         Map<String, List<String>> params = new HashMap<>();

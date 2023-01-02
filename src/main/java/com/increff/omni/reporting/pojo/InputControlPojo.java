@@ -11,7 +11,8 @@ import javax.persistence.*;
 @Setter
 @Getter
 @Table(name = "input_control", indexes = {@Index(name = "idx_scope_displayName", columnList = "scope,displayName"),
-        @Index(name = "idx_scope_paramName", columnList = "scope,paramName")})
+        @Index(name = "idx_scope_paramName", columnList = "scope,paramName"), @Index(name = "idx_schemaVersionId",
+        columnList = "schemaVersionId")})
 public class InputControlPojo extends AbstractVersionedPojo{
 
     @Id
@@ -32,5 +33,8 @@ public class InputControlPojo extends AbstractVersionedPojo{
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private InputControlType type;
+
+    @Column(nullable = false)
+    private Integer schemaVersionId;
 
 }

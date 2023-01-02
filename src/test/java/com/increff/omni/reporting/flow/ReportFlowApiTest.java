@@ -4,6 +4,7 @@ import com.increff.omni.reporting.api.*;
 import com.increff.omni.reporting.config.AbstractTest;
 import com.increff.omni.reporting.config.ApplicationProperties;
 import com.increff.omni.reporting.dao.DirectoryDao;
+import com.increff.omni.reporting.helper.SchemaTestHelper;
 import com.increff.omni.reporting.model.constants.InputControlScope;
 import com.increff.omni.reporting.model.constants.InputControlType;
 import com.increff.omni.reporting.model.constants.ReportType;
@@ -12,6 +13,7 @@ import com.increff.omni.reporting.model.form.ValidationGroupForm;
 import com.increff.omni.reporting.pojo.*;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
+import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -47,7 +49,14 @@ public class ReportFlowApiTest extends AbstractTest {
     private ReportApi reportApi;
     @Autowired
     private InputControlApi inputControlApi;
-
+    
+    SchemaVersionPojo p;
+    @Before
+    public void initInputControlApi() throws ApiException {
+        p = SchemaTestHelper.getSchemaPojo("1.0.0");
+        schemaVersionApi.add(p);
+    }
+    
     @Test
     public void testAddReport() throws ApiException {
         DirectoryPojo rootPojo = directoryDao.select("directoryName", properties.getRootDirectory());
@@ -159,11 +168,12 @@ public class ReportFlowApiTest extends AbstractTest {
     @Test
     public void testMapReportToControl() throws ApiException {
         InputControlPojo inputControlPojo =
-                getInputControlPojo("Client ID", "clientId", InputControlScope.GLOBAL, InputControlType.MULTI_SELECT);
+                getInputControlPojo("Client ID", "clientId", InputControlScope.GLOBAL, InputControlType.MULTI_SELECT,
+                        p.getId());
         InputControlQueryPojo inputControlQueryPojo = getInputControlQueryPojo("select * from oms.oms_orders;", null);
         inputControlApi.add(inputControlPojo, inputControlQueryPojo, new ArrayList<>());
         ReportPojo reportPojo = getReportPojo("Report 1", ReportType.STANDARD
-                , 100001, 100001);
+                , 100001, p.getId());
         reportApi.add(reportPojo);
         ReportControlsPojo controlsPojo = getReportControlsPojo(reportPojo.getId(), inputControlPojo.getId());
         flowApi.mapControlToReport(controlsPojo);
@@ -172,7 +182,8 @@ public class ReportFlowApiTest extends AbstractTest {
     @Test(expected = ApiException.class)
     public void testMapReportToLocalControl() throws ApiException {
         InputControlPojo inputControlPojo =
-                getInputControlPojo("Client ID", "clientId", InputControlScope.LOCAL, InputControlType.MULTI_SELECT);
+                getInputControlPojo("Client ID", "clientId", InputControlScope.LOCAL, InputControlType.MULTI_SELECT,
+                        p.getId());
         InputControlQueryPojo inputControlQueryPojo = getInputControlQueryPojo("select * from oms.oms_orders;", null);
         inputControlApi.add(inputControlPojo, inputControlQueryPojo, new ArrayList<>());
         ReportPojo reportPojo = getReportPojo("Report 1", ReportType.STANDARD
@@ -191,12 +202,12 @@ public class ReportFlowApiTest extends AbstractTest {
     @Test
     public void testAddMandatoryValidationGroup() throws ApiException {
         InputControlPojo inputControlPojo = getInputControlPojo("Client ID", "clientId"
-                , InputControlScope.GLOBAL, InputControlType.MULTI_SELECT);
+                , InputControlScope.GLOBAL, InputControlType.MULTI_SELECT, p.getId());
         InputControlQueryPojo inputControlQueryPojo = getInputControlQueryPojo("select * from oms.oms_orders;"
                 , null);
         inputControlApi.add(inputControlPojo, inputControlQueryPojo, new ArrayList<>());
         ReportPojo reportPojo = getReportPojo("Report 1", ReportType.STANDARD
-                , 100001, 100001);
+                , 100001, p.getId());
         reportApi.add(reportPojo);
         ReportControlsPojo controlsPojo = getReportControlsPojo(reportPojo.getId(), inputControlPojo.getId());
         flowApi.mapControlToReport(controlsPojo);
@@ -208,7 +219,7 @@ public class ReportFlowApiTest extends AbstractTest {
     @Test(expected = ApiException.class)
     public void testAddMandatoryValidationGroup2Times() throws ApiException {
         InputControlPojo inputControlPojo = getInputControlPojo("Client ID", "clientId"
-                , InputControlScope.GLOBAL, InputControlType.MULTI_SELECT);
+                , InputControlScope.GLOBAL, InputControlType.MULTI_SELECT, p.getId());
         InputControlQueryPojo inputControlQueryPojo = getInputControlQueryPojo("select * from oms.oms_orders;"
                 , null);
         inputControlApi.add(inputControlPojo, inputControlQueryPojo, new ArrayList<>());
@@ -232,12 +243,12 @@ public class ReportFlowApiTest extends AbstractTest {
     @Test
     public void testAddSingleMandatoryValidationGroup() throws ApiException {
         InputControlPojo inputControlPojo = getInputControlPojo("Client ID", "clientId"
-                , InputControlScope.GLOBAL, InputControlType.MULTI_SELECT);
+                , InputControlScope.GLOBAL, InputControlType.MULTI_SELECT, p.getId());
         InputControlQueryPojo inputControlQueryPojo = getInputControlQueryPojo("select * from oms.oms_orders;"
                 , null);
         inputControlApi.add(inputControlPojo, inputControlQueryPojo, new ArrayList<>());
         ReportPojo reportPojo = getReportPojo("Report 1", ReportType.STANDARD
-                , 100001, 100001);
+                , 100001, p.getId());
         reportApi.add(reportPojo);
         ReportControlsPojo controlsPojo = getReportControlsPojo(reportPojo.getId(), inputControlPojo.getId());
         flowApi.mapControlToReport(controlsPojo);
@@ -249,12 +260,12 @@ public class ReportFlowApiTest extends AbstractTest {
     @Test(expected = ApiException.class)
     public void testAddDateValidationGroupWrongControlType() throws ApiException {
         InputControlPojo inputControlPojo = getInputControlPojo("Client ID", "clientId"
-                , InputControlScope.GLOBAL, InputControlType.MULTI_SELECT);
+                , InputControlScope.GLOBAL, InputControlType.MULTI_SELECT, p.getId());
         InputControlQueryPojo inputControlQueryPojo = getInputControlQueryPojo("select * from oms.oms_orders;"
                 , null);
         inputControlApi.add(inputControlPojo, inputControlQueryPojo, new ArrayList<>());
         ReportPojo reportPojo = getReportPojo("Report 1", ReportType.STANDARD
-                , 100001, 100001);
+                , 100001, p.getId());
         reportApi.add(reportPojo);
         ReportControlsPojo controlsPojo = getReportControlsPojo(reportPojo.getId(), inputControlPojo.getId());
         flowApi.mapControlToReport(controlsPojo);
@@ -273,7 +284,7 @@ public class ReportFlowApiTest extends AbstractTest {
     @Test(expected = ApiException.class)
     public void testAddDateValidationGroupSizeError() throws ApiException {
         InputControlPojo inputControlPojo = getInputControlPojo("Client ID", "clientId"
-                , InputControlScope.GLOBAL, InputControlType.DATE);
+                , InputControlScope.GLOBAL, InputControlType.DATE, p.getId());
         InputControlQueryPojo inputControlQueryPojo = getInputControlQueryPojo("select * from oms.oms_orders;"
                 , null);
         inputControlApi.add(inputControlPojo, inputControlQueryPojo, new ArrayList<>());
@@ -297,13 +308,13 @@ public class ReportFlowApiTest extends AbstractTest {
     @Test
     public void testAddDateValidationGroup() throws ApiException {
         InputControlPojo inputControlPojo = getInputControlPojo("Start Date", "startDate"
-                , InputControlScope.GLOBAL, InputControlType.DATE);
+                , InputControlScope.GLOBAL, InputControlType.DATE, p.getId());
         inputControlApi.add(inputControlPojo, null, new ArrayList<>());
         InputControlPojo inputControlPojo2 = getInputControlPojo("End Date", "endDate"
-                , InputControlScope.GLOBAL, InputControlType.DATE);
+                , InputControlScope.GLOBAL, InputControlType.DATE, p.getId());
         inputControlApi.add(inputControlPojo2, null, new ArrayList<>());
         ReportPojo reportPojo = getReportPojo("Report 1", ReportType.STANDARD
-                , 100001, 100001);
+                , 100001, p.getId());
         reportApi.add(reportPojo);
         ReportControlsPojo controlsPojo = getReportControlsPojo(reportPojo.getId(), inputControlPojo.getId());
         flowApi.mapControlToReport(controlsPojo);
@@ -317,13 +328,13 @@ public class ReportFlowApiTest extends AbstractTest {
     @Test
     public void testDeleteReportControl() throws ApiException {
         InputControlPojo inputControlPojo = getInputControlPojo("Start Date", "startDate"
-                , InputControlScope.GLOBAL, InputControlType.DATE);
+                , InputControlScope.GLOBAL, InputControlType.DATE, p.getId());
         inputControlApi.add(inputControlPojo, null, new ArrayList<>());
         InputControlPojo inputControlPojo2 = getInputControlPojo("End Date", "endDate"
-                , InputControlScope.GLOBAL, InputControlType.DATE);
+                , InputControlScope.GLOBAL, InputControlType.DATE, p.getId());
         inputControlApi.add(inputControlPojo2, null, new ArrayList<>());
         ReportPojo reportPojo = getReportPojo("Report 1", ReportType.STANDARD
-                , 100001, 100001);
+                , 100001, p.getId());
         reportApi.add(reportPojo);
         ReportControlsPojo controlsPojo = getReportControlsPojo(reportPojo.getId(), inputControlPojo.getId());
         flowApi.mapControlToReport(controlsPojo);

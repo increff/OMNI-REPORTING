@@ -4,12 +4,14 @@ import com.increff.omni.reporting.api.*;
 import com.increff.omni.reporting.config.AbstractTest;
 import com.increff.omni.reporting.config.ApplicationProperties;
 import com.increff.omni.reporting.dao.DirectoryDao;
+import com.increff.omni.reporting.helper.SchemaTestHelper;
 import com.increff.omni.reporting.model.constants.InputControlScope;
 import com.increff.omni.reporting.model.constants.InputControlType;
 import com.increff.omni.reporting.model.constants.ReportType;
 import com.increff.omni.reporting.pojo.*;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
+import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -47,10 +49,18 @@ public class InputControlFlowApiTest extends AbstractTest {
     @Autowired
     private ApplicationProperties properties;
 
+    SchemaVersionPojo p;
+    @Before
+    public void initInputControlApi() throws ApiException {
+        p = SchemaTestHelper.getSchemaPojo("1.0.0");
+        schemaVersionApi.add(p);
+    }
+
     @Test
     public void testAddGlobalInputControl() throws ApiException {
         InputControlPojo inputControlPojo =
-                getInputControlPojo("Client ID", "clientId", InputControlScope.GLOBAL, InputControlType.MULTI_SELECT);
+                getInputControlPojo("Client ID", "clientId", InputControlScope.GLOBAL, InputControlType.MULTI_SELECT,
+                        p.getId());
         String query = "select * from oms.oms_orders;";
         flowApi.add(inputControlPojo, query, new ArrayList<>(), null);
         InputControlPojo pojo = api.getCheck(inputControlPojo.getId());
@@ -67,7 +77,8 @@ public class InputControlFlowApiTest extends AbstractTest {
     @Test(expected = ApiException.class)
     public void testAddLocalInputControlWithoutReport() throws ApiException {
         InputControlPojo inputControlPojo =
-                getInputControlPojo("Client ID", "clientId", InputControlScope.LOCAL, InputControlType.MULTI_SELECT);
+                getInputControlPojo("Client ID", "clientId", InputControlScope.LOCAL, InputControlType.MULTI_SELECT,
+                        p.getId());
         String query = "select * from oms.oms_orders;";
         try {
             flowApi.add(inputControlPojo, query, new ArrayList<>(), 1);
@@ -89,7 +100,8 @@ public class InputControlFlowApiTest extends AbstractTest {
                 schemaVersionPojo.getId());
         reportApi.add(pojo);
         InputControlPojo inputControlPojo =
-                getInputControlPojo("Client ID", "clientId", InputControlScope.LOCAL, InputControlType.MULTI_SELECT);
+                getInputControlPojo("Client ID", "clientId", InputControlScope.LOCAL, InputControlType.MULTI_SELECT,
+                        schemaVersionPojo.getId());
         String query = "select * from oms.oms_orders;";
         flowApi.add(inputControlPojo, query, new ArrayList<>(), pojo.getId());
     }
@@ -106,11 +118,12 @@ public class InputControlFlowApiTest extends AbstractTest {
         reportApi.add(pojo);
 
         InputControlPojo inputControlPojo =
-                getInputControlPojo("Client ID", "clientId", InputControlScope.LOCAL, InputControlType.MULTI_SELECT);
+                getInputControlPojo("Client ID", "clientId", InputControlScope.LOCAL, InputControlType.MULTI_SELECT,
+                        schemaVersionPojo.getId());
         String query = "select * from oms.oms_orders;";
         flowApi.add(inputControlPojo, query, new ArrayList<>(), pojo.getId());
         InputControlPojo inputControlPojo2 = getInputControlPojo("Warehouse ID", "warehouseId", InputControlScope.LOCAL,
-                InputControlType.MULTI_SELECT);
+                InputControlType.MULTI_SELECT, schemaVersionPojo.getId());
         query = "select * from oms.oms_orders;";
         flowApi.add(inputControlPojo2, query, new ArrayList<>(), pojo.getId());
     }
@@ -127,12 +140,14 @@ public class InputControlFlowApiTest extends AbstractTest {
         reportApi.add(pojo);
 
         InputControlPojo inputControlPojo =
-                getInputControlPojo("Client ID", "clientId", InputControlScope.LOCAL, InputControlType.MULTI_SELECT);
+                getInputControlPojo("Client ID", "clientId", InputControlScope.LOCAL, InputControlType.MULTI_SELECT,
+                        p.getId());
         String query = "select * from oms.oms_orders;";
         flowApi.add(inputControlPojo, query, new ArrayList<>(), pojo.getId());
 
         InputControlPojo inputControlPojo2 =
-                getInputControlPojo("Client ID", "warehouseId", InputControlScope.LOCAL, InputControlType.MULTI_SELECT);
+                getInputControlPojo("Client ID", "warehouseId", InputControlScope.LOCAL, InputControlType.MULTI_SELECT,
+                        p.getId());
         query = "select * from oms.oms_orders;";
         try {
             flowApi.add(inputControlPojo2, query, new ArrayList<>(), pojo.getId());
@@ -155,12 +170,14 @@ public class InputControlFlowApiTest extends AbstractTest {
         reportApi.add(pojo);
 
         InputControlPojo inputControlPojo =
-                getInputControlPojo("Client ID", "clientId", InputControlScope.LOCAL, InputControlType.MULTI_SELECT);
+                getInputControlPojo("Client ID", "clientId", InputControlScope.LOCAL, InputControlType.MULTI_SELECT,
+                        p.getId());
         String query = "select * from oms.oms_orders;";
         flowApi.add(inputControlPojo, query, new ArrayList<>(), pojo.getId());
 
         InputControlPojo inputControlPojo2 =
-                getInputControlPojo("Warehouse ID", "clientId", InputControlScope.LOCAL, InputControlType.MULTI_SELECT);
+                getInputControlPojo("Warehouse ID", "clientId", InputControlScope.LOCAL, InputControlType.MULTI_SELECT,
+                        p.getId());
         query = "select * from oms.oms_orders;";
         try {
             flowApi.add(inputControlPojo2, query, new ArrayList<>(), pojo.getId());
@@ -174,12 +191,13 @@ public class InputControlFlowApiTest extends AbstractTest {
     @Test
     public void testUpdateInputControlWithQuery() throws ApiException {
         InputControlPojo inputControlPojo =
-                getInputControlPojo("Client ID", "clientId", InputControlScope.GLOBAL, InputControlType.MULTI_SELECT);
+                getInputControlPojo("Client ID", "clientId", InputControlScope.GLOBAL, InputControlType.MULTI_SELECT,
+                        p.getId());
         String query = "select * from oms.oms_orders;";
         flowApi.add(inputControlPojo, query, new ArrayList<>(), null);
         Integer id = inputControlPojo.getId();
         inputControlPojo = getInputControlPojo("Client ID 2", "clientId2", InputControlScope.LOCAL,
-                InputControlType.SINGLE_SELECT);
+                InputControlType.SINGLE_SELECT, p.getId());
         query = "select * from oms.oms_order;";
         inputControlPojo.setId(id);
         flowApi.update(inputControlPojo, query, new ArrayList<>());
@@ -197,12 +215,14 @@ public class InputControlFlowApiTest extends AbstractTest {
     @Test
     public void testUpdateInputControlWithValues() throws ApiException {
         InputControlPojo inputControlPojo =
-                getInputControlPojo("Client ID", "clientId", InputControlScope.GLOBAL, InputControlType.MULTI_SELECT);
+                getInputControlPojo("Client ID", "clientId", InputControlScope.GLOBAL, InputControlType.MULTI_SELECT,
+                        p.getId());
         List<String> values = Arrays.asList("LIVE", "PACKED");
         flowApi.add(inputControlPojo, null, values, null);
         Integer id = inputControlPojo.getId();
         inputControlPojo =
-                getInputControlPojo("Client ID", "clientId2", InputControlScope.LOCAL, InputControlType.MULTI_SELECT);
+                getInputControlPojo("Client ID", "clientId2", InputControlScope.LOCAL, InputControlType.MULTI_SELECT,
+                        p.getId());
         inputControlPojo.setId(id);
         values = Arrays.asList("LIVE", "PACKING");
         flowApi.update(inputControlPojo, null, values);

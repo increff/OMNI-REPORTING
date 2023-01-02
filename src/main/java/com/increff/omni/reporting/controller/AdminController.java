@@ -37,6 +37,8 @@ public class AdminController {
     @Autowired
     private ReportRequestDto reportRequestDto;
 
+    // App admin APIs
+
     @ApiOperation(value = "Add Connection")
     @RequestMapping(value = "/connections", method = RequestMethod.POST)
     public ConnectionData add(@RequestBody ConnectionForm form) throws ApiException {
@@ -75,14 +77,14 @@ public class AdminController {
 
     @ApiOperation(value = "Get Input Control")
     @RequestMapping(value = "/controls/{id}", method = RequestMethod.GET)
-    public InputControlData updateInputControl(@PathVariable Integer id) throws ApiException {
+    public InputControlData getInputControl(@PathVariable Integer id) throws ApiException {
         return inputControlDto.getById(id);
     }
 
     @ApiOperation(value = "Select all global controls")
-    @RequestMapping(value = "/controls/global", method = RequestMethod.GET)
-    public List<InputControlData> selectAllGlobal() throws ApiException {
-        return inputControlDto.selectAllGlobal();
+    @RequestMapping(value = "/schemas/{schemaVersionId}/controls/global", method = RequestMethod.GET)
+    public List<InputControlData> selectAllGlobal(@PathVariable Integer schemaVersionId) throws ApiException {
+        return inputControlDto.selectAllGlobal(schemaVersionId);
     }
 
     @ApiOperation(value = "Add Schema")
@@ -157,12 +159,6 @@ public class AdminController {
         return reportDto.getQuery(reportId);
     }
 
-    @ApiOperation(value = "Get Reports")
-    @RequestMapping(value = "/reports/orgs/{orgId}", method = RequestMethod.GET)
-    public List<ReportData> selectByOrgId(@PathVariable Integer orgId) throws ApiException {
-        return reportDto.selectByOrg(orgId);
-    }
-
     @ApiOperation(value = "Map control to a report")
     @RequestMapping(value = "/reports/{reportId}/controls/{controlId}", method = RequestMethod.POST)
     public void mapReportToControl(@PathVariable Integer reportId, @PathVariable Integer controlId) throws ApiException {
@@ -197,12 +193,6 @@ public class AdminController {
     @RequestMapping(value = "/orgs", method = RequestMethod.PUT)
     public OrganizationData update(@RequestBody OrganizationForm form) throws ApiException {
         return organizationDto.update(form);
-    }
-
-    @ApiOperation(value = "Get All Organizations")
-    @RequestMapping(value = "/orgs", method = RequestMethod.GET)
-    public List<OrganizationData> selectAllOrgs() {
-        return organizationDto.selectAll();
     }
 
     @ApiOperation(value = "Map organization to a schema")
@@ -259,22 +249,37 @@ public class AdminController {
         return customReportAccessDto.getAllDataByReport(reportId);
     }
 
+    @ApiOperation(value = "Change Log Level")
+    @RequestMapping(value = "/log", method = RequestMethod.PUT)
+    public void changeLogLevel(@RequestParam Level level) {
+        LogManager.getRootLogger().setLevel(level);
+    }
+
+
+    // Report admin APIs
+
+    @ApiOperation(value = "Get All Organizations")
+    @RequestMapping(value = "/orgs", method = RequestMethod.GET)
+    public List<OrganizationData> selectAllOrgs() {
+        return organizationDto.selectAll();
+    }
+
     @ApiOperation(value = "Request Report")
     @RequestMapping(value = "/request-report/orgs/{orgId}", method = RequestMethod.POST)
     public void requestReport(@RequestBody ReportRequestForm form, @PathVariable Integer orgId) throws ApiException {
         reportRequestDto.requestReportForAnyOrg(form, orgId);
     }
 
+    @ApiOperation(value = "Get Reports")
+    @RequestMapping(value = "/reports/orgs/{orgId}", method = RequestMethod.GET)
+    public List<ReportData> selectByOrgId(@PathVariable Integer orgId) throws ApiException {
+        return reportDto.selectByOrg(orgId);
+    }
+
     @ApiOperation(value = "Select controls for a report for given organization")
     @RequestMapping(value = "/orgs/{orgId}/reports/{reportId}/controls", method = RequestMethod.GET)
     public List<InputControlData> selectByReportId(@PathVariable Integer reportId, @PathVariable Integer orgId) throws ApiException {
         return inputControlDto.selectForReport(reportId, orgId);
-    }
-
-    @ApiOperation(value = "Change Log Level")
-    @RequestMapping(value = "/log", method = RequestMethod.PUT)
-    public void changeLogLevel(@RequestParam Level level) {
-        LogManager.getRootLogger().setLevel(level);
     }
 
 }
