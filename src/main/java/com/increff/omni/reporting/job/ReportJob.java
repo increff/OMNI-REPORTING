@@ -9,10 +9,12 @@ import com.nextscm.commons.spring.common.ApiException;
 import lombok.extern.log4j.Log4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 
+import javax.persistence.OptimisticLockException;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -42,8 +44,6 @@ public class ReportJob {
     @Scheduled(fixedDelay = 1000)
     public void runReports()
             throws IOException, ApiException, InvocationTargetException, NoSuchMethodException, IllegalAccessException {
-        if(!properties.getIsRunScheduler())
-            return;
         // Get all the tasks pending for execution + Tasks that got stuck in processing
         int limitForEligibleRequest = getLimitForEligibleRequests();
         List<ReportRequestPojo> reportRequestPojoList = api.getEligibleRequests(limitForEligibleRequest);
@@ -74,11 +74,16 @@ public class ReportJob {
         }
     }
 
-    @Scheduled(fixedDelay = 1000)
+    @Scheduled(fixedDelay = 60 * 1000)
     public void markJobsStuck() {
-        if(!properties.getIsRunScheduler())
-            return;
-        api.markStuck(properties.getStuckReportTime());
+        List<ReportRequestPojo> stuckRequests = api.getStuckRequests(properties.getStuckReportTime());
+        stuckRequests.forEach(s -> {
+            try {
+                api.markStuck(s);
+            } catch (OptimisticLockException | ObjectOptimisticLockingFailureException e) {
+                log.debug("Error occurred while marking report in progress for request id : " + s.getId(), e);
+            }
+        });
     }
 
     @Scheduled(fixedDelay = 3600 * 1000)

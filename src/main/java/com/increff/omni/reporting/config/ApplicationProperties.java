@@ -45,9 +45,6 @@ public class ApplicationProperties {
     @Value("${query.outDir:omni-reporting-files}")
     private String outDir;
 
-    @Value("${scheduler.run}")
-    private Boolean isRunScheduler;
-
     @Value("${reporting.version}")
     private String version;
 

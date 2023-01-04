@@ -7,7 +7,6 @@ jdbc.password=
 hibernate.hbm2ddl.auto=
 
 # GCP properties
-gcp.baseUrl=
 gcp.bucketName=
 gcp.filePath=
 

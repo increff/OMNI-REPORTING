@@ -14,9 +14,11 @@ import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
 import lombok.extern.log4j.Log4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import javax.persistence.OptimisticLockException;
 import java.io.*;
 import java.nio.file.Files;
 import java.util.*;
@@ -48,8 +50,11 @@ public class ReportTask {
     @Async("jobExecutor")
     public void runAsync(ReportRequestPojo pojo) throws ApiException, IOException {
         // mark as processing - locking
-        api.markProcessingIfEligible(pojo.getId());
-
+        try {
+            api.markProcessingIfEligible(pojo.getId());
+        } catch (OptimisticLockException | ObjectOptimisticLockingFailureException | ApiException e) {
+            log.debug("Error occurred while marking report in progress for request id : " + pojo.getId(), e);
+        }
         // process
         ReportRequestPojo reportRequestPojo = api.getCheck(pojo.getId());
         List<ReportInputParamsPojo> reportInputParamsPojoList = reportInputParamsApi

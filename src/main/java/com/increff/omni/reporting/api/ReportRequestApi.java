@@ -54,9 +54,9 @@ public class ReportRequestApi extends AbstractApi {
             throw new ApiException(ApiStatus.UNKNOWN_ERROR, "Task not in eligible state");
     }
 
-    public void markStuck(Integer stuckReportTime) {
-        List<ReportRequestPojo> stuck = dao.getStuckReports(stuckReportTime);
-        stuck.forEach(s -> s.setStatus(ReportRequestStatus.STUCK));
+    public void markStuck(ReportRequestPojo s) {
+        ReportRequestPojo p = dao.select(s.getId());
+        p.setStatus(ReportRequestStatus.STUCK);
     }
 
     public void updateStatus(Integer id, ReportRequestStatus status, String filePath, Integer noOfRows, Double fileSize)
@@ -81,5 +81,9 @@ public class ReportRequestApi extends AbstractApi {
         reportRequestPojo.setFileSize(fileSize);
         reportRequestPojo.setNoOfRows(noOfRows);
         dao.update(reportRequestPojo);
+    }
+
+    public List<ReportRequestPojo> getStuckRequests(Integer stuckReportTime) {
+        return dao.getStuckReports(stuckReportTime);
     }
 }

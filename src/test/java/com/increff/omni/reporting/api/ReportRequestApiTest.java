@@ -103,8 +103,9 @@ public class ReportRequestApiTest extends AbstractTest {
     @Test
     public void testMarkStuck() {
         commonSetup();
-        api.markStuck(10);
-        List<ReportRequestPojo> pojoList = dao.selectMultiple("status", ReportRequestStatus.STUCK);
+        List<ReportRequestPojo> pojoList = api.getStuckRequests(10);
+        api.markStuck(pojoList.get(0));
+        pojoList = dao.selectMultiple("status", ReportRequestStatus.STUCK);
         assertEquals(2, pojoList.size());
         assertEquals(100002, pojoList.get(0).getReportId().intValue());
         assertEquals(100001, pojoList.get(0).getOrgId().intValue());
