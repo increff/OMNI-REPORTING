@@ -42,7 +42,6 @@ public class ReportApi extends AbstractAuditApi {
         ReportPojo existing = getCheck(pojo.getId());
         existing.setDirectoryId(pojo.getDirectoryId());
         existing.setName(pojo.getName());
-        existing.setSchemaVersionId(pojo.getSchemaVersionId());
         existing.setType(pojo.getType());
         existing.setIsEnabled(pojo.getIsEnabled());
         dao.update(existing);

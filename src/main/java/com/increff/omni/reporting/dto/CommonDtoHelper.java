@@ -35,6 +35,17 @@ public class CommonDtoHelper {
         return params;
     }
 
+    public static void sortBasedOnReportControlMappedTime(List<InputControlData> inputControlDataList,
+                                                          List<ReportControlsPojo> reportControlsPojos) {
+        inputControlDataList.sort((o1, o2) -> {
+            ReportControlsPojo p1 = reportControlsPojos.stream().filter(r -> r.getControlId().equals(o1.getId()))
+                    .collect(Collectors.toList()).get(0);
+            ReportControlsPojo p2 = reportControlsPojos.stream().filter(r -> r.getControlId().equals(o2.getId()))
+                    .collect(Collectors.toList()).get(0);
+            return Objects.equals(p1.getId(), p2.getId()) ? 0 : (p1.getId() > p2.getId() ? 1 : -1);
+        });
+    }
+
     public static String massageQuery(String query, Integer maxExecutionTime) {
         return "" //
                 + "SET SESSION MAX_EXECUTION_TIME=" + maxExecutionTime * 60 * 1000 + ";\n" //
