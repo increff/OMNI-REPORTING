@@ -1,5 +1,6 @@
 package com.increff.omni.reporting.model.form;
 
+import com.increff.omni.reporting.model.constants.DateType;
 import com.increff.omni.reporting.model.constants.InputControlScope;
 import com.increff.omni.reporting.model.constants.InputControlType;
 import lombok.Getter;
@@ -27,6 +28,8 @@ public class InputControlForm {
 
     @NotNull
     private Integer schemaVersionId;
+
+    private DateType dateType;
 
     private Integer reportId;
 

@@ -3,6 +3,7 @@ package com.increff.omni.reporting.api;
 import com.increff.omni.reporting.dao.InputControlDao;
 import com.increff.omni.reporting.dao.InputControlQueryDao;
 import com.increff.omni.reporting.dao.InputControlValuesDao;
+import com.increff.omni.reporting.model.constants.DateType;
 import com.increff.omni.reporting.model.constants.InputControlScope;
 import com.increff.omni.reporting.model.constants.InputControlType;
 import com.increff.omni.reporting.pojo.InputControlPojo;
@@ -17,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -37,6 +39,7 @@ public class InputControlApi extends AbstractApi {
     public InputControlPojo add(InputControlPojo pojo, InputControlQueryPojo queryPojo,
                                 List<InputControlValuesPojo> valuesPojo) throws ApiException {
         validateControlAddition(pojo);
+        setDateType(pojo);
         dao.persist(pojo);
         addQueryOrValues(queryPojo, pojo, valuesPojo);
         return pojo;
@@ -48,6 +51,7 @@ public class InputControlApi extends AbstractApi {
         validateControlAdditionForEdit(pojo);
         validateTypeTransition(ex, pojo);
         copyToExisting(ex, pojo);
+        setDateType(ex);
         dao.update(ex);
         InputControlQueryPojo exQuery = selectControlQuery(pojo.getId());
         if (Objects.nonNull(exQuery)) {
@@ -116,10 +120,12 @@ public class InputControlApi extends AbstractApi {
                 pojo.getSchemaVersionId());
 
         if (existingByName != null || existingByParam != null)
-            throw new ApiException(ApiStatus.BAD_DATA, "Cannot create input control with same" + " display name or param name");
+            throw new ApiException(ApiStatus.BAD_DATA,
+                    "Cannot create input control with same" + " display name or param name");
     }
 
-    private void addQueryOrValues(InputControlQueryPojo queryPojo, InputControlPojo pojo, List<InputControlValuesPojo> valuesList) {
+    private void addQueryOrValues(InputControlQueryPojo queryPojo, InputControlPojo pojo,
+                                  List<InputControlValuesPojo> valuesList) {
         if (Objects.nonNull(queryPojo)) {
             queryPojo.setControlId(pojo.getId());
             queryDao.persist(queryPojo);
@@ -140,19 +146,30 @@ public class InputControlApi extends AbstractApi {
         InputControlPojo existingByParam = getByScopeAndParamName(InputControlScope.GLOBAL, pojo.getParamName(),
                 pojo.getSchemaVersionId());
 
-        if ((existingByName != null && !existingByName.getId().equals(pojo.getId())) || (existingByParam != null && !existingByParam.getId().equals(pojo.getId())))
-            throw new ApiException(ApiStatus.BAD_DATA, "Cannot create input control with same" + " display name or param name");
+        if ((existingByName != null && !existingByName.getId().equals(pojo.getId())) ||
+                (existingByParam != null && !existingByParam.getId().equals(pojo.getId())))
+            throw new ApiException(ApiStatus.BAD_DATA,
+                    "Cannot create input control with same" + " display name or param name");
     }
 
     private void validateTypeTransition(InputControlPojo ex, InputControlPojo pojo) throws ApiException {
-        if(ex.getType().equals(InputControlType.ACCESS_CONTROLLED_MULTI_SELECT) &&
+        if (ex.getType().equals(InputControlType.ACCESS_CONTROLLED_MULTI_SELECT) &&
                 !pojo.getType().equals(InputControlType.ACCESS_CONTROLLED_MULTI_SELECT)) {
             throw new ApiException(ApiStatus.BAD_DATA, "Access controlled multi select can't be updated to any other " +
                     "type");
-        } else if(pojo.getType().equals(InputControlType.ACCESS_CONTROLLED_MULTI_SELECT) &&
+        } else if (pojo.getType().equals(InputControlType.ACCESS_CONTROLLED_MULTI_SELECT) &&
                 !ex.getType().equals(InputControlType.ACCESS_CONTROLLED_MULTI_SELECT)) {
             throw new ApiException(ApiStatus.BAD_DATA, "No other control can be migrated to access controlled multi " +
                     "select");
+        }
+    }
+
+    private void setDateType(InputControlPojo pojo) {
+        if (Arrays.asList(InputControlType.DATE_TIME, InputControlType.DATE).contains(pojo.getType())) {
+            if (Objects.isNull(pojo.getDateType()))
+                pojo.setDateType(DateType.NORMAL);
+        } else {
+            pojo.setDateType(null);
         }
     }
 
