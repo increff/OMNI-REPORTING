@@ -21,6 +21,7 @@ import org.springframework.util.CollectionUtils;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.increff.omni.reporting.dto.CommonDtoHelper.sortBasedOnReportControlMappedTime;
 import static com.increff.omni.reporting.dto.CommonDtoHelper.updateValidationTypes;
 
 @Service
@@ -94,6 +95,7 @@ public class InputControlDto extends AbstractDto {
         List<InputControlPojo> pojos = api.selectByIds(controlIds);
 
         List<InputControlData> inputControlDataList = getInputControlDatas(pojos, orgId);
+        sortBasedOnReportControlMappedTime(inputControlDataList, reportControlsPojos);
         updateValidationTypes(inputControlDataList, validationGroupPojoList, reportControlsPojos);
         return inputControlDataList;
     }
