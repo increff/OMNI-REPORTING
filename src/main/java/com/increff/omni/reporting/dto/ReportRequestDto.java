@@ -23,7 +23,6 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -86,15 +85,17 @@ public class ReportRequestDto extends AbstractDto {
         checkValid(form);
         OrganizationPojo organizationPojo = organizationApi.getCheck(orgId);
         Map<String, String> inputParamsMap = UserPrincipalUtil.getCompleteMapWithAccessControl(form.getParamMap());
+        Map<String, List<String>> inputDisplayMap = new HashMap<>();
         ReportRequestPojo pojo = CommonDtoHelper.getReportRequestPojo(form, orgId, getUserId());
         ReportPojo reportPojo = reportApi.getCheck(pojo.getReportId());
         ReportQueryPojo reportQueryPojo = queryApi.getByReportId(reportPojo.getId());
         if (Objects.isNull(reportQueryPojo))
             throw new ApiException(ApiStatus.BAD_DATA, "No query defined for report : " + reportPojo.getName());
         validateCustomReportAccess(reportPojo, orgId);
-        validateInputParamValues(reportPojo, form.getParamMap(), inputParamsMap, orgId);
+        validateInputParamValues(reportPojo, form.getParamMap(), inputParamsMap, orgId, inputDisplayMap);
+        Map<String, String> inputDisplayStringMap = UserPrincipalUtil.getStringToStringParamMap(inputDisplayMap);
         List<ReportInputParamsPojo> reportInputParamsPojoList =
-                CommonDtoHelper.getReportInputParamsPojoList(inputParamsMap, form.getTimezone(), orgId);
+                CommonDtoHelper.getReportInputParamsPojoList(inputParamsMap, form.getTimezone(), orgId, inputDisplayStringMap);
         flow.requestReport(pojo, reportInputParamsPojoList);
         flow.saveAudit(reportPojo.getId().toString(), AuditActions.REQUEST_REPORT.toString(), "Request Report",
                 "Report request submitted for organization : " + organizationPojo.getName(), getUserName());
@@ -186,7 +187,8 @@ public class ReportRequestDto extends AbstractDto {
     }
 
     private void validateInputParamValues(ReportPojo reportPojo, Map<String, List<String>> inputParams,
-                                          Map<String, String> params, int orgId) throws ApiException {
+                                          Map<String, String> params, int orgId,
+                                          Map<String, List<String>> inputDisplayMap) throws ApiException {
         List<ReportControlsPojo> reportControlsPojoList = reportControlsApi.getByReportId(reportPojo.getId());
         List<InputControlPojo> inputControlPojoList = controlApi.selectByIds(reportControlsPojoList.stream()
                 .map(ReportControlsPojo::getControlId).collect(Collectors.toList()));
@@ -200,6 +202,7 @@ public class ReportRequestDto extends AbstractDto {
                 }
                 List<String> values;
                 Map<String, String> allowedValuesMap;
+                List<String> displayNames = new ArrayList<>();
                 switch (i.getType()) {
                     case TEXT:
                     case MULTI_TEXT:
@@ -233,6 +236,8 @@ public class ReportRequestDto extends AbstractDto {
                         if (!allowedValuesMap.containsKey(s))
                             throw new ApiException(ApiStatus.BAD_DATA, values.get(0) + " is not allowed for filter : "
                                     + i.getDisplayName());
+                        displayNames.add(allowedValuesMap.get(s));
+                        inputDisplayMap.put(i.getParamName(), displayNames);
                         break;
                     case ACCESS_CONTROLLED_MULTI_SELECT:
                         values = inputParams.get(i.getParamName());
@@ -241,7 +246,9 @@ public class ReportRequestDto extends AbstractDto {
                             if (!allowedValuesMap.containsKey(v))
                                 throw new ApiException(ApiStatus.BAD_DATA, v + " is not allowed for filter : "
                                         + i.getDisplayName());
+                            displayNames.add(allowedValuesMap.get(v));
                         }
+                        inputDisplayMap.put(i.getParamName(), displayNames);
                         break;
                     case MULTI_SELECT:
                         values = inputParams.get(i.getParamName());
@@ -254,7 +261,9 @@ public class ReportRequestDto extends AbstractDto {
                             if (!allowedValuesMap.containsKey(v))
                                 throw new ApiException(ApiStatus.BAD_DATA, v + " is not allowed for filter : "
                                         + i.getDisplayName());
+                            displayNames.add(allowedValuesMap.get(v));
                         }
+                        inputDisplayMap.put(i.getParamName(), displayNames);
                         break;
                     default:
                         throw new ApiException(ApiStatus.BAD_DATA, "Invalid Input Control Type");
@@ -318,8 +327,8 @@ public class ReportRequestDto extends AbstractDto {
                 d.setType(controlPojo.get().getType());
                 d.setParamName(controlPojo.get().getParamName());
                 d.setDisplayName(controlPojo.get().getDisplayName());
-                List<String> values = Objects.isNull(reportInputParamsPojo.getParamValue()) ? new ArrayList<>() :
-                        Arrays.stream(reportInputParamsPojo.getParamValue().split(
+                List<String> values = Objects.isNull(reportInputParamsPojo.getDisplayValue()) ? new ArrayList<>() :
+                        Arrays.stream(reportInputParamsPojo.getDisplayValue().split(
                                         ","))
                                 .map(this::getValueFromQuotes).collect(Collectors.toList());
                 d.setValues(values);

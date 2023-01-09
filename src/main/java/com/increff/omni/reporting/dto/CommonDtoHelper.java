@@ -9,7 +9,6 @@ import com.increff.omni.reporting.pojo.*;
 import com.increff.omni.reporting.util.SqlCmd;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
-import org.apache.commons.text.StringSubstitutor;
 
 import java.io.File;
 import java.time.LocalDateTime;
@@ -159,12 +158,13 @@ public class CommonDtoHelper {
     }
 
     public static List<ReportInputParamsPojo> getReportInputParamsPojoList(Map<String, String> paramMap
-            , String timeZone, Integer orgId) {
+            , String timeZone, Integer orgId, Map<String, String> inputDisplayStringMap) {
         List<ReportInputParamsPojo> reportInputParamsPojoList = new ArrayList<>();
         paramMap.forEach((k, v) -> {
             ReportInputParamsPojo reportInputParamsPojo = new ReportInputParamsPojo();
             reportInputParamsPojo.setParamKey(k);
             reportInputParamsPojo.setParamValue(v);
+            reportInputParamsPojo.setDisplayValue(inputDisplayStringMap.getOrDefault(k, v));
             reportInputParamsPojoList.add(reportInputParamsPojo);
         });
         ReportInputParamsPojo timeZoneParam = new ReportInputParamsPojo();

@@ -1,5 +1,6 @@
 package com.increff.omni.reporting.pojo;
 
+import com.increff.omni.reporting.model.constants.DateType;
 import com.increff.omni.reporting.model.constants.InputControlScope;
 import com.increff.omni.reporting.model.constants.InputControlType;
 import lombok.Getter;
@@ -24,7 +25,7 @@ public class InputControlPojo extends AbstractVersionedPojo{
     private String displayName;
 
     @Column(nullable = false)
-    private String paramName; // Parameter name in Report query For e.g. itemId in case of query contains ${itemId}
+    private String paramName; // Parameter name in Report query
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
@@ -33,6 +34,9 @@ public class InputControlPojo extends AbstractVersionedPojo{
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private InputControlType type;
+
+    @Enumerated(EnumType.STRING)
+    private DateType dateType;
 
     @Column(nullable = false)
     private Integer schemaVersionId;

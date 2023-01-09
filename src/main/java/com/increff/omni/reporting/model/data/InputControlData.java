@@ -1,5 +1,6 @@
 package com.increff.omni.reporting.model.data;
 
+import com.increff.omni.reporting.model.constants.DateType;
 import com.increff.omni.reporting.model.constants.InputControlScope;
 import com.increff.omni.reporting.model.constants.InputControlType;
 import com.increff.omni.reporting.model.constants.ValidationType;
@@ -20,6 +21,7 @@ public class InputControlData {
     private InputControlType type;
     private String query;
     private String schemaVersionName;
+    private DateType dateType;
     private List<String> values;
     private List<ValidationType> validationTypes = new ArrayList<>();
     private List<InputControlDataValue> options = new ArrayList<>();
