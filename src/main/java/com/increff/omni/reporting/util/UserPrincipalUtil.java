@@ -45,7 +45,7 @@ public class UserPrincipalUtil {
         return getStringToStringParamMap(accessControlMap);
     }
 
-    private static Map<String, String> getStringToStringParamMap(Map<String, List<String>> params) {
+    public static Map<String, String> getStringToStringParamMap(Map<String, List<String>> params) {
         if(params.isEmpty())
             return new HashMap<>();
         Map<String, String> finalMap = new HashMap<>();
