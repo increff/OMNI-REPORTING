@@ -167,7 +167,7 @@ public class InputControlApi extends AbstractApi {
     private void setDateType(InputControlPojo pojo) {
         if (Arrays.asList(InputControlType.DATE_TIME, InputControlType.DATE).contains(pojo.getType())) {
             if (Objects.isNull(pojo.getDateType()))
-                pojo.setDateType(DateType.NORMAL);
+                pojo.setDateType(DateType.START_DATE);
         } else {
             pojo.setDateType(null);
         }
