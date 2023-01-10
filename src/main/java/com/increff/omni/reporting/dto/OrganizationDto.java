@@ -5,14 +5,18 @@ import com.increff.omni.reporting.model.constants.AuditActions;
 import com.increff.omni.reporting.model.data.OrgConnectionData;
 import com.increff.omni.reporting.model.data.OrgSchemaData;
 import com.increff.omni.reporting.model.data.OrganizationData;
+import com.increff.omni.reporting.model.form.IntegrationOrgConnectionForm;
+import com.increff.omni.reporting.model.form.IntegrationOrgSchemaForm;
 import com.increff.omni.reporting.model.form.OrganizationForm;
 import com.increff.omni.reporting.pojo.*;
 import com.nextscm.commons.spring.common.ApiException;
+import com.nextscm.commons.spring.common.ApiStatus;
 import com.nextscm.commons.spring.common.ConvertUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class OrganizationDto extends AbstractDto {
@@ -68,6 +72,21 @@ public class OrganizationDto extends AbstractDto {
         return CommonDtoHelper.getOrgSchemaData(pojo, schemaVersionPojo);
     }
 
+    public OrgSchemaData mapToSchema(IntegrationOrgSchemaForm form) throws ApiException {
+        OrganizationPojo organizationPojo = api.getByName(form.getOrgName());
+        if(Objects.isNull(organizationPojo)) {
+            throw new ApiException(ApiStatus.BAD_DATA,
+                    "Organization is not available with name : " + form.getOrgName());
+        }
+        SchemaVersionPojo schemaVersionPojo = schemaVersionApi.getByName(form.getSchemaVersionName());
+        if(Objects.isNull(schemaVersionPojo)) {
+            throw new ApiException(ApiStatus.BAD_DATA,
+                    "Schema is not available with name : " + form.getSchemaVersionName());
+        }
+        OrgSchemaVersionPojo pojo = createPojo(organizationPojo, schemaVersionPojo);
+        return CommonDtoHelper.getOrgSchemaData(pojo, schemaVersionPojo);
+    }
+
     public List<OrgSchemaData> selectAllOrgSchema(){
         List<OrgSchemaVersionPojo> pojos = orgSchemaApi.selectAll();
         List<SchemaVersionPojo> allPojos = schemaVersionApi.selectAll();
@@ -92,6 +111,21 @@ public class OrganizationDto extends AbstractDto {
         return CommonDtoHelper.getOrgConnectionData(pojo, connectionPojo);
     }
 
+    public OrgConnectionData mapToConnection(IntegrationOrgConnectionForm form) throws ApiException {
+        OrganizationPojo organizationPojo = api.getByName(form.getOrgName());
+        if(Objects.isNull(organizationPojo)) {
+            throw new ApiException(ApiStatus.BAD_DATA,
+                    "Organization is not available with name : " + form.getOrgName());
+        }
+        ConnectionPojo connectionPojo = connectionApi.getByName(form.getConnectionName());
+        if(Objects.isNull(connectionPojo)) {
+            throw new ApiException(ApiStatus.BAD_DATA,
+                    "Connection is not available with name : " + form.getConnectionName());
+        }
+        OrgConnectionPojo pojo = createPojo(organizationPojo, connectionPojo);
+        return CommonDtoHelper.getOrgConnectionData(pojo, connectionPojo);
+    }
+
     private OrgSchemaVersionPojo createPojo(OrganizationPojo orgPojo, SchemaVersionPojo schemaVersionPojo) {
         OrgSchemaVersionPojo pojo = new OrgSchemaVersionPojo();
         pojo.setOrgId(orgPojo.getId());
@@ -105,4 +139,5 @@ public class OrganizationDto extends AbstractDto {
         pojo.setConnectionId(connectionPojo.getId());
         return orgConnectionApi.map(pojo);
     }
+
 }
