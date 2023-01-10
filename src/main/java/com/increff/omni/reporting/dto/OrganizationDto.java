@@ -83,6 +83,11 @@ public class OrganizationDto extends AbstractDto {
             throw new ApiException(ApiStatus.BAD_DATA,
                     "Schema is not available with name : " + form.getSchemaVersionName());
         }
+        orgSchemaApi.saveAudit(organizationPojo.getId().toString(),
+                AuditActions.ORGANIZATION_SCHEMA_VERSION_MAPPING.toString(),
+                "Map Org to Schema Version", "Mapping org : " + organizationPojo.getName() + " to schema " +
+                        "version : " + schemaVersionPojo.getName(),
+                getUserName());
         OrgSchemaVersionPojo pojo = createPojo(organizationPojo, schemaVersionPojo);
         return CommonDtoHelper.getOrgSchemaData(pojo, schemaVersionPojo);
     }
@@ -122,6 +127,11 @@ public class OrganizationDto extends AbstractDto {
             throw new ApiException(ApiStatus.BAD_DATA,
                     "Connection is not available with name : " + form.getConnectionName());
         }
+        orgConnectionApi.saveAudit(organizationPojo.getId().toString(),
+                AuditActions.ORGANIZATION_CONNECTION_MAPPING.toString(),
+                "Map Org to Connection", "Mapping org : " + organizationPojo.getName() +
+                        " to connection : " + connectionPojo.getName(),
+                getUserName());
         OrgConnectionPojo pojo = createPojo(organizationPojo, connectionPojo);
         return CommonDtoHelper.getOrgConnectionData(pojo, connectionPojo);
     }
