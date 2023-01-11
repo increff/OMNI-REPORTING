@@ -43,8 +43,12 @@ public class SchemaVersionApi extends AbstractApi {
         return existing;
     }
 
+    public SchemaVersionPojo getByName(String name) {
+        return dao.select("name", name);
+    }
+
     private void validateForEdit(SchemaVersionPojo pojo) throws ApiException {
-        SchemaVersionPojo existing = dao.select("name", pojo.getName());
+        SchemaVersionPojo existing = getByName(pojo.getName());
         if(existing != null && !Objects.equals(existing.getId(), pojo.getId()))
             throw new ApiException(ApiStatus.BAD_DATA, "Schema with same name already present");
     }

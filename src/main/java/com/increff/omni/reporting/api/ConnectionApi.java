@@ -42,8 +42,12 @@ public class ConnectionApi extends AbstractAuditApi {
         return pojo;
     }
 
+    public ConnectionPojo getByName(String name) {
+        return dao.select("name", name);
+    }
+
     private void validateForEdit(ConnectionPojo pojo) throws ApiException {
-        ConnectionPojo existing = dao.select("name", pojo.getName());
+        ConnectionPojo existing = getByName(pojo.getName());
         if(existing != null && !Objects.equals(existing.getId(), pojo.getId()))
             throw new ApiException(ApiStatus.BAD_DATA, "Connection with same name already present");
     }

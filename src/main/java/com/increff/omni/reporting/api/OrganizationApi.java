@@ -43,11 +43,15 @@ public class OrganizationApi extends AbstractApi {
         return dao.selectAll();
     }
 
+    public OrganizationPojo getByName(String name) {
+        return dao.select("name", name);
+    }
+
     private void validate(OrganizationPojo pojo) throws ApiException {
         OrganizationPojo existing = dao.select(pojo.getId());
         checkNull(existing, "Organization already present with requested id");
 
-        existing = dao.select("name", pojo.getName());
+        existing = getByName(pojo.getName());
         checkNull(existing, "Organization already present with requested name");
     }
 
