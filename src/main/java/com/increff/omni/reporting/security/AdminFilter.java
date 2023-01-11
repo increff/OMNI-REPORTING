@@ -28,7 +28,8 @@ public class AdminFilter extends GenericFilterBean {
     private static final String APP_ADMIN = "app.admin";
 
     @Override
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+            throws IOException, ServletException {
         HttpServletResponse httpResponse = (HttpServletResponse) response;
         UserPrincipal userPrincipal = SecurityUtil.getPrincipal();
         if (userPrincipal == null) {
@@ -36,10 +37,8 @@ public class AdminFilter extends GenericFilterBean {
             return;
         }
         if (!properties.getIncreffOrgId().equals(userPrincipal.getDomainId())) {
-            if (userPrincipal.getRoles().contains(APP_ADMIN)) {
-                unAuthenticateCall(HttpStatus.FORBIDDEN, httpResponse, "This request is only accessible by Increff Admins");
-                return;
-            }
+            unAuthenticateCall(HttpStatus.FORBIDDEN, httpResponse, "This request is only accessible by Increff Admins");
+            return;
         }
         chain.doFilter(request, response);
     }
