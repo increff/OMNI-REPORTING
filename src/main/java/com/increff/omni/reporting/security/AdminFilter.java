@@ -25,8 +25,6 @@ public class AdminFilter extends GenericFilterBean {
     @Autowired
     private ApplicationProperties properties;
 
-    private static final String APP_ADMIN = "app.admin";
-
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
