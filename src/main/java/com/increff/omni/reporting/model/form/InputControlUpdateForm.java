@@ -1,5 +1,6 @@
 package com.increff.omni.reporting.model.form;
 
+import com.increff.omni.reporting.model.constants.DateType;
 import com.increff.omni.reporting.model.constants.InputControlType;
 import lombok.Getter;
 import lombok.Setter;
@@ -22,6 +23,8 @@ public class InputControlUpdateForm {
     private InputControlType type;
 
     private String query;
+
+    private DateType dateType;
 
     private List<String> values = new ArrayList<>();
 

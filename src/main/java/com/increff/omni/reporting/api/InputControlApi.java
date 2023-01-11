@@ -51,7 +51,7 @@ public class InputControlApi extends AbstractApi {
         validateControlAdditionForEdit(pojo);
         validateTypeTransition(ex, pojo);
         copyToExisting(ex, pojo);
-        setDateType(ex);
+        setDateTypeForEdit(ex, pojo);
         dao.update(ex);
         InputControlQueryPojo exQuery = selectControlQuery(pojo.getId());
         if (Objects.nonNull(exQuery)) {
@@ -170,6 +170,14 @@ public class InputControlApi extends AbstractApi {
                 pojo.setDateType(DateType.START_DATE);
         } else {
             pojo.setDateType(null);
+        }
+    }
+
+    private void setDateTypeForEdit(InputControlPojo ex, InputControlPojo pojo) {
+        if (Arrays.asList(InputControlType.DATE_TIME, InputControlType.DATE).contains(ex.getType())) {
+            ex.setDateType(pojo.getDateType());
+        } else {
+            ex.setDateType(null);
         }
     }
 

@@ -2,6 +2,7 @@ package com.increff.omni.reporting.dto;
 
 import com.increff.omni.reporting.api.ReportApi;
 import com.increff.omni.reporting.config.AbstractTest;
+import com.increff.omni.reporting.model.constants.DateType;
 import com.increff.omni.reporting.model.constants.InputControlScope;
 import com.increff.omni.reporting.model.constants.InputControlType;
 import com.increff.omni.reporting.model.constants.ReportType;
@@ -18,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 import static com.increff.omni.reporting.helper.ConnectionTestHelper.getConnectionForm;
@@ -132,13 +134,36 @@ public class InputControlDtoTest extends AbstractTest {
                 , InputControlType.TEXT, new ArrayList<>(), null, null, schemaVersionId);
         InputControlData data1 = dto.add(form);
         InputControlUpdateForm updateForm = getInputControlUpdateForm("Client id 2", "clientId2"
-        , InputControlType.NUMBER, new ArrayList<>(), null);
+        , InputControlType.DATE, new ArrayList<>(), null);
+        updateForm.setDateType(DateType.END_DATE);
         dto.update(data1.getId(), updateForm);
         InputControlData data = dto.getById(data1.getId());
         assertEquals("Client id 2", data.getDisplayName());
         assertEquals("clientId2", data.getParamName());
         assertEquals(InputControlScope.GLOBAL, data.getScope());
-        assertEquals(InputControlType.NUMBER, data.getType());
+        assertEquals(InputControlType.DATE, data.getType());
+        assertEquals(DateType.END_DATE, data.getDateType());
+        assertNull(data.getQuery());
+        assertEquals(0, data.getOptions().size());
+    }
+
+    @Test
+    public void testUpdateControlDateType() throws ApiException {
+        commonSetup();
+        InputControlForm form = getInputControlForm("Client Id", "clientId", InputControlScope.GLOBAL
+                , InputControlType.DATE, new ArrayList<>(), null, null, schemaVersionId);
+        InputControlData data1 = dto.add(form);
+        assertEquals(DateType.START_DATE, data1.getDateType());
+        InputControlUpdateForm updateForm = getInputControlUpdateForm("Client id 2", "clientId2"
+                , InputControlType.DATE_TIME, new ArrayList<>(), null);
+        updateForm.setDateType(DateType.END_DATE);
+        dto.update(data1.getId(), updateForm);
+        InputControlData data = dto.getById(data1.getId());
+        assertEquals("Client id 2", data.getDisplayName());
+        assertEquals("clientId2", data.getParamName());
+        assertEquals(InputControlScope.GLOBAL, data.getScope());
+        assertEquals(InputControlType.DATE_TIME, data.getType());
+        assertEquals(DateType.END_DATE, data.getDateType());
         assertNull(data.getQuery());
         assertEquals(0, data.getOptions().size());
     }
