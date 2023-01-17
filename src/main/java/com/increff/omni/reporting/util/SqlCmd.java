@@ -7,7 +7,6 @@ import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
 import lombok.extern.log4j.Log4j;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.text.StringSubstitutor;
 
 import java.io.IOException;
 import java.lang.ProcessBuilder.Redirect;
@@ -22,7 +21,8 @@ public class SqlCmd {
         processQuery(sp, true, maxExecutionTime);
     }
 
-    public static void processQuery(SqlParams sp, Boolean isUserPrincipalAvailable, Integer maxExecutionTime) throws ApiException {
+    public static void processQuery(SqlParams sp, Boolean isUserPrincipalAvailable, Integer maxExecutionTime)
+            throws ApiException {
         if (isUserPrincipalAvailable) addAccessControlMap(sp, maxExecutionTime);
         String[] cmd = getQueryCmd(sp);
         Redirect redirectAll = Redirect.appendTo(sp.getOutFile());
@@ -80,23 +80,30 @@ public class SqlCmd {
     }
 
     private static String getValueFromMethod(Map<String, String> inputParamMap, String f, String methodName) {
-        String paramKey;
-        String paramValue;
+        String paramKey, paramValue, columnName, operator, condition;
         String finalString = "{{" + f + "}}";
         switch (methodName) {
             case "filter":
                 paramKey = f.split("\\(")[1].split(",")[0].trim();
                 paramValue = inputParamMap.get(paramKey);
-                String columnName = f.split("\\(")[1].split(",")[1].trim();
-                String operator = f.split("\\(")[1].split(",")[2].split("\\)")[0].trim();
+                columnName = f.split("\\(")[1].split(",")[1].trim();
+                operator = f.split("\\(")[1].split(",")[2].split("\\)")[0].trim();
                 finalString = QueryExecutionDto.filter(columnName, operator, paramValue);
                 break;
             case "replace":
                 paramKey = StringUtils.substringBetween(f, "(", ")").trim();
-                paramValue =  inputParamMap.get(paramKey);
+                paramValue = inputParamMap.get(paramKey);
                 if (Objects.nonNull(paramValue)) {
                     finalString = paramValue;
                 }
+                break;
+            case "filterAppend":
+                paramKey = f.split("\\(")[1].split(",")[0].trim();
+                paramValue = inputParamMap.get(paramKey);
+                columnName = f.split("\\(")[1].split(",")[1].trim();
+                operator = f.split("\\(")[1].split(",")[2].trim();
+                condition = f.split("\\(")[1].split(",")[3].split("\\)")[0].trim();
+                finalString = QueryExecutionDto.filterAppend(columnName, operator, paramValue, condition);
                 break;
         }
         return finalString;

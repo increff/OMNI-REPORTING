@@ -11,6 +11,14 @@ public class QueryExecutionDto extends AbstractDto {
     
     private final static String ALWAYS_TRUE = "1=1";
 
+    public static String filterAppend(String columnName, String operator, String paramValue, String condition) {
+        String filter = filter(columnName, operator, paramValue);
+        if(filter.equals(ALWAYS_TRUE))
+            return ALWAYS_TRUE;
+        else
+            return filter.concat(" ").concat(condition);
+    }
+
     public static String filter(String columnName, String operator, String paramValue) {
         if (Objects.isNull(paramValue))
             return ALWAYS_TRUE;
