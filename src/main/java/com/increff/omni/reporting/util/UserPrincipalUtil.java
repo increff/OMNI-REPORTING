@@ -61,6 +61,7 @@ public class UserPrincipalUtil {
                     fList.add(s);
                     continue;
                 }
+                s = s.replace("'", "\\'");
                 fList.add("'" + s + "'");
             }
             finalMap.put(entry.getKey(), String.join(",", fList));
