@@ -227,8 +227,11 @@ public class CommonDtoHelper {
     public static Map<Integer, List<ReportRequestPojo>> groupByOrgID(List<ReportRequestPojo> reportRequestPojoList) {
         Map<Integer, List<ReportRequestPojo>> orgToRequests = new HashMap<>();
         for (ReportRequestPojo r : reportRequestPojoList) {
-            if (orgToRequests.containsKey(r.getOrgId()))
-                orgToRequests.get(r.getOrgId()).add(r);
+            if (orgToRequests.containsKey(r.getOrgId())) {
+                List<ReportRequestPojo> newList = orgToRequests.get(r.getOrgId());
+                newList.add(r);
+                orgToRequests.put(r.getOrgId(), newList);
+            }
             else
                 orgToRequests.put(r.getOrgId(), Collections.singletonList(r));
         }
