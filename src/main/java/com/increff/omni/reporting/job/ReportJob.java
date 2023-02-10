@@ -5,7 +5,6 @@ import com.increff.omni.reporting.api.FolderApi;
 import com.increff.omni.reporting.api.ReportRequestApi;
 import com.increff.omni.reporting.config.ApplicationProperties;
 import com.increff.omni.reporting.pojo.ReportRequestPojo;
-import com.nextscm.commons.spring.common.ApiException;
 import lombok.extern.log4j.Log4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -15,8 +14,6 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 
 import javax.persistence.OptimisticLockException;
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -42,35 +39,38 @@ public class ReportJob {
     private Executor executor;
 
     @Scheduled(fixedDelay = 1000)
-    public void runReports()
-            throws IOException, ApiException, InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+    public void runReports() {
         // Get all the tasks pending for execution + Tasks that got stuck in processing
         int limitForEligibleRequest = getLimitForEligibleRequests();
         List<ReportRequestPojo> reportRequestPojoList = api.getEligibleRequests(limitForEligibleRequest);
         if (reportRequestPojoList.isEmpty())
             return;
 
-        sortBasedOnCreatedAt(reportRequestPojoList);
+        try {
+            sortBasedOnCreatedAt(reportRequestPojoList);
 
-        // Group by orgs
-        Map<Integer, List<ReportRequestPojo>> orgToRequests = groupByOrgID(reportRequestPojoList);
-        boolean flag = true;
-        while (flag) {
-            for (Map.Entry<Integer, List<ReportRequestPojo>> e : orgToRequests.entrySet()) {
-                // 1 from an org and then the other org
-                List<ReportRequestPojo> pojoList = new ArrayList<>(e.getValue());
-                Iterator<ReportRequestPojo> itr = pojoList.iterator();
-                if (!itr.hasNext()) {
-                    orgToRequests.remove(e.getKey());
-                    continue;
+            // Group by orgs
+            Map<Integer, List<ReportRequestPojo>> orgToRequests = groupByOrgID(reportRequestPojoList);
+            boolean flag = true;
+            while (flag) {
+                for (Map.Entry<Integer, List<ReportRequestPojo>> e : orgToRequests.entrySet()) {
+                    // 1 from an org and then the other org
+                    List<ReportRequestPojo> pojoList = new ArrayList<>(e.getValue());
+                    Iterator<ReportRequestPojo> itr = pojoList.iterator();
+                    if (!itr.hasNext()) {
+                        orgToRequests.remove(e.getKey());
+                        continue;
+                    }
+                    ReportRequestPojo reportRequestPojo = itr.next();
+                    reportTask.runAsync(reportRequestPojo);
+                    itr.remove();
+                    orgToRequests.put(e.getKey(), pojoList);
                 }
-                ReportRequestPojo reportRequestPojo = itr.next();
-                reportTask.runAsync(reportRequestPojo);
-                itr.remove();
-                orgToRequests.put(e.getKey(), pojoList);
+                if (orgToRequests.isEmpty())
+                    flag = false;
             }
-            if (orgToRequests.isEmpty())
-                flag = false;
+        } catch (Exception e) {
+            log.error("Error while running requests ", e);
         }
     }
 
