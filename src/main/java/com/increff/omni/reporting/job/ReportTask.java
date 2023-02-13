@@ -47,13 +47,55 @@ public class ReportTask {
     @Autowired
     private ApplicationProperties properties;
 
-    @Async("jobExecutor")
-    public void runAsync(ReportRequestPojo pojo) throws ApiException, IOException {
+    @Async("reportRequestExecutor")
+    public void runUserReportAsync(ReportRequestPojo pojo) throws ApiException, IOException {
         // mark as processing - locking
         try {
             api.markProcessingIfEligible(pojo.getId());
         } catch (OptimisticLockException | ObjectOptimisticLockingFailureException | ApiException e) {
             log.debug("Error occurred while marking report in progress for request id : " + pojo.getId(), e);
+            return;
+        }
+        // process
+        ReportRequestPojo reportRequestPojo = api.getCheck(pojo.getId());
+        List<ReportInputParamsPojo> reportInputParamsPojoList = reportInputParamsApi
+                .getInputParamsForReportRequest(reportRequestPojo.getId());
+        ReportPojo reportPojo = reportApi.getCheck(reportRequestPojo.getReportId());
+        ReportQueryPojo reportQueryPojo = reportQueryApi.getByReportId(reportPojo.getId());
+        if (Objects.isNull(reportQueryPojo))
+            throw new ApiException(ApiStatus.BAD_DATA, "Query is not defined for requested report : "
+                    + reportPojo.getName());
+        OrgConnectionPojo orgConnectionPojo = orgConnectionApi.getCheckByOrgId(reportRequestPojo.getOrgId());
+        ConnectionPojo connectionPojo = connectionApi.getCheck(orgConnectionPojo.getConnectionId());
+
+        // Creation of file
+        File file = folderApi.getFileForExtension(reportRequestPojo.getId(), ".tsv");
+        File errorFile = folderApi.getErrFile(reportRequestPojo.getId(), ".tsv");
+        Map<String, String> inputParamMap = getInputParamMapFromPojoList(reportInputParamsPojoList);
+        SqlParams sqlParams = CommonDtoHelper.convert(connectionPojo, reportQueryPojo, inputParamMap, file, errorFile,
+                properties.getMaxExecutionTime());
+        try {
+            String fQuery = SqlCmd.prepareQuery(inputParamMap, reportQueryPojo.getQuery(),
+                    properties.getMaxExecutionTime());
+            sqlParams.setQuery(fQuery);
+        } catch (Exception e) {
+            log.error("Report ID : " + pojo.getId() + " failed", e);
+            api.markFailed(pojo.getId(), ReportRequestStatus.FAILED,
+                    "Error while processing query : " + e.getMessage(), 0, 0.0);
+            return;
+        }
+        // Execute query and save results
+        saveResultsOnCloud(pojo, sqlParams);
+    }
+
+    @Async("reportScheduleExecutor")
+    public void runScheduleReportAsync(ReportRequestPojo pojo) throws ApiException, IOException {
+        // mark as processing - locking
+        try {
+            api.markProcessingIfEligible(pojo.getId());
+        } catch (OptimisticLockException | ObjectOptimisticLockingFailureException | ApiException e) {
+            log.debug("Error occurred while marking report in progress for request id : " + pojo.getId(), e);
+            return;
         }
         // process
         ReportRequestPojo reportRequestPojo = api.getCheck(pojo.getId());

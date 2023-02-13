@@ -3,8 +3,11 @@ package com.increff.omni.reporting.job;
 
 import com.increff.omni.reporting.api.FolderApi;
 import com.increff.omni.reporting.api.ReportRequestApi;
+import com.increff.omni.reporting.api.ReportScheduleApi;
 import com.increff.omni.reporting.config.ApplicationProperties;
+import com.increff.omni.reporting.model.constants.ReportRequestType;
 import com.increff.omni.reporting.pojo.ReportRequestPojo;
+import com.increff.omni.reporting.pojo.ReportSchedulePojo;
 import lombok.extern.log4j.Log4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -14,64 +17,42 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 
 import javax.persistence.OptimisticLockException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.Executor;
 
+import static com.increff.omni.reporting.dto.CommonDtoHelper.convertToReportRequestPojo;
 import static com.increff.omni.reporting.dto.CommonDtoHelper.groupByOrgID;
 
 @Log4j
 @Component
-public class ReportJob {
+public class ScheduledJobs {
 
     @Autowired
     private ReportRequestApi api;
     @Autowired
     private FolderApi folderApi;
     @Autowired
+    private ReportScheduleApi reportScheduleApi;
+    @Autowired
     private ApplicationProperties properties;
     @Autowired
     private ReportTask reportTask;
     @Autowired
-    @Qualifier(value = "jobExecutor")
-    private Executor executor;
+    @Qualifier(value = "reportRequestExecutor")
+    private Executor userReportExecutor;
+
+    @Autowired
+    @Qualifier(value = "reportScheduleExecutor")
+    private Executor scheduleReportExecutor;
 
     @Scheduled(fixedDelay = 1000)
-    public void runReports() {
-        // Get all the tasks pending for execution + Tasks that got stuck in processing
-        int limitForEligibleRequest = getLimitForEligibleRequests();
-        List<ReportRequestPojo> reportRequestPojoList = api.getEligibleRequests(limitForEligibleRequest);
-        if (reportRequestPojoList.isEmpty())
-            return;
+    public void runUserReports() {
+        runReports(userReportExecutor, Collections.singletonList(ReportRequestType.USER));
+    }
 
-        try {
-            sortBasedOnCreatedAt(reportRequestPojoList);
-
-            // Group by orgs
-            Map<Integer, List<ReportRequestPojo>> orgToRequests = groupByOrgID(reportRequestPojoList);
-            boolean flag = true;
-            while (flag) {
-                for (Map.Entry<Integer, List<ReportRequestPojo>> e : orgToRequests.entrySet()) {
-                    // 1 from an org and then the other org
-                    List<ReportRequestPojo> pojoList = new ArrayList<>(e.getValue());
-                    Iterator<ReportRequestPojo> itr = pojoList.iterator();
-                    if (!itr.hasNext()) {
-                        orgToRequests.remove(e.getKey());
-                        continue;
-                    }
-                    ReportRequestPojo reportRequestPojo = itr.next();
-                    reportTask.runAsync(reportRequestPojo);
-                    itr.remove();
-                    orgToRequests.put(e.getKey(), pojoList);
-                }
-                if (orgToRequests.isEmpty())
-                    flag = false;
-            }
-        } catch (Exception e) {
-            log.error("Error while running requests ", e);
-        }
+    @Scheduled(fixedDelay = 1000)
+    public void runScheduleReports() {
+        runReports(scheduleReportExecutor, Arrays.asList(ReportRequestType.EMAIL));
     }
 
     @Scheduled(fixedDelay = 60 * 1000)
@@ -91,13 +72,57 @@ public class ReportJob {
         folderApi.deleteFilesOlderThan1Hr();
     }
 
-    private int getLimitForEligibleRequests() {
-        ThreadPoolTaskExecutor threadPoolExecutor = (ThreadPoolTaskExecutor) executor;
-        long poolSize = properties.getCorePoolSize() - 10; // Just for safety we kept buffer of 10 to core pool
-        long currentUsedThreads = threadPoolExecutor.getThreadPoolExecutor().getTaskCount()
-                - threadPoolExecutor.getThreadPoolExecutor().getCompletedTaskCount();
-        log.debug("Task Count : " + threadPoolExecutor.getThreadPoolExecutor().getTaskCount());
-        log.debug("Completed Task Count : " + threadPoolExecutor.getThreadPoolExecutor().getCompletedTaskCount());
+    @Scheduled(fixedDelay = 1000)
+    public void addScheduleReportRequests() {
+        List<ReportSchedulePojo> schedulePojos = reportScheduleApi.getEligibleSchedules();
+        log.debug("Eligible schedules : " + schedulePojos.size());
+        schedulePojos.forEach(s -> {
+            ReportRequestPojo reportRequestPojo = convertToReportRequestPojo(s);
+            api.add(reportRequestPojo);
+        });
+    }
+
+    private void runReports(Executor executor, List<ReportRequestType> types) {
+        // Get all the tasks pending for execution + Tasks that got stuck in processing
+        int limitForEligibleRequest = getLimitForEligibleRequests((ThreadPoolTaskExecutor) executor);
+        List<ReportRequestPojo> reportRequestPojoList = api.getEligibleRequests(types, limitForEligibleRequest);
+        if (reportRequestPojoList.isEmpty())
+            return;
+
+        try {
+            sortBasedOnCreatedAt(reportRequestPojoList);
+
+            // Group by orgs
+            Map<Integer, List<ReportRequestPojo>> orgToRequests = groupByOrgID(reportRequestPojoList);
+            boolean flag = true;
+            while (flag) {
+                for (Map.Entry<Integer, List<ReportRequestPojo>> e : orgToRequests.entrySet()) {
+                    // 1 from an org and then the other org
+                    List<ReportRequestPojo> pojoList = new ArrayList<>(e.getValue());
+                    Iterator<ReportRequestPojo> itr = pojoList.iterator();
+                    if (!itr.hasNext()) {
+                        orgToRequests.remove(e.getKey());
+                        continue;
+                    }
+                    ReportRequestPojo reportRequestPojo = itr.next();
+                    this.reportTask.runUserReportAsync(reportRequestPojo);
+                    itr.remove();
+                    orgToRequests.put(e.getKey(), pojoList);
+                }
+                if (orgToRequests.isEmpty())
+                    flag = false;
+            }
+        } catch (Exception e) {
+            log.error("Error while running requests ", e);
+        }
+    }
+
+    private int getLimitForEligibleRequests(ThreadPoolTaskExecutor executor) {
+        long poolSize = properties.getReportRequestCorePool() - 10; // Just for safety we kept buffer of 10 to core pool
+        long currentUsedThreads = executor.getThreadPoolExecutor().getTaskCount()
+                - executor.getThreadPoolExecutor().getCompletedTaskCount();
+        log.debug("Task Count : " + executor.getThreadPoolExecutor().getTaskCount());
+        log.debug("Completed Task Count : " + executor.getThreadPoolExecutor().getCompletedTaskCount());
         log.debug("Current Used threads : " + currentUsedThreads);
         if (currentUsedThreads >= poolSize) {
             log.error("Threshold is Greater than " + poolSize);

@@ -3,6 +3,7 @@ package com.increff.omni.reporting.api;
 import com.increff.omni.reporting.config.AbstractTest;
 import com.increff.omni.reporting.dao.ReportRequestDao;
 import com.increff.omni.reporting.model.constants.ReportRequestStatus;
+import com.increff.omni.reporting.model.constants.ReportRequestType;
 import com.increff.omni.reporting.pojo.ReportRequestPojo;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
@@ -10,6 +11,7 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.ZonedDateTime;
+import java.util.Collections;
 import java.util.List;
 
 import static com.increff.omni.reporting.helper.ReportTestHelper.getReportRequestPojo;
@@ -103,7 +105,7 @@ public class ReportRequestApiTest extends AbstractTest {
     @Test
     public void testMarkStuck() {
         commonSetup();
-        List<ReportRequestPojo> pojoList = api.getStuckRequests(10);
+        List<ReportRequestPojo> pojoList = api.getStuckRequests( 10);
         api.markStuck(pojoList.get(0));
         pojoList = dao.selectMultiple("status", ReportRequestStatus.STUCK);
         assertEquals(2, pojoList.size());
@@ -129,13 +131,14 @@ public class ReportRequestApiTest extends AbstractTest {
     @Test
     public void testGetEligibleRequests() {
         commonSetup();
-        List<ReportRequestPojo> pojoList = api.getEligibleRequests(1);
+        List<ReportRequestPojo> pojoList = api.getEligibleRequests(Collections.singletonList(ReportRequestType.USER),
+                1);
         assertEquals(1, pojoList.size());
         assertEquals(ReportRequestStatus.NEW, pojoList.get(0).getStatus());
         assertEquals(100001, pojoList.get(0).getReportId().intValue());
         assertEquals(100001, pojoList.get(0).getOrgId().intValue());
         assertEquals(100001, pojoList.get(0).getUserId().intValue());
-        pojoList = api.getEligibleRequests(0);
+        pojoList = api.getEligibleRequests(Collections.singletonList(ReportRequestType.USER), 0);
         assertEquals(0, pojoList.size());
     }
 }

@@ -3,12 +3,10 @@ package com.increff.omni.reporting.controller;
 
 import com.increff.account.client.AuthClient;
 import com.increff.omni.reporting.config.ApplicationProperties;
-import com.increff.omni.reporting.dto.DirectoryDto;
-import com.increff.omni.reporting.dto.InputControlDto;
-import com.increff.omni.reporting.dto.ReportDto;
-import com.increff.omni.reporting.dto.ReportRequestDto;
+import com.increff.omni.reporting.dto.*;
 import com.increff.omni.reporting.model.data.*;
 import com.increff.omni.reporting.model.form.ReportRequestForm;
+import com.increff.omni.reporting.model.form.ReportScheduleForm;
 import com.increff.omni.reporting.util.FileUtil;
 import com.nextscm.commons.spring.common.ApiException;
 import io.swagger.annotations.Api;
@@ -30,6 +28,8 @@ public class StandardController {
 
     @Autowired
     private ReportRequestDto reportRequestDto;
+    @Autowired
+    private ReportScheduleDto reportScheduleDto;
     @Autowired
     private InputControlDto inputControlDto;
     @Autowired
@@ -96,6 +96,13 @@ public class StandardController {
     @RequestMapping(value = "/request-report/{requestId}/view", method = RequestMethod.GET)
     public List<Map<String, String>> viewFile(@PathVariable Integer requestId) throws ApiException, IOException {
         return reportRequestDto.getJsonFromCsv(requestId);
+    }
+
+    // Scheduling a Report
+    @ApiOperation(value = "Schedule a Report")
+    @RequestMapping(value = "/schedule", method = RequestMethod.POST)
+    public void scheduleReport(@RequestBody ReportScheduleForm form) throws ApiException {
+        reportScheduleDto.scheduleReport(form);
     }
 
     @ApiOperation(value = "Get Application Version")

@@ -10,16 +10,27 @@ import org.springframework.stereotype.Component;
 @Component
 public class ApplicationProperties {
 
-    @Value("${async.corePoolSize:100}")
-    private Integer corePoolSize;
+    @Value("${report.request.corePoolSize:100}")
+    private Integer reportRequestCorePool;
 
-    @Value("${async.maxPoolSize:200}")
-    private Integer maxPoolSize;
+    @Value("${report.request.maxPoolSize:200}")
+    private Integer reportRequestMaxPool;
 
     // Reason for default queue capacity 0 is we have implemented report job in such
     // a way that if we have free core pool then only we will assign a thread
-    @Value("${async.queueCapacity:0}")
-    private Integer queueCapacity;
+    @Value("${report.request.queueCapacity:0}")
+    private Integer reportRequestQueueCapacity;
+
+    @Value("${report.schedule.corePoolSize:100}")
+    private Integer reportScheduleCorePool;
+
+    @Value("${report.schedule.maxPoolSize:200}")
+    private Integer reportScheduleMaxPool;
+
+    // Reason for default queue capacity 0 is we have implemented report job in such
+    // a way that if we have free core pool then only we will assign a thread
+    @Value("${report.schedule.queueCapacity:0}")
+    private Integer reportScheduleQueueCapacity;
 
     @Value("${stuck.report.time.minutes:10}")
     private Integer stuckReportTime;

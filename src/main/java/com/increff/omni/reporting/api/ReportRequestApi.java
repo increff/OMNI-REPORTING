@@ -2,6 +2,7 @@ package com.increff.omni.reporting.api;
 
 import com.increff.omni.reporting.dao.ReportRequestDao;
 import com.increff.omni.reporting.model.constants.ReportRequestStatus;
+import com.increff.omni.reporting.model.constants.ReportRequestType;
 import com.increff.omni.reporting.pojo.ReportRequestPojo;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
@@ -27,7 +28,7 @@ public class ReportRequestApi extends AbstractApi {
     }
 
     public List<ReportRequestPojo> getPendingByUserId(Integer userId) {
-        return dao.getByUserIdAndStatuses(userId,
+        return dao.getByUserIdAndStatuses(ReportRequestType.USER, userId,
                 Arrays.asList(ReportRequestStatus.NEW, ReportRequestStatus.IN_PROGRESS));
     }
 
@@ -37,10 +38,10 @@ public class ReportRequestApi extends AbstractApi {
         return pojo;
     }
 
-    public List<ReportRequestPojo> getEligibleRequests(int limitForEligibleRequest) {
+    public List<ReportRequestPojo> getEligibleRequests(List<ReportRequestType> type, int limitForEligibleRequest) {
         if(limitForEligibleRequest <= 0)
             return new ArrayList<>();
-        return dao.getEligibleReports(Arrays.asList(ReportRequestStatus.NEW, ReportRequestStatus.STUCK)
+        return dao.getEligibleReports(type, Arrays.asList(ReportRequestStatus.NEW, ReportRequestStatus.STUCK)
                 , limitForEligibleRequest);
     }
 
@@ -70,7 +71,7 @@ public class ReportRequestApi extends AbstractApi {
     }
 
     public List<ReportRequestPojo> getByUserId(int userId, Integer limit) {
-        return dao.selectByUserId(userId, limit);
+        return dao.selectByUserId(userId,ReportRequestType.USER, limit);
     }
 
     public void markFailed(Integer id, ReportRequestStatus status, String message, int noOfRows, double fileSize)

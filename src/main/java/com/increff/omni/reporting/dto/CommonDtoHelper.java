@@ -1,16 +1,20 @@
 package com.increff.omni.reporting.dto;
 
 import com.increff.omni.reporting.model.constants.ReportRequestStatus;
+import com.increff.omni.reporting.model.constants.ReportRequestType;
 import com.increff.omni.reporting.model.constants.ValidationType;
 import com.increff.omni.reporting.model.data.*;
 import com.increff.omni.reporting.model.form.ReportRequestForm;
+import com.increff.omni.reporting.model.form.ReportScheduleForm;
 import com.increff.omni.reporting.model.form.SqlParams;
 import com.increff.omni.reporting.pojo.*;
 import com.increff.omni.reporting.util.SqlCmd;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
+import org.springframework.scheduling.support.CronSequenceGenerator;
 
 import java.io.File;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -119,6 +123,7 @@ public class CommonDtoHelper {
         reportRequestPojo.setReportId(form.getReportId());
         reportRequestPojo.setOrgId(orgId);
         reportRequestPojo.setStatus(ReportRequestStatus.NEW);
+        reportRequestPojo.setType(ReportRequestType.USER);
         reportRequestPojo.setUserId(userId);
         return reportRequestPojo;
     }
@@ -236,5 +241,34 @@ public class CommonDtoHelper {
                 orgToRequests.put(r.getOrgId(), Collections.singletonList(r));
         }
         return orgToRequests;
+    }
+
+    public static ReportRequestPojo convertToReportRequestPojo(ReportSchedulePojo schedulePojo) {
+        ReportRequestPojo reportRequestPojo = new ReportRequestPojo();
+        reportRequestPojo.setReportId(schedulePojo.getReportId());
+        reportRequestPojo.setType(schedulePojo.getType());
+        reportRequestPojo.setStatus(ReportRequestStatus.NEW);
+        reportRequestPojo.setUserId(schedulePojo.getUserId());
+        reportRequestPojo.setOrgId(schedulePojo.getOrgId());
+        return reportRequestPojo;
+    }
+
+    public static ReportSchedulePojo convertFormToReportSchedulePojo(ReportScheduleForm form, int orgId, int userId) {
+        ReportSchedulePojo schedulePojo = new ReportSchedulePojo();
+        String cron = "0" + " " + form.getCronSchedule().getMinute() + " " + form.getCronSchedule().getHour() +
+                " " + form.getCronSchedule().getDayOfMonth() + " " + "*" + " " + "?";
+        schedulePojo.setReportId(form.getReportId());
+        schedulePojo.setTimezone(form.getTimezone());
+        schedulePojo.setEnabled(true);
+        schedulePojo.setOrgId(orgId);
+        schedulePojo.setUserId(userId);
+        schedulePojo.setCron(cron);
+        CronSequenceGenerator generator = new CronSequenceGenerator(cron,
+                TimeZone.getTimeZone(ZoneId.of(form.getTimezone())));
+        Instant instant = generator.next(new Date()).toInstant();
+        schedulePojo.setNextRuntime(ZonedDateTime.ofInstant(instant, ZoneId.of("UTC")));
+        schedulePojo.setSendTo(form.getSendTo());
+        schedulePojo.setType(form.getType());
+        return schedulePojo;
     }
 }

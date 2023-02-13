@@ -1,6 +1,7 @@
 package com.increff.omni.reporting.dao;
 
 import com.increff.omni.reporting.model.constants.ReportRequestStatus;
+import com.increff.omni.reporting.model.constants.ReportRequestType;
 import com.increff.omni.reporting.pojo.ReportRequestPojo;
 import com.nextscm.commons.spring.db.AbstractDao;
 import org.springframework.stereotype.Repository;
@@ -17,12 +18,14 @@ import java.util.List;
 @Transactional
 public class ReportRequestDao extends AbstractDao<ReportRequestPojo> {
 
-    public List<ReportRequestPojo> getByUserIdAndStatuses(Integer userId, List<ReportRequestStatus> statuses) {
+    public List<ReportRequestPojo> getByUserIdAndStatuses(ReportRequestType type, Integer userId,
+                                                          List<ReportRequestStatus> statuses) {
         CriteriaBuilder cb = this.em.getCriteriaBuilder();
         CriteriaQuery<ReportRequestPojo> query = cb.createQuery(ReportRequestPojo.class);
         Root<ReportRequestPojo> root = query.from(ReportRequestPojo.class);
         query.where(
                 cb.and(
+                        cb.equal(root.get("type"), type),
                         root.get("status").in(statuses),
                         cb.equal(root.get("userId"), userId)
                 )
@@ -31,12 +34,14 @@ public class ReportRequestDao extends AbstractDao<ReportRequestPojo> {
         return selectMultiple(tQuery);
     }
 
-    public List<ReportRequestPojo> getEligibleReports(List<ReportRequestStatus> statuses, int limitForEligibleRequest) {
+    public List<ReportRequestPojo> getEligibleReports(List<ReportRequestType> type, List<ReportRequestStatus> statuses,
+                                                      int limitForEligibleRequest) {
         CriteriaBuilder cb = this.em.getCriteriaBuilder();
         CriteriaQuery<ReportRequestPojo> query = cb.createQuery(ReportRequestPojo.class);
         Root<ReportRequestPojo> root = query.from(ReportRequestPojo.class);
         query.where(
-                root.get("status").in(statuses)
+                cb.and(root.get("type").in(type),
+                        root.get("status").in(statuses))
         ).orderBy(cb.asc(root.get("createdAt")));
         TypedQuery<ReportRequestPojo> tQuery = createQuery(query);
         return tQuery.setMaxResults(limitForEligibleRequest).getResultList();
@@ -56,12 +61,14 @@ public class ReportRequestDao extends AbstractDao<ReportRequestPojo> {
         return tQuery.setMaxResults(100).getResultList();
     }
 
-    public List<ReportRequestPojo> selectByUserId(int userId, Integer limit) {
+    public List<ReportRequestPojo> selectByUserId(int userId, ReportRequestType type, Integer limit) {
         CriteriaBuilder cb = this.em.getCriteriaBuilder();
         CriteriaQuery<ReportRequestPojo> query = cb.createQuery(ReportRequestPojo.class);
         Root<ReportRequestPojo> root = query.from(ReportRequestPojo.class);
         query.where(
-                cb.equal(root.get("userId"), userId)
+                cb.and(
+                        cb.equal(root.get("type"), type),
+                        cb.equal(root.get("userId"), userId))
         ).orderBy(cb.desc(root.get("createdAt")));
         TypedQuery<ReportRequestPojo> tQuery = createQuery(query);
         return tQuery.setMaxResults(limit).getResultList();

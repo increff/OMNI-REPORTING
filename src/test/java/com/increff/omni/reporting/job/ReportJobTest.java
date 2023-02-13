@@ -25,7 +25,7 @@ import static com.increff.omni.reporting.helper.SchemaTestHelper.getSchemaForm;
 public class ReportJobTest extends AbstractTest {
 
     @Autowired
-    private ReportJob reportJob;
+    private ScheduledJobs reportJob;
     @Autowired
     private ReportRequestDto dto;
     @Autowired
@@ -81,6 +81,6 @@ public class ReportJobTest extends AbstractTest {
         params.put("clientId", Collections.singletonList("1100007455"));
         ReportRequestForm form = getReportRequestForm(reportData.getId(), params, "Asia/Kolkata");
         dto.requestReport(form);
-        reportJob.runReports();
+        reportJob.runUserReports();
     }
 }

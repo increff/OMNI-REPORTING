@@ -29,6 +29,7 @@ public class StandardSecurityConfig extends WebSecurityConfigurerAdapter {
         http// Match only these URLs
                 .requestMatchers()//
                 .antMatchers("/standard/**").and().authorizeRequests()//
+                .antMatchers("/standard/*/schedules/**").hasAnyAuthority(APP_ADMIN, REPORT_ADMIN)
                 .antMatchers("/standard/**").hasAnyAuthority(APP_ADMIN, REPORT_ADMIN, REPORT_STANDARD)//
                 .and().cors().and().csrf().disable()
                 .addFilterBefore(authTokenFilter, BasicAuthenticationFilter.class)

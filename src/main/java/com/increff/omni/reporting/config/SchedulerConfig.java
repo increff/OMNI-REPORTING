@@ -16,15 +16,25 @@ public class SchedulerConfig {
 
     @Bean
     public Executor getScheduledThreadPool() {
-        return Executors.newScheduledThreadPool(4);
+        return Executors.newScheduledThreadPool(6);
     }
 
-    @Bean(name = "jobExecutor")
-    public Executor getAsyncExecutor() {
+    @Bean(name = "reportRequestExecutor")
+    public Executor getReportRequestAsyncExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(properties.getCorePoolSize());
-        executor.setMaxPoolSize(properties.getMaxPoolSize());
-        executor.setQueueCapacity(properties.getQueueCapacity());
+        executor.setCorePoolSize(properties.getReportRequestCorePool());
+        executor.setMaxPoolSize(properties.getReportRequestMaxPool());
+        executor.setQueueCapacity(properties.getReportRequestQueueCapacity());
+        executor.initialize();
+        return executor;
+    }
+
+    @Bean(name = "reportScheduleExecutor")
+    public Executor getReportScheduleAsyncExecutor() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(properties.getReportScheduleCorePool());
+        executor.setMaxPoolSize(properties.getReportScheduleMaxPool());
+        executor.setQueueCapacity(properties.getReportScheduleQueueCapacity());
         executor.initialize();
         return executor;
     }

@@ -175,6 +175,7 @@ public class ReportRequestDto extends AbstractDto {
         data.setRequestCreationTime(pojo.getCreatedAt());
         data.setRequestUpdatedTime(pojo.getUpdatedAt());
         data.setStatus(pojo.getStatus());
+        data.setType(pojo.getType());
         data.setRequestId(pojo.getId());
         data.setReportId(reportPojo.getId());
         data.setReportName(reportPojo.getName());
