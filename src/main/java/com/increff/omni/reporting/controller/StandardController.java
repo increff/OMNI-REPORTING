@@ -100,9 +100,28 @@ public class StandardController {
 
     // Scheduling a Report
     @ApiOperation(value = "Schedule a Report")
-    @RequestMapping(value = "/schedule", method = RequestMethod.POST)
+    @RequestMapping(value = "/schedules", method = RequestMethod.POST)
     public void scheduleReport(@RequestBody ReportScheduleForm form) throws ApiException {
         reportScheduleDto.scheduleReport(form);
+    }
+
+    @ApiOperation(value = "Schedule a Report")
+    @RequestMapping(value = "/schedules", method = RequestMethod.GET)
+    public List<ReportScheduleData> getScheduleReports() throws ApiException {
+        return reportScheduleDto.getScheduleReports();
+    }
+
+    // Scheduling a Report
+    @ApiOperation(value = "Edit Schedule of a Report")
+    @RequestMapping(value = "/schedules/{id}", method = RequestMethod.PUT)
+    public void editScheduleReport(@PathVariable Integer id, @RequestBody ReportScheduleForm form) throws ApiException {
+        reportScheduleDto.editScheduleReport(id, form);
+    }
+
+    @ApiOperation(value = "Enable / Disable Report Schedule")
+    @RequestMapping(value = "/schedules/{id}/status", method = RequestMethod.PATCH)
+    public void editStatus(@PathVariable Integer id, @RequestParam Boolean isEnabled) throws ApiException {
+        reportScheduleDto.updateStatus(id, isEnabled);
     }
 
     @ApiOperation(value = "Get Application Version")

@@ -29,7 +29,7 @@ public class ReportSchedulePojo extends AbstractVersionedPojo {
     private Integer reportId;
 
     @Column(nullable = false)
-    private Boolean enabled;
+    private Boolean isEnabled;
 
     @Column(nullable = false)
     private String cron;

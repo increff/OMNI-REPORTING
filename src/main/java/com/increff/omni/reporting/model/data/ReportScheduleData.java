@@ -1,25 +1,25 @@
-package com.increff.omni.reporting.model.form;
+package com.increff.omni.reporting.model.data;
 
 import com.increff.omni.reporting.model.constants.ReportRequestType;
+import com.increff.omni.reporting.model.form.CronScheduleForm;
 import lombok.Getter;
 import lombok.Setter;
 
 import javax.validation.constraints.NotNull;
+import java.time.ZonedDateTime;
 
 @Getter
 @Setter
-public class ReportScheduleForm {
+public class ReportScheduleData {
 
-    @NotNull
     private String timezone;
-    @NotNull
     private Integer reportId;
-    private CronScheduleForm cronSchedule;
-    @NotNull
+    private String reportName;
     private ReportRequestType type;
-    @NotNull
     private String sendTo;
-    @NotNull
     private Boolean isEnabled;
+    private ZonedDateTime nextRuntime;
+    private ZonedDateTime createdAt;
+    private ZonedDateTime updatedAt;
 
 }

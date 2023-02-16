@@ -198,9 +198,13 @@ public class CommonDtoHelper {
     }
 
     public static void validate(ReportRequestPojo requestPojo, Integer requestId, ReportPojo reportPojo
-            , int userId) throws ApiException {
-        if (requestPojo.getUserId() != userId) {
+            , int userId, int orgId) throws ApiException {
+        if (requestPojo.getType().equals(ReportRequestType.USER) && requestPojo.getUserId() != userId) {
             throw new ApiException(ApiStatus.BAD_DATA, "Logged in user has not requested the report with id : " + requestId);
+        }
+        if (requestPojo.getOrgId() != orgId) {
+            throw new ApiException(ApiStatus.BAD_DATA,
+                    "Logged in org has not scheduled the report with id : " + requestId);
         }
         if (!Arrays.asList(ReportRequestStatus.COMPLETED, ReportRequestStatus.FAILED).contains(requestPojo.getStatus())) {
             throw new ApiException(ApiStatus.BAD_DATA, "Report request is still in processing, name : " + reportPojo.getName());
@@ -259,7 +263,7 @@ public class CommonDtoHelper {
                 " " + form.getCronSchedule().getDayOfMonth() + " " + "*" + " " + "?";
         schedulePojo.setReportId(form.getReportId());
         schedulePojo.setTimezone(form.getTimezone());
-        schedulePojo.setEnabled(true);
+        schedulePojo.setIsEnabled(form.getIsEnabled());
         schedulePojo.setOrgId(orgId);
         schedulePojo.setUserId(userId);
         schedulePojo.setCron(cron);

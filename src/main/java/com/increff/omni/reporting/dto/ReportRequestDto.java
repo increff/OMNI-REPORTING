@@ -114,7 +114,7 @@ public class ReportRequestDto extends AbstractDto {
     public File getReportFile(Integer requestId) throws ApiException, IOException {
         ReportRequestPojo requestPojo = reportRequestApi.getCheck(requestId);
         ReportPojo reportPojo = reportApi.getCheck(requestPojo.getReportId());
-        validate(requestPojo, requestId, reportPojo, getUserId());
+        validate(requestPojo, requestId, reportPojo, getUserId(), getOrgId());
         String reportName = requestId + "_" + UUID.randomUUID();
         File sourceFile = folderApi.getFile(reportName + ".csv");
         byte[] data = getFileFromUrl(requestPojo.getUrl());
@@ -127,7 +127,7 @@ public class ReportRequestDto extends AbstractDto {
         if (requestPojo.getStatus().equals(ReportRequestStatus.FAILED))
             throw new ApiException(ApiStatus.BAD_DATA, "Failed report can't be viewed");
         ReportPojo reportPojo = reportApi.getCheck(requestPojo.getReportId());
-        validate(requestPojo, requestId, reportPojo, getUserId());
+        validate(requestPojo, requestId, reportPojo, getUserId(), getOrgId());
         if (requestPojo.getNoOfRows() >= MAX_NUMBER_OF_ROWS)
             throw new ApiException(ApiStatus.BAD_DATA, "Data contains more than 50 rows. View option is restricted");
         List<Map<String, String>> data = new ArrayList<>();

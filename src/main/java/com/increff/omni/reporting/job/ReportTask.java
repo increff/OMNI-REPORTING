@@ -13,6 +13,8 @@ import com.nextscm.commons.fileclient.FileClientException;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
 import lombok.extern.log4j.Log4j;
+import org.apache.commons.compress.archivers.sevenz.SevenZArchiveEntry;
+import org.apache.commons.compress.archivers.sevenz.SevenZOutputFile;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.scheduling.annotation.Async;
@@ -21,7 +23,10 @@ import org.springframework.stereotype.Service;
 import javax.persistence.OptimisticLockException;
 import java.io.*;
 import java.nio.file.Files;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 
 @Service
@@ -62,9 +67,6 @@ public class ReportTask {
                 .getInputParamsForReportRequest(reportRequestPojo.getId());
         ReportPojo reportPojo = reportApi.getCheck(reportRequestPojo.getReportId());
         ReportQueryPojo reportQueryPojo = reportQueryApi.getByReportId(reportPojo.getId());
-        if (Objects.isNull(reportQueryPojo))
-            throw new ApiException(ApiStatus.BAD_DATA, "Query is not defined for requested report : "
-                    + reportPojo.getName());
         OrgConnectionPojo orgConnectionPojo = orgConnectionApi.getCheckByOrgId(reportRequestPojo.getOrgId());
         ConnectionPojo connectionPojo = connectionApi.getCheck(orgConnectionPojo.getConnectionId());
 
@@ -78,14 +80,13 @@ public class ReportTask {
             String fQuery = SqlCmd.prepareQuery(inputParamMap, reportQueryPojo.getQuery(),
                     properties.getMaxExecutionTime());
             sqlParams.setQuery(fQuery);
+            // Execute query and save results
+            saveResultsOnCloud(pojo, sqlParams);
         } catch (Exception e) {
             log.error("Report ID : " + pojo.getId() + " failed", e);
             api.markFailed(pojo.getId(), ReportRequestStatus.FAILED,
                     "Error while processing query : " + e.getMessage(), 0, 0.0);
-            return;
         }
-        // Execute query and save results
-        saveResultsOnCloud(pojo, sqlParams);
     }
 
     @Async("reportScheduleExecutor")
@@ -99,34 +100,28 @@ public class ReportTask {
         }
         // process
         ReportRequestPojo reportRequestPojo = api.getCheck(pojo.getId());
-        List<ReportInputParamsPojo> reportInputParamsPojoList = reportInputParamsApi
-                .getInputParamsForReportRequest(reportRequestPojo.getId());
         ReportPojo reportPojo = reportApi.getCheck(reportRequestPojo.getReportId());
         ReportQueryPojo reportQueryPojo = reportQueryApi.getByReportId(reportPojo.getId());
-        if (Objects.isNull(reportQueryPojo))
-            throw new ApiException(ApiStatus.BAD_DATA, "Query is not defined for requested report : "
-                    + reportPojo.getName());
         OrgConnectionPojo orgConnectionPojo = orgConnectionApi.getCheckByOrgId(reportRequestPojo.getOrgId());
         ConnectionPojo connectionPojo = connectionApi.getCheck(orgConnectionPojo.getConnectionId());
 
         // Creation of file
         File file = folderApi.getFileForExtension(reportRequestPojo.getId(), ".tsv");
         File errorFile = folderApi.getErrFile(reportRequestPojo.getId(), ".tsv");
-        Map<String, String> inputParamMap = getInputParamMapFromPojoList(reportInputParamsPojoList);
+        Map<String, String> inputParamMap = new HashMap<>();
         SqlParams sqlParams = CommonDtoHelper.convert(connectionPojo, reportQueryPojo, inputParamMap, file, errorFile,
                 properties.getMaxExecutionTime());
         try {
             String fQuery = SqlCmd.prepareQuery(inputParamMap, reportQueryPojo.getQuery(),
                     properties.getMaxExecutionTime());
             sqlParams.setQuery(fQuery);
+            // Execute query and send results
+            saveResultsOnCloud(pojo, sqlParams);
         } catch (Exception e) {
             log.error("Report ID : " + pojo.getId() + " failed", e);
             api.markFailed(pojo.getId(), ReportRequestStatus.FAILED,
                     "Error while processing query : " + e.getMessage(), 0, 0.0);
-            return;
         }
-        // Execute query and save results
-        saveResultsOnCloud(pojo, sqlParams);
     }
 
     private void saveResultsOnCloud(ReportRequestPojo pojo, SqlParams sqlParams) {
@@ -139,8 +134,15 @@ public class ReportTask {
 
             // upload result to cloud
             String filePath = uploadFile(csvFile, pojo);
+            double fileSize = FileUtil.getSizeInMb(csvFile.length());
+            switch (pojo.getType()) {
+                case EMAIL:
+                    sendEmail(fileSize, csvFile);
+                    break;
+                case USER:
+                    break;
+            }
             // update status to completed
-            Double fileSize = FileUtil.getSizeInMb(csvFile.length());
             api.updateStatus(pojo.getId(), ReportRequestStatus.COMPLETED, filePath, noOfRows, fileSize);
             FileUtil.delete(csvFile);
         } catch (Exception e) {
@@ -155,6 +157,22 @@ public class ReportTask {
         } finally {
             deleteFiles(sqlParams.getOutFile(), sqlParams.getErrFile());
         }
+    }
+
+    private void sendEmail(double fileSize, File csvFile) throws IOException, ApiException {
+        if (fileSize > 20.0) {
+            String outFileName = csvFile.getName().split(".csv")[0] + ".7z";
+            File zipFile = folderApi.getFile(outFileName);
+            try (SevenZOutputFile sevenZOutput = new SevenZOutputFile(zipFile)) {
+                SevenZArchiveEntry archiveEntry = sevenZOutput.createArchiveEntry(csvFile, csvFile.getName());
+                sevenZOutput.putArchiveEntry(archiveEntry);
+                sevenZOutput.write(Files.readAllBytes(csvFile.toPath()));
+                sevenZOutput.closeArchiveEntry();
+            } catch (IOException e) {
+                log.error("Error while zipping : ", e);
+            }
+        }
+        // todo send email
     }
 
     private void deleteFiles(File outFile, File errFile) {

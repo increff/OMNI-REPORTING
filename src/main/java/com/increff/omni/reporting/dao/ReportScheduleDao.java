@@ -26,4 +26,17 @@ public class ReportScheduleDao extends AbstractDao<ReportSchedulePojo> {
         TypedQuery<ReportSchedulePojo> tQuery = createQuery(query);
         return tQuery.getResultList();
     }
+
+    public List<ReportSchedulePojo> selectByOrgId(int orgId) {
+        CriteriaBuilder cb = this.em.getCriteriaBuilder();
+        CriteriaQuery<ReportSchedulePojo> query = cb.createQuery(ReportSchedulePojo.class);
+        Root<ReportSchedulePojo> root = query.from(ReportSchedulePojo.class);
+        query.where(
+                cb.and(
+                        cb.isTrue(root.get("enabled")),
+                        cb.equal(root.get("orgId"), orgId))
+        );
+        TypedQuery<ReportSchedulePojo> tQuery = createQuery(query);
+        return tQuery.getResultList();
+    }
 }

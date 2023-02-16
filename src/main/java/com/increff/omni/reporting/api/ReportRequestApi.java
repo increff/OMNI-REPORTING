@@ -39,7 +39,7 @@ public class ReportRequestApi extends AbstractApi {
     }
 
     public List<ReportRequestPojo> getEligibleRequests(List<ReportRequestType> type, int limitForEligibleRequest) {
-        if(limitForEligibleRequest <= 0)
+        if (limitForEligibleRequest <= 0)
             return new ArrayList<>();
         return dao.getEligibleReports(type, Arrays.asList(ReportRequestStatus.NEW, ReportRequestStatus.STUCK)
                 , limitForEligibleRequest);
@@ -50,8 +50,7 @@ public class ReportRequestApi extends AbstractApi {
         if (pojo.getStatus().equals(ReportRequestStatus.NEW) ||
                 (pojo.getStatus().equals(ReportRequestStatus.STUCK))) {
             pojo.setStatus(ReportRequestStatus.IN_PROGRESS);
-        }
-        else
+        } else
             throw new ApiException(ApiStatus.UNKNOWN_ERROR, "Task not in eligible state");
     }
 
@@ -71,7 +70,7 @@ public class ReportRequestApi extends AbstractApi {
     }
 
     public List<ReportRequestPojo> getByUserId(int userId, Integer limit) {
-        return dao.selectByUserId(userId,ReportRequestType.USER, limit);
+        return dao.selectByUserId(userId, ReportRequestType.USER, limit);
     }
 
     public void markFailed(Integer id, ReportRequestStatus status, String message, int noOfRows, double fileSize)
@@ -86,5 +85,10 @@ public class ReportRequestApi extends AbstractApi {
 
     public List<ReportRequestPojo> getStuckRequests(Integer stuckReportTime) {
         return dao.getStuckReports(stuckReportTime);
+    }
+
+    public List<ReportRequestPojo> getByOrg(int orgId, ReportRequestType type) {
+        // todo
+        return new ArrayList<>();
     }
 }

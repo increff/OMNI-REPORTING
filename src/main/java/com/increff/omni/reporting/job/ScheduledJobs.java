@@ -8,6 +8,8 @@ import com.increff.omni.reporting.config.ApplicationProperties;
 import com.increff.omni.reporting.model.constants.ReportRequestType;
 import com.increff.omni.reporting.pojo.ReportRequestPojo;
 import com.increff.omni.reporting.pojo.ReportSchedulePojo;
+import com.nextscm.commons.spring.common.ApiException;
+import com.nextscm.commons.spring.common.ApiStatus;
 import lombok.extern.log4j.Log4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -105,7 +107,16 @@ public class ScheduledJobs {
                         continue;
                     }
                     ReportRequestPojo reportRequestPojo = itr.next();
-                    this.reportTask.runUserReportAsync(reportRequestPojo);
+                    switch (reportRequestPojo.getType()) {
+                        case USER:
+                            reportTask.runUserReportAsync(reportRequestPojo);
+                            break;
+                        case EMAIL:
+                            reportTask.runScheduleReportAsync(reportRequestPojo);
+                            break;
+                        default:
+                            throw new ApiException(ApiStatus.BAD_DATA, "Unknown report request type");
+                    }
                     itr.remove();
                     orgToRequests.put(e.getKey(), pojoList);
                 }

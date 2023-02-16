@@ -1,6 +1,7 @@
 package com.increff.omni.reporting.helper;
 
 import com.increff.omni.reporting.model.constants.ReportRequestStatus;
+import com.increff.omni.reporting.model.constants.ReportRequestType;
 import com.increff.omni.reporting.model.constants.ReportType;
 import com.increff.omni.reporting.model.constants.ValidationType;
 import com.increff.omni.reporting.model.form.*;
@@ -97,12 +98,13 @@ public class ReportTestHelper {
     }
 
     public static ReportRequestPojo getReportRequestPojo(Integer reportId, ReportRequestStatus status
-            , Integer orgId, Integer userId) {
+            , Integer orgId, Integer userId, ReportRequestType type) {
         ReportRequestPojo pojo = new ReportRequestPojo();
         pojo.setReportId(reportId);
         pojo.setStatus(status);
         pojo.setOrgId(orgId);
         pojo.setUserId(userId);
+        pojo.setType(type);
         return pojo;
     }
 
