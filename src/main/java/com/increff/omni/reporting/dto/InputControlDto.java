@@ -148,7 +148,7 @@ public class InputControlDto extends AbstractDto {
         } else {
             List<String> values = controlToValuesMapping.getOrDefault(p.getId(), null);
             if (!CollectionUtils.isEmpty(values)) {
-                Map<String, String> valuesMap = new HashMap<>();
+                Map<String, String> valuesMap = new LinkedHashMap<>();
                 values.forEach(m -> valuesMap.put(m, m));
                 setInputControlOptions(data, valuesMap);
             }
