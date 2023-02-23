@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 @Getter
 @Setter
@@ -13,12 +14,10 @@ public class ReportScheduleForm {
     @NotNull
     private String timezone;
     @NotNull
-    private Integer reportId;
+    private String reportName;
     private CronScheduleForm cronSchedule;
     @NotNull
-    private ReportRequestType type;
-    @NotNull
-    private String sendTo;
+    private List<String> sendTo;
     @NotNull
     private Boolean isEnabled;
 

@@ -7,17 +7,17 @@ import lombok.Setter;
 
 import javax.validation.constraints.NotNull;
 import java.time.ZonedDateTime;
+import java.util.List;
 
 @Getter
 @Setter
 public class ReportScheduleData {
 
     private String timezone;
-    private Integer reportId;
     private String reportName;
-    private ReportRequestType type;
-    private String sendTo;
     private Boolean isEnabled;
+    private CronScheduleForm cronSchedule;
+    private List<String> sendTo;
     private ZonedDateTime nextRuntime;
     private ZonedDateTime createdAt;
     private ZonedDateTime updatedAt;

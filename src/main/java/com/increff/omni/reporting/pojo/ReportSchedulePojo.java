@@ -26,7 +26,7 @@ public class ReportSchedulePojo extends AbstractVersionedPojo {
     private Integer userId;
 
     @Column(nullable = false)
-    private Integer reportId;
+    private String reportName;
 
     @Column(nullable = false)
     private Boolean isEnabled;
@@ -41,10 +41,6 @@ public class ReportSchedulePojo extends AbstractVersionedPojo {
     private ZonedDateTime nextRuntime;
 
     @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
-    private ReportRequestType type;
-
-    @Column(nullable = false)
-    private String sendTo;
+    private Boolean isDeleted;
 
 }

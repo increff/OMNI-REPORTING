@@ -56,7 +56,7 @@ public class InputControlApi extends AbstractApi {
         InputControlQueryPojo exQuery = selectControlQuery(pojo.getId());
         if (Objects.nonNull(exQuery)) {
             queryDao.remove(exQuery.getId());
-            // flush is required as in single transaction batch processing, delete and insert immediately fails sometimes
+            // flush is required as in single transaction batch processing, delete and insert immediately fails
             queryDao.flush();
         }
         List<InputControlValuesPojo> valuesPojoList = valuesDao.selectMultiple("controlId", pojo.getId());

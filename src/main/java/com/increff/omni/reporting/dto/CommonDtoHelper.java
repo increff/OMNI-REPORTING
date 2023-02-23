@@ -261,7 +261,7 @@ public class CommonDtoHelper {
         ReportSchedulePojo schedulePojo = new ReportSchedulePojo();
         String cron = "0" + " " + form.getCronSchedule().getMinute() + " " + form.getCronSchedule().getHour() +
                 " " + form.getCronSchedule().getDayOfMonth() + " " + "*" + " " + "?";
-        schedulePojo.setReportId(form.getReportId());
+        schedulePojo.setReportName(form.getReportName());
         schedulePojo.setTimezone(form.getTimezone());
         schedulePojo.setIsEnabled(form.getIsEnabled());
         schedulePojo.setOrgId(orgId);
@@ -271,8 +271,8 @@ public class CommonDtoHelper {
                 TimeZone.getTimeZone(ZoneId.of(form.getTimezone())));
         Instant instant = generator.next(new Date()).toInstant();
         schedulePojo.setNextRuntime(ZonedDateTime.ofInstant(instant, ZoneId.of("UTC")));
-        schedulePojo.setSendTo(form.getSendTo());
-        schedulePojo.setType(form.getType());
+        // New / updated schedule is created with deleted flag false
+        schedulePojo.setIsDeleted(false);
         return schedulePojo;
     }
 }

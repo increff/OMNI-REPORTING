@@ -105,10 +105,10 @@ public class StandardController {
         reportScheduleDto.scheduleReport(form);
     }
 
-    @ApiOperation(value = "Schedule a Report")
+    @ApiOperation(value = "Get Schedules for an organization")
     @RequestMapping(value = "/schedules", method = RequestMethod.GET)
-    public List<ReportScheduleData> getScheduleReports() throws ApiException {
-        return reportScheduleDto.getScheduleReports();
+    public List<ReportScheduleData> getScheduleReports(@RequestParam Integer pageNo, @RequestParam Integer pageSize) throws ApiException {
+        return reportScheduleDto.getScheduleReports(pageNo, pageSize);
     }
 
     // Scheduling a Report
@@ -116,6 +116,12 @@ public class StandardController {
     @RequestMapping(value = "/schedules/{id}", method = RequestMethod.PUT)
     public void editScheduleReport(@PathVariable Integer id, @RequestBody ReportScheduleForm form) throws ApiException {
         reportScheduleDto.editScheduleReport(id, form);
+    }
+
+    @ApiOperation(value = "Delete Schedule of a Report")
+    @RequestMapping(value = "/schedules/{id}", method = RequestMethod.DELETE)
+    public void deleteSchedule(@PathVariable Integer id) throws ApiException {
+        reportScheduleDto.deleteSchedule(id);
     }
 
     @ApiOperation(value = "Enable / Disable Report Schedule")

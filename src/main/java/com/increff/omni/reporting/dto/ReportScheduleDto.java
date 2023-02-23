@@ -1,13 +1,13 @@
 package com.increff.omni.reporting.dto;
 
-import com.increff.omni.reporting.api.OrganizationApi;
-import com.increff.omni.reporting.api.ReportApi;
-import com.increff.omni.reporting.api.ReportRequestApi;
-import com.increff.omni.reporting.api.ReportScheduleApi;
+import com.increff.omni.reporting.api.*;
+import com.increff.omni.reporting.config.ApplicationProperties;
+import com.increff.omni.reporting.flow.ReportScheduleFlowApi;
 import com.increff.omni.reporting.model.constants.AuditActions;
 import com.increff.omni.reporting.model.constants.ReportRequestType;
 import com.increff.omni.reporting.model.data.ReportRequestData;
 import com.increff.omni.reporting.model.data.ReportScheduleData;
+import com.increff.omni.reporting.model.form.CronScheduleForm;
 import com.increff.omni.reporting.model.form.ReportScheduleForm;
 import com.increff.omni.reporting.pojo.*;
 import com.nextscm.commons.spring.common.ApiException;
@@ -18,6 +18,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static com.increff.omni.reporting.dto.CommonDtoHelper.convertFormToReportSchedulePojo;
 
@@ -32,59 +34,83 @@ public class ReportScheduleDto extends AbstractDto {
     private ReportApi reportApi;
     @Autowired
     private ReportRequestApi reportRequestApi;
+    @Autowired
+    private OrgSchemaApi orgSchemaApi;
+    @Autowired
+    private ReportScheduleFlowApi flowApi;
+    @Autowired
+    private ApplicationProperties properties;
 
     public void scheduleReport(ReportScheduleForm form) throws ApiException {
         checkValid(form);
         checkLimitForOrg();
         OrganizationPojo organizationPojo = organizationApi.getCheck(getOrgId());
-        reportApi.getCheck(form.getReportId());
+        checkValidReport(form.getReportName());
         ReportSchedulePojo pojo = convertFormToReportSchedulePojo(form, getOrgId(), getUserId());
-        api.add(pojo);
-        api.saveAudit(pojo.getId().toString(), AuditActions.CREATE_REPORT_SCHEDULE.toString(), "Create Report Schedule",
-                "Report schedule created for organization : " + organizationPojo.getName() , getUserName());
+        flowApi.add(pojo, form.getSendTo());
+        flowApi.saveAudit(pojo.getId().toString(), AuditActions.CREATE_REPORT_SCHEDULE.toString(),
+                "Create Report Schedule",
+                "Report schedule created for organization : " + organizationPojo.getName(), getUserName());
     }
 
     public void editScheduleReport(Integer id, ReportScheduleForm form) throws ApiException {
         checkValid(form);
+        checkLimitForOrg();
         ReportSchedulePojo ex = api.getCheck(id);
-        if(!ex.getOrgId().equals(getOrgId()))
+        if (!ex.getOrgId().equals(getOrgId()))
             throw new ApiException(ApiStatus.BAD_DATA, "Org ID mismatch, existing org id : " + ex.getOrgId() + " , " +
                     "new org id : " + getOrgId());
         OrganizationPojo organizationPojo = organizationApi.getCheck(getOrgId());
-        reportApi.getCheck(form.getReportId());
+        checkValidReport(form.getReportName());
         ReportSchedulePojo pojo = convertFormToReportSchedulePojo(form, getOrgId(), getUserId());
         pojo.setId(id);
-        api.edit(pojo);
-        api.saveAudit(pojo.getId().toString(), AuditActions.EDIT_REPORT_SCHEDULE.toString(), "Edit Report Schedule",
+        flowApi.edit(pojo, form.getSendTo());
+        flowApi.saveAudit(pojo.getId().toString(), AuditActions.EDIT_REPORT_SCHEDULE.toString(), "Edit Report Schedule",
                 "Report schedule updated for organization : " + organizationPojo.getName() +
-                        " with cron : " + pojo.getCron() , getUserName());
+                        " with cron : " + pojo.getCron(), getUserName());
     }
 
     public void updateStatus(Integer id, Boolean isEnabled) throws ApiException {
-        if(isEnabled)
+        if (isEnabled)
             checkLimitForOrg();
         ReportSchedulePojo pojo = api.getCheck(id);
-        if(!pojo.getOrgId().equals(getOrgId()))
+        if (!pojo.getOrgId().equals(getOrgId()))
             throw new ApiException(ApiStatus.BAD_DATA, "Org ID mismatch, existing org id : " + pojo.getOrgId() + " , " +
                     "new org id : " + getOrgId());
         OrganizationPojo organizationPojo = organizationApi.getCheck(getOrgId());
+        checkValidReport(pojo.getReportName());
         pojo.setIsEnabled(isEnabled);
-        api.edit(pojo);
-        api.saveAudit(pojo.getId().toString(), AuditActions.EDIT_REPORT_SCHEDULE.toString(), "Edit Report Schedule",
+        flowApi.editEnableOrDeletedFlag(pojo);
+        flowApi.saveAudit(pojo.getId().toString(), AuditActions.ENABLE_DISABLE_REPORT_SCHEDULE.toString(), "Enable / Disable " +
+                        "Report Schedule",
                 "Report schedule updated for organization : " + organizationPojo.getName() +
-                        " with status isEnabled : " + pojo.getIsEnabled() , getUserName());
+                        " with status isEnabled : " + pojo.getIsEnabled(), getUserName());
     }
 
-    public List<ReportScheduleData> getScheduleReports() throws ApiException {
-        List<ReportSchedulePojo> reportSchedulePojoList = api.selectByOrgId(getOrgId());
-        List<ReportScheduleData> dataList = new ArrayList<>();
-        for (ReportSchedulePojo pojo : reportSchedulePojoList) {
-            ReportScheduleData data = ConvertUtil.convert(pojo, ReportScheduleData.class);
-            ReportPojo reportPojo = reportApi.getCheck(pojo.getReportId());
-            data.setReportName(reportPojo.getName());
-            dataList.add(data);
-        }
-        return dataList;
+    public void deleteSchedule(Integer id) throws ApiException {
+        ReportSchedulePojo pojo = api.getCheck(id);
+        if (!pojo.getOrgId().equals(getOrgId()))
+            throw new ApiException(ApiStatus.BAD_DATA, "Org ID mismatch, existing org id : " + pojo.getOrgId() + " , " +
+                    "new org id : " + getOrgId());
+        OrganizationPojo organizationPojo = organizationApi.getCheck(getOrgId());
+        pojo.setIsDeleted(true);
+        flowApi.editEnableOrDeletedFlag(pojo);
+        flowApi.saveAudit(pojo.getId().toString(), AuditActions.DELETE_REPORT_SCHEDULE.toString(), "Delete Report " +
+                        "Schedule",
+                "Report schedule updated for organization : " + organizationPojo.getName() +
+                        " with status isDeleted : " + pojo.getIsDeleted(), getUserName());
+
+    }
+
+    public List<ReportScheduleData> getScheduleReportsForAllOrgs(Integer pageNo, Integer pageSize) throws ApiException {
+        List<ReportSchedulePojo> reportSchedulePojoList = api.selectByOrgIdAndEnabledStatus(null, null, pageNo, pageSize);
+        return getReportScheduleData(reportSchedulePojoList);
+    }
+
+    public List<ReportScheduleData> getScheduleReports(Integer pageNo, Integer pageSize) throws ApiException {
+        List<ReportSchedulePojo> reportSchedulePojoList = api.selectByOrgIdAndEnabledStatus(getOrgId(), null, pageNo,
+                pageSize);
+        return getReportScheduleData(reportSchedulePojoList);
     }
 
     // todo
@@ -96,6 +122,22 @@ public class ReportScheduleDto extends AbstractDto {
             reportRequestDataList.add(getReportRequestData(r, reportPojo));
         }
         return reportRequestDataList;
+    }
+
+    private List<ReportScheduleData> getReportScheduleData(List<ReportSchedulePojo> reportSchedulePojoList) {
+        List<ReportScheduleData> dataList = new ArrayList<>();
+        for (ReportSchedulePojo pojo : reportSchedulePojoList) {
+            List<ReportScheduleEmailsPojo> emailsPojos = api.getByScheduleId(pojo.getId());
+            ReportScheduleData data = ConvertUtil.convert(pojo, ReportScheduleData.class);
+            CronScheduleForm cronData = new CronScheduleForm();
+            cronData.setDayOfMonth(pojo.getCron().split(" ")[3]);
+            cronData.setHour(pojo.getCron().split(" ")[2]);
+            cronData.setMinute(pojo.getCron().split(" ")[1]);
+            data.setCronSchedule(cronData);
+            data.setSendTo(emailsPojos.stream().map(ReportScheduleEmailsPojo::getSendTo).collect(Collectors.toList()));
+            dataList.add(data);
+        }
+        return dataList;
     }
 
     private ReportRequestData getReportRequestData(ReportRequestPojo pojo, ReportPojo reportPojo) throws ApiException {
@@ -115,9 +157,19 @@ public class ReportScheduleDto extends AbstractDto {
         return data;
     }
 
-    private void checkLimitForOrg() {
-        // todo
-        List<ReportSchedulePojo> reportSchedulePojoList = api.selectByOrgId(getOrgId());
+    private void checkValidReport(String reportName) throws ApiException {
+        OrgSchemaVersionPojo orgSchemaVersionPojo = orgSchemaApi.getCheckByOrgId(getOrgId());
+        ReportPojo reportPojo = reportApi.getByNameAndSchema(reportName, orgSchemaVersionPojo.getSchemaVersionId());
+        if (Objects.isNull(reportPojo) || !reportPojo.getCanSchedule())
+            throw new ApiException(ApiStatus.BAD_DATA, "Report : " + reportName + " is not allowed to " +
+                    "schedule");
+    }
 
+    private void checkLimitForOrg() throws ApiException {
+        List<ReportSchedulePojo> reportSchedulePojoList = api.selectByOrgIdAndEnabledStatus(getOrgId(), true, null, null);
+        if (reportSchedulePojoList.size() >= properties.getMaxScheduleLimit())
+            throw new ApiException(ApiStatus.BAD_DATA,
+                    "Organization has crossed max schedule limit of " + properties.getMaxScheduleLimit() + " " +
+                            " enabled reports");
     }
 }

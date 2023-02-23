@@ -38,6 +38,9 @@ public class ApplicationProperties {
     @Value("${max.execution.time.minutes:5}")
     private Integer maxExecutionTime;
 
+    @Value("${max.schedule.limit:15}")
+    private Integer maxScheduleLimit;
+
     @Value("${gcp.baseUrl:dummy}")
     private String gcpBaseUrl;
 
