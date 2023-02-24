@@ -151,7 +151,10 @@ public class InputControlFlowApi extends AbstractApi {
             dataRow = tsvfile.readLine();
         while (dataRow != null) {
             List<String> values = Arrays.asList(dataRow.split("\t"));
-            fMap.put(values.get(0), values.get(1));
+            if(!values.isEmpty())
+                fMap.put(values.get(0), values.get(1));
+            else
+                fMap.put("", "");
             dataRow = tsvfile.readLine(); // Read next line of data.
         }
         tsvfile.close();
