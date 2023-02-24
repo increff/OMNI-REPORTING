@@ -3,7 +3,10 @@ package com.increff.omni.reporting.dto;
 import com.increff.omni.reporting.model.constants.ReportRequestStatus;
 import com.increff.omni.reporting.model.constants.ReportRequestType;
 import com.increff.omni.reporting.model.constants.ValidationType;
-import com.increff.omni.reporting.model.data.*;
+import com.increff.omni.reporting.model.data.InputControlData;
+import com.increff.omni.reporting.model.data.OrgConnectionData;
+import com.increff.omni.reporting.model.data.OrgSchemaData;
+import com.increff.omni.reporting.model.data.TimeZoneData;
 import com.increff.omni.reporting.model.form.ReportRequestForm;
 import com.increff.omni.reporting.model.form.ReportScheduleForm;
 import com.increff.omni.reporting.model.form.SqlParams;
@@ -183,15 +186,32 @@ public class CommonDtoHelper {
         return reportInputParamsPojoList;
     }
 
-    public static SqlParams convert(ConnectionPojo connectionPojo, ReportQueryPojo reportQueryPojo
-            , Map<String, String> inputParamsMap, File file, File errorFile, Integer maxExecutionTime) {
+    public static List<ReportScheduleInputParamsPojo> getReportScheduleInputParamsPojoList(Map<String, String> paramMap
+            , String timeZone, Integer orgId, Map<String, String> inputDisplayStringMap) {
+        List<ReportInputParamsPojo> reportInputParamsPojoList = new ArrayList<>();
+        paramMap.forEach((k, v) -> {
+            ReportInputParamsPojo reportInputParamsPojo = new ReportInputParamsPojo();
+            reportInputParamsPojo.setParamKey(k);
+            reportInputParamsPojo.setParamValue(v);
+            reportInputParamsPojo.setDisplayValue(inputDisplayStringMap.getOrDefault(k, v));
+            reportInputParamsPojoList.add(reportInputParamsPojo);
+        });
+        ReportInputParamsPojo timeZoneParam = new ReportInputParamsPojo();
+        timeZoneParam.setParamKey("timezone");
+        timeZoneParam.setParamValue("'" + timeZone + "'");
+        reportInputParamsPojoList.add(timeZoneParam);
+        ReportInputParamsPojo orgIdParam = new ReportInputParamsPojo();
+        orgIdParam.setParamKey("orgId");
+        orgIdParam.setParamValue("'" + orgId.toString() + "'");
+        reportInputParamsPojoList.add(orgIdParam);
+        return reportInputParamsPojoList;
+    }
+
+    public static SqlParams convert(ConnectionPojo connectionPojo, File file, File errorFile) {
         SqlParams sqlParams = new SqlParams();
         sqlParams.setHost(connectionPojo.getHost());
         sqlParams.setUsername(connectionPojo.getUsername());
         sqlParams.setPassword(connectionPojo.getPassword());
-        // Replacing query param with input control values
-//        String fQuery = SqlCmd.getSubstitutedString(reportQueryPojo.getQuery(), inputParamsMap);
-//        sqlParams.setQuery(massageQuery(fQuery, maxExecutionTime));
         sqlParams.setOutFile(file);
         sqlParams.setErrFile(errorFile);
         return sqlParams;
@@ -200,14 +220,17 @@ public class CommonDtoHelper {
     public static void validate(ReportRequestPojo requestPojo, Integer requestId, ReportPojo reportPojo
             , int userId, int orgId) throws ApiException {
         if (requestPojo.getType().equals(ReportRequestType.USER) && requestPojo.getUserId() != userId) {
-            throw new ApiException(ApiStatus.BAD_DATA, "Logged in user has not requested the report with id : " + requestId);
+            throw new ApiException(ApiStatus.BAD_DATA,
+                    "Logged in user has not requested the report with id : " + requestId);
         }
         if (requestPojo.getOrgId() != orgId) {
             throw new ApiException(ApiStatus.BAD_DATA,
                     "Logged in org has not scheduled the report with id : " + requestId);
         }
-        if (!Arrays.asList(ReportRequestStatus.COMPLETED, ReportRequestStatus.FAILED).contains(requestPojo.getStatus())) {
-            throw new ApiException(ApiStatus.BAD_DATA, "Report request is still in processing, name : " + reportPojo.getName());
+        if (!Arrays.asList(ReportRequestStatus.COMPLETED, ReportRequestStatus.FAILED)
+                .contains(requestPojo.getStatus())) {
+            throw new ApiException(ApiStatus.BAD_DATA,
+                    "Report request is still in processing, name : " + reportPojo.getName());
         }
     }
 
@@ -240,17 +263,17 @@ public class CommonDtoHelper {
                 List<ReportRequestPojo> newList = new ArrayList<>(orgToRequests.get(r.getOrgId()));
                 newList.add(r);
                 orgToRequests.put(r.getOrgId(), newList);
-            }
-            else
+            } else
                 orgToRequests.put(r.getOrgId(), Collections.singletonList(r));
         }
         return orgToRequests;
     }
 
-    public static ReportRequestPojo convertToReportRequestPojo(ReportSchedulePojo schedulePojo) {
+    public static ReportRequestPojo convertToReportRequestPojo(ReportSchedulePojo schedulePojo,
+                                                               Integer reportId) {
         ReportRequestPojo reportRequestPojo = new ReportRequestPojo();
-        reportRequestPojo.setReportId(schedulePojo.getReportId());
-        reportRequestPojo.setType(schedulePojo.getType());
+        reportRequestPojo.setReportId(reportId);
+        reportRequestPojo.setType(ReportRequestType.EMAIL);
         reportRequestPojo.setStatus(ReportRequestStatus.NEW);
         reportRequestPojo.setUserId(schedulePojo.getUserId());
         reportRequestPojo.setOrgId(schedulePojo.getOrgId());

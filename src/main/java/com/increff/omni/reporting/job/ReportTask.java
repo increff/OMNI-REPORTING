@@ -52,7 +52,7 @@ public class ReportTask {
     @Autowired
     private ApplicationProperties properties;
 
-    @Async("reportRequestExecutor")
+    @Async("userReportRequestExecutor")
     public void runUserReportAsync(ReportRequestPojo pojo) throws ApiException, IOException {
         // mark as processing - locking
         try {
@@ -74,8 +74,8 @@ public class ReportTask {
         File file = folderApi.getFileForExtension(reportRequestPojo.getId(), ".tsv");
         File errorFile = folderApi.getErrFile(reportRequestPojo.getId(), ".tsv");
         Map<String, String> inputParamMap = getInputParamMapFromPojoList(reportInputParamsPojoList);
-        SqlParams sqlParams = CommonDtoHelper.convert(connectionPojo, reportQueryPojo, inputParamMap, file, errorFile,
-                properties.getMaxExecutionTime());
+        SqlParams sqlParams = CommonDtoHelper.convert(connectionPojo, file, errorFile
+        );
         try {
             String fQuery = SqlCmd.prepareQuery(inputParamMap, reportQueryPojo.getQuery(),
                     properties.getMaxExecutionTime());
@@ -89,7 +89,7 @@ public class ReportTask {
         }
     }
 
-    @Async("reportScheduleExecutor")
+    @Async("scheduleReportRequestExecutor")
     public void runScheduleReportAsync(ReportRequestPojo pojo) throws ApiException, IOException {
         // mark as processing - locking
         try {
@@ -109,8 +109,8 @@ public class ReportTask {
         File file = folderApi.getFileForExtension(reportRequestPojo.getId(), ".tsv");
         File errorFile = folderApi.getErrFile(reportRequestPojo.getId(), ".tsv");
         Map<String, String> inputParamMap = new HashMap<>();
-        SqlParams sqlParams = CommonDtoHelper.convert(connectionPojo, reportQueryPojo, inputParamMap, file, errorFile,
-                properties.getMaxExecutionTime());
+        SqlParams sqlParams = CommonDtoHelper.convert(connectionPojo, file, errorFile
+        );
         try {
             String fQuery = SqlCmd.prepareQuery(inputParamMap, reportQueryPojo.getQuery(),
                     properties.getMaxExecutionTime());

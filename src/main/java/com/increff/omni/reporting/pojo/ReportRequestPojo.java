@@ -29,7 +29,6 @@ public class ReportRequestPojo extends AbstractVersionedPojo {
     @Column(nullable = false)
     private Integer userId;
 
-    @Column(nullable = false)
     private Integer reportId;
 
     @Column(nullable = false)

@@ -10,27 +10,27 @@ import org.springframework.stereotype.Component;
 @Component
 public class ApplicationProperties {
 
-    @Value("${report.request.corePoolSize:100}")
-    private Integer reportRequestCorePool;
+    @Value("${user.report.request.corePoolSize:100}")
+    private Integer userReportRequestCorePool;
 
-    @Value("${report.request.maxPoolSize:200}")
-    private Integer reportRequestMaxPool;
-
-    // Reason for default queue capacity 0 is we have implemented report job in such
-    // a way that if we have free core pool then only we will assign a thread
-    @Value("${report.request.queueCapacity:0}")
-    private Integer reportRequestQueueCapacity;
-
-    @Value("${report.schedule.corePoolSize:100}")
-    private Integer reportScheduleCorePool;
-
-    @Value("${report.schedule.maxPoolSize:200}")
-    private Integer reportScheduleMaxPool;
+    @Value("${user.report.request.maxPoolSize:200}")
+    private Integer userReportRequestMaxPool;
 
     // Reason for default queue capacity 0 is we have implemented report job in such
     // a way that if we have free core pool then only we will assign a thread
-    @Value("${report.schedule.queueCapacity:0}")
-    private Integer reportScheduleQueueCapacity;
+    @Value("${user.report.request.queueCapacity:0}")
+    private Integer userReportRequestQueueCapacity;
+
+    @Value("${schedule.report.request.corePoolSize:100}")
+    private Integer scheduleReportRequestCorePool;
+
+    @Value("${schedule.report.request.maxPoolSize:200}")
+    private Integer scheduleReportRequestMaxPool;
+
+    // Reason for default queue capacity 0 is we have implemented report job in such
+    // a way that if we have free core pool then only we will assign a thread
+    @Value("${schedule.report.request.queueCapacity:0}")
+    private Integer scheduleReportRequestQueueCapacity;
 
     @Value("${stuck.report.time.minutes:10}")
     private Integer stuckReportTime;

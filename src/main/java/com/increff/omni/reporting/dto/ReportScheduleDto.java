@@ -10,15 +10,14 @@ import com.increff.omni.reporting.model.data.ReportScheduleData;
 import com.increff.omni.reporting.model.form.CronScheduleForm;
 import com.increff.omni.reporting.model.form.ReportScheduleForm;
 import com.increff.omni.reporting.pojo.*;
+import com.increff.omni.reporting.util.UserPrincipalUtil;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
 import com.nextscm.commons.spring.common.ConvertUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.increff.omni.reporting.dto.CommonDtoHelper.convertFormToReportSchedulePojo;
@@ -47,6 +46,11 @@ public class ReportScheduleDto extends AbstractDto {
         OrganizationPojo organizationPojo = organizationApi.getCheck(getOrgId());
         checkValidReport(form.getReportName());
         ReportSchedulePojo pojo = convertFormToReportSchedulePojo(form, getOrgId(), getUserId());
+        Map<String, String> inputParamsMap = UserPrincipalUtil.getCompleteMapWithAccessControl(form.getParamMap());
+        Map<String, List<String>> inputDisplayMap = new HashMap<>();
+        ReportPojo reportPojo = reportApi.getByNameAndSchema()
+        List<ReportScheduleInputParamsPojo> reportScheduleInputParamsPojos =
+                CommonDtoHelper.getReportInputParamsPojoList(inputParamsMap, form.getTimezone(), orgId, inputDisplayStringMap);
         flowApi.add(pojo, form.getSendTo());
         flowApi.saveAudit(pojo.getId().toString(), AuditActions.CREATE_REPORT_SCHEDULE.toString(),
                 "Create Report Schedule",

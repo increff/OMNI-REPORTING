@@ -19,22 +19,22 @@ public class SchedulerConfig {
         return Executors.newScheduledThreadPool(6);
     }
 
-    @Bean(name = "reportRequestExecutor")
+    @Bean(name = "userReportRequestExecutor")
     public Executor getReportRequestAsyncExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(properties.getReportRequestCorePool());
-        executor.setMaxPoolSize(properties.getReportRequestMaxPool());
-        executor.setQueueCapacity(properties.getReportRequestQueueCapacity());
+        executor.setCorePoolSize(properties.getUserReportRequestCorePool());
+        executor.setMaxPoolSize(properties.getUserReportRequestMaxPool());
+        executor.setQueueCapacity(properties.getUserReportRequestQueueCapacity());
         executor.initialize();
         return executor;
     }
 
-    @Bean(name = "reportScheduleExecutor")
+    @Bean(name = "scheduleReportRequestExecutor")
     public Executor getReportScheduleAsyncExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(properties.getReportScheduleCorePool());
-        executor.setMaxPoolSize(properties.getReportScheduleMaxPool());
-        executor.setQueueCapacity(properties.getReportScheduleQueueCapacity());
+        executor.setCorePoolSize(properties.getScheduleReportRequestCorePool());
+        executor.setMaxPoolSize(properties.getScheduleReportRequestMaxPool());
+        executor.setQueueCapacity(properties.getScheduleReportRequestQueueCapacity());
         executor.initialize();
         return executor;
     }

@@ -1,11 +1,11 @@
 package com.increff.omni.reporting.job;
 
 
-import com.increff.omni.reporting.api.FolderApi;
-import com.increff.omni.reporting.api.ReportRequestApi;
-import com.increff.omni.reporting.api.ReportScheduleApi;
+import com.increff.omni.reporting.api.*;
 import com.increff.omni.reporting.config.ApplicationProperties;
 import com.increff.omni.reporting.model.constants.ReportRequestType;
+import com.increff.omni.reporting.pojo.OrgSchemaVersionPojo;
+import com.increff.omni.reporting.pojo.ReportPojo;
 import com.increff.omni.reporting.pojo.ReportRequestPojo;
 import com.increff.omni.reporting.pojo.ReportSchedulePojo;
 import com.nextscm.commons.spring.common.ApiException;
@@ -40,11 +40,15 @@ public class ScheduledJobs {
     @Autowired
     private ReportTask reportTask;
     @Autowired
-    @Qualifier(value = "reportRequestExecutor")
+    private ReportApi reportApi;
+    @Autowired
+    private OrgSchemaApi orgSchemaApi;
+    @Autowired
+    @Qualifier(value = "userReportRequestExecutor")
     private Executor userReportExecutor;
 
     @Autowired
-    @Qualifier(value = "reportScheduleExecutor")
+    @Qualifier(value = "scheduleReportRequestExecutor")
     private Executor scheduleReportExecutor;
 
     @Scheduled(fixedDelay = 1000)
@@ -75,13 +79,17 @@ public class ScheduledJobs {
     }
 
     @Scheduled(fixedDelay = 1000)
-    public void addScheduleReportRequests() {
+    public void addScheduleReportRequests() throws ApiException {
         List<ReportSchedulePojo> schedulePojos = reportScheduleApi.getEligibleSchedules();
         log.debug("Eligible schedules : " + schedulePojos.size());
-        schedulePojos.forEach(s -> {
-            ReportRequestPojo reportRequestPojo = convertToReportRequestPojo(s);
+        for(ReportSchedulePojo s : schedulePojos) {
+            OrgSchemaVersionPojo orgSchemaVersionPojo = orgSchemaApi.getCheckByOrgId(s.getOrgId());
+            ReportPojo reportPojo = reportApi.getByNameAndSchema(s.getReportName(),
+                    orgSchemaVersionPojo.getSchemaVersionId());
+            Integer reportId = Objects.isNull(reportPojo) ? null : reportPojo.getId();
+            ReportRequestPojo reportRequestPojo = convertToReportRequestPojo(s, reportId);
             api.add(reportRequestPojo);
-        });
+        }
     }
 
     private void runReports(Executor executor, List<ReportRequestType> types) {
@@ -129,7 +137,7 @@ public class ScheduledJobs {
     }
 
     private int getLimitForEligibleRequests(ThreadPoolTaskExecutor executor) {
-        long poolSize = properties.getReportRequestCorePool() - 10; // Just for safety we kept buffer of 10 to core pool
+        long poolSize = properties.getUserReportRequestCorePool() - 10; // Just for safety we kept buffer of 10 to core pool
         long currentUsedThreads = executor.getThreadPoolExecutor().getTaskCount()
                 - executor.getThreadPoolExecutor().getCompletedTaskCount();
         log.debug("Task Count : " + executor.getThreadPoolExecutor().getTaskCount());
