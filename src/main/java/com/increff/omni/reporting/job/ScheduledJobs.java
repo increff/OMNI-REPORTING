@@ -3,11 +3,9 @@ package com.increff.omni.reporting.job;
 
 import com.increff.omni.reporting.api.*;
 import com.increff.omni.reporting.config.ApplicationProperties;
+import com.increff.omni.reporting.flow.ReportRequestFlowApi;
 import com.increff.omni.reporting.model.constants.ReportRequestType;
-import com.increff.omni.reporting.pojo.OrgSchemaVersionPojo;
-import com.increff.omni.reporting.pojo.ReportPojo;
-import com.increff.omni.reporting.pojo.ReportRequestPojo;
-import com.increff.omni.reporting.pojo.ReportSchedulePojo;
+import com.increff.omni.reporting.pojo.*;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
 import lombok.extern.log4j.Log4j;
@@ -31,6 +29,10 @@ public class ScheduledJobs {
 
     @Autowired
     private ReportRequestApi api;
+    @Autowired
+    private ReportRequestFlowApi reportRequestFlowApi;
+    @Autowired
+    private ReportScheduleApi scheduleApi;
     @Autowired
     private FolderApi folderApi;
     @Autowired
@@ -88,7 +90,16 @@ public class ScheduledJobs {
                     orgSchemaVersionPojo.getSchemaVersionId());
             Integer reportId = Objects.isNull(reportPojo) ? null : reportPojo.getId();
             ReportRequestPojo reportRequestPojo = convertToReportRequestPojo(s, reportId);
-            api.add(reportRequestPojo);
+            List<ReportInputParamsPojo> reportInputParamsPojoList = new ArrayList<>();
+            List<ReportScheduleInputParamsPojo> scheduleInputParamsPojos = scheduleApi.getScheduleParams(s.getId());
+            scheduleInputParamsPojos.forEach(sp -> {
+                ReportInputParamsPojo ip = new ReportInputParamsPojo();
+                ip.setDisplayValue(sp.getDisplayValue());
+                ip.setParamKey(sp.getParamKey());
+                ip.setParamValue(sp.getParamValue());
+                reportInputParamsPojoList.add(ip);
+            });
+            reportRequestFlowApi.requestReport(reportRequestPojo, reportInputParamsPojoList);
         }
     }
 

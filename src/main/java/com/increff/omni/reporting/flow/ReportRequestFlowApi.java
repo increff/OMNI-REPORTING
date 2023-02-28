@@ -1,11 +1,9 @@
 package com.increff.omni.reporting.flow;
 
 import com.increff.omni.reporting.api.*;
+import com.increff.omni.reporting.model.constants.ReportRequestType;
 import com.increff.omni.reporting.model.constants.ValidationType;
 import com.increff.omni.reporting.pojo.*;
-import com.increff.omni.reporting.validators.DateValidator;
-import com.increff.omni.reporting.validators.MandatoryValidator;
-import com.increff.omni.reporting.validators.SingleMandatoryValidator;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +18,7 @@ import java.util.stream.Collectors;
 
 @Service
 @Transactional(rollbackFor = Exception.class)
-public class ReportRequestFlowApi extends AbstractAuditApi {
+public class ReportRequestFlowApi extends AbstractFlowApi {
 
     @Autowired
     private ReportRequestApi api;
@@ -37,13 +35,7 @@ public class ReportRequestFlowApi extends AbstractAuditApi {
     @Autowired
     private OrgConnectionApi orgConnectionApi;
     @Autowired
-    private MandatoryValidator mandatoryValidator;
-    @Autowired
-    private SingleMandatoryValidator singleMandatoryValidator;
-    @Autowired
     private ReportValidationGroupApi reportValidationGroupApi;
-    @Autowired
-    private DateValidator dateValidator;
 
     private final static Integer MAX_OPEN_REPORT_REQUESTS = 5;
 
@@ -83,29 +75,9 @@ public class ReportRequestFlowApi extends AbstractAuditApi {
                 paramValues.add(p.getParamValue());
                 displayValues.add(i.getDisplayName());
             });
-            runValidators(reportPojo, groupPojoList, type, paramValues, displayValues);
+            runValidators(reportPojo, groupPojoList, type, paramValues, displayValues, ReportRequestType.USER);
         }
 
-    }
-
-    private void runValidators(ReportPojo reportPojo, List<ReportValidationGroupPojo> groupPojoList
-            , ValidationType type, List<String> paramValues, List<String> displayValues) throws ApiException {
-        switch (type) {
-            case SINGLE_MANDATORY:
-                singleMandatoryValidator.validate(displayValues, paramValues, reportPojo.getName()
-                        , groupPojoList.get(0).getValidationValue());
-                break;
-            case MANDATORY:
-                mandatoryValidator.validate(displayValues, paramValues, reportPojo.getName()
-                        , groupPojoList.get(0).getValidationValue());
-                break;
-            case DATE_RANGE:
-                dateValidator.validate(displayValues, paramValues, reportPojo.getName()
-                        , groupPojoList.get(0).getValidationValue());
-                break;
-            default:
-                throw new ApiException(ApiStatus.BAD_DATA, "Invalid Validation Type");
-        }
     }
 
 }

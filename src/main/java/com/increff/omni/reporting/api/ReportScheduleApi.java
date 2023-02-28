@@ -2,7 +2,9 @@ package com.increff.omni.reporting.api;
 
 import com.increff.omni.reporting.dao.ReportScheduleDao;
 import com.increff.omni.reporting.dao.ReportScheduleEmailsDao;
+import com.increff.omni.reporting.dao.ReportScheduleInputParamsDao;
 import com.increff.omni.reporting.pojo.ReportScheduleEmailsPojo;
+import com.increff.omni.reporting.pojo.ReportScheduleInputParamsPojo;
 import com.increff.omni.reporting.pojo.ReportSchedulePojo;
 import com.nextscm.commons.spring.common.ApiException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,10 +21,38 @@ public class ReportScheduleApi extends AbstractAuditApi {
     private ReportScheduleDao dao;
     @Autowired
     private ReportScheduleEmailsDao emailsDao;
+    @Autowired
+    private ReportScheduleInputParamsDao scheduleInputParamsDao;
 
     public void add(ReportSchedulePojo pojo) {
         dao.persist(pojo);
     }
+
+    public void addScheduleInputParams(List<ReportScheduleInputParamsPojo> reportScheduleInputParamsPojoList,
+                                       ReportSchedulePojo schedulePojo) {
+        reportScheduleInputParamsPojoList.forEach(r -> {
+            r.setScheduleId(schedulePojo.getId());
+            scheduleInputParamsDao.persist(r);
+        });
+    }
+
+    public List<ReportScheduleInputParamsPojo> getScheduleParams(Integer scheduleId) {
+        return scheduleInputParamsDao.selectMultiple("scheduleId", scheduleId);
+    }
+
+    public void updateScheduleInputParams(List<ReportScheduleInputParamsPojo> reportScheduleInputParamsPojoList,
+                                          ReportSchedulePojo schedulePojo) {
+        List<ReportScheduleInputParamsPojo> existing = getScheduleParams(schedulePojo.getId());
+        existing.forEach(e -> {
+            scheduleInputParamsDao.remove(e.getId());
+        });
+        scheduleInputParamsDao.flush();
+        reportScheduleInputParamsPojoList.forEach(r -> {
+            r.setScheduleId(schedulePojo.getId());
+            scheduleInputParamsDao.persist(r);
+        });
+    }
+
 
     public List<ReportSchedulePojo> selectByOrgIdAndEnabledStatus(Integer orgId, Boolean isEnabled, Integer pageNo,
                                                                   Integer pageSize) {

@@ -54,6 +54,15 @@ public class ReportTask {
 
     @Async("userReportRequestExecutor")
     public void runUserReportAsync(ReportRequestPojo pojo) throws ApiException, IOException {
+        run(pojo);
+    }
+
+    @Async("scheduleReportRequestExecutor")
+    public void runScheduleReportAsync(ReportRequestPojo pojo) throws ApiException, IOException {
+        run(pojo);
+    }
+
+    private void run(ReportRequestPojo pojo) throws ApiException, IOException {
         // mark as processing - locking
         try {
             api.markProcessingIfEligible(pojo.getId());
@@ -89,41 +98,6 @@ public class ReportTask {
         }
     }
 
-    @Async("scheduleReportRequestExecutor")
-    public void runScheduleReportAsync(ReportRequestPojo pojo) throws ApiException, IOException {
-        // mark as processing - locking
-        try {
-            api.markProcessingIfEligible(pojo.getId());
-        } catch (OptimisticLockException | ObjectOptimisticLockingFailureException | ApiException e) {
-            log.debug("Error occurred while marking report in progress for request id : " + pojo.getId(), e);
-            return;
-        }
-        // process
-        ReportRequestPojo reportRequestPojo = api.getCheck(pojo.getId());
-        ReportPojo reportPojo = reportApi.getCheck(reportRequestPojo.getReportId());
-        ReportQueryPojo reportQueryPojo = reportQueryApi.getByReportId(reportPojo.getId());
-        OrgConnectionPojo orgConnectionPojo = orgConnectionApi.getCheckByOrgId(reportRequestPojo.getOrgId());
-        ConnectionPojo connectionPojo = connectionApi.getCheck(orgConnectionPojo.getConnectionId());
-
-        // Creation of file
-        File file = folderApi.getFileForExtension(reportRequestPojo.getId(), ".tsv");
-        File errorFile = folderApi.getErrFile(reportRequestPojo.getId(), ".tsv");
-        Map<String, String> inputParamMap = new HashMap<>();
-        SqlParams sqlParams = CommonDtoHelper.convert(connectionPojo, file, errorFile
-        );
-        try {
-            String fQuery = SqlCmd.prepareQuery(inputParamMap, reportQueryPojo.getQuery(),
-                    properties.getMaxExecutionTime());
-            sqlParams.setQuery(fQuery);
-            // Execute query and send results
-            saveResultsOnCloud(pojo, sqlParams);
-        } catch (Exception e) {
-            log.error("Report ID : " + pojo.getId() + " failed", e);
-            api.markFailed(pojo.getId(), ReportRequestStatus.FAILED,
-                    "Error while processing query : " + e.getMessage(), 0, 0.0);
-        }
-    }
-
     private void saveResultsOnCloud(ReportRequestPojo pojo, SqlParams sqlParams) {
         try {
             // Process data
@@ -133,13 +107,14 @@ public class ReportTask {
             Integer noOfRows = FileUtil.getCsvFromTsv(sqlParams.getOutFile(), csvFile);
 
             // upload result to cloud
-            String filePath = uploadFile(csvFile, pojo);
+            String filePath = "NA";
             double fileSize = FileUtil.getSizeInMb(csvFile.length());
             switch (pojo.getType()) {
                 case EMAIL:
                     sendEmail(fileSize, csvFile);
                     break;
                 case USER:
+                    filePath = uploadFile(csvFile, pojo);
                     break;
             }
             // update status to completed
@@ -147,9 +122,9 @@ public class ReportTask {
             FileUtil.delete(csvFile);
         } catch (Exception e) {
             // log as error and mark fail
-            log.error("Report ID : " + pojo.getId() + " failed", e);
+            log.error("Report Request ID : " + pojo.getId() + " failed", e);
             try {
-                String message = String.join("\t", Files.readAllLines(sqlParams.getErrFile().toPath()));
+                String message = String.join("\t", Files.readAllLines(sqlParams.getErrFile().toPath())).concat(e.getMessage());
                 api.markFailed(pojo.getId(), ReportRequestStatus.FAILED, message, 0, 0.0);
             } catch (Exception ex) {
                 log.error("Error while updating the status of failed request", ex);
@@ -160,6 +135,7 @@ public class ReportTask {
     }
 
     private void sendEmail(double fileSize, File csvFile) throws IOException, ApiException {
+        File out = csvFile;
         if (fileSize > 20.0) {
             String outFileName = csvFile.getName().split(".csv")[0] + ".7z";
             File zipFile = folderApi.getFile(outFileName);
@@ -170,7 +146,9 @@ public class ReportTask {
                 sevenZOutput.closeArchiveEntry();
             } catch (IOException e) {
                 log.error("Error while zipping : ", e);
+                throw new ApiException(ApiStatus.BAD_DATA, "Error while zipping the file");
             }
+            out = zipFile;
         }
         // todo send email
     }

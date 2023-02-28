@@ -1,6 +1,7 @@
 package com.increff.omni.reporting.validators;
 
 import com.increff.omni.reporting.model.constants.InputControlType;
+import com.increff.omni.reporting.model.constants.ReportRequestType;
 import com.increff.omni.reporting.model.constants.ValidationType;
 import com.nextscm.commons.lang.StringUtil;
 import com.nextscm.commons.spring.common.ApiException;
@@ -16,7 +17,7 @@ public abstract class AbstractValidator {
 
     // Parameter to be list of input controls with input
     public abstract void validate(List<String> displayName, List<String> paramValue, String reportName
-            , Integer validationValue) throws ApiException;
+            , Integer validationValue, ReportRequestType type) throws ApiException;
 
     public String getValidationMessage(String reportName, List<String> displayNames, ValidationType validationType
             , String extraMessage) {
@@ -26,8 +27,10 @@ public abstract class AbstractValidator {
     }
 
     protected String getValueFromQuotes(String value) {
-        if(StringUtil.isEmpty(value))
+        if (StringUtil.isEmpty(value))
             return null;
-        return value.substring(1, value.length()-1);
+        if (value.charAt(0) == '\'')
+            return value.substring(1, value.length() - 1);
+        return value;
     }
 }

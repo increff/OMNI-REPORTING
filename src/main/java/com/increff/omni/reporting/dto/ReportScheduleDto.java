@@ -48,24 +48,11 @@ public class ReportScheduleDto extends AbstractDto {
         checkValid(form);
         checkLimitForOrg();
         OrganizationPojo organizationPojo = organizationApi.getCheck(getOrgId());
-        OrgSchemaVersionPojo orgSchemaVersionPojo = orgSchemaApi.getCheckByOrgId(getOrgId());
-
         ReportPojo reportPojo = checkValidReport(form.getReportName());
         ReportSchedulePojo pojo = convertFormToReportSchedulePojo(form, getOrgId(), getUserId());
-        List<ReportControlsPojo> reportControlsPojoList = reportControlsApi.getByReportId(reportPojo.getId());
-        List<InputControlPojo> inputControlPojoList = controlApi.selectByIds(reportControlsPojoList.stream()
-                .map(ReportControlsPojo::getControlId).collect(Collectors.toList()));
-        Map<String, List<String>> userInputParams = getUserInputParams(form.getParamMap());
-        Map<String, String> inputParamsMap = UserPrincipalUtil.getCompleteMapWithAccessControl(form.getParamMap());
-        Map<String, List<String>> inputDisplayMap = new HashMap<>();
-        validateCustomReportAccess(reportPojo, getOrgId());
-        validateInputParamValues(userInputParams, inputParamsMap, getOrgId(), inputDisplayMap, inputControlPojoList,
-                ReportRequestType.EMAIL);
-        Map<String, String> inputDisplayStringMap = UserPrincipalUtil.getStringToStringParamMap(inputDisplayMap);
         List<ReportScheduleInputParamsPojo> reportScheduleInputParamsPojos =
-                CommonDtoHelper.getReportScheduleInputParamsPojoList(inputParamsMap, form.getTimezone(), getOrgId(),
-                        inputDisplayStringMap);
-        flowApi.add(pojo, form.getSendTo(), reportScheduleInputParamsPojos);
+                validateAndPrepareInputParams(form, reportPojo);
+        flowApi.add(pojo, form.getSendTo(), reportScheduleInputParamsPojos, reportPojo);
         flowApi.saveAudit(pojo.getId().toString(), AuditActions.CREATE_REPORT_SCHEDULE.toString(),
                 "Create Report Schedule",
                 "Report schedule created for organization : " + organizationPojo.getName(), getUserName());
@@ -79,10 +66,12 @@ public class ReportScheduleDto extends AbstractDto {
             throw new ApiException(ApiStatus.BAD_DATA, "Org ID mismatch, existing org id : " + ex.getOrgId() + " , " +
                     "new org id : " + getOrgId());
         OrganizationPojo organizationPojo = organizationApi.getCheck(getOrgId());
-        checkValidReport(form.getReportName());
+        ReportPojo reportPojo = checkValidReport(form.getReportName());
         ReportSchedulePojo pojo = convertFormToReportSchedulePojo(form, getOrgId(), getUserId());
         pojo.setId(id);
-        flowApi.edit(pojo, form.getSendTo());
+        List<ReportScheduleInputParamsPojo> reportScheduleInputParamsPojos =
+                validateAndPrepareInputParams(form, reportPojo);
+        flowApi.edit(pojo, form.getSendTo(), reportScheduleInputParamsPojos, reportPojo);
         flowApi.saveAudit(pojo.getId().toString(), AuditActions.EDIT_REPORT_SCHEDULE.toString(), "Edit Report Schedule",
                 "Report schedule updated for organization : " + organizationPojo.getName() +
                         " with cron : " + pojo.getCron(), getUserName());
@@ -120,7 +109,7 @@ public class ReportScheduleDto extends AbstractDto {
 
     }
 
-    public List<ReportScheduleData> getScheduleReportsForAllOrgs(Integer pageNo, Integer pageSize) throws ApiException {
+    public List<ReportScheduleData> getScheduleReportsForAllOrgs(Integer pageNo, Integer pageSize) {
         List<ReportSchedulePojo> reportSchedulePojoList = api.selectByOrgIdAndEnabledStatus(null, null, pageNo, pageSize);
         return getReportScheduleData(reportSchedulePojoList);
     }
@@ -190,6 +179,23 @@ public class ReportScheduleDto extends AbstractDto {
             throw new ApiException(ApiStatus.BAD_DATA,
                     "Organization has crossed max schedule limit of " + properties.getMaxScheduleLimit() + " " +
                             " enabled reports");
+    }
+
+    private List<ReportScheduleInputParamsPojo> validateAndPrepareInputParams(ReportScheduleForm form,
+                                                                              ReportPojo reportPojo)
+            throws ApiException {
+        List<ReportControlsPojo> reportControlsPojoList = reportControlsApi.getByReportId(reportPojo.getId());
+        List<InputControlPojo> inputControlPojoList = controlApi.selectByIds(reportControlsPojoList.stream()
+                .map(ReportControlsPojo::getControlId).collect(Collectors.toList()));
+        Map<String, List<String>> userInputParams = getUserInputParams(form.getParamMap());
+        Map<String, String> inputParamsMap = UserPrincipalUtil.getCompleteMapWithAccessControl(form.getParamMap());
+        Map<String, List<String>> inputDisplayMap = new HashMap<>();
+        validateCustomReportAccess(reportPojo, getOrgId());
+        validateInputParamValues(userInputParams, inputParamsMap, getOrgId(), inputDisplayMap, inputControlPojoList,
+                ReportRequestType.EMAIL);
+        Map<String, String> inputDisplayStringMap = UserPrincipalUtil.getStringToStringParamMap(inputDisplayMap);
+        return CommonDtoHelper.getReportScheduleInputParamsPojoList(inputParamsMap, form.getTimezone(), getOrgId(),
+                inputDisplayStringMap);
     }
 
     private Map<String, List<String>> getUserInputParams(List<ReportScheduleForm.InputParamMap> paramMap) {
