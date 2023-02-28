@@ -52,12 +52,6 @@ public class CommonDtoHelper {
         });
     }
 
-    public static String massageQuery(String query, Integer maxExecutionTime) {
-        return "" //
-                + "SET SESSION MAX_EXECUTION_TIME=" + maxExecutionTime * 60 * 1000 + ";\n" //
-                + query;
-    }
-
     // Zone Offset/Abbreviation will be populated based on DST(DayLight Saving Time) in case it is applicable for a Zone
     // at current timestamp
     public static TimeZoneData convertToTimeZoneData(String timeZoneId) throws ApiException {
@@ -188,19 +182,19 @@ public class CommonDtoHelper {
 
     public static List<ReportScheduleInputParamsPojo> getReportScheduleInputParamsPojoList(Map<String, String> paramMap
             , String timeZone, Integer orgId, Map<String, String> inputDisplayStringMap) {
-        List<ReportInputParamsPojo> reportInputParamsPojoList = new ArrayList<>();
+        List<ReportScheduleInputParamsPojo> reportInputParamsPojoList = new ArrayList<>();
         paramMap.forEach((k, v) -> {
-            ReportInputParamsPojo reportInputParamsPojo = new ReportInputParamsPojo();
+            ReportScheduleInputParamsPojo reportInputParamsPojo = new ReportScheduleInputParamsPojo();
             reportInputParamsPojo.setParamKey(k);
             reportInputParamsPojo.setParamValue(v);
             reportInputParamsPojo.setDisplayValue(inputDisplayStringMap.getOrDefault(k, v));
             reportInputParamsPojoList.add(reportInputParamsPojo);
         });
-        ReportInputParamsPojo timeZoneParam = new ReportInputParamsPojo();
+        ReportScheduleInputParamsPojo timeZoneParam = new ReportScheduleInputParamsPojo();
         timeZoneParam.setParamKey("timezone");
         timeZoneParam.setParamValue("'" + timeZone + "'");
         reportInputParamsPojoList.add(timeZoneParam);
-        ReportInputParamsPojo orgIdParam = new ReportInputParamsPojo();
+        ReportScheduleInputParamsPojo orgIdParam = new ReportScheduleInputParamsPojo();
         orgIdParam.setParamKey("orgId");
         orgIdParam.setParamValue("'" + orgId.toString() + "'");
         reportInputParamsPojoList.add(orgIdParam);

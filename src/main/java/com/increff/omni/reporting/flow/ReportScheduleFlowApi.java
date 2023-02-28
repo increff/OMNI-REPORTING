@@ -3,6 +3,7 @@ package com.increff.omni.reporting.flow;
 import com.increff.omni.reporting.api.AbstractAuditApi;
 import com.increff.omni.reporting.api.ReportScheduleApi;
 import com.increff.omni.reporting.pojo.ReportScheduleEmailsPojo;
+import com.increff.omni.reporting.pojo.ReportScheduleInputParamsPojo;
 import com.increff.omni.reporting.pojo.ReportSchedulePojo;
 import com.nextscm.commons.lang.StringUtil;
 import com.nextscm.commons.spring.common.ApiException;
@@ -26,7 +27,8 @@ public class ReportScheduleFlowApi extends AbstractAuditApi {
     private static final Pattern VALID_EMAIL_ADDRESS_REGEX =
             Pattern.compile("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$", Pattern.CASE_INSENSITIVE);
 
-    public void add(ReportSchedulePojo pojo, List<String> sendTo) throws ApiException {
+    public void add(ReportSchedulePojo pojo, List<String> sendTo,
+                    List<ReportScheduleInputParamsPojo> reportScheduleInputParamsPojos) throws ApiException {
         reportScheduleApi.add(pojo);
         addEmails(pojo, sendTo);
     }
