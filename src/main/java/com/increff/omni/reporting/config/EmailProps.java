@@ -18,7 +18,10 @@ public class EmailProps {
     private String smtpHost;
     private String smtpPort;
     private File attachment;
+    private Boolean isAttachment;
 
     private String subject = "Test email.";
     private String content = "<h1> Hello </h1> This is a <b>test</b> email";
+    private String contentType = "text/html; charset=utf-8";
+
 }

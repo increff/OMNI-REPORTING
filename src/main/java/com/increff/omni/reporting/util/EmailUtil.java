@@ -1,24 +1,23 @@
 package com.increff.omni.reporting.util;
 
 import com.increff.omni.reporting.config.EmailProps;
-import com.sun.xml.internal.messaging.saaj.packaging.mime.MessagingException;
-import org.apache.commons.io.IOUtils;
 
-import java.io.Closeable;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Properties;
-
+import javax.activation.DataHandler;
+import javax.activation.DataSource;
+import javax.activation.FileDataSource;
 import javax.mail.*;
 import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
+import java.util.Properties;
 
 /**
  * Utility to send emails
  */
 public class EmailUtil {
 
-    public static void sendMail(EmailProps eprops) throws MessagingException, javax.mail.MessagingException {
+    public static void sendMail(EmailProps eprops) throws javax.mail.MessagingException {
         Properties props = new Properties();
         props.put("mail.smtp.auth", "true");
         props.put("mail.smtp.starttls.enable", "true");
@@ -48,35 +47,40 @@ public class EmailUtil {
         // Set Subject: header field
         message.setSubject(eprops.getSubject());
 
-        // Send the actual HTML message, as big as you like
-        message.setContent(eprops.getContent(), eprops.getContentType());
+        setMessageContent(eprops, message);
+
 
         // Send message
         Transport.send(message);
 
     }
 
-    /**
-     * Fetch and encode template to String
-     *
-     * @param resourcePath Path to template
-     * @return Encoded base template String
-     */
-    public static String getTemplate(String resourcePath) throws IOException {
-        InputStream is = EmailUtil.class.getResourceAsStream(resourcePath);
-        String query = IOUtils.toString(is, "utf-8");
-        closeQuietly(is);
-        return query;
-    }
+    private static void setMessageContent(EmailProps eprops, Message message) throws javax.mail.MessagingException {
 
-    private static void closeQuietly(Closeable c) {
-        if (c == null) {
-            return;
-        }
-        try {
-            c.close();
-        } catch (Throwable t) {
-            //Do nothing
+        if (eprops.getIsAttachment()) {
+            BodyPart messageBodyPart = new MimeBodyPart();
+
+            // Now set the actual message
+            messageBodyPart.setText("PFA Report");
+
+            // Create a multipar message
+            Multipart multipart = new MimeMultipart();
+
+            // Set text message part
+            multipart.addBodyPart(messageBodyPart);
+
+            // Part two is attachment
+            messageBodyPart = new MimeBodyPart();
+            String filename = eprops.getAttachment().getAbsolutePath();
+            DataSource source = new FileDataSource(filename);
+            messageBodyPart.setDataHandler(new DataHandler(source));
+            messageBodyPart.setFileName(filename);
+            multipart.addBodyPart(messageBodyPart);
+
+            // Send the complete message parts
+            message.setContent(multipart);
+        } else {
+            message.setContent(eprops.getContent(), eprops.getContentType());
         }
     }
 
