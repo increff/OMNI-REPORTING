@@ -27,6 +27,12 @@ public class ApplicationProperties {
     @Value("${max.execution.time.minutes:5}")
     private Integer maxExecutionTime;
 
+    @Value("${auth.baseUrl}")
+    private String authBaseUrl;
+
+    @Value("${auth.appToken}")
+    private String authAppToken;
+
     @Value("${gcp.baseUrl:dummy}")
     private String gcpBaseUrl;
 
