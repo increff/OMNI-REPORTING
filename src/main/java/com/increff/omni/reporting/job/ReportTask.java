@@ -2,6 +2,7 @@ package com.increff.omni.reporting.job;
 
 import com.increff.omni.reporting.api.*;
 import com.increff.omni.reporting.config.ApplicationProperties;
+import com.increff.omni.reporting.config.EmailProps;
 import com.increff.omni.reporting.dto.CommonDtoHelper;
 import com.increff.omni.reporting.model.constants.ReportRequestStatus;
 import com.increff.omni.reporting.model.form.SqlParams;
@@ -71,34 +72,37 @@ public class ReportTask {
             return;
         }
         // process
-        ReportRequestPojo reportRequestPojo = api.getCheck(pojo.getId());
-        List<ReportInputParamsPojo> reportInputParamsPojoList = reportInputParamsApi
-                .getInputParamsForReportRequest(reportRequestPojo.getId());
-        ReportPojo reportPojo = reportApi.getCheck(reportRequestPojo.getReportId());
-        ReportQueryPojo reportQueryPojo = reportQueryApi.getByReportId(reportPojo.getId());
-        OrgConnectionPojo orgConnectionPojo = orgConnectionApi.getCheckByOrgId(reportRequestPojo.getOrgId());
-        ConnectionPojo connectionPojo = connectionApi.getCheck(orgConnectionPojo.getConnectionId());
-
-        // Creation of file
-        File file = folderApi.getFileForExtension(reportRequestPojo.getId(), ".tsv");
-        File errorFile = folderApi.getErrFile(reportRequestPojo.getId(), ".tsv");
-        Map<String, String> inputParamMap = getInputParamMapFromPojoList(reportInputParamsPojoList);
-        SqlParams sqlParams = CommonDtoHelper.convert(connectionPojo, file, errorFile
-        );
         try {
+            ReportRequestPojo reportRequestPojo = api.getCheck(pojo.getId());
+
+            List<ReportInputParamsPojo> reportInputParamsPojoList = reportInputParamsApi
+                    .getInputParamsForReportRequest(reportRequestPojo.getId());
+            ReportPojo reportPojo = reportApi.getCheck(reportRequestPojo.getReportId());
+            ReportQueryPojo reportQueryPojo = reportQueryApi.getByReportId(reportPojo.getId());
+            OrgConnectionPojo orgConnectionPojo = orgConnectionApi.getCheckByOrgId(reportRequestPojo.getOrgId());
+            ConnectionPojo connectionPojo = connectionApi.getCheck(orgConnectionPojo.getConnectionId());
+
+            // Creation of file
+            File file = folderApi.getFileForExtension(reportRequestPojo.getId(), ".tsv");
+            File errorFile = folderApi.getErrFile(reportRequestPojo.getId(), ".tsv");
+            Map<String, String> inputParamMap = getInputParamMapFromPojoList(reportInputParamsPojoList);
+            SqlParams sqlParams = CommonDtoHelper.convert(connectionPojo, file, errorFile
+            );
             String fQuery = SqlCmd.prepareQuery(inputParamMap, reportQueryPojo.getQuery(),
                     properties.getMaxExecutionTime());
             sqlParams.setQuery(fQuery);
             // Execute query and save results
-            saveResultsOnCloud(pojo, sqlParams);
+            saveResultsOnCloud(pojo, sqlParams, reportPojo);
+
         } catch (Exception e) {
-            log.error("Report ID : " + pojo.getId() + " failed", e);
+            log.error("Report Request ID : " + pojo.getId() + " failed", e);
             api.markFailed(pojo.getId(), ReportRequestStatus.FAILED,
                     "Error while processing query : " + e.getMessage(), 0, 0.0);
         }
     }
 
-    private void saveResultsOnCloud(ReportRequestPojo pojo, SqlParams sqlParams) {
+    private void saveResultsOnCloud(ReportRequestPojo pojo, SqlParams sqlParams,
+                                    ReportPojo reportPojo) {
         try {
             // Process data
             SqlCmd.processQuery(sqlParams, false, properties.getMaxExecutionTime());
@@ -111,7 +115,7 @@ public class ReportTask {
             double fileSize = FileUtil.getSizeInMb(csvFile.length());
             switch (pojo.getType()) {
                 case EMAIL:
-                    sendEmail(fileSize, csvFile);
+                    sendEmail(fileSize, csvFile, pojo, reportPojo);
                     break;
                 case USER:
                     filePath = uploadFile(csvFile, pojo);
@@ -124,7 +128,8 @@ public class ReportTask {
             // log as error and mark fail
             log.error("Report Request ID : " + pojo.getId() + " failed", e);
             try {
-                String message = String.join("\t", Files.readAllLines(sqlParams.getErrFile().toPath())).concat(e.getMessage());
+                String message =
+                        String.join("\t", Files.readAllLines(sqlParams.getErrFile().toPath())).concat(e.getMessage());
                 api.markFailed(pojo.getId(), ReportRequestStatus.FAILED, message, 0, 0.0);
             } catch (Exception ex) {
                 log.error("Error while updating the status of failed request", ex);
@@ -134,7 +139,8 @@ public class ReportTask {
         }
     }
 
-    private void sendEmail(double fileSize, File csvFile) throws IOException, ApiException {
+    private void sendEmail(double fileSize, File csvFile, ReportRequestPojo pojo,
+                           ReportPojo reportPojo) throws IOException, ApiException {
         File out = csvFile;
         if (fileSize > 20.0) {
             String outFileName = csvFile.getName().split(".csv")[0] + ".7z";
@@ -151,6 +157,18 @@ public class ReportTask {
             out = zipFile;
         }
         // todo send email
+        EmailProps props = createEmailProps(pojo, reportPojo, out);
+    }
+
+    private EmailProps createEmailProps(ReportRequestPojo pojo, ReportPojo reportPojo, File out) {
+        EmailProps props = new EmailProps();
+        props.setFromEmail(properties.getFromEmail());
+        props.setUsername(properties.getUsername());
+        props.setPassword(properties.getPassword());
+        props.setSmtpHost(properties.getSmtpHost());
+        props.setSmtpPort(properties.getSmtpPort());
+        props.setSubject("Increff Reporting : " + reportPojo.getName());
+        props.setToEmails();
     }
 
     private void deleteFiles(File outFile, File errFile) {

@@ -5,6 +5,8 @@ import lombok.Setter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Getter
 @Setter
 @Component
@@ -61,5 +63,20 @@ public class ApplicationProperties {
 
     @Value("${reporting.version}")
     private String version;
+
+    @Value("${from.email}")
+    private String fromEmail;
+
+    @Value("${mailjet.username}")
+    private String username;
+
+    @Value("${mailjet.password}")
+    private String password;
+
+    @Value("${mailjet.smtp.host}")
+    private String smtpHost;
+
+    @Value("${mailjet.smtp.port}")
+    private String smtpPort;
 
 }

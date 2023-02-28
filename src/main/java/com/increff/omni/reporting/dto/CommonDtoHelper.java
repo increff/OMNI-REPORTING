@@ -271,6 +271,7 @@ public class CommonDtoHelper {
         reportRequestPojo.setStatus(ReportRequestStatus.NEW);
         reportRequestPojo.setUserId(schedulePojo.getUserId());
         reportRequestPojo.setOrgId(schedulePojo.getOrgId());
+        reportRequestPojo.setScheduleId(schedulePojo.getId());
         return reportRequestPojo;
     }
 
