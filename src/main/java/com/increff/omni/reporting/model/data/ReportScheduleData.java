@@ -21,5 +21,7 @@ public class ReportScheduleData {
     private ZonedDateTime nextRuntime;
     private ZonedDateTime createdAt;
     private ZonedDateTime updatedAt;
+    private Integer successCount;
+    private Integer failureCount;
 
 }

@@ -88,7 +88,8 @@ public class ReportScheduleDto extends AbstractDto {
         checkValidReport(pojo.getReportName());
         pojo.setIsEnabled(isEnabled);
         flowApi.editEnableOrDeletedFlag(pojo);
-        flowApi.saveAudit(pojo.getId().toString(), AuditActions.ENABLE_DISABLE_REPORT_SCHEDULE.toString(), "Enable / Disable " +
+        flowApi.saveAudit(pojo.getId().toString(), AuditActions.ENABLE_DISABLE_REPORT_SCHEDULE.toString(),
+                "Enable / Disable " +
                         "Report Schedule",
                 "Report schedule updated for organization : " + organizationPojo.getName() +
                         " with status isEnabled : " + pojo.getIsEnabled(), getUserName());
@@ -110,7 +111,8 @@ public class ReportScheduleDto extends AbstractDto {
     }
 
     public List<ReportScheduleData> getScheduleReportsForAllOrgs(Integer pageNo, Integer pageSize) {
-        List<ReportSchedulePojo> reportSchedulePojoList = api.selectByOrgIdAndEnabledStatus(null, null, pageNo, pageSize);
+        List<ReportSchedulePojo> reportSchedulePojoList =
+                api.selectByOrgIdAndEnabledStatus(null, null, pageNo, pageSize);
         return getReportScheduleData(reportSchedulePojoList);
     }
 
@@ -120,12 +122,18 @@ public class ReportScheduleDto extends AbstractDto {
         return getReportScheduleData(reportSchedulePojoList);
     }
 
-    // todo
-    public List<ReportRequestData> getScheduledRequests() throws ApiException {
+    public List<ReportRequestData> getScheduledRequests(Integer pageNo, Integer pageSize) throws ApiException {
         List<ReportRequestData> reportRequestDataList = new ArrayList<>();
-        List<ReportRequestPojo> reportRequestPojoList = reportRequestApi.getByOrg(getOrgId(), ReportRequestType.EMAIL);
+        List<ReportRequestPojo> reportRequestPojoList =
+                reportRequestApi.getByOrgAndType(getOrgId(), ReportRequestType.EMAIL
+                        , pageNo, pageSize);
         for (ReportRequestPojo r : reportRequestPojoList) {
-            ReportPojo reportPojo = reportApi.getCheck(r.getReportId());
+            ReportPojo reportPojo = null;
+            try {
+                reportPojo = reportApi.getCheck(r.getReportId());
+            } catch (Exception ignored) {
+
+            }
             reportRequestDataList.add(getReportRequestData(r, reportPojo));
         }
         return reportRequestDataList;
@@ -155,8 +163,8 @@ public class ReportScheduleDto extends AbstractDto {
         data.setStatus(pojo.getStatus());
         data.setType(pojo.getType());
         data.setRequestId(pojo.getId());
-        data.setReportId(reportPojo.getId());
-        data.setReportName(reportPojo.getName());
+        data.setReportId(Objects.nonNull(reportPojo) ? reportPojo.getId() : 0);
+        data.setReportName(Objects.nonNull(reportPojo) ? reportPojo.getName() : "NA");
         data.setOrgName(organizationPojo.getName());
         data.setFileSize(pojo.getFileSize());
         data.setNoOfRows(pojo.getNoOfRows());
@@ -174,7 +182,8 @@ public class ReportScheduleDto extends AbstractDto {
     }
 
     private void checkLimitForOrg() throws ApiException {
-        List<ReportSchedulePojo> reportSchedulePojoList = api.selectByOrgIdAndEnabledStatus(getOrgId(), true, null, null);
+        List<ReportSchedulePojo> reportSchedulePojoList =
+                api.selectByOrgIdAndEnabledStatus(getOrgId(), true, null, null);
         if (reportSchedulePojoList.size() >= properties.getMaxScheduleLimit())
             throw new ApiException(ApiStatus.BAD_DATA,
                     "Organization has crossed max schedule limit of " + properties.getMaxScheduleLimit() + " " +

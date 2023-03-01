@@ -42,6 +42,11 @@ public class ReportRequestFlowApi extends AbstractFlowApi {
     public void requestReport(ReportRequestPojo pojo, List<ReportInputParamsPojo> reportInputParamsPojoList)
             throws ApiException {
         validate(pojo, reportInputParamsPojoList);
+        requestReportWithoutValidation(pojo, reportInputParamsPojoList);
+    }
+
+    public void requestReportWithoutValidation(ReportRequestPojo pojo,
+                                               List<ReportInputParamsPojo> reportInputParamsPojoList) {
         api.add(pojo);
         reportInputParamsPojoList.forEach(r -> r.setReportRequestId(pojo.getId()));
         reportInputParamsApi.add(reportInputParamsPojoList);

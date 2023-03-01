@@ -99,7 +99,7 @@ public class ScheduledJobs {
                 ip.setParamValue(sp.getParamValue());
                 reportInputParamsPojoList.add(ip);
             });
-            reportRequestFlowApi.requestReport(reportRequestPojo, reportInputParamsPojoList);
+            reportRequestFlowApi.requestReportWithoutValidation(reportRequestPojo, reportInputParamsPojoList);
         }
     }
 

@@ -110,6 +110,8 @@ public class ReportRequestDto extends AbstractDto {
 
     public File getReportFile(Integer requestId) throws ApiException, IOException {
         ReportRequestPojo requestPojo = reportRequestApi.getCheck(requestId);
+        if(!requestPojo.getType().equals(ReportRequestType.USER))
+            throw new ApiException(ApiStatus.BAD_DATA, "Scheduled reports can't be downloaded");
         ReportPojo reportPojo = reportApi.getCheck(requestPojo.getReportId());
         validate(requestPojo, requestId, reportPojo, getUserId(), getOrgId());
         String reportName = requestId + "_" + UUID.randomUUID();
@@ -121,6 +123,8 @@ public class ReportRequestDto extends AbstractDto {
 
     public List<Map<String, String>> getJsonFromCsv(Integer requestId) throws ApiException, IOException {
         ReportRequestPojo requestPojo = reportRequestApi.getCheck(requestId);
+        if(!requestPojo.getType().equals(ReportRequestType.USER))
+            throw new ApiException(ApiStatus.BAD_DATA, "Scheduled reports can't be viewed");
         if (requestPojo.getStatus().equals(ReportRequestStatus.FAILED))
             throw new ApiException(ApiStatus.BAD_DATA, "Failed report can't be viewed");
         ReportPojo reportPojo = reportApi.getCheck(requestPojo.getReportId());

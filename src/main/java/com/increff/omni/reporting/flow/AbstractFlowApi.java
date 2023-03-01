@@ -31,15 +31,15 @@ public class AbstractFlowApi extends AbstractAuditApi {
         switch (type) {
             case SINGLE_MANDATORY:
                 singleMandatoryValidator.validate(displayValues, paramValues, reportPojo.getName()
-                        , groupPojoList.get(0).getValidationValue());
+                        , groupPojoList.get(0).getValidationValue(), requestType);
                 break;
             case MANDATORY:
                 mandatoryValidator.validate(displayValues, paramValues, reportPojo.getName()
-                        , groupPojoList.get(0).getValidationValue());
+                        , groupPojoList.get(0).getValidationValue(), requestType);
                 break;
             case DATE_RANGE:
                 dateValidator.validate(displayValues, paramValues, reportPojo.getName()
-                        , groupPojoList.get(0).getValidationValue());
+                        , groupPojoList.get(0).getValidationValue(), requestType);
                 break;
             default:
                 throw new ApiException(ApiStatus.BAD_DATA, "Invalid Validation Type");

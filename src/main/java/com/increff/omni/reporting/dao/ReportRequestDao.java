@@ -13,6 +13,7 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Objects;
 
 @Repository
 @Transactional
@@ -72,5 +73,24 @@ public class ReportRequestDao extends AbstractDao<ReportRequestPojo> {
         ).orderBy(cb.desc(root.get("createdAt")));
         TypedQuery<ReportRequestPojo> tQuery = createQuery(query);
         return tQuery.setMaxResults(limit).getResultList();
+    }
+
+    public List<ReportRequestPojo> getByOrgAndType(Integer orgId, ReportRequestType type, Integer pageNo,
+                                                   Integer pageSize) {
+        if(Objects.isNull(pageNo))
+            pageNo = 1;
+        if(Objects.isNull(pageSize))
+            pageSize = 100;
+        CriteriaBuilder cb = this.em.getCriteriaBuilder();
+        CriteriaQuery<ReportRequestPojo> query = cb.createQuery(ReportRequestPojo.class);
+        Root<ReportRequestPojo> root = query.from(ReportRequestPojo.class);
+        query.where(
+                cb.and(
+                        cb.equal(root.get("type"), type),
+                        cb.equal(root.get("orgId"), orgId))
+        ).orderBy(cb.desc(root.get("createdAt")));
+        TypedQuery<ReportRequestPojo> tQuery = createQuery(query);
+        return tQuery.setFirstResult((pageNo - 1) * pageSize)
+                .setMaxResults(pageSize).getResultList();
     }
 }

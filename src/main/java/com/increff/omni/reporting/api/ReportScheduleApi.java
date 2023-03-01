@@ -97,4 +97,10 @@ public class ReportScheduleApi extends AbstractAuditApi {
         existingEmails.forEach(e -> emailsDao.remove(e.getId()));
         emailsDao.flush();
     }
+
+    public void updateScheduleCount(Integer scheduleId, Integer successCount, Integer failureCount) {
+        ReportSchedulePojo pojo = dao.select(scheduleId);
+        pojo.setSuccessCount(pojo.getSuccessCount() + successCount);
+        pojo.setFailureCount(pojo.getFailureCount() + failureCount);
+    }
 }

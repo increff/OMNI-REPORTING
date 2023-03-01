@@ -99,19 +99,21 @@ public class ReportTask {
             sqlParams.setQuery(fQuery);
             // Execute query and save results
             saveResultsOnCloud(pojo, sqlParams);
-
+            if(pojo.getType().equals(ReportRequestType.EMAIL)) {
+                reportScheduleApi.updateScheduleCount(pojo.getScheduleId(), 1, 0);
+            }
         } catch (Exception e) {
             log.error("Report Request ID : " + pojo.getId() + " failed", e);
-            api.markFailed(pojo.getId(), ReportRequestStatus.FAILED,
-                    "Error while processing query : " + e.getMessage(), 0, 0.0);
+            api.markFailed(pojo.getId(), ReportRequestStatus.FAILED, e.getMessage(), 0, 0.0);
             if(pojo.getType().equals(ReportRequestType.EMAIL)) {
-                ReportSchedulePojo schedulePojo = reportScheduleApi.getCheck(pojo.getId());
+                ReportSchedulePojo schedulePojo = reportScheduleApi.getCheck(pojo.getScheduleId());
                 List<String> toEmails = reportScheduleApi.getByScheduleId(schedulePojo.getId()).stream()
                         .map(ReportScheduleEmailsPojo::getSendTo).collect(
                                 Collectors.toList());
                 EmailProps props = createEmailProps(null, false, schedulePojo, toEmails, "Hi Team, \nPlease re-submit" +
                         " the schedule in the reporting application.");
                 EmailUtil.sendMail(props);
+                reportScheduleApi.updateScheduleCount(pojo.getScheduleId(), 0, 1);
             }
         }
     }

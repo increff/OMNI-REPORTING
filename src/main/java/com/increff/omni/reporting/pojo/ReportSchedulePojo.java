@@ -43,4 +43,8 @@ public class ReportSchedulePojo extends AbstractVersionedPojo {
     @Column(nullable = false)
     private Boolean isDeleted;
 
+    private Integer successCount = 0;
+
+    private Integer failureCount = 0;
+
 }

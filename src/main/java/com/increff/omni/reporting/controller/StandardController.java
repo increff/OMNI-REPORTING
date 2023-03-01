@@ -111,6 +111,13 @@ public class StandardController {
         return reportScheduleDto.getScheduleReports(pageNo, pageSize);
     }
 
+    @ApiOperation(value = "Get Schedule requests for an organization")
+    @RequestMapping(value = "/schedules/requests", method = RequestMethod.GET)
+    public List<ReportRequestData> getScheduleReportRequests(@RequestParam Integer pageNo,
+                                                         @RequestParam Integer pageSize) throws ApiException {
+        return reportScheduleDto.getScheduledRequests(pageNo, pageSize);
+    }
+
     // Scheduling a Report
     @ApiOperation(value = "Edit Schedule of a Report")
     @RequestMapping(value = "/schedules/{id}", method = RequestMethod.PUT)
