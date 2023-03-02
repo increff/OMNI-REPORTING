@@ -53,9 +53,6 @@ public class InputControlFlowApi extends AbstractApi {
     @Autowired
     private ApplicationProperties properties;
 
-    @Autowired
-    private FileUtil fileUtil;
-
     public InputControlPojo add(InputControlPojo pojo, String query, List<String> values,
                                 Integer reportId) throws ApiException {
 
