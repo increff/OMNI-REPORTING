@@ -53,6 +53,9 @@ public class InputControlFlowApi extends AbstractApi {
     @Autowired
     private ApplicationProperties properties;
 
+    @Autowired
+    private FileUtil fileUtil;
+
     public InputControlPojo add(InputControlPojo pojo, String query, List<String> values,
                                 Integer reportId) throws ApiException {
 
@@ -81,9 +84,10 @@ public class InputControlFlowApi extends AbstractApi {
         return pojo;
     }
 
-    public Map<String, String> getValuesFromQuery(String query, ConnectionPojo connectionPojo) throws ApiException {
+    public Map<String, String> getValuesFromQuery(String query, ConnectionPojo connectionPojo) {
         File file = null;
         File errFile = null;
+        File sanitizedFile = null;
         try {
             String fileName = UUID.randomUUID().toString();
             file = folderApi.getFile(fileName + ".tsv");
@@ -91,11 +95,13 @@ public class InputControlFlowApi extends AbstractApi {
             SqlParams sqlp = CommonDtoHelper.getSqlParams(connectionPojo, query, file, errFile
                     , properties.getMaxExecutionTime());
             SqlCmd.processQuery(sqlp, properties.getMaxExecutionTime());
-            return getMapFromTsv(file);
-        } catch (ApiException | IOException e) {
+            sanitizedFile = fileUtil.sanitizeTsv(sqlp.getOutFile());
+            return getMapFromTsv(sanitizedFile);
+        } catch (Exception e) {
             log.error("Error while getting input control values ", e);
         } finally {
             FileUtil.delete(file);
+            FileUtil.delete(sanitizedFile);
             FileUtil.delete(errFile);
         }
         return new HashMap<>();
@@ -151,10 +157,8 @@ public class InputControlFlowApi extends AbstractApi {
             dataRow = tsvfile.readLine();
         while (dataRow != null) {
             List<String> values = Arrays.asList(dataRow.split("\t"));
-            if(!values.isEmpty())
+            if(values.size() == 2)
                 fMap.put(values.get(0), values.get(1));
-            else
-                fMap.put("", "");
             dataRow = tsvfile.readLine(); // Read next line of data.
         }
         tsvfile.close();

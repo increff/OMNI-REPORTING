@@ -1,16 +1,25 @@
 package com.increff.omni.reporting.util;
 
+import com.increff.omni.reporting.api.FolderApi;
+import com.nextscm.commons.spring.common.ApiException;
 import lombok.extern.log4j.Log4j;
 import org.apache.commons.io.FileUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.util.Arrays;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Scanner;
 
 @Log4j
+@Component
 public class FileUtil {
+
+    @Autowired
+    private FolderApi folderApi;
 
     private static final double MB = 1024 * 1024;
 
@@ -37,6 +46,27 @@ public class FileUtil {
         }
     }
 
+    public File sanitizeTsv(File file) throws IOException, ApiException {
+        File outputFile = folderApi.getFile(file.getName().split(".tsv")[0] + "-sanitized.tsv");
+        BufferedReader TSVFile =
+                new BufferedReader(new FileReader(file));
+        PrintWriter writer = new PrintWriter(outputFile);
+        int c = 0;
+        // Set the delimiter to tabs
+        while (true) {
+            c++;
+            String dataRow = TSVFile.readLine();
+            if(dataRow == null)
+                break;
+            String newRow = dataRow.replace("\\n","");
+            writer.write(newRow);
+            writer.write("\n");
+        }
+        TSVFile.close();
+        writer.close();
+        return outputFile;
+    }
+
     public static Integer getCsvFromTsv(File file, File csvFile) throws IOException {
         Integer noOfRows = 0;
         BufferedReader TSVFile =
@@ -52,6 +82,8 @@ public class FileUtil {
                 v = v.replace("\"", "'");
                 if(v.contains(","))
                     it.set("\"" + v + "\"");
+                if(v.contains("\n"))
+                    it.set(v.replace("\n"," "));
             }
             dataRow = String.join("\t", values);
             String csvRow = dataRow.replaceAll("\t",",");
