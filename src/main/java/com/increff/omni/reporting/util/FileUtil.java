@@ -1,18 +1,15 @@
 package com.increff.omni.reporting.util;
 
 import com.increff.omni.reporting.api.FolderApi;
-import com.nextscm.commons.spring.common.ApiException;
 import lombok.extern.log4j.Log4j;
 import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.util.Arrays;
 import java.util.List;
 import java.util.ListIterator;
-import java.util.Scanner;
 
 @Log4j
 public class FileUtil {
@@ -60,8 +57,6 @@ public class FileUtil {
                 v = v.replace("\"", "'");
                 if(v.contains(","))
                     it.set("\"" + v + "\"");
-                if(v.contains("\n"))
-                    it.set(v.replace("\n"," "));
             }
             dataRow = String.join("\t", values);
             String csvRow = dataRow.replaceAll("\t",",");
