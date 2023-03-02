@@ -15,7 +15,6 @@ import java.util.ListIterator;
 import java.util.Scanner;
 
 @Log4j
-@Component
 public class FileUtil {
 
     @Autowired
@@ -44,27 +43,6 @@ public class FileUtil {
             log.error("Error deleting file, " + f.getAbsolutePath(), e);
             return false;
         }
-    }
-
-    public File sanitizeTsv(File file) throws IOException, ApiException {
-        File outputFile = folderApi.getFile(file.getName().split(".tsv")[0] + "-sanitized.tsv");
-        BufferedReader TSVFile =
-                new BufferedReader(new FileReader(file));
-        PrintWriter writer = new PrintWriter(outputFile);
-        int c = 0;
-        // Set the delimiter to tabs
-        while (true) {
-            c++;
-            String dataRow = TSVFile.readLine();
-            if(dataRow == null)
-                break;
-            String newRow = dataRow.replace("\\n","");
-            writer.write(newRow);
-            writer.write("\n");
-        }
-        TSVFile.close();
-        writer.close();
-        return outputFile;
     }
 
     public static Integer getCsvFromTsv(File file, File csvFile) throws IOException {

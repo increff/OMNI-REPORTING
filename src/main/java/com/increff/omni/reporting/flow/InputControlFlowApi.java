@@ -87,7 +87,6 @@ public class InputControlFlowApi extends AbstractApi {
     public Map<String, String> getValuesFromQuery(String query, ConnectionPojo connectionPojo) {
         File file = null;
         File errFile = null;
-        File sanitizedFile = null;
         try {
             String fileName = UUID.randomUUID().toString();
             file = folderApi.getFile(fileName + ".tsv");
@@ -95,13 +94,11 @@ public class InputControlFlowApi extends AbstractApi {
             SqlParams sqlp = CommonDtoHelper.getSqlParams(connectionPojo, query, file, errFile
                     , properties.getMaxExecutionTime());
             SqlCmd.processQuery(sqlp, properties.getMaxExecutionTime());
-            sanitizedFile = fileUtil.sanitizeTsv(sqlp.getOutFile());
-            return getMapFromTsv(sanitizedFile);
+            return getMapFromTsv(file);
         } catch (Exception e) {
             log.error("Error while getting input control values ", e);
         } finally {
             FileUtil.delete(file);
-            FileUtil.delete(sanitizedFile);
             FileUtil.delete(errFile);
         }
         return new HashMap<>();
