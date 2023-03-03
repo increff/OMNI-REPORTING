@@ -21,5 +21,7 @@ public class ReportForm {
     private Integer schemaVersionId;
     @NotNull
     private Boolean isEnabled = true;
+    @NotNull
+    private Boolean canSchedule = false;
 
 }

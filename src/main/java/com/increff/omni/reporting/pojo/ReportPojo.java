@@ -38,6 +38,6 @@ public class ReportPojo extends AbstractVersionedPojo{
     private Boolean isEnabled = true;
 
     @Column(nullable = false)
-    private Boolean canSchedule = true;
+    private Boolean canSchedule = false;
 
 }

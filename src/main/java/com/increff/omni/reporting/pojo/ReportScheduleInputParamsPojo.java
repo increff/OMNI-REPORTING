@@ -15,7 +15,7 @@ public class ReportScheduleInputParamsPojo extends AbstractVersionedPojo {
     @Id
     @TableGenerator(name = "report_schedule_input_params", pkColumnValue = "report_schedule_input_params",
             allocationSize = 1, initialValue = 100000)
-    @GeneratedValue(strategy = GenerationType.TABLE, generator = "report_input_params")
+    @GeneratedValue(strategy = GenerationType.TABLE, generator = "report_schedule_input_params")
     private Integer id;
 
     @Column(nullable = false)

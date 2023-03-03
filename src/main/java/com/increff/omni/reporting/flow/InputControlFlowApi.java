@@ -81,7 +81,7 @@ public class InputControlFlowApi extends AbstractApi {
         return pojo;
     }
 
-    public Map<String, String> getValuesFromQuery(String query, ConnectionPojo connectionPojo) throws ApiException {
+    public Map<String, String> getValuesFromQuery(String query, ConnectionPojo connectionPojo) {
         File file = null;
         File errFile = null;
         try {
@@ -92,7 +92,7 @@ public class InputControlFlowApi extends AbstractApi {
                     , properties.getMaxExecutionTime());
             SqlCmd.processQuery(sqlp, properties.getMaxExecutionTime());
             return getMapFromTsv(file);
-        } catch (ApiException | IOException e) {
+        } catch (Exception e) {
             log.error("Error while getting input control values ", e);
         } finally {
             FileUtil.delete(file);
@@ -151,7 +151,8 @@ public class InputControlFlowApi extends AbstractApi {
             dataRow = tsvfile.readLine();
         while (dataRow != null) {
             List<String> values = Arrays.asList(dataRow.split("\t"));
-            fMap.put(values.get(0), values.get(1));
+            if(values.size() == 2)
+                fMap.put(values.get(0), values.get(1));
             dataRow = tsvfile.readLine(); // Read next line of data.
         }
         tsvfile.close();
