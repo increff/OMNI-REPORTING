@@ -86,9 +86,9 @@ public class ReportJob {
         });
     }
 
-    @Scheduled(fixedDelay = 3600 * 1000)
+    @Scheduled(fixedDelay = 5 * 60 * 1000)
     public void deleteOldFiles() {
-        folderApi.deleteFilesOlderThan1Hr();
+        folderApi.deleteOlderFiles();
     }
 
     private int getLimitForEligibleRequests() {

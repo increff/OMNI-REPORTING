@@ -48,14 +48,14 @@ public class FolderApiTest extends AbstractTest {
         assertEquals(10, Objects.requireNonNull(file.listFiles()).length);
 
         //delete files
-        folderApi.deleteFilesOlderThan1Hr();
+        folderApi.deleteOlderFiles();
         assertEquals(10, Objects.requireNonNull(file.listFiles()).length);
         //modify last modified of all files
         for (File t : Objects.requireNonNull(file.listFiles())) {
             if(!t.setLastModified(System.currentTimeMillis() - 61 * 60 * 1000))
                 log.error("Error in modifying last modified time");
         }
-        folderApi.deleteFilesOlderThan1Hr();
+        folderApi.deleteOlderFiles();
         assertEquals(0, Objects.requireNonNull(file.listFiles()).length);
     }
 
