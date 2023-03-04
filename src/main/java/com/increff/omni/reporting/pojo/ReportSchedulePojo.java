@@ -35,9 +35,6 @@ public class ReportSchedulePojo extends AbstractVersionedPojo {
     private String cron;
 
     @Column(nullable = false)
-    private String timezone;
-
-    @Column(nullable = false)
     private ZonedDateTime nextRuntime;
 
     @Column(nullable = false)

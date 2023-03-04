@@ -43,16 +43,13 @@ public class ReportScheduleApi extends AbstractAuditApi {
     public void updateScheduleInputParams(List<ReportScheduleInputParamsPojo> reportScheduleInputParamsPojoList,
                                           ReportSchedulePojo schedulePojo) {
         List<ReportScheduleInputParamsPojo> existing = getScheduleParams(schedulePojo.getId());
-        existing.forEach(e -> {
-            scheduleInputParamsDao.remove(e.getId());
-        });
+        existing.forEach(e -> scheduleInputParamsDao.remove(e.getId()));
         scheduleInputParamsDao.flush();
         reportScheduleInputParamsPojoList.forEach(r -> {
             r.setScheduleId(schedulePojo.getId());
             scheduleInputParamsDao.persist(r);
         });
     }
-
 
     public List<ReportSchedulePojo> selectByOrgIdAndEnabledStatus(Integer orgId, Boolean isEnabled, Integer pageNo,
                                                                   Integer pageSize) {
@@ -79,8 +76,8 @@ public class ReportScheduleApi extends AbstractAuditApi {
         ex.setCron(pojo.getCron());
         ex.setUserId(pojo.getUserId());
         ex.setIsEnabled(pojo.getIsEnabled());
-        ex.setTimezone(pojo.getTimezone());
         ex.setNextRuntime(pojo.getNextRuntime());
+        ex.setIsDeleted(pojo.getIsDeleted());
         dao.update(ex);
     }
 

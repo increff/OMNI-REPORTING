@@ -20,8 +20,7 @@ import javax.persistence.OptimisticLockException;
 import java.util.*;
 import java.util.concurrent.Executor;
 
-import static com.increff.omni.reporting.dto.CommonDtoHelper.convertToReportRequestPojo;
-import static com.increff.omni.reporting.dto.CommonDtoHelper.groupByOrgID;
+import static com.increff.omni.reporting.dto.CommonDtoHelper.*;
 
 @Log4j
 @Component
@@ -92,14 +91,19 @@ public class ScheduledJobs {
             ReportRequestPojo reportRequestPojo = convertToReportRequestPojo(s, reportId);
             List<ReportInputParamsPojo> reportInputParamsPojoList = new ArrayList<>();
             List<ReportScheduleInputParamsPojo> scheduleInputParamsPojos = scheduleApi.getScheduleParams(s.getId());
-            scheduleInputParamsPojos.forEach(sp -> {
+            String timezone = "UTC";
+            for (ReportScheduleInputParamsPojo sp : scheduleInputParamsPojos) {
+                if(sp.getParamKey().equalsIgnoreCase("timezone"))
+                    timezone = sp.getParamValue();
                 ReportInputParamsPojo ip = new ReportInputParamsPojo();
                 ip.setDisplayValue(sp.getDisplayValue());
                 ip.setParamKey(sp.getParamKey());
                 ip.setParamValue(sp.getParamValue());
                 reportInputParamsPojoList.add(ip);
-            });
+            }
             reportRequestFlowApi.requestReportWithoutValidation(reportRequestPojo, reportInputParamsPojoList);
+            s.setNextRuntime(getNextRunTime(s.getCron(), timezone));
+            scheduleApi.edit(s);
         }
     }
 

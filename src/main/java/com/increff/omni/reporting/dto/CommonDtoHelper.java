@@ -280,17 +280,20 @@ public class CommonDtoHelper {
         String cron = "0" + " " + form.getCronSchedule().getMinute() + " " + form.getCronSchedule().getHour() +
                 " " + form.getCronSchedule().getDayOfMonth() + " " + "*" + " " + "?";
         schedulePojo.setReportName(form.getReportName());
-        schedulePojo.setTimezone(form.getTimezone());
         schedulePojo.setIsEnabled(form.getIsEnabled());
         schedulePojo.setOrgId(orgId);
         schedulePojo.setUserId(userId);
         schedulePojo.setCron(cron);
-        CronSequenceGenerator generator = new CronSequenceGenerator(cron,
-                TimeZone.getTimeZone(ZoneId.of(form.getTimezone())));
-        Instant instant = generator.next(new Date()).toInstant();
-        schedulePojo.setNextRuntime(ZonedDateTime.ofInstant(instant, ZoneId.of("UTC")));
+        schedulePojo.setNextRuntime(getNextRunTime(cron, form.getTimezone()));
         // New / updated schedule is created with deleted flag false
         schedulePojo.setIsDeleted(false);
         return schedulePojo;
+    }
+
+    public static ZonedDateTime getNextRunTime(String cron, String timezone) {
+        CronSequenceGenerator generator = new CronSequenceGenerator(cron,
+                TimeZone.getTimeZone(ZoneId.of(timezone)));
+        Instant instant = generator.next(new Date()).toInstant();
+        return ZonedDateTime.ofInstant(instant, ZoneId.of("UTC"));
     }
 }
