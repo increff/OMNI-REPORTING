@@ -27,6 +27,9 @@ public class ApplicationProperties {
     @Value("${max.execution.time.minutes:5}")
     private Integer maxExecutionTime;
 
+    @Value("${max.file.size.mb:200}")
+    private Integer maxFileSize;
+
     @Value("${auth.baseUrl}")
     private String authBaseUrl;
 

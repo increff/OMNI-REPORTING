@@ -17,21 +17,18 @@ import java.util.Objects;
 @Log4j
 public class SqlCmd {
 
-    public static void processQuery(SqlParams sp, Integer maxExecutionTime) throws ApiException {
+    public static void processQuery(SqlParams sp, Integer maxExecutionTime)
+            throws IOException, InterruptedException {
         processQuery(sp, true, maxExecutionTime);
     }
 
     public static void processQuery(SqlParams sp, Boolean isUserPrincipalAvailable, Integer maxExecutionTime)
-            throws ApiException {
+            throws IOException, InterruptedException {
         if (isUserPrincipalAvailable) addAccessControlMap(sp, maxExecutionTime);
         String[] cmd = getQueryCmd(sp);
         Redirect redirectAll = Redirect.appendTo(sp.getOutFile());
         Redirect errRedirect = Redirect.appendTo(sp.getErrFile());
-        try {
-            CmdUtil.runCmd(cmd, redirectAll, errRedirect);
-        } catch (IOException | InterruptedException e) {
-            throw new ApiException(ApiStatus.UNKNOWN_ERROR, "Error executing query : " + e.getMessage());
-        }
+        CmdUtil.runCmd(cmd, redirectAll, errRedirect);
     }
 
     public static String prepareQuery(Map<String, String> inputParamMap, String query, Integer maxExecutionTime) {

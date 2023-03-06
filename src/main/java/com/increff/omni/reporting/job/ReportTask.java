@@ -91,6 +91,10 @@ public class ReportTask {
         try {
             // Process data
             SqlCmd.processQuery(sqlParams, false, properties.getMaxExecutionTime());
+            double fileSize = FileUtil.getSizeInMb(sqlParams.getOutFile().length());
+            if (fileSize > properties.getMaxFileSize())
+                throw new ApiException(ApiStatus.BAD_DATA,
+                        "File size " + fileSize + " MB exceeded max limit of " + properties.getMaxFileSize() + " MB" + ". Please select granular filters");
             String name = sqlParams.getOutFile().getName().split(".tsv")[0] + ".csv";
             File csvFile = folderApi.getFile(name);
             Integer noOfRows = FileUtil.getCsvFromTsv(sqlParams.getOutFile(), csvFile);
@@ -98,15 +102,23 @@ public class ReportTask {
             // upload result to cloud
             String filePath = uploadFile(csvFile, pojo);
             // update status to completed
-            Double fileSize = FileUtil.getSizeInMb(csvFile.length());
+            fileSize = FileUtil.getSizeInMb(csvFile.length());
             api.updateStatus(pojo.getId(), ReportRequestStatus.COMPLETED, filePath, noOfRows, fileSize);
             FileUtil.delete(csvFile);
-        } catch (Exception e) {
+        } catch (IOException | InterruptedException e) {
             // log as error and mark fail
             log.error("Report ID : " + pojo.getId() + " failed", e);
             try {
                 String message = String.join("\t", Files.readAllLines(sqlParams.getErrFile().toPath()));
                 api.markFailed(pojo.getId(), ReportRequestStatus.FAILED, message, 0, 0.0);
+            } catch (Exception ex) {
+                log.error("Error while updating the status of failed request", ex);
+            }
+        } catch (ApiException e) {
+            // log as error and mark fail
+            log.error("Report ID : " + pojo.getId() + " failed", e);
+            try {
+                api.markFailed(pojo.getId(), ReportRequestStatus.FAILED, e.getMessage(), 0, 0.0);
             } catch (Exception ex) {
                 log.error("Error while updating the status of failed request", ex);
             }
