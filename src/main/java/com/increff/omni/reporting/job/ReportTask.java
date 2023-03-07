@@ -54,6 +54,7 @@ public class ReportTask {
             api.markProcessingIfEligible(pojo.getId());
         } catch (OptimisticLockException | ObjectOptimisticLockingFailureException | ApiException e) {
             log.debug("Error occurred while marking report in progress for request id : " + pojo.getId(), e);
+            return;
         }
         // process
         ReportRequestPojo reportRequestPojo = api.getCheck(pojo.getId());
