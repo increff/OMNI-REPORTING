@@ -29,7 +29,7 @@ public class FolderApi {
         File[] listFiles = directory.listFiles();
         if(Objects.isNull(listFiles) || listFiles.length == 0)
             return;
-        long purgeTime = System.currentTimeMillis() - (5 * 60 * 1000);
+        long purgeTime = System.currentTimeMillis() - (30 * 60 * 1000);
         for (File file : listFiles) {
             if (file.lastModified() < purgeTime) {
                 FileUtil.delete(file);

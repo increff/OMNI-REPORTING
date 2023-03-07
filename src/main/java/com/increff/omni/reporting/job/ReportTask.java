@@ -137,9 +137,11 @@ public class ReportTask {
     private String uploadFile(File file, ReportRequestPojo pojo) throws FileNotFoundException, ApiException {
         InputStream inputStream = new FileInputStream(file);
         String filePath = pojo.getOrgId() + "/" + "REPORTS" + "/" + pojo.getId() + "_" + UUID.randomUUID() + ".csv";
+        log.debug("GCP Upload started for request ID : "  + pojo.getId());
         try {
             fileClient.create(filePath, inputStream);
-        } catch (FileClientException e) {
+            log.debug("GCP Upload completed for request ID : "  + pojo.getId());
+        } catch (Exception e) {
             throw new ApiException(ApiStatus.BAD_DATA, "Error in uploading Report File to Gcp for report : " +
                     pojo.getId());
         }

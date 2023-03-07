@@ -74,7 +74,7 @@ public class ReportJob {
         }
     }
 
-    @Scheduled(fixedDelay = 60 * 1000)
+    @Scheduled(fixedDelay = 2 * 60 * 1000)
     public void markJobsStuck() {
         List<ReportRequestPojo> stuckRequests = api.getStuckRequests(properties.getStuckReportTime());
         stuckRequests.forEach(s -> {
@@ -86,7 +86,7 @@ public class ReportJob {
         });
     }
 
-    @Scheduled(fixedDelay = 5 * 60 * 1000)
+    @Scheduled(fixedDelay = 2 * 60 * 1000)
     public void deleteOldFiles() {
         folderApi.deleteOlderFiles();
     }
