@@ -202,7 +202,7 @@ public class ReportTask {
         String filePath = pojo.getOrgId() + "/" + "REPORTS" + "/" + pojo.getId() + "_" + UUID.randomUUID() + ".csv";
         try {
             fileClient.create(filePath, inputStream);
-        } catch (FileClientException e) {
+        } catch (Exception e) {
             throw new ApiException(ApiStatus.BAD_DATA, "Error in uploading Report File to Gcp for report : " +
                     pojo.getId());
         }
