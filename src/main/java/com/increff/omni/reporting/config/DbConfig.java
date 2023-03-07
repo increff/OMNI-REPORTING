@@ -47,7 +47,7 @@ public class DbConfig {
 	@Bean(name = "dataSource")
 	public DataSource getDataSource() {
 		return DbPoolUtil.initDataSource(jdbcDriver, jdbcUrl, jdbcUsername, jdbcPassword, CONNECTION_POOL_SIZE,
-				(int) (CONNECTION_POOL_SIZE * 3));
+				CONNECTION_POOL_SIZE * 5);
 	}
 
 	@Bean(name = "entityManagerFactory")

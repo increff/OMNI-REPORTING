@@ -156,6 +156,7 @@ public class CommonDtoHelper {
         p.setParamName(o.getParamName());
         p.setScope(o.getScope());
         p.setSchemaVersionId(newSchemaVersionId);
+        p.setDateType(o.getDateType());
         return p;
     }
 

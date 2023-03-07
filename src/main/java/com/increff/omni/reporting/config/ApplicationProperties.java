@@ -5,8 +5,6 @@ import lombok.Setter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
-
 @Getter
 @Setter
 @Component
@@ -39,6 +37,15 @@ public class ApplicationProperties {
 
     @Value("${max.execution.time.minutes:5}")
     private Integer maxExecutionTime;
+
+    @Value("${max.file.size.mb:200}")
+    private Integer maxFileSize;
+
+    @Value("${auth.baseUrl}")
+    private String authBaseUrl;
+
+    @Value("${auth.appToken}")
+    private String authAppToken;
 
     @Value("${max.schedule.limit:15}")
     private Integer maxScheduleLimit;

@@ -1,7 +1,9 @@
 package com.increff.omni.reporting.util;
 
+import com.increff.omni.reporting.api.FolderApi;
 import lombok.extern.log4j.Log4j;
 import org.apache.commons.io.FileUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
@@ -11,6 +13,9 @@ import java.util.ListIterator;
 
 @Log4j
 public class FileUtil {
+
+    @Autowired
+    private FolderApi folderApi;
 
     private static final double MB = 1024 * 1024;
 

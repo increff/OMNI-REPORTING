@@ -74,7 +74,7 @@ public class ConnectionDto extends AbstractDto {
             SqlCmd.processQuery(sqlp, properties.getMaxExecutionTime());
             result = FileUtils.readFileToString(file, "utf-8");
             log.debug("Test File created");
-        } catch (IOException | ApiException e) {
+        } catch (IOException | InterruptedException | ApiException e) {
             log.error("Error in testing connection ", e);
             try {
                 assert errFile != null;

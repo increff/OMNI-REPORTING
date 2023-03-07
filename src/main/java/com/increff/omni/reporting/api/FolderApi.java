@@ -20,7 +20,7 @@ public class FolderApi {
     @Autowired
     private ApplicationProperties properties;
 
-    public void deleteFilesOlderThan1Hr() {
+    public void deleteOlderFiles() {
         File directory = new File(properties.getOutDir());
         if (!directory.exists()) {
             return;
@@ -29,7 +29,7 @@ public class FolderApi {
         File[] listFiles = directory.listFiles();
         if(Objects.isNull(listFiles) || listFiles.length == 0)
             return;
-        long purgeTime = System.currentTimeMillis() - (60 * 60 * 1000);
+        long purgeTime = System.currentTimeMillis() - (30 * 60 * 1000);
         for (File file : listFiles) {
             if (file.lastModified() < purgeTime) {
                 FileUtil.delete(file);
