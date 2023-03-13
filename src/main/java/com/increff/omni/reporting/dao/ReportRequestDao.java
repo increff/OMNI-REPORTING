@@ -79,7 +79,7 @@ public class ReportRequestDao extends AbstractDao<ReportRequestPojo> {
                                                    Integer pageSize) {
         if(Objects.isNull(pageNo))
             pageNo = 1;
-        if(Objects.isNull(pageSize))
+        if(Objects.isNull(pageSize) || pageSize > 100)
             pageSize = 100;
         CriteriaBuilder cb = this.em.getCriteriaBuilder();
         CriteriaQuery<ReportRequestPojo> query = cb.createQuery(ReportRequestPojo.class);

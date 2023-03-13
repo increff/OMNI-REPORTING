@@ -34,7 +34,7 @@ public class ReportScheduleDao extends AbstractDao<ReportSchedulePojo> {
     public List<ReportSchedulePojo> selectByOrgId(Integer orgId, Boolean isEnabled, Integer pageNo, Integer pageSize) {
         if(Objects.isNull(pageNo))
             pageNo = 1;
-        if(Objects.isNull(pageSize))
+        if(Objects.isNull(pageSize) || pageSize > 100)
             pageSize = 100;
         CriteriaBuilder cb = this.em.getCriteriaBuilder();
         CriteriaQuery<ReportSchedulePojo> query = cb.createQuery(ReportSchedulePojo.class);

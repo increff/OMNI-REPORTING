@@ -17,7 +17,7 @@ public class ReportForm {
     private ReportType type;
     @NotNull
     private Integer directoryId;
-    @NotNull
+
     private Integer schemaVersionId;
     @NotNull
     private Boolean isEnabled = true;

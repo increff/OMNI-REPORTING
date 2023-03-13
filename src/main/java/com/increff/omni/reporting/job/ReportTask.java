@@ -15,8 +15,6 @@ import com.nextscm.commons.fileclient.FileClient;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
 import lombok.extern.log4j.Log4j;
-import org.apache.commons.compress.archivers.sevenz.SevenZArchiveEntry;
-import org.apache.commons.compress.archivers.sevenz.SevenZOutputFile;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.scheduling.annotation.Async;
@@ -33,6 +31,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 
 @Service
@@ -114,7 +114,7 @@ public class ReportTask {
                             .map(ReportScheduleEmailsPojo::getSendTo).collect(
                                     Collectors.toList());
                     EmailProps props = createEmailProps(null, false, schedulePojo, toEmails, "Hi Team, \nPlease re-submit" +
-                            " the schedule in the reporting application.");
+                            " the schedule in the reporting application.", false);
                     EmailUtil.sendMail(props);
                     reportScheduleApi.addScheduleCount(pojo.getScheduleId(), 0, 1);
                 }
@@ -160,33 +160,44 @@ public class ReportTask {
     private void sendEmail(double fileSize, File csvFile, ReportRequestPojo pojo)
             throws IOException, ApiException, javax.mail.MessagingException {
         File out = csvFile;
+        boolean isZip = false;
         if(fileSize > 50.0) {
             throw new ApiException(ApiStatus.BAD_DATA, "File size has crossed 50 MB limit. Mail can't be sent");
         }
-        if (fileSize > 20.0) {
+        if (fileSize > 15.0) {
             String outFileName = csvFile.getName().split(".csv")[0] + ".7z";
             File zipFile = folderApi.getFile(outFileName);
-            try (SevenZOutputFile sevenZOutput = new SevenZOutputFile(zipFile)) {
-                SevenZArchiveEntry archiveEntry = sevenZOutput.createArchiveEntry(csvFile, csvFile.getName());
-                sevenZOutput.putArchiveEntry(archiveEntry);
-                sevenZOutput.write(Files.readAllBytes(csvFile.toPath()));
-                sevenZOutput.closeArchiveEntry();
-            } catch (IOException e) {
+            try {
+                // Create a 7z output stream
+                FileOutputStream fos = new FileOutputStream(zipFile);
+                ZipOutputStream zos = new ZipOutputStream(fos);
+                ZipEntry ze = new ZipEntry(csvFile.getName());
+                zos.putNextEntry(ze);
+
+                // Add the input file to the archive
+                zos.write(Files.readAllBytes(csvFile.toPath()));
+                zos.finish();
+                zos.close();
+                fos.close();
+            } catch (Exception e) {
                 log.error("Error while zipping : ", e);
                 throw new ApiException(ApiStatus.BAD_DATA, "Error while zipping the file");
             }
             out = zipFile;
+            isZip = true;
         }
         ReportSchedulePojo schedulePojo = reportScheduleApi.getCheck(pojo.getScheduleId());
         List<String> toEmails = reportScheduleApi.getByScheduleId(schedulePojo.getId()).stream()
                 .map(ReportScheduleEmailsPojo::getSendTo).collect(
                         Collectors.toList());
-        EmailProps props = createEmailProps(out, true, schedulePojo, toEmails, "");
+        EmailProps props = createEmailProps(out, true, schedulePojo, toEmails, "", isZip);
         EmailUtil.sendMail(props);
+
     }
 
     private EmailProps createEmailProps(File out, Boolean isAttachment,
-                                        ReportSchedulePojo schedulePojo, List<String> toEmails, String content) {
+                                        ReportSchedulePojo schedulePojo, List<String> toEmails, String content,
+                                        boolean isZip) {
         EmailProps props = new EmailProps();
         props.setFromEmail(properties.getFromEmail());
         props.setUsername(properties.getUsername());
@@ -197,7 +208,7 @@ public class ReportTask {
         props.setSubject("Increff Reporting : " + schedulePojo.getReportName());
         props.setAttachment(out);
         props.setCustomizedFileName(schedulePojo.getReportName() + " - " + ZonedDateTime.now()
-                .format(DateTimeFormatter.ofPattern(CommonDtoHelper.TIME_ZONE_PATTERN)) + ".csv");
+                .format(DateTimeFormatter.ofPattern(CommonDtoHelper.TIME_ZONE_PATTERN)) + ((isZip) ? ".zip" : ".csv"));
         props.setIsAttachment(isAttachment);
         props.setContent(content);
         return props;

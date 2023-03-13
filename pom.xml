@@ -48,11 +48,6 @@
             <version>${apache-commons-csv.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-compress</artifactId>
-            <version>${apache-commons-compress.version}</version>
-        </dependency>
-        <dependency>
             <groupId>com.nextscm.commons</groupId>
             <artifactId>commons-spring-server</artifactId>
             <version>${nextscm-commons-spring.version}</version>
@@ -112,6 +107,11 @@
             <artifactId>mockito-all</artifactId>
             <version>${mockito.version}</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-compress</artifactId>
+            <version>${apache-commons-compress.version}</version>
         </dependency>
     </dependencies>
 
