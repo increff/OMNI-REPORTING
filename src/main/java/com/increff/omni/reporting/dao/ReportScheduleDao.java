@@ -25,7 +25,7 @@ public class ReportScheduleDao extends AbstractDao<ReportSchedulePojo> {
                 cb.and(
                         cb.isTrue(root.get("isEnabled")),
                         cb.isFalse(root.get("isDeleted")),
-                        cb.greaterThanOrEqualTo(root.get("nextRuntime"), ZonedDateTime.now()))
+                        cb.lessThanOrEqualTo(root.get("nextRuntime"), ZonedDateTime.now()))
         );
         TypedQuery<ReportSchedulePojo> tQuery = createQuery(query);
         return tQuery.getResultList();

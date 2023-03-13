@@ -56,10 +56,6 @@ public class ReportScheduleApi extends AbstractAuditApi {
         return dao.selectByOrgId(orgId, isEnabled, pageNo, pageSize);
     }
 
-    public ReportSchedulePojo select(Integer id) {
-        return dao.select(id);
-    }
-
     public List<ReportSchedulePojo> getEligibleSchedules() {
         return dao.getEligibleSchedules();
     }
@@ -95,7 +91,7 @@ public class ReportScheduleApi extends AbstractAuditApi {
         emailsDao.flush();
     }
 
-    public void updateScheduleCount(Integer scheduleId, Integer successCount, Integer failureCount) {
+    public void addScheduleCount(Integer scheduleId, Integer successCount, Integer failureCount) {
         ReportSchedulePojo pojo = dao.select(scheduleId);
         pojo.setSuccessCount(pojo.getSuccessCount() + successCount);
         pojo.setFailureCount(pojo.getFailureCount() + failureCount);

@@ -18,6 +18,7 @@ public class EmailProps {
     private String smtpHost;
     private String smtpPort;
     private File attachment;
+    private String customizedFileName;
     private Boolean isAttachment;
 
     private String subject = "Test email.";

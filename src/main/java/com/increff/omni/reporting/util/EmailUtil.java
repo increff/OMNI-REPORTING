@@ -20,7 +20,7 @@ public class EmailUtil {
     public static void sendMail(EmailProps eprops) throws javax.mail.MessagingException {
         Properties props = new Properties();
         props.put("mail.smtp.auth", "true");
-        props.put("mail.smtp.starttls.enable", "true");
+        props.put("mail.smtp.starttls.enable", "false");
         props.put("mail.smtp.host", eprops.getSmtpHost());
         props.put("mail.smtp.port", eprops.getSmtpPort());
 
@@ -74,7 +74,7 @@ public class EmailUtil {
             String filename = eprops.getAttachment().getAbsolutePath();
             DataSource source = new FileDataSource(filename);
             messageBodyPart.setDataHandler(new DataHandler(source));
-            messageBodyPart.setFileName(filename);
+            messageBodyPart.setFileName(eprops.getCustomizedFileName());
             multipart.addBodyPart(messageBodyPart);
 
             // Send the complete message parts

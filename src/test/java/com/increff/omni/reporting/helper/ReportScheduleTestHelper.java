@@ -1,9 +1,16 @@
 package com.increff.omni.reporting.helper;
 
+import com.increff.omni.reporting.model.constants.InputControlType;
+import com.increff.omni.reporting.model.form.CronScheduleForm;
+import com.increff.omni.reporting.model.form.ReportScheduleForm;
+import com.increff.omni.reporting.pojo.ReportScheduleEmailsPojo;
 import com.increff.omni.reporting.pojo.ReportScheduleInputParamsPojo;
 import com.increff.omni.reporting.pojo.ReportSchedulePojo;
 
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class ReportScheduleTestHelper {
 
@@ -32,5 +39,40 @@ public class ReportScheduleTestHelper {
         inputParamsPojo.setParamValue(paramValue);
         inputParamsPojo.setDisplayValue(displayValue);
         return inputParamsPojo;
+    }
+
+    public static ReportScheduleForm getReportScheduleForm(String minute, String hour, String dayOfMonth, String reportName
+            , String timezone, Boolean isEnabled, List<String> sendTo, List<ReportScheduleForm.InputParamMap> inputParamMaps) {
+        ReportScheduleForm form = new ReportScheduleForm();
+        CronScheduleForm cronScheduleForm = new CronScheduleForm();
+        cronScheduleForm.setMinute(minute);
+        cronScheduleForm.setHour(hour);
+        cronScheduleForm.setDayOfMonth(dayOfMonth);
+        form.setCronSchedule(cronScheduleForm);
+        form.setReportName(reportName);
+        form.setTimezone(timezone);
+        form.setIsEnabled(isEnabled);
+        form.setSendTo(sendTo);
+        form.setParamMap(inputParamMaps);
+        return form;
+    }
+
+    public static List<ReportScheduleForm.InputParamMap> getInputParamList() {
+        List<ReportScheduleForm.InputParamMap> inputParamMapList = new ArrayList<>();
+        ReportScheduleForm.InputParamMap inputParamMap = new ReportScheduleForm.InputParamMap();
+        inputParamMap.setKey("clientId");
+        inputParamMap.setValue(Arrays.asList("1100002253", "1100002255"));
+        inputParamMap.setType(InputControlType.MULTI_SELECT);
+        inputParamMapList.add(inputParamMap);
+        return inputParamMapList;
+    }
+
+    public static List<ReportScheduleEmailsPojo> getEmailsPojo(Integer scheduleId) {
+        List<ReportScheduleEmailsPojo> emailsPojoList = new ArrayList<>();
+        ReportScheduleEmailsPojo scheduleEmailsPojo = new ReportScheduleEmailsPojo();
+        scheduleEmailsPojo.setSendTo("a@gmail.com");
+        scheduleEmailsPojo.setScheduleId(scheduleId);
+        emailsPojoList.add(scheduleEmailsPojo);
+        return emailsPojoList;
     }
 }

@@ -53,10 +53,6 @@ public class ReportScheduleFlowApi extends AbstractFlowApi {
         reportScheduleApi.updateScheduleInputParams(reportScheduleInputParamsPojos, pojo);
     }
 
-    public void editEnableOrDeletedFlag(ReportSchedulePojo pojo) throws ApiException {
-        reportScheduleApi.edit(pojo);
-    }
-
     private void validate(ReportPojo reportPojo, List<ReportScheduleInputParamsPojo> reportScheduleInputParamsPojoList)
             throws ApiException {
         List<ReportValidationGroupPojo> reportValidationGroupPojoList = reportValidationGroupApi

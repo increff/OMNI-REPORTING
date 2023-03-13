@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
 
 public class CommonDtoHelper {
 
-    public final static String TIME_ZONE_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX";
+    public final static String TIME_ZONE_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSSxxx";
 
     public static SqlParams getSqlParams(ConnectionPojo pojo, String query, File file, File errFile,
                                          Integer maxExecutionTime) {

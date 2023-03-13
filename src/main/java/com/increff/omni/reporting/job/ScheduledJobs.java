@@ -6,6 +6,7 @@ import com.increff.omni.reporting.config.ApplicationProperties;
 import com.increff.omni.reporting.flow.ReportRequestFlowApi;
 import com.increff.omni.reporting.model.constants.ReportRequestType;
 import com.increff.omni.reporting.pojo.*;
+import com.nextscm.commons.lang.StringUtil;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
 import lombok.extern.log4j.Log4j;
@@ -74,9 +75,9 @@ public class ScheduledJobs {
         });
     }
 
-    @Scheduled(fixedDelay = 3600 * 1000)
+    @Scheduled(fixedDelay = 2 * 60 * 1000)
     public void deleteOldFiles() {
-        folderApi.deleteFilesOlderThan1Hr();
+        folderApi.deleteOlderFiles();
     }
 
     @Scheduled(fixedDelay = 1000)
@@ -94,7 +95,7 @@ public class ScheduledJobs {
             String timezone = "UTC";
             for (ReportScheduleInputParamsPojo sp : scheduleInputParamsPojos) {
                 if(sp.getParamKey().equalsIgnoreCase("timezone"))
-                    timezone = sp.getParamValue();
+                    timezone = getValueFromQuotes(sp.getParamValue());
                 ReportInputParamsPojo ip = new ReportInputParamsPojo();
                 ip.setDisplayValue(sp.getDisplayValue());
                 ip.setParamKey(sp.getParamKey());
@@ -170,5 +171,13 @@ public class ScheduledJobs {
                 return 0;
             return o1.getCreatedAt().isAfter(o2.getCreatedAt()) ? 1 : -1;
         });
+    }
+
+    private String getValueFromQuotes(String value) {
+        if (StringUtil.isEmpty(value))
+            return null;
+        if (value.charAt(0) == '\'')
+            return value.substring(1, value.length() - 1);
+        return value;
     }
 }

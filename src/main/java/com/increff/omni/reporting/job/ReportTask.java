@@ -12,7 +12,6 @@ import com.increff.omni.reporting.util.EmailUtil;
 import com.increff.omni.reporting.util.FileUtil;
 import com.increff.omni.reporting.util.SqlCmd;
 import com.nextscm.commons.fileclient.FileClient;
-import com.nextscm.commons.fileclient.FileClientException;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
 import lombok.extern.log4j.Log4j;
@@ -27,6 +26,8 @@ import javax.mail.MessagingException;
 import javax.persistence.OptimisticLockException;
 import java.io.*;
 import java.nio.file.Files;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -58,6 +59,7 @@ public class ReportTask {
     private ApplicationProperties properties;
     @Autowired
     private ReportScheduleApi reportScheduleApi;
+
 
     @Async("userReportRequestExecutor")
     public void runUserReportAsync(ReportRequestPojo pojo) throws ApiException, MessagingException {
@@ -100,20 +102,24 @@ public class ReportTask {
             // Execute query and save results
             saveResultsOnCloud(pojo, sqlParams);
             if(pojo.getType().equals(ReportRequestType.EMAIL)) {
-                reportScheduleApi.updateScheduleCount(pojo.getScheduleId(), 1, 0);
+                reportScheduleApi.addScheduleCount(pojo.getScheduleId(), 1, 0);
             }
         } catch (Exception e) {
             log.error("Report Request ID : " + pojo.getId() + " failed", e);
             api.markFailed(pojo.getId(), ReportRequestStatus.FAILED, e.getMessage(), 0, 0.0);
-            if(pojo.getType().equals(ReportRequestType.EMAIL)) {
-                ReportSchedulePojo schedulePojo = reportScheduleApi.getCheck(pojo.getScheduleId());
-                List<String> toEmails = reportScheduleApi.getByScheduleId(schedulePojo.getId()).stream()
-                        .map(ReportScheduleEmailsPojo::getSendTo).collect(
-                                Collectors.toList());
-                EmailProps props = createEmailProps(null, false, schedulePojo, toEmails, "Hi Team, \nPlease re-submit" +
-                        " the schedule in the reporting application.");
-                EmailUtil.sendMail(props);
-                reportScheduleApi.updateScheduleCount(pojo.getScheduleId(), 0, 1);
+            try {
+                if(pojo.getType().equals(ReportRequestType.EMAIL)) {
+                    ReportSchedulePojo schedulePojo = reportScheduleApi.getCheck(pojo.getScheduleId());
+                    List<String> toEmails = reportScheduleApi.getByScheduleId(schedulePojo.getId()).stream()
+                            .map(ReportScheduleEmailsPojo::getSendTo).collect(
+                                    Collectors.toList());
+                    EmailProps props = createEmailProps(null, false, schedulePojo, toEmails, "Hi Team, \nPlease re-submit" +
+                            " the schedule in the reporting application.");
+                    EmailUtil.sendMail(props);
+                    reportScheduleApi.addScheduleCount(pojo.getScheduleId(), 0, 1);
+                }
+            } catch (Exception ex) {
+                log.error("Report Request ID : " + pojo.getId() + ". Failed to send email. ", ex);
             }
         }
     }
@@ -140,6 +146,8 @@ public class ReportTask {
             // update status to completed
             api.updateStatus(pojo.getId(), ReportRequestStatus.COMPLETED, filePath, noOfRows, fileSize);
             FileUtil.delete(csvFile);
+        } catch (ApiException apiException) {
+            throw apiException;
         } catch (Exception e) {
             String message =
                     String.join("\t", Files.readAllLines(sqlParams.getErrFile().toPath())).concat(e.getMessage());
@@ -152,6 +160,9 @@ public class ReportTask {
     private void sendEmail(double fileSize, File csvFile, ReportRequestPojo pojo)
             throws IOException, ApiException, javax.mail.MessagingException {
         File out = csvFile;
+        if(fileSize > 50.0) {
+            throw new ApiException(ApiStatus.BAD_DATA, "File size has crossed 50 MB limit. Mail can't be sent");
+        }
         if (fileSize > 20.0) {
             String outFileName = csvFile.getName().split(".csv")[0] + ".7z";
             File zipFile = folderApi.getFile(outFileName);
@@ -166,7 +177,7 @@ public class ReportTask {
             }
             out = zipFile;
         }
-        ReportSchedulePojo schedulePojo = reportScheduleApi.getCheck(pojo.getId());
+        ReportSchedulePojo schedulePojo = reportScheduleApi.getCheck(pojo.getScheduleId());
         List<String> toEmails = reportScheduleApi.getByScheduleId(schedulePojo.getId()).stream()
                 .map(ReportScheduleEmailsPojo::getSendTo).collect(
                         Collectors.toList());
@@ -185,6 +196,8 @@ public class ReportTask {
         props.setToEmails(toEmails);
         props.setSubject("Increff Reporting : " + schedulePojo.getReportName());
         props.setAttachment(out);
+        props.setCustomizedFileName(schedulePojo.getReportName() + " - " + ZonedDateTime.now()
+                .format(DateTimeFormatter.ofPattern(CommonDtoHelper.TIME_ZONE_PATTERN)) + ".csv");
         props.setIsAttachment(isAttachment);
         props.setContent(content);
         return props;

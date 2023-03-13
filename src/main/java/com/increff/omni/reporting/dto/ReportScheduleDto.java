@@ -5,6 +5,7 @@ import com.increff.omni.reporting.config.ApplicationProperties;
 import com.increff.omni.reporting.flow.ReportScheduleFlowApi;
 import com.increff.omni.reporting.model.constants.AuditActions;
 import com.increff.omni.reporting.model.constants.ReportRequestType;
+import com.increff.omni.reporting.model.data.ReportQueryData;
 import com.increff.omni.reporting.model.data.ReportRequestData;
 import com.increff.omni.reporting.model.data.ReportScheduleData;
 import com.increff.omni.reporting.model.form.CronScheduleForm;
@@ -41,6 +42,8 @@ public class ReportScheduleDto extends AbstractDto {
     private OrgSchemaApi orgSchemaApi;
     @Autowired
     private ReportScheduleFlowApi flowApi;
+    @Autowired
+    private ReportQueryApi reportQueryApi;
     @Autowired
     private ApplicationProperties properties;
 
@@ -87,7 +90,7 @@ public class ReportScheduleDto extends AbstractDto {
         OrganizationPojo organizationPojo = organizationApi.getCheck(getOrgId());
         checkValidReport(pojo.getReportName());
         pojo.setIsEnabled(isEnabled);
-        flowApi.editEnableOrDeletedFlag(pojo);
+        api.edit(pojo);
         flowApi.saveAudit(pojo.getId().toString(), AuditActions.ENABLE_DISABLE_REPORT_SCHEDULE.toString(),
                 "Enable / Disable " +
                         "Report Schedule",
@@ -102,7 +105,7 @@ public class ReportScheduleDto extends AbstractDto {
                     "new org id : " + getOrgId());
         OrganizationPojo organizationPojo = organizationApi.getCheck(getOrgId());
         pojo.setIsDeleted(true);
-        flowApi.editEnableOrDeletedFlag(pojo);
+        api.edit(pojo);
         flowApi.saveAudit(pojo.getId().toString(), AuditActions.DELETE_REPORT_SCHEDULE.toString(), "Delete Report " +
                         "Schedule",
                 "Report schedule updated for organization : " + organizationPojo.getName() +
@@ -128,12 +131,7 @@ public class ReportScheduleDto extends AbstractDto {
                 reportRequestApi.getByOrgAndType(getOrgId(), ReportRequestType.EMAIL
                         , pageNo, pageSize);
         for (ReportRequestPojo r : reportRequestPojoList) {
-            ReportPojo reportPojo = null;
-            try {
-                reportPojo = reportApi.getCheck(r.getReportId());
-            } catch (Exception ignored) {
-
-            }
+            ReportPojo reportPojo = Objects.isNull(r.getReportId()) ? null : reportApi.getCheck(r.getReportId());
             reportRequestDataList.add(getReportRequestData(r, reportPojo));
         }
         return reportRequestDataList;
@@ -143,12 +141,16 @@ public class ReportScheduleDto extends AbstractDto {
         List<ReportScheduleData> dataList = new ArrayList<>();
         for (ReportSchedulePojo pojo : reportSchedulePojoList) {
             List<ReportScheduleEmailsPojo> emailsPojos = api.getByScheduleId(pojo.getId());
+            List<ReportScheduleInputParamsPojo> paramsPojos = api.getScheduleParams(pojo.getId());
+            String timezone = paramsPojos.stream().filter(p -> p.getParamKey().equalsIgnoreCase("timezone")).collect(
+                    Collectors.toList()).get(0).getParamValue();
             ReportScheduleData data = ConvertUtil.convert(pojo, ReportScheduleData.class);
             CronScheduleForm cronData = new CronScheduleForm();
             cronData.setDayOfMonth(pojo.getCron().split(" ")[3]);
             cronData.setHour(pojo.getCron().split(" ")[2]);
             cronData.setMinute(pojo.getCron().split(" ")[1]);
             data.setCronSchedule(cronData);
+            data.setTimezone(getValueFromQuotes(timezone));
             data.setSendTo(emailsPojos.stream().map(ReportScheduleEmailsPojo::getSendTo).collect(Collectors.toList()));
             dataList.add(data);
         }
@@ -178,6 +180,9 @@ public class ReportScheduleDto extends AbstractDto {
         if (Objects.isNull(reportPojo) || !reportPojo.getCanSchedule())
             throw new ApiException(ApiStatus.BAD_DATA, "Report : " + reportName + " is not allowed to " +
                     "schedule");
+        ReportQueryPojo reportQueryPojo = reportQueryApi.getByReportId(reportPojo.getId());
+        if(Objects.isNull(reportQueryPojo))
+            throw new ApiException(ApiStatus.BAD_DATA, "Report : " + reportName + " doesn't have any query defined.");
         return reportPojo;
     }
 

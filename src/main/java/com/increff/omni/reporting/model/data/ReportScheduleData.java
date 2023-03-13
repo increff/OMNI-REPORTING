@@ -13,6 +13,7 @@ import java.util.List;
 @Setter
 public class ReportScheduleData {
 
+    private Integer id;
     private String timezone;
     private String reportName;
     private Boolean isEnabled;

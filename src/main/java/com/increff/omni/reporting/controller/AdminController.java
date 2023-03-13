@@ -284,7 +284,7 @@ public class AdminController {
         return inputControlDto.selectForReport(reportId, orgId);
     }
 
-    @ApiOperation(value = "Get Schedules for an organization")
+    @ApiOperation(value = "Get Schedules for all organizations")
     @RequestMapping(value = "/schedules", method = RequestMethod.GET)
     public List<ReportScheduleData> getScheduleReports(@RequestParam Integer pageNo, @RequestParam Integer pageSize) throws ApiException {
         return reportScheduleDto.getScheduleReportsForAllOrgs(pageNo, pageSize);

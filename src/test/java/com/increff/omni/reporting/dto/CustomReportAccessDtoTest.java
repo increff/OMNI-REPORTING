@@ -48,7 +48,7 @@ public class CustomReportAccessDtoTest extends AbstractTest {
         ConnectionData connectionData = connectionDto.add(connectionForm);
         organizationDto.mapToConnection(organizationData.getId(), connectionData.getId());
         organizationDto.mapToSchema(organizationData.getId(), schemaData.getId());
-        return getReportForm(name, type, directoryData.getId(), schemaData.getId());
+        return getReportForm(name, type, directoryData.getId(), schemaData.getId(), false);
     }
 
     @Test

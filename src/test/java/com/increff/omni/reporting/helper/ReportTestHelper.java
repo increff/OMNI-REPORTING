@@ -42,12 +42,14 @@ public class ReportTestHelper {
         return groupForm;
     }
 
-    public static ReportForm getReportForm(String name, ReportType type, Integer directoryId, Integer schemaVersionId) {
+    public static ReportForm getReportForm(String name, ReportType type, Integer directoryId, Integer schemaVersionId,
+                                           boolean canSchedule) {
         ReportForm form = new ReportForm();
         form.setDirectoryId(directoryId);
         form.setSchemaVersionId(schemaVersionId);
         form.setName(name);
         form.setType(type);
+        form.setCanSchedule(canSchedule);
         return form;
     }
 
