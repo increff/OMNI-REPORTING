@@ -20,7 +20,7 @@ public class EmailUtil {
     public static void sendMail(EmailProps eprops) throws javax.mail.MessagingException {
         Properties props = new Properties();
         props.put("mail.smtp.auth", "true");
-        props.put("mail.smtp.starttls.enable", "false");
+        props.put("mail.smtp.starttls.enable", "true");
         props.put("mail.smtp.host", eprops.getSmtpHost());
         props.put("mail.smtp.port", eprops.getSmtpPort());
 
