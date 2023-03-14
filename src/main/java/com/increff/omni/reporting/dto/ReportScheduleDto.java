@@ -5,7 +5,6 @@ import com.increff.omni.reporting.config.ApplicationProperties;
 import com.increff.omni.reporting.flow.ReportScheduleFlowApi;
 import com.increff.omni.reporting.model.constants.AuditActions;
 import com.increff.omni.reporting.model.constants.ReportRequestType;
-import com.increff.omni.reporting.model.data.ReportQueryData;
 import com.increff.omni.reporting.model.data.ReportRequestData;
 import com.increff.omni.reporting.model.data.ReportScheduleData;
 import com.increff.omni.reporting.model.form.CronScheduleForm;
@@ -21,7 +20,7 @@ import org.springframework.stereotype.Component;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.increff.omni.reporting.dto.CommonDtoHelper.convertFormToReportSchedulePojo;
+import static com.increff.omni.reporting.dto.CommonDtoHelper.*;
 
 @Component
 public class ReportScheduleDto extends AbstractDto {
@@ -46,6 +45,8 @@ public class ReportScheduleDto extends AbstractDto {
     private ReportQueryApi reportQueryApi;
     @Autowired
     private ApplicationProperties properties;
+    @Autowired
+    private ReportInputParamsApi reportInputParamsApi;
 
     public void scheduleReport(ReportScheduleForm form) throws ApiException {
         checkValid(form);
@@ -132,7 +133,15 @@ public class ReportScheduleDto extends AbstractDto {
                         , pageNo, pageSize);
         for (ReportRequestPojo r : reportRequestPojoList) {
             ReportPojo reportPojo = Objects.isNull(r.getReportId()) ? null : reportApi.getCheck(r.getReportId());
-            reportRequestDataList.add(getReportRequestData(r, reportPojo));
+            List<ReportControlsPojo> reportControlsPojos = Objects.isNull(r.getReportId()) ?
+                    new ArrayList<>() : reportControlsApi.getByReportId(r.getReportId());
+            List<Integer> controlIds = reportControlsPojos.stream()
+                    .map(ReportControlsPojo::getControlId).collect(Collectors.toList());
+            List<InputControlPojo> controlPojos = controlIds.isEmpty() ? new ArrayList<>() :
+                    controlApi.selectByIds(controlIds);
+            List<ReportInputParamsPojo> paramsPojoList = reportInputParamsApi.getInputParamsForReportRequest(r.getId());
+            OrganizationPojo organizationPojo = organizationApi.getCheck(r.getOrgId());
+            reportRequestDataList.add(getReportRequestData(r, reportPojo, controlPojos, paramsPojoList, organizationPojo));
         }
         return reportRequestDataList;
     }
@@ -155,23 +164,6 @@ public class ReportScheduleDto extends AbstractDto {
             dataList.add(data);
         }
         return dataList;
-    }
-
-    private ReportRequestData getReportRequestData(ReportRequestPojo pojo, ReportPojo reportPojo) throws ApiException {
-        OrganizationPojo organizationPojo = organizationApi.getCheck(pojo.getOrgId());
-        ReportRequestData data = new ReportRequestData();
-        data.setRequestCreationTime(pojo.getCreatedAt());
-        data.setRequestUpdatedTime(pojo.getUpdatedAt());
-        data.setStatus(pojo.getStatus());
-        data.setType(pojo.getType());
-        data.setRequestId(pojo.getId());
-        data.setReportId(Objects.nonNull(reportPojo) ? reportPojo.getId() : 0);
-        data.setReportName(Objects.nonNull(reportPojo) ? reportPojo.getName() : "NA");
-        data.setOrgName(organizationPojo.getName());
-        data.setFileSize(pojo.getFileSize());
-        data.setNoOfRows(pojo.getNoOfRows());
-        data.setFailureReason(pojo.getFailureReason());
-        return data;
     }
 
     private ReportPojo checkValidReport(String reportName) throws ApiException {
@@ -214,9 +206,7 @@ public class ReportScheduleDto extends AbstractDto {
 
     private Map<String, List<String>> getUserInputParams(List<ReportScheduleForm.InputParamMap> paramMap) {
         Map<String, List<String>> inputParams = new HashMap<>();
-        paramMap.forEach(p -> {
-            inputParams.put(p.getKey(), p.getValue());
-        });
+        paramMap.forEach(p -> inputParams.put(p.getKey(), p.getValue()));
         return inputParams;
     }
 }

@@ -61,7 +61,7 @@ public class ReportScheduleTestHelper {
         List<ReportScheduleForm.InputParamMap> inputParamMapList = new ArrayList<>();
         ReportScheduleForm.InputParamMap inputParamMap = new ReportScheduleForm.InputParamMap();
         inputParamMap.setKey("clientId");
-        inputParamMap.setValue(Arrays.asList("1100002253", "1100002255"));
+        inputParamMap.setValue(Arrays.asList("1100002253"));
         inputParamMap.setType(InputControlType.MULTI_SELECT);
         inputParamMapList.add(inputParamMap);
         return inputParamMapList;

@@ -105,7 +105,9 @@ public class ReportJobTest extends AbstractTest {
     public void testCreateScheduleRequests() throws ApiException {
         ReportForm reportForm = commonSetup();
         reportForm.setCanSchedule(true);
-        reportDto.add(reportForm);
+        ReportData reportData = reportDto.add(reportForm);
+        ReportQueryForm queryForm = getReportQueryForm("select version();");
+        reportDto.upsertQuery(reportData.getId(), queryForm);
         List<ReportScheduleForm.InputParamMap> inputParamMaps = getInputParamList();
         ReportScheduleForm form = getReportScheduleForm("*/15", "*", "*", "Report 2", "Asia/Kolkata",
                 true, Arrays.asList("a@gmail.com", "b@gmail.com"), inputParamMaps);

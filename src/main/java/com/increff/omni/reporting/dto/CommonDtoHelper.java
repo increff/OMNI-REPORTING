@@ -3,10 +3,7 @@ package com.increff.omni.reporting.dto;
 import com.increff.omni.reporting.model.constants.ReportRequestStatus;
 import com.increff.omni.reporting.model.constants.ReportRequestType;
 import com.increff.omni.reporting.model.constants.ValidationType;
-import com.increff.omni.reporting.model.data.InputControlData;
-import com.increff.omni.reporting.model.data.OrgConnectionData;
-import com.increff.omni.reporting.model.data.OrgSchemaData;
-import com.increff.omni.reporting.model.data.TimeZoneData;
+import com.increff.omni.reporting.model.data.*;
 import com.increff.omni.reporting.model.form.ReportRequestForm;
 import com.increff.omni.reporting.model.form.ReportScheduleForm;
 import com.increff.omni.reporting.model.form.SqlParams;
@@ -25,6 +22,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.increff.omni.reporting.dto.ReportRequestDto.accessControlledKeys;
+
 public class CommonDtoHelper {
 
     public final static String TIME_ZONE_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSSxxx";
@@ -39,6 +38,57 @@ public class CommonDtoHelper {
         params.setOutFile(file);
         params.setErrFile(errFile);
         return params;
+    }
+
+    public static ReportRequestData getReportRequestData(ReportRequestPojo pojo, ReportPojo reportPojo,
+                                                         List<InputControlPojo> controlPojos,
+                                                         List<ReportInputParamsPojo> paramsPojoList,
+                                                         OrganizationPojo organizationPojo) {
+        ReportRequestData data = new ReportRequestData();
+        data.setRequestCreationTime(pojo.getCreatedAt());
+        data.setRequestUpdatedTime(pojo.getUpdatedAt());
+        data.setStatus(pojo.getStatus());
+        data.setType(pojo.getType());
+        data.setRequestId(pojo.getId());
+        data.setReportId(Objects.nonNull(reportPojo) ? reportPojo.getId() : 0);
+        data.setReportName(Objects.nonNull(reportPojo) ? reportPojo.getName() : "NA");
+        data.setOrgName(organizationPojo.getName());
+        data.setFileSize(pojo.getFileSize());
+        data.setNoOfRows(pojo.getNoOfRows());
+        data.setFailureReason(pojo.getFailureReason());
+        setFiltersApplied(paramsPojoList, data, controlPojos);
+        return data;
+    }
+
+    public static void setFiltersApplied(List<ReportInputParamsPojo> paramsPojoList,
+                                         ReportRequestData data,
+                                         List<InputControlPojo> controlPojos) {
+        List<InputControlFilterData> filterData = new ArrayList<>();
+        for (ReportInputParamsPojo reportInputParamsPojo : paramsPojoList) {
+            if (accessControlledKeys.contains(reportInputParamsPojo.getParamKey())
+                    || reportInputParamsPojo.getParamKey().equals("orgId"))
+                continue;
+            if (reportInputParamsPojo.getParamKey().equals("timezone")) {
+                data.setTimezone(getValueFromQuotes(reportInputParamsPojo.getParamValue()));
+                continue;
+            }
+            Optional<InputControlPojo> controlPojo =
+                    controlPojos.stream().filter(c -> c.getParamName().equals(reportInputParamsPojo.getParamKey()))
+                            .findFirst();
+            if (controlPojo.isPresent()) {
+                InputControlFilterData d = new InputControlFilterData();
+                d.setType(controlPojo.get().getType());
+                d.setParamName(controlPojo.get().getParamName());
+                d.setDisplayName(controlPojo.get().getDisplayName());
+                List<String> values = Objects.isNull(reportInputParamsPojo.getDisplayValue()) ? new ArrayList<>() :
+                        Arrays.stream(reportInputParamsPojo.getDisplayValue().split(
+                                        ","))
+                                .map(CommonDtoHelper::getValueFromQuotes).collect(Collectors.toList());
+                d.setValues(values);
+                filterData.add(d);
+            }
+        }
+        data.setFilters(filterData);
     }
 
     public static void sortBasedOnReportControlMappedTime(List<InputControlData> inputControlDataList,
@@ -296,5 +346,13 @@ public class CommonDtoHelper {
                 TimeZone.getTimeZone(ZoneId.of(timezone)));
         Instant instant = generator.next(new Date()).toInstant();
         return ZonedDateTime.ofInstant(instant, ZoneId.of("UTC"));
+    }
+
+    public static String getValueFromQuotes(String value) {
+        try {
+            return value.substring(1, value.length() - 1);
+        } catch (Exception e) {
+            return "";
+        }
     }
 }

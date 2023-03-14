@@ -6,6 +6,7 @@ import com.increff.omni.reporting.api.*;
 import com.increff.omni.reporting.flow.InputControlFlowApi;
 import com.increff.omni.reporting.model.constants.ReportRequestType;
 import com.increff.omni.reporting.model.constants.ReportType;
+import com.increff.omni.reporting.model.data.ReportRequestData;
 import com.increff.omni.reporting.pojo.*;
 import com.nextscm.commons.lang.StringUtil;
 import com.nextscm.commons.spring.common.ApiException;
@@ -17,6 +18,8 @@ import org.springframework.stereotype.Component;
 
 import java.time.ZonedDateTime;
 import java.util.*;
+
+import static com.increff.omni.reporting.dto.CommonDtoHelper.getValueFromQuotes;
 
 @Log4j
 @Component
@@ -148,14 +151,6 @@ public class AbstractDto extends AbstractDtoApi {
         }
     }
 
-    protected String getValueFromQuotes(String value) {
-        try {
-            return value.substring(1, value.length() - 1);
-        } catch (Exception e) {
-            return "";
-        }
-    }
-
     private Map<String, String> checkValidValues(InputControlPojo p, int orgId) throws ApiException {
         Map<String, String> valuesMap = new HashMap<>();
         InputControlQueryPojo queryPojo = controlApi.selectControlQuery(p.getId());
@@ -176,5 +171,6 @@ public class AbstractDto extends AbstractDtoApi {
     private static UserPrincipal getPrincipal() {
         return SecurityUtil.getPrincipal();
     }
+
 
 }
