@@ -142,6 +142,7 @@ public class ReportTask {
         try {
             fileClient.create(filePath, inputStream);
             log.debug("GCP Upload completed for request ID : "  + pojo.getId());
+            inputStream.close();
         } catch (Exception e) {
             throw new ApiException(ApiStatus.BAD_DATA, "Error in uploading Report File to Gcp for report : " +
                     pojo.getId());

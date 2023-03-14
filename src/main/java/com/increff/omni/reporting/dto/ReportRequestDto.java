@@ -26,10 +26,8 @@ import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.Reader;
+import javax.servlet.http.HttpServletResponse;
+import java.io.*;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.*;
@@ -111,15 +109,22 @@ public class ReportRequestDto extends AbstractDto {
         return reportRequestDataList;
     }
 
-    public File getReportFile(Integer requestId) throws ApiException, IOException {
+    public void getReportFile(Integer requestId, HttpServletResponse response) throws ApiException, IOException {
         ReportRequestPojo requestPojo = reportRequestApi.getCheck(requestId);
         ReportPojo reportPojo = reportApi.getCheck(requestPojo.getReportId());
         validate(requestPojo, requestId, reportPojo, getUserId());
-        String reportName = requestId + "_" + UUID.randomUUID();
-        File sourceFile = folderApi.getFile(reportName + ".csv");
         byte[] data = getFileFromUrl(requestPojo.getUrl());
-        FileUtils.writeByteArrayToFile(sourceFile, data);
-        return sourceFile;
+        response.setContentType("application/octet-stream");
+        response.setHeader("Content-Disposition", "inline");
+        response.setHeader("Content-length", String.valueOf(data.length));
+        OutputStream outputStream = null;
+        try {
+            outputStream = response.getOutputStream();
+            outputStream.write(data);
+            outputStream.flush();
+        } finally {
+            FileUtil.closeQuietly(outputStream);
+        }
     }
 
     public List<Map<String, String>> getJsonFromCsv(Integer requestId) throws ApiException, IOException {
