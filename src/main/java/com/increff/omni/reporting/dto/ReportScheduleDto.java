@@ -5,6 +5,7 @@ import com.increff.omni.reporting.config.ApplicationProperties;
 import com.increff.omni.reporting.flow.ReportScheduleFlowApi;
 import com.increff.omni.reporting.model.constants.AuditActions;
 import com.increff.omni.reporting.model.constants.ReportRequestType;
+import com.increff.omni.reporting.model.data.InputControlFilterData;
 import com.increff.omni.reporting.model.data.ReportRequestData;
 import com.increff.omni.reporting.model.data.ReportScheduleData;
 import com.increff.omni.reporting.model.form.CronScheduleForm;
@@ -114,7 +115,7 @@ public class ReportScheduleDto extends AbstractDto {
 
     }
 
-    public List<ReportScheduleData> getScheduleReportsForAllOrgs(Integer pageNo, Integer pageSize) {
+    public List<ReportScheduleData> getScheduleReportsForAllOrgs(Integer pageNo, Integer pageSize) throws ApiException {
         List<ReportSchedulePojo> reportSchedulePojoList =
                 api.selectByOrgIdAndEnabledStatus(null, null, pageNo, pageSize);
         return getReportScheduleData(reportSchedulePojoList);
@@ -146,14 +147,26 @@ public class ReportScheduleDto extends AbstractDto {
         return reportRequestDataList;
     }
 
-    private List<ReportScheduleData> getReportScheduleData(List<ReportSchedulePojo> reportSchedulePojoList) {
+    private List<ReportScheduleData> getReportScheduleData(List<ReportSchedulePojo> reportSchedulePojoList)
+            throws ApiException {
         List<ReportScheduleData> dataList = new ArrayList<>();
         for (ReportSchedulePojo pojo : reportSchedulePojoList) {
+            OrgSchemaVersionPojo orgSchemaVersionPojo = orgSchemaApi.getCheckByOrgId(pojo.getOrgId());
+            ReportPojo reportPojo = reportApi.getByNameAndSchema(pojo.getReportName(),
+                    orgSchemaVersionPojo.getSchemaVersionId());
+            List<ReportControlsPojo> reportControlsPojos = Objects.isNull(reportPojo) ?
+                    new ArrayList<>() : reportControlsApi.getByReportId(reportPojo.getId());
+            List<Integer> controlIds = reportControlsPojos.stream()
+                    .map(ReportControlsPojo::getControlId).collect(Collectors.toList());
+            List<InputControlPojo> controlPojos = controlIds.isEmpty() ? new ArrayList<>() :
+                    controlApi.selectByIds(controlIds);
             List<ReportScheduleEmailsPojo> emailsPojos = api.getByScheduleId(pojo.getId());
             List<ReportScheduleInputParamsPojo> paramsPojos = api.getScheduleParams(pojo.getId());
             String timezone = paramsPojos.stream().filter(p -> p.getParamKey().equalsIgnoreCase("timezone")).collect(
                     Collectors.toList()).get(0).getParamValue();
+            List<InputControlFilterData> filterData = prepareFilters(paramsPojos, controlPojos);
             ReportScheduleData data = ConvertUtil.convert(pojo, ReportScheduleData.class);
+            data.setFilters(filterData);
             CronScheduleForm cronData = new CronScheduleForm();
             cronData.setDayOfMonth(pojo.getCron().split(" ")[3]);
             cronData.setHour(pojo.getCron().split(" ")[2]);

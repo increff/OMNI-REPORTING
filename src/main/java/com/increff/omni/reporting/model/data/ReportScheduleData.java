@@ -18,11 +18,13 @@ public class ReportScheduleData {
     private String reportName;
     private Boolean isEnabled;
     private CronScheduleForm cronSchedule;
+    private List<InputControlFilterData> filters;
     private List<String> sendTo;
     private ZonedDateTime nextRuntime;
     private ZonedDateTime createdAt;
     private ZonedDateTime updatedAt;
     private Integer successCount;
     private Integer failureCount;
+
 
 }

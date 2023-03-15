@@ -9,6 +9,7 @@ import com.increff.omni.reporting.model.form.ReportScheduleForm;
 import com.increff.omni.reporting.model.form.SqlParams;
 import com.increff.omni.reporting.pojo.*;
 import com.increff.omni.reporting.util.SqlCmd;
+import com.nextscm.commons.lang.StringUtil;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
 import org.springframework.scheduling.support.CronSequenceGenerator;
@@ -38,6 +39,28 @@ public class CommonDtoHelper {
         params.setOutFile(file);
         params.setErrFile(errFile);
         return params;
+    }
+
+    public static List<InputControlFilterData> prepareFilters(List<ReportScheduleInputParamsPojo> paramsPojos,
+                                                              List<InputControlPojo> controlPojos) {
+        List<InputControlFilterData> inputControlFilterData = new ArrayList<>();
+        paramsPojos.forEach(p -> {
+            Optional<InputControlPojo>
+                    controlPojo = controlPojos.stream().filter(c -> c.getParamName().equals(p.getParamKey())).findFirst();
+            if(controlPojo.isPresent()) {
+                InputControlFilterData filterData = new InputControlFilterData();
+                filterData.setParamName(controlPojo.get().getParamName());
+                filterData.setDisplayName(controlPojo.get().getDisplayName());
+                List<String> values = Objects.isNull(p.getDisplayValue()) ? new ArrayList<>() :
+                        Arrays.stream(p.getDisplayValue().split(
+                                        ","))
+                                .map(CommonDtoHelper::getValueFromQuotes).collect(Collectors.toList());
+                filterData.setValues(values);
+                filterData.setType(controlPojo.get().getType());
+                inputControlFilterData.add(filterData);
+            }
+        });
+        return inputControlFilterData;
     }
 
     public static ReportRequestData getReportRequestData(ReportRequestPojo pojo, ReportPojo reportPojo,
@@ -349,10 +372,10 @@ public class CommonDtoHelper {
     }
 
     public static String getValueFromQuotes(String value) {
-        try {
+        if (StringUtil.isEmpty(value))
+            return null;
+        if (value.charAt(0) == '\'')
             return value.substring(1, value.length() - 1);
-        } catch (Exception e) {
-            return "";
-        }
+        return value;
     }
 }

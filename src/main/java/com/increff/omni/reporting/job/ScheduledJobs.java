@@ -172,12 +172,4 @@ public class ScheduledJobs {
             return o1.getCreatedAt().isAfter(o2.getCreatedAt()) ? 1 : -1;
         });
     }
-
-    private String getValueFromQuotes(String value) {
-        if (StringUtil.isEmpty(value))
-            return null;
-        if (value.charAt(0) == '\'')
-            return value.substring(1, value.length() - 1);
-        return value;
-    }
 }
