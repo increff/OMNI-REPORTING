@@ -87,9 +87,7 @@ public class StandardController {
     @RequestMapping(value = "/request-report/{requestId}", method = RequestMethod.GET)
     public void getFile(@PathVariable Integer requestId, HttpServletResponse response) throws
             ApiException, IOException {
-        File file = reportRequestDto.getReportFile(requestId);
-        FileUtil.createFileResponse(file, response);
-        FileUtil.delete(file);
+        reportRequestDto.getReportFile(requestId, response);
     }
 
     @ApiOperation(value = "View CSV of Request")

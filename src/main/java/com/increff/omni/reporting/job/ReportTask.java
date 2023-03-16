@@ -129,13 +129,17 @@ public class ReportTask {
         try {
             // Process data
             SqlCmd.processQuery(sqlParams, false, properties.getMaxExecutionTime());
+            double fileSize = FileUtil.getSizeInMb(sqlParams.getOutFile().length());
+            if (fileSize > properties.getMaxFileSize())
+                throw new ApiException(ApiStatus.BAD_DATA,
+                        "File size " + fileSize + " MB exceeded max limit of " + properties.getMaxFileSize() + " MB" + ". Please select granular filters");
             String name = sqlParams.getOutFile().getName().split(".tsv")[0] + ".csv";
             File csvFile = folderApi.getFile(name);
             Integer noOfRows = FileUtil.getCsvFromTsv(sqlParams.getOutFile(), csvFile);
 
             // upload result to cloud
             String filePath = "NA";
-            double fileSize = FileUtil.getSizeInMb(csvFile.length());
+            fileSize = FileUtil.getSizeInMb(csvFile.length());
             switch (pojo.getType()) {
                 case EMAIL:
                     sendEmail(fileSize, csvFile, pojo);
@@ -225,8 +229,11 @@ public class ReportTask {
     private String uploadFile(File file, ReportRequestPojo pojo) throws FileNotFoundException, ApiException {
         InputStream inputStream = new FileInputStream(file);
         String filePath = pojo.getOrgId() + "/" + "REPORTS" + "/" + pojo.getId() + "_" + UUID.randomUUID() + ".csv";
+        log.debug("GCP Upload started for request ID : "  + pojo.getId());
         try {
             fileClient.create(filePath, inputStream);
+            log.debug("GCP Upload completed for request ID : "  + pojo.getId());
+            inputStream.close();
         } catch (Exception e) {
             throw new ApiException(ApiStatus.BAD_DATA, "Error in uploading Report File to Gcp for report : " +
                     pojo.getId());

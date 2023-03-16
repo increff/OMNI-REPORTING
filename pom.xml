@@ -4,7 +4,7 @@
 
     <groupId>com.increff.omni</groupId>
     <artifactId>omni-reporting</artifactId>
-    <version>1.25-SNAPSHOT</version>
+    <version>1.27-SNAPSHOT</version>
     <packaging>war</packaging>
     <properties>
         <!-- Maven Properties -->

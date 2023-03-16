@@ -25,8 +25,9 @@ public class DateValidator extends AbstractValidator {
         // Check all are DATE input controls
         if (inputControlTypeList.stream()
                 .anyMatch(c -> !Arrays.asList(InputControlType.DATE, InputControlType.DATE_TIME).contains(c)))
-            throw new ApiException(ApiStatus.BAD_DATA, "DATE_RANGE validation can only be applied on DATE / DATE_TIME " +
-                    "input controls");
+            throw new ApiException(ApiStatus.BAD_DATA,
+                    "DATE_RANGE validation can only be applied on DATE / DATE_TIME " +
+                            "input controls");
         if (inputControlTypeList.size() != 2)
             throw new ApiException(ApiStatus.BAD_DATA, "DATE_RANGE validation type should have exactly 2 DATE / " +
                     "DATE_TIME input controls");
@@ -36,14 +37,17 @@ public class DateValidator extends AbstractValidator {
     public void validate(List<String> displayName, List<String> paramValue, String reportName,
                          Integer validationValue, ReportRequestType type)
             throws ApiException {
+        if(type.equals(ReportRequestType.EMAIL))
+            return;
         if (paramValue.size() != 2)
             throw new ApiException(ApiStatus.BAD_DATA, "Exactly 2 Date inputs are required to validate");
         List<String> nonEmptyValues = paramValue.stream().filter(p -> !StringUtil.isEmpty(getValueFromQuotes(p)))
                 .collect(Collectors.toList());
+        if(nonEmptyValues.isEmpty())
+            return;
         if (nonEmptyValues.size() != 2)
-            return;
-        if(type.equals(ReportRequestType.EMAIL))
-            return;
+            throw new ApiException(ApiStatus.BAD_DATA,
+                    "Both from and to date should be selected for filters : " + JsonUtil.serialize(displayName));
         try {
             // We can't define which one is exactly the start date
             ZonedDateTime date1 = ZonedDateTime.parse(getValueFromQuotes(paramValue.get(0))
