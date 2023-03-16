@@ -27,7 +27,7 @@ import static com.increff.omni.reporting.dto.ReportRequestDto.accessControlledKe
 
 public class CommonDtoHelper {
 
-    public final static String TIME_ZONE_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSSxxx";
+    public final static String TIME_ZONE_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX";
 
     public static SqlParams getSqlParams(ConnectionPojo pojo, String query, File file, File errFile,
                                          Integer maxExecutionTime) {
