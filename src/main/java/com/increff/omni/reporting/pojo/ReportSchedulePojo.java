@@ -10,7 +10,9 @@ import java.time.ZonedDateTime;
 @Entity
 @Setter
 @Getter
-@Table(name = "report_schedule")
+@Table(name = "report_schedule", indexes = {@Index(name = "idx_orgId_isEnabled", columnList = "orgId, isEnabled"),
+                @Index(name = "idx_isDeleted", columnList = "isDeleted"),
+                @Index(name = "idx_nextRuntime_isEnabled", columnList = "nextRuntime, isEnabled")})
 public class ReportSchedulePojo extends AbstractVersionedPojo {
 
     @Id

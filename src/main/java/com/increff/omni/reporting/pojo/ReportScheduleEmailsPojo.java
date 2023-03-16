@@ -8,13 +8,13 @@ import javax.persistence.*;
 @Entity
 @Setter
 @Getter
-@Table(name = "report_schedule_emails")
+@Table(name = "report_schedule_emails", indexes = {
+        @Index(name = "idx_scheduleId", columnList = "scheduleId")})
 public class ReportScheduleEmailsPojo extends AbstractVersionedPojo {
 
     @Id
     @TableGenerator(name = "report_schedule_emails", pkColumnValue = "report_schedule_emails", allocationSize = 10,
-            initialValue =
-            100000)
+            initialValue = 100000)
     @GeneratedValue(strategy = GenerationType.TABLE, generator = "report_schedule_emails")
     private Integer id;
 

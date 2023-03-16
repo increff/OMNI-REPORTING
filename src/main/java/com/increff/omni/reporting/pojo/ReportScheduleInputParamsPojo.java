@@ -9,7 +9,7 @@ import javax.persistence.*;
 @Setter
 @Getter
 @Table(name = "report_schedule_input_params", uniqueConstraints = {
-        @UniqueConstraint(name = "idx_scheduleId_paramKey", columnNames = {"scheduleId", "paramKey"})})
+        @UniqueConstraint(name = "uk_scheduleId_paramKey", columnNames = {"scheduleId", "paramKey"})})
 public class ReportScheduleInputParamsPojo extends AbstractVersionedPojo {
 
     @Id

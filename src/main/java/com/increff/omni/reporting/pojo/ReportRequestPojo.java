@@ -12,7 +12,7 @@ import javax.persistence.*;
 @Getter
 @Table(name = "report_request", indexes = {
         @Index(name = "idx_status_updatedAt", columnList = "status, updatedAt"),
-        @Index(name = "idx_type", columnList = "type"),
+        @Index(name = "idx_type_orgId", columnList = "type, orgId"),
         @Index(name = "idx_userId", columnList = "userId"),
         @Index(name = "idx_createdAt", columnList = "createdAt")
 })
