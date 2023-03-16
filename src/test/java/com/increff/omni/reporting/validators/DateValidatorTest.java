@@ -39,7 +39,7 @@ public class DateValidatorTest extends AbstractTest {
         List<String> params = Arrays.asList("'2022-05-10T10:00:00.000+05:30'", "''");
         List<String> displayNames = Arrays.asList("Client Id", "Item Id");
         try {
-            validator.validate(displayNames, params, "Report 1", 10);
+            validator.validate(displayNames, params, "Report 1", 10, ReportRequestType.USER);
         } catch (ApiException e) {
             assertEquals(ApiStatus.BAD_DATA, e.getStatus());
             assertEquals("Both from and to date should be selected for filters : [\"Client Id\",\"Item Id\"]",
