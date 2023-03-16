@@ -71,7 +71,7 @@ public class ReportTask {
         run(pojo);
     }
 
-    private void run(ReportRequestPojo pojo) throws ApiException, MessagingException {
+    private void run(ReportRequestPojo pojo) throws ApiException {
         // mark as processing - locking
         try {
             api.markProcessingIfEligible(pojo.getId());
