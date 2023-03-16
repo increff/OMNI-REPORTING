@@ -319,7 +319,7 @@ public class CommonDtoHelper {
         reportPojo.setDirectoryId(oldReport.getDirectoryId());
         reportPojo.setName(oldReport.getName());
         reportPojo.setType(oldReport.getType());
-        reportPojo.setSchemaVersionId(oldReport.getSchemaVersionId());
+        reportPojo.setCanSchedule(oldReport.getCanSchedule());
         return reportPojo;
     }
 
