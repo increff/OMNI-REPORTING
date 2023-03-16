@@ -1,6 +1,7 @@
 package com.increff.omni.reporting.model.data;
 
 import com.increff.omni.reporting.model.constants.ReportRequestStatus;
+import com.increff.omni.reporting.model.constants.ReportRequestType;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -17,6 +18,7 @@ public class ReportRequestData {
     private String reportName;
     private String orgName;
     private ReportRequestStatus status;
+    private ReportRequestType type;
     private ZonedDateTime requestCreationTime;
     private ZonedDateTime requestUpdatedTime;
     private List<InputControlFilterData> filters;

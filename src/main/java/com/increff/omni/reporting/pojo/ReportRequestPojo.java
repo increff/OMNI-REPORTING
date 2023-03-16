@@ -1,6 +1,7 @@
 package com.increff.omni.reporting.pojo;
 
 import com.increff.omni.reporting.model.constants.ReportRequestStatus;
+import com.increff.omni.reporting.model.constants.ReportRequestType;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -11,6 +12,7 @@ import javax.persistence.*;
 @Getter
 @Table(name = "report_request", indexes = {
         @Index(name = "idx_status_updatedAt", columnList = "status, updatedAt"),
+        @Index(name = "idx_type_orgId", columnList = "type, orgId"),
         @Index(name = "idx_userId", columnList = "userId"),
         @Index(name = "idx_createdAt", columnList = "createdAt")
 })
@@ -27,12 +29,17 @@ public class ReportRequestPojo extends AbstractVersionedPojo {
     @Column(nullable = false)
     private Integer userId;
 
-    @Column(nullable = false)
+    private Integer scheduleId;
+
     private Integer reportId;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private ReportRequestStatus status;
+
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private ReportRequestType type;
 
     private Integer noOfRows;
 

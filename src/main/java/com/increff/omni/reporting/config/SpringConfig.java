@@ -44,14 +44,6 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-/**
- * TOP-MOST level Spring configuration file, that starts the Spring
- * configuration
- */
-
-/**
- * Spring configuration for loading application properties.
- */
 @Configuration
 @EnableScheduling
 @EnableAsync

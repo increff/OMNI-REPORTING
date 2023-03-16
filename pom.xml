@@ -34,13 +34,18 @@
         <javax.servlet.version>3.1.0</javax.servlet.version>
         <mockito.version>1.9.5</mockito.version>
 
+        <!-- External Dependencies -->
+        <apache-commons-csv.version>1.9.0</apache-commons-csv.version>
+        <apache-commons-compress.version>1.22</apache-commons-compress.version>
+        <javax.mail.version>1.4.7</javax.mail.version>
+
     </properties>
 
     <dependencies>
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-csv</artifactId>
-            <version>1.9.0</version>
+            <version>${apache-commons-csv.version}</version>
         </dependency>
         <dependency>
             <groupId>com.nextscm.commons</groupId>
@@ -85,6 +90,11 @@
             <version>${lombok.version}</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>javax.mail</groupId>
+            <artifactId>mail</artifactId>
+            <version>${javax.mail.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>com.nextscm.commons</groupId>
@@ -97,6 +107,11 @@
             <artifactId>mockito-all</artifactId>
             <version>${mockito.version}</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-compress</artifactId>
+            <version>${apache-commons-compress.version}</version>
         </dependency>
     </dependencies>
 

@@ -36,6 +36,8 @@ public class AdminController {
     private CustomReportAccessDto customReportAccessDto;
     @Autowired
     private ReportRequestDto reportRequestDto;
+    @Autowired
+    private ReportScheduleDto reportScheduleDto;
 
     // App admin APIs
 
@@ -280,6 +282,12 @@ public class AdminController {
     @RequestMapping(value = "/orgs/{orgId}/reports/{reportId}/controls", method = RequestMethod.GET)
     public List<InputControlData> selectByReportId(@PathVariable Integer reportId, @PathVariable Integer orgId) throws ApiException {
         return inputControlDto.selectForReport(reportId, orgId);
+    }
+
+    @ApiOperation(value = "Get Schedules for all organizations")
+    @RequestMapping(value = "/schedules", method = RequestMethod.GET)
+    public List<ReportScheduleData> getScheduleReports(@RequestParam Integer pageNo, @RequestParam Integer pageSize) throws ApiException {
+        return reportScheduleDto.getScheduleReportsForAllOrgs(pageNo, pageSize);
     }
 
 }

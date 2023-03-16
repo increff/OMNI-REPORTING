@@ -2,6 +2,7 @@ package com.increff.omni.reporting.validators;
 
 import com.increff.omni.reporting.dto.CommonDtoHelper;
 import com.increff.omni.reporting.model.constants.InputControlType;
+import com.increff.omni.reporting.model.constants.ReportRequestType;
 import com.increff.omni.reporting.model.constants.ValidationType;
 import com.nextscm.commons.lang.StringUtil;
 import com.nextscm.commons.spring.common.ApiException;
@@ -33,8 +34,11 @@ public class DateValidator extends AbstractValidator {
     }
 
     @Override
-    public void validate(List<String> displayName, List<String> paramValue, String reportName, Integer validationValue)
+    public void validate(List<String> displayName, List<String> paramValue, String reportName,
+                         Integer validationValue, ReportRequestType type)
             throws ApiException {
+        if(type.equals(ReportRequestType.EMAIL))
+            return;
         if (paramValue.size() != 2)
             throw new ApiException(ApiStatus.BAD_DATA, "Exactly 2 Date inputs are required to validate");
         List<String> nonEmptyValues = paramValue.stream().filter(p -> !StringUtil.isEmpty(getValueFromQuotes(p)))

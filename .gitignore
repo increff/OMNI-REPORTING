@@ -50,4 +50,5 @@ omni-reporting.properties
 *.tsv
 *.csv
 *.txt
+*.zip
 

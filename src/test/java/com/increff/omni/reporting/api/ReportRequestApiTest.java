@@ -3,6 +3,7 @@ package com.increff.omni.reporting.api;
 import com.increff.omni.reporting.config.AbstractTest;
 import com.increff.omni.reporting.dao.ReportRequestDao;
 import com.increff.omni.reporting.model.constants.ReportRequestStatus;
+import com.increff.omni.reporting.model.constants.ReportRequestType;
 import com.increff.omni.reporting.pojo.ReportRequestPojo;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
@@ -10,6 +11,7 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.ZonedDateTime;
+import java.util.Collections;
 import java.util.List;
 
 import static com.increff.omni.reporting.helper.ReportTestHelper.getReportRequestPojo;
@@ -25,16 +27,16 @@ public class ReportRequestApiTest extends AbstractTest {
 
     private ReportRequestPojo commonSetup() {
         ReportRequestPojo pojo1 = getReportRequestPojo(100001, ReportRequestStatus.NEW
-                , 100001, 100001);
+                , 100001, 100001, ReportRequestType.USER);
         ReportRequestPojo pojo2 = getReportRequestPojo(100001, ReportRequestStatus.FAILED
-                , 100001, 100002);
+                , 100001, 100002, ReportRequestType.USER);
         ReportRequestPojo pojo3 = getReportRequestPojo(100001, ReportRequestStatus.COMPLETED
-                , 100002, 100003);
+                , 100002, 100003, ReportRequestType.USER);
         ReportRequestPojo pojo4 = getReportRequestPojo(100002, ReportRequestStatus.STUCK
-                , 100001, 100001);
+                , 100001, 100001, ReportRequestType.USER);
         pojo4.setCreatedAt(ZonedDateTime.now().plusDays(1));
         ReportRequestPojo pojo5 = getReportRequestPojo(100002, ReportRequestStatus.IN_PROGRESS
-                , 100002, 100003);
+                , 100002, 100003, ReportRequestType.USER);
         pojo5.setUpdatedAt(ZonedDateTime.now().minusMinutes(11));
         api.add(pojo1);
         api.add(pojo2);
@@ -103,7 +105,7 @@ public class ReportRequestApiTest extends AbstractTest {
     @Test
     public void testMarkStuck() {
         commonSetup();
-        List<ReportRequestPojo> pojoList = api.getStuckRequests(10);
+        List<ReportRequestPojo> pojoList = api.getStuckRequests( 10);
         api.markStuck(pojoList.get(0));
         pojoList = dao.selectMultiple("status", ReportRequestStatus.STUCK);
         assertEquals(2, pojoList.size());
@@ -129,13 +131,14 @@ public class ReportRequestApiTest extends AbstractTest {
     @Test
     public void testGetEligibleRequests() {
         commonSetup();
-        List<ReportRequestPojo> pojoList = api.getEligibleRequests(1);
+        List<ReportRequestPojo> pojoList = api.getEligibleRequests(Collections.singletonList(ReportRequestType.USER),
+                1);
         assertEquals(1, pojoList.size());
         assertEquals(ReportRequestStatus.NEW, pojoList.get(0).getStatus());
         assertEquals(100001, pojoList.get(0).getReportId().intValue());
         assertEquals(100001, pojoList.get(0).getOrgId().intValue());
         assertEquals(100001, pojoList.get(0).getUserId().intValue());
-        pojoList = api.getEligibleRequests(0);
+        pojoList = api.getEligibleRequests(Collections.singletonList(ReportRequestType.USER), 0);
         assertEquals(0, pojoList.size());
     }
 }

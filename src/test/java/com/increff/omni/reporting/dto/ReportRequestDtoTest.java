@@ -51,7 +51,7 @@ public class ReportRequestDtoTest extends AbstractTest {
         ConnectionData connectionData = connectionDto.add(connectionForm);
         organizationDto.mapToConnection(organizationData.getId(), connectionData.getId());
         organizationDto.mapToSchema(organizationData.getId(), schemaData.getId());
-        return getReportForm("Report 2", ReportType.STANDARD, directoryData.getId(), schemaData.getId());
+        return getReportForm("Report 2", ReportType.STANDARD, directoryData.getId(), schemaData.getId(), false);
     }
 
     @Test

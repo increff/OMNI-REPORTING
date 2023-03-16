@@ -1,33 +1,42 @@
 package com.increff.omni.reporting.job;
 
 import com.increff.omni.reporting.config.AbstractTest;
+import com.increff.omni.reporting.dao.ReportScheduleDao;
 import com.increff.omni.reporting.dto.*;
 import com.increff.omni.reporting.model.constants.InputControlScope;
 import com.increff.omni.reporting.model.constants.InputControlType;
 import com.increff.omni.reporting.model.constants.ReportType;
 import com.increff.omni.reporting.model.data.*;
 import com.increff.omni.reporting.model.form.*;
+import com.increff.omni.reporting.pojo.ReportSchedulePojo;
 import com.nextscm.commons.spring.common.ApiException;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.time.ZonedDateTime;
 import java.util.*;
 
 import static com.increff.omni.reporting.helper.ConnectionTestHelper.getConnectionForm;
 import static com.increff.omni.reporting.helper.DirectoryTestHelper.getDirectoryForm;
 import static com.increff.omni.reporting.helper.InputControlTestHelper.getInputControlForm;
 import static com.increff.omni.reporting.helper.OrgTestHelper.getOrganizationForm;
+import static com.increff.omni.reporting.helper.ReportScheduleTestHelper.getInputParamList;
+import static com.increff.omni.reporting.helper.ReportScheduleTestHelper.getReportScheduleForm;
 import static com.increff.omni.reporting.helper.ReportTestHelper.*;
 import static com.increff.omni.reporting.helper.SchemaTestHelper.getSchemaForm;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class ReportJobTest extends AbstractTest {
 
     @Autowired
-    private ReportJob reportJob;
+    private ScheduledJobs reportJob;
     @Autowired
     private ReportRequestDto dto;
+    @Autowired
+    private ReportScheduleDto scheduleDto;
     @Autowired
     private ReportDto reportDto;
     @Autowired
@@ -40,6 +49,8 @@ public class ReportJobTest extends AbstractTest {
     private ConnectionDto connectionDto;
     @Autowired
     private InputControlDto inputControlDto;
+    @Autowired
+    private ReportScheduleDao reportScheduleDao;
 
     private ReportForm commonSetup() throws ApiException {
         OrganizationForm form = getOrganizationForm(100001, "increff");
@@ -53,7 +64,7 @@ public class ReportJobTest extends AbstractTest {
         ConnectionData connectionData = connectionDto.add(connectionForm);
         organizationDto.mapToConnection(organizationData.getId(), connectionData.getId());
         organizationDto.mapToSchema(organizationData.getId(), schemaData.getId());
-        return getReportForm("Report 2", ReportType.STANDARD, directoryData.getId(), schemaData.getId());
+        return getReportForm("Report 2", ReportType.STANDARD, directoryData.getId(), schemaData.getId(), false);
     }
 
     @Test
@@ -68,7 +79,7 @@ public class ReportJobTest extends AbstractTest {
 
     @Test
     public void testRunReport()
-            throws IOException, ApiException, InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+            throws ApiException{
         ReportForm reportForm = commonSetup();
         ReportData reportData = reportDto.add(reportForm);
         ReportQueryForm queryForm = getReportQueryForm("select version();");
@@ -81,6 +92,35 @@ public class ReportJobTest extends AbstractTest {
         params.put("clientId", Collections.singletonList("1100007455"));
         ReportRequestForm form = getReportRequestForm(reportData.getId(), params, "Asia/Kolkata");
         dto.requestReport(form);
-        reportJob.runReports();
+        reportJob.runUserReports();
     }
+
+    @Test
+    public void testCreateScheduleRequestWithNoSchedule() throws ApiException {
+        commonSetup();
+        reportJob.addScheduleReportRequests();
+    }
+
+    @Test
+    public void testCreateScheduleRequests() throws ApiException {
+        ReportForm reportForm = commonSetup();
+        reportForm.setCanSchedule(true);
+        ReportData reportData = reportDto.add(reportForm);
+        ReportQueryForm queryForm = getReportQueryForm("select version();");
+        reportDto.upsertQuery(reportData.getId(), queryForm);
+        List<ReportScheduleForm.InputParamMap> inputParamMaps = getInputParamList();
+        ReportScheduleForm form = getReportScheduleForm("*/15", "*", "*", "Report 2", "Asia/Kolkata",
+                true, Arrays.asList("a@gmail.com", "b@gmail.com"), inputParamMaps);
+        scheduleDto.scheduleReport(form);
+        List<ReportScheduleData> reportScheduleData = scheduleDto.getScheduleReports(1, 100);
+
+        ReportSchedulePojo pojo = reportScheduleDao.select(reportScheduleData.get(0).getId());
+        pojo.setNextRuntime(ZonedDateTime.now().minusMinutes(1));
+        reportJob.addScheduleReportRequests();
+        List<ReportRequestData> dataList = scheduleDto.getScheduledRequests(1, 100);
+        assertEquals(1, dataList.size());
+        pojo = reportScheduleDao.select(reportScheduleData.get(0).getId());
+        assertTrue(ZonedDateTime.now().isBefore(pojo.getNextRuntime()));
+    }
+
 }

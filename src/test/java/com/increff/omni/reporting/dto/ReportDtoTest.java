@@ -49,7 +49,7 @@ public class ReportDtoTest extends AbstractTest {
         ConnectionData connectionData = connectionDto.add(connectionForm);
         organizationDto.mapToConnection(organizationData.getId(), connectionData.getId());
         organizationDto.mapToSchema(organizationData.getId(), schemaData.getId());
-        return getReportForm(name, type, directoryData.getId(), schemaData.getId());
+        return getReportForm(name, type, directoryData.getId(), schemaData.getId(), false);
     }
 
     @Test
@@ -67,7 +67,7 @@ public class ReportDtoTest extends AbstractTest {
         ReportForm form = commonSetup("Report 2", ReportType.CUSTOM);
         ReportData data = dto.add(form);
         ReportForm updateForm =
-                getReportForm("Report 3", ReportType.CUSTOM, form.getDirectoryId(), form.getSchemaVersionId());
+                getReportForm("Report 3", ReportType.CUSTOM, form.getDirectoryId(), form.getSchemaVersionId(), false);
         dto.edit(data.getId(), updateForm);
         ReportData fData = dto.get(data.getId());
         assertNotNull(fData);

@@ -100,7 +100,7 @@ public class ReportRequestFlowApiTest extends AbstractTest {
     public void testAdd() throws ApiException {
         ReportPojo reportPojo = commonSetup();
         ReportRequestPojo reportRequestPojo = getReportRequestPojo(reportPojo.getId(), ReportRequestStatus.NEW
-                , 100001, 100001);
+                , 100001, 100001, ReportRequestType.USER);
         ReportInputParamsPojo reportInputParamsPojo = getReportInputParamsPojo(null, "clientId", "'1100002253'");
         ReportInputParamsPojo reportInputParamsPojo1 = getReportInputParamsPojo(null
                 , "startDate", "'2022-05-10T10:00:00.000+05:30'");
@@ -115,7 +115,7 @@ public class ReportRequestFlowApiTest extends AbstractTest {
     public void testCheckOpenRequests() throws ApiException {
         ReportPojo reportPojo = commonSetup();
         ReportRequestPojo reportRequestPojo = getReportRequestPojo(reportPojo.getId(), ReportRequestStatus.NEW
-                , 100001, 100001);
+                , 100001, 100001, ReportRequestType.USER);
         ReportInputParamsPojo reportInputParamsPojo = getReportInputParamsPojo(null, "clientId", "'1100002253'");
         ReportInputParamsPojo reportInputParamsPojo1 = getReportInputParamsPojo(null
                 , "startDate", "'2022-05-10T10:00:00.000+05:30'");
@@ -125,19 +125,19 @@ public class ReportRequestFlowApiTest extends AbstractTest {
                 Arrays.asList(reportInputParamsPojo, reportInputParamsPojo1, reportInputParamsPojo2);
         flowApi.requestReport(reportRequestPojo, reportInputParamsPojoList);
         reportRequestPojo = getReportRequestPojo(reportPojo.getId(), ReportRequestStatus.NEW
-                , 100001, 100001);
+                , 100001, 100001, ReportRequestType.USER);
         flowApi.requestReport(reportRequestPojo, reportInputParamsPojoList);
         reportRequestPojo = getReportRequestPojo(reportPojo.getId(), ReportRequestStatus.NEW
-                , 100001, 100001);
+                , 100001, 100001, ReportRequestType.USER);
         flowApi.requestReport(reportRequestPojo, reportInputParamsPojoList);
         reportRequestPojo = getReportRequestPojo(reportPojo.getId(), ReportRequestStatus.NEW
-                , 100001, 100001);
+                , 100001, 100001, ReportRequestType.USER);
         flowApi.requestReport(reportRequestPojo, reportInputParamsPojoList);
         reportRequestPojo = getReportRequestPojo(reportPojo.getId(), ReportRequestStatus.NEW
-                , 100001, 100001);
+                , 100001, 100001, ReportRequestType.USER);
         flowApi.requestReport(reportRequestPojo, reportInputParamsPojoList);
         reportRequestPojo = getReportRequestPojo(reportPojo.getId(), ReportRequestStatus.NEW
-                , 100001, 100001);
+                , 100001, 100001, ReportRequestType.USER);
         try {
             flowApi.requestReport(reportRequestPojo, reportInputParamsPojoList);
         } catch (ApiException e) {

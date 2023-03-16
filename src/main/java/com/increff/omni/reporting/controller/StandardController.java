@@ -3,12 +3,10 @@ package com.increff.omni.reporting.controller;
 
 import com.increff.account.client.AuthClient;
 import com.increff.omni.reporting.config.ApplicationProperties;
-import com.increff.omni.reporting.dto.DirectoryDto;
-import com.increff.omni.reporting.dto.InputControlDto;
-import com.increff.omni.reporting.dto.ReportDto;
-import com.increff.omni.reporting.dto.ReportRequestDto;
+import com.increff.omni.reporting.dto.*;
 import com.increff.omni.reporting.model.data.*;
 import com.increff.omni.reporting.model.form.ReportRequestForm;
+import com.increff.omni.reporting.model.form.ReportScheduleForm;
 import com.increff.omni.reporting.util.FileUtil;
 import com.nextscm.commons.spring.common.ApiException;
 import io.swagger.annotations.Api;
@@ -30,6 +28,8 @@ public class StandardController {
 
     @Autowired
     private ReportRequestDto reportRequestDto;
+    @Autowired
+    private ReportScheduleDto reportScheduleDto;
     @Autowired
     private InputControlDto inputControlDto;
     @Autowired
@@ -94,6 +94,45 @@ public class StandardController {
     @RequestMapping(value = "/request-report/{requestId}/view", method = RequestMethod.GET)
     public List<Map<String, String>> viewFile(@PathVariable Integer requestId) throws ApiException, IOException {
         return reportRequestDto.getJsonFromCsv(requestId);
+    }
+
+    // Scheduling a Report
+    @ApiOperation(value = "Schedule a Report")
+    @RequestMapping(value = "/schedules", method = RequestMethod.POST)
+    public void scheduleReport(@RequestBody ReportScheduleForm form) throws ApiException {
+        reportScheduleDto.scheduleReport(form);
+    }
+
+    @ApiOperation(value = "Get Schedules for an organization")
+    @RequestMapping(value = "/schedules", method = RequestMethod.GET)
+    public List<ReportScheduleData> getScheduleReports(@RequestParam Integer pageNo, @RequestParam Integer pageSize) throws ApiException {
+        return reportScheduleDto.getScheduleReports(pageNo, pageSize);
+    }
+
+    @ApiOperation(value = "Get Schedule requests for an organization")
+    @RequestMapping(value = "/schedules/requests", method = RequestMethod.GET)
+    public List<ReportRequestData> getScheduleReportRequests(@RequestParam Integer pageNo,
+                                                         @RequestParam Integer pageSize) throws ApiException {
+        return reportScheduleDto.getScheduledRequests(pageNo, pageSize);
+    }
+
+    // Scheduling a Report
+    @ApiOperation(value = "Edit Schedule of a Report")
+    @RequestMapping(value = "/schedules/{id}", method = RequestMethod.PUT)
+    public void editScheduleReport(@PathVariable Integer id, @RequestBody ReportScheduleForm form) throws ApiException {
+        reportScheduleDto.editScheduleReport(id, form);
+    }
+
+    @ApiOperation(value = "Delete Schedule of a Report")
+    @RequestMapping(value = "/schedules/{id}", method = RequestMethod.DELETE)
+    public void deleteSchedule(@PathVariable Integer id) throws ApiException {
+        reportScheduleDto.deleteSchedule(id);
+    }
+
+    @ApiOperation(value = "Enable / Disable Report Schedule")
+    @RequestMapping(value = "/schedules/{id}/status", method = RequestMethod.PATCH)
+    public void editStatus(@PathVariable Integer id, @RequestParam Boolean isEnabled) throws ApiException {
+        reportScheduleDto.updateStatus(id, isEnabled);
     }
 
     @ApiOperation(value = "Get Application Version")

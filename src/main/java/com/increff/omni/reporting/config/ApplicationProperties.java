@@ -10,16 +10,27 @@ import org.springframework.stereotype.Component;
 @Component
 public class ApplicationProperties {
 
-    @Value("${async.corePoolSize:100}")
-    private Integer corePoolSize;
+    @Value("${user.report.request.corePoolSize:100}")
+    private Integer userReportRequestCorePool;
 
-    @Value("${async.maxPoolSize:200}")
-    private Integer maxPoolSize;
+    @Value("${user.report.request.maxPoolSize:200}")
+    private Integer userReportRequestMaxPool;
 
     // Reason for default queue capacity 0 is we have implemented report job in such
     // a way that if we have free core pool then only we will assign a thread
-    @Value("${async.queueCapacity:0}")
-    private Integer queueCapacity;
+    @Value("${user.report.request.queueCapacity:0}")
+    private Integer userReportRequestQueueCapacity;
+
+    @Value("${schedule.report.request.corePoolSize:100}")
+    private Integer scheduleReportRequestCorePool;
+
+    @Value("${schedule.report.request.maxPoolSize:200}")
+    private Integer scheduleReportRequestMaxPool;
+
+    // Reason for default queue capacity 0 is we have implemented report job in such
+    // a way that if we have free core pool then only we will assign a thread
+    @Value("${schedule.report.request.queueCapacity:0}")
+    private Integer scheduleReportRequestQueueCapacity;
 
     @Value("${stuck.report.time.minutes:10}")
     private Integer stuckReportTime;
@@ -35,6 +46,9 @@ public class ApplicationProperties {
 
     @Value("${auth.appToken}")
     private String authAppToken;
+
+    @Value("${max.schedule.limit:15}")
+    private Integer maxScheduleLimit;
 
     @Value("${gcp.baseUrl:dummy}")
     private String gcpBaseUrl;
@@ -56,5 +70,20 @@ public class ApplicationProperties {
 
     @Value("${reporting.version}")
     private String version;
+
+    @Value("${from.email}")
+    private String fromEmail;
+
+    @Value("${mailjet.username}")
+    private String username;
+
+    @Value("${mailjet.password}")
+    private String password;
+
+    @Value("${mailjet.smtp.host}")
+    private String smtpHost;
+
+    @Value("${mailjet.smtp.port}")
+    private String smtpPort;
 
 }

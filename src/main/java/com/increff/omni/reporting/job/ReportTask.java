@@ -2,14 +2,16 @@ package com.increff.omni.reporting.job;
 
 import com.increff.omni.reporting.api.*;
 import com.increff.omni.reporting.config.ApplicationProperties;
+import com.increff.omni.reporting.config.EmailProps;
 import com.increff.omni.reporting.dto.CommonDtoHelper;
 import com.increff.omni.reporting.model.constants.ReportRequestStatus;
+import com.increff.omni.reporting.model.constants.ReportRequestType;
 import com.increff.omni.reporting.model.form.SqlParams;
 import com.increff.omni.reporting.pojo.*;
+import com.increff.omni.reporting.util.EmailUtil;
 import com.increff.omni.reporting.util.FileUtil;
 import com.increff.omni.reporting.util.SqlCmd;
 import com.nextscm.commons.fileclient.FileClient;
-import com.nextscm.commons.fileclient.FileClientException;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
 import lombok.extern.log4j.Log4j;
@@ -18,10 +20,19 @@ import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import javax.mail.MessagingException;
 import javax.persistence.OptimisticLockException;
 import java.io.*;
 import java.nio.file.Files;
-import java.util.*;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 
 @Service
@@ -46,9 +57,21 @@ public class ReportTask {
     private FileClient fileClient;
     @Autowired
     private ApplicationProperties properties;
+    @Autowired
+    private ReportScheduleApi reportScheduleApi;
 
-    @Async("jobExecutor")
-    public void runAsync(ReportRequestPojo pojo) throws ApiException, IOException {
+
+    @Async("userReportRequestExecutor")
+    public void runUserReportAsync(ReportRequestPojo pojo) throws ApiException, MessagingException {
+        run(pojo);
+    }
+
+    @Async("scheduleReportRequestExecutor")
+    public void runScheduleReportAsync(ReportRequestPojo pojo) throws ApiException, MessagingException {
+        run(pojo);
+    }
+
+    private void run(ReportRequestPojo pojo) throws ApiException {
         // mark as processing - locking
         try {
             api.markProcessingIfEligible(pojo.getId());
@@ -57,38 +80,52 @@ public class ReportTask {
             return;
         }
         // process
-        ReportRequestPojo reportRequestPojo = api.getCheck(pojo.getId());
-        List<ReportInputParamsPojo> reportInputParamsPojoList = reportInputParamsApi
-                .getInputParamsForReportRequest(reportRequestPojo.getId());
-        ReportPojo reportPojo = reportApi.getCheck(reportRequestPojo.getReportId());
-        ReportQueryPojo reportQueryPojo = reportQueryApi.getByReportId(reportPojo.getId());
-        if (Objects.isNull(reportQueryPojo))
-            throw new ApiException(ApiStatus.BAD_DATA, "Query is not defined for requested report : "
-                    + reportPojo.getName());
-        OrgConnectionPojo orgConnectionPojo = orgConnectionApi.getCheckByOrgId(reportRequestPojo.getOrgId());
-        ConnectionPojo connectionPojo = connectionApi.getCheck(orgConnectionPojo.getConnectionId());
-
-        // Creation of file
-        File file = folderApi.getFileForExtension(reportRequestPojo.getId(), ".tsv");
-        File errorFile = folderApi.getErrFile(reportRequestPojo.getId(), ".tsv");
-        Map<String, String> inputParamMap = getInputParamMapFromPojoList(reportInputParamsPojoList);
-        SqlParams sqlParams = CommonDtoHelper.convert(connectionPojo, reportQueryPojo, inputParamMap, file, errorFile,
-                properties.getMaxExecutionTime());
         try {
+            ReportRequestPojo reportRequestPojo = api.getCheck(pojo.getId());
+
+            List<ReportInputParamsPojo> reportInputParamsPojoList = reportInputParamsApi
+                    .getInputParamsForReportRequest(reportRequestPojo.getId());
+            ReportPojo reportPojo = reportApi.getCheck(reportRequestPojo.getReportId());
+            ReportQueryPojo reportQueryPojo = reportQueryApi.getByReportId(reportPojo.getId());
+            OrgConnectionPojo orgConnectionPojo = orgConnectionApi.getCheckByOrgId(reportRequestPojo.getOrgId());
+            ConnectionPojo connectionPojo = connectionApi.getCheck(orgConnectionPojo.getConnectionId());
+
+            // Creation of file
+            File file = folderApi.getFileForExtension(reportRequestPojo.getId(), ".tsv");
+            File errorFile = folderApi.getErrFile(reportRequestPojo.getId(), ".tsv");
+            Map<String, String> inputParamMap = getInputParamMapFromPojoList(reportInputParamsPojoList);
+            SqlParams sqlParams = CommonDtoHelper.convert(connectionPojo, file, errorFile
+            );
             String fQuery = SqlCmd.prepareQuery(inputParamMap, reportQueryPojo.getQuery(),
                     properties.getMaxExecutionTime());
             sqlParams.setQuery(fQuery);
+            // Execute query and save results
+            saveResultsOnCloud(pojo, sqlParams);
+            if(pojo.getType().equals(ReportRequestType.EMAIL)) {
+                reportScheduleApi.addScheduleCount(pojo.getScheduleId(), 1, 0);
+            }
         } catch (Exception e) {
-            log.error("Report ID : " + pojo.getId() + " failed", e);
-            api.markFailed(pojo.getId(), ReportRequestStatus.FAILED,
-                    "Error while processing query : " + e.getMessage(), 0, 0.0);
-            return;
+            log.error("Report Request ID : " + pojo.getId() + " failed", e);
+            api.markFailed(pojo.getId(), ReportRequestStatus.FAILED, e.getMessage(), 0, 0.0);
+            try {
+                if(pojo.getType().equals(ReportRequestType.EMAIL)) {
+                    ReportSchedulePojo schedulePojo = reportScheduleApi.getCheck(pojo.getScheduleId());
+                    List<String> toEmails = reportScheduleApi.getByScheduleId(schedulePojo.getId()).stream()
+                            .map(ReportScheduleEmailsPojo::getSendTo).collect(
+                                    Collectors.toList());
+                    EmailProps props = createEmailProps(null, false, schedulePojo, toEmails, "Hi,<br>Please " +
+                            "check failure reason in the latest scheduled requests. Re-submit the schedule in the " +
+                            "reporting application, which might solve the issue.", false);
+                    EmailUtil.sendMail(props);
+                    reportScheduleApi.addScheduleCount(pojo.getScheduleId(), 0, 1);
+                }
+            } catch (Exception ex) {
+                log.error("Report Request ID : " + pojo.getId() + ". Failed to send email. ", ex);
+            }
         }
-        // Execute query and save results
-        saveResultsOnCloud(pojo, sqlParams);
     }
 
-    private void saveResultsOnCloud(ReportRequestPojo pojo, SqlParams sqlParams) {
+    private void saveResultsOnCloud(ReportRequestPojo pojo, SqlParams sqlParams) throws IOException, ApiException {
         try {
             // Process data
             SqlCmd.processQuery(sqlParams, false, properties.getMaxExecutionTime());
@@ -101,31 +138,85 @@ public class ReportTask {
             Integer noOfRows = FileUtil.getCsvFromTsv(sqlParams.getOutFile(), csvFile);
 
             // upload result to cloud
-            String filePath = uploadFile(csvFile, pojo);
-            // update status to completed
+            String filePath = "NA";
             fileSize = FileUtil.getSizeInMb(csvFile.length());
+            switch (pojo.getType()) {
+                case EMAIL:
+                    sendEmail(fileSize, csvFile, pojo);
+                    break;
+                case USER:
+                    filePath = uploadFile(csvFile, pojo);
+                    break;
+            }
+            // update status to completed
             api.updateStatus(pojo.getId(), ReportRequestStatus.COMPLETED, filePath, noOfRows, fileSize);
             FileUtil.delete(csvFile);
-        } catch (IOException | InterruptedException e) {
-            // log as error and mark fail
-            log.error("Report ID : " + pojo.getId() + " failed", e);
-            try {
-                String message = String.join("\t", Files.readAllLines(sqlParams.getErrFile().toPath()));
-                api.markFailed(pojo.getId(), ReportRequestStatus.FAILED, message, 0, 0.0);
-            } catch (Exception ex) {
-                log.error("Error while updating the status of failed request", ex);
-            }
-        } catch (ApiException e) {
-            // log as error and mark fail
-            log.error("Report ID : " + pojo.getId() + " failed", e);
-            try {
-                api.markFailed(pojo.getId(), ReportRequestStatus.FAILED, e.getMessage(), 0, 0.0);
-            } catch (Exception ex) {
-                log.error("Error while updating the status of failed request", ex);
-            }
+        } catch (ApiException apiException) {
+            throw apiException;
+        } catch (Exception e) {
+            String message =
+                    String.join("\t", Files.readAllLines(sqlParams.getErrFile().toPath())).concat(e.getMessage());
+            throw new ApiException(ApiStatus.BAD_DATA, message);
         } finally {
             deleteFiles(sqlParams.getOutFile(), sqlParams.getErrFile());
         }
+    }
+
+    private void sendEmail(double fileSize, File csvFile, ReportRequestPojo pojo)
+            throws IOException, ApiException, javax.mail.MessagingException {
+        File out = csvFile;
+        boolean isZip = false;
+        if(fileSize > 50.0) {
+            throw new ApiException(ApiStatus.BAD_DATA, "File size has crossed 50 MB limit. Mail can't be sent");
+        }
+        if (fileSize > 15.0) {
+            String outFileName = csvFile.getName().split(".csv")[0] + ".7z";
+            File zipFile = folderApi.getFile(outFileName);
+            try {
+                // Create a 7z output stream
+                FileOutputStream fos = new FileOutputStream(zipFile);
+                ZipOutputStream zos = new ZipOutputStream(fos);
+                ZipEntry ze = new ZipEntry(csvFile.getName());
+                zos.putNextEntry(ze);
+
+                // Add the input file to the archive
+                zos.write(Files.readAllBytes(csvFile.toPath()));
+                zos.finish();
+                zos.close();
+                fos.close();
+            } catch (Exception e) {
+                log.error("Error while zipping : ", e);
+                throw new ApiException(ApiStatus.BAD_DATA, "Error while zipping the file");
+            }
+            out = zipFile;
+            isZip = true;
+        }
+        ReportSchedulePojo schedulePojo = reportScheduleApi.getCheck(pojo.getScheduleId());
+        List<String> toEmails = reportScheduleApi.getByScheduleId(schedulePojo.getId()).stream()
+                .map(ReportScheduleEmailsPojo::getSendTo).collect(
+                        Collectors.toList());
+        EmailProps props = createEmailProps(out, true, schedulePojo, toEmails, "", isZip);
+        EmailUtil.sendMail(props);
+
+    }
+
+    private EmailProps createEmailProps(File out, Boolean isAttachment,
+                                        ReportSchedulePojo schedulePojo, List<String> toEmails, String content,
+                                        boolean isZip) {
+        EmailProps props = new EmailProps();
+        props.setFromEmail(properties.getFromEmail());
+        props.setUsername(properties.getUsername());
+        props.setPassword(properties.getPassword());
+        props.setSmtpHost(properties.getSmtpHost());
+        props.setSmtpPort(properties.getSmtpPort());
+        props.setToEmails(toEmails);
+        props.setSubject("Increff Reporting : " + schedulePojo.getReportName());
+        props.setAttachment(out);
+        props.setCustomizedFileName(schedulePojo.getReportName() + " - " + ZonedDateTime.now()
+                .format(DateTimeFormatter.ofPattern(CommonDtoHelper.TIME_ZONE_PATTERN)) + ((isZip) ? ".zip" : ".csv"));
+        props.setIsAttachment(isAttachment);
+        props.setContent(content);
+        return props;
     }
 
     private void deleteFiles(File outFile, File errFile) {
