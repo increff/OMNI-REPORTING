@@ -374,8 +374,13 @@ public class CommonDtoHelper {
     public static String getValueFromQuotes(String value) {
         if (StringUtil.isEmpty(value))
             return null;
-        if (value.charAt(0) == '\'')
-            return value.substring(1, value.length() - 1);
-        return value;
+        try {
+            if (value.charAt(0) == '\'')
+                return value.substring(1, value.length() - 1);
+            else
+                return value;
+        } catch (Exception e) {
+            return null;
+        }
     }
 }
