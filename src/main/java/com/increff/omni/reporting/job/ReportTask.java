@@ -113,8 +113,9 @@ public class ReportTask {
                     List<String> toEmails = reportScheduleApi.getByScheduleId(schedulePojo.getId()).stream()
                             .map(ReportScheduleEmailsPojo::getSendTo).collect(
                                     Collectors.toList());
-                    EmailProps props = createEmailProps(null, false, schedulePojo, toEmails, "Hi Team, \nPlease re-submit" +
-                            " the schedule in the reporting application.", false);
+                    EmailProps props = createEmailProps(null, false, schedulePojo, toEmails, "Hi,<br>Please " +
+                            "check failure reason in the latest scheduled requests. Re-submit the schedule in the " +
+                            "reporting application, which might solve the issue.", false);
                     EmailUtil.sendMail(props);
                     reportScheduleApi.addScheduleCount(pojo.getScheduleId(), 0, 1);
                 }
