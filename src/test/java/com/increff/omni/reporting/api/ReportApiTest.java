@@ -60,14 +60,14 @@ public class ReportApiTest extends AbstractTest {
         ReportPojo pojo = getReportPojo("CIMS Inventory Exposure Report", ReportType.STANDARD
                 , directoryPojo.getId(), schemaVersionPojo.getId());
         api.add(pojo);
-        ReportPojo r = api.getByNameAndSchema("CIMS Inventory Exposure Report", schemaVersionPojo.getId());
+        ReportPojo r = api.getByNameAndSchema("CIMS Inventory Exposure Report", schemaVersionPojo.getId(), false);
         assertNotNull(r);
         assertEquals("CIMS Inventory Exposure Report", r.getName());
         assertEquals(ReportType.STANDARD, r.getType());
         assertEquals(directoryPojo.getId(), r.getDirectoryId());
         assertEquals(schemaVersionPojo.getId(), r.getSchemaVersionId());
         assertEquals(schemaVersionPojo.getId(), r.getSchemaVersionId());
-        r = api.getByNameAndSchema("CIMS", schemaVersionPojo.getId());
+        r = api.getByNameAndSchema("CIMS Inventory Exposure Report", schemaVersionPojo.getId(), true);
         assertNull(r);
     }
 
@@ -81,9 +81,9 @@ public class ReportApiTest extends AbstractTest {
         ReportPojo pojo = getReportPojo("CIMS Inventory Exposure Report", ReportType.STANDARD, directoryPojo.getId(),
                 schemaVersionPojo.getId());
         api.add(pojo);
-        List<ReportPojo> r = api.getByTypeAndSchema(ReportType.CUSTOM, schemaVersionPojo.getId());
+        List<ReportPojo> r = api.getByTypeAndSchema(ReportType.CUSTOM, schemaVersionPojo.getId(), false);
         assertEquals(0, r.size());
-        r = api.getByTypeAndSchema(ReportType.STANDARD, schemaVersionPojo.getId());
+        r = api.getByTypeAndSchema(ReportType.STANDARD, schemaVersionPojo.getId(), false);
         assertEquals(1, r.size());
         assertEquals("CIMS Inventory Exposure Report", r.get(0).getName());
         assertEquals(ReportType.STANDARD, r.get(0).getType());
@@ -101,12 +101,16 @@ public class ReportApiTest extends AbstractTest {
         ReportPojo pojo = getReportPojo("CIMS Inventory Exposure Report", ReportType.STANDARD, directoryPojo.getId(),
                 schemaVersionPojo.getId());
         api.add(pojo);
-        List<ReportPojo> r = api.getByIdsAndSchema(Collections.singletonList(pojo.getId()), schemaVersionPojo.getId());
+        List<ReportPojo> r = api.getByIdsAndSchema(Collections.singletonList(pojo.getId()), schemaVersionPojo.getId(),
+                false);
         assertEquals(1, r.size());
         assertEquals("CIMS Inventory Exposure Report", r.get(0).getName());
         assertEquals(ReportType.STANDARD, r.get(0).getType());
         assertEquals(directoryPojo.getId(), r.get(0).getDirectoryId());
         assertEquals(schemaVersionPojo.getId(), r.get(0).getSchemaVersionId());
+        r = api.getByIdsAndSchema(Collections.singletonList(pojo.getId()), schemaVersionPojo.getId(),
+                true);
+        assertEquals(0, r.size());
     }
 
     @Test
@@ -119,7 +123,7 @@ public class ReportApiTest extends AbstractTest {
         ReportPojo pojo = getReportPojo("CIMS Inventory Exposure Report", ReportType.STANDARD, directoryPojo.getId(),
                 schemaVersionPojo.getId());
         api.add(pojo);
-        List<ReportPojo> r = api.getByIdsAndSchema(Collections.emptyList(), schemaVersionPojo.getId());
+        List<ReportPojo> r = api.getByIdsAndSchema(Collections.emptyList(), schemaVersionPojo.getId(), false);
         assertEquals(0, r.size());
     }
 

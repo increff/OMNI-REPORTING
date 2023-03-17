@@ -17,8 +17,6 @@ import com.nextscm.commons.fileclient.GcpFileProvider;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
 import lombok.extern.log4j.Log4j;
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -81,6 +79,8 @@ public class ReportRequestDto extends AbstractDto {
         Map<String, List<String>> inputDisplayMap = new HashMap<>();
         ReportRequestPojo pojo = CommonDtoHelper.getReportRequestPojo(form, orgId, getUserId());
         ReportPojo reportPojo = reportApi.getCheck(pojo.getReportId());
+        if(reportPojo.getIsDashboard())
+            throw new ApiException(ApiStatus.BAD_DATA, "Dashboard can't be requested here");
         ReportQueryPojo reportQueryPojo = queryApi.getByReportId(reportPojo.getId());
         List<ReportControlsPojo> reportControlsPojoList = reportControlsApi.getByReportId(reportPojo.getId());
         List<InputControlPojo> inputControlPojoList = controlApi.selectByIds(reportControlsPojoList.stream()
@@ -143,19 +143,11 @@ public class ReportRequestDto extends AbstractDto {
         validate(requestPojo, requestId, reportPojo, getUserId());
         if (requestPojo.getNoOfRows() >= MAX_NUMBER_OF_ROWS)
             throw new ApiException(ApiStatus.BAD_DATA, "Data contains more than 50 rows. View option is restricted");
-        List<Map<String, String>> data = new ArrayList<>();
         String reportName = requestId + "_" + UUID.randomUUID();
         File sourceFile = folderApi.getFile(reportName + ".csv");
         byte[] bytes = getFileFromUrl(requestPojo.getUrl());
         FileUtils.writeByteArrayToFile(sourceFile, bytes);
-        Reader in = new FileReader(sourceFile);
-        Iterable<CSVRecord> records =
-                CSVFormat.DEFAULT.builder().setHeader().setSkipHeaderRecord(true).build().parse(in);
-        for (CSVRecord record : records) {
-            Map<String, String> value = record.toMap();
-            data.add(value);
-        }
-        in.close();
+        List<Map<String, String>> data = FileUtil.getJsonDataFromFile(sourceFile, ',');
         FileUtil.delete(sourceFile);
         return data;
     }

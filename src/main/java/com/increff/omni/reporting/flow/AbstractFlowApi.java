@@ -1,10 +1,12 @@
 package com.increff.omni.reporting.flow;
 
 import com.increff.omni.reporting.api.AbstractAuditApi;
+import com.increff.omni.reporting.api.InputControlApi;
+import com.increff.omni.reporting.api.ReportControlsApi;
+import com.increff.omni.reporting.api.ReportValidationGroupApi;
 import com.increff.omni.reporting.model.constants.ReportRequestType;
 import com.increff.omni.reporting.model.constants.ValidationType;
-import com.increff.omni.reporting.pojo.ReportPojo;
-import com.increff.omni.reporting.pojo.ReportValidationGroupPojo;
+import com.increff.omni.reporting.pojo.*;
 import com.increff.omni.reporting.validators.DateValidator;
 import com.increff.omni.reporting.validators.MandatoryValidator;
 import com.increff.omni.reporting.validators.SingleMandatoryValidator;
@@ -13,7 +15,10 @@ import com.nextscm.commons.spring.common.ApiStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class AbstractFlowApi extends AbstractAuditApi {
@@ -24,6 +29,41 @@ public class AbstractFlowApi extends AbstractAuditApi {
     private MandatoryValidator mandatoryValidator;
     @Autowired
     private DateValidator dateValidator;
+    @Autowired
+    private ReportControlsApi reportControlsApi;
+    @Autowired
+    private InputControlApi controlApi;
+    @Autowired
+    private ReportValidationGroupApi reportValidationGroupApi;
+
+    protected void validate(ReportPojo reportPojo, List<ReportInputParamsPojo> reportInputParamsPojoList)
+            throws ApiException {
+        List<ReportValidationGroupPojo> reportValidationGroupPojoList = reportValidationGroupApi
+                .getByReportId(reportPojo.getId());
+        Map<String, List<ReportValidationGroupPojo>> groupedByName = reportValidationGroupPojoList.stream()
+                .collect(Collectors.groupingBy(ReportValidationGroupPojo::getGroupName));
+
+        // Run through all the validators for this report
+        for (Map.Entry<String, List<ReportValidationGroupPojo>> validationList : groupedByName.entrySet()) {
+            List<ReportValidationGroupPojo> groupPojoList = validationList.getValue();
+            ValidationType type = groupPojoList.get(0).getType();
+            List<ReportControlsPojo> reportControlsPojoList = reportControlsApi.getByIds(groupPojoList
+                    .stream().map(ReportValidationGroupPojo::getReportControlId).collect(Collectors.toList()));
+            List<InputControlPojo> inputControlPojoList = controlApi.selectByIds(reportControlsPojoList.stream()
+                    .map(ReportControlsPojo::getControlId).collect(Collectors.toList()));
+            List<String> paramValues = new ArrayList<>();
+            List<String> displayValues = new ArrayList<>();
+
+            inputControlPojoList.forEach(i -> {
+                ReportInputParamsPojo p = reportInputParamsPojoList.stream().filter(r -> r.getParamKey()
+                        .equals(i.getParamName())).collect(Collectors.toList()).get(0);
+                paramValues.add(p.getParamValue());
+                displayValues.add(i.getDisplayName());
+            });
+            runValidators(reportPojo, groupPojoList, type, paramValues, displayValues, ReportRequestType.USER);
+        }
+
+    }
 
     protected void runValidators(ReportPojo reportPojo, List<ReportValidationGroupPojo> groupPojoList
             , ValidationType type, List<String> paramValues, List<String> displayValues,

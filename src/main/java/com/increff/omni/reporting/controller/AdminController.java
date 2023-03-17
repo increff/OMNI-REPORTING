@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 // Todo internationalization
 @CrossOrigin
@@ -274,8 +275,14 @@ public class AdminController {
 
     @ApiOperation(value = "Get Reports")
     @RequestMapping(value = "/reports/orgs/{orgId}", method = RequestMethod.GET)
-    public List<ReportData> selectByOrgId(@PathVariable Integer orgId) throws ApiException {
-        return reportDto.selectByOrg(orgId);
+    public List<ReportData> selectByOrgId(@PathVariable Integer orgId, @RequestParam Boolean isDashboard) throws ApiException {
+        return reportDto.selectByOrg(orgId, isDashboard);
+    }
+
+    @ApiOperation(value = "Get Live Data For Any Organization")
+    @RequestMapping(value = "/orgs/{orgId}/reports/live", method = RequestMethod.POST)
+    public List<Map<String, String>> requestReport(@PathVariable Integer orgId, @RequestBody ReportRequestForm form) throws ApiException {
+        return reportDto.getLiveDataForAnyOrganization(form, orgId);
     }
 
     @ApiOperation(value = "Select controls for a report for given organization")

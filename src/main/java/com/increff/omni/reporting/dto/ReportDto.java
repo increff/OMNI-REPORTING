@@ -5,6 +5,7 @@ import com.increff.omni.reporting.config.ApplicationProperties;
 import com.increff.omni.reporting.flow.ReportFlowApi;
 import com.increff.omni.reporting.flow.ReportRequestFlowApi;
 import com.increff.omni.reporting.model.constants.AuditActions;
+import com.increff.omni.reporting.model.constants.ReportRequestType;
 import com.increff.omni.reporting.model.constants.ValidationType;
 import com.increff.omni.reporting.model.data.ReportData;
 import com.increff.omni.reporting.model.data.ReportQueryData;
@@ -16,6 +17,8 @@ import com.increff.omni.reporting.util.UserPrincipalUtil;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
 import com.nextscm.commons.spring.common.ConvertUtil;
+import lombok.Setter;
+import org.hibernate.validator.constraints.Mod10Check;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,6 +26,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
+@Setter
 public class ReportDto extends AbstractDto {
 
     @Autowired
@@ -67,6 +71,21 @@ public class ReportDto extends AbstractDto {
         return convertToReportData(Collections.singletonList(pojo)).get(0);
     }
 
+    public List<Map<String, String>> getLiveDataForAnyOrganization(ReportRequestForm form, Integer orgId)
+            throws ApiException {
+        OrganizationPojo organizationPojo = organizationApi.getCheck(orgId);
+        ReportPojo reportPojo = validateReportForOrg(form, orgId);
+        List<ReportInputParamsPojo> reportInputParamsPojoList = validateControls(form, orgId, reportPojo);
+        List<Map<String, String>> data = flowApi.validateAndGetLiveData(reportPojo, orgId, reportInputParamsPojoList);
+        flowApi.saveAudit(reportPojo.getId().toString(), AuditActions.LIVE_REPORT.toString(), "Live Report",
+                "Live Report request submitted for organization : " + organizationPojo.getName(), getUserName());
+        return data;
+    }
+
+    public List<Map<String, String>> getLiveData(ReportRequestForm form) throws ApiException {
+        return getLiveDataForAnyOrganization(form, getOrgId());
+    }
+
     public void updateStatus(Integer reportId, Boolean isEnabled) throws ApiException {
         ReportPojo pojo = reportApi.getCheck(reportId);
         pojo.setIsEnabled(isEnabled);
@@ -105,13 +124,13 @@ public class ReportDto extends AbstractDto {
         return data;
     }
 
-    public List<ReportData> selectByOrg() throws ApiException {
-        return selectByOrg(getOrgId());
+    public List<ReportData> selectByOrg(Boolean isDashboard) throws ApiException {
+        return selectByOrg(getOrgId(), isDashboard);
     }
 
-    public List<ReportData> selectByOrg(Integer orgId) throws ApiException {
+    public List<ReportData> selectByOrg(Integer orgId, Boolean isDashboard) throws ApiException {
         organizationApi.getCheck(orgId);
-        List<ReportPojo> pojos = flowApi.getAll(orgId);
+        List<ReportPojo> pojos = flowApi.getAll(orgId, isDashboard);
         return convertToReportData(pojos);
     }
 
@@ -188,5 +207,28 @@ public class ReportDto extends AbstractDto {
             dataList.add(data);
         }
         return dataList;
+    }
+
+    private List<ReportInputParamsPojo> validateControls(ReportRequestForm form, Integer orgId,
+                                                         ReportPojo reportPojo) throws ApiException {
+        Map<String, String> inputParamsMap = UserPrincipalUtil.getCompleteMapWithAccessControl(form.getParamMap());
+        Map<String, List<String>> inputDisplayMap = new HashMap<>();
+        List<ReportControlsPojo> reportControlsPojoList = reportControlsApi.getByReportId(reportPojo.getId());
+        List<InputControlPojo> inputControlPojoList = inputControlApi.selectByIds(reportControlsPojoList.stream()
+                .map(ReportControlsPojo::getControlId).collect(Collectors.toList()));
+        validateInputParamValues(form.getParamMap(), inputParamsMap, orgId, inputDisplayMap, inputControlPojoList, ReportRequestType.USER);
+        Map<String, String> inputDisplayStringMap = UserPrincipalUtil.getStringToStringParamMap(inputDisplayMap);
+        return CommonDtoHelper.getReportInputParamsPojoList(inputParamsMap, form.getTimezone(), orgId, inputDisplayStringMap);
+    }
+
+    private ReportPojo validateReportForOrg(ReportRequestForm form, Integer orgId) throws ApiException {
+        ReportPojo reportPojo = reportApi.getCheck(form.getReportId());
+        validateCustomReportAccess(reportPojo, orgId);
+        if(!reportPojo.getIsDashboard())
+            throw new ApiException(ApiStatus.BAD_DATA, "Live data is only available for dashboards");
+        ReportQueryPojo reportQueryPojo = reportQueryApi.getByReportId(reportPojo.getId());
+        if (Objects.isNull(reportQueryPojo))
+            throw new ApiException(ApiStatus.BAD_DATA, "No query defined for report : " + reportPojo.getName());
+        return reportPojo;
     }
 }

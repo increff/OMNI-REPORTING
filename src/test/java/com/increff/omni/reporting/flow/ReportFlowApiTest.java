@@ -95,8 +95,8 @@ public class ReportFlowApiTest extends AbstractTest {
             flowApi.addReport(reportPojo2);
         } catch (ApiException e) {
             assertEquals(ApiStatus.BAD_DATA, e.getStatus());
-            assertEquals("Report already present with same name and schema version", e.getMessage());
-            List<ReportPojo> reportPojos = flowApi.getAll(100001);
+            assertEquals("Report already present with same name, schema version and report type (normal / dashboard)", e.getMessage());
+            List<ReportPojo> reportPojos = flowApi.getAll(100001, false);
             assertEquals(1, reportPojos.size());
             assertEquals("Report 1", reportPojos.get(0).getName());
             throw e;
@@ -132,6 +132,10 @@ public class ReportFlowApiTest extends AbstractTest {
         ReportPojo reportPojo = getReportPojo("Report 1", ReportType.CUSTOM
                 , directoryPojo.getId(), schemaVersionPojo.getId());
         flowApi.addReport(reportPojo);
+        reportPojo = getReportPojo("Report 1", ReportType.CUSTOM
+                , directoryPojo.getId(), schemaVersionPojo.getId());
+        reportPojo.setIsDashboard(true);
+        flowApi.addReport(reportPojo);
         ReportPojo reportPojo1 = getReportPojo("Report 1 - 1", ReportType.STANDARD
                 , directoryPojo.getId(), schemaVersionPojo.getId());
         flowApi.addReport(reportPojo1);
@@ -142,7 +146,7 @@ public class ReportFlowApiTest extends AbstractTest {
             flowApi.editReport(reportPojo2);
         } catch (ApiException e) {
             assertEquals(ApiStatus.BAD_DATA, e.getStatus());
-            assertEquals("Report already present with same name and schema version", e.getMessage());
+            assertEquals("Report already present with same name, schema version and report type (normal / dashboard)", e.getMessage());
             throw e;
         }
     }

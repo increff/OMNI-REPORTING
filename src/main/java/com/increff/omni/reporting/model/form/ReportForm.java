@@ -23,5 +23,8 @@ public class ReportForm {
     private Boolean isEnabled = true;
     @NotNull
     private Boolean canSchedule = false;
+    @NotNull
+    private Boolean isDashboard = false;
+
 
 }

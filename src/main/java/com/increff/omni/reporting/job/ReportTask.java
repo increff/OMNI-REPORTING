@@ -34,6 +34,8 @@ import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import static com.increff.omni.reporting.dto.CommonDtoHelper.getInputParamMapFromPojoList;
+
 
 @Service
 @Log4j
@@ -239,12 +241,6 @@ public class ReportTask {
                     pojo.getId());
         }
         return filePath;
-    }
-
-    private Map<String, String> getInputParamMapFromPojoList(List<ReportInputParamsPojo> reportInputParamsPojoList) {
-        Map<String, String> inputParamMap = new HashMap<>();
-        reportInputParamsPojoList.forEach(r -> inputParamMap.put(r.getParamKey(), r.getParamValue()));
-        return inputParamMap;
     }
 
 }

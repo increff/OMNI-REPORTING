@@ -30,12 +30,12 @@ public class ReportApi extends AbstractAuditApi {
         return pojo;
     }
 
-    public ReportPojo getByNameAndSchema(String name, Integer schemaVersionId){
-        return dao.getByNameAndSchema(name, schemaVersionId);
+    public ReportPojo getByNameAndSchema(String name, Integer schemaVersionId, Boolean isDashboard){
+        return dao.getByNameAndSchema(name, schemaVersionId, isDashboard);
     }
 
-    public List<ReportPojo> getByTypeAndSchema(ReportType type, Integer schemaVersionId){
-        return dao.getByTypeAndSchema(type, schemaVersionId);
+    public List<ReportPojo> getByTypeAndSchema(ReportType type, Integer schemaVersionId, Boolean isDashboard){
+        return dao.getByTypeAndSchema(type, schemaVersionId, isDashboard);
     }
 
     public ReportPojo edit(ReportPojo pojo) throws ApiException {
@@ -45,18 +45,15 @@ public class ReportApi extends AbstractAuditApi {
         existing.setType(pojo.getType());
         existing.setIsEnabled(pojo.getIsEnabled());
         existing.setCanSchedule(pojo.getCanSchedule());
+        existing.setIsDashboard(pojo.getIsDashboard());
         dao.update(existing);
         return existing;
     }
 
-    public List<ReportPojo> getByIdsAndSchema(List<Integer> ids, Integer schemaVersionId){
+    public List<ReportPojo> getByIdsAndSchema(List<Integer> ids, Integer schemaVersionId, Boolean isDashboard){
         if(CollectionUtils.isEmpty(ids))
             return new ArrayList<>();
-        return dao.getByIdsAndSchema(ids, schemaVersionId);
-    }
-
-    public List<ReportPojo> selectAll() {
-        return dao.selectAll();
+        return dao.getByIdsAndSchema(ids, schemaVersionId, isDashboard);
     }
 
     public List<ReportPojo> getBySchemaVersion(Integer schemaVersionId) {

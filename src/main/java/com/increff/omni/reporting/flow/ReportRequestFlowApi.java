@@ -41,7 +41,11 @@ public class ReportRequestFlowApi extends AbstractFlowApi {
 
     public void requestReport(ReportRequestPojo pojo, List<ReportInputParamsPojo> reportInputParamsPojoList)
             throws ApiException {
-        validate(pojo, reportInputParamsPojoList);
+        List<ReportRequestPojo> pendingReports = api.getPendingByUserId(pojo.getUserId());
+        if (!CollectionUtils.isEmpty(pendingReports) && pendingReports.size() >= MAX_OPEN_REPORT_REQUESTS)
+            throw new ApiException(ApiStatus.BAD_DATA, "Wait for existing reports to get executed");
+        ReportPojo reportPojo = reportApi.getCheck(pojo.getReportId());
+        validate(reportPojo, reportInputParamsPojoList);
         requestReportWithoutValidation(pojo, reportInputParamsPojoList);
     }
 
@@ -50,39 +54,6 @@ public class ReportRequestFlowApi extends AbstractFlowApi {
         api.add(pojo);
         reportInputParamsPojoList.forEach(r -> r.setReportRequestId(pojo.getId()));
         reportInputParamsApi.add(reportInputParamsPojoList);
-    }
-
-    private void validate(ReportRequestPojo pojo, List<ReportInputParamsPojo> reportInputParamsPojoList)
-            throws ApiException {
-        ReportPojo reportPojo = reportApi.getCheck(pojo.getReportId());
-        List<ReportRequestPojo> pendingReports = api.getPendingByUserId(pojo.getUserId());
-        if (!CollectionUtils.isEmpty(pendingReports) && pendingReports.size() >= MAX_OPEN_REPORT_REQUESTS)
-            throw new ApiException(ApiStatus.BAD_DATA, "Wait for existing reports to get executed");
-        List<ReportValidationGroupPojo> reportValidationGroupPojoList = reportValidationGroupApi
-                .getByReportId(reportPojo.getId());
-        Map<String, List<ReportValidationGroupPojo>> groupedByName = reportValidationGroupPojoList.stream()
-                .collect(Collectors.groupingBy(ReportValidationGroupPojo::getGroupName));
-
-        // Run through all the validators for this report
-        for (Map.Entry<String, List<ReportValidationGroupPojo>> validationList : groupedByName.entrySet()) {
-            List<ReportValidationGroupPojo> groupPojoList = validationList.getValue();
-            ValidationType type = groupPojoList.get(0).getType();
-            List<ReportControlsPojo> reportControlsPojoList = reportControlsApi.getByIds(groupPojoList
-                    .stream().map(ReportValidationGroupPojo::getReportControlId).collect(Collectors.toList()));
-            List<InputControlPojo> inputControlPojoList = controlApi.selectByIds(reportControlsPojoList.stream()
-                    .map(ReportControlsPojo::getControlId).collect(Collectors.toList()));
-            List<String> paramValues = new ArrayList<>();
-            List<String> displayValues = new ArrayList<>();
-
-            inputControlPojoList.forEach(i -> {
-                ReportInputParamsPojo p = reportInputParamsPojoList.stream().filter(r -> r.getParamKey()
-                        .equals(i.getParamName())).collect(Collectors.toList()).get(0);
-                paramValues.add(p.getParamValue());
-                displayValues.add(i.getDisplayName());
-            });
-            runValidators(reportPojo, groupPojoList, type, paramValues, displayValues, ReportRequestType.USER);
-        }
-
     }
 
 }
