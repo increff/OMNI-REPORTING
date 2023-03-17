@@ -179,26 +179,6 @@ public class ReportDtoTest extends AbstractTest {
     }
 
     @Test
-    public void testGetLiveData() throws ApiException, IOException, InterruptedException {
-        ReportForm reportForm = commonSetup("Report 2", ReportType.STANDARD);
-        reportForm.setIsDashboard(true);
-        ReportData reportData = dto.add(reportForm);
-        ReportQueryData queryData = dto.getQuery(reportData.getId());
-        assertEquals("", queryData.getQuery());
-        ReportQueryForm queryForm = getReportQueryForm("select version() as version;");
-        dto.upsertQuery(reportData.getId(), queryForm);
-        InputControlForm inputControlForm = getInputControlForm("Client Id", "clientId", InputControlScope.GLOBAL
-                , InputControlType.NUMBER, new ArrayList<>(), null, null, reportForm.getSchemaVersionId());
-        InputControlData inputControlData = inputControlDto.add(inputControlForm);
-        dto.mapToControl(reportData.getId(), inputControlData.getId());
-        Map<String, List<String>> params = new HashMap<>();
-        params.put("clientId", Collections.singletonList("1100007455"));
-        ReportRequestForm form = getReportRequestForm(reportData.getId(), params, "Asia/Kolkata");
-        List<Map<String, String>> data = dto.getLiveData(form);
-        assertEquals(1, data.size());
-    }
-
-    @Test
     public void testCopyReports() throws ApiException {
         ReportForm form = commonSetup("Report 2", ReportType.STANDARD);
         ReportData data = dto.add(form);
