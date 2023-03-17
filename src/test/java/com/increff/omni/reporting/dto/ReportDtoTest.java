@@ -11,10 +11,13 @@ import com.increff.omni.reporting.model.form.*;
 import com.increff.omni.reporting.util.SqlCmd;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.io.IOException;
 import java.util.*;
 
 import static com.increff.omni.reporting.helper.ConnectionTestHelper.getConnectionForm;
@@ -25,6 +28,9 @@ import static com.increff.omni.reporting.helper.ReportTestHelper.*;
 import static com.increff.omni.reporting.helper.SchemaTestHelper.getSchemaForm;
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyDouble;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
 
 public class ReportDtoTest extends AbstractTest {
 
@@ -49,7 +55,7 @@ public class ReportDtoTest extends AbstractTest {
         DirectoryData directoryData = directoryDto.add(directoryForm);
         SchemaVersionForm schemaVersionForm = getSchemaForm("9.0.1");
         SchemaVersionData schemaData = schemaDto.add(schemaVersionForm);
-        ConnectionForm connectionForm = getConnectionForm("127.0.0.1", "Dev DB", username, password);
+        ConnectionForm connectionForm = getConnectionForm("127.0.0.1", "Test DB", username, password);
         ConnectionData connectionData = connectionDto.add(connectionForm);
         organizationDto.mapToConnection(organizationData.getId(), connectionData.getId());
         organizationDto.mapToSchema(organizationData.getId(), schemaData.getId());
@@ -173,7 +179,7 @@ public class ReportDtoTest extends AbstractTest {
     }
 
     @Test
-    public void testGetLiveData() throws ApiException {
+    public void testGetLiveData() throws ApiException, IOException, InterruptedException {
         ReportForm reportForm = commonSetup("Report 2", ReportType.STANDARD);
         reportForm.setIsDashboard(true);
         ReportData reportData = dto.add(reportForm);

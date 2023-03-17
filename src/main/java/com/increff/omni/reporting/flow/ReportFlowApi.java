@@ -100,13 +100,13 @@ public class ReportFlowApi extends AbstractFlowApi {
                     properties.getLiveReportMaxExecutionTime());
             sqlParams.setQuery(fQuery);
             // Execute query and save results
-            SqlCmd.processQuery(sqlParams, false, properties.getMaxExecutionTime());
+            SqlCmd.processQuery(sqlParams, true, properties.getMaxExecutionTime());
             List<Map<String, String>> data =  FileUtil.getJsonDataFromFile(file, '\t');
             deleteFiles(file, errorFile);
             return data;
         } catch (Exception e) {
             throw new ApiException(ApiStatus.BAD_DATA, "Failed to get the data for dashboard. Please raise a support " +
-                    "ticket");
+                    "ticket : " + e.getMessage());
         }
     }
 
