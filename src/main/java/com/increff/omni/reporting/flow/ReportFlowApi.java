@@ -69,6 +69,9 @@ public class ReportFlowApi extends AbstractFlowApi {
     @Autowired
     private ApplicationProperties properties;
 
+    private static final Integer MAX_NUMBER_OF_ROWS = 300;
+
+
     public ReportPojo addReport(ReportPojo pojo) throws ApiException {
         validate(pojo);
         return api.add(pojo);
@@ -101,12 +104,15 @@ public class ReportFlowApi extends AbstractFlowApi {
             sqlParams.setQuery(fQuery);
             // Execute query and save results
             SqlCmd.processQuery(sqlParams, true, properties.getMaxExecutionTime());
+            if(FileUtil.getNumberOfRows(sqlParams.getOutFile()) > MAX_NUMBER_OF_ROWS) {
+                throw new ApiException(ApiStatus.BAD_DATA, "Data exceeded " + MAX_NUMBER_OF_ROWS + " Rows, select " +
+                        "granular filters.");
+            }
             List<Map<String, String>> data =  FileUtil.getJsonDataFromFile(file, '\t');
             deleteFiles(file, errorFile);
             return data;
         } catch (Exception e) {
-            throw new ApiException(ApiStatus.BAD_DATA, "Failed to get the data for dashboard. Please raise a support " +
-                    "ticket : " + e.getMessage());
+            throw new ApiException(ApiStatus.BAD_DATA, "Failed to get the data for dashboard." + e.getMessage());
         }
     }
 

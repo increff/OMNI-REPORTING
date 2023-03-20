@@ -82,18 +82,19 @@ public class FileUtil {
         return data;
     }
 
-    public static void createFileResponse(File file, HttpServletResponse response) throws IOException {
-        response.setContentType("application/octet-stream");
-        response.setHeader("Content-Disposition", "inline");
-        response.setHeader("Content-length", String.valueOf(file.length()));
-        OutputStream outputStream = null;
-        try {
-            outputStream = response.getOutputStream();
-            FileUtils.copyFile(file, response.getOutputStream());
-            outputStream.flush();
-        } finally {
-            FileUtil.closeQuietly(outputStream);
+    public static int getNumberOfRows(File file) throws IOException, InterruptedException {
+
+        Process p = Runtime.getRuntime().exec("wc -l " + file);
+        p.waitFor();
+        BufferedReader b = new BufferedReader(new InputStreamReader(p.getInputStream()));
+        String line = "";
+        int lineCount = 0;
+        while ((line = b.readLine()) != null) {
+            line = line.trim();
+            String[] parts = line.split(" ");
+            lineCount = Integer.parseInt(parts[0]);
         }
+        return lineCount;
     }
 
     public static double getSizeInMb(long size) {
