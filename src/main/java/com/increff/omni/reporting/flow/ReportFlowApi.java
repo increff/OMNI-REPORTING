@@ -86,17 +86,17 @@ public class ReportFlowApi extends AbstractFlowApi {
         return api.edit(pojo);
     }
 
-    public List<Map<String, String>> validateAndGetLiveData(ReportPojo reportPojo, Integer orgId, List<ReportInputParamsPojo> reportInputParamsPojoList)
-            throws ApiException {
+    public List<Map<String, String>> validateAndGetLiveData(ReportPojo reportPojo, Integer orgId,
+                                                            List<ReportInputParamsPojo> reportInputParamsPojoList)
+            throws ApiException, IOException {
         validate(reportPojo, reportInputParamsPojoList);
         ReportQueryPojo reportQueryPojo = queryApi.getByReportId(reportPojo.getId());
         OrgConnectionPojo orgConnectionPojo = orgConnectionApi.getCheckByOrgId(orgId);
         ConnectionPojo connectionPojo = connectionApi.getCheck(orgConnectionPojo.getConnectionId());
-
+        File file = folderApi.getFileForExtension(reportPojo.getId(), ".tsv");
+        File errorFile = folderApi.getErrFile(reportPojo.getId(), ".tsv");;
         // Creation of file
         try {
-            File file = folderApi.getFileForExtension(reportPojo.getId(), ".tsv");
-            File errorFile = folderApi.getErrFile(reportPojo.getId(), ".tsv");
             Map<String, String> inputParamMap = getInputParamMapFromPojoList(reportInputParamsPojoList);
             SqlParams sqlParams = CommonDtoHelper.convert(connectionPojo, file, errorFile);
             String fQuery = SqlCmd.prepareQuery(inputParamMap, reportQueryPojo.getQuery(),
@@ -104,15 +104,15 @@ public class ReportFlowApi extends AbstractFlowApi {
             sqlParams.setQuery(fQuery);
             // Execute query and save results
             SqlCmd.processQuery(sqlParams, true, properties.getMaxExecutionTime());
-            if(FileUtil.getNumberOfRows(sqlParams.getOutFile()) > MAX_NUMBER_OF_ROWS) {
+            if (FileUtil.getNumberOfRows(sqlParams.getOutFile()) > MAX_NUMBER_OF_ROWS) {
                 throw new ApiException(ApiStatus.BAD_DATA, "Data exceeded " + MAX_NUMBER_OF_ROWS + " Rows, select " +
                         "granular filters.");
             }
-            List<Map<String, String>> data =  FileUtil.getJsonDataFromFile(file, '\t');
-            deleteFiles(file, errorFile);
-            return data;
+            return FileUtil.getJsonDataFromFile(file, '\t');
         } catch (Exception e) {
             throw new ApiException(ApiStatus.BAD_DATA, "Failed to get the data for dashboard." + e.getMessage());
+        } finally {
+            deleteFiles(file, errorFile);
         }
     }
 

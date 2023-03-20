@@ -11,6 +11,7 @@ import org.apache.log4j.LogManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -281,7 +282,8 @@ public class AdminController {
 
     @ApiOperation(value = "Get Live Data For Any Organization")
     @RequestMapping(value = "/orgs/{orgId}/reports/live", method = RequestMethod.POST)
-    public List<Map<String, String>> requestReport(@PathVariable Integer orgId, @RequestBody ReportRequestForm form) throws ApiException {
+    public List<Map<String, String>> requestReport(@PathVariable Integer orgId, @RequestBody ReportRequestForm form)
+            throws ApiException, IOException {
         return reportDto.getLiveDataForAnyOrganization(form, orgId);
     }
 

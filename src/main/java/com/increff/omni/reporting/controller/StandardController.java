@@ -62,7 +62,7 @@ public class StandardController {
 
     @ApiOperation(value = "Get Live Data")
     @RequestMapping(value = "/reports/live", method = RequestMethod.POST)
-    public List<Map<String, String>> getLiveData(@RequestBody ReportRequestForm form) throws ApiException {
+    public List<Map<String, String>> getLiveData(@RequestBody ReportRequestForm form) throws ApiException, IOException {
         return reportDto.getLiveData(form);
     }
 

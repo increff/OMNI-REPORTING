@@ -11,6 +11,7 @@ import com.nextscm.commons.spring.common.ApiStatus;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.io.IOException;
 import java.util.*;
 
 import static com.increff.omni.reporting.helper.ConnectionTestHelper.getConnectionForm;
@@ -65,7 +66,7 @@ public class ConnectionDtoTestIT extends AbstractTest {
     }
 
     @Test
-    public void testGetLiveData() throws ApiException {
+    public void testGetLiveData() throws ApiException, IOException {
         ReportForm reportForm = commonSetup("Report 2", ReportType.STANDARD);
         reportForm.setIsDashboard(true);
         ReportData reportData = reportDto.add(reportForm);

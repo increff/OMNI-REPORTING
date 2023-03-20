@@ -22,6 +22,7 @@ import org.hibernate.validator.constraints.Mod10Check;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -72,7 +73,7 @@ public class ReportDto extends AbstractDto {
     }
 
     public List<Map<String, String>> getLiveDataForAnyOrganization(ReportRequestForm form, Integer orgId)
-            throws ApiException {
+            throws ApiException, IOException {
         OrganizationPojo organizationPojo = organizationApi.getCheck(orgId);
         ReportPojo reportPojo = validateReportForOrg(form, orgId);
         List<ReportInputParamsPojo> reportInputParamsPojoList = validateControls(form, orgId, reportPojo);
@@ -82,7 +83,7 @@ public class ReportDto extends AbstractDto {
         return data;
     }
 
-    public List<Map<String, String>> getLiveData(ReportRequestForm form) throws ApiException {
+    public List<Map<String, String>> getLiveData(ReportRequestForm form) throws ApiException, IOException {
         return getLiveDataForAnyOrganization(form, getOrgId());
     }
 
