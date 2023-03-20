@@ -24,9 +24,9 @@ import javax.mail.MessagingException;
 import javax.persistence.OptimisticLockException;
 import java.io.*;
 import java.nio.file.Files;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -35,6 +35,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import static com.increff.omni.reporting.dto.CommonDtoHelper.getInputParamMapFromPojoList;
+import static com.increff.omni.reporting.dto.CommonDtoHelper.getValueFromQuotes;
 
 
 @Service
@@ -62,6 +63,7 @@ public class ReportTask {
     @Autowired
     private ReportScheduleApi reportScheduleApi;
 
+    private final static String TIME_ZONE_PATTERN_WITHOUT_ZONE = "yyyy-MM-dd HH:mm:ss";
 
     @Async("userReportRequestExecutor")
     public void runUserReportAsync(ReportRequestPojo pojo) throws ApiException, MessagingException {
@@ -82,6 +84,7 @@ public class ReportTask {
             return;
         }
         // process
+        String timezone = "Asia/Kolkata";
         try {
             ReportRequestPojo reportRequestPojo = api.getCheck(pojo.getId());
 
@@ -96,28 +99,29 @@ public class ReportTask {
             File file = folderApi.getFileForExtension(reportRequestPojo.getId(), ".tsv");
             File errorFile = folderApi.getErrFile(reportRequestPojo.getId(), ".tsv");
             Map<String, String> inputParamMap = getInputParamMapFromPojoList(reportInputParamsPojoList);
+            timezone = getValueFromQuotes(inputParamMap.get("timezone"));
             SqlParams sqlParams = CommonDtoHelper.convert(connectionPojo, file, errorFile
             );
             String fQuery = SqlCmd.prepareQuery(inputParamMap, reportQueryPojo.getQuery(),
                     properties.getMaxExecutionTime());
             sqlParams.setQuery(fQuery);
             // Execute query and save results
-            saveResultsOnCloud(pojo, sqlParams);
-            if(pojo.getType().equals(ReportRequestType.EMAIL)) {
+            saveResultsOnCloud(pojo, sqlParams, timezone);
+            if (pojo.getType().equals(ReportRequestType.EMAIL)) {
                 reportScheduleApi.addScheduleCount(pojo.getScheduleId(), 1, 0);
             }
         } catch (Exception e) {
             log.error("Report Request ID : " + pojo.getId() + " failed", e);
             api.markFailed(pojo.getId(), ReportRequestStatus.FAILED, e.getMessage(), 0, 0.0);
             try {
-                if(pojo.getType().equals(ReportRequestType.EMAIL)) {
+                if (pojo.getType().equals(ReportRequestType.EMAIL)) {
                     ReportSchedulePojo schedulePojo = reportScheduleApi.getCheck(pojo.getScheduleId());
                     List<String> toEmails = reportScheduleApi.getByScheduleId(schedulePojo.getId()).stream()
                             .map(ReportScheduleEmailsPojo::getSendTo).collect(
                                     Collectors.toList());
                     EmailProps props = createEmailProps(null, false, schedulePojo, toEmails, "Hi,<br>Please " +
                             "check failure reason in the latest scheduled requests. Re-submit the schedule in the " +
-                            "reporting application, which might solve the issue.", false);
+                            "reporting application, which might solve the issue.", false, timezone);
                     EmailUtil.sendMail(props);
                     reportScheduleApi.addScheduleCount(pojo.getScheduleId(), 0, 1);
                 }
@@ -127,14 +131,16 @@ public class ReportTask {
         }
     }
 
-    private void saveResultsOnCloud(ReportRequestPojo pojo, SqlParams sqlParams) throws IOException, ApiException {
+    private void saveResultsOnCloud(ReportRequestPojo pojo, SqlParams sqlParams, String timezone)
+            throws IOException, ApiException {
         try {
             // Process data
             SqlCmd.processQuery(sqlParams, false, properties.getMaxExecutionTime());
             double fileSize = FileUtil.getSizeInMb(sqlParams.getOutFile().length());
             if (fileSize > properties.getMaxFileSize())
                 throw new ApiException(ApiStatus.BAD_DATA,
-                        "File size " + fileSize + " MB exceeded max limit of " + properties.getMaxFileSize() + " MB" + ". Please select granular filters");
+                        "File size " + fileSize + " MB exceeded max limit of " + properties.getMaxFileSize() + " MB" +
+                                ". Please select granular filters");
             String name = sqlParams.getOutFile().getName().split(".tsv")[0] + ".csv";
             File csvFile = folderApi.getFile(name);
             Integer noOfRows = FileUtil.getCsvFromTsv(sqlParams.getOutFile(), csvFile);
@@ -144,7 +150,7 @@ public class ReportTask {
             fileSize = FileUtil.getSizeInMb(csvFile.length());
             switch (pojo.getType()) {
                 case EMAIL:
-                    sendEmail(fileSize, csvFile, pojo);
+                    sendEmail(fileSize, csvFile, pojo, timezone);
                     break;
                 case USER:
                     filePath = uploadFile(csvFile, pojo);
@@ -164,11 +170,11 @@ public class ReportTask {
         }
     }
 
-    private void sendEmail(double fileSize, File csvFile, ReportRequestPojo pojo)
+    private void sendEmail(double fileSize, File csvFile, ReportRequestPojo pojo, String timezone)
             throws IOException, ApiException, javax.mail.MessagingException {
         File out = csvFile;
         boolean isZip = false;
-        if(fileSize > 50.0) {
+        if (fileSize > 50.0) {
             throw new ApiException(ApiStatus.BAD_DATA, "File size has crossed 50 MB limit. Mail can't be sent");
         }
         if (fileSize > 15.0) {
@@ -197,14 +203,14 @@ public class ReportTask {
         List<String> toEmails = reportScheduleApi.getByScheduleId(schedulePojo.getId()).stream()
                 .map(ReportScheduleEmailsPojo::getSendTo).collect(
                         Collectors.toList());
-        EmailProps props = createEmailProps(out, true, schedulePojo, toEmails, "", isZip);
+        EmailProps props = createEmailProps(out, true, schedulePojo, toEmails, "", isZip, timezone);
         EmailUtil.sendMail(props);
 
     }
 
     private EmailProps createEmailProps(File out, Boolean isAttachment,
                                         ReportSchedulePojo schedulePojo, List<String> toEmails, String content,
-                                        boolean isZip) {
+                                        boolean isZip, String timezone) {
         EmailProps props = new EmailProps();
         props.setFromEmail(properties.getFromEmail());
         props.setUsername(properties.getUsername());
@@ -214,8 +220,10 @@ public class ReportTask {
         props.setToEmails(toEmails);
         props.setSubject("Increff Reporting : " + schedulePojo.getReportName());
         props.setAttachment(out);
-        props.setCustomizedFileName(schedulePojo.getReportName() + " - " + ZonedDateTime.now()
-                .format(DateTimeFormatter.ofPattern(CommonDtoHelper.TIME_ZONE_PATTERN)) + ((isZip) ? ".zip" : ".csv"));
+        props.setCustomizedFileName(schedulePojo.getReportName() + " - " + ZonedDateTime.now().withZoneSameInstant(
+                ZoneId.of(timezone)).format(DateTimeFormatter.ofPattern(TIME_ZONE_PATTERN_WITHOUT_ZONE))
+                + ((isZip) ? ".zip" :
+                ".csv"));
         props.setIsAttachment(isAttachment);
         props.setContent(content);
         return props;
@@ -231,10 +239,10 @@ public class ReportTask {
     private String uploadFile(File file, ReportRequestPojo pojo) throws FileNotFoundException, ApiException {
         InputStream inputStream = new FileInputStream(file);
         String filePath = pojo.getOrgId() + "/" + "REPORTS" + "/" + pojo.getId() + "_" + UUID.randomUUID() + ".csv";
-        log.debug("GCP Upload started for request ID : "  + pojo.getId());
+        log.debug("GCP Upload started for request ID : " + pojo.getId());
         try {
             fileClient.create(filePath, inputStream);
-            log.debug("GCP Upload completed for request ID : "  + pojo.getId());
+            log.debug("GCP Upload completed for request ID : " + pojo.getId());
             inputStream.close();
         } catch (Exception e) {
             throw new ApiException(ApiStatus.BAD_DATA, "Error in uploading Report File to Gcp for report : " +
