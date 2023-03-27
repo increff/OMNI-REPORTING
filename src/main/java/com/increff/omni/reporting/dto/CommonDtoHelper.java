@@ -29,18 +29,6 @@ public class CommonDtoHelper {
 
     public final static String TIME_ZONE_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX";
 
-    public static SqlParams getSqlParams(ConnectionPojo pojo, String query, File file, File errFile,
-                                         Double maxExecutionTime) {
-        SqlParams params = new SqlParams();
-        params.setPassword(pojo.getPassword());
-        params.setUsername(pojo.getUsername());
-        params.setHost(pojo.getHost());
-        params.setQuery(SqlCmd.massageQuery(query, maxExecutionTime));
-        params.setOutFile(file);
-        params.setErrFile(errFile);
-        return params;
-    }
-
     public static Map<String, String> getInputParamMapFromPojoList(List<ReportInputParamsPojo> reportInputParamsPojoList) {
         Map<String, String> inputParamMap = new HashMap<>();
         reportInputParamsPojoList.forEach(r -> inputParamMap.put(r.getParamKey(), r.getParamValue()));

@@ -3,10 +3,8 @@ package com.increff.omni.reporting.job;
 import com.increff.omni.reporting.api.*;
 import com.increff.omni.reporting.config.ApplicationProperties;
 import com.increff.omni.reporting.config.EmailProps;
-import com.increff.omni.reporting.dto.CommonDtoHelper;
 import com.increff.omni.reporting.model.constants.ReportRequestStatus;
 import com.increff.omni.reporting.model.constants.ReportRequestType;
-import com.increff.omni.reporting.model.form.SqlParams;
 import com.increff.omni.reporting.pojo.*;
 import com.increff.omni.reporting.util.EmailUtil;
 import com.increff.omni.reporting.util.FileUtil;
@@ -24,11 +22,13 @@ import javax.mail.MessagingException;
 import javax.persistence.OptimisticLockException;
 import java.io.*;
 import java.nio.file.Files;
+import java.sql.*;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
@@ -44,6 +44,8 @@ public class ReportTask {
 
     @Autowired
     private ReportRequestApi api;
+    @Autowired
+    private DBConnectionApi dbConnectionApi;
     @Autowired
     private ReportApi reportApi;
     @Autowired
@@ -96,18 +98,12 @@ public class ReportTask {
             ConnectionPojo connectionPojo = connectionApi.getCheck(orgConnectionPojo.getConnectionId());
 
             // Creation of file
-            File file = folderApi.getFileForExtension(reportRequestPojo.getId(), ".tsv");
-            File errorFile = folderApi.getErrFile(reportRequestPojo.getId(), ".tsv");
             Map<String, String> inputParamMap = getInputParamMapFromPojoList(reportInputParamsPojoList);
             timezone = getValueFromQuotes(inputParamMap.get("timezone"));
-            SqlParams sqlParams = CommonDtoHelper.convert(connectionPojo, file, errorFile
-            );
-            String fQuery = SqlCmd.prepareQuery(inputParamMap, reportQueryPojo.getQuery(),
-                    properties.getMaxExecutionTime());
-            sqlParams.setQuery(fQuery);
+            String fQuery = SqlCmd.getFinalQuery(inputParamMap, reportQueryPojo.getQuery(), false);
             // Execute query and save results
-            saveResultsOnCloud(pojo, sqlParams, timezone);
-            if (pojo.getType().equals(ReportRequestType.EMAIL)) {
+            saveResultsOnCloud(pojo, fQuery, connectionPojo, timezone);
+            if(pojo.getType().equals(ReportRequestType.EMAIL)) {
                 reportScheduleApi.addScheduleCount(pojo.getScheduleId(), 1, 0);
             }
         } catch (Exception e) {
@@ -131,42 +127,50 @@ public class ReportTask {
         }
     }
 
-    private void saveResultsOnCloud(ReportRequestPojo pojo, SqlParams sqlParams, String timezone)
-            throws IOException, ApiException {
+    private void saveResultsOnCloud(ReportRequestPojo pojo, String query, ConnectionPojo connectionPojo,
+                                    String timezone) throws IOException,
+            ApiException {
+        File file = folderApi.getFileForExtension(pojo.getId(), ".csv");
+        Connection connection = null;
         try {
             // Process data
-            SqlCmd.processQuery(sqlParams, false, properties.getMaxExecutionTime());
-            double fileSize = FileUtil.getSizeInMb(sqlParams.getOutFile().length());
+            connection = dbConnectionApi.getConnection(connectionPojo.getHost(), connectionPojo.getUsername(),
+                    connectionPojo.getPassword(), properties.getMaxConnectionTime());
+            PreparedStatement statement = dbConnectionApi.getStatement(connection, properties.getMaxExecutionTime(),
+                    query, properties.getResultSetFetchSize());
+            ResultSet resultSet = statement.executeQuery();
+            Integer noOfRows = FileUtil.writeCsvFromResultSet(resultSet, file);
+            double fileSize = FileUtil.getSizeInMb(file.length());
             if (fileSize > properties.getMaxFileSize())
                 throw new ApiException(ApiStatus.BAD_DATA,
-                        "File size " + fileSize + " MB exceeded max limit of " + properties.getMaxFileSize() + " MB" +
-                                ". Please select granular filters");
-            String name = sqlParams.getOutFile().getName().split(".tsv")[0] + ".csv";
-            File csvFile = folderApi.getFile(name);
-            Integer noOfRows = FileUtil.getCsvFromTsv(sqlParams.getOutFile(), csvFile);
-
+                        "File size " + fileSize + " MB exceeded max limit of " + properties.getMaxFileSize() + " MB" + ". Please select granular filters");
             // upload result to cloud
             String filePath = "NA";
-            fileSize = FileUtil.getSizeInMb(csvFile.length());
             switch (pojo.getType()) {
                 case EMAIL:
-                    sendEmail(fileSize, csvFile, pojo, timezone);
+                    sendEmail(fileSize, file, pojo, timezone);
                     break;
                 case USER:
-                    filePath = uploadFile(csvFile, pojo);
+                    filePath = uploadFile(file, pojo);
                     break;
             }
             // update status to completed
             api.updateStatus(pojo.getId(), ReportRequestStatus.COMPLETED, filePath, noOfRows, fileSize);
-            FileUtil.delete(csvFile);
         } catch (ApiException apiException) {
             throw apiException;
+        } catch (SQLException e) {
+            throw new ApiException(ApiStatus.BAD_DATA, "Error while processing request : " + e.getMessage());
         } catch (Exception e) {
-            String message =
-                    String.join("\t", Files.readAllLines(sqlParams.getErrFile().toPath())).concat(e.getMessage());
-            throw new ApiException(ApiStatus.BAD_DATA, message);
+            throw new ApiException(ApiStatus.BAD_DATA, e.getMessage());
         } finally {
-            deleteFiles(sqlParams.getOutFile(), sqlParams.getErrFile());
+            FileUtil.delete(file);
+            try {
+                if (Objects.nonNull(connection)) {
+                    connection.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -227,13 +231,6 @@ public class ReportTask {
         props.setIsAttachment(isAttachment);
         props.setContent(content);
         return props;
-    }
-
-    private void deleteFiles(File outFile, File errFile) {
-        if (outFile.exists() && !FileUtil.delete(outFile))
-            log.debug("File deletion failed, name : " + outFile.getName());
-        if (errFile.exists() && !FileUtil.delete(errFile))
-            log.debug("File deletion failed, name : " + errFile.getName());
     }
 
     private String uploadFile(File file, ReportRequestPojo pojo) throws FileNotFoundException, ApiException {

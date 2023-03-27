@@ -1,9 +1,6 @@
 package com.increff.omni.reporting.flow;
 
-import com.increff.omni.reporting.api.FolderApi;
-import com.increff.omni.reporting.api.InputControlApi;
-import com.increff.omni.reporting.api.ReportApi;
-import com.increff.omni.reporting.api.ReportControlsApi;
+import com.increff.omni.reporting.api.*;
 import com.increff.omni.reporting.config.ApplicationProperties;
 import com.increff.omni.reporting.dto.CommonDtoHelper;
 import com.increff.omni.reporting.model.constants.InputControlScope;
@@ -25,6 +22,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.sql.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -37,6 +35,9 @@ public class InputControlFlowApi extends AbstractApi {
 
     @Autowired
     private InputControlApi api;
+
+    @Autowired
+    private DBConnectionApi dbConnectionApi;
 
     @Autowired
     private ReportControlsApi reportControlsApi;
@@ -82,21 +83,26 @@ public class InputControlFlowApi extends AbstractApi {
     }
 
     public Map<String, String> getValuesFromQuery(String query, ConnectionPojo connectionPojo) {
-        File file = null;
-        File errFile = null;
+        Connection connection = null;
         try {
-            String fileName = UUID.randomUUID().toString();
-            file = folderApi.getFile(fileName + ".tsv");
-            errFile = folderApi.getFile(fileName + "-err.txt");
-            SqlParams sqlp = CommonDtoHelper.getSqlParams(connectionPojo, query, file, errFile
-                    , properties.getMaxExecutionTime());
-            SqlCmd.processQuery(sqlp, properties.getMaxExecutionTime());
-            return getMapFromTsv(file);
+            String fQuery = SqlCmd.getFinalQuery(new HashMap<>(), query, true);
+            connection = dbConnectionApi.getConnection(connectionPojo.getHost(),
+                    connectionPojo.getUsername(), connectionPojo.getPassword(),
+                    properties.getMaxConnectionTime());
+            PreparedStatement statement = dbConnectionApi.getStatement(connection,
+                    properties.getLiveDataMaxExecutionTime(), fQuery, properties.getResultSetFetchSize());
+            ResultSet resultSet = statement.executeQuery();
+            return FileUtil.getMapFromResultSet(resultSet);
         } catch (Exception e) {
-            log.error("Error while getting input control values ", e);
+            log.error("Error while getting input control values : ", e);
         } finally {
-            FileUtil.delete(file);
-            FileUtil.delete(errFile);
+            try {
+                if (Objects.nonNull(connection)) {
+                    connection.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
         return new HashMap<>();
     }
@@ -140,23 +146,6 @@ public class InputControlFlowApi extends AbstractApi {
         if (!CollectionUtils.isEmpty(duplicate))
             throw new ApiException(ApiStatus.BAD_DATA, "Another input control present with same display name" +
                     " or param name");
-    }
-
-    private Map<String, String> getMapFromTsv(File file) throws IOException {
-        Map<String, String> fMap = new HashMap<>();
-        BufferedReader tsvfile =
-                new BufferedReader(new FileReader(file));
-        String dataRow = tsvfile.readLine();
-        if(dataRow != null)
-            dataRow = tsvfile.readLine();
-        while (dataRow != null) {
-            List<String> values = Arrays.asList(dataRow.split("\t"));
-            if(values.size() == 2)
-                fMap.put(values.get(0), values.get(1));
-            dataRow = tsvfile.readLine(); // Read next line of data.
-        }
-        tsvfile.close();
-        return fMap;
     }
 
 }

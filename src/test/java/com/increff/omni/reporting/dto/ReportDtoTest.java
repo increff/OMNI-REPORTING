@@ -1,23 +1,17 @@
 package com.increff.omni.reporting.dto;
 
 import com.increff.omni.reporting.config.AbstractTest;
-import com.increff.omni.reporting.flow.ReportFlowApi;
 import com.increff.omni.reporting.model.constants.InputControlScope;
 import com.increff.omni.reporting.model.constants.InputControlType;
 import com.increff.omni.reporting.model.constants.ReportType;
 import com.increff.omni.reporting.model.constants.ValidationType;
 import com.increff.omni.reporting.model.data.*;
 import com.increff.omni.reporting.model.form.*;
-import com.increff.omni.reporting.util.SqlCmd;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
-import org.junit.Ignore;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.io.IOException;
 import java.util.*;
 
 import static com.increff.omni.reporting.helper.ConnectionTestHelper.getConnectionForm;
@@ -27,10 +21,6 @@ import static com.increff.omni.reporting.helper.OrgTestHelper.getOrganizationFor
 import static com.increff.omni.reporting.helper.ReportTestHelper.*;
 import static com.increff.omni.reporting.helper.SchemaTestHelper.getSchemaForm;
 import static org.junit.Assert.*;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyDouble;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.mock;
 
 public class ReportDtoTest extends AbstractTest {
 
@@ -113,8 +103,7 @@ public class ReportDtoTest extends AbstractTest {
     public void testTransformedQuery() {
         ReportQueryTestForm testForm = getQueryTestForm();
         ReportQueryData queryData = dto.getTransformedQuery(testForm);
-        assertEquals("SET SESSION MAX_EXECUTION_TIME=300000;\n" +
-                "select * from table where id = '1';", queryData.getQuery());
+        assertEquals("select * from table where id = '1';", queryData.getQuery());
     }
 
     @Test
@@ -122,8 +111,7 @@ public class ReportDtoTest extends AbstractTest {
         ReportQueryTestForm testForm = getQueryTestForm();
         testForm.setParamMap(new HashMap<>());
         ReportQueryData queryData = dto.getTransformedQuery(testForm);
-        assertEquals("SET SESSION MAX_EXECUTION_TIME=300000;\n" +
-                "select * from table where id = {{replace(id)}};", queryData.getQuery());
+        assertEquals("select * from table where id = {{replace(id)}};", queryData.getQuery());
     }
 
     @Test
@@ -131,8 +119,7 @@ public class ReportDtoTest extends AbstractTest {
         ReportQueryTestForm testForm = getQueryTestForm();
         testForm.setParamMap(new HashMap<>());
         ReportQueryData queryData = dto.getTransformedQuery(testForm);
-        assertEquals("SET SESSION MAX_EXECUTION_TIME=300000;\n" +
-                        "select * from table where id = {{replace(id)}};", queryData.getQuery());
+        assertEquals("select * from table where id = {{replace(id)}};", queryData.getQuery());
     }
 
     @Test
@@ -140,8 +127,7 @@ public class ReportDtoTest extends AbstractTest {
         ReportQueryTestForm testForm = getQueryTestForm();
         testForm.setQuery("select * from table where {{filter(id,id,<=)}};");
         ReportQueryData queryData = dto.getTransformedQuery(testForm);
-        assertEquals("SET SESSION MAX_EXECUTION_TIME=300000;\n" +
-                "select * from table where id <= '1';", queryData.getQuery());
+        assertEquals("select * from table where id <= '1';", queryData.getQuery());
     }
 
     @Test
@@ -267,7 +253,8 @@ public class ReportDtoTest extends AbstractTest {
         ReportForm form = commonSetup("Report 2", ReportType.CUSTOM);
         ReportData data = dto.add(form);
         InputControlForm inputControlForm = getInputControlForm("Client Id", "clientId", InputControlScope.GLOBAL
-                , InputControlType.ACCESS_CONTROLLED_MULTI_SELECT, Arrays.asList("IGNORE", "SENT"), null, null, form.getSchemaVersionId());
+                , InputControlType.ACCESS_CONTROLLED_MULTI_SELECT, Arrays.asList("IGNORE", "SENT"), null, null,
+                form.getSchemaVersionId());
         InputControlData inputControlData = inputControlDto.add(inputControlForm);
         dto.mapToControl(data.getId(), inputControlData.getId());
         List<ValidationGroupData> validationGroupData = dto.getValidationGroups(data.getId());

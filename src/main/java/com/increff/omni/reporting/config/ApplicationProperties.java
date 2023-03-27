@@ -35,11 +35,17 @@ public class ApplicationProperties {
     @Value("${stuck.report.time.minutes:10}")
     private Integer stuckReportTime;
 
-    @Value("${max.execution.time.minutes:5.0}")
-    private Double maxExecutionTime;
+    @Value("${max.execution.time.seconds:300}")
+    private Integer maxExecutionTime;
 
-    @Value("${live.report.max.execution.time.minutes:0.5}")
-    private Double liveReportMaxExecutionTime;
+    @Value("${live.data.max.execution.time.seconds:30}")
+    private Integer liveDataMaxExecutionTime;
+
+    @Value("${max.connection.time.seconds:5}")
+    private Integer maxConnectionTime;
+
+    @Value("${resultset.fetch.size:100}")
+    private Integer resultSetFetchSize;
 
     @Value("${max.file.size.mb:200}")
     private Integer maxFileSize;
@@ -88,5 +94,6 @@ public class ApplicationProperties {
 
     @Value("${mailjet.smtp.port}")
     private String smtpPort;
+
 
 }

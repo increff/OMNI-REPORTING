@@ -18,7 +18,6 @@ import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
 import com.nextscm.commons.spring.common.ConvertUtil;
 import lombok.Setter;
-import org.hibernate.validator.constraints.Mod10Check;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -112,7 +111,7 @@ public class ReportDto extends AbstractDto {
         Map<String, String> paramsMap = UserPrincipalUtil.getCompleteMapWithAccessControl(form.getParamMap());
         paramsMap.put("timezone", "'" + form.getTimezone() + "'");
         ReportQueryData data = new ReportQueryData();
-        data.setQuery(SqlCmd.prepareQuery(paramsMap, form.getQuery(), properties.getMaxExecutionTime()));
+        data.setQuery(SqlCmd.getFinalQuery(paramsMap, form.getQuery(), true));
         return data;
     }
 
