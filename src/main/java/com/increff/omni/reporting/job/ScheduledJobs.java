@@ -87,7 +87,7 @@ public class ScheduledJobs {
         for(ReportSchedulePojo s : schedulePojos) {
             OrgSchemaVersionPojo orgSchemaVersionPojo = orgSchemaApi.getCheckByOrgId(s.getOrgId());
             ReportPojo reportPojo = reportApi.getByNameAndSchema(s.getReportName(),
-                    orgSchemaVersionPojo.getSchemaVersionId());
+                    orgSchemaVersionPojo.getSchemaVersionId(), false);
             Integer reportId = Objects.isNull(reportPojo) ? null : reportPojo.getId();
             ReportRequestPojo reportRequestPojo = convertToReportRequestPojo(s, reportId);
             List<ReportInputParamsPojo> reportInputParamsPojoList = new ArrayList<>();

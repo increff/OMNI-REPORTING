@@ -1,22 +1,58 @@
 package com.increff.omni.reporting.dto;
 
 import com.increff.omni.reporting.config.AbstractTest;
-import com.increff.omni.reporting.model.data.ConnectionData;
-import com.increff.omni.reporting.model.form.ConnectionForm;
+import com.increff.omni.reporting.model.constants.InputControlScope;
+import com.increff.omni.reporting.model.constants.InputControlType;
+import com.increff.omni.reporting.model.constants.ReportType;
+import com.increff.omni.reporting.model.data.*;
+import com.increff.omni.reporting.model.form.*;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.List;
+import java.io.IOException;
+import java.util.*;
 
 import static com.increff.omni.reporting.helper.ConnectionTestHelper.getConnectionForm;
+import static com.increff.omni.reporting.helper.DirectoryTestHelper.getDirectoryForm;
+import static com.increff.omni.reporting.helper.InputControlTestHelper.getInputControlForm;
+import static com.increff.omni.reporting.helper.OrgTestHelper.getOrganizationForm;
+import static com.increff.omni.reporting.helper.ReportTestHelper.*;
+import static com.increff.omni.reporting.helper.SchemaTestHelper.getSchemaForm;
 import static org.junit.Assert.*;
 
 public class ConnectionDtoTestIT extends AbstractTest {
 
     @Autowired
     private ConnectionDto dto;
+    @Autowired
+    private ReportDto reportDto;
+    @Autowired
+    private DirectoryDto directoryDto;
+    @Autowired
+    private SchemaDto schemaDto;
+    @Autowired
+    private OrganizationDto organizationDto;
+    @Autowired
+    private ConnectionDto connectionDto;
+    @Autowired
+    private InputControlDto inputControlDto;
+
+    private ReportForm commonSetup(String name, ReportType type) throws ApiException {
+        OrganizationForm form = getOrganizationForm(100001, "increff");
+        OrganizationData organizationData = organizationDto.add(form);
+        List<DirectoryData> data = directoryDto.getAllDirectories();
+        DirectoryForm directoryForm = getDirectoryForm("Standard Reports", data.get(0).getId());
+        DirectoryData directoryData = directoryDto.add(directoryForm);
+        SchemaVersionForm schemaVersionForm = getSchemaForm("9.0.1");
+        SchemaVersionData schemaData = schemaDto.add(schemaVersionForm);
+        ConnectionForm connectionForm = getConnectionForm("127.0.0.1", "Test DB", username, password);
+        ConnectionData connectionData = connectionDto.add(connectionForm);
+        organizationDto.mapToConnection(organizationData.getId(), connectionData.getId());
+        organizationDto.mapToSchema(organizationData.getId(), schemaData.getId());
+        return getReportForm(name, type, directoryData.getId(), schemaData.getId(), false);
+    }
 
     @Test
     public void testAddConnection() throws ApiException {
@@ -27,6 +63,26 @@ public class ConnectionDtoTestIT extends AbstractTest {
         assertEquals("Dev DB", data.getName());
         assertEquals("db.user", data.getUsername());
         assertEquals("db.password", data.getPassword());
+    }
+
+    @Test
+    public void testGetLiveData() throws ApiException, IOException {
+        ReportForm reportForm = commonSetup("Report 2", ReportType.STANDARD);
+        reportForm.setIsDashboard(true);
+        ReportData reportData = reportDto.add(reportForm);
+        ReportQueryData queryData = reportDto.getQuery(reportData.getId());
+        assertEquals("", queryData.getQuery());
+        ReportQueryForm queryForm = getReportQueryForm("select version() as version;");
+        reportDto.upsertQuery(reportData.getId(), queryForm);
+        InputControlForm inputControlForm = getInputControlForm("Client Id", "clientId", InputControlScope.GLOBAL
+                , InputControlType.NUMBER, new ArrayList<>(), null, null, reportForm.getSchemaVersionId());
+        InputControlData inputControlData = inputControlDto.add(inputControlForm);
+        reportDto.mapToControl(reportData.getId(), inputControlData.getId());
+        Map<String, List<String>> params = new HashMap<>();
+        params.put("clientId", Collections.singletonList("1100007455"));
+        ReportRequestForm form = getReportRequestForm(reportData.getId(), params, "Asia/Kolkata");
+        List<Map<String, String>> data = reportDto.getLiveData(form);
+        assertEquals(1, data.size());
     }
 
     @Test

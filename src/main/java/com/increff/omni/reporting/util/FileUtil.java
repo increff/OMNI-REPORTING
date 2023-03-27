@@ -2,14 +2,14 @@ package com.increff.omni.reporting.util;
 
 import com.increff.omni.reporting.api.FolderApi;
 import lombok.extern.log4j.Log4j;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
-import java.util.Arrays;
-import java.util.List;
-import java.util.ListIterator;
+import java.util.*;
 
 @Log4j
 public class FileUtil {
@@ -69,18 +69,32 @@ public class FileUtil {
         return noOfRows;
     }
 
-    public static void createFileResponse(File file, HttpServletResponse response) throws IOException {
-        response.setContentType("application/octet-stream");
-        response.setHeader("Content-Disposition", "inline");
-        response.setHeader("Content-length", String.valueOf(file.length()));
-        OutputStream outputStream = null;
-        try {
-            outputStream = response.getOutputStream();
-            FileUtils.copyFile(file, response.getOutputStream());
-            outputStream.flush();
-        } finally {
-            FileUtil.closeQuietly(outputStream);
+    public static List<Map<String, String>> getJsonDataFromFile(File sourceFile, char delimiter) throws IOException {
+        List<Map<String, String>> data = new ArrayList<>();
+        Reader in = new FileReader(sourceFile);
+        Iterable<CSVRecord> records =
+                CSVFormat.DEFAULT.builder().setDelimiter(delimiter).setHeader().setSkipHeaderRecord(true).build().parse(in);
+        for (CSVRecord record : records) {
+            Map<String, String> value = record.toMap();
+            data.add(value);
         }
+        in.close();
+        return data;
+    }
+
+    public static int getNumberOfRows(File file) throws IOException, InterruptedException {
+
+        Process p = Runtime.getRuntime().exec("wc -l " + file);
+        p.waitFor();
+        BufferedReader b = new BufferedReader(new InputStreamReader(p.getInputStream()));
+        String line = "";
+        int lineCount = 0;
+        while ((line = b.readLine()) != null) {
+            line = line.trim();
+            String[] parts = line.split(" ");
+            lineCount = Integer.parseInt(parts[0]);
+        }
+        return lineCount;
     }
 
     public static double getSizeInMb(long size) {

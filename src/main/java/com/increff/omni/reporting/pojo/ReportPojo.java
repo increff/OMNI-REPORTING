@@ -10,7 +10,8 @@ import javax.persistence.*;
 @Setter
 @Getter
 @Table(name = "report", indexes = {
-        @Index(name = "idx_schemaVersionId_name", columnList = "schemaVersionId, name", unique = true),
+        @Index(name = "idx_schemaVersionId_name_isDashboard", columnList = "schemaVersionId, name, isDashboard",
+                unique = true),
         @Index(name = "idx_schemaVersionId_type", columnList = "schemaVersionId, type"),
         @Index(name = "idx_id_schemaVersionId", columnList = "id, schemaVersionId")
 })
@@ -39,5 +40,8 @@ public class ReportPojo extends AbstractVersionedPojo{
 
     @Column(nullable = false)
     private Boolean canSchedule = false;
+
+    @Column(nullable = false)
+    private Boolean isDashboard = false;
 
 }

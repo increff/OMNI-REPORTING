@@ -35,8 +35,11 @@ public class ApplicationProperties {
     @Value("${stuck.report.time.minutes:10}")
     private Integer stuckReportTime;
 
-    @Value("${max.execution.time.minutes:5}")
-    private Integer maxExecutionTime;
+    @Value("${max.execution.time.minutes:5.0}")
+    private Double maxExecutionTime;
+
+    @Value("${live.report.max.execution.time.minutes:0.5}")
+    private Double liveReportMaxExecutionTime;
 
     @Value("${max.file.size.mb:200}")
     private Integer maxFileSize;

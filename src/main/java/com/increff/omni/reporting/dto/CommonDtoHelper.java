@@ -30,7 +30,7 @@ public class CommonDtoHelper {
     public final static String TIME_ZONE_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX";
 
     public static SqlParams getSqlParams(ConnectionPojo pojo, String query, File file, File errFile,
-                                         Integer maxExecutionTime) {
+                                         Double maxExecutionTime) {
         SqlParams params = new SqlParams();
         params.setPassword(pojo.getPassword());
         params.setUsername(pojo.getUsername());
@@ -39,6 +39,12 @@ public class CommonDtoHelper {
         params.setOutFile(file);
         params.setErrFile(errFile);
         return params;
+    }
+
+    public static Map<String, String> getInputParamMapFromPojoList(List<ReportInputParamsPojo> reportInputParamsPojoList) {
+        Map<String, String> inputParamMap = new HashMap<>();
+        reportInputParamsPojoList.forEach(r -> inputParamMap.put(r.getParamKey(), r.getParamValue()));
+        return inputParamMap;
     }
 
     public static List<InputControlFilterData> prepareFilters(List<ReportScheduleInputParamsPojo> paramsPojos,
@@ -316,6 +322,7 @@ public class CommonDtoHelper {
         reportPojo.setName(oldReport.getName());
         reportPojo.setType(oldReport.getType());
         reportPojo.setCanSchedule(oldReport.getCanSchedule());
+        reportPojo.setIsDashboard(oldReport.getIsDashboard());
         return reportPojo;
     }
 

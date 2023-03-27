@@ -3,8 +3,6 @@ package com.increff.omni.reporting.util;
 import com.increff.omni.reporting.dto.QueryExecutionDto;
 import com.increff.omni.reporting.model.form.SqlParams;
 import com.nextscm.commons.lang.CmdUtil;
-import com.nextscm.commons.spring.common.ApiException;
-import com.nextscm.commons.spring.common.ApiStatus;
 import lombok.extern.log4j.Log4j;
 import org.apache.commons.lang3.StringUtils;
 
@@ -17,12 +15,12 @@ import java.util.Objects;
 @Log4j
 public class SqlCmd {
 
-    public static void processQuery(SqlParams sp, Integer maxExecutionTime)
+    public static void processQuery(SqlParams sp, Double maxExecutionTime)
             throws IOException, InterruptedException {
         processQuery(sp, true, maxExecutionTime);
     }
 
-    public static void processQuery(SqlParams sp, Boolean isUserPrincipalAvailable, Integer maxExecutionTime)
+    public static void processQuery(SqlParams sp, Boolean isUserPrincipalAvailable, Double maxExecutionTime)
             throws IOException, InterruptedException {
         if (isUserPrincipalAvailable) addAccessControlMap(sp, maxExecutionTime);
         String[] cmd = getQueryCmd(sp);
@@ -31,7 +29,7 @@ public class SqlCmd {
         CmdUtil.runCmd(cmd, redirectAll, errRedirect);
     }
 
-    public static String prepareQuery(Map<String, String> inputParamMap, String query, Integer maxExecutionTime) {
+    public static String prepareQuery(Map<String, String> inputParamMap, String query, Double maxExecutionTime) {
         String[] matchingFunctions = StringUtils.substringsBetween(query, "{{", "}}");
         if (Objects.isNull(matchingFunctions)) {
             return massageQuery(query, maxExecutionTime);
@@ -48,13 +46,12 @@ public class SqlCmd {
         return massageQuery(query, maxExecutionTime);
     }
 
-    public static String massageQuery(String query, Integer maxExecutionTime) {
-        return "" //
-                + "SET SESSION MAX_EXECUTION_TIME=" + maxExecutionTime * 60 * 1000 + ";\n" //
-                + query;
+    public static String massageQuery(String query, Double maxExecutionTime) {
+        int maxTime = (int) (maxExecutionTime * 60 * 1000);
+        return "SET SESSION MAX_EXECUTION_TIME=" + maxTime + ";\n" + query;
     }
 
-    private static void addAccessControlMap(SqlParams sp, Integer maxExecutionTime) {
+    private static void addAccessControlMap(SqlParams sp, Double maxExecutionTime) {
         Map<String, String> accessControlMap = UserPrincipalUtil.getAccessControlMap();
         String nQuery = prepareQuery(accessControlMap, sp.getQuery(), maxExecutionTime);
         sp.setQuery(nQuery);

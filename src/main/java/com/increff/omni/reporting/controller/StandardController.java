@@ -9,6 +9,7 @@ import com.increff.omni.reporting.model.form.ReportRequestForm;
 import com.increff.omni.reporting.model.form.ReportScheduleForm;
 import com.increff.omni.reporting.util.FileUtil;
 import com.nextscm.commons.spring.common.ApiException;
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,8 +56,14 @@ public class StandardController {
 
     @ApiOperation(value = "Get Reports")
     @RequestMapping(value = "/reports", method = RequestMethod.GET)
-    public List<ReportData> selectByOrgId() throws ApiException {
-        return reportDto.selectByOrg();
+    public List<ReportData> selectByOrgId(@RequestParam Boolean isDashboard) throws ApiException {
+        return reportDto.selectByOrg(isDashboard);
+    }
+
+    @ApiOperation(value = "Get Live Data")
+    @RequestMapping(value = "/reports/live", method = RequestMethod.POST)
+    public List<Map<String, String>> getLiveData(@RequestBody ReportRequestForm form) throws ApiException, IOException {
+        return reportDto.getLiveData(form);
     }
 
     @ApiOperation(value = "Get validation group")

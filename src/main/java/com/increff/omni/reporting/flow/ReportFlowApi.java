@@ -1,65 +1,76 @@
 package com.increff.omni.reporting.flow;
 
 import com.increff.omni.reporting.api.*;
+import com.increff.omni.reporting.config.ApplicationProperties;
+import com.increff.omni.reporting.dto.CommonDtoHelper;
 import com.increff.omni.reporting.model.constants.InputControlScope;
 import com.increff.omni.reporting.model.constants.InputControlType;
 import com.increff.omni.reporting.model.constants.ReportType;
 import com.increff.omni.reporting.model.constants.ValidationType;
+import com.increff.omni.reporting.model.form.SqlParams;
 import com.increff.omni.reporting.model.form.ValidationGroupForm;
 import com.increff.omni.reporting.pojo.*;
+import com.increff.omni.reporting.util.FileUtil;
+import com.increff.omni.reporting.util.SqlCmd;
 import com.increff.omni.reporting.validators.DateValidator;
 import com.increff.omni.reporting.validators.MandatoryValidator;
 import com.increff.omni.reporting.validators.SingleMandatoryValidator;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
+import lombok.Setter;
+import lombok.extern.log4j.Log4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.increff.omni.reporting.dto.CommonDtoHelper.*;
 
 @Service
+@Setter
 @Transactional(rollbackFor = ApiException.class)
-public class ReportFlowApi extends AbstractAuditApi {
+@Log4j
+public class ReportFlowApi extends AbstractFlowApi {
 
     @Autowired
     private SchemaVersionApi schemaVersionApi;
-
+    @Autowired
+    private OrgConnectionApi orgConnectionApi;
+    @Autowired
+    private ConnectionApi connectionApi;
+    @Autowired
+    private FolderApi folderApi;
     @Autowired
     private OrgSchemaApi orgSchemaApi;
-
     @Autowired
     private DirectoryApi directoryApi;
-
     @Autowired
     private CustomReportAccessApi customReportAccessApi;
-
     @Autowired
     private ReportValidationGroupApi reportValidationGroupApi;
-
     @Autowired
     private MandatoryValidator mandatoryValidator;
-
     @Autowired
     private DateValidator dateValidator;
-
     @Autowired
     private SingleMandatoryValidator singleMandatoryValidator;
-
     @Autowired
     private ReportApi api;
-
     @Autowired
     private ReportQueryApi queryApi;
-
     @Autowired
     private ReportControlsApi reportControlsApi;
-
     @Autowired
     private InputControlApi inputControlApi;
+    @Autowired
+    private ApplicationProperties properties;
+
+    private static final Integer MAX_NUMBER_OF_ROWS = 300;
+
 
     public ReportPojo addReport(ReportPojo pojo) throws ApiException {
         validate(pojo);
@@ -73,6 +84,36 @@ public class ReportFlowApi extends AbstractAuditApi {
         if (existing.getType().equals(ReportType.CUSTOM) && pojo.getType().equals(ReportType.STANDARD))
             customReportAccessApi.deleteByReportId(pojo.getId());
         return api.edit(pojo);
+    }
+
+    public List<Map<String, String>> validateAndGetLiveData(ReportPojo reportPojo, Integer orgId,
+                                                            List<ReportInputParamsPojo> reportInputParamsPojoList)
+            throws ApiException, IOException {
+        validate(reportPojo, reportInputParamsPojoList);
+        ReportQueryPojo reportQueryPojo = queryApi.getByReportId(reportPojo.getId());
+        OrgConnectionPojo orgConnectionPojo = orgConnectionApi.getCheckByOrgId(orgId);
+        ConnectionPojo connectionPojo = connectionApi.getCheck(orgConnectionPojo.getConnectionId());
+        File file = folderApi.getFileForExtension(reportPojo.getId(), ".tsv");
+        File errorFile = folderApi.getErrFile(reportPojo.getId(), ".tsv");;
+        // Creation of file
+        try {
+            Map<String, String> inputParamMap = getInputParamMapFromPojoList(reportInputParamsPojoList);
+            SqlParams sqlParams = CommonDtoHelper.convert(connectionPojo, file, errorFile);
+            String fQuery = SqlCmd.prepareQuery(inputParamMap, reportQueryPojo.getQuery(),
+                    properties.getLiveReportMaxExecutionTime());
+            sqlParams.setQuery(fQuery);
+            // Execute query and save results
+            SqlCmd.processQuery(sqlParams, true, properties.getMaxExecutionTime());
+            if (FileUtil.getNumberOfRows(sqlParams.getOutFile()) > MAX_NUMBER_OF_ROWS) {
+                throw new ApiException(ApiStatus.BAD_DATA, "Data exceeded " + MAX_NUMBER_OF_ROWS + " Rows, select " +
+                        "granular filters.");
+            }
+            return FileUtil.getJsonDataFromFile(file, '\t');
+        } catch (Exception e) {
+            throw new ApiException(ApiStatus.BAD_DATA, "Failed to get the data for dashboard." + e.getMessage());
+        } finally {
+            deleteFiles(file, errorFile);
+        }
     }
 
     public ReportQueryPojo upsertQuery(ReportQueryPojo pojo) throws ApiException {
@@ -90,19 +131,20 @@ public class ReportFlowApi extends AbstractAuditApi {
         return api.getBySchemaVersion(schemaVersionId);
     }
 
-    public List<ReportPojo> getAll(Integer orgId) throws ApiException {
+    public List<ReportPojo> getAll(Integer orgId, Boolean isDashboard) throws ApiException {
 
         OrgSchemaVersionPojo orgSchemaVersionPojo = orgSchemaApi.getCheckByOrgId(orgId);
         //All standard
         List<ReportPojo> standard =
-                api.getByTypeAndSchema(ReportType.STANDARD, orgSchemaVersionPojo.getSchemaVersionId());
+                api.getByTypeAndSchema(ReportType.STANDARD, orgSchemaVersionPojo.getSchemaVersionId(), isDashboard);
 
         //All custom
         List<CustomReportAccessPojo> customAccess = customReportAccessApi.getByOrgId(orgId);
         List<Integer> customIds = customAccess.stream().map(CustomReportAccessPojo::getReportId)
                 .collect(Collectors.toList());
 
-        List<ReportPojo> custom = api.getByIdsAndSchema(customIds, orgSchemaVersionPojo.getSchemaVersionId());
+        List<ReportPojo> custom =
+                api.getByIdsAndSchema(customIds, orgSchemaVersionPojo.getSchemaVersionId(), isDashboard);
 
         //combined 2 list
         standard.addAll(custom);
@@ -148,7 +190,7 @@ public class ReportFlowApi extends AbstractAuditApi {
         // Migrate Reports
         List<ReportPojo> oldSchemaReports = api.getBySchemaVersion(oldSchemaVersionId);
         for (ReportPojo oldReport : oldSchemaReports) {
-            ReportPojo ex = api.getByNameAndSchema(oldReport.getName(), newSchemaVersionId);
+            ReportPojo ex = api.getByNameAndSchema(oldReport.getName(), newSchemaVersionId, oldReport.getIsDashboard());
             if (Objects.nonNull(ex))
                 continue;
             // Add Report
@@ -233,7 +275,7 @@ public class ReportFlowApi extends AbstractAuditApi {
         InputControlPojo icPojo = inputControlApi.getCheck(pojo.getControlId());
         if (icPojo.getScope().equals(InputControlScope.LOCAL))
             throw new ApiException(ApiStatus.BAD_DATA, "Only Global Control can be mapped to a report");
-        if(!icPojo.getSchemaVersionId().equals(reportPojo.getSchemaVersionId()))
+        if (!icPojo.getSchemaVersionId().equals(reportPojo.getSchemaVersionId()))
             throw new ApiException(ApiStatus.BAD_DATA, "Report Schema version and input control schema version not " +
                     "matching");
     }
@@ -243,18 +285,21 @@ public class ReportFlowApi extends AbstractAuditApi {
         schemaVersionApi.getCheck(pojo.getSchemaVersionId());
 
         // validating if requested name is already present
-        ReportPojo existingByName = api.getByNameAndSchema(pojo.getName(), pojo.getSchemaVersionId());
+        ReportPojo existingByName =
+                api.getByNameAndSchema(pojo.getName(), pojo.getSchemaVersionId(), pojo.getIsDashboard());
         if (Objects.nonNull(existingByName) && !existingByName.getId().equals(pojo.getId()))
-            throw new ApiException(ApiStatus.BAD_DATA, "Report already present with same name and schema version");
+            throw new ApiException(ApiStatus.BAD_DATA, "Report already present with same name, schema version and " +
+                    "report type (normal / dashboard)");
     }
 
     private void validate(ReportPojo pojo) throws ApiException {
         directoryApi.getCheck(pojo.getDirectoryId());
         schemaVersionApi.getCheck(pojo.getSchemaVersionId());
 
-        ReportPojo existing = api.getByNameAndSchema(pojo.getName(), pojo.getSchemaVersionId());
+        ReportPojo existing = api.getByNameAndSchema(pojo.getName(), pojo.getSchemaVersionId(), pojo.getIsDashboard());
         if (existing != null)
-            throw new ApiException(ApiStatus.BAD_DATA, "Report already present with same name and schema version");
+            throw new ApiException(ApiStatus.BAD_DATA, "Report already present with same name, schema version and " +
+                    "report type (normal / dashboard)");
 
     }
 
@@ -278,18 +323,18 @@ public class ReportFlowApi extends AbstractAuditApi {
             throws ApiException {
         Map<Integer, Integer> oldToNewControls = new HashMap<>();
         List<InputControlPojo> oldControls = inputControlApi.getBySchemaVersion(oldSchemaVersionId);
-        for(InputControlPojo o : oldControls) {
+        for (InputControlPojo o : oldControls) {
             InputControlPojo p = getInputControlPojoFromOldControl(newSchemaVersionId, o);
             InputControlQueryPojo q = null;
             List<InputControlValuesPojo> v = new ArrayList<>();
             InputControlQueryPojo oldQuery = inputControlApi.selectControlQuery(o.getId());
-            if(Objects.nonNull(oldQuery)) {
+            if (Objects.nonNull(oldQuery)) {
                 q = new InputControlQueryPojo();
                 q.setQuery(oldQuery.getQuery());
             }
             List<InputControlValuesPojo> oldValues =
                     inputControlApi.selectControlValues(Collections.singletonList(o.getId()));
-            if(!oldValues.isEmpty()) {
+            if (!oldValues.isEmpty()) {
                 oldValues.forEach(ov -> {
                     InputControlValuesPojo valuesPojo = new InputControlValuesPojo();
                     valuesPojo.setValue(ov.getValue());
@@ -300,5 +345,12 @@ public class ReportFlowApi extends AbstractAuditApi {
             oldToNewControls.put(o.getId(), p.getId());
         }
         return oldToNewControls;
+    }
+
+    private void deleteFiles(File outFile, File errFile) {
+        if (outFile.exists() && !FileUtil.delete(outFile))
+            log.debug("File deletion failed, name : " + outFile.getName());
+        if (errFile.exists() && !FileUtil.delete(errFile))
+            log.debug("File deletion failed, name : " + errFile.getName());
     }
 }

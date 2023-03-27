@@ -37,7 +37,7 @@ public class ReportScheduleFlowApi extends AbstractFlowApi {
     public void add(ReportSchedulePojo pojo, List<String> sendTo,
                     List<ReportScheduleInputParamsPojo> reportScheduleInputParamsPojos,
                     ReportPojo reportPojo) throws ApiException {
-        validate(reportPojo, reportScheduleInputParamsPojos);
+        validateGroups(reportPojo, reportScheduleInputParamsPojos);
         reportScheduleApi.add(pojo);
         addEmails(pojo, sendTo);
         reportScheduleApi.addScheduleInputParams(reportScheduleInputParamsPojos, pojo);
@@ -46,14 +46,14 @@ public class ReportScheduleFlowApi extends AbstractFlowApi {
     public void edit(ReportSchedulePojo pojo, List<String> sendTo,
                      List<ReportScheduleInputParamsPojo> reportScheduleInputParamsPojos,
                      ReportPojo reportPojo) throws ApiException {
-        validate(reportPojo, reportScheduleInputParamsPojos);
+        validateGroups(reportPojo, reportScheduleInputParamsPojos);
         reportScheduleApi.edit(pojo);
         reportScheduleApi.removeExistingEmails(pojo.getId());
         addEmails(pojo, sendTo);
         reportScheduleApi.updateScheduleInputParams(reportScheduleInputParamsPojos, pojo);
     }
 
-    private void validate(ReportPojo reportPojo, List<ReportScheduleInputParamsPojo> reportScheduleInputParamsPojoList)
+    private void validateGroups(ReportPojo reportPojo, List<ReportScheduleInputParamsPojo> reportScheduleInputParamsPojoList)
             throws ApiException {
         List<ReportValidationGroupPojo> reportValidationGroupPojoList = reportValidationGroupApi
                 .getByReportId(reportPojo.getId());
