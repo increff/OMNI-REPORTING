@@ -93,6 +93,7 @@ public class FileUtil {
                 log.error("Couldn't got values");
             }
         }
+        resultSet.close();
         return fMap;
     }
 
