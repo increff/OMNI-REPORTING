@@ -136,10 +136,16 @@ public class ReportTask {
             // Process data
             connection = dbConnectionApi.getConnection(connectionPojo.getHost(), connectionPojo.getUsername(),
                     connectionPojo.getPassword(), properties.getMaxConnectionTime());
+            log.info("Connection created : " + ZonedDateTime.now());
+
             PreparedStatement statement = dbConnectionApi.getStatement(connection, properties.getMaxExecutionTime(),
                     query, properties.getResultSetFetchSize());
+            log.info("Statement created : " + ZonedDateTime.now());
             ResultSet resultSet = statement.executeQuery();
+            log.info("Resultset created : " + ZonedDateTime.now());
+
             Integer noOfRows = FileUtil.writeCsvFromResultSet(resultSet, file);
+            log.info("File created : " + ZonedDateTime.now());
             double fileSize = FileUtil.getSizeInMb(file.length());
             if (fileSize > properties.getMaxFileSize())
                 throw new ApiException(ApiStatus.BAD_DATA,
