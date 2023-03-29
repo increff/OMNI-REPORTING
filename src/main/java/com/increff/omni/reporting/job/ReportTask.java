@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 import javax.mail.MessagingException;
 import javax.persistence.OptimisticLockException;
 import java.io.*;
+import java.net.SocketTimeoutException;
 import java.nio.file.Files;
 import java.sql.*;
 import java.time.ZoneId;
@@ -30,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -168,11 +170,9 @@ public class ReportTask {
             throw apiException;
         } catch (SQLException sqlException) {
             log.info("SQL exception occured", sqlException);
-
             throw new ApiException(ApiStatus.BAD_DATA, "Error while processing request : " + sqlException.getMessage());
-        } catch (Exception e) {
+        } catch (Throwable e) {
             log.info("Unknown exception occured", e);
-
             throw new ApiException(ApiStatus.BAD_DATA, e.getMessage());
         } finally {
             log.info("Deleting file and connections");
