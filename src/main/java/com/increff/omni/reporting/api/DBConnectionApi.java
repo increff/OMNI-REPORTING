@@ -35,6 +35,7 @@ public class DBConnectionApi {
         try {
             PreparedStatement statement = connection.prepareStatement(query);
             statement.setQueryTimeout(maxExecutionTime);
+            statement.closeOnCompletion();
 //            statement.setFetchSize(fetchSize);
             return statement;
         } catch (SQLException e) {

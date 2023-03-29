@@ -132,6 +132,7 @@ public class ReportTask {
             ApiException {
         File file = folderApi.getFileForExtension(pojo.getId(), ".csv");
         Connection connection = null;
+        ResultSet resultSet = null;
         try {
             // Process data
             connection = dbConnectionApi.getConnection(connectionPojo.getHost(), connectionPojo.getUsername(),
@@ -141,7 +142,7 @@ public class ReportTask {
             PreparedStatement statement = dbConnectionApi.getStatement(connection, properties.getMaxExecutionTime(),
                     query, properties.getResultSetFetchSize());
             log.info("Statement created : " + ZonedDateTime.now());
-            ResultSet resultSet = statement.executeQuery();
+            resultSet = statement.executeQuery();
             log.info("Resultset created : " + ZonedDateTime.now());
 
             Integer noOfRows = FileUtil.writeCsvFromResultSet(resultSet, file);
@@ -163,18 +164,27 @@ public class ReportTask {
             // update status to completed
             api.updateStatus(pojo.getId(), ReportRequestStatus.COMPLETED, filePath, noOfRows, fileSize);
         } catch (ApiException apiException) {
+            log.info("Api exception occured");
             throw apiException;
-        } catch (SQLException e) {
-            throw new ApiException(ApiStatus.BAD_DATA, "Error while processing request : " + e.getMessage());
+        } catch (SQLException sqlException) {
+            log.info("SQL exception occured", sqlException);
+
+            throw new ApiException(ApiStatus.BAD_DATA, "Error while processing request : " + sqlException.getMessage());
         } catch (Exception e) {
+            log.info("Unknown exception occured", e);
+
             throw new ApiException(ApiStatus.BAD_DATA, e.getMessage());
         } finally {
+            log.info("Deleting file and connections");
             FileUtil.delete(file);
             try {
                 if (Objects.nonNull(connection)) {
                     connection.close();
                 }
-            } catch (SQLException e) {
+                if (Objects.nonNull(resultSet)) {
+                    resultSet.close();
+                }
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
