@@ -35,7 +35,7 @@ public class DBConnectionApi {
         try {
             PreparedStatement statement = connection.prepareStatement(query);
             statement.setQueryTimeout(maxExecutionTime);
-            statement.setFetchSize(fetchSize);
+//            statement.setFetchSize(fetchSize);
             return statement;
         } catch (SQLException e) {
             throw new ApiException(ApiStatus.BAD_DATA, "Error connecting to the database " + e.getMessage());
