@@ -1,9 +1,11 @@
 package com.increff.omni.reporting.util;
 
-import com.google.auth.ServiceAccountSigner;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.auth.oauth2.ServiceAccountCredentials;
-import com.google.cloud.storage.*;
+import com.google.cloud.storage.BlobId;
+import com.google.cloud.storage.BlobInfo;
+import com.google.cloud.storage.Storage;
+import com.google.cloud.storage.StorageOptions;
 import com.nextscm.commons.fileclient.FileClientException;
 import org.apache.commons.io.IOUtils;
 
@@ -25,19 +27,21 @@ public class FileUploadUtil {
         storage = StorageOptions.newBuilder().setCredentials(credentials).build().getService();
     }
 
-    public void create(String filePath, InputStream is) throws FileClientException {
+    public void create(String filePath, InputStream is, String filename) throws FileClientException {
         BlobId blobId = BlobId.of(bucketName, filePath);
-        BlobInfo blobInfo = BlobInfo.newBuilder(blobId).setContentDisposition("inline").build();
+        BlobInfo blobInfo =
+                BlobInfo.newBuilder(blobId).setContentDisposition("inline; filename=\"" + filename + "\"").build();
+
         try {
             storage.create(blobInfo, IOUtils.toByteArray(is));
-        }catch (IOException e){
-            throw  new FileClientException("Error while creating file:"+e.getMessage(), e);
+        } catch (IOException e) {
+            throw new FileClientException("Error while creating file:" + e.getMessage(), e);
         }
     }
 
     public URL getSignedUri(String filePath) {
         BlobId blobId = BlobId.of(bucketName, filePath);
-        BlobInfo blobInfo = BlobInfo.newBuilder(blobId).setContentDisposition("inline").build();
-        return storage.signUrl(blobInfo,10, TimeUnit.SECONDS);
+        BlobInfo blobInfo = BlobInfo.newBuilder(blobId).build();
+        return storage.signUrl(blobInfo, 10, TimeUnit.SECONDS);
     }
 }
