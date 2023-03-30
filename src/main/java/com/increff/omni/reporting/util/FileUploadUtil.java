@@ -1,5 +1,6 @@
 package com.increff.omni.reporting.util;
 
+import com.google.auth.ServiceAccountSigner;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.auth.oauth2.ServiceAccountCredentials;
 import com.google.cloud.storage.*;
@@ -36,7 +37,7 @@ public class FileUploadUtil {
 
     public URL getSignedUri(String filePath) {
         BlobId blobId = BlobId.of(bucketName, filePath);
-        Blob blob = storage.get(blobId);
-        return blob.signUrl(10, TimeUnit.SECONDS);
+        BlobInfo blobInfo = BlobInfo.newBuilder(blobId).setContentDisposition("inline").build();
+        return storage.signUrl(blobInfo,10, TimeUnit.SECONDS);
     }
 }
