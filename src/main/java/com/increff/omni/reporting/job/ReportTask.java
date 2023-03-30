@@ -151,10 +151,10 @@ public class ReportTask {
             Integer noOfRows = FileUtil.writeCsvFromResultSet(resultSet, file);
             log.info("File created : " + ZonedDateTime.now());
             double fileSize = FileUtil.getSizeInMb(file.length());
-            if (fileSize > properties.getMaxFileSize())
-                throw new ApiException(ApiStatus.BAD_DATA,
-                        "File size " + fileSize + " MB exceeded max limit of " + properties.getMaxFileSize() + " MB" + ". Please select granular filters");
-            // upload result to cloud
+//            if (fileSize > properties.getMaxFileSize())
+//                throw new ApiException(ApiStatus.BAD_DATA,
+//                        "File size " + fileSize + " MB exceeded max limit of " + properties.getMaxFileSize() + " MB" + ". Please select granular filters");
+//            // upload result to cloud
             String filePath = "NA";
             switch (pojo.getType()) {
                 case EMAIL:
@@ -252,10 +252,10 @@ public class ReportTask {
 
     private String uploadFile(File file, ReportRequestPojo pojo) throws ApiException {
         String filePath = pojo.getOrgId() + "/" + "REPORTS" + "/" + pojo.getId() + "_" + UUID.randomUUID() + ".csv";
-        log.debug("GCP Upload started for request ID : " + pojo.getId());
+        log.info("GCP Upload started for request ID : " + pojo.getId());
         try (BufferedInputStream inputStream = new BufferedInputStream(new FileInputStream(file));){
             fIleUploadUtil.create(filePath, inputStream);
-            log.debug("GCP Upload completed for request ID : " + pojo.getId());
+            log.info("GCP Upload completed for request ID : " + pojo.getId());
         } catch (Exception e) {
             throw new ApiException(ApiStatus.BAD_DATA, "Error in uploading Report File to Gcp for report : " +
                     pojo.getId());

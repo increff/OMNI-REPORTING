@@ -14,7 +14,7 @@ import com.increff.omni.reporting.pojo.*;
 import com.increff.omni.reporting.util.FIleUploadUtil;
 import com.increff.omni.reporting.util.FileUtil;
 import com.increff.omni.reporting.util.UserPrincipalUtil;
-import com.nextscm.commons.fileclient.GcpFileProvider;
+//import com.nextscm.commons.fileclient.GcpFileProvider;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
 import lombok.extern.log4j.Log4j;
