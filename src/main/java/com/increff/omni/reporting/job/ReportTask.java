@@ -9,9 +9,9 @@ import com.increff.omni.reporting.model.constants.ReportRequestType;
 import com.increff.omni.reporting.model.form.SqlParams;
 import com.increff.omni.reporting.pojo.*;
 import com.increff.omni.reporting.util.EmailUtil;
+import com.increff.omni.reporting.util.FileUploadUtil;
 import com.increff.omni.reporting.util.FileUtil;
 import com.increff.omni.reporting.util.SqlCmd;
-import com.nextscm.commons.fileclient.FileClient;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
 import lombok.extern.log4j.Log4j;
@@ -57,7 +57,7 @@ public class ReportTask {
     @Autowired
     private FolderApi folderApi;
     @Autowired
-    private FileClient fileClient;
+    private FileUploadUtil fileUploadUtil;
     @Autowired
     private ApplicationProperties properties;
     @Autowired
@@ -241,7 +241,7 @@ public class ReportTask {
         String filePath = pojo.getOrgId() + "/" + "REPORTS" + "/" + pojo.getId() + "_" + UUID.randomUUID() + ".csv";
         log.debug("GCP Upload started for request ID : " + pojo.getId());
         try {
-            fileClient.create(filePath, inputStream);
+            fileUploadUtil.create(filePath, inputStream);
             log.debug("GCP Upload completed for request ID : " + pojo.getId());
             inputStream.close();
         } catch (Exception e) {
