@@ -11,6 +11,7 @@ import com.increff.omni.reporting.model.data.ReportRequestData;
 import com.increff.omni.reporting.model.data.TimeZoneData;
 import com.increff.omni.reporting.model.form.ReportRequestForm;
 import com.increff.omni.reporting.pojo.*;
+import com.increff.omni.reporting.util.FIleUploadUtil;
 import com.increff.omni.reporting.util.FileUtil;
 import com.increff.omni.reporting.util.UserPrincipalUtil;
 import com.nextscm.commons.fileclient.GcpFileProvider;
@@ -59,7 +60,7 @@ public class ReportRequestDto extends AbstractDto {
     @Autowired
     private OrganizationApi organizationApi;
     @Autowired
-    private GcpFileProvider gcpFileProvider;
+    private FIleUploadUtil gcpFileProvider;
     @Autowired
     private ReportInputParamsApi reportInputParamsApi;
 

@@ -51,7 +51,8 @@ public class FileUtil {
     public static int writeCsvFromResultSet(ResultSet resultSet, File file) throws SQLException, IOException {
         int noOfRows = 0;
         FileWriter fileWriter = new FileWriter(file);
-        CSVPrinter csvPrinter = new CSVPrinter(fileWriter, CSVFormat.DEFAULT);
+        BufferedWriter writer = new BufferedWriter(fileWriter);
+        CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT);
         ResultSetMetaData metaData = resultSet.getMetaData();
         int columnCount = metaData.getColumnCount();
         List<String> headers = new ArrayList<>();
@@ -73,6 +74,7 @@ public class FileUtil {
         }
         csvPrinter.flush();
         csvPrinter.close();
+        writer.close();
         fileWriter.close();
         resultSet.close();
         return noOfRows;

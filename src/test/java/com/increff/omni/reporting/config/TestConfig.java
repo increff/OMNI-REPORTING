@@ -8,6 +8,7 @@ import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.ZonedDateTimeSerializer;
 import com.increff.account.client.AuthClient;
 import com.increff.omni.reporting.dto.CommonDtoHelper;
+import com.increff.omni.reporting.util.FIleUploadUtil;
 import com.nextscm.commons.fileclient.AbstractFileProvider;
 import com.nextscm.commons.fileclient.FileClient;
 import com.nextscm.commons.fileclient.FileClientException;
@@ -33,6 +34,7 @@ import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -47,16 +49,21 @@ public class TestConfig {
     @Autowired
     private ApplicationProperties applicationProperties;
 
-    @Bean
-    public FileClient getFileClient() throws FileClientException {
-        AbstractFileProvider gcpFileProvider = getGcpFileProvider();
-        return new FileClient(gcpFileProvider);
-    }
+//    @Bean
+//    public FileClient getFileClient() throws FileClientException {
+//        AbstractFileProvider gcpFileProvider = getGcpFileProvider();
+//        return new FileClient(gcpFileProvider);
+//    }
+//
+//    @Bean
+//    public GcpFileProvider getGcpFileProvider() throws FileClientException {
+//        return new GcpFileProvider(applicationProperties.getGcpBaseUrl(),
+//                applicationProperties.getGcpBucketName(), applicationProperties.getGcpFilePath());
+//    }
 
     @Bean
-    public GcpFileProvider getGcpFileProvider() throws FileClientException {
-        return new GcpFileProvider(applicationProperties.getGcpBaseUrl(),
-                applicationProperties.getGcpBucketName(), applicationProperties.getGcpFilePath());
+    public FIleUploadUtil getGcpFileProvider() throws IOException {
+        return new FIleUploadUtil(applicationProperties.getGcpBucketName(), applicationProperties.getGcpFilePath());
     }
 
     @Bean(name = "objectMapper")

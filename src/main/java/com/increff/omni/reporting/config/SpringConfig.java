@@ -8,10 +8,7 @@ import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.ZonedDateTimeSerializer;
 import com.increff.account.client.AuthClient;
 import com.increff.omni.reporting.dto.CommonDtoHelper;
-import com.nextscm.commons.fileclient.AbstractFileProvider;
-import com.nextscm.commons.fileclient.FileClient;
-import com.nextscm.commons.fileclient.FileClientException;
-import com.nextscm.commons.fileclient.GcpFileProvider;
+import com.increff.omni.reporting.util.FIleUploadUtil;
 import com.nextscm.commons.spring.audit.api.AuditApi;
 import com.nextscm.commons.spring.audit.dao.AuditDao;
 import com.nextscm.commons.spring.audit.dao.DaoProvider;
@@ -39,6 +36,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -59,27 +57,28 @@ public class SpringConfig extends WebMvcConfigurerAdapter {
     @Autowired
     private ApplicationProperties applicationProperties;
 
-    @Bean
-    public FileClient getFileClient() throws FileClientException {
-        AbstractFileProvider gcpFileProvider = getGcpFileProvider();
-        return new FileClient(gcpFileProvider);
-    }
+//    @Bean
+//    public FileClient getFileClient() throws FileClientException {
+//        AbstractFileProvider gcpFileProvider = getGcpFileProvider();
+//        return new FileClient(gcpFileProvider);
+//    }
 
     @Bean
-    public GcpFileProvider getGcpFileProvider() throws FileClientException {
-        return new GcpFileProvider(applicationProperties.getGcpBaseUrl(),
-                applicationProperties.getGcpBucketName(), applicationProperties.getGcpFilePath());
+    public FIleUploadUtil getGcpFileProvider() throws IOException {
+        return new FIleUploadUtil(applicationProperties.getGcpBucketName(), applicationProperties.getGcpFilePath());
     }
 
     @Bean(name = "objectMapper")
-    public ObjectMapper getMapper(){
+    public ObjectMapper getMapper() {
         ObjectMapper mapper = new ObjectMapper();
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        JavaTimeModule javaTimeModule=new JavaTimeModule();
+        JavaTimeModule javaTimeModule = new JavaTimeModule();
         javaTimeModule.addSerializer(ZonedDateTime.class,
                 new ZonedDateTimeSerializer(DateTimeFormatter.ofPattern(CommonDtoHelper.TIME_ZONE_PATTERN)));
-        javaTimeModule.addDeserializer(LocalDateTime.class, new LocalDateTimeDeserializer(DateTimeFormatter.ISO_DATE_TIME));
-        return Jackson2ObjectMapperBuilder.json().featuresToDisable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS) // ISODate
+        javaTimeModule.addDeserializer(LocalDateTime.class,
+                new LocalDateTimeDeserializer(DateTimeFormatter.ISO_DATE_TIME));
+        return Jackson2ObjectMapperBuilder.json()
+                .featuresToDisable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS) // ISODate
                 .modules(javaTimeModule).build();
     }
 
@@ -152,7 +151,8 @@ public class SpringConfig extends WebMvcConfigurerAdapter {
             }
         };
 
-        HttpClient httpClient = HttpClients.custom().setConnectionManager(connManager).setKeepAliveStrategy(myStrategy).build();
+        HttpClient httpClient =
+                HttpClients.custom().setConnectionManager(connManager).setKeepAliveStrategy(myStrategy).build();
 
         /* HttpComponentsClientHttpRequestFactory is being used as this gives more flexibility around timeouts.
          * Also one must be aware that when ever HttpComponentsClientHttpRequestFactory is used, default connection

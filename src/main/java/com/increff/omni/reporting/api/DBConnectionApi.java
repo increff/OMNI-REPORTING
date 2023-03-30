@@ -6,10 +6,7 @@ import com.nextscm.commons.spring.common.ApiStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import java.sql.*;
 
 @Service
 public class DBConnectionApi {
@@ -34,9 +31,11 @@ public class DBConnectionApi {
                                           Integer fetchSize) throws ApiException {
         try {
             PreparedStatement statement = connection.prepareStatement(query);
+            connection.prepareStatement(query, ResultSet.TYPE_SCROLL_INSENSITIVE,
+                    ResultSet.CONCUR_READ_ONLY);
             statement.setQueryTimeout(maxExecutionTime);
+            statement.setFetchSize(fetchSize);
             statement.closeOnCompletion();
-//            statement.setFetchSize(fetchSize);
             return statement;
         } catch (SQLException e) {
             throw new ApiException(ApiStatus.BAD_DATA, "Error connecting to the database " + e.getMessage());
