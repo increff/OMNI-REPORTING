@@ -75,8 +75,7 @@ public class SpringConfig extends WebMvcConfigurerAdapter {
 
     @Bean
     public FileUploadUtil getFileUploadUtil() throws IOException {
-        return new FileUploadUtil(
-                applicationProperties.getGcpBucketName(), applicationProperties.getGcpFilePath());
+        return new FileUploadUtil(applicationProperties.getGcpBucketName(), applicationProperties.getGcpFilePath());
     }
 
     @Bean(name = "objectMapper")
