@@ -7,16 +7,13 @@ import com.increff.omni.reporting.dto.*;
 import com.increff.omni.reporting.model.data.*;
 import com.increff.omni.reporting.model.form.ReportRequestForm;
 import com.increff.omni.reporting.model.form.ReportScheduleForm;
-import com.increff.omni.reporting.util.FileUtil;
 import com.nextscm.commons.spring.common.ApiException;
-import com.sun.org.apache.xpath.internal.operations.Bool;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
-import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
@@ -92,9 +89,9 @@ public class StandardController {
 
     @ApiOperation(value = "Get Result of Request")
     @RequestMapping(value = "/request-report/{requestId}", method = RequestMethod.GET)
-    public void getFile(@PathVariable Integer requestId, HttpServletResponse response) throws
+    public String getFile(@PathVariable Integer requestId, HttpServletResponse response) throws
             ApiException, IOException {
-        reportRequestDto.getReportFile(requestId, response);
+        return reportRequestDto.getReportFile(requestId);
     }
 
     @ApiOperation(value = "View CSV of Request")

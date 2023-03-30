@@ -8,6 +8,7 @@ import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.ZonedDateTimeSerializer;
 import com.increff.account.client.AuthClient;
 import com.increff.omni.reporting.dto.CommonDtoHelper;
+import com.increff.omni.reporting.util.FileUploadUtil;
 import com.nextscm.commons.fileclient.AbstractFileProvider;
 import com.nextscm.commons.fileclient.FileClient;
 import com.nextscm.commons.fileclient.FileClientException;
@@ -39,6 +40,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -68,6 +70,12 @@ public class SpringConfig extends WebMvcConfigurerAdapter {
     @Bean
     public GcpFileProvider getGcpFileProvider() throws FileClientException {
         return new GcpFileProvider(applicationProperties.getGcpBaseUrl(),
+                applicationProperties.getGcpBucketName(), applicationProperties.getGcpFilePath());
+    }
+
+    @Bean
+    public FileUploadUtil getFileUploadUtil() throws IOException {
+        return new FileUploadUtil(
                 applicationProperties.getGcpBucketName(), applicationProperties.getGcpFilePath());
     }
 
