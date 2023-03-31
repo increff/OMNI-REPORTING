@@ -11,6 +11,7 @@ import com.increff.omni.reporting.model.data.ReportRequestData;
 import com.increff.omni.reporting.model.data.TimeZoneData;
 import com.increff.omni.reporting.model.form.ReportRequestForm;
 import com.increff.omni.reporting.pojo.*;
+import com.increff.omni.reporting.util.FileUploadUtil;
 import com.increff.omni.reporting.util.FileUtil;
 import com.increff.omni.reporting.util.UserPrincipalUtil;
 import com.nextscm.commons.fileclient.GcpFileProvider;
@@ -22,9 +23,9 @@ import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -58,6 +59,8 @@ public class ReportRequestDto extends AbstractDto {
     private InputControlFlowApi inputControlFlowApi;
     @Autowired
     private OrganizationApi organizationApi;
+    @Autowired
+    private FileUploadUtil fileUploadUtil;
     @Autowired
     private GcpFileProvider gcpFileProvider;
     @Autowired
@@ -113,24 +116,13 @@ public class ReportRequestDto extends AbstractDto {
         return reportRequestDataList;
     }
 
-    public void getReportFile(Integer requestId, HttpServletResponse response) throws ApiException, IOException {
+    public String getReportFile(Integer requestId) throws ApiException {
         ReportRequestPojo requestPojo = reportRequestApi.getCheck(requestId);
         if(!requestPojo.getType().equals(ReportRequestType.USER))
             throw new ApiException(ApiStatus.BAD_DATA, "Scheduled reports can't be downloaded");
         ReportPojo reportPojo = reportApi.getCheck(requestPojo.getReportId());
         validate(requestPojo, requestId, reportPojo, getUserId());
-        byte[] data = getFileFromUrl(requestPojo.getUrl());
-        response.setContentType("application/octet-stream");
-        response.setHeader("Content-Disposition", "inline");
-        response.setHeader("Content-length", String.valueOf(data.length));
-        OutputStream outputStream = null;
-        try {
-            outputStream = response.getOutputStream();
-            outputStream.write(data);
-            outputStream.flush();
-        } finally {
-            FileUtil.closeQuietly(outputStream);
-        }
+        return fileUploadUtil.getSignedUri(requestPojo.getUrl()).toString();
     }
 
     public List<Map<String, String>> getJsonFromCsv(Integer requestId) throws ApiException, IOException {

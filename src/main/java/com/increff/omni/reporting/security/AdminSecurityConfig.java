@@ -39,6 +39,7 @@ public class AdminSecurityConfig extends WebSecurityConfigurerAdapter {
                                 REPORT_ADMIN)
                 .antMatchers(HttpMethod.GET,"/admin/reports/orgs/**").hasAnyAuthority(APP_ADMIN, REPORT_ADMIN)
                 .antMatchers(HttpMethod.GET,"/admin/orgs/*/reports/*/controls").hasAnyAuthority(APP_ADMIN, REPORT_ADMIN)
+                .antMatchers(HttpMethod.GET,"/admin/orgs/*/reports/live").hasAnyAuthority(APP_ADMIN, REPORT_ADMIN)
                 .antMatchers("/admin/**").hasAnyAuthority(APP_ADMIN)//
                 .and().cors().and().csrf().disable()
                 .addFilterBefore(authTokenFilter, BasicAuthenticationFilter.class)

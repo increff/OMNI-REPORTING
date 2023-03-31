@@ -9,9 +9,9 @@ import com.increff.omni.reporting.model.constants.ReportRequestType;
 import com.increff.omni.reporting.model.form.SqlParams;
 import com.increff.omni.reporting.pojo.*;
 import com.increff.omni.reporting.util.EmailUtil;
+import com.increff.omni.reporting.util.FileUploadUtil;
 import com.increff.omni.reporting.util.FileUtil;
 import com.increff.omni.reporting.util.SqlCmd;
-import com.nextscm.commons.fileclient.FileClient;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
 import lombok.extern.log4j.Log4j;
@@ -57,7 +57,7 @@ public class ReportTask {
     @Autowired
     private FolderApi folderApi;
     @Autowired
-    private FileClient fileClient;
+    private FileUploadUtil fileUploadUtil;
     @Autowired
     private ApplicationProperties properties;
     @Autowired
@@ -106,7 +106,7 @@ public class ReportTask {
                     properties.getMaxExecutionTime());
             sqlParams.setQuery(fQuery);
             // Execute query and save results
-            saveResultsOnCloud(pojo, sqlParams, timezone);
+            saveResultsOnCloud(pojo, sqlParams, timezone, reportPojo);
             if (pojo.getType().equals(ReportRequestType.EMAIL)) {
                 reportScheduleApi.addScheduleCount(pojo.getScheduleId(), 1, 0);
             }
@@ -131,7 +131,8 @@ public class ReportTask {
         }
     }
 
-    private void saveResultsOnCloud(ReportRequestPojo pojo, SqlParams sqlParams, String timezone)
+    private void saveResultsOnCloud(ReportRequestPojo pojo, SqlParams sqlParams, String timezone,
+                                    ReportPojo reportPojo)
             throws IOException, ApiException {
         try {
             // Process data
@@ -153,7 +154,7 @@ public class ReportTask {
                     sendEmail(fileSize, csvFile, pojo, timezone);
                     break;
                 case USER:
-                    filePath = uploadFile(csvFile, pojo);
+                    filePath = uploadFile(csvFile, pojo, timezone, reportPojo);
                     break;
             }
             // update status to completed
@@ -236,12 +237,14 @@ public class ReportTask {
             log.debug("File deletion failed, name : " + errFile.getName());
     }
 
-    private String uploadFile(File file, ReportRequestPojo pojo) throws FileNotFoundException, ApiException {
+    private String uploadFile(File file, ReportRequestPojo pojo, String timezone,
+                              ReportPojo reportPojo) throws FileNotFoundException, ApiException {
         InputStream inputStream = new FileInputStream(file);
         String filePath = pojo.getOrgId() + "/" + "REPORTS" + "/" + pojo.getId() + "_" + UUID.randomUUID() + ".csv";
+        String filename = getFileName(reportPojo, timezone);
         log.debug("GCP Upload started for request ID : " + pojo.getId());
         try {
-            fileClient.create(filePath, inputStream);
+            fileUploadUtil.create(filePath, inputStream, filename);
             log.debug("GCP Upload completed for request ID : " + pojo.getId());
             inputStream.close();
         } catch (Exception e) {
@@ -249,6 +252,11 @@ public class ReportTask {
                     pojo.getId());
         }
         return filePath;
+    }
+
+    private String getFileName(ReportPojo reportPojo, String timezone) {
+        return reportPojo.getName() + "-" +ZonedDateTime.now().withZoneSameInstant(ZoneId.of(timezone))
+                .format(DateTimeFormatter.ofPattern(CommonDtoHelper.TIME_ZONE_PATTERN)) + ".csv";
     }
 
 }

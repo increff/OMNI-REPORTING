@@ -19,7 +19,7 @@ import java.util.Properties;
 @EnableTransactionManagement
 public class DbConfig {
 
-	private static final int CONNECTION_POOL_SIZE = 100;
+	private static final int CONNECTION_POOL_SIZE = 50;
 
 	public static final String PACKAGE_POJO = "com.increff.omni.reporting.pojo";
 	public static final String AUDIT_POJO = "com.nextscm.commons.spring.audit.pojo";
@@ -47,7 +47,7 @@ public class DbConfig {
 	@Bean(name = "dataSource")
 	public DataSource getDataSource() {
 		return DbPoolUtil.initDataSource(jdbcDriver, jdbcUrl, jdbcUsername, jdbcPassword, CONNECTION_POOL_SIZE,
-				CONNECTION_POOL_SIZE * 5);
+				CONNECTION_POOL_SIZE * 2);
 	}
 
 	@Bean(name = "entityManagerFactory")
