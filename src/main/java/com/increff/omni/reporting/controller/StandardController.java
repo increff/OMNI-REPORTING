@@ -13,7 +13,6 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
@@ -89,7 +88,7 @@ public class StandardController {
 
     @ApiOperation(value = "Get Result of Request")
     @RequestMapping(value = "/request-report/{requestId}", method = RequestMethod.GET)
-    public String getFile(@PathVariable Integer requestId, HttpServletResponse response) throws
+    public String getFile(@PathVariable Integer requestId) throws
             ApiException, IOException {
         return reportRequestDto.getReportFile(requestId);
     }
