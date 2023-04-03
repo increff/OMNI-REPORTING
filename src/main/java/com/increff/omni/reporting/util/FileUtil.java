@@ -55,6 +55,7 @@ public class FileUtil {
             while (it.hasNext()) {
                 String v = it.next();
                 v = v.replace("\"", "");
+                it.set(v);
                 if(v.contains(","))
                     it.set("\"" + v + "\"");
             }
