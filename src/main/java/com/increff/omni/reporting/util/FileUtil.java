@@ -54,7 +54,7 @@ public class FileUtil {
             ListIterator<String> it = values.listIterator();
             while (it.hasNext()) {
                 String v = it.next();
-                v = v.replace("\"", "'");
+                v = v.replace("\"", " ");
                 if(v.contains(","))
                     it.set("\"" + v + "\"");
             }
