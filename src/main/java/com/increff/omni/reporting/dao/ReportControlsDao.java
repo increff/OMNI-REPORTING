@@ -39,4 +39,15 @@ public class ReportControlsDao extends AbstractDao<ReportControlsPojo> {
         TypedQuery<ReportControlsPojo> tQuery = createQuery(query);
         return selectMultiple(tQuery);
     }
+
+    public List<ReportControlsPojo> selectByReportIds(List<Integer> reportIds) {
+        CriteriaBuilder cb = this.em.getCriteriaBuilder();
+        CriteriaQuery<ReportControlsPojo> query = cb.createQuery(ReportControlsPojo.class);
+        Root<ReportControlsPojo> root = query.from(ReportControlsPojo.class);
+        query.where(
+                root.get("reportId").in(reportIds)
+        );
+        TypedQuery<ReportControlsPojo> tQuery = createQuery(query);
+        return selectMultiple(tQuery);
+    }
 }

@@ -29,6 +29,10 @@ public class OrganizationApi extends AbstractApi {
         return pojo;
     }
 
+    public List<OrganizationPojo> getCheck(List<Integer> ids) throws ApiException {
+        return dao.selectByIds(ids);
+    }
+
     public OrganizationPojo update(OrganizationPojo pojo) throws ApiException {
         // validating
         OrganizationPojo existing = getCheck(pojo.getId());

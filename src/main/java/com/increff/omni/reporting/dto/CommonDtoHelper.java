@@ -12,6 +12,7 @@ import com.increff.omni.reporting.util.SqlCmd;
 import com.nextscm.commons.lang.StringUtil;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
+import io.swagger.models.auth.In;
 import org.springframework.scheduling.support.CronSequenceGenerator;
 
 import java.io.File;
@@ -118,6 +119,28 @@ public class CommonDtoHelper {
             }
         }
         data.setFilters(filterData);
+    }
+
+    public static Map<Integer, List<ReportInputParamsPojo>> prepareRequestToParamMap(List<ReportInputParamsPojo> allParamsPojo) {
+        Map<Integer, List<ReportInputParamsPojo>> requestToParamsPojo = new HashMap<>();
+        allParamsPojo.forEach(a -> {
+            if(requestToParamsPojo.containsKey(a.getReportRequestId())) {
+                List<ReportInputParamsPojo> existingParams = requestToParamsPojo.get(a.getReportRequestId());
+                existingParams.add(a);
+                requestToParamsPojo.put(a.getReportRequestId(), existingParams);
+            } else {
+                requestToParamsPojo.put(a.getReportRequestId(), new ArrayList<>(Collections.singletonList(a)));
+            }
+        });
+        return requestToParamsPojo;
+    }
+
+    public static Map<Integer, OrganizationPojo> prepareOrgIdToPojo(List<OrganizationPojo> organizationPojoList) {
+        Map<Integer, OrganizationPojo> orgToPojo = new HashMap<>();
+        organizationPojoList.forEach(a -> {
+            orgToPojo.put(a.getId(), a);
+        });
+        return orgToPojo;
     }
 
     public static void sortBasedOnReportControlMappedTime(List<InputControlData> inputControlDataList,

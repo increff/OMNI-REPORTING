@@ -44,4 +44,8 @@ public class ReportControlsApi extends AbstractApi {
     public void delete(Integer id) {
         dao.remove(id);
     }
+
+    public List<ReportControlsPojo> getByReportIds(List<Integer> reportIds) {
+        return dao.selectByReportIds(reportIds);
+    }
 }

@@ -23,9 +23,9 @@ import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -82,7 +82,7 @@ public class ReportRequestDto extends AbstractDto {
         Map<String, List<String>> inputDisplayMap = new HashMap<>();
         ReportRequestPojo pojo = CommonDtoHelper.getReportRequestPojo(form, orgId, getUserId());
         ReportPojo reportPojo = reportApi.getCheck(pojo.getReportId());
-        if(reportPojo.getIsDashboard())
+        if (reportPojo.getIsDashboard())
             throw new ApiException(ApiStatus.BAD_DATA, "Dashboard can't be requested here");
         ReportQueryPojo reportQueryPojo = queryApi.getByReportId(reportPojo.getId());
         List<ReportControlsPojo> reportControlsPojoList = reportControlsApi.getByReportId(reportPojo.getId());
@@ -91,10 +91,12 @@ public class ReportRequestDto extends AbstractDto {
         if (Objects.isNull(reportQueryPojo))
             throw new ApiException(ApiStatus.BAD_DATA, "No query defined for report : " + reportPojo.getName());
         validateCustomReportAccess(reportPojo, orgId);
-        validateInputParamValues(form.getParamMap(), inputParamsMap, orgId, inputDisplayMap, inputControlPojoList, ReportRequestType.USER);
+        validateInputParamValues(form.getParamMap(), inputParamsMap, orgId, inputDisplayMap, inputControlPojoList,
+                ReportRequestType.USER);
         Map<String, String> inputDisplayStringMap = UserPrincipalUtil.getStringToStringParamMap(inputDisplayMap);
         List<ReportInputParamsPojo> reportInputParamsPojoList =
-                CommonDtoHelper.getReportInputParamsPojoList(inputParamsMap, form.getTimezone(), orgId, inputDisplayStringMap);
+                CommonDtoHelper.getReportInputParamsPojoList(inputParamsMap, form.getTimezone(), orgId,
+                        inputDisplayStringMap);
         flow.requestReport(pojo, reportInputParamsPojoList);
         flow.saveAudit(pojo.getId().toString(), AuditActions.REQUEST_REPORT.toString(), "Request Report",
                 "Report request submitted for organization : " + organizationPojo.getName(), getUserName());
@@ -103,22 +105,39 @@ public class ReportRequestDto extends AbstractDto {
     public List<ReportRequestData> getAll() throws ApiException, IOException {
         List<ReportRequestData> reportRequestDataList = new ArrayList<>();
         List<ReportRequestPojo> reportRequestPojoList = reportRequestApi.getByUserId(getUserId(), MAX_LIMIT);
+        List<Integer> reportIds =
+                reportRequestPojoList.stream().map(ReportRequestPojo::getReportId).collect(Collectors.toList());
+        List<Integer> orgIds =
+                reportRequestPojoList.stream().map(ReportRequestPojo::getOrgId).collect(Collectors.toList());
+        List<Integer> reportRequestIds =
+                reportRequestPojoList.stream().map(ReportRequestPojo::getId).collect(Collectors.toList());
+        List<ReportInputParamsPojo> allParamsPojo =
+                reportInputParamsApi.getInputParamsForReportRequestIds(reportRequestIds);
+        Map<Integer, List<ReportInputParamsPojo>> requestToParamsMap = prepareRequestToParamMap(allParamsPojo);
+        List<ReportPojo> reportPojoList = reportApi.getByIds(reportIds, false);
+        List<ReportControlsPojo> reportControlsPojos = reportControlsApi.getByReportIds(reportIds);
+        List<Integer> controlIds = reportControlsPojos.stream()
+                .map(ReportControlsPojo::getControlId).collect(Collectors.toList());
+        List<InputControlPojo> controlPojos = controlApi.selectByIds(controlIds);
+        List<OrganizationPojo> organizationPojoList = organizationApi.getCheck(orgIds);
+        Map<Integer, OrganizationPojo> orgToPojo = prepareOrgIdToPojo(organizationPojoList);
+
         for (ReportRequestPojo r : reportRequestPojoList) {
-            ReportPojo reportPojo = reportApi.getCheck(r.getReportId());
-            List<ReportControlsPojo> reportControlsPojos = reportControlsApi.getByReportId(r.getReportId());
-            List<Integer> controlIds = reportControlsPojos.stream()
-                    .map(ReportControlsPojo::getControlId).collect(Collectors.toList());
-            List<InputControlPojo> controlPojos = controlApi.selectByIds(controlIds);
-            List<ReportInputParamsPojo> paramsPojoList = reportInputParamsApi.getInputParamsForReportRequest(r.getId());
-            OrganizationPojo organizationPojo = organizationApi.getCheck(r.getOrgId());
-            reportRequestDataList.add(getReportRequestData(r, reportPojo, controlPojos, paramsPojoList, organizationPojo));
+            Optional<ReportPojo> reportPojo =
+                    reportPojoList.stream().filter(report -> report.getId().equals(r.getReportId())).findFirst();
+            if(!reportPojo.isPresent())
+                continue;
+            List<ReportInputParamsPojo> paramsPojoList = requestToParamsMap.get(r.getId());
+            OrganizationPojo organizationPojo = orgToPojo.get(r.getOrgId());
+            reportRequestDataList.add(
+                    getReportRequestData(r, reportPojo.get(), controlPojos, paramsPojoList, organizationPojo));
         }
         return reportRequestDataList;
     }
 
     public String getReportFile(Integer requestId) throws ApiException {
         ReportRequestPojo requestPojo = reportRequestApi.getCheck(requestId);
-        if(!requestPojo.getType().equals(ReportRequestType.USER))
+        if (!requestPojo.getType().equals(ReportRequestType.USER))
             throw new ApiException(ApiStatus.BAD_DATA, "Scheduled reports can't be downloaded");
         ReportPojo reportPojo = reportApi.getCheck(requestPojo.getReportId());
         validate(requestPojo, requestId, reportPojo, getUserId());
@@ -127,7 +146,7 @@ public class ReportRequestDto extends AbstractDto {
 
     public List<Map<String, String>> getJsonFromCsv(Integer requestId) throws ApiException, IOException {
         ReportRequestPojo requestPojo = reportRequestApi.getCheck(requestId);
-        if(!requestPojo.getType().equals(ReportRequestType.USER))
+        if (!requestPojo.getType().equals(ReportRequestType.USER))
             throw new ApiException(ApiStatus.BAD_DATA, "Scheduled reports can't be viewed");
         if (requestPojo.getStatus().equals(ReportRequestStatus.FAILED))
             throw new ApiException(ApiStatus.BAD_DATA, "Failed report can't be viewed");

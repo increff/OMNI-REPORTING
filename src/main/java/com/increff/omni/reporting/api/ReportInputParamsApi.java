@@ -22,4 +22,8 @@ public class ReportInputParamsApi extends AbstractApi {
     public List<ReportInputParamsPojo> getInputParamsForReportRequest(Integer reportRequestId) {
         return dao.selectMultiple("reportRequestId", reportRequestId);
     }
+
+    public List<ReportInputParamsPojo> getInputParamsForReportRequestIds(List<Integer> reportRequestIds) {
+        return dao.selectByRequestIds(reportRequestIds);
+    }
 }
