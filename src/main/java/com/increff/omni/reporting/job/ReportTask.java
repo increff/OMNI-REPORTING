@@ -136,7 +136,10 @@ public class ReportTask {
             throws IOException, ApiException {
         try {
             // Process data
+            log.info("Thread in async task : " + Thread.currentThread().getId() + " " +Thread.currentThread().getName());
             SqlCmd.processQuery(sqlParams, false, properties.getMaxExecutionTime());
+            log.info("Thread in async task after query : " + Thread.currentThread().getId() + " " +Thread.currentThread().getName());
+
             double fileSize = FileUtil.getSizeInMb(sqlParams.getOutFile().length());
             if (fileSize > properties.getMaxFileSize())
                 throw new ApiException(ApiStatus.BAD_DATA,

@@ -2,7 +2,6 @@ package com.increff.omni.reporting.util;
 
 import com.increff.omni.reporting.dto.QueryExecutionDto;
 import com.increff.omni.reporting.model.form.SqlParams;
-import com.nextscm.commons.lang.CmdUtil;
 import lombok.extern.log4j.Log4j;
 import org.apache.commons.lang3.StringUtils;
 
@@ -26,7 +25,11 @@ public class SqlCmd {
         String[] cmd = getQueryCmd(sp);
         Redirect redirectAll = Redirect.appendTo(sp.getOutFile());
         Redirect errRedirect = Redirect.appendTo(sp.getErrFile());
-        CmdUtil.runCmd(cmd, redirectAll, errRedirect);
+        log.info("Thread in process query : " + Thread.currentThread().getId() + " " +Thread.currentThread().getName());
+
+        runCmd(cmd, redirectAll, errRedirect);
+        log.info("Thread in process query after cmd : " + Thread.currentThread().getId() + " " +Thread.currentThread().getName());
+
     }
 
     public static String prepareQuery(Map<String, String> inputParamMap, String query, Double maxExecutionTime) {
@@ -101,6 +104,39 @@ public class SqlCmd {
                 break;
         }
         return finalString;
+    }
+
+    private static void runCmd(String[] cmd, Redirect out, Redirect error) throws IOException, InterruptedException {
+        Process p = runCmdProcess(cmd, out, error);
+        int exitValue = p.exitValue();
+        log.info("Thread in run cmd : " + Thread.currentThread().getId() + " " +Thread.currentThread().getName());
+
+        p.destroy();
+        log.info("Thread in run cmd after destroy : " + Thread.currentThread().getId() + " " +Thread.currentThread().getName());
+
+        if (exitValue == 0) {
+            return;
+        }
+        String cmdName = cmd[0];
+        throw new IOException("Error running command: " + cmdName + ", exitValue: " + exitValue);
+    }
+
+    private static Process runCmdProcess(String[] cmd, Redirect out, Redirect error)
+            throws IOException, InterruptedException {
+        Process p = null;
+        ProcessBuilder b = new ProcessBuilder(cmd);
+        if (error != null) {
+            b.redirectError(error);
+        }
+        if (out != null) {
+            b.redirectOutput(out);
+        }
+        p = b.start();
+        log.info("Thread in process start : " + Thread.currentThread().getId() + " " +Thread.currentThread().getName());
+
+        p.waitFor();
+        Thread.sleep(40000);
+        return p;
     }
 
     private static String escape(String str) {
