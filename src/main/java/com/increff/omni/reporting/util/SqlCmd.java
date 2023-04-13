@@ -25,11 +25,7 @@ public class SqlCmd {
         String[] cmd = getQueryCmd(sp);
         Redirect redirectAll = Redirect.appendTo(sp.getOutFile());
         Redirect errRedirect = Redirect.appendTo(sp.getErrFile());
-        log.info("Thread in process query : " + Thread.currentThread().getId() + " " +Thread.currentThread().getName());
-
         runCmd(cmd, redirectAll, errRedirect);
-        log.info("Thread in process query after cmd : " + Thread.currentThread().getId() + " " +Thread.currentThread().getName());
-
     }
 
     public static String prepareQuery(Map<String, String> inputParamMap, String query, Double maxExecutionTime) {
@@ -109,11 +105,7 @@ public class SqlCmd {
     private static void runCmd(String[] cmd, Redirect out, Redirect error) throws IOException, InterruptedException {
         Process p = runCmdProcess(cmd, out, error);
         int exitValue = p.exitValue();
-        log.info("Thread in run cmd : " + Thread.currentThread().getId() + " " +Thread.currentThread().getName());
-
         p.destroy();
-        log.info("Thread in run cmd after destroy : " + Thread.currentThread().getId() + " " +Thread.currentThread().getName());
-
         if (exitValue == 0) {
             return;
         }
@@ -123,7 +115,7 @@ public class SqlCmd {
 
     private static Process runCmdProcess(String[] cmd, Redirect out, Redirect error)
             throws IOException, InterruptedException {
-        Process p = null;
+        Process p;
         ProcessBuilder b = new ProcessBuilder(cmd);
         if (error != null) {
             b.redirectError(error);
@@ -132,10 +124,7 @@ public class SqlCmd {
             b.redirectOutput(out);
         }
         p = b.start();
-        log.info("Thread in process start : " + Thread.currentThread().getId() + " " +Thread.currentThread().getName());
-
         p.waitFor();
-        Thread.sleep(40000);
         return p;
     }
 
