@@ -1,5 +1,6 @@
 package com.increff.omni.reporting.model.data;
 
+import com.increff.commons.queryexecutor.constants.FileFormat;
 import com.increff.omni.reporting.model.constants.ReportRequestStatus;
 import com.increff.omni.reporting.model.constants.ReportRequestType;
 import lombok.Getter;
@@ -25,4 +26,5 @@ public class ReportRequestData {
     private Double fileSize;
     private Integer noOfRows;
     private String timezone;
+    private FileFormat fileFormat;
 }

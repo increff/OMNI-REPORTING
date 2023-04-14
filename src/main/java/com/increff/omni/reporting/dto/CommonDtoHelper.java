@@ -85,6 +85,7 @@ public class CommonDtoHelper {
         data.setFileSize(pojo.getFileSize());
         data.setNoOfRows(pojo.getNoOfRows());
         data.setFailureReason(pojo.getFailureReason());
+        data.setFileFormat(pojo.getFileFormat());
         setFiltersApplied(paramsPojoList, data, controlPojos);
         return data;
     }

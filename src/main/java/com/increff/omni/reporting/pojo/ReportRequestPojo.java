@@ -1,5 +1,6 @@
 package com.increff.omni.reporting.pojo;
 
+import com.increff.commons.queryexecutor.constants.FileFormat;
 import com.increff.omni.reporting.model.constants.ReportRequestStatus;
 import com.increff.omni.reporting.model.constants.ReportRequestType;
 import lombok.Getter;
@@ -44,6 +45,8 @@ public class ReportRequestPojo extends AbstractVersionedPojo {
     private Integer noOfRows;
 
     private Double fileSize;
+
+    private FileFormat fileFormat;
 
     private String url;
 

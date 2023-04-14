@@ -1,5 +1,8 @@
 package com.increff.omni.reporting.job;
 
+import com.increff.commons.queryexecutor.form.FileUploadDetailsForm;
+import com.increff.commons.queryexecutor.form.QueryDetailsForm;
+import com.increff.commons.queryexecutor.form.QueryExecutorForm;
 import com.increff.omni.reporting.api.*;
 import com.increff.omni.reporting.config.ApplicationProperties;
 import com.increff.omni.reporting.config.EmailProps;
@@ -67,15 +70,93 @@ public class ReportTask {
 
     @Async("userReportRequestExecutor")
     public void runUserReportAsync(ReportRequestPojo pojo) throws ApiException, MessagingException {
-        run(pojo);
+        runUserReports(pojo);
     }
 
     @Async("scheduleReportRequestExecutor")
     public void runScheduleReportAsync(ReportRequestPojo pojo) throws ApiException, MessagingException {
-        run(pojo);
+        runScheduleReports(pojo);
     }
 
-    private void run(ReportRequestPojo pojo) throws ApiException {
+    private void runUserReports(ReportRequestPojo pojo) {
+        // mark as processing - locking
+        try {
+            api.markProcessingIfEligible(pojo.getId());
+        } catch (OptimisticLockException | ObjectOptimisticLockingFailureException | ApiException e) {
+            log.debug("Error occurred while marking report in progress for request id : " + pojo.getId(), e);
+            return;
+        }
+        // process
+        String timezone = "Asia/Kolkata";
+        try {
+            ReportRequestPojo reportRequestPojo = api.getCheck(pojo.getId());
+
+            List<ReportInputParamsPojo> reportInputParamsPojoList = reportInputParamsApi
+                    .getInputParamsForReportRequest(reportRequestPojo.getId());
+            ReportPojo reportPojo = reportApi.getCheck(reportRequestPojo.getReportId());
+            ReportQueryPojo reportQueryPojo = reportQueryApi.getByReportId(reportPojo.getId());
+            OrgConnectionPojo orgConnectionPojo = orgConnectionApi.getCheckByOrgId(reportRequestPojo.getOrgId());
+            ConnectionPojo connectionPojo = connectionApi.getCheck(orgConnectionPojo.getConnectionId());
+
+            // Creation of file
+            Map<String, String> inputParamMap = getInputParamMapFromPojoList(reportInputParamsPojoList);
+            timezone = getValueFromQuotes(inputParamMap.get("timezone"));
+//            SqlParams sqlParams = CommonDtoHelper.convert(connectionPojo, file, errorFile
+//            );
+            String fQuery = SqlCmd.prepareQuery(inputParamMap, reportQueryPojo.getQuery(),
+                    properties.getMaxExecutionTime());
+            QueryExecutorForm queryExecutorForm = getQueryExecutorForm(fQuery, timezone, connectionPojo,
+                    reportRequestPojo, reportPojo);
+
+//            sqlParams.setQuery(fQuery);
+            // Execute query and save results
+            saveResultsOnCloud(pojo, sqlParams, timezone, reportPojo);
+            if (pojo.getType().equals(ReportRequestType.EMAIL)) {
+                reportScheduleApi.addScheduleCount(pojo.getScheduleId(), 1, 0);
+            }
+        } catch (Exception e) {
+            log.error("Report Request ID : " + pojo.getId() + " failed", e);
+            api.markFailed(pojo.getId(), ReportRequestStatus.FAILED, e.getMessage(), 0, 0.0);
+            try {
+                if (pojo.getType().equals(ReportRequestType.EMAIL)) {
+                    ReportSchedulePojo schedulePojo = reportScheduleApi.getCheck(pojo.getScheduleId());
+                    List<String> toEmails = reportScheduleApi.getByScheduleId(schedulePojo.getId()).stream()
+                            .map(ReportScheduleEmailsPojo::getSendTo).collect(
+                                    Collectors.toList());
+                    EmailProps props = createEmailProps(null, false, schedulePojo, toEmails, "Hi,<br>Please " +
+                            "check failure reason in the latest scheduled requests. Re-submit the schedule in the " +
+                            "reporting application, which might solve the issue.", false, timezone);
+                    EmailUtil.sendMail(props);
+                    reportScheduleApi.addScheduleCount(pojo.getScheduleId(), 0, 1);
+                }
+            } catch (Exception ex) {
+                log.error("Report Request ID : " + pojo.getId() + ". Failed to send email. ", ex);
+            }
+        }
+    }
+
+    private QueryExecutorForm getQueryExecutorForm(String fQuery, String timezone, ConnectionPojo connectionPojo,
+                                                   ReportRequestPojo reportRequestPojo,
+                                                   ReportPojo reportPojo) {
+        QueryExecutorForm form = new QueryExecutorForm();
+        form.setUserId(reportRequestPojo.getUserId());
+        form.setReferenceId(Long.valueOf(reportRequestPojo.getId()));
+        FileUploadDetailsForm uploadDetailsForm = new FileUploadDetailsForm();
+        uploadDetailsForm.setFileFormat(reportRequestPojo.getFileFormat());
+        uploadDetailsForm.setGcpBucketName(properties.getGcpBucketName());
+        uploadDetailsForm.setFilename(reportPojo.getName());
+        uploadDetailsForm.setMaxFileSize(properties.getMaxFileSize());
+        uploadDetailsForm.setFilepath(getFilePath(reportRequestPojo));
+        form.setFileUploadDetails(uploadDetailsForm);
+        QueryDetailsForm queryDetailsForm = new QueryDetailsForm();
+        queryDetailsForm.setQuery(fQuery);
+        queryDetailsForm.setConnectTimeout(5);
+        queryDetailsForm.setPassword(connectionPojo.getPassword());
+        queryDetailsForm.setUsername(connectionPojo.getUsername());
+        queryDetailsForm.setReadTimeout(properties.getMaxExecutionTime());
+    }
+
+    private void runScheduleReports(ReportRequestPojo pojo) throws ApiException {
         // mark as processing - locking
         try {
             api.markProcessingIfEligible(pojo.getId());
@@ -240,7 +321,7 @@ public class ReportTask {
     private String uploadFile(File file, ReportRequestPojo pojo, String timezone,
                               ReportPojo reportPojo) throws FileNotFoundException, ApiException {
         InputStream inputStream = new FileInputStream(file);
-        String filePath = pojo.getOrgId() + "/" + "REPORTS" + "/" + pojo.getId() + "_" + UUID.randomUUID() + ".csv";
+        String filePath = getFilePath(pojo);
         String filename = getFileName(reportPojo, timezone);
         log.debug("GCP Upload started for request ID : " + pojo.getId());
         try {
@@ -252,6 +333,11 @@ public class ReportTask {
                     pojo.getId());
         }
         return filePath;
+    }
+
+    private String getFilePath(ReportRequestPojo pojo) {
+        return pojo.getOrgId() + "/" + "REPORTS" + "/" + pojo.getId() + "_" + UUID.randomUUID() + "." +
+                pojo.getFileFormat().toString().toLowerCase();
     }
 
     private String getFileName(ReportPojo reportPojo, String timezone) {

@@ -64,6 +64,16 @@
         </dependency>
         <dependency>
             <groupId>com.increff.commons</groupId>
+            <artifactId>query-executor-commons</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.increff.commons</groupId>
+            <artifactId>query-executor-client</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.increff.commons</groupId>
             <artifactId>commons-logging</artifactId>
             <version>${increff-commons-logging.version}</version>
         </dependency>
