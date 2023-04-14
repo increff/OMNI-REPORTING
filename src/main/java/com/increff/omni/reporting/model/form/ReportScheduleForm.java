@@ -1,13 +1,11 @@
 package com.increff.omni.reporting.model.form;
 
 import com.increff.omni.reporting.model.constants.InputControlType;
-import com.increff.omni.reporting.model.constants.ReportRequestType;
 import lombok.Getter;
 import lombok.Setter;
 
 import javax.validation.constraints.NotNull;
 import java.util.List;
-import java.util.Map;
 
 @Getter
 @Setter

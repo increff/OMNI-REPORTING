@@ -8,7 +8,6 @@ import com.increff.omni.reporting.model.constants.ResourceQueryParamKeys;
 import com.increff.omni.reporting.model.form.ReportScheduleForm;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class UserPrincipalUtil {
 

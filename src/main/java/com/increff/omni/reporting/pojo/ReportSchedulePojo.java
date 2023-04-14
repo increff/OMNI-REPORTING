@@ -1,6 +1,5 @@
 package com.increff.omni.reporting.pojo;
 
-import com.increff.omni.reporting.model.constants.ReportRequestType;
 import lombok.Getter;
 import lombok.Setter;
 

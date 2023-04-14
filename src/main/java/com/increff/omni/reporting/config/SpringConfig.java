@@ -19,14 +19,12 @@ import com.nextscm.commons.spring.audit.dao.DaoProvider;
 import com.nextscm.commons.spring.server.WebMvcConfig;
 import org.apache.http.HeaderElement;
 import org.apache.http.HeaderElementIterator;
-import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.conn.ConnectionKeepAliveStrategy;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.message.BasicHeaderElementIterator;
 import org.apache.http.protocol.HTTP;
-import org.apache.http.protocol.HttpContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.*;
 import org.springframework.http.client.ClientHttpRequestFactory;
@@ -141,22 +139,19 @@ public class SpringConfig extends WebMvcConfigurerAdapter {
         PoolingHttpClientConnectionManager connManager = new PoolingHttpClientConnectionManager();
         connManager.setDefaultMaxPerRoute(100);
         connManager.setMaxTotal(100);
-        ConnectionKeepAliveStrategy myStrategy = new ConnectionKeepAliveStrategy() {
-            @Override
-            public long getKeepAliveDuration(HttpResponse httpResponse, HttpContext httpContext) {
-                HeaderElementIterator it = new BasicHeaderElementIterator
-                        (httpResponse.headerIterator(HTTP.CONN_KEEP_ALIVE));
-                while (it.hasNext()) {
-                    HeaderElement he = it.nextElement();
-                    String param = he.getName();
-                    String value = he.getValue();
-                    if (value != null && param.equalsIgnoreCase
-                            ("timeout")) {
-                        return Long.parseLong(value) * 1000;
-                    }
+        ConnectionKeepAliveStrategy myStrategy = (httpResponse, httpContext) -> {
+            HeaderElementIterator it = new BasicHeaderElementIterator
+                    (httpResponse.headerIterator(HTTP.CONN_KEEP_ALIVE));
+            while (it.hasNext()) {
+                HeaderElement he = it.nextElement();
+                String param = he.getName();
+                String value = he.getValue();
+                if (value != null && param.equalsIgnoreCase
+                        ("timeout")) {
+                    return Long.parseLong(value) * 1000;
                 }
-                return 30 * 1000L;
             }
+            return 30 * 1000L;
         };
 
         HttpClient httpClient = HttpClients.custom().setConnectionManager(connManager).setKeepAliveStrategy(myStrategy).build();

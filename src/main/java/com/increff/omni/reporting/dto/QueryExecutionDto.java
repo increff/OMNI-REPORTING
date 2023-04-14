@@ -1,9 +1,6 @@
 package com.increff.omni.reporting.dto;
 
 import com.increff.omni.reporting.model.constants.QueryOperator;
-import com.nextscm.commons.lang.StringUtil;
-import com.nextscm.commons.spring.common.ApiException;
-import org.springframework.stereotype.Component;
 
 import java.util.Objects;
 

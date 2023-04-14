@@ -18,7 +18,6 @@ import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
 import com.nextscm.commons.spring.common.ConvertUtil;
 import lombok.Setter;
-import org.hibernate.validator.constraints.Mod10Check;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

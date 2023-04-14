@@ -1,11 +1,9 @@
 package com.increff.omni.reporting.model.data;
 
-import com.increff.omni.reporting.model.constants.ReportRequestType;
 import com.increff.omni.reporting.model.form.CronScheduleForm;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.validation.constraints.NotNull;
 import java.time.ZonedDateTime;
 import java.util.List;
 

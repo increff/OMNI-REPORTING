@@ -161,6 +161,7 @@ public class ReportRequestDto extends AbstractDto {
         List<Map<String, String>> data = FileUtil.getJsonDataFromFile(sourceFile, ',');
         FileUtil.delete(sourceFile);
         return data;
+
     }
 
     public List<TimeZoneData> getAllAvailableTimeZones() throws ApiException {

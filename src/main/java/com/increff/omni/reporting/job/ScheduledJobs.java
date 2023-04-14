@@ -6,7 +6,6 @@ import com.increff.omni.reporting.config.ApplicationProperties;
 import com.increff.omni.reporting.flow.ReportRequestFlowApi;
 import com.increff.omni.reporting.model.constants.ReportRequestType;
 import com.increff.omni.reporting.pojo.*;
-import com.nextscm.commons.lang.StringUtil;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
 import lombok.extern.log4j.Log4j;
@@ -60,7 +59,7 @@ public class ScheduledJobs {
 
     @Scheduled(fixedDelay = 1000)
     public void runScheduleReports() {
-        runReports(scheduleReportExecutor, Arrays.asList(ReportRequestType.EMAIL));
+        runReports(scheduleReportExecutor, Collections.singletonList(ReportRequestType.EMAIL));
     }
 
     @Scheduled(fixedDelay = 60 * 1000)

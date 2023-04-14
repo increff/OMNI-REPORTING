@@ -144,18 +144,18 @@ public class InputControlFlowApi extends AbstractApi {
 
     private Map<String, String> getMapFromTsv(File file) throws IOException {
         Map<String, String> fMap = new HashMap<>();
-        BufferedReader tsvfile =
-                new BufferedReader(new FileReader(file));
-        String dataRow = tsvfile.readLine();
-        if(dataRow != null)
-            dataRow = tsvfile.readLine();
-        while (dataRow != null) {
-            List<String> values = Arrays.asList(dataRow.split("\t"));
-            if(values.size() == 2)
-                fMap.put(values.get(0), values.get(1));
-            dataRow = tsvfile.readLine(); // Read next line of data.
+        try (FileReader fileReader = new FileReader(file);
+            BufferedReader tsvfile = new BufferedReader(fileReader)) {
+            String dataRow = tsvfile.readLine();
+            if(dataRow != null)
+                dataRow = tsvfile.readLine();
+            while (dataRow != null) {
+                List<String> values = Arrays.asList(dataRow.split("\t"));
+                if(values.size() == 2)
+                    fMap.put(values.get(0), values.get(1));
+                dataRow = tsvfile.readLine(); // Read next line of data.
+            }
         }
-        tsvfile.close();
         return fMap;
     }
 

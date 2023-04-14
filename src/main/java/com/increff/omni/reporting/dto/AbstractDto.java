@@ -6,7 +6,6 @@ import com.increff.omni.reporting.api.*;
 import com.increff.omni.reporting.flow.InputControlFlowApi;
 import com.increff.omni.reporting.model.constants.ReportRequestType;
 import com.increff.omni.reporting.model.constants.ReportType;
-import com.increff.omni.reporting.model.data.ReportRequestData;
 import com.increff.omni.reporting.pojo.*;
 import com.nextscm.commons.lang.StringUtil;
 import com.nextscm.commons.spring.common.ApiException;

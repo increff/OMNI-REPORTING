@@ -111,22 +111,19 @@ public class TestConfig {
         PoolingHttpClientConnectionManager connManager = new PoolingHttpClientConnectionManager();
         connManager.setDefaultMaxPerRoute(100);
         connManager.setMaxTotal(100);
-        ConnectionKeepAliveStrategy myStrategy = new ConnectionKeepAliveStrategy() {
-            @Override
-            public long getKeepAliveDuration(HttpResponse httpResponse, HttpContext httpContext) {
-                HeaderElementIterator it = new BasicHeaderElementIterator
-                        (httpResponse.headerIterator(HTTP.CONN_KEEP_ALIVE));
-                while (it.hasNext()) {
-                    HeaderElement he = it.nextElement();
-                    String param = he.getName();
-                    String value = he.getValue();
-                    if (value != null && param.equalsIgnoreCase
-                            ("timeout")) {
-                        return Long.parseLong(value) * 1000;
-                    }
+        ConnectionKeepAliveStrategy myStrategy = (httpResponse, httpContext) -> {
+            HeaderElementIterator it = new BasicHeaderElementIterator
+                    (httpResponse.headerIterator(HTTP.CONN_KEEP_ALIVE));
+            while (it.hasNext()) {
+                HeaderElement he = it.nextElement();
+                String param = he.getName();
+                String value = he.getValue();
+                if (value != null && param.equalsIgnoreCase
+                        ("timeout")) {
+                    return Long.parseLong(value) * 1000;
                 }
-                return 30 * 1000L;
             }
+            return 30 * 1000L;
         };
 
         HttpClient httpClient = HttpClients.custom().setConnectionManager(connManager).setKeepAliveStrategy(myStrategy).build();
