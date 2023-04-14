@@ -110,7 +110,7 @@ public class ReportFlowApi extends AbstractFlowApi {
             }
             return FileUtil.getJsonDataFromFile(file, '\t');
         } catch (Throwable e) {
-            log.info("Failed to get the data for dashboard for report id : " + reportPojo.getId() + " , org id : " + orgId,
+            log.error("Failed to get the data for dashboard for report id : " + reportPojo.getId() + " , org id : " + orgId,
                     e);
             throw new ApiException(ApiStatus.BAD_DATA, "Failed to get the data for dashboard." + e.getMessage());
         } finally {
