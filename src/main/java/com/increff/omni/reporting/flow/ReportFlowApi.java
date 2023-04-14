@@ -103,13 +103,15 @@ public class ReportFlowApi extends AbstractFlowApi {
                     properties.getLiveReportMaxExecutionTime());
             sqlParams.setQuery(fQuery);
             // Execute query and save results
-            SqlCmd.processQuery(sqlParams, true, properties.getMaxExecutionTime());
+            SqlCmd.processQuery(sqlParams, true, properties.getLiveReportMaxExecutionTime());
             if (FileUtil.getNumberOfRows(sqlParams.getOutFile()) > MAX_NUMBER_OF_ROWS) {
                 throw new ApiException(ApiStatus.BAD_DATA, "Data exceeded " + MAX_NUMBER_OF_ROWS + " Rows, select " +
                         "granular filters.");
             }
             return FileUtil.getJsonDataFromFile(file, '\t');
-        } catch (Exception e) {
+        } catch (Throwable e) {
+            log.info("Failed to get the data for dashboard for report id : " + reportPojo.getId() + " , org id : " + orgId,
+                    e);
             throw new ApiException(ApiStatus.BAD_DATA, "Failed to get the data for dashboard." + e.getMessage());
         } finally {
             deleteFiles(file, errorFile);
