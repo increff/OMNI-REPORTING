@@ -1,5 +1,7 @@
 package com.increff.omni.reporting.dto;
 
+import com.increff.commons.queryexecutor.constants.RequestStatus;
+import com.increff.commons.queryexecutor.data.QueryRequestData;
 import com.increff.omni.reporting.model.constants.ReportRequestStatus;
 import com.increff.omni.reporting.model.constants.ReportRequestType;
 import com.increff.omni.reporting.model.constants.ValidationType;
@@ -30,7 +32,7 @@ public class CommonDtoHelper {
     public final static String TIME_ZONE_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX";
 
     public static SqlParams getSqlParams(ConnectionPojo pojo, String query, File file, File errFile,
-                                         Double maxExecutionTime) {
+                                         Integer maxExecutionTime) {
         SqlParams params = new SqlParams();
         params.setPassword(pojo.getPassword());
         params.setUsername(pojo.getUsername());
@@ -69,6 +71,17 @@ public class CommonDtoHelper {
         return inputControlFilterData;
     }
 
+    public static ReportRequestStatus getStatusMapping(RequestStatus status) {
+        switch (status) {
+            case COMPLETED:
+                return ReportRequestStatus.COMPLETED;
+            case FAILED:
+                return ReportRequestStatus.FAILED;
+            default:
+                return ReportRequestStatus.REQUESTED;
+        }
+    }
+
     public static ReportRequestData getReportRequestData(ReportRequestPojo pojo, ReportPojo reportPojo,
                                                          List<InputControlPojo> controlPojos,
                                                          List<ReportInputParamsPojo> paramsPojoList,
@@ -76,7 +89,8 @@ public class CommonDtoHelper {
         ReportRequestData data = new ReportRequestData();
         data.setRequestCreationTime(pojo.getCreatedAt());
         data.setRequestUpdatedTime(pojo.getUpdatedAt());
-        data.setStatus(pojo.getStatus());
+        data.setStatus(pojo.getStatus().equals(ReportRequestStatus.REQUESTED) ? ReportRequestStatus.IN_PROGRESS :
+                pojo.getStatus());
         data.setType(pojo.getType());
         data.setRequestId(pojo.getId());
         data.setReportId(Objects.nonNull(reportPojo) ? reportPojo.getId() : 0);

@@ -7,6 +7,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.ZonedDateTimeSerializer;
 import com.increff.account.client.AuthClient;
+import com.increff.commons.queryexecutor.QueryExecutorClient;
 import com.increff.omni.reporting.dto.CommonDtoHelper;
 import com.increff.omni.reporting.util.FileUploadUtil;
 import com.nextscm.commons.fileclient.AbstractFileProvider;
@@ -47,7 +48,7 @@ import java.util.List;
 @Configuration
 @EnableScheduling
 @EnableAsync
-@ComponentScan({"com.increff.omni.reporting", "com.increff.account.client"})
+@ComponentScan({"com.increff.omni.reporting", "com.increff.account.client", "com.increff.commons.queryexecutor"})
 @PropertySource(value = "file:omni-reporting.properties")
 @PropertySources({ //
         @PropertySource(value = "classpath:config.properties"), //
@@ -74,6 +75,15 @@ public class SpringConfig extends WebMvcConfigurerAdapter {
     @Bean
     public FileUploadUtil getFileUploadUtil() throws IOException {
         return new FileUploadUtil(applicationProperties.getGcpBucketName(), applicationProperties.getGcpFilePath());
+    }
+
+    @Bean
+    public QueryExecutorClient getQueryExecutorClient() {
+        return new QueryExecutorClient(applicationProperties.getQueryExecutorBaseUrl(),
+                applicationProperties.getQueryExecutorAuthDomain(),
+                applicationProperties.getQueryExecutorAuthUsername(),
+                applicationProperties.getQueryExecutorAuthPassword(),
+                new RestTemplate(getRequestFactory()));
     }
 
     @Bean(name = "objectMapper")

@@ -14,12 +14,12 @@ import java.util.Objects;
 @Log4j
 public class SqlCmd {
 
-    public static void processQuery(SqlParams sp, Double maxExecutionTime)
+    public static void processQuery(SqlParams sp, Integer maxExecutionTime)
             throws IOException, InterruptedException {
         processQuery(sp, true, maxExecutionTime);
     }
 
-    public static void processQuery(SqlParams sp, Boolean isUserPrincipalAvailable, Double maxExecutionTime)
+    public static void processQuery(SqlParams sp, Boolean isUserPrincipalAvailable, Integer maxExecutionTime)
             throws IOException, InterruptedException {
         if (isUserPrincipalAvailable) addAccessControlMap(sp, maxExecutionTime);
         String[] cmd = getQueryCmd(sp);
@@ -28,7 +28,7 @@ public class SqlCmd {
         runCmd(cmd, redirectAll, errRedirect);
     }
 
-    public static String prepareQuery(Map<String, String> inputParamMap, String query, Double maxExecutionTime) {
+    public static String prepareQuery(Map<String, String> inputParamMap, String query, Integer maxExecutionTime) {
         String[] matchingFunctions = StringUtils.substringsBetween(query, "{{", "}}");
         if (Objects.isNull(matchingFunctions)) {
             return massageQuery(query, maxExecutionTime);
@@ -45,12 +45,12 @@ public class SqlCmd {
         return massageQuery(query, maxExecutionTime);
     }
 
-    public static String massageQuery(String query, Double maxExecutionTime) {
-        int maxTime = (int) (maxExecutionTime * 60 * 1000);
+    public static String massageQuery(String query, Integer maxExecutionTime) {
+        int maxTime = maxExecutionTime * 1000;
         return "SET SESSION MAX_EXECUTION_TIME=" + maxTime + ";\n" + query;
     }
 
-    private static void addAccessControlMap(SqlParams sp, Double maxExecutionTime) {
+    private static void addAccessControlMap(SqlParams sp, Integer maxExecutionTime) {
         Map<String, String> accessControlMap = UserPrincipalUtil.getAccessControlMap();
         String nQuery = prepareQuery(accessControlMap, sp.getQuery(), maxExecutionTime);
         sp.setQuery(nQuery);

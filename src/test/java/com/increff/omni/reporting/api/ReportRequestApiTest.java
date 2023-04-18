@@ -36,7 +36,7 @@ public class ReportRequestApiTest extends AbstractTest {
                 , 100001, 100001, ReportRequestType.USER);
         pojo4.setCreatedAt(ZonedDateTime.now().plusDays(1));
         ReportRequestPojo pojo5 = getReportRequestPojo(100002, ReportRequestStatus.IN_PROGRESS
-                , 100002, 100003, ReportRequestType.USER);
+                , 100002, 100003, ReportRequestType.EMAIL);
         pojo5.setUpdatedAt(ZonedDateTime.now().minusMinutes(11));
         api.add(pojo1);
         api.add(pojo2);

@@ -1,14 +1,11 @@
 package com.increff.omni.reporting.job;
 
-import com.increff.commons.queryexecutor.form.FileUploadDetailsForm;
-import com.increff.commons.queryexecutor.form.QueryDetailsForm;
-import com.increff.commons.queryexecutor.form.QueryExecutorForm;
+import com.increff.commons.queryexecutor.QueryExecutorClient;
 import com.increff.omni.reporting.api.*;
 import com.increff.omni.reporting.config.ApplicationProperties;
 import com.increff.omni.reporting.config.EmailProps;
 import com.increff.omni.reporting.dto.CommonDtoHelper;
 import com.increff.omni.reporting.model.constants.ReportRequestStatus;
-import com.increff.omni.reporting.model.constants.ReportRequestType;
 import com.increff.omni.reporting.model.form.SqlParams;
 import com.increff.omni.reporting.pojo.*;
 import com.increff.omni.reporting.util.EmailUtil;
@@ -21,9 +18,8 @@ import lombok.extern.log4j.Log4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
-import javax.mail.MessagingException;
 import javax.persistence.OptimisticLockException;
 import java.io.*;
 import java.nio.file.Files;
@@ -32,7 +28,6 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -40,10 +35,9 @@ import java.util.zip.ZipOutputStream;
 import static com.increff.omni.reporting.dto.CommonDtoHelper.getInputParamMapFromPojoList;
 import static com.increff.omni.reporting.dto.CommonDtoHelper.getValueFromQuotes;
 
-
-@Service
+@Component
 @Log4j
-public class ReportTask {
+public class ScheduleReportTask extends AbstractTask {
 
     @Autowired
     private ReportRequestApi api;
@@ -65,98 +59,14 @@ public class ReportTask {
     private ApplicationProperties properties;
     @Autowired
     private ReportScheduleApi reportScheduleApi;
+    @Autowired
+    private QueryExecutorClient executorClient;
 
     private final static String TIME_ZONE_PATTERN_WITHOUT_ZONE = "yyyy-MM-dd HH:mm:ss";
 
-    @Async("userReportRequestExecutor")
-    public void runUserReportAsync(ReportRequestPojo pojo) throws ApiException, MessagingException {
-        runUserReports(pojo);
-    }
-
+    @Override
     @Async("scheduleReportRequestExecutor")
-    public void runScheduleReportAsync(ReportRequestPojo pojo) throws ApiException, MessagingException {
-        runScheduleReports(pojo);
-    }
-
-    private void runUserReports(ReportRequestPojo pojo) {
-        // mark as processing - locking
-        try {
-            api.markProcessingIfEligible(pojo.getId());
-        } catch (OptimisticLockException | ObjectOptimisticLockingFailureException | ApiException e) {
-            log.debug("Error occurred while marking report in progress for request id : " + pojo.getId(), e);
-            return;
-        }
-        // process
-        String timezone = "Asia/Kolkata";
-        try {
-            ReportRequestPojo reportRequestPojo = api.getCheck(pojo.getId());
-
-            List<ReportInputParamsPojo> reportInputParamsPojoList = reportInputParamsApi
-                    .getInputParamsForReportRequest(reportRequestPojo.getId());
-            ReportPojo reportPojo = reportApi.getCheck(reportRequestPojo.getReportId());
-            ReportQueryPojo reportQueryPojo = reportQueryApi.getByReportId(reportPojo.getId());
-            OrgConnectionPojo orgConnectionPojo = orgConnectionApi.getCheckByOrgId(reportRequestPojo.getOrgId());
-            ConnectionPojo connectionPojo = connectionApi.getCheck(orgConnectionPojo.getConnectionId());
-
-            // Creation of file
-            Map<String, String> inputParamMap = getInputParamMapFromPojoList(reportInputParamsPojoList);
-            timezone = getValueFromQuotes(inputParamMap.get("timezone"));
-//            SqlParams sqlParams = CommonDtoHelper.convert(connectionPojo, file, errorFile
-//            );
-            String fQuery = SqlCmd.prepareQuery(inputParamMap, reportQueryPojo.getQuery(),
-                    properties.getMaxExecutionTime());
-            QueryExecutorForm queryExecutorForm = getQueryExecutorForm(fQuery, timezone, connectionPojo,
-                    reportRequestPojo, reportPojo);
-
-//            sqlParams.setQuery(fQuery);
-            // Execute query and save results
-            saveResultsOnCloud(pojo, sqlParams, timezone, reportPojo);
-            if (pojo.getType().equals(ReportRequestType.EMAIL)) {
-                reportScheduleApi.addScheduleCount(pojo.getScheduleId(), 1, 0);
-            }
-        } catch (Exception e) {
-            log.error("Report Request ID : " + pojo.getId() + " failed", e);
-            api.markFailed(pojo.getId(), ReportRequestStatus.FAILED, e.getMessage(), 0, 0.0);
-            try {
-                if (pojo.getType().equals(ReportRequestType.EMAIL)) {
-                    ReportSchedulePojo schedulePojo = reportScheduleApi.getCheck(pojo.getScheduleId());
-                    List<String> toEmails = reportScheduleApi.getByScheduleId(schedulePojo.getId()).stream()
-                            .map(ReportScheduleEmailsPojo::getSendTo).collect(
-                                    Collectors.toList());
-                    EmailProps props = createEmailProps(null, false, schedulePojo, toEmails, "Hi,<br>Please " +
-                            "check failure reason in the latest scheduled requests. Re-submit the schedule in the " +
-                            "reporting application, which might solve the issue.", false, timezone);
-                    EmailUtil.sendMail(props);
-                    reportScheduleApi.addScheduleCount(pojo.getScheduleId(), 0, 1);
-                }
-            } catch (Exception ex) {
-                log.error("Report Request ID : " + pojo.getId() + ". Failed to send email. ", ex);
-            }
-        }
-    }
-
-    private QueryExecutorForm getQueryExecutorForm(String fQuery, String timezone, ConnectionPojo connectionPojo,
-                                                   ReportRequestPojo reportRequestPojo,
-                                                   ReportPojo reportPojo) {
-        QueryExecutorForm form = new QueryExecutorForm();
-        form.setUserId(reportRequestPojo.getUserId());
-        form.setReferenceId(Long.valueOf(reportRequestPojo.getId()));
-        FileUploadDetailsForm uploadDetailsForm = new FileUploadDetailsForm();
-        uploadDetailsForm.setFileFormat(reportRequestPojo.getFileFormat());
-        uploadDetailsForm.setGcpBucketName(properties.getGcpBucketName());
-        uploadDetailsForm.setFilename(reportPojo.getName());
-        uploadDetailsForm.setMaxFileSize(properties.getMaxFileSize());
-        uploadDetailsForm.setFilepath(getFilePath(reportRequestPojo));
-        form.setFileUploadDetails(uploadDetailsForm);
-        QueryDetailsForm queryDetailsForm = new QueryDetailsForm();
-        queryDetailsForm.setQuery(fQuery);
-        queryDetailsForm.setConnectTimeout(5);
-        queryDetailsForm.setPassword(connectionPojo.getPassword());
-        queryDetailsForm.setUsername(connectionPojo.getUsername());
-        queryDetailsForm.setReadTimeout(properties.getMaxExecutionTime());
-    }
-
-    private void runScheduleReports(ReportRequestPojo pojo) throws ApiException {
+    protected void runReportAsync(ReportRequestPojo pojo) throws ApiException {
         // mark as processing - locking
         try {
             api.markProcessingIfEligible(pojo.getId());
@@ -187,33 +97,29 @@ public class ReportTask {
                     properties.getMaxExecutionTime());
             sqlParams.setQuery(fQuery);
             // Execute query and save results
-            saveResultsOnCloud(pojo, sqlParams, timezone, reportPojo);
-            if (pojo.getType().equals(ReportRequestType.EMAIL)) {
-                reportScheduleApi.addScheduleCount(pojo.getScheduleId(), 1, 0);
-            }
+            prepareAndSendEmail(pojo, sqlParams, timezone);
+            reportScheduleApi.addScheduleCount(pojo.getScheduleId(), 1, 0);
         } catch (Exception e) {
             log.error("Report Request ID : " + pojo.getId() + " failed", e);
             api.markFailed(pojo.getId(), ReportRequestStatus.FAILED, e.getMessage(), 0, 0.0);
             try {
-                if (pojo.getType().equals(ReportRequestType.EMAIL)) {
-                    ReportSchedulePojo schedulePojo = reportScheduleApi.getCheck(pojo.getScheduleId());
-                    List<String> toEmails = reportScheduleApi.getByScheduleId(schedulePojo.getId()).stream()
-                            .map(ReportScheduleEmailsPojo::getSendTo).collect(
-                                    Collectors.toList());
-                    EmailProps props = createEmailProps(null, false, schedulePojo, toEmails, "Hi,<br>Please " +
-                            "check failure reason in the latest scheduled requests. Re-submit the schedule in the " +
-                            "reporting application, which might solve the issue.", false, timezone);
-                    EmailUtil.sendMail(props);
-                    reportScheduleApi.addScheduleCount(pojo.getScheduleId(), 0, 1);
-                }
+                ReportSchedulePojo schedulePojo = reportScheduleApi.getCheck(pojo.getScheduleId());
+                List<String> toEmails = reportScheduleApi.getByScheduleId(schedulePojo.getId()).stream()
+                        .map(ReportScheduleEmailsPojo::getSendTo).collect(
+                                Collectors.toList());
+                EmailProps props = createEmailProps(null, false, schedulePojo, toEmails, "Hi,<br>Please " +
+                        "check failure reason in the latest scheduled requests. Re-submit the schedule in the " +
+                        "reporting application, which might solve the issue.", false, timezone);
+                EmailUtil.sendMail(props);
+                reportScheduleApi.addScheduleCount(pojo.getScheduleId(), 0, 1);
             } catch (Exception ex) {
                 log.error("Report Request ID : " + pojo.getId() + ". Failed to send email. ", ex);
             }
         }
+
     }
 
-    private void saveResultsOnCloud(ReportRequestPojo pojo, SqlParams sqlParams, String timezone,
-                                    ReportPojo reportPojo)
+    private void prepareAndSendEmail(ReportRequestPojo pojo, SqlParams sqlParams, String timezone)
             throws IOException, ApiException {
         try {
             // Process data
@@ -230,20 +136,13 @@ public class ReportTask {
             // upload result to cloud
             String filePath = "NA";
             fileSize = FileUtil.getSizeInMb(csvFile.length());
-            switch (pojo.getType()) {
-                case EMAIL:
-                    sendEmail(fileSize, csvFile, pojo, timezone);
-                    break;
-                case USER:
-                    filePath = uploadFile(csvFile, pojo, timezone, reportPojo);
-                    break;
-            }
+            sendEmail(fileSize, csvFile, pojo, timezone);
             // update status to completed
             api.updateStatus(pojo.getId(), ReportRequestStatus.COMPLETED, filePath, noOfRows, fileSize);
             FileUtil.delete(csvFile);
         } catch (ApiException apiException) {
             throw apiException;
-        } catch (Exception e) {
+        } catch (Throwable e) {
             String message =
                     String.join("\t", Files.readAllLines(sqlParams.getErrFile().toPath())).concat(e.getMessage());
             throw new ApiException(ApiStatus.BAD_DATA, message);
@@ -287,7 +186,6 @@ public class ReportTask {
                         Collectors.toList());
         EmailProps props = createEmailProps(out, true, schedulePojo, toEmails, "", isZip, timezone);
         EmailUtil.sendMail(props);
-
     }
 
     private EmailProps createEmailProps(File out, Boolean isAttachment,
@@ -317,32 +215,4 @@ public class ReportTask {
         if (errFile.exists() && !FileUtil.delete(errFile))
             log.debug("File deletion failed, name : " + errFile.getName());
     }
-
-    private String uploadFile(File file, ReportRequestPojo pojo, String timezone,
-                              ReportPojo reportPojo) throws FileNotFoundException, ApiException {
-        InputStream inputStream = new FileInputStream(file);
-        String filePath = getFilePath(pojo);
-        String filename = getFileName(reportPojo, timezone);
-        log.debug("GCP Upload started for request ID : " + pojo.getId());
-        try {
-            fileUploadUtil.create(filePath, inputStream, filename);
-            log.debug("GCP Upload completed for request ID : " + pojo.getId());
-            inputStream.close();
-        } catch (Exception e) {
-            throw new ApiException(ApiStatus.BAD_DATA, "Error in uploading Report File to Gcp for report : " +
-                    pojo.getId());
-        }
-        return filePath;
-    }
-
-    private String getFilePath(ReportRequestPojo pojo) {
-        return pojo.getOrgId() + "/" + "REPORTS" + "/" + pojo.getId() + "_" + UUID.randomUUID() + "." +
-                pojo.getFileFormat().toString().toLowerCase();
-    }
-
-    private String getFileName(ReportPojo reportPojo, String timezone) {
-        return reportPojo.getName() + "-" +ZonedDateTime.now().withZoneSameInstant(ZoneId.of(timezone))
-                .format(DateTimeFormatter.ofPattern(CommonDtoHelper.TIME_ZONE_PATTERN)) + ".csv";
-    }
-
 }

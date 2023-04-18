@@ -91,4 +91,8 @@ public class ReportRequestApi extends AbstractApi {
                                                    Integer pageSize) {
         return dao.getByOrgAndType(orgId, type, pageNo, pageSize);
     }
+
+    public List<ReportRequestPojo> getByIds(List<Integer> reportRequestIds) {
+        return dao.selectByIds(reportRequestIds);
+    }
 }

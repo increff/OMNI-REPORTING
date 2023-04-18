@@ -55,6 +55,7 @@ public class ReportRequestDao extends AbstractDao<ReportRequestPojo> {
         query.where(
                 cb.and(
                         cb.equal(root.get("status"), ReportRequestStatus.IN_PROGRESS),
+                        cb.equal(root.get("type"), ReportRequestType.EMAIL),
                         cb.lessThanOrEqualTo(root.get("updatedAt"), ZonedDateTime.now().minusMinutes(stuckReportTime))
                 )
         ).orderBy(cb.desc(root.get("createdAt")));
@@ -77,9 +78,9 @@ public class ReportRequestDao extends AbstractDao<ReportRequestPojo> {
 
     public List<ReportRequestPojo> getByOrgAndType(Integer orgId, ReportRequestType type, Integer pageNo,
                                                    Integer pageSize) {
-        if(Objects.isNull(pageNo))
+        if (Objects.isNull(pageNo))
             pageNo = 1;
-        if(Objects.isNull(pageSize) || pageSize > 100)
+        if (Objects.isNull(pageSize) || pageSize > 100)
             pageSize = 100;
         CriteriaBuilder cb = this.em.getCriteriaBuilder();
         CriteriaQuery<ReportRequestPojo> query = cb.createQuery(ReportRequestPojo.class);
@@ -92,5 +93,16 @@ public class ReportRequestDao extends AbstractDao<ReportRequestPojo> {
         TypedQuery<ReportRequestPojo> tQuery = createQuery(query);
         return tQuery.setFirstResult((pageNo - 1) * pageSize)
                 .setMaxResults(pageSize).getResultList();
+    }
+
+    public List<ReportRequestPojo> selectByIds(List<Integer> reportRequestIds) {
+        CriteriaBuilder cb = this.em.getCriteriaBuilder();
+        CriteriaQuery<ReportRequestPojo> query = cb.createQuery(ReportRequestPojo.class);
+        Root<ReportRequestPojo> root = query.from(ReportRequestPojo.class);
+        query.where(
+                root.get("id").in(reportRequestIds)
+        );
+        TypedQuery<ReportRequestPojo> tQuery = createQuery(query);
+        return tQuery.getResultList();
     }
 }

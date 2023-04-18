@@ -35,11 +35,11 @@ public class ApplicationProperties {
     @Value("${stuck.report.time.minutes:10}")
     private Integer stuckReportTime;
 
-    @Value("${max.execution.time.minutes:5.0}")
-    private Double maxExecutionTime;
+    @Value("${max.execution.time.seconds:300}")
+    private Integer maxExecutionTime;
 
-    @Value("${live.report.max.execution.time.minutes:0.5}")
-    private Double liveReportMaxExecutionTime;
+    @Value("${live.report.max.execution.time.seconds:30}")
+    private Integer liveReportMaxExecutionTime;
 
     @Value("${max.file.size.mb:200}")
     private Integer maxFileSize;
@@ -49,6 +49,20 @@ public class ApplicationProperties {
 
     @Value("${auth.appToken}")
     private String authAppToken;
+
+    @Value("${query.executor.baseUrl}")
+    private String queryExecutorBaseUrl;
+
+    @Value("${query.executor.authDomainName}")
+    private String queryExecutorAuthDomain;
+
+    @Value("${query.executor.authUsername}")
+    private String queryExecutorAuthUsername;
+
+    @Value("${query.executor.authPassword}")
+    private String queryExecutorAuthPassword;
+
+
 
     @Value("${max.schedule.limit:15}")
     private Integer maxScheduleLimit;

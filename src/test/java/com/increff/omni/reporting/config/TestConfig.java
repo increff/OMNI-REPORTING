@@ -7,6 +7,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.ZonedDateTimeSerializer;
 import com.increff.account.client.AuthClient;
+import com.increff.commons.queryexecutor.QueryExecutorClient;
 import com.increff.omni.reporting.dto.CommonDtoHelper;
 import com.increff.omni.reporting.util.FileUploadUtil;
 import com.nextscm.commons.fileclient.AbstractFileProvider;
@@ -41,7 +42,7 @@ import java.time.format.DateTimeFormatter;
 
 @Configuration
 @EnableWebMvc
-@ComponentScan(value = {"com.increff.omni.reporting", "com.increff.account.client"},
+@ComponentScan(value = {"com.increff.omni.reporting", "com.increff.account.client", "com.increff.commons.queryexecutor"},
         excludeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, value = {SpringConfig.class}))
 @PropertySource("classpath:com/increff/omni/reporting/test.properties")
 public class TestConfig {
@@ -95,6 +96,15 @@ public class TestConfig {
     @Bean
     public AuthClient getAuthClient() {
         return new AuthClient(applicationProperties.getAuthBaseUrl(), applicationProperties.getAuthAppToken(),
+                new RestTemplate(getRequestFactory()));
+    }
+
+    @Bean
+    public QueryExecutorClient getQueryExecutorClient() {
+        return new QueryExecutorClient(applicationProperties.getQueryExecutorBaseUrl(),
+                applicationProperties.getQueryExecutorAuthDomain(),
+                applicationProperties.getQueryExecutorAuthUsername(),
+                applicationProperties.getQueryExecutorAuthPassword(),
                 new RestTemplate(getRequestFactory()));
     }
 

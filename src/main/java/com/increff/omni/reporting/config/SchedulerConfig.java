@@ -25,6 +25,7 @@ public class SchedulerConfig {
         executor.setCorePoolSize(properties.getUserReportRequestCorePool());
         executor.setMaxPoolSize(properties.getUserReportRequestMaxPool());
         executor.setQueueCapacity(properties.getUserReportRequestQueueCapacity());
+        executor.setWaitForTasksToCompleteOnShutdown(true);
         executor.initialize();
         return executor;
     }
