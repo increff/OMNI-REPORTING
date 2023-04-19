@@ -46,7 +46,9 @@ public class ReportRequestPojo extends AbstractVersionedPojo {
 
     private Double fileSize;
 
-    private FileFormat fileFormat;
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private FileFormat fileFormat = FileFormat.CSV;
 
     private String url;
 

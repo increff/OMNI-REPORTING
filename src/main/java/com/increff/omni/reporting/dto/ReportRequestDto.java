@@ -1,6 +1,5 @@
 package com.increff.omni.reporting.dto;
 
-import com.increff.commons.queryexecutor.QueryExecutorClient;
 import com.increff.commons.queryexecutor.data.QueryRequestData;
 import com.increff.commons.queryexecutor.form.GetRequestForm;
 import com.increff.omni.reporting.api.*;
@@ -18,7 +17,6 @@ import com.increff.omni.reporting.util.FileUploadUtil;
 import com.increff.omni.reporting.util.FileUtil;
 import com.increff.omni.reporting.util.UserPrincipalUtil;
 import com.nextscm.commons.fileclient.GcpFileProvider;
-import com.nextscm.commons.spring.client.AppClientException;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
 import lombok.extern.log4j.Log4j;
@@ -190,7 +188,7 @@ public class ReportRequestDto extends AbstractDto {
             if(requestPojo.isPresent()) {
                 // This happens separately in a separate transaction
                 reportRequestApi.updateStatus(requestPojo.get().getId(), getStatusMapping(d.getStatus()),
-                        requestPojo.get().getUrl(), d.getNoOfRows(), d.getFileSize());
+                        requestPojo.get().getUrl(), d.getNoOfRows(), d.getFileSize(), d.getFailureReason());
             }
         }
     }

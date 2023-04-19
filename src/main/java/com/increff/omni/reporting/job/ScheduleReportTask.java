@@ -138,7 +138,7 @@ public class ScheduleReportTask extends AbstractTask {
             fileSize = FileUtil.getSizeInMb(csvFile.length());
             sendEmail(fileSize, csvFile, pojo, timezone);
             // update status to completed
-            api.updateStatus(pojo.getId(), ReportRequestStatus.COMPLETED, filePath, noOfRows, fileSize);
+            api.updateStatus(pojo.getId(), ReportRequestStatus.COMPLETED, filePath, noOfRows, fileSize, "");
             FileUtil.delete(csvFile);
         } catch (ApiException apiException) {
             throw apiException;

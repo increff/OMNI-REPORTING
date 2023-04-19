@@ -120,7 +120,7 @@ public class ReportRequestApiTest extends AbstractTest {
     @Test
     public void testUpdateStatus() throws ApiException {
         ReportRequestPojo pojo = commonSetup();
-        api.updateStatus(pojo.getId(), ReportRequestStatus.COMPLETED, "https://fileUrl.com", 2, 0.01);
+        api.updateStatus(pojo.getId(), ReportRequestStatus.COMPLETED, "https://fileUrl.com", 2, 0.01, "");
         ReportRequestPojo p = api.getCheck(pojo.getId());
         assertEquals(ReportRequestStatus.COMPLETED, p.getStatus());
         assertEquals(100001, p.getReportId().intValue());
