@@ -101,7 +101,7 @@ public class ReportRequestDao extends AbstractDao<ReportRequestPojo> {
         Root<ReportRequestPojo> root = query.from(ReportRequestPojo.class);
         query.where(
                 root.get("id").in(reportRequestIds)
-        );
+        ).orderBy(cb.desc(root.get("createdAt")));
         TypedQuery<ReportRequestPojo> tQuery = createQuery(query);
         return tQuery.getResultList();
     }

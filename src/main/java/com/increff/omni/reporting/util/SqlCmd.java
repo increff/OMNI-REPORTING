@@ -47,7 +47,7 @@ public class SqlCmd {
 
     public static String massageQuery(String query, Integer maxExecutionTime) {
         int maxTime = maxExecutionTime * 1000;
-        return "SET SESSION MAX_EXECUTION_TIME=" + maxTime + ";\n" + query;
+        return query;
     }
 
     private static void addAccessControlMap(SqlParams sp, Integer maxExecutionTime) {
