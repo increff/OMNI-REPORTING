@@ -42,12 +42,16 @@ public class DbConfig {
 	private String hibernateHbm2ddl;
 	@Value("${hibernate.jdbc.time_zone}")
 	private String hibernateTimezone;
+	@Value("${hibernate.min.connection:50}")
+	private Integer minConnection;
+	@Value("${hibernate.max.connection:100}")
+	private Integer maxConnection;
 
 
 	@Bean(name = "dataSource")
 	public DataSource getDataSource() {
-		return DbPoolUtil.initDataSource(jdbcDriver, jdbcUrl, jdbcUsername, jdbcPassword, CONNECTION_POOL_SIZE,
-				CONNECTION_POOL_SIZE * 2);
+		return DbPoolUtil.initDataSource(jdbcDriver, jdbcUrl, jdbcUsername, jdbcPassword, minConnection,
+				maxConnection);
 	}
 
 	@Bean(name = "entityManagerFactory")

@@ -27,6 +27,9 @@ import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.increff.omni.reporting.dto.CommonDtoHelper.getDirectoryPath;
+import static com.increff.omni.reporting.dto.CommonDtoHelper.getIdToPojoMap;
+
 @Service
 @Setter
 public class ReportDto extends AbstractDto {
@@ -205,12 +208,16 @@ public class ReportDto extends AbstractDto {
 
     private List<ReportData> convertToReportData(List<ReportPojo> pojos) throws ApiException {
         List<ReportData> dataList = new ArrayList<>();
+        if(pojos.isEmpty())
+            return dataList;
+        SchemaVersionPojo schemaVersionPojo = schemaVersionApi.getCheck(pojos.get(0).getSchemaVersionId());
+        List<DirectoryPojo> directoryPojoList = directoryApi.getAll();
+        Map<Integer, DirectoryPojo> idToDirectoryPojoList = getIdToPojoMap(directoryPojoList);
         for(ReportPojo p : pojos) {
             ReportData data = ConvertUtil.convert(p, ReportData.class);
-            SchemaVersionPojo schemaVersionPojo = schemaVersionApi.getCheck(data.getSchemaVersionId());
-            DirectoryPojo directoryPojo = directoryApi.getCheck(data.getDirectoryId());
+            DirectoryPojo directoryPojo = idToDirectoryPojoList.get(data.getDirectoryId());
             data.setDirectoryName(directoryPojo.getDirectoryName());
-            data.setDirectoryPath(directoryApi.getDirectoryPath(directoryPojo.getId()));
+            data.setDirectoryPath(getDirectoryPath(directoryPojo.getId(), idToDirectoryPojoList));
             data.setSchemaVersionName(schemaVersionPojo.getName());
             dataList.add(data);
         }

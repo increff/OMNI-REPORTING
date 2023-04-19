@@ -13,6 +13,10 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+
+import static com.increff.omni.reporting.dto.CommonDtoHelper.getDirectoryPath;
+import static com.increff.omni.reporting.dto.CommonDtoHelper.getIdToPojoMap;
 
 @Service
 public class DirectoryDto extends AbstractDtoApi {
@@ -41,10 +45,12 @@ public class DirectoryDto extends AbstractDtoApi {
     }
 
     private List<DirectoryData> convertToDirectoryData(List<DirectoryPojo> pojos) throws ApiException {
+        List<DirectoryPojo> allPojos = api.getAll();
+        Map<Integer, DirectoryPojo> idToDirectoryPojoList = getIdToPojoMap(allPojos);
         List<DirectoryData> dataList = new ArrayList<>();
         for(DirectoryPojo pojo : pojos) {
             DirectoryData data = ConvertUtil.convert(pojo, DirectoryData.class);
-            data.setDirectoryPath(api.getDirectoryPath(pojo.getId()));
+            data.setDirectoryPath(getDirectoryPath(pojo.getId(), idToDirectoryPojoList));
             dataList.add(data);
         }
         return dataList;

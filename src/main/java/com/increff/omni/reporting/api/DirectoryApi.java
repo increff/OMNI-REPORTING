@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 
 @Service
 @Transactional(rollbackFor = Exception.class)
@@ -27,18 +28,6 @@ public class DirectoryApi extends AbstractApi {
         DirectoryPojo pojo = dao.select(id);
         checkNotNull(pojo, "No directory with id : " + id);
         return pojo;
-    }
-
-    public String getDirectoryPath(Integer id) throws ApiException {
-        DirectoryPojo directoryPojo = getCheck(id);
-        String directoryPath = directoryPojo.getDirectoryName();
-        Integer parentId = directoryPojo.getParentId();
-        while (parentId != 0) {
-            DirectoryPojo p = getCheck(parentId);
-            directoryPath = p.getDirectoryName().concat("/").concat(directoryPath);
-            parentId = p.getParentId();
-        }
-        return directoryPath;
     }
 
     public List<DirectoryPojo> getAll() {
