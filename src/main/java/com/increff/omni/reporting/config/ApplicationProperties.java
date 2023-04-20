@@ -62,17 +62,14 @@ public class ApplicationProperties {
     @Value("${query.executor.authPassword}")
     private String queryExecutorAuthPassword;
 
-    @Value("${max.connection.time}")
+    @Value("${max.connection.time:5}")
     private Integer maxConnectionTime;
 
-    @Value("${resultset.fetch.size}")
+    @Value("${resultset.fetch.size:1000}")
     private Integer resultSetFetchSize;
 
     @Value("${max.schedule.limit:15}")
     private Integer maxScheduleLimit;
-
-    @Value("${gcp.baseUrl:dummy}")
-    private String gcpBaseUrl;
 
     @Value("${gcp.bucketName}")
     private String gcpBucketName;

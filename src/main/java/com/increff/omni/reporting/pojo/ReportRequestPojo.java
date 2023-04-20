@@ -48,7 +48,7 @@ public class ReportRequestPojo extends AbstractVersionedPojo {
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private FileFormat fileFormat = FileFormat.CSV;
+    private FileFormat fileFormat = FileFormat.XLSX;
 
     private String url;
 
