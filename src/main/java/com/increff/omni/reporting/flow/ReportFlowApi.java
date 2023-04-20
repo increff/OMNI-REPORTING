@@ -2,12 +2,10 @@ package com.increff.omni.reporting.flow;
 
 import com.increff.omni.reporting.api.*;
 import com.increff.omni.reporting.config.ApplicationProperties;
-import com.increff.omni.reporting.dto.CommonDtoHelper;
 import com.increff.omni.reporting.model.constants.InputControlScope;
 import com.increff.omni.reporting.model.constants.InputControlType;
 import com.increff.omni.reporting.model.constants.ReportType;
 import com.increff.omni.reporting.model.constants.ValidationType;
-import com.increff.omni.reporting.model.form.SqlParams;
 import com.increff.omni.reporting.model.form.ValidationGroupForm;
 import com.increff.omni.reporting.pojo.*;
 import com.increff.omni.reporting.util.FileUtil;
@@ -25,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
 import java.io.IOException;
+import java.sql.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -44,6 +43,8 @@ public class ReportFlowApi extends AbstractFlowApi {
     private ConnectionApi connectionApi;
     @Autowired
     private FolderApi folderApi;
+    @Autowired
+    private DBConnectionApi dbConnectionApi;
     @Autowired
     private OrgSchemaApi orgSchemaApi;
     @Autowired
@@ -93,26 +94,35 @@ public class ReportFlowApi extends AbstractFlowApi {
         ReportQueryPojo reportQueryPojo = queryApi.getByReportId(reportPojo.getId());
         OrgConnectionPojo orgConnectionPojo = orgConnectionApi.getCheckByOrgId(orgId);
         ConnectionPojo connectionPojo = connectionApi.getCheck(orgConnectionPojo.getConnectionId());
-        File file = folderApi.getFileForExtension(reportPojo.getId(), ".tsv");
-        File errorFile = folderApi.getErrFile(reportPojo.getId(), ".tsv");;
+        File file = folderApi.getFileForExtension(reportPojo.getId(), ".csv");
         // Creation of file
+        Connection connection = null;
         try {
             Map<String, String> inputParamMap = getInputParamMapFromPojoList(reportInputParamsPojoList);
-            SqlParams sqlParams = CommonDtoHelper.convert(connectionPojo, file, errorFile);
-            String fQuery = SqlCmd.prepareQuery(inputParamMap, reportQueryPojo.getQuery(),
-                    properties.getLiveReportMaxExecutionTime());
-            sqlParams.setQuery(fQuery);
+            String fQuery = SqlCmd.getFinalQuery(inputParamMap, reportQueryPojo.getQuery(), true);
             // Execute query and save results
-            SqlCmd.processQuery(sqlParams, true, properties.getMaxExecutionTime());
-            if (FileUtil.getNumberOfRows(sqlParams.getOutFile()) > MAX_NUMBER_OF_ROWS) {
+            connection = dbConnectionApi.getConnection(connectionPojo.getHost(), connectionPojo.getUsername(),
+                    connectionPojo.getPassword(), properties.getMaxConnectionTime());
+            PreparedStatement statement = dbConnectionApi.getStatement(connection,
+                    properties.getLiveDataMaxExecutionTime(), fQuery, properties.getResultSetFetchSize());
+            ResultSet resultSet = statement.executeQuery();
+            int noOfRows = FileUtil.writeCsvFromResultSet(resultSet, file);
+            if (noOfRows > MAX_NUMBER_OF_ROWS) {
                 throw new ApiException(ApiStatus.BAD_DATA, "Data exceeded " + MAX_NUMBER_OF_ROWS + " Rows, select " +
                         "granular filters.");
             }
-            return FileUtil.getJsonDataFromFile(file, '\t');
+            return FileUtil.getJsonDataFromFile(file, ',');
         } catch (Exception e) {
-            throw new ApiException(ApiStatus.BAD_DATA, "Failed to get the data for dashboard." + e.getMessage());
+            throw new ApiException(ApiStatus.BAD_DATA, "Failed to get the data for dashboard : " + e.getMessage());
         } finally {
-            deleteFiles(file, errorFile);
+            FileUtil.delete(file);
+            try {
+                if (Objects.nonNull(connection)) {
+                    connection.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -345,12 +355,5 @@ public class ReportFlowApi extends AbstractFlowApi {
             oldToNewControls.put(o.getId(), p.getId());
         }
         return oldToNewControls;
-    }
-
-    private void deleteFiles(File outFile, File errFile) {
-        if (outFile.exists() && !FileUtil.delete(outFile))
-            log.debug("File deletion failed, name : " + outFile.getName());
-        if (errFile.exists() && !FileUtil.delete(errFile))
-            log.debug("File deletion failed, name : " + errFile.getName());
     }
 }

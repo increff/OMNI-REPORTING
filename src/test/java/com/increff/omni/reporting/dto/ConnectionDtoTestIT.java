@@ -98,7 +98,7 @@ public class ConnectionDtoTestIT extends AbstractTest {
             dto.testConnection(form);
         } catch (ApiException e) {
             assertEquals(ApiStatus.UNKNOWN_ERROR, e.getStatus());
-            assertTrue(e.getMessage().contains("Database could not be connected"));
+            assertTrue(e.getMessage().contains("Error connecting to the database"));
             throw e;
         }
     }

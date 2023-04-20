@@ -111,7 +111,7 @@ public class ReportDto extends AbstractDto {
         Map<String, String> paramsMap = UserPrincipalUtil.getCompleteMapWithAccessControl(form.getParamMap());
         paramsMap.put("timezone", "'" + form.getTimezone() + "'");
         ReportQueryData data = new ReportQueryData();
-        data.setQuery(SqlCmd.prepareQuery(paramsMap, form.getQuery(), properties.getMaxExecutionTime()));
+        data.setQuery(SqlCmd.getFinalQuery(paramsMap, form.getQuery(), true));
         return data;
     }
 

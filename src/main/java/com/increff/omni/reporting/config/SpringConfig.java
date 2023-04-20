@@ -61,20 +61,13 @@ public class SpringConfig extends WebMvcConfigurerAdapter {
     private ApplicationProperties applicationProperties;
 
     @Bean
-    public FileClient getFileClient() throws FileClientException {
-        AbstractFileProvider gcpFileProvider = getGcpFileProvider();
-        return new FileClient(gcpFileProvider);
-    }
-
-    @Bean
-    public GcpFileProvider getGcpFileProvider() throws FileClientException {
-        return new GcpFileProvider(applicationProperties.getGcpBaseUrl(),
-                applicationProperties.getGcpBucketName(), applicationProperties.getGcpFilePath());
+    public FIleUploadUtil getGcpFileProvider() throws IOException {
+        return new FIleUploadUtil(applicationProperties.getGcpBucketName(), applicationProperties.getGcpFilePath());
     }
 
     @Bean
     public FileUploadUtil getFileUploadUtil() throws IOException {
-        return new FileUploadUtil(applicationProperties.getGcpBucketName(), applicationProperties.getGcpFilePath());
+        return new FileUploadUtil(applicationProperties.getGcpBucketName());
     }
 
     @Bean

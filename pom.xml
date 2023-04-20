@@ -14,7 +14,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <!-- Jetty -->
-        <jetty.version>9.3.7.v20160115</jetty.version>
+        <jetty.version>9.4.51.v20230217</jetty.version>
         <jetty.http.port>9001</jetty.http.port>
         <jetty.http.host>0.0.0.0</jetty.http.host>
         <jetty.context>/omni-reporting/api/</jetty.context>
@@ -42,6 +42,12 @@
     </properties>
 
     <dependencies>
+        <dependency>
+            <groupId>com.google.cloud</groupId>
+            <artifactId>google-cloud-storage</artifactId>
+            <version>2.20.0</version>
+        </dependency>
+
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-csv</artifactId>
@@ -84,11 +90,11 @@
             <version>${javax.servlet.version}</version>
             <scope>provided</scope>
         </dependency>
-        <dependency>
-            <groupId>com.nextscm.commons</groupId>
-            <artifactId>commons-fileclient</artifactId>
-            <version>${fileclient.version}</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>com.nextscm.commons</groupId>-->
+<!--            <artifactId>commons-fileclient</artifactId>-->
+<!--            <version>${fileclient.version}</version>-->
+<!--        </dependency>-->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
