@@ -96,7 +96,7 @@ public class StandardController {
     @ApiOperation(value = "View CSV of Request")
     @RequestMapping(value = "/request-report/{requestId}/view", method = RequestMethod.GET)
     public List<Map<String, String>> viewFile(@PathVariable Integer requestId) throws ApiException, IOException {
-        return reportRequestDto.getJsonFromCsv(requestId);
+        return reportRequestDto.viewReport(requestId);
     }
 
     // Scheduling a Report

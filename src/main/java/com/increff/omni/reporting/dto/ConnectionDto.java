@@ -15,10 +15,7 @@ import lombok.extern.log4j.Log4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.List;
 import java.util.Objects;
 
@@ -64,8 +61,9 @@ public class ConnectionDto extends AbstractDto {
             connection = dbConnectionApi.getConnection(pojo.getHost(), pojo.getUsername(),
                     pojo.getPassword(), properties.getMaxConnectionTime());
             PreparedStatement statement = dbConnectionApi.getStatement(connection,
-                    properties.getLiveDataMaxExecutionTime(), "select version();", properties.getResultSetFetchSize());
-            statement.executeQuery();
+                    properties.getLiveReportMaxExecutionTime(), "select version();", properties.getResultSetFetchSize());
+            ResultSet resultSet = statement.executeQuery();
+            resultSet.close();
         } catch (SQLException e) {
             throw new ApiException(ApiStatus.UNKNOWN_ERROR, "Error connecting to database : " + e.getMessage());
         } finally {

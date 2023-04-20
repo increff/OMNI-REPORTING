@@ -69,8 +69,8 @@ public class UserReportTask extends AbstractTask{
             // Creation of file
             Map<String, String> inputParamMap = getInputParamMapFromPojoList(reportInputParamsPojoList);
             String timezone = getValueFromQuotes(inputParamMap.get("timezone"));
-            String fQuery = SqlCmd.prepareQuery(inputParamMap, reportQueryPojo.getQuery(),
-                    properties.getMaxExecutionTime());
+            String fQuery = SqlCmd.getFinalQuery(inputParamMap, reportQueryPojo.getQuery(),
+                    false);
             QueryExecutorForm queryExecutorForm = getQueryExecutorForm(fQuery, timezone, connectionPojo,
                     reportRequestPojo, reportPojo);
             executorClient.postRequest(queryExecutorForm);
@@ -96,7 +96,7 @@ public class UserReportTask extends AbstractTask{
         uploadDetailsForm.setTimezone(timezone);
         QueryDetailsForm queryDetailsForm = new QueryDetailsForm();
         queryDetailsForm.setQuery(fQuery);
-        queryDetailsForm.setConnectTimeout(5);
+        queryDetailsForm.setConnectTimeout(properties.getMaxConnectionTime());
         queryDetailsForm.setPassword(connectionPojo.getPassword());
         queryDetailsForm.setUsername(connectionPojo.getUsername());
         queryDetailsForm.setReadTimeout(properties.getMaxExecutionTime());

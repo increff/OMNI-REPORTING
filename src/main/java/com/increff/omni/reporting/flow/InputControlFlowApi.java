@@ -2,9 +2,7 @@ package com.increff.omni.reporting.flow;
 
 import com.increff.omni.reporting.api.*;
 import com.increff.omni.reporting.config.ApplicationProperties;
-import com.increff.omni.reporting.dto.CommonDtoHelper;
 import com.increff.omni.reporting.model.constants.InputControlScope;
-import com.increff.omni.reporting.model.form.SqlParams;
 import com.increff.omni.reporting.pojo.*;
 import com.increff.omni.reporting.util.FileUtil;
 import com.increff.omni.reporting.util.SqlCmd;
@@ -18,11 +16,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -90,7 +87,7 @@ public class InputControlFlowApi extends AbstractApi {
                     connectionPojo.getUsername(), connectionPojo.getPassword(),
                     properties.getMaxConnectionTime());
             PreparedStatement statement = dbConnectionApi.getStatement(connection,
-                    properties.getLiveDataMaxExecutionTime(), fQuery, properties.getResultSetFetchSize());
+                    properties.getLiveReportMaxExecutionTime(), fQuery, properties.getResultSetFetchSize());
             ResultSet resultSet = statement.executeQuery();
             return FileUtil.getMapFromResultSet(resultSet);
         } catch (Exception e) {

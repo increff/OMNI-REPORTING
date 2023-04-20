@@ -10,28 +10,17 @@ import com.increff.account.client.AuthClient;
 import com.increff.commons.queryexecutor.QueryExecutorClient;
 import com.increff.omni.reporting.dto.CommonDtoHelper;
 import com.increff.omni.reporting.util.FileUploadUtil;
-import com.nextscm.commons.fileclient.AbstractFileProvider;
-import com.nextscm.commons.fileclient.FileClient;
-import com.nextscm.commons.fileclient.FileClientException;
-import com.nextscm.commons.fileclient.GcpFileProvider;
-import com.increff.omni.reporting.util.FIleUploadUtil;
-//import com.nextscm.commons.fileclient.AbstractFileProvider;
-//import com.nextscm.commons.fileclient.FileClient;
-//import com.nextscm.commons.fileclient.FileClientException;
-//import com.nextscm.commons.fileclient.GcpFileProvider;
 import com.nextscm.commons.spring.audit.api.AuditApi;
 import com.nextscm.commons.spring.audit.dao.AuditDao;
 import com.nextscm.commons.spring.audit.dao.DaoProvider;
 import org.apache.http.HeaderElement;
 import org.apache.http.HeaderElementIterator;
-import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.conn.ConnectionKeepAliveStrategy;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.message.BasicHeaderElementIterator;
 import org.apache.http.protocol.HTTP;
-import org.apache.http.protocol.HttpContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.*;
 import org.springframework.http.client.ClientHttpRequestFactory;
@@ -56,20 +45,8 @@ public class TestConfig {
     private ApplicationProperties applicationProperties;
 
     @Bean
-    public FileClient getFileClient() throws FileClientException {
-        AbstractFileProvider gcpFileProvider = getGcpFileProvider();
-        return new FileClient(gcpFileProvider);
-    }
-
-    @Bean
     public FileUploadUtil getFileUploadUtil() throws IOException {
         return new FileUploadUtil(
-                applicationProperties.getGcpBucketName(), applicationProperties.getGcpFilePath());
-    }
-
-    @Bean
-    public GcpFileProvider getGcpFileProvider() throws FileClientException {
-        return new GcpFileProvider(applicationProperties.getGcpBaseUrl(),
                 applicationProperties.getGcpBucketName(), applicationProperties.getGcpFilePath());
     }
 

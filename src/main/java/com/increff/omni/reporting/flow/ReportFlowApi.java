@@ -104,7 +104,7 @@ public class ReportFlowApi extends AbstractFlowApi {
             connection = dbConnectionApi.getConnection(connectionPojo.getHost(), connectionPojo.getUsername(),
                     connectionPojo.getPassword(), properties.getMaxConnectionTime());
             PreparedStatement statement = dbConnectionApi.getStatement(connection,
-                    properties.getLiveDataMaxExecutionTime(), fQuery, properties.getResultSetFetchSize());
+                    properties.getLiveReportMaxExecutionTime(), fQuery, properties.getResultSetFetchSize());
             ResultSet resultSet = statement.executeQuery();
             int noOfRows = FileUtil.writeCsvFromResultSet(resultSet, file);
             if (noOfRows > MAX_NUMBER_OF_ROWS) {

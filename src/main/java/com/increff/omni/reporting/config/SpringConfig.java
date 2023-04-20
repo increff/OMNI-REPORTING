@@ -10,10 +10,6 @@ import com.increff.account.client.AuthClient;
 import com.increff.commons.queryexecutor.QueryExecutorClient;
 import com.increff.omni.reporting.dto.CommonDtoHelper;
 import com.increff.omni.reporting.util.FileUploadUtil;
-import com.nextscm.commons.fileclient.AbstractFileProvider;
-import com.nextscm.commons.fileclient.FileClient;
-import com.nextscm.commons.fileclient.FileClientException;
-import com.nextscm.commons.fileclient.GcpFileProvider;
 import com.nextscm.commons.spring.audit.api.AuditApi;
 import com.nextscm.commons.spring.audit.dao.AuditDao;
 import com.nextscm.commons.spring.audit.dao.DaoProvider;
@@ -61,13 +57,8 @@ public class SpringConfig extends WebMvcConfigurerAdapter {
     private ApplicationProperties applicationProperties;
 
     @Bean
-    public FIleUploadUtil getGcpFileProvider() throws IOException {
-        return new FIleUploadUtil(applicationProperties.getGcpBucketName(), applicationProperties.getGcpFilePath());
-    }
-
-    @Bean
-    public FileUploadUtil getFileUploadUtil() throws IOException {
-        return new FileUploadUtil(applicationProperties.getGcpBucketName());
+    public FileUploadUtil getGcpFileProvider() throws IOException {
+        return new FileUploadUtil(applicationProperties.getGcpBucketName(), applicationProperties.getGcpFilePath());
     }
 
     @Bean

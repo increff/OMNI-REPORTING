@@ -62,7 +62,11 @@ public class ApplicationProperties {
     @Value("${query.executor.authPassword}")
     private String queryExecutorAuthPassword;
 
+    @Value("${max.connection.time}")
+    private Integer maxConnectionTime;
 
+    @Value("${resultset.fetch.size}")
+    private Integer resultSetFetchSize;
 
     @Value("${max.schedule.limit:15}")
     private Integer maxScheduleLimit;
@@ -102,5 +106,4 @@ public class ApplicationProperties {
 
     @Value("${mailjet.smtp.port}")
     private String smtpPort;
-
 }
