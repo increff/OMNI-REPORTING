@@ -22,8 +22,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static com.increff.omni.reporting.dto.CommonDtoHelper.getDirectoryPath;
+import static com.increff.omni.reporting.dto.CommonDtoHelper.getIdToPojoMap;
 
 @Service
 @Setter
@@ -75,11 +80,17 @@ public class ReportDto extends AbstractDto {
             throws ApiException, IOException {
         OrganizationPojo organizationPojo = organizationApi.getCheck(orgId);
         ReportPojo reportPojo = validateReportForOrg(form, orgId);
-        List<ReportInputParamsPojo> reportInputParamsPojoList = validateControls(form, orgId, reportPojo);
-        List<Map<String, String>> data = flowApi.validateAndGetLiveData(reportPojo, orgId, reportInputParamsPojoList);
-        flowApi.saveAudit(reportPojo.getId().toString(), AuditActions.LIVE_REPORT.toString(), "Live Report",
-                "Live Report request submitted for organization : " + organizationPojo.getName(), getUserName());
-        return data;
+        ZonedDateTime startTime = ZonedDateTime.now();
+        try {
+            List<ReportInputParamsPojo> reportInputParamsPojoList = validateControls(form, orgId, reportPojo);
+            return flowApi.validateAndGetLiveData(reportPojo, orgId, reportInputParamsPojoList);
+        } finally {
+            flowApi.saveAudit(reportPojo.getId().toString(), AuditActions.LIVE_REPORT.toString(),
+                    "Live Report",
+                    "Live Report request submitted for organization : " + organizationPojo.getName()
+                     + " , duration : " + (int) ChronoUnit.MILLIS.between(startTime, ZonedDateTime.now()) ,
+                    getUserName());
+        }
     }
 
     public List<Map<String, String>> getLiveData(ReportRequestForm form) throws ApiException, IOException {
@@ -197,12 +208,16 @@ public class ReportDto extends AbstractDto {
 
     private List<ReportData> convertToReportData(List<ReportPojo> pojos) throws ApiException {
         List<ReportData> dataList = new ArrayList<>();
+        if(pojos.isEmpty())
+            return dataList;
+        SchemaVersionPojo schemaVersionPojo = schemaVersionApi.getCheck(pojos.get(0).getSchemaVersionId());
+        List<DirectoryPojo> directoryPojoList = directoryApi.getAll();
+        Map<Integer, DirectoryPojo> idToDirectoryPojoList = getIdToPojoMap(directoryPojoList);
         for(ReportPojo p : pojos) {
             ReportData data = ConvertUtil.convert(p, ReportData.class);
-            SchemaVersionPojo schemaVersionPojo = schemaVersionApi.getCheck(data.getSchemaVersionId());
-            DirectoryPojo directoryPojo = directoryApi.getCheck(data.getDirectoryId());
+            DirectoryPojo directoryPojo = idToDirectoryPojoList.get(data.getDirectoryId());
             data.setDirectoryName(directoryPojo.getDirectoryName());
-            data.setDirectoryPath(directoryApi.getDirectoryPath(directoryPojo.getId()));
+            data.setDirectoryPath(getDirectoryPath(directoryPojo.getId(), idToDirectoryPojoList));
             data.setSchemaVersionName(schemaVersionPojo.getName());
             dataList.add(data);
         }

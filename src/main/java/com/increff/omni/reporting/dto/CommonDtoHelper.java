@@ -92,6 +92,25 @@ public class CommonDtoHelper {
         return data;
     }
 
+    public static Map<Integer, DirectoryPojo> getIdToPojoMap(List<DirectoryPojo> directoryPojoList) {
+        Map<Integer, DirectoryPojo> idToPojo = new HashMap<>();
+        directoryPojoList.forEach(d -> idToPojo.put(d.getId(), d));
+        return idToPojo;
+    }
+
+    public static String getDirectoryPath(Integer id,
+                                   Map<Integer, DirectoryPojo> idToDirectoryPojoList) {
+        DirectoryPojo directoryPojo = idToDirectoryPojoList.get(id);
+        String directoryPath = directoryPojo.getDirectoryName();
+        Integer parentId = directoryPojo.getParentId();
+        while (parentId != 0) {
+            DirectoryPojo p = idToDirectoryPojoList.get(parentId);
+            directoryPath = p.getDirectoryName().concat("/").concat(directoryPath);
+            parentId = p.getParentId();
+        }
+        return directoryPath;
+    }
+
     public static void setFiltersApplied(List<ReportInputParamsPojo> paramsPojoList,
                                          ReportRequestData data,
                                          List<InputControlPojo> controlPojos) {
