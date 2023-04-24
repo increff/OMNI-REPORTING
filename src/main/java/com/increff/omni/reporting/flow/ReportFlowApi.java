@@ -32,7 +32,6 @@ import static com.increff.omni.reporting.dto.CommonDtoHelper.*;
 
 @Service
 @Setter
-@Transactional(rollbackFor = ApiException.class)
 @Log4j
 public class ReportFlowApi extends AbstractFlowApi {
 
@@ -71,12 +70,13 @@ public class ReportFlowApi extends AbstractFlowApi {
 
     private static final Integer MAX_NUMBER_OF_ROWS = 300;
 
-
+    @Transactional(rollbackFor = ApiException.class)
     public ReportPojo addReport(ReportPojo pojo) throws ApiException {
         validate(pojo);
         return api.add(pojo);
     }
 
+    @Transactional(rollbackFor = ApiException.class)
     public ReportPojo editReport(ReportPojo pojo) throws ApiException {
         ReportPojo existing = api.getCheck(pojo.getId());
         validateForEdit(pojo);
@@ -118,21 +118,25 @@ public class ReportFlowApi extends AbstractFlowApi {
         }
     }
 
+    @Transactional(rollbackFor = ApiException.class)
     public ReportQueryPojo upsertQuery(ReportQueryPojo pojo) throws ApiException {
         api.getCheck(pojo.getReportId());
         return queryApi.upsertQuery(pojo);
     }
 
+    @Transactional(rollbackFor = ApiException.class)
     public void mapControlToReport(ReportControlsPojo pojo) throws ApiException {
         validateControlReportMapping(pojo);
         reportControlsApi.add(pojo);
         checkAndAddValidationGroup(pojo);
     }
 
+    @Transactional(readOnly = true)
     public List<ReportPojo> getAllBySchemaVersionId(Integer schemaVersionId) {
         return api.getBySchemaVersion(schemaVersionId);
     }
 
+    @Transactional(readOnly = true)
     public List<ReportPojo> getAll(Integer orgId, Boolean isDashboard) throws ApiException {
 
         OrgSchemaVersionPojo orgSchemaVersionPojo = orgSchemaApi.getCheckByOrgId(orgId);
@@ -153,6 +157,7 @@ public class ReportFlowApi extends AbstractFlowApi {
         return standard;
     }
 
+    @Transactional(rollbackFor = ApiException.class)
     public void addValidationGroup(Integer reportId, ValidationGroupForm groupForm) throws ApiException {
         validate(reportId, groupForm);
         List<InputControlPojo> inputControlPojoList = inputControlApi.selectByIds(groupForm.getControlIds());
@@ -176,6 +181,7 @@ public class ReportFlowApi extends AbstractFlowApi {
         reportValidationGroupApi.addAll(validationGroupPojoList);
     }
 
+    @Transactional(rollbackFor = ApiException.class)
     public void deleteReportControl(Integer reportId, Integer controlId) throws ApiException {
         api.getCheck(reportId);
         ReportControlsPojo pojo = reportControlsApi.getByReportAndControlId(reportId, controlId);
@@ -184,6 +190,7 @@ public class ReportFlowApi extends AbstractFlowApi {
         reportControlsApi.delete(pojo.getId());
     }
 
+    @Transactional(rollbackFor = ApiException.class)
     public void copyReports(Integer oldSchemaVersionId, Integer newSchemaVersionId) throws ApiException {
         schemaVersionApi.getCheck(oldSchemaVersionId);
         schemaVersionApi.getCheck(newSchemaVersionId);
@@ -241,6 +248,7 @@ public class ReportFlowApi extends AbstractFlowApi {
         }
     }
 
+    @Transactional(rollbackFor = ApiException.class)
     public void checkAndAddValidationGroup(ReportControlsPojo pojo) throws ApiException {
         InputControlPojo inputControlPojo = inputControlApi.getCheck(pojo.getControlId());
         if (Arrays.asList(InputControlType.ACCESS_CONTROLLED_MULTI_SELECT, InputControlType.SINGLE_SELECT)
