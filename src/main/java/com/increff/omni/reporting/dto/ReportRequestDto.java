@@ -13,7 +13,7 @@ import com.increff.omni.reporting.model.data.ReportRequestData;
 import com.increff.omni.reporting.model.data.TimeZoneData;
 import com.increff.omni.reporting.model.form.ReportRequestForm;
 import com.increff.omni.reporting.pojo.*;
-import com.increff.omni.reporting.util.FileUploadUtil;
+import com.increff.omni.reporting.util.FileDownloadUtil;
 import com.increff.omni.reporting.util.FileUtil;
 import com.increff.omni.reporting.util.UserPrincipalUtil;
 import com.nextscm.commons.spring.common.ApiException;
@@ -61,7 +61,7 @@ public class ReportRequestDto extends AbstractDto {
     @Autowired
     private OrganizationApi organizationApi;
     @Autowired
-    private FileUploadUtil fileUploadUtil;
+    private FileDownloadUtil fileDownloadUtil;
     @Autowired
     private ReportInputParamsApi reportInputParamsApi;
     @Autowired
@@ -147,7 +147,7 @@ public class ReportRequestDto extends AbstractDto {
             throw new ApiException(ApiStatus.BAD_DATA, "Scheduled reports can't be downloaded");
         ReportPojo reportPojo = reportApi.getCheck(requestPojo.getReportId());
         validate(requestPojo, requestId, reportPojo, getUserId());
-        return fileUploadUtil.getSignedUri(requestPojo.getUrl()).toString();
+        return fileDownloadUtil.getSignedUri(requestPojo.getUrl()).toString();
     }
 
     public List<Map<String, String>> viewReport(Integer requestId) throws ApiException, IOException {
@@ -201,6 +201,6 @@ public class ReportRequestDto extends AbstractDto {
     }
 
     private byte[] getFileFromUrl(String url) throws IOException {
-        return IOUtils.toByteArray(fileUploadUtil.get(url));
+        return IOUtils.toByteArray(fileDownloadUtil.get(url));
     }
 }

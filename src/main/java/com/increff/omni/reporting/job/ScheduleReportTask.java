@@ -7,7 +7,7 @@ import com.increff.omni.reporting.config.EmailProps;
 import com.increff.omni.reporting.model.constants.ReportRequestStatus;
 import com.increff.omni.reporting.pojo.*;
 import com.increff.omni.reporting.util.EmailUtil;
-import com.increff.omni.reporting.util.FileUploadUtil;
+import com.increff.omni.reporting.util.FileDownloadUtil;
 import com.increff.omni.reporting.util.FileUtil;
 import com.increff.omni.reporting.util.SqlCmd;
 import com.nextscm.commons.spring.common.ApiException;
@@ -61,7 +61,7 @@ public class ScheduleReportTask extends AbstractTask {
     @Autowired
     private FolderApi folderApi;
     @Autowired
-    private FileUploadUtil fileUploadUtil;
+    private FileDownloadUtil fileDownloadUtil;
     @Autowired
     private ApplicationProperties properties;
     @Autowired

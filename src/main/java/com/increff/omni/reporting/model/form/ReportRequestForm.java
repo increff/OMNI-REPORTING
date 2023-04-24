@@ -13,7 +13,7 @@ public class ReportRequestForm {
 
     private Integer reportId;
     private String timezone = "UTC";
-    private FileFormat fileFormat;
+    private FileFormat fileFormat = FileFormat.CSV;
     private Map<String, List<String>> paramMap;
 
 }

@@ -11,12 +11,12 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.concurrent.TimeUnit;
 
-public class FileUploadUtil {
+public class FileDownloadUtil {
 
     private Storage storage;
     private final String bucketName;
 
-    public FileUploadUtil(String bucketName, String credentialFilePath)
+    public FileDownloadUtil(String bucketName, String credentialFilePath)
             throws IOException {
         this.bucketName = bucketName;
         GoogleCredentials credentials = ServiceAccountCredentials.fromStream(new FileInputStream(credentialFilePath));

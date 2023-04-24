@@ -9,7 +9,7 @@ import com.fasterxml.jackson.datatype.jsr310.ser.ZonedDateTimeSerializer;
 import com.increff.account.client.AuthClient;
 import com.increff.commons.queryexecutor.QueryExecutorClient;
 import com.increff.omni.reporting.dto.CommonDtoHelper;
-import com.increff.omni.reporting.util.FileUploadUtil;
+import com.increff.omni.reporting.util.FileDownloadUtil;
 import com.nextscm.commons.spring.audit.api.AuditApi;
 import com.nextscm.commons.spring.audit.dao.AuditDao;
 import com.nextscm.commons.spring.audit.dao.DaoProvider;
@@ -45,8 +45,8 @@ public class TestConfig {
     private ApplicationProperties applicationProperties;
 
     @Bean
-    public FileUploadUtil getFileUploadUtil() throws IOException {
-        return new FileUploadUtil(
+    public FileDownloadUtil getFileUploadUtil() throws IOException {
+        return new FileDownloadUtil(
                 applicationProperties.getGcpBucketName(), applicationProperties.getGcpFilePath());
     }
 
