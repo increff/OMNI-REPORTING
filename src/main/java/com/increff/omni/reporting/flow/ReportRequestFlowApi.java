@@ -32,7 +32,8 @@ public class ReportRequestFlowApi extends AbstractFlowApi {
     @Autowired
     private ReportValidationGroupApi reportValidationGroupApi;
 
-    private final static Integer MAX_OPEN_REPORT_REQUESTS = 5;
+    // todo change before release
+    private final static Integer MAX_OPEN_REPORT_REQUESTS = 500;
 
     public void requestReport(ReportRequestPojo pojo, List<ReportInputParamsPojo> reportInputParamsPojoList)
             throws ApiException {

@@ -29,7 +29,7 @@ public class ReportRequestApi extends AbstractApi {
 
     public List<ReportRequestPojo> getPendingByUserId(Integer userId) {
         return dao.getByUserIdAndStatuses(ReportRequestType.USER, userId,
-                Arrays.asList(ReportRequestStatus.NEW, ReportRequestStatus.IN_PROGRESS));
+                Arrays.asList(ReportRequestStatus.NEW, ReportRequestStatus.IN_PROGRESS, ReportRequestStatus.REQUESTED));
     }
 
     public ReportRequestPojo getCheck(Integer id) throws ApiException {
