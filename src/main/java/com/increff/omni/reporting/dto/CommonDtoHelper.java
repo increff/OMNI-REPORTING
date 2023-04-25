@@ -245,6 +245,7 @@ public class CommonDtoHelper {
         reportRequestPojo.setStatus(ReportRequestStatus.NEW);
         reportRequestPojo.setType(ReportRequestType.USER);
         reportRequestPojo.setUserId(userId);
+        reportRequestPojo.setFileFormat(form.getFileFormat());
         return reportRequestPojo;
     }
 
