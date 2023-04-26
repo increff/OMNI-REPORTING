@@ -185,7 +185,7 @@ public class ReportRequestDto extends AbstractDto {
             if(requestPojo.isPresent()) {
                 // This happens separately in a separate transaction
                 reportRequestApi.updateStatus(requestPojo.get().getId(), getStatusMapping(d.getStatus()),
-                        requestPojo.get().getUrl(), d.getNoOfRows(), d.getFileSize(), d.getFailureReason());
+                        requestPojo.get().getUrl(), d.getNoOfRows(), d.getFileSize(), d.getFailureReason(), d.getUpdatedAt());
             }
         }
     }

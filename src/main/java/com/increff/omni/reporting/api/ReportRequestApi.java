@@ -11,9 +11,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @Transactional(rollbackFor = Exception.class)
@@ -60,7 +62,7 @@ public class ReportRequestApi extends AbstractApi {
     }
 
     public void updateStatus(Integer id, ReportRequestStatus status, String filePath, Integer noOfRows, Double fileSize,
-                             String failureReason)
+                             String failureReason, ZonedDateTime updatedAt)
             throws ApiException {
         ReportRequestPojo reportRequestPojo = getCheck(id);
         reportRequestPojo.setStatus(status);
@@ -68,6 +70,8 @@ public class ReportRequestApi extends AbstractApi {
         reportRequestPojo.setFileSize(fileSize);
         reportRequestPojo.setNoOfRows(noOfRows);
         reportRequestPojo.setFailureReason(failureReason);
+        if(Objects.nonNull(updatedAt))
+            reportRequestPojo.setUpdatedAt(updatedAt);
         dao.update(reportRequestPojo);
     }
 

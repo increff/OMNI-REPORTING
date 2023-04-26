@@ -75,7 +75,7 @@ public class UserReportTask extends AbstractTask{
                     reportRequestPojo, reportPojo);
             executorClient.postRequest(queryExecutorForm);
             api.updateStatus(pojo.getId(), ReportRequestStatus.REQUESTED, queryExecutorForm.getFileUploadDetails().getFilepath(),
-                    0, 0.0, "");
+                    0, 0.0, "", null);
         } catch (Exception e) {
             log.error("Report Request ID : " + pojo.getId() + " failed", e);
             api.markFailed(pojo.getId(), ReportRequestStatus.FAILED, e.getMessage(), 0, 0.0);
