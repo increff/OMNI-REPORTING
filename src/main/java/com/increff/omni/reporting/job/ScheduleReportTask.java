@@ -144,7 +144,7 @@ public class ScheduleReportTask extends AbstractTask {
             sendEmail(fileSize, file, pojo, timezone);
             // update status to completed
             api.updateStatus(pojo.getId(), ReportRequestStatus.COMPLETED, filePath, noOfRows, fileSize, "",
-                    null);
+                    ZonedDateTime.now());
             FileUtil.delete(file);
         } catch (
                 ApiException apiException) {

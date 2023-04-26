@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.time.ZonedDateTime;
 
 @Entity
 @Setter
@@ -54,4 +55,7 @@ public class ReportRequestPojo extends AbstractVersionedPojo {
 
     @Column(columnDefinition = "TEXT")
     private String failureReason;
+
+    private ZonedDateTime requestCompletionTime;
+
 }

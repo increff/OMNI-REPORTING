@@ -1,7 +1,6 @@
 package com.increff.omni.reporting.dto;
 
 import com.increff.commons.queryexecutor.constants.RequestStatus;
-import com.increff.commons.queryexecutor.data.QueryRequestData;
 import com.increff.omni.reporting.model.constants.ReportRequestStatus;
 import com.increff.omni.reporting.model.constants.ReportRequestType;
 import com.increff.omni.reporting.model.constants.ValidationType;
@@ -10,7 +9,6 @@ import com.increff.omni.reporting.model.form.ReportRequestForm;
 import com.increff.omni.reporting.model.form.ReportScheduleForm;
 import com.increff.omni.reporting.model.form.SqlParams;
 import com.increff.omni.reporting.pojo.*;
-import com.increff.omni.reporting.util.SqlCmd;
 import com.nextscm.commons.lang.StringUtil;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
@@ -31,7 +29,8 @@ public class CommonDtoHelper {
 
     public final static String TIME_ZONE_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX";
 
-    public static Map<String, String> getInputParamMapFromPojoList(List<ReportInputParamsPojo> reportInputParamsPojoList) {
+    public static Map<String, String> getInputParamMapFromPojoList(
+            List<ReportInputParamsPojo> reportInputParamsPojoList) {
         Map<String, String> inputParamMap = new HashMap<>();
         reportInputParamsPojoList.forEach(r -> inputParamMap.put(r.getParamKey(), r.getParamValue()));
         return inputParamMap;
@@ -42,8 +41,9 @@ public class CommonDtoHelper {
         List<InputControlFilterData> inputControlFilterData = new ArrayList<>();
         paramsPojos.forEach(p -> {
             Optional<InputControlPojo>
-                    controlPojo = controlPojos.stream().filter(c -> c.getParamName().equals(p.getParamKey())).findFirst();
-            if(controlPojo.isPresent()) {
+                    controlPojo =
+                    controlPojos.stream().filter(c -> c.getParamName().equals(p.getParamKey())).findFirst();
+            if (controlPojo.isPresent()) {
                 InputControlFilterData filterData = new InputControlFilterData();
                 filterData.setParamName(controlPojo.get().getParamName());
                 filterData.setDisplayName(controlPojo.get().getDisplayName());
@@ -76,7 +76,8 @@ public class CommonDtoHelper {
                                                          OrganizationPojo organizationPojo) {
         ReportRequestData data = new ReportRequestData();
         data.setRequestCreationTime(pojo.getCreatedAt());
-        data.setRequestUpdatedTime(pojo.getUpdatedAt());
+        data.setRequestUpdatedTime(Objects.isNull(pojo.getRequestCompletionTime()) ? pojo.getUpdatedAt() :
+                pojo.getRequestCompletionTime());
         data.setStatus(pojo.getStatus().equals(ReportRequestStatus.REQUESTED) ? ReportRequestStatus.IN_PROGRESS :
                 pojo.getStatus());
         data.setType(pojo.getType());
@@ -99,7 +100,7 @@ public class CommonDtoHelper {
     }
 
     public static String getDirectoryPath(Integer id,
-                                   Map<Integer, DirectoryPojo> idToDirectoryPojoList) {
+                                          Map<Integer, DirectoryPojo> idToDirectoryPojoList) {
         DirectoryPojo directoryPojo = idToDirectoryPojoList.get(id);
         String directoryPath = directoryPojo.getDirectoryName();
         Integer parentId = directoryPojo.getParentId();
@@ -142,10 +143,11 @@ public class CommonDtoHelper {
         data.setFilters(filterData);
     }
 
-    public static Map<Integer, List<ReportInputParamsPojo>> prepareRequestToParamMap(List<ReportInputParamsPojo> allParamsPojo) {
+    public static Map<Integer, List<ReportInputParamsPojo>> prepareRequestToParamMap(
+            List<ReportInputParamsPojo> allParamsPojo) {
         Map<Integer, List<ReportInputParamsPojo>> requestToParamsPojo = new HashMap<>();
         allParamsPojo.forEach(a -> {
-            if(requestToParamsPojo.containsKey(a.getReportRequestId())) {
+            if (requestToParamsPojo.containsKey(a.getReportRequestId())) {
                 List<ReportInputParamsPojo> existingParams = requestToParamsPojo.get(a.getReportRequestId());
                 existingParams.add(a);
                 requestToParamsPojo.put(a.getReportRequestId(), existingParams);

@@ -15,7 +15,6 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 
 @Service
 @Transactional(rollbackFor = Exception.class)
@@ -62,7 +61,7 @@ public class ReportRequestApi extends AbstractApi {
     }
 
     public void updateStatus(Integer id, ReportRequestStatus status, String filePath, Integer noOfRows, Double fileSize,
-                             String failureReason, ZonedDateTime updatedAt)
+                             String failureReason, ZonedDateTime completionTime)
             throws ApiException {
         ReportRequestPojo reportRequestPojo = getCheck(id);
         reportRequestPojo.setStatus(status);
@@ -70,8 +69,9 @@ public class ReportRequestApi extends AbstractApi {
         reportRequestPojo.setFileSize(fileSize);
         reportRequestPojo.setNoOfRows(noOfRows);
         reportRequestPojo.setFailureReason(failureReason);
-        if(Objects.nonNull(updatedAt))
-            reportRequestPojo.setUpdatedAt(updatedAt);
+        if (reportRequestPojo.getStatus().equals(ReportRequestStatus.COMPLETED) ||
+                reportRequestPojo.getStatus().equals(ReportRequestStatus.FAILED))
+            reportRequestPojo.setRequestCompletionTime(completionTime);
         dao.update(reportRequestPojo);
     }
 
@@ -86,6 +86,7 @@ public class ReportRequestApi extends AbstractApi {
         reportRequestPojo.setFailureReason(message);
         reportRequestPojo.setFileSize(fileSize);
         reportRequestPojo.setNoOfRows(noOfRows);
+        reportRequestPojo.setRequestCompletionTime(ZonedDateTime.now());
         dao.update(reportRequestPojo);
     }
 
