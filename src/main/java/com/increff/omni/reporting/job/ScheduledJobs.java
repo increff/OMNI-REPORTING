@@ -18,6 +18,7 @@ import org.springframework.stereotype.Component;
 import javax.persistence.OptimisticLockException;
 import java.util.*;
 import java.util.concurrent.Executor;
+import java.util.stream.Collectors;
 
 import static com.increff.omni.reporting.dto.CommonDtoHelper.*;
 
@@ -103,6 +104,17 @@ public class ScheduledJobs {
             reportRequestFlowApi.requestReportWithoutValidation(reportRequestPojo, reportInputParamsPojoList);
             s.setNextRuntime(getNextRunTime(s.getCron(), timezone));
             scheduleApi.edit(s);
+        }
+    }
+
+    //todo schedule for requested report
+    @Scheduled(fixedDelay = 5 * 60 * 1000)
+    public void refreshRequests() throws ApiException {
+        List<ReportRequestPojo> reportRequestPojoList = api.getPendingRequests();
+        Map<Integer, List<ReportRequestPojo>> userIdToRequests = groupByUserID(reportRequestPojoList);
+        for (Map.Entry<Integer, List<ReportRequestPojo>> e : userIdToRequests.entrySet()) {
+            List<Integer> pendingIds = e.getValue().stream().map(ReportRequestPojo::getId).collect(Collectors.toList());
+            reportRequestFlowApi.updatePendingRequestStatus(pendingIds, e.getValue(), e.getKey());
         }
     }
 

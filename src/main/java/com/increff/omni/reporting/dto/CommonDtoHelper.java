@@ -1,5 +1,6 @@
 package com.increff.omni.reporting.dto;
 
+import com.increff.commons.queryexecutor.constants.FileFormat;
 import com.increff.commons.queryexecutor.constants.RequestStatus;
 import com.increff.omni.reporting.model.constants.ReportRequestStatus;
 import com.increff.omni.reporting.model.constants.ReportRequestType;
@@ -387,6 +388,19 @@ public class CommonDtoHelper {
         return orgToRequests;
     }
 
+    public static Map<Integer, List<ReportRequestPojo>> groupByUserID(List<ReportRequestPojo> reportRequestPojoList) {
+        Map<Integer, List<ReportRequestPojo>> userIdToRequests = new HashMap<>();
+        for (ReportRequestPojo r : reportRequestPojoList) {
+            if (userIdToRequests.containsKey(r.getUserId())) {
+                List<ReportRequestPojo> newList = new ArrayList<>(userIdToRequests.get(r.getUserId()));
+                newList.add(r);
+                userIdToRequests.put(r.getUserId(), newList);
+            } else
+                userIdToRequests.put(r.getUserId(), Collections.singletonList(r));
+        }
+        return userIdToRequests;
+    }
+
     public static ReportRequestPojo convertToReportRequestPojo(ReportSchedulePojo schedulePojo,
                                                                Integer reportId) {
         ReportRequestPojo reportRequestPojo = new ReportRequestPojo();
@@ -396,6 +410,7 @@ public class CommonDtoHelper {
         reportRequestPojo.setUserId(schedulePojo.getUserId());
         reportRequestPojo.setOrgId(schedulePojo.getOrgId());
         reportRequestPojo.setScheduleId(schedulePojo.getId());
+        reportRequestPojo.setFileFormat(FileFormat.CSV);
         return reportRequestPojo;
     }
 

@@ -1,7 +1,5 @@
 package com.increff.omni.reporting.dto;
 
-import com.increff.commons.queryexecutor.data.QueryRequestData;
-import com.increff.commons.queryexecutor.form.GetRequestForm;
 import com.increff.omni.reporting.api.*;
 import com.increff.omni.reporting.flow.InputControlFlowApi;
 import com.increff.omni.reporting.flow.ReportRequestFlowApi;
@@ -109,7 +107,7 @@ public class ReportRequestDto extends AbstractDto {
         List<Integer> pendingRequestIds = reportRequestPojoList.stream().filter(r -> r.getStatus().equals(ReportRequestStatus.REQUESTED))
                         .map(ReportRequestPojo::getId).collect(
                         Collectors.toList());
-        updatePendingRequestStatus(pendingRequestIds, reportRequestPojoList, getUserId());
+        flow.updatePendingRequestStatus(pendingRequestIds, reportRequestPojoList, getUserId());
         List<Integer> reportRequestIds =
                 reportRequestPojoList.stream().map(ReportRequestPojo::getId).collect(Collectors.toList());
         reportRequestPojoList = reportRequestApi.getByIds(reportRequestIds);
@@ -168,26 +166,6 @@ public class ReportRequestDto extends AbstractDto {
         FileUtil.delete(sourceFile);
         return data;
 
-    }
-
-    public void updatePendingRequestStatus(List<Integer> pendingRequestIds, List<ReportRequestPojo> reportRequestPojoList,
-                                      int userId) throws ApiException {
-        if(pendingRequestIds.isEmpty())
-            return;
-        GetRequestForm form = new GetRequestForm();
-        List<Long> requestIds = pendingRequestIds.stream().map(Long::valueOf).collect(Collectors.toList());
-        form.setReferenceIds(requestIds);
-        form.setUserId(userId);
-        List<QueryRequestData> data = executorClientApi.getQueryRequestDataList(form);
-        for(QueryRequestData d : data) {
-            Optional<ReportRequestPojo> requestPojo =
-                    reportRequestPojoList.stream().filter(r -> r.getId().equals(d.getReferenceId().intValue())).findFirst();
-            if(requestPojo.isPresent()) {
-                // This happens separately in a separate transaction
-                reportRequestApi.updateStatus(requestPojo.get().getId(), getStatusMapping(d.getStatus()),
-                        requestPojo.get().getUrl(), d.getNoOfRows(), d.getFileSize(), d.getFailureReason(), d.getUpdatedAt());
-            }
-        }
     }
 
     public List<TimeZoneData> getAllAvailableTimeZones() throws ApiException {

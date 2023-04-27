@@ -94,6 +94,10 @@ public class ReportRequestApi extends AbstractApi {
         return dao.getStuckReports(stuckReportTime);
     }
 
+    public List<ReportRequestPojo> getPendingRequests() {
+        return dao.getPendingRequests();
+    }
+
     public List<ReportRequestPojo> getByOrgAndType(Integer orgId, ReportRequestType type, Integer pageNo,
                                                    Integer pageSize) {
         return dao.getByOrgAndType(orgId, type, pageNo, pageSize);

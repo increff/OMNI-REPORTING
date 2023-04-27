@@ -105,4 +105,18 @@ public class ReportRequestDao extends AbstractDao<ReportRequestPojo> {
         TypedQuery<ReportRequestPojo> tQuery = createQuery(query);
         return tQuery.getResultList();
     }
+
+    public List<ReportRequestPojo> getPendingRequests() {
+        CriteriaBuilder cb = this.em.getCriteriaBuilder();
+        CriteriaQuery<ReportRequestPojo> query = cb.createQuery(ReportRequestPojo.class);
+        Root<ReportRequestPojo> root = query.from(ReportRequestPojo.class);
+        query.where(
+                cb.and(
+                        cb.equal(root.get("status"), ReportRequestStatus.REQUESTED),
+                        cb.equal(root.get("type"), ReportRequestType.USER)
+                )
+        );
+        TypedQuery<ReportRequestPojo> tQuery = createQuery(query);
+        return tQuery.setMaxResults(500).getResultList();
+    }
 }
