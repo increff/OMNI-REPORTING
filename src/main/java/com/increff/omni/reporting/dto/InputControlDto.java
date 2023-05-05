@@ -15,7 +15,6 @@ import com.nextscm.commons.spring.common.ConvertUtil;
 import lombok.extern.log4j.Log4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.util.*;
@@ -52,8 +51,6 @@ public class InputControlDto extends AbstractDto {
     @Autowired
     private SchemaVersionApi schemaVersionApi;
 
-    // @Transactional is added to rollback on exception happening while getting values from query
-    @Transactional(rollbackFor = ApiException.class)
     public InputControlData add(InputControlForm form) throws ApiException {
         validate(form);
         InputControlPojo pojo = ConvertUtil.convert(form, InputControlPojo.class);
@@ -61,8 +58,6 @@ public class InputControlDto extends AbstractDto {
         return getInputControlDatas(Collections.singletonList(pojo), getOrgId()).get(0);
     }
 
-    // @Transactional is added to rollback on exception happening while getting values from query
-    @Transactional(rollbackFor = ApiException.class)
     public InputControlData update(Integer id, InputControlUpdateForm form) throws ApiException {
         validateForEdit(form);
         InputControlPojo pojo = ConvertUtil.convert(form, InputControlPojo.class);
