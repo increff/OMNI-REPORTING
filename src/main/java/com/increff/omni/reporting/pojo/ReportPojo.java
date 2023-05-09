@@ -18,7 +18,7 @@ import javax.persistence.*;
 public class ReportPojo extends AbstractVersionedPojo{
 
     @Id
-    @TableGenerator(name = "report", pkColumnValue = "report", allocationSize = 1,initialValue = 100000)
+    @TableGenerator(name = "report", pkColumnValue = "report",initialValue = 100000)
     @GeneratedValue(strategy = GenerationType.TABLE, generator = "report")
     private Integer id;
 

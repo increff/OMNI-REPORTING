@@ -14,6 +14,7 @@ import java.util.List;
 public class ReportRequestData {
 
     private Integer requestId;
+    private Integer sequenceNumber;
     private Integer reportId;
     private String reportName;
     private String orgName;

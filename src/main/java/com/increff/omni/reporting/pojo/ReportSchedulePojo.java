@@ -15,7 +15,7 @@ import java.time.ZonedDateTime;
 public class ReportSchedulePojo extends AbstractVersionedPojo {
 
     @Id
-    @TableGenerator(name = "report_schedule", pkColumnValue = "report_schedule", allocationSize = 1, initialValue =
+    @TableGenerator(name = "report_schedule", pkColumnValue = "report_schedule", initialValue =
             100000)
     @GeneratedValue(strategy = GenerationType.TABLE, generator = "report_schedule")
     private Integer id;

@@ -114,7 +114,8 @@ public class ScheduledJobs {
         Map<Integer, List<ReportRequestPojo>> userIdToRequests = groupByUserID(reportRequestPojoList);
         for (Map.Entry<Integer, List<ReportRequestPojo>> e : userIdToRequests.entrySet()) {
             List<Integer> pendingIds = e.getValue().stream().map(ReportRequestPojo::getId).collect(Collectors.toList());
-            reportRequestFlowApi.updatePendingRequestStatus(pendingIds, e.getValue(), e.getKey());
+            reportRequestFlowApi.updatePendingRequestStatus(pendingIds, e.getValue(), e.getKey(),
+                    new HashMap<>());
         }
     }
 

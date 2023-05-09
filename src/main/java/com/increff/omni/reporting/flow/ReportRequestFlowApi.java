@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -61,8 +62,10 @@ public class ReportRequestFlowApi extends AbstractFlowApi {
         reportInputParamsApi.add(reportInputParamsPojoList);
     }
 
-    public void updatePendingRequestStatus(List<Integer> pendingRequestIds, List<ReportRequestPojo> reportRequestPojoList,
-                                           int userId) throws ApiException {
+    public void updatePendingRequestStatus(List<Integer> pendingRequestIds,
+                                           List<ReportRequestPojo> reportRequestPojoList,
+                                           int userId,
+                                           Map<Integer, Integer> referenceIdToSequenceNumber) throws ApiException {
         if(pendingRequestIds.isEmpty())
             return;
         GetRequestForm form = new GetRequestForm();
@@ -77,6 +80,7 @@ public class ReportRequestFlowApi extends AbstractFlowApi {
                 // This happens separately in a separate transaction
                 api.updateStatus(requestPojo.get().getId(), getStatusMapping(d.getStatus()),
                         requestPojo.get().getUrl(), d.getNoOfRows(), d.getFileSize(), d.getFailureReason(), d.getUpdatedAt());
+                referenceIdToSequenceNumber.put(requestPojo.get().getId(), d.getSequenceNumber());
             }
         }
     }

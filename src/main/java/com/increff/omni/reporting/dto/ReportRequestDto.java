@@ -107,7 +107,8 @@ public class ReportRequestDto extends AbstractDto {
         List<Integer> pendingRequestIds = reportRequestPojoList.stream().filter(r -> r.getStatus().equals(ReportRequestStatus.REQUESTED))
                         .map(ReportRequestPojo::getId).collect(
                         Collectors.toList());
-        flow.updatePendingRequestStatus(pendingRequestIds, reportRequestPojoList, getUserId());
+        Map<Integer, Integer> referenceIdToSequenceNumber = new HashMap<>();
+        flow.updatePendingRequestStatus(pendingRequestIds, reportRequestPojoList, getUserId(), referenceIdToSequenceNumber);
         List<Integer> reportRequestIds =
                 reportRequestPojoList.stream().map(ReportRequestPojo::getId).collect(Collectors.toList());
         reportRequestPojoList = reportRequestApi.getByIds(reportRequestIds);
@@ -134,7 +135,8 @@ public class ReportRequestDto extends AbstractDto {
             List<ReportInputParamsPojo> paramsPojoList = requestToParamsMap.get(r.getId());
             OrganizationPojo organizationPojo = orgToPojo.get(r.getOrgId());
             reportRequestDataList.add(
-                    getReportRequestData(r, reportPojo.get(), controlPojos, paramsPojoList, organizationPojo));
+                    getReportRequestData(r, reportPojo.get(), controlPojos, paramsPojoList, organizationPojo,
+                            referenceIdToSequenceNumber.getOrDefault(r.getId(), 0)));
         }
         return reportRequestDataList;
     }

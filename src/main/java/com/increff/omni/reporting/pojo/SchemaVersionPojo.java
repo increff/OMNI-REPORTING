@@ -12,7 +12,7 @@ import javax.persistence.*;
 public class SchemaVersionPojo extends AbstractVersionedPojo {
 
     @Id
-    @TableGenerator(name = "schema_version", pkColumnValue = "schema_version", allocationSize = 1, initialValue = 100000)
+    @TableGenerator(name = "schema_version", pkColumnValue = "schema_version", initialValue = 100000)
     @GeneratedValue(strategy = GenerationType.TABLE, generator = "schema_version")
     private Integer id;
     @Column(nullable = false, unique = true)

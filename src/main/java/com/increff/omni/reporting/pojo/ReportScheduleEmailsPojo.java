@@ -13,7 +13,7 @@ import javax.persistence.*;
 public class ReportScheduleEmailsPojo extends AbstractVersionedPojo {
 
     @Id
-    @TableGenerator(name = "report_schedule_emails", pkColumnValue = "report_schedule_emails", allocationSize = 10,
+    @TableGenerator(name = "report_schedule_emails", pkColumnValue = "report_schedule_emails",
             initialValue = 100000)
     @GeneratedValue(strategy = GenerationType.TABLE, generator = "report_schedule_emails")
     private Integer id;

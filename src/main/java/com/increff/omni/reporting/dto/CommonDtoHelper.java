@@ -74,7 +74,7 @@ public class CommonDtoHelper {
     public static ReportRequestData getReportRequestData(ReportRequestPojo pojo, ReportPojo reportPojo,
                                                          List<InputControlPojo> controlPojos,
                                                          List<ReportInputParamsPojo> paramsPojoList,
-                                                         OrganizationPojo organizationPojo) {
+                                                         OrganizationPojo organizationPojo, Integer sequenceNumber) {
         ReportRequestData data = new ReportRequestData();
         data.setRequestCreationTime(pojo.getCreatedAt());
         data.setRequestUpdatedTime(Objects.isNull(pojo.getRequestCompletionTime()) ? pojo.getUpdatedAt() :
@@ -88,6 +88,7 @@ public class CommonDtoHelper {
         data.setOrgName(organizationPojo.getName());
         data.setFileSize(pojo.getFileSize());
         data.setNoOfRows(pojo.getNoOfRows());
+        data.setSequenceNumber(sequenceNumber);
         data.setFailureReason(pojo.getFailureReason());
         data.setFileFormat(pojo.getFileFormat());
         setFiltersApplied(paramsPojoList, data, controlPojos);
