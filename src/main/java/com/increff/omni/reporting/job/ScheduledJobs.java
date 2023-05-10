@@ -107,7 +107,6 @@ public class ScheduledJobs {
         }
     }
 
-    //todo schedule for requested report
     @Scheduled(fixedDelay = 5 * 60 * 1000)
     public void refreshRequests() throws ApiException {
         List<ReportRequestPojo> reportRequestPojoList = api.getPendingRequests();

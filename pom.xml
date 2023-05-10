@@ -71,7 +71,7 @@
         <dependency>
             <groupId>com.increff.commons</groupId>
             <artifactId>query-executor-client</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>1.0</version>
         </dependency>
         <dependency>
             <groupId>com.increff.commons</groupId>
@@ -90,11 +90,6 @@
             <version>${javax.servlet.version}</version>
             <scope>provided</scope>
         </dependency>
-<!--        <dependency>-->
-<!--            <groupId>com.nextscm.commons</groupId>-->
-<!--            <artifactId>commons-fileclient</artifactId>-->
-<!--            <version>${fileclient.version}</version>-->
-<!--        </dependency>-->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
