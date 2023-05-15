@@ -131,8 +131,8 @@ public class SpringConfig extends WebMvcConfigurerAdapter {
          * requests are supposed to make external calls, we have use these decisively.
          * Suggested value is 100 for a heavy proxy and 50 for light weight proxy*/
         PoolingHttpClientConnectionManager connManager = new PoolingHttpClientConnectionManager();
-        connManager.setDefaultMaxPerRoute(100);
-        connManager.setMaxTotal(100);
+        connManager.setDefaultMaxPerRoute(applicationProperties.getMaxConnectionsPerRoute());
+        connManager.setMaxTotal(applicationProperties.getMaxConnections());
         ConnectionKeepAliveStrategy myStrategy = (httpResponse, httpContext) -> {
             HeaderElementIterator it = new BasicHeaderElementIterator
                     (httpResponse.headerIterator(HTTP.CONN_KEEP_ALIVE));
@@ -156,6 +156,7 @@ public class SpringConfig extends WebMvcConfigurerAdapter {
          * are too small as mentioned above. So when using HttpComponentsClientHttpRequestFactory, one must properly
          * configure PoolingHttpClientConnectionManager else problems are expected at scale*/
         HttpComponentsClientHttpRequestFactory factory = new HttpComponentsClientHttpRequestFactory(httpClient);
+        factory.setConnectionRequestTimeout(15 * 1000);
         factory.setConnectTimeout(15 * 1000);
         factory.setReadTimeout(25 * 1000);
 

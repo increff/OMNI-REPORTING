@@ -103,4 +103,11 @@ public class ApplicationProperties {
 
     @Value("${mailjet.smtp.port}")
     private String smtpPort;
+
+    @Value("${rest.max.connection.per.route:100}")
+    private int maxConnectionsPerRoute;
+
+    @Value("${rest.max.connection:200}")
+    private int maxConnections;
+
 }

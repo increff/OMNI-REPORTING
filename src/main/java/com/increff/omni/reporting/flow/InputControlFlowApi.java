@@ -27,7 +27,6 @@ import static com.increff.omni.reporting.dto.CommonDtoHelper.getReportControlPoj
 
 @Service
 @Log4j
-@Transactional(rollbackFor = ApiException.class)
 public class InputControlFlowApi extends AbstractApi {
 
     @Autowired
@@ -51,6 +50,7 @@ public class InputControlFlowApi extends AbstractApi {
     @Autowired
     private ApplicationProperties properties;
 
+    @Transactional(rollbackFor = ApiException.class)
     public InputControlPojo add(InputControlPojo pojo, String query, List<String> values,
                                 Integer reportId) throws ApiException {
 
@@ -71,6 +71,7 @@ public class InputControlFlowApi extends AbstractApi {
         return pojo;
     }
 
+    @Transactional(rollbackFor = ApiException.class)
     public InputControlPojo update(InputControlPojo pojo, String query, List<String> values) throws ApiException {
 
         InputControlQueryPojo queryPojo = getQueryPojo(query);
@@ -78,6 +79,7 @@ public class InputControlFlowApi extends AbstractApi {
         pojo = api.update(pojo, queryPojo, valuesList);
         return pojo;
     }
+
 
     public Map<String, String> getValuesFromQuery(String query, ConnectionPojo connectionPojo) {
         Connection connection = null;
