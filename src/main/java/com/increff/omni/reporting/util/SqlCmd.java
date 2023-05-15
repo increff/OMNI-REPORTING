@@ -5,8 +5,6 @@ import com.increff.omni.reporting.model.form.SqlParams;
 import lombok.extern.log4j.Log4j;
 import org.apache.commons.lang3.StringUtils;
 
-import java.io.IOException;
-import java.lang.ProcessBuilder.Redirect;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -14,24 +12,14 @@ import java.util.Objects;
 @Log4j
 public class SqlCmd {
 
-    public static void processQuery(SqlParams sp, Double maxExecutionTime)
-            throws IOException, InterruptedException {
-        processQuery(sp, true, maxExecutionTime);
-    }
-
-    public static void processQuery(SqlParams sp, Boolean isUserPrincipalAvailable, Double maxExecutionTime)
-            throws IOException, InterruptedException {
-        if (isUserPrincipalAvailable) addAccessControlMap(sp, maxExecutionTime);
-        String[] cmd = getQueryCmd(sp);
-        Redirect redirectAll = Redirect.appendTo(sp.getOutFile());
-        Redirect errRedirect = Redirect.appendTo(sp.getErrFile());
-        runCmd(cmd, redirectAll, errRedirect);
-    }
-
-    public static String prepareQuery(Map<String, String> inputParamMap, String query, Double maxExecutionTime) {
+    public static String getFinalQuery(Map<String, String> inputParamMap, String query,
+                                       Boolean isUserPrincipalAvailable) {
+        if(isUserPrincipalAvailable)
+            inputParamMap.putAll(UserPrincipalUtil.getAccessControlMap());
         String[] matchingFunctions = StringUtils.substringsBetween(query, "{{", "}}");
         if (Objects.isNull(matchingFunctions)) {
-            return massageQuery(query, maxExecutionTime);
+            log.debug("Query formed : " + query);
+            return query;
         }
         Map<String, String> functionValueMap = new HashMap<>();
         for (String f : matchingFunctions) {
@@ -42,34 +30,8 @@ public class SqlCmd {
         for (Map.Entry<String, String> e : functionValueMap.entrySet()) {
             query = query.replace(e.getKey(), e.getValue());
         }
-        return massageQuery(query, maxExecutionTime);
-    }
-
-    public static String massageQuery(String query, Double maxExecutionTime) {
-        int maxTime = (int) (maxExecutionTime * 60 * 1000);
-        return "SET SESSION MAX_EXECUTION_TIME=" + maxTime + ";\n" + query;
-    }
-
-    private static void addAccessControlMap(SqlParams sp, Double maxExecutionTime) {
-        Map<String, String> accessControlMap = UserPrincipalUtil.getAccessControlMap();
-        String nQuery = prepareQuery(accessControlMap, sp.getQuery(), maxExecutionTime);
-        sp.setQuery(nQuery);
-    }
-
-    // Commands
-    private static String[] getQueryCmd(SqlParams sp) {
-        String[] cmd = new String[]{ //
-                "mysql", //
-                "--quick", //
-                "--connect-timeout=5", //
-                "--host=" + sp.getHost(), //
-                "--user=" + sp.getUsername(), //
-                "--password=" + sp.getPassword(), //
-                "-e", //
-                escape(sp.getQuery()) //
-        };
-        log.debug("Query formed : " + sp.getQuery());
-        return cmd;
+        log.debug("Query formed : " + query);
+        return query;
     }
 
     private static String getValueFromMethod(Map<String, String> inputParamMap, String f, String methodName) {
@@ -100,49 +62,6 @@ public class SqlCmd {
                 break;
         }
         return finalString;
-    }
-
-    private static void runCmd(String[] cmd, Redirect out, Redirect error) throws IOException, InterruptedException {
-        Process p = runCmdProcess(cmd, out, error);
-        int exitValue = p.exitValue();
-        p.destroy();
-        if (exitValue == 0) {
-            return;
-        }
-        String cmdName = cmd[0];
-        throw new IOException("Error running command: " + cmdName + ", exitValue: " + exitValue);
-    }
-
-    private static Process runCmdProcess(String[] cmd, Redirect out, Redirect error)
-            throws IOException, InterruptedException {
-        Process p;
-        ProcessBuilder b = new ProcessBuilder(cmd);
-        if (error != null) {
-            b.redirectError(error);
-        }
-        if (out != null) {
-            b.redirectOutput(out);
-        }
-        p = b.start();
-        p.waitFor();
-        return p;
-    }
-
-    private static String escape(String str) {
-        String os = getOs();
-        if (os.equals("windows")) {
-            return "\"" + str + "\"";
-        }
-        return str;
-    }
-
-    private static String getOs() {
-        String os = System.getProperty("os.name").toLowerCase();
-        if (os.contains("win")) {
-            return "windows";
-        } else {
-            return "linux";
-        }
     }
 
 }

@@ -143,7 +143,7 @@ public class ReportScheduleDto extends AbstractDto {
             List<ReportInputParamsPojo> paramsPojoList = reportInputParamsApi.getInputParamsForReportRequest(r.getId());
             OrganizationPojo organizationPojo = organizationApi.getCheck(r.getOrgId());
             reportRequestDataList.add(
-                    getReportRequestData(r, reportPojo, controlPojos, paramsPojoList, organizationPojo));
+                    getReportRequestData(r, reportPojo, controlPojos, paramsPojoList, organizationPojo, 0));
         }
         return reportRequestDataList;
     }

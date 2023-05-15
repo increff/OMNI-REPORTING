@@ -11,10 +11,9 @@ import com.increff.omni.reporting.model.data.ReportRequestData;
 import com.increff.omni.reporting.model.data.TimeZoneData;
 import com.increff.omni.reporting.model.form.ReportRequestForm;
 import com.increff.omni.reporting.pojo.*;
-import com.increff.omni.reporting.util.FileUploadUtil;
+import com.increff.omni.reporting.util.FileDownloadUtil;
 import com.increff.omni.reporting.util.FileUtil;
 import com.increff.omni.reporting.util.UserPrincipalUtil;
-import com.nextscm.commons.fileclient.GcpFileProvider;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
 import lombok.extern.log4j.Log4j;
@@ -60,14 +59,14 @@ public class ReportRequestDto extends AbstractDto {
     @Autowired
     private OrganizationApi organizationApi;
     @Autowired
-    private FileUploadUtil fileUploadUtil;
-    @Autowired
-    private GcpFileProvider gcpFileProvider;
+    private FileDownloadUtil fileDownloadUtil;
     @Autowired
     private ReportInputParamsApi reportInputParamsApi;
+    @Autowired
+    private QueryExecutorClientApi executorClientApi;
 
     private static final Integer MAX_NUMBER_OF_ROWS = 50;
-    private static final Integer MAX_LIMIT = 50;
+    private static final Integer MAX_LIMIT = 25;
     public static final List<String> accessControlledKeys = Arrays.asList(ResourceQueryParamKeys.clientQueryParam,
             ResourceQueryParamKeys.fulfillmentLocationQueryParamKey);
 
@@ -105,12 +104,18 @@ public class ReportRequestDto extends AbstractDto {
     public List<ReportRequestData> getAll() throws ApiException, IOException {
         List<ReportRequestData> reportRequestDataList = new ArrayList<>();
         List<ReportRequestPojo> reportRequestPojoList = reportRequestApi.getByUserId(getUserId(), MAX_LIMIT);
+        List<Integer> pendingRequestIds = reportRequestPojoList.stream().filter(r -> r.getStatus().equals(ReportRequestStatus.REQUESTED))
+                        .map(ReportRequestPojo::getId).collect(
+                        Collectors.toList());
+        Map<Integer, Integer> referenceIdToSequenceNumber = new HashMap<>();
+        flow.updatePendingRequestStatus(pendingRequestIds, reportRequestPojoList, getUserId(), referenceIdToSequenceNumber);
+        List<Integer> reportRequestIds =
+                reportRequestPojoList.stream().map(ReportRequestPojo::getId).collect(Collectors.toList());
+        reportRequestPojoList = reportRequestApi.getByIds(reportRequestIds);
         List<Integer> reportIds =
                 reportRequestPojoList.stream().map(ReportRequestPojo::getReportId).collect(Collectors.toList());
         List<Integer> orgIds =
                 reportRequestPojoList.stream().map(ReportRequestPojo::getOrgId).collect(Collectors.toList());
-        List<Integer> reportRequestIds =
-                reportRequestPojoList.stream().map(ReportRequestPojo::getId).collect(Collectors.toList());
         List<ReportInputParamsPojo> allParamsPojo =
                 reportInputParamsApi.getInputParamsForReportRequestIds(reportRequestIds);
         Map<Integer, List<ReportInputParamsPojo>> requestToParamsMap = prepareRequestToParamMap(allParamsPojo);
@@ -130,7 +135,8 @@ public class ReportRequestDto extends AbstractDto {
             List<ReportInputParamsPojo> paramsPojoList = requestToParamsMap.get(r.getId());
             OrganizationPojo organizationPojo = orgToPojo.get(r.getOrgId());
             reportRequestDataList.add(
-                    getReportRequestData(r, reportPojo.get(), controlPojos, paramsPojoList, organizationPojo));
+                    getReportRequestData(r, reportPojo.get(), controlPojos, paramsPojoList, organizationPojo,
+                            referenceIdToSequenceNumber.getOrDefault(r.getId(), 0)));
         }
         return reportRequestDataList;
     }
@@ -141,10 +147,10 @@ public class ReportRequestDto extends AbstractDto {
             throw new ApiException(ApiStatus.BAD_DATA, "Scheduled reports can't be downloaded");
         ReportPojo reportPojo = reportApi.getCheck(requestPojo.getReportId());
         validate(requestPojo, requestId, reportPojo, getUserId());
-        return fileUploadUtil.getSignedUri(requestPojo.getUrl()).toString();
+        return fileDownloadUtil.getSignedUri(requestPojo.getUrl()).toString();
     }
 
-    public List<Map<String, String>> getJsonFromCsv(Integer requestId) throws ApiException, IOException {
+    public List<Map<String, String>> viewReport(Integer requestId) throws ApiException, IOException {
         ReportRequestPojo requestPojo = reportRequestApi.getCheck(requestId);
         if (!requestPojo.getType().equals(ReportRequestType.USER))
             throw new ApiException(ApiStatus.BAD_DATA, "Scheduled reports can't be viewed");
@@ -175,6 +181,6 @@ public class ReportRequestDto extends AbstractDto {
     }
 
     private byte[] getFileFromUrl(String url) throws IOException {
-        return IOUtils.toByteArray(gcpFileProvider.get(url));
+        return IOUtils.toByteArray(fileDownloadUtil.get(url));
     }
 }

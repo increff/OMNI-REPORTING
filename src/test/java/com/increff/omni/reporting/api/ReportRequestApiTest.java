@@ -36,7 +36,7 @@ public class ReportRequestApiTest extends AbstractTest {
                 , 100001, 100001, ReportRequestType.USER);
         pojo4.setCreatedAt(ZonedDateTime.now().plusDays(1));
         ReportRequestPojo pojo5 = getReportRequestPojo(100002, ReportRequestStatus.IN_PROGRESS
-                , 100002, 100003, ReportRequestType.USER);
+                , 100002, 100003, ReportRequestType.EMAIL);
         pojo5.setUpdatedAt(ZonedDateTime.now().minusMinutes(11));
         api.add(pojo1);
         api.add(pojo2);
@@ -120,7 +120,8 @@ public class ReportRequestApiTest extends AbstractTest {
     @Test
     public void testUpdateStatus() throws ApiException {
         ReportRequestPojo pojo = commonSetup();
-        api.updateStatus(pojo.getId(), ReportRequestStatus.COMPLETED, "https://fileUrl.com", 2, 0.01);
+        api.updateStatus(pojo.getId(), ReportRequestStatus.COMPLETED, "https://fileUrl.com", 2, 0.01, "",
+                null);
         ReportRequestPojo p = api.getCheck(pojo.getId());
         assertEquals(ReportRequestStatus.COMPLETED, p.getStatus());
         assertEquals(100001, p.getReportId().intValue());

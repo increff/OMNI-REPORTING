@@ -15,7 +15,7 @@ import javax.persistence.*;
 public class CustomReportAccessPojo extends AbstractVersionedPojo {
 
     @Id
-    @TableGenerator(name = "custom_report_access", pkColumnValue = "custom_report_access", allocationSize = 1, initialValue = 100000)
+    @TableGenerator(name = "custom_report_access", pkColumnValue = "custom_report_access", initialValue = 100000)
     @GeneratedValue(strategy = GenerationType.TABLE, generator = "custom_report_access")
     private Integer id;
 

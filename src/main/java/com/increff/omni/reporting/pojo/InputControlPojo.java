@@ -17,7 +17,7 @@ import javax.persistence.*;
 public class InputControlPojo extends AbstractVersionedPojo{
 
     @Id
-    @TableGenerator(name = "organization", pkColumnValue = "organization", allocationSize = 1,initialValue = 100000)
+    @TableGenerator(name = "organization", pkColumnValue = "organization", initialValue = 100000)
     @GeneratedValue(strategy = GenerationType.TABLE, generator = "organization")
     private Integer id;
 

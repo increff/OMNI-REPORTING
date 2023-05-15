@@ -7,12 +7,9 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.ZonedDateTimeSerializer;
 import com.increff.account.client.AuthClient;
+import com.increff.commons.queryexecutor.QueryExecutorClient;
 import com.increff.omni.reporting.dto.CommonDtoHelper;
-import com.increff.omni.reporting.util.FileUploadUtil;
-import com.nextscm.commons.fileclient.AbstractFileProvider;
-import com.nextscm.commons.fileclient.FileClient;
-import com.nextscm.commons.fileclient.FileClientException;
-import com.nextscm.commons.fileclient.GcpFileProvider;
+import com.increff.omni.reporting.util.FileDownloadUtil;
 import com.nextscm.commons.spring.audit.api.AuditApi;
 import com.nextscm.commons.spring.audit.dao.AuditDao;
 import com.nextscm.commons.spring.audit.dao.DaoProvider;
@@ -47,7 +44,7 @@ import java.util.List;
 @Configuration
 @EnableScheduling
 @EnableAsync
-@ComponentScan({"com.increff.omni.reporting", "com.increff.account.client"})
+@ComponentScan({"com.increff.omni.reporting", "com.increff.account.client", "com.increff.commons.queryexecutor"})
 @PropertySource(value = "file:omni-reporting.properties")
 @PropertySources({ //
         @PropertySource(value = "classpath:config.properties"), //
@@ -60,20 +57,17 @@ public class SpringConfig extends WebMvcConfigurerAdapter {
     private ApplicationProperties applicationProperties;
 
     @Bean
-    public FileClient getFileClient() throws FileClientException {
-        AbstractFileProvider gcpFileProvider = getGcpFileProvider();
-        return new FileClient(gcpFileProvider);
+    public FileDownloadUtil getFileDownloadUtil() throws IOException {
+        return new FileDownloadUtil(applicationProperties.getGcpBucketName(), applicationProperties.getGcpFilePath());
     }
 
     @Bean
-    public GcpFileProvider getGcpFileProvider() throws FileClientException {
-        return new GcpFileProvider(applicationProperties.getGcpBaseUrl(),
-                applicationProperties.getGcpBucketName(), applicationProperties.getGcpFilePath());
-    }
-
-    @Bean
-    public FileUploadUtil getFileUploadUtil() throws IOException {
-        return new FileUploadUtil(applicationProperties.getGcpBucketName(), applicationProperties.getGcpFilePath());
+    public QueryExecutorClient getQueryExecutorClient() {
+        return new QueryExecutorClient(applicationProperties.getQueryExecutorBaseUrl(),
+                applicationProperties.getQueryExecutorAuthDomain(),
+                applicationProperties.getQueryExecutorAuthUsername(),
+                applicationProperties.getQueryExecutorAuthPassword(),
+                new RestTemplate(getRequestFactory()));
     }
 
     @Bean(name = "objectMapper")

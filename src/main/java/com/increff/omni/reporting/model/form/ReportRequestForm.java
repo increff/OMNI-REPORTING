@@ -1,5 +1,6 @@
 package com.increff.omni.reporting.model.form;
 
+import com.increff.commons.queryexecutor.constants.FileFormat;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -12,6 +13,7 @@ public class ReportRequestForm {
 
     private Integer reportId;
     private String timezone = "UTC";
+    private FileFormat fileFormat = FileFormat.CSV;
     private Map<String, List<String>> paramMap;
 
 }

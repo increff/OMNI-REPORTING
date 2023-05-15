@@ -7,7 +7,6 @@ import com.increff.omni.reporting.flow.ReportRequestFlowApi;
 import com.increff.omni.reporting.model.constants.ReportRequestType;
 import com.increff.omni.reporting.pojo.*;
 import com.nextscm.commons.spring.common.ApiException;
-import com.nextscm.commons.spring.common.ApiStatus;
 import lombok.extern.log4j.Log4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -19,6 +18,7 @@ import org.springframework.stereotype.Component;
 import javax.persistence.OptimisticLockException;
 import java.util.*;
 import java.util.concurrent.Executor;
+import java.util.stream.Collectors;
 
 import static com.increff.omni.reporting.dto.CommonDtoHelper.*;
 
@@ -39,11 +39,11 @@ public class ScheduledJobs {
     @Autowired
     private ApplicationProperties properties;
     @Autowired
-    private ReportTask reportTask;
-    @Autowired
     private ReportApi reportApi;
     @Autowired
     private OrgSchemaApi orgSchemaApi;
+    @Autowired
+    private JobFactory jobFactory;
     @Autowired
     @Qualifier(value = "userReportRequestExecutor")
     private Executor userReportExecutor;
@@ -107,6 +107,17 @@ public class ScheduledJobs {
         }
     }
 
+    @Scheduled(fixedDelay = 5 * 60 * 1000)
+    public void refreshRequests() throws ApiException {
+        List<ReportRequestPojo> reportRequestPojoList = api.getPendingRequests();
+        Map<Integer, List<ReportRequestPojo>> userIdToRequests = groupByUserID(reportRequestPojoList);
+        for (Map.Entry<Integer, List<ReportRequestPojo>> e : userIdToRequests.entrySet()) {
+            List<Integer> pendingIds = e.getValue().stream().map(ReportRequestPojo::getId).collect(Collectors.toList());
+            reportRequestFlowApi.updatePendingRequestStatus(pendingIds, e.getValue(), e.getKey(),
+                    new HashMap<>());
+        }
+    }
+
     private void runReports(Executor executor, List<ReportRequestType> types) {
         // Get all the tasks pending for execution + Tasks that got stuck in processing
         int limitForEligibleRequest = getLimitForEligibleRequests((ThreadPoolTaskExecutor) executor);
@@ -130,16 +141,8 @@ public class ScheduledJobs {
                         continue;
                     }
                     ReportRequestPojo reportRequestPojo = itr.next();
-                    switch (reportRequestPojo.getType()) {
-                        case USER:
-                            reportTask.runUserReportAsync(reportRequestPojo);
-                            break;
-                        case EMAIL:
-                            reportTask.runScheduleReportAsync(reportRequestPojo);
-                            break;
-                        default:
-                            throw new ApiException(ApiStatus.BAD_DATA, "Unknown report request type");
-                    }
+                    AbstractTask task = jobFactory.getTask(reportRequestPojo.getType());
+                    task.runReportAsync(reportRequestPojo);
                     itr.remove();
                     orgToRequests.put(e.getKey(), pojoList);
                 }

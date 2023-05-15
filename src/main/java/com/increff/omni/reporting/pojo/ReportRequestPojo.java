@@ -1,11 +1,13 @@
 package com.increff.omni.reporting.pojo;
 
+import com.increff.commons.queryexecutor.constants.FileFormat;
 import com.increff.omni.reporting.model.constants.ReportRequestStatus;
 import com.increff.omni.reporting.model.constants.ReportRequestType;
 import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.time.ZonedDateTime;
 
 @Entity
 @Setter
@@ -19,7 +21,7 @@ import javax.persistence.*;
 public class ReportRequestPojo extends AbstractVersionedPojo {
 
     @Id
-    @TableGenerator(name = "report_request", pkColumnValue = "report_request", allocationSize = 1, initialValue = 100000)
+    @TableGenerator(name = "report_request", pkColumnValue = "report_request", initialValue = 100000)
     @GeneratedValue(strategy = GenerationType.TABLE, generator = "report_request")
     private Integer id;
 
@@ -45,8 +47,15 @@ public class ReportRequestPojo extends AbstractVersionedPojo {
 
     private Double fileSize;
 
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private FileFormat fileFormat = FileFormat.CSV;
+
     private String url;
 
     @Column(columnDefinition = "TEXT")
     private String failureReason;
+
+    private ZonedDateTime requestCompletionTime;
+
 }

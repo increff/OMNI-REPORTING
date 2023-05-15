@@ -13,7 +13,7 @@ import javax.persistence.*;
 public class DirectoryPojo extends AbstractVersionedPojo {
 
     @Id
-    @TableGenerator(name = "directory", pkColumnValue = "directory", allocationSize = 1, initialValue = 100000)
+    @TableGenerator(name = "directory", pkColumnValue = "directory", initialValue = 100000)
     @GeneratedValue(strategy = GenerationType.TABLE, generator = "directory")
     private Integer id;
     @Column(nullable = false, unique = true)

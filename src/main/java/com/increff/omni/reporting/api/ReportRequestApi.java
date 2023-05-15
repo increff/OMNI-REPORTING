@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -29,7 +30,7 @@ public class ReportRequestApi extends AbstractApi {
 
     public List<ReportRequestPojo> getPendingByUserId(Integer userId) {
         return dao.getByUserIdAndStatuses(ReportRequestType.USER, userId,
-                Arrays.asList(ReportRequestStatus.NEW, ReportRequestStatus.IN_PROGRESS));
+                Arrays.asList(ReportRequestStatus.NEW, ReportRequestStatus.IN_PROGRESS, ReportRequestStatus.REQUESTED));
     }
 
     public ReportRequestPojo getCheck(Integer id) throws ApiException {
@@ -59,13 +60,18 @@ public class ReportRequestApi extends AbstractApi {
         p.setStatus(ReportRequestStatus.STUCK);
     }
 
-    public void updateStatus(Integer id, ReportRequestStatus status, String filePath, Integer noOfRows, Double fileSize)
+    public void updateStatus(Integer id, ReportRequestStatus status, String filePath, Integer noOfRows, Double fileSize,
+                             String failureReason, ZonedDateTime completionTime)
             throws ApiException {
         ReportRequestPojo reportRequestPojo = getCheck(id);
         reportRequestPojo.setStatus(status);
         reportRequestPojo.setUrl(filePath);
         reportRequestPojo.setFileSize(fileSize);
         reportRequestPojo.setNoOfRows(noOfRows);
+        reportRequestPojo.setFailureReason(failureReason);
+        if (reportRequestPojo.getStatus().equals(ReportRequestStatus.COMPLETED) ||
+                reportRequestPojo.getStatus().equals(ReportRequestStatus.FAILED))
+            reportRequestPojo.setRequestCompletionTime(completionTime);
         dao.update(reportRequestPojo);
     }
 
@@ -80,6 +86,7 @@ public class ReportRequestApi extends AbstractApi {
         reportRequestPojo.setFailureReason(message);
         reportRequestPojo.setFileSize(fileSize);
         reportRequestPojo.setNoOfRows(noOfRows);
+        reportRequestPojo.setRequestCompletionTime(ZonedDateTime.now());
         dao.update(reportRequestPojo);
     }
 
@@ -87,8 +94,16 @@ public class ReportRequestApi extends AbstractApi {
         return dao.getStuckReports(stuckReportTime);
     }
 
+    public List<ReportRequestPojo> getPendingRequests() {
+        return dao.getPendingRequests();
+    }
+
     public List<ReportRequestPojo> getByOrgAndType(Integer orgId, ReportRequestType type, Integer pageNo,
                                                    Integer pageSize) {
         return dao.getByOrgAndType(orgId, type, pageNo, pageSize);
+    }
+
+    public List<ReportRequestPojo> getByIds(List<Integer> reportRequestIds) {
+        return dao.selectByIds(reportRequestIds);
     }
 }

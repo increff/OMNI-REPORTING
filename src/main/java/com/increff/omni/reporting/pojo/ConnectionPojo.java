@@ -12,7 +12,7 @@ import javax.persistence.*;
 public class ConnectionPojo extends AbstractVersionedPojo{
 
     @Id
-    @TableGenerator(name = "connection", pkColumnValue = "connection", allocationSize = 1,initialValue = 100000)
+    @TableGenerator(name = "connection", pkColumnValue = "connection" ,initialValue = 100000)
     @GeneratedValue(strategy = GenerationType.TABLE, generator = "connection")
     private Integer id;
     @Column(nullable = false, unique = true)

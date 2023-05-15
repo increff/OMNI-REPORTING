@@ -1,5 +1,7 @@
 package com.increff.omni.reporting.flow;
 
+import com.increff.commons.queryexecutor.data.QueryRequestData;
+import com.increff.commons.queryexecutor.form.GetRequestForm;
 import com.increff.omni.reporting.api.*;
 import com.increff.omni.reporting.pojo.*;
 import com.nextscm.commons.spring.common.ApiException;
@@ -10,9 +12,13 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import static com.increff.omni.reporting.dto.CommonDtoHelper.getStatusMapping;
 
 @Service
-@Transactional(rollbackFor = Exception.class)
 public class ReportRequestFlowApi extends AbstractFlowApi {
 
     @Autowired
@@ -31,9 +37,12 @@ public class ReportRequestFlowApi extends AbstractFlowApi {
     private OrgConnectionApi orgConnectionApi;
     @Autowired
     private ReportValidationGroupApi reportValidationGroupApi;
+    @Autowired
+    private QueryExecutorClientApi executorClientApi;
 
     private final static Integer MAX_OPEN_REPORT_REQUESTS = 5;
 
+    @Transactional(rollbackFor = Exception.class)
     public void requestReport(ReportRequestPojo pojo, List<ReportInputParamsPojo> reportInputParamsPojoList)
             throws ApiException {
         List<ReportRequestPojo> pendingReports = api.getPendingByUserId(pojo.getUserId());
@@ -44,6 +53,7 @@ public class ReportRequestFlowApi extends AbstractFlowApi {
         requestReportWithoutValidation(pojo, reportInputParamsPojoList);
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public void requestReportWithoutValidation(ReportRequestPojo pojo,
                                                List<ReportInputParamsPojo> reportInputParamsPojoList) {
         api.add(pojo);
@@ -51,4 +61,26 @@ public class ReportRequestFlowApi extends AbstractFlowApi {
         reportInputParamsApi.add(reportInputParamsPojoList);
     }
 
+    public void updatePendingRequestStatus(List<Integer> pendingRequestIds,
+                                           List<ReportRequestPojo> reportRequestPojoList,
+                                           int userId,
+                                           Map<Integer, Integer> referenceIdToSequenceNumber) throws ApiException {
+        if(pendingRequestIds.isEmpty())
+            return;
+        GetRequestForm form = new GetRequestForm();
+        List<Long> requestIds = pendingRequestIds.stream().map(Long::valueOf).collect(Collectors.toList());
+        form.setReferenceIds(requestIds);
+        form.setUserId(userId);
+        List<QueryRequestData> data = executorClientApi.getQueryRequestDataList(form);
+        for(QueryRequestData d : data) {
+            Optional<ReportRequestPojo> requestPojo =
+                    reportRequestPojoList.stream().filter(r -> r.getId().equals(d.getReferenceId().intValue())).findFirst();
+            if(requestPojo.isPresent()) {
+                // This happens separately in a separate transaction
+                api.updateStatus(requestPojo.get().getId(), getStatusMapping(d.getStatus()),
+                        requestPojo.get().getUrl(), d.getNoOfRows(), d.getFileSize(), d.getFailureReason(), d.getUpdatedAt());
+                referenceIdToSequenceNumber.put(requestPojo.get().getId(), d.getSequenceNumber());
+            }
+        }
+    }
 }

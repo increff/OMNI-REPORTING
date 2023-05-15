@@ -1,5 +1,7 @@
 package com.increff.omni.reporting.dto;
 
+import com.increff.commons.queryexecutor.constants.FileFormat;
+import com.increff.commons.queryexecutor.constants.RequestStatus;
 import com.increff.omni.reporting.model.constants.ReportRequestStatus;
 import com.increff.omni.reporting.model.constants.ReportRequestType;
 import com.increff.omni.reporting.model.constants.ValidationType;
@@ -8,7 +10,6 @@ import com.increff.omni.reporting.model.form.ReportRequestForm;
 import com.increff.omni.reporting.model.form.ReportScheduleForm;
 import com.increff.omni.reporting.model.form.SqlParams;
 import com.increff.omni.reporting.pojo.*;
-import com.increff.omni.reporting.util.SqlCmd;
 import com.nextscm.commons.lang.StringUtil;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
@@ -29,19 +30,8 @@ public class CommonDtoHelper {
 
     public final static String TIME_ZONE_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX";
 
-    public static SqlParams getSqlParams(ConnectionPojo pojo, String query, File file, File errFile,
-                                         Double maxExecutionTime) {
-        SqlParams params = new SqlParams();
-        params.setPassword(pojo.getPassword());
-        params.setUsername(pojo.getUsername());
-        params.setHost(pojo.getHost());
-        params.setQuery(SqlCmd.massageQuery(query, maxExecutionTime));
-        params.setOutFile(file);
-        params.setErrFile(errFile);
-        return params;
-    }
-
-    public static Map<String, String> getInputParamMapFromPojoList(List<ReportInputParamsPojo> reportInputParamsPojoList) {
+    public static Map<String, String> getInputParamMapFromPojoList(
+            List<ReportInputParamsPojo> reportInputParamsPojoList) {
         Map<String, String> inputParamMap = new HashMap<>();
         reportInputParamsPojoList.forEach(r -> inputParamMap.put(r.getParamKey(), r.getParamValue()));
         return inputParamMap;
@@ -52,8 +42,9 @@ public class CommonDtoHelper {
         List<InputControlFilterData> inputControlFilterData = new ArrayList<>();
         paramsPojos.forEach(p -> {
             Optional<InputControlPojo>
-                    controlPojo = controlPojos.stream().filter(c -> c.getParamName().equals(p.getParamKey())).findFirst();
-            if(controlPojo.isPresent()) {
+                    controlPojo =
+                    controlPojos.stream().filter(c -> c.getParamName().equals(p.getParamKey())).findFirst();
+            if (controlPojo.isPresent()) {
                 InputControlFilterData filterData = new InputControlFilterData();
                 filterData.setParamName(controlPojo.get().getParamName());
                 filterData.setDisplayName(controlPojo.get().getDisplayName());
@@ -69,14 +60,27 @@ public class CommonDtoHelper {
         return inputControlFilterData;
     }
 
+    public static ReportRequestStatus getStatusMapping(RequestStatus status) {
+        switch (status) {
+            case COMPLETED:
+                return ReportRequestStatus.COMPLETED;
+            case FAILED:
+                return ReportRequestStatus.FAILED;
+            default:
+                return ReportRequestStatus.REQUESTED;
+        }
+    }
+
     public static ReportRequestData getReportRequestData(ReportRequestPojo pojo, ReportPojo reportPojo,
                                                          List<InputControlPojo> controlPojos,
                                                          List<ReportInputParamsPojo> paramsPojoList,
-                                                         OrganizationPojo organizationPojo) {
+                                                         OrganizationPojo organizationPojo, Integer sequenceNumber) {
         ReportRequestData data = new ReportRequestData();
         data.setRequestCreationTime(pojo.getCreatedAt());
-        data.setRequestUpdatedTime(pojo.getUpdatedAt());
-        data.setStatus(pojo.getStatus());
+        data.setRequestUpdatedTime(Objects.isNull(pojo.getRequestCompletionTime()) ? pojo.getUpdatedAt() :
+                pojo.getRequestCompletionTime());
+        data.setStatus(pojo.getStatus().equals(ReportRequestStatus.REQUESTED) ? ReportRequestStatus.IN_PROGRESS :
+                pojo.getStatus());
         data.setType(pojo.getType());
         data.setRequestId(pojo.getId());
         data.setReportId(Objects.nonNull(reportPojo) ? reportPojo.getId() : 0);
@@ -84,7 +88,9 @@ public class CommonDtoHelper {
         data.setOrgName(organizationPojo.getName());
         data.setFileSize(pojo.getFileSize());
         data.setNoOfRows(pojo.getNoOfRows());
+        data.setSequenceNumber(sequenceNumber);
         data.setFailureReason(pojo.getFailureReason());
+        data.setFileFormat(pojo.getFileFormat());
         setFiltersApplied(paramsPojoList, data, controlPojos);
         return data;
     }
@@ -96,7 +102,7 @@ public class CommonDtoHelper {
     }
 
     public static String getDirectoryPath(Integer id,
-                                   Map<Integer, DirectoryPojo> idToDirectoryPojoList) {
+                                          Map<Integer, DirectoryPojo> idToDirectoryPojoList) {
         DirectoryPojo directoryPojo = idToDirectoryPojoList.get(id);
         String directoryPath = directoryPojo.getDirectoryName();
         Integer parentId = directoryPojo.getParentId();
@@ -139,10 +145,11 @@ public class CommonDtoHelper {
         data.setFilters(filterData);
     }
 
-    public static Map<Integer, List<ReportInputParamsPojo>> prepareRequestToParamMap(List<ReportInputParamsPojo> allParamsPojo) {
+    public static Map<Integer, List<ReportInputParamsPojo>> prepareRequestToParamMap(
+            List<ReportInputParamsPojo> allParamsPojo) {
         Map<Integer, List<ReportInputParamsPojo>> requestToParamsPojo = new HashMap<>();
         allParamsPojo.forEach(a -> {
-            if(requestToParamsPojo.containsKey(a.getReportRequestId())) {
+            if (requestToParamsPojo.containsKey(a.getReportRequestId())) {
                 List<ReportInputParamsPojo> existingParams = requestToParamsPojo.get(a.getReportRequestId());
                 existingParams.add(a);
                 requestToParamsPojo.put(a.getReportRequestId(), existingParams);
@@ -242,6 +249,7 @@ public class CommonDtoHelper {
         reportRequestPojo.setStatus(ReportRequestStatus.NEW);
         reportRequestPojo.setType(ReportRequestType.USER);
         reportRequestPojo.setUserId(userId);
+        reportRequestPojo.setFileFormat(form.getFileFormat());
         return reportRequestPojo;
     }
 
@@ -381,6 +389,19 @@ public class CommonDtoHelper {
         return orgToRequests;
     }
 
+    public static Map<Integer, List<ReportRequestPojo>> groupByUserID(List<ReportRequestPojo> reportRequestPojoList) {
+        Map<Integer, List<ReportRequestPojo>> userIdToRequests = new HashMap<>();
+        for (ReportRequestPojo r : reportRequestPojoList) {
+            if (userIdToRequests.containsKey(r.getUserId())) {
+                List<ReportRequestPojo> newList = new ArrayList<>(userIdToRequests.get(r.getUserId()));
+                newList.add(r);
+                userIdToRequests.put(r.getUserId(), newList);
+            } else
+                userIdToRequests.put(r.getUserId(), Collections.singletonList(r));
+        }
+        return userIdToRequests;
+    }
+
     public static ReportRequestPojo convertToReportRequestPojo(ReportSchedulePojo schedulePojo,
                                                                Integer reportId) {
         ReportRequestPojo reportRequestPojo = new ReportRequestPojo();
@@ -390,6 +411,7 @@ public class CommonDtoHelper {
         reportRequestPojo.setUserId(schedulePojo.getUserId());
         reportRequestPojo.setOrgId(schedulePojo.getOrgId());
         reportRequestPojo.setScheduleId(schedulePojo.getId());
+        reportRequestPojo.setFileFormat(FileFormat.CSV);
         return reportRequestPojo;
     }
 

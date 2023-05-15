@@ -1,26 +1,23 @@
 package com.increff.omni.reporting.dto;
 
 import com.increff.omni.reporting.api.ConnectionApi;
+import com.increff.omni.reporting.api.DBConnectionApi;
 import com.increff.omni.reporting.api.FolderApi;
 import com.increff.omni.reporting.config.ApplicationProperties;
 import com.increff.omni.reporting.model.constants.AuditActions;
-import com.increff.omni.reporting.model.form.SqlParams;
 import com.increff.omni.reporting.model.data.ConnectionData;
 import com.increff.omni.reporting.model.form.ConnectionForm;
 import com.increff.omni.reporting.pojo.ConnectionPojo;
-import com.increff.omni.reporting.util.FileUtil;
-import com.increff.omni.reporting.util.SqlCmd;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
 import com.nextscm.commons.spring.common.ConvertUtil;
 import lombok.extern.log4j.Log4j;
-import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.io.File;
-import java.io.IOException;
+import java.sql.*;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @Log4j
@@ -32,6 +29,8 @@ public class ConnectionDto extends AbstractDto {
     private FolderApi folderApi;
     @Autowired
     private ApplicationProperties properties;
+    @Autowired
+    private DBConnectionApi dbConnectionApi;
 
     public ConnectionData add(ConnectionForm form) throws ApiException {
         checkValid(form);
@@ -56,36 +55,25 @@ public class ConnectionDto extends AbstractDto {
     }
 
     public void testConnection(ConnectionForm form) throws ApiException {
-        String result = execute(form);
-        if (result.contains("ERROR")) {
-            throw new ApiException(ApiStatus.UNKNOWN_ERROR, "Database could not be connected");
-        }
-    }
-
-    private String execute(ConnectionForm form) throws ApiException {
-        String result;
-        File file = null;
-        File errFile = null;
+        Connection connection = null;
         try {
-            file = folderApi.getFile("test-db-success.tsv");
-            errFile = folderApi.getFile("test-db-err.txt");
             ConnectionPojo pojo = ConvertUtil.convert(form, ConnectionPojo.class);
-            SqlParams sqlp = CommonDtoHelper.getSqlParams(pojo, "select version();", file, errFile, properties.getMaxExecutionTime());
-            SqlCmd.processQuery(sqlp, properties.getMaxExecutionTime());
-            result = FileUtils.readFileToString(file, "utf-8");
-            log.debug("Test File created");
-        } catch (IOException | InterruptedException | ApiException e) {
-            log.error("Error in testing connection ", e);
-            try {
-                assert errFile != null;
-                result = FileUtils.readFileToString(errFile, "utf-8");
-            } catch (IOException ex) {
-                throw new ApiException(ApiStatus.UNKNOWN_ERROR, ex.getMessage());
-            }
+            connection = dbConnectionApi.getConnection(pojo.getHost(), pojo.getUsername(),
+                    pojo.getPassword(), properties.getMaxConnectionTime());
+            PreparedStatement statement = dbConnectionApi.getStatement(connection,
+                    properties.getLiveReportMaxExecutionTime(), "select version();", properties.getResultSetFetchSize());
+            ResultSet resultSet = statement.executeQuery();
+            resultSet.close();
+        } catch (SQLException e) {
+            throw new ApiException(ApiStatus.UNKNOWN_ERROR, "Error connecting to database : " + e.getMessage());
         } finally {
-            FileUtil.delete(file);
-            FileUtil.delete(errFile);
+            try {
+                if (Objects.nonNull(connection)) {
+                    connection.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
-        return result;
     }
 }

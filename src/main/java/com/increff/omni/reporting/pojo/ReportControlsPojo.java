@@ -13,7 +13,7 @@ import javax.persistence.*;
 public class ReportControlsPojo extends AbstractVersionedPojo{
 
     @Id
-    @TableGenerator(name = "report_controls", pkColumnValue = "report_controls", allocationSize = 1,initialValue = 100000)
+    @TableGenerator(name = "report_controls", pkColumnValue = "report_controls",initialValue = 100000)
     @GeneratedValue(strategy = GenerationType.TABLE, generator = "report_controls")
     private Integer id;
 
