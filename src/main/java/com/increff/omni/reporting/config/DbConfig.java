@@ -32,7 +32,7 @@ public class DbConfig {
 	private String jdbcUsername;
 	@Value("${jdbc.password}")
 	private String jdbcPassword;
-	@Value("${hibernate.dialect:org.hibernate.dialect.MySQLDialect}")
+	@Value("${hibernate.dialect:org.hibernate.dialect.MySQL8Dialect}")
 	private String hibernateDialect;
 	@Value("${hibernate.show_sql:false}")
 	private String hibernateShowSql;
@@ -70,6 +70,9 @@ public class DbConfig {
 		jpaProperties.put("hibernate.jdbc.batch_size", hibernateJdbcBatchSize);
 		jpaProperties.put("hibernate.cache.use_second_level_cache", false);
 		jpaProperties.put("hibernate.physical_naming_strategy", new SnakeCaseNamingStrategy(""));
+		jpaProperties.put("hibernate.id.generator.stored_last_used",false);
+		jpaProperties.put("hibernate.model.generator_name_as_sequence_name",false);
+		
 		bean.setJpaProperties(jpaProperties);
 		return bean;
 	}
