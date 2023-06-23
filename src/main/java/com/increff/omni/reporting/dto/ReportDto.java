@@ -39,6 +39,8 @@ public class ReportDto extends AbstractDto {
     @Autowired
     private OrganizationApi organizationApi;
     @Autowired
+    private OrgSchemaApi orgSchemaApi;
+    @Autowired
     private ReportValidationGroupApi reportValidationGroupApi;
     @Autowired
     private ReportControlsApi reportControlsApi;
@@ -133,6 +135,17 @@ public class ReportDto extends AbstractDto {
         data.setQuery(Objects.isNull(queryPojo) ? "" : queryPojo.getQuery());
         data.setUpdatedAt(Objects.isNull(queryPojo) ? null : queryPojo.getUpdatedAt());
         return data;
+    }
+
+    public ReportData selectByAlias(Boolean isDashboard, String alias) throws ApiException {
+        Integer orgId = getOrgId();
+        organizationApi.getCheck(orgId);
+        OrgSchemaVersionPojo schemaVersionPojo = orgSchemaApi.getCheckByOrgId(orgId);
+        ReportPojo reportPojo = reportApi.getByAliasAndSchema(alias, schemaVersionPojo.getSchemaVersionId(),
+                isDashboard);
+        if(Objects.isNull(reportPojo))
+            throw new ApiException(ApiStatus.BAD_DATA, "Report not available for alias : " + alias);
+        return convertToReportData(Collections.singletonList(reportPojo)).get(0);
     }
 
     public List<ReportData> selectByOrg(Boolean isDashboard) throws ApiException {

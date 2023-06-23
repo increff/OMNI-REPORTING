@@ -50,10 +50,18 @@ public class StandardController {
         return inputControlDto.selectForReport(reportId);
     }
 
+
+
     @ApiOperation(value = "Get Reports")
     @RequestMapping(value = "/reports", method = RequestMethod.GET)
     public List<ReportData> selectByOrgId(@RequestParam Boolean isDashboard) throws ApiException {
         return reportDto.selectByOrg(isDashboard);
+    }
+
+    @ApiOperation(value = "Get Report by Alias")
+    @RequestMapping(value = "/reports/find", method = RequestMethod.GET)
+    public ReportData selectByAlias(@RequestParam Boolean isDashboard, @RequestParam String alias) throws ApiException {
+        return reportDto.selectByAlias(isDashboard, alias);
     }
 
     @ApiOperation(value = "Get Live Data")
