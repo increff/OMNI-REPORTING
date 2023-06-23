@@ -21,7 +21,7 @@ public class ReportApi extends AbstractAuditApi {
     private ReportDao dao;
 
     public ReportPojo add(ReportPojo pojo){
-        pojo.setAlias(pojo.getAlias().trim().toUpperCase(Locale.ROOT));
+        pojo.setAlias(pojo.getAlias().trim().toLowerCase());
         dao.persist(pojo);
         return pojo;
     }
