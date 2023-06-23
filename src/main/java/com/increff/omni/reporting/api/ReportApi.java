@@ -11,6 +11,7 @@ import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 @Service
 @Transactional(rollbackFor = Exception.class)
@@ -20,6 +21,7 @@ public class ReportApi extends AbstractAuditApi {
     private ReportDao dao;
 
     public ReportPojo add(ReportPojo pojo){
+        pojo.setAlias(pojo.getAlias().trim().toUpperCase(Locale.ROOT));
         dao.persist(pojo);
         return pojo;
     }
@@ -64,5 +66,9 @@ public class ReportApi extends AbstractAuditApi {
 
     public List<ReportPojo> getBySchemaVersion(Integer schemaVersionId) {
         return dao.selectMultiple("schemaVersionId", schemaVersionId);
+    }
+
+    public ReportPojo getByAliasAndSchema(String alias, Integer schemaVersionId, Boolean isDashboard) {
+        return dao.getByAliasAndSchema(alias, schemaVersionId, isDashboard);
     }
 }
