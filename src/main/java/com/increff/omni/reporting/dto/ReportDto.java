@@ -144,7 +144,8 @@ public class ReportDto extends AbstractDto {
         ReportPojo reportPojo = reportApi.getByAliasAndSchema(alias, schemaVersionPojo.getSchemaVersionId(),
                 isDashboard);
         if(Objects.isNull(reportPojo))
-            throw new ApiException(ApiStatus.BAD_DATA, "Report not available for alias : " + alias);
+            throw new ApiException(ApiStatus.BAD_DATA,
+                    isDashboard ? "Dashboard" : "Report"  + " not available for alias : " + alias);
         validateCustomReportAccess(reportPojo, orgId);
         return convertToReportData(Collections.singletonList(reportPojo)).get(0);
     }
