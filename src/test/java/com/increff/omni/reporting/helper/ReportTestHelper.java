@@ -21,6 +21,7 @@ public class ReportTestHelper {
         pojo.setType(reportType);
         pojo.setDirectoryId(directoryId);
         pojo.setSchemaVersionId(schemaVersionId);
+        pojo.setAlias(reportName.replace(" ", "_"));
         return pojo;
     }
 
@@ -50,6 +51,7 @@ public class ReportTestHelper {
         form.setName(name);
         form.setType(type);
         form.setCanSchedule(canSchedule);
+        form.setAlias(name.replace(" ", "_"));
         return form;
     }
 

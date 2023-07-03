@@ -372,6 +372,7 @@ public class CommonDtoHelper {
         reportPojo.setType(oldReport.getType());
         reportPojo.setCanSchedule(oldReport.getCanSchedule());
         reportPojo.setIsDashboard(oldReport.getIsDashboard());
+        reportPojo.setAlias(oldReport.getAlias());
         return reportPojo;
     }
 
