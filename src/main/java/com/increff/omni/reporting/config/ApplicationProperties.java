@@ -110,4 +110,7 @@ public class ApplicationProperties {
     @Value("${rest.max.connection:200}")
     private int maxConnections;
 
+    @Value("${crypto.base.url}")
+    private String cryptoBaseUrl;
+
 }

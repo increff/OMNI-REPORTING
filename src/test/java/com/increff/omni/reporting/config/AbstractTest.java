@@ -2,8 +2,13 @@ package com.increff.omni.reporting.config;
 
 import com.increff.account.client.UserPrincipal;
 import com.increff.omni.reporting.model.constants.AppResourceKeys;
+import com.increff.service.encryption.EncryptionClient;
+import com.increff.service.encryption.data.CryptoData;
+import com.increff.service.encryption.form.CryptoForm;
+import com.nextscm.commons.spring.client.AppClientException;
 import org.junit.Before;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,10 +34,21 @@ public abstract class AbstractTest {
     @Value("${testdb.password}")
     protected String password;
 
+    @Mock
+    protected EncryptionClient encryptionClient;
+
     @Before
-    public void setUp() {
+    public void setUp() throws AppClientException {
         MockitoAnnotations.initMocks(this);
         setSecurityContext();
+        Mockito.when(encryptionClient.encode(Mockito.any(CryptoForm.class))).thenReturn(getCryptoData());
+        Mockito.when(encryptionClient.decode(Mockito.any())).thenReturn(getCryptoData());
+    }
+
+    private CryptoData getCryptoData() {
+        CryptoData cryptoData = new CryptoData();
+        cryptoData.setValue(null);
+        return cryptoData;
     }
 
     private void setSecurityContext() {

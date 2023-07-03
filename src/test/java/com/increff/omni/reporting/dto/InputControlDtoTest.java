@@ -48,6 +48,9 @@ public class InputControlDtoTest extends AbstractTest {
     Integer schemaVersionId;
 
     private void commonSetup() throws ApiException {
+        dto.setEncryptionClient(encryptionClient);
+        reportDto.setEncryptionClient(encryptionClient);
+        connectionDto.setEncryptionClient(encryptionClient);
         OrganizationForm organizationForm = getOrganizationForm(100001, "increff");
         OrganizationData organizationData = organizationDto.add(organizationForm);
         ConnectionForm connectionForm = getConnectionForm("dev-db.increff.com", "Dev DB", "db.user", "db.password");

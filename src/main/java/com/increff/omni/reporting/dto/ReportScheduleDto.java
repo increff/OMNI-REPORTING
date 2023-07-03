@@ -48,6 +48,10 @@ public class ReportScheduleDto extends AbstractDto {
     private ApplicationProperties properties;
     @Autowired
     private ReportInputParamsApi reportInputParamsApi;
+    @Autowired
+    private OrgConnectionApi orgConnectionApi;
+    @Autowired
+    private ConnectionApi connectionApi;
 
     public void scheduleReport(ReportScheduleForm form) throws ApiException {
         checkValid(form);
@@ -206,6 +210,9 @@ public class ReportScheduleDto extends AbstractDto {
                                                                               ReportPojo reportPojo)
             throws ApiException {
         List<ReportControlsPojo> reportControlsPojoList = reportControlsApi.getByReportId(reportPojo.getId());
+        OrgConnectionPojo orgConnectionPojo = orgConnectionApi.getCheckByOrgId(getOrgId());
+        ConnectionPojo connectionPojo = connectionApi.getCheck(orgConnectionPojo.getConnectionId());
+        String password = getDecryptedPassword(connectionPojo.getPassword());
         List<InputControlPojo> inputControlPojoList = controlApi.selectByIds(reportControlsPojoList.stream()
                 .map(ReportControlsPojo::getControlId).collect(Collectors.toList()));
         Map<String, List<String>> userInputParams = getUserInputParams(form.getParamMap());
@@ -213,7 +220,7 @@ public class ReportScheduleDto extends AbstractDto {
         Map<String, List<String>> inputDisplayMap = new HashMap<>();
         validateCustomReportAccess(reportPojo, getOrgId());
         validateInputParamValues(userInputParams, inputParamsMap, getOrgId(), inputDisplayMap, inputControlPojoList,
-                ReportRequestType.EMAIL);
+                ReportRequestType.EMAIL, password);
         Map<String, String> inputDisplayStringMap = UserPrincipalUtil.getStringToStringParamMap(inputDisplayMap);
         return CommonDtoHelper.getReportScheduleInputParamsPojoList(inputParamsMap, form.getTimezone(), getOrgId(),
                 inputDisplayStringMap);

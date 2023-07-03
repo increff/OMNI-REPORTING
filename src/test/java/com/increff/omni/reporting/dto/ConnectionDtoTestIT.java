@@ -6,9 +6,11 @@ import com.increff.omni.reporting.model.constants.InputControlType;
 import com.increff.omni.reporting.model.constants.ReportType;
 import com.increff.omni.reporting.model.data.*;
 import com.increff.omni.reporting.model.form.*;
+import com.increff.service.encryption.EncryptionClient;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
 import org.junit.Test;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
@@ -40,6 +42,9 @@ public class ConnectionDtoTestIT extends AbstractTest {
     private InputControlDto inputControlDto;
 
     private ReportForm commonSetup(String name, ReportType type) throws ApiException {
+        connectionDto.setEncryptionClient(encryptionClient);
+        reportDto.setEncryptionClient(encryptionClient);
+        inputControlDto.setEncryptionClient(encryptionClient);
         OrganizationForm form = getOrganizationForm(100001, "increff");
         OrganizationData organizationData = organizationDto.add(form);
         List<DirectoryData> data = directoryDto.getAllDirectories();

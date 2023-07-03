@@ -8,14 +8,14 @@ import com.increff.omni.reporting.model.constants.ValidationType;
 import com.increff.omni.reporting.model.data.*;
 import com.increff.omni.reporting.model.form.ReportRequestForm;
 import com.increff.omni.reporting.model.form.ReportScheduleForm;
-import com.increff.omni.reporting.model.form.SqlParams;
 import com.increff.omni.reporting.pojo.*;
+import com.increff.service.encryption.common.CryptoCommon;
+import com.increff.service.encryption.form.CryptoForm;
 import com.nextscm.commons.lang.StringUtil;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
 import org.springframework.scheduling.support.CronSequenceGenerator;
 
-import java.io.File;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -162,9 +162,7 @@ public class CommonDtoHelper {
 
     public static Map<Integer, OrganizationPojo> prepareOrgIdToPojo(List<OrganizationPojo> organizationPojoList) {
         Map<Integer, OrganizationPojo> orgToPojo = new HashMap<>();
-        organizationPojoList.forEach(a -> {
-            orgToPojo.put(a.getId(), a);
-        });
+        organizationPojoList.forEach(a -> orgToPojo.put(a.getId(), a));
         return orgToPojo;
     }
 
@@ -330,16 +328,6 @@ public class CommonDtoHelper {
         return reportInputParamsPojoList;
     }
 
-    public static SqlParams convert(ConnectionPojo connectionPojo, File file, File errorFile) {
-        SqlParams sqlParams = new SqlParams();
-        sqlParams.setHost(connectionPojo.getHost());
-        sqlParams.setUsername(connectionPojo.getUsername());
-        sqlParams.setPassword(connectionPojo.getPassword());
-        sqlParams.setOutFile(file);
-        sqlParams.setErrFile(errorFile);
-        return sqlParams;
-    }
-
     public static void validate(ReportRequestPojo requestPojo, Integer requestId, ReportPojo reportPojo
             , int userId) throws ApiException {
         if (requestPojo.getType().equals(ReportRequestType.USER) && requestPojo.getUserId() != userId) {
@@ -376,6 +364,21 @@ public class CommonDtoHelper {
         return reportPojo;
     }
 
+    public static CryptoForm getCryptoForm(String password, Integer userId) {
+        CryptoForm cryptoForm = new CryptoForm();
+        cryptoForm.setKey("key");
+        cryptoForm.setValue(password);
+        cryptoForm.setAppName("omni-reporting");
+        cryptoForm.setOrgId(userId.toString());
+        return cryptoForm;
+    }
+
+    public static CryptoCommon convertToCryptoForm(String value) {
+        CryptoCommon form = new CryptoCommon();
+        form.setKey("key");
+        form.setValue(value);
+        return form;
+    }
 
     public static Map<Integer, List<ReportRequestPojo>> groupByOrgID(List<ReportRequestPojo> reportRequestPojoList) {
         Map<Integer, List<ReportRequestPojo>> orgToRequests = new HashMap<>();

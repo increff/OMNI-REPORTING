@@ -77,6 +77,9 @@ public class ReportRequestDto extends AbstractDto {
     public void requestReportForAnyOrg(ReportRequestForm form, Integer orgId) throws ApiException {
         checkValid(form);
         OrganizationPojo organizationPojo = organizationApi.getCheck(orgId);
+        OrgConnectionPojo orgConnectionPojo = orgConnectionApi.getCheckByOrgId(orgId);
+        ConnectionPojo connectionPojo = connectionApi.getCheck(orgConnectionPojo.getConnectionId());
+        String password = getDecryptedPassword(connectionPojo.getPassword());
         Map<String, String> inputParamsMap = UserPrincipalUtil.getCompleteMapWithAccessControl(form.getParamMap());
         Map<String, List<String>> inputDisplayMap = new HashMap<>();
         ReportRequestPojo pojo = CommonDtoHelper.getReportRequestPojo(form, orgId, getUserId());
@@ -91,7 +94,7 @@ public class ReportRequestDto extends AbstractDto {
             throw new ApiException(ApiStatus.BAD_DATA, "No query defined for report : " + reportPojo.getName());
         validateCustomReportAccess(reportPojo, orgId);
         validateInputParamValues(form.getParamMap(), inputParamsMap, orgId, inputDisplayMap, inputControlPojoList,
-                ReportRequestType.USER);
+                ReportRequestType.USER, password);
         Map<String, String> inputDisplayStringMap = UserPrincipalUtil.getStringToStringParamMap(inputDisplayMap);
         List<ReportInputParamsPojo> reportInputParamsPojoList =
                 CommonDtoHelper.getReportInputParamsPojoList(inputParamsMap, form.getTimezone(), orgId,

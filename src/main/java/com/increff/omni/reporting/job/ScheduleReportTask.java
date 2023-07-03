@@ -4,12 +4,16 @@ import com.increff.commons.queryexecutor.QueryExecutorClient;
 import com.increff.omni.reporting.api.*;
 import com.increff.omni.reporting.config.ApplicationProperties;
 import com.increff.omni.reporting.config.EmailProps;
+import com.increff.omni.reporting.dto.CommonDtoHelper;
 import com.increff.omni.reporting.model.constants.ReportRequestStatus;
 import com.increff.omni.reporting.pojo.*;
 import com.increff.omni.reporting.util.EmailUtil;
 import com.increff.omni.reporting.util.FileDownloadUtil;
 import com.increff.omni.reporting.util.FileUtil;
 import com.increff.omni.reporting.util.SqlCmd;
+import com.increff.service.encryption.EncryptionClient;
+import com.increff.service.encryption.common.CryptoCommon;
+import com.nextscm.commons.spring.client.AppClientException;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
 import lombok.extern.log4j.Log4j;
@@ -68,6 +72,8 @@ public class ScheduleReportTask extends AbstractTask {
     private ReportScheduleApi reportScheduleApi;
     @Autowired
     private QueryExecutorClient executorClient;
+    @Autowired
+    private EncryptionClient encryptionClient;
 
     private final static String TIME_ZONE_PATTERN_WITHOUT_ZONE = "yyyy-MM-dd HH:mm:ss";
 
@@ -126,10 +132,11 @@ public class ScheduleReportTask extends AbstractTask {
         File file = folderApi.getFileForExtension(pojo.getId(), ".csv");
         Connection connection = null;
         ResultSet resultSet = null;
+        String password = getDecryptedPassword(connectionPojo.getPassword());
         try {
             // Process data
             connection = dbConnectionApi.getConnection(connectionPojo.getHost(), connectionPojo.getUsername(),
-                    connectionPojo.getPassword(), properties.getMaxConnectionTime());
+                    password, properties.getMaxConnectionTime());
             PreparedStatement statement =
                     dbConnectionApi.getStatement(connection, properties.getMaxExecutionTime(), fQuery,
                             properties.getResultSetFetchSize());
@@ -165,6 +172,16 @@ public class ScheduleReportTask extends AbstractTask {
             } catch (Exception e) {
                 e.printStackTrace();
             }
+        }
+    }
+
+    private String getDecryptedPassword(String password) throws ApiException {
+        try {
+            CryptoCommon form = CommonDtoHelper.convertToCryptoForm(password);
+            String decryptedPassword = encryptionClient.decode(form).getValue();
+            return Objects.isNull(decryptedPassword) ? password : decryptedPassword;
+        } catch (AppClientException e) {
+            throw new ApiException(ApiStatus.UNKNOWN_ERROR, "Error From Crypto Service " + e.getMessage());
         }
     }
 
