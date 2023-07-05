@@ -148,6 +148,15 @@ public class ReportScheduleDto extends AbstractDto {
         return reportRequestDataList;
     }
 
+    public ReportScheduleData getScheduleReport(Integer id) throws ApiException {
+        ReportSchedulePojo ex = api.getCheck(id);
+        if (!ex.getOrgId().equals(getOrgId()))
+            throw new ApiException(ApiStatus.BAD_DATA, "Org ID mismatch, existing org id : " + ex.getOrgId() + " , " +
+                    "new org id : " + getOrgId());
+        List<ReportScheduleData> scheduleData = getReportScheduleData(Collections.singletonList(ex));
+        return scheduleData.get(0);
+    }
+
     private List<ReportScheduleData> getReportScheduleData(List<ReportSchedulePojo> reportSchedulePojoList)
             throws ApiException {
         List<ReportScheduleData> dataList = new ArrayList<>();
