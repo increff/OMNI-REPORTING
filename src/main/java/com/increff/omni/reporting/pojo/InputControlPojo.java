@@ -6,7 +6,7 @@ import com.increff.omni.reporting.model.constants.InputControlType;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 @Entity
 @Setter
@@ -17,8 +17,8 @@ import javax.persistence.*;
 public class InputControlPojo extends AbstractVersionedPojo{
 
     @Id
-    @TableGenerator(name = "organization", pkColumnValue = "organization", initialValue = 100000)
-    @GeneratedValue(strategy = GenerationType.TABLE, generator = "organization")
+    @TableGenerator(name = "organization_sequence", pkColumnValue = "organization_sequence", initialValue = 100000)
+    @GeneratedValue(strategy = GenerationType.TABLE, generator = "organization_sequence")
     private Integer id;
 
     @Column(nullable = false)

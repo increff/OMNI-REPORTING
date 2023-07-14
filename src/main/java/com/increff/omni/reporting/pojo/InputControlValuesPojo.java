@@ -3,7 +3,7 @@ package com.increff.omni.reporting.pojo;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 @Entity
 @Setter
@@ -18,6 +18,6 @@ public class InputControlValuesPojo extends AbstractVersionedPojo {
     private Integer id;
     @Column(nullable = false)
     private Integer controlId;
-    @Column(nullable = false)
+    @Column(nullable = false, name = "`value`")
     private String value;
 }

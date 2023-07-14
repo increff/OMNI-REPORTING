@@ -1,7 +1,7 @@
 package com.increff.omni.reporting.config;
 
-import com.increff.commons.sql.DbPoolUtil;
-import com.nextscm.commons.spring.server.SnakeCaseNamingStrategy;
+import com.increff.omni.reporting.util.DbPoolUtil;
+import com.increff.omni.reporting.util.SnakeCaseNamingStrategy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -40,7 +40,7 @@ public class DbConfig {
 	private String hibernateJdbcBatchSize;
 	@Value("${hibernate.hbm2ddl.auto}")
 	private String hibernateHbm2ddl;
-	@Value("${hibernate.jdbc.time_zone}")
+	@Value("${hibernate.jdbc.time_zone:UTC}")
 	private String hibernateTimezone;
 	@Value("${hibernate.min.connection:50}")
 	private Integer minConnection;
@@ -70,6 +70,11 @@ public class DbConfig {
 		jpaProperties.put("hibernate.jdbc.batch_size", hibernateJdbcBatchSize);
 		jpaProperties.put("hibernate.cache.use_second_level_cache", false);
 		jpaProperties.put("hibernate.physical_naming_strategy", new SnakeCaseNamingStrategy(""));
+		jpaProperties.put("hibernate.id.db_structure_naming_strategy", "single");
+		jpaProperties.put("hibernate.id.generator.stored_last_used", false);
+		jpaProperties.put("hibernate.model.generator_name_as_sequence_name", false);
+		jpaProperties.put("hibernate.default_storage_engine", "InnoDB");
+//		jpaProperties.put("hibernate.id.new_generator_mappings",false);
 		bean.setJpaProperties(jpaProperties);
 		return bean;
 	}

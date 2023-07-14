@@ -14,12 +14,12 @@ import com.increff.omni.reporting.model.form.*;
 import com.increff.omni.reporting.pojo.ReportPojo;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
-import org.junit.Test;
+//import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 
 import static com.increff.omni.reporting.helper.ConnectionTestHelper.getConnectionForm;
@@ -28,7 +28,8 @@ import static com.increff.omni.reporting.helper.InputControlTestHelper.getInputC
 import static com.increff.omni.reporting.helper.OrgTestHelper.getOrganizationForm;
 import static com.increff.omni.reporting.helper.ReportTestHelper.getReportPojo;
 import static com.increff.omni.reporting.helper.SchemaTestHelper.getSchemaForm;
-import static org.junit.Assert.*;
+//import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class InputControlDtoTest extends AbstractTest {
 
@@ -71,60 +72,56 @@ public class InputControlDtoTest extends AbstractTest {
         assertEquals(0, data.getOptions().size());
     }
 
-    @Test(expected = ApiException.class)
+    @Test
     public void testAddInputControlForInvalidQuery() throws ApiException {
         commonSetup();
         InputControlForm form = getInputControlForm("Client Id", "clientId", InputControlScope.GLOBAL
                 , InputControlType.TEXT, new ArrayList<>(), "select version();", null, schemaVersionId);
-        try {
+        ApiException exception = assertThrows(ApiException.class, () -> {
             dto.add(form);
-        } catch (ApiException e) {
-            assertEquals(ApiStatus.BAD_DATA, e.getStatus());
-            assertEquals("For Text, Number and Date, neither query nor value is needed", e.getMessage());
-            throw e;
-        }
+        });
+
+        assertEquals(ApiStatus.BAD_DATA, exception.getStatus());
+        assertEquals("For Text, Number and Date, neither query nor value is needed", exception.getMessage());
     }
 
-    @Test(expected = ApiException.class)
+    @Test
     public void testAddInputControlForWrongMultiSelectCase1() throws ApiException {
         commonSetup();
         InputControlForm form = getInputControlForm("Client Id", "clientId", InputControlScope.GLOBAL
                 , InputControlType.MULTI_SELECT, new ArrayList<>(), "", null, schemaVersionId);
-        try {
+        ApiException exception = assertThrows(ApiException.class, () -> {
             dto.add(form);
-        } catch (ApiException e) {
-            assertEquals(ApiStatus.BAD_DATA, e.getStatus());
-            assertEquals("For Select, either query or value is mandatory", e.getMessage());
-            throw e;
-        }
+        });
+
+        assertEquals(ApiStatus.BAD_DATA, exception.getStatus());
+        assertEquals("For Select, either query or value is mandatory", exception.getMessage());
     }
 
-    @Test(expected = ApiException.class)
+    @Test
     public void testAddInputControlForWrongMultiSelectCase2() throws ApiException {
         commonSetup();
         InputControlForm form = getInputControlForm("Client Id", "clientId", InputControlScope.GLOBAL
                 , InputControlType.MULTI_SELECT, Arrays.asList("Live", "Packed"), "select version();", null, schemaVersionId);
-        try {
+        ApiException exception = assertThrows(ApiException.class, () -> {
             dto.add(form);
-        } catch (ApiException e) {
-            assertEquals(ApiStatus.BAD_DATA, e.getStatus());
-            assertEquals("For Select, either query or value one is mandatory", e.getMessage());
-            throw e;
-        }
+        });
+
+        assertEquals(ApiStatus.BAD_DATA, exception.getStatus());
+        assertEquals("For Select, either query or value one is mandatory", exception.getMessage());
     }
 
-    @Test(expected = ApiException.class)
+    @Test
     public void testAddLocalInputControl() throws ApiException {
         commonSetup();
         InputControlForm form = getInputControlForm("Client Id", "clientId", InputControlScope.LOCAL
                 , InputControlType.MULTI_SELECT, new ArrayList<>(), "select version();", null, schemaVersionId);
-        try {
+        ApiException exception = assertThrows(ApiException.class, () -> {
             dto.add(form);
-        } catch (ApiException e) {
-            assertEquals(ApiStatus.BAD_DATA, e.getStatus());
-            assertEquals("Report is mandatory for Local Scope Control", e.getMessage());
-            throw e;
-        }
+        });
+
+        assertEquals(ApiStatus.BAD_DATA, exception.getStatus());
+        assertEquals("Report is mandatory for Local Scope Control", exception.getMessage());
     }
 
     @Test

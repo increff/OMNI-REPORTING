@@ -4,14 +4,16 @@ import com.increff.omni.reporting.config.AbstractTest;
 import com.increff.omni.reporting.model.constants.ValidationType;
 import com.increff.omni.reporting.pojo.ReportValidationGroupPojo;
 import com.nextscm.commons.spring.common.ApiException;
-import org.junit.Test;
+//import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Arrays;
 import java.util.List;
 
 import static com.increff.omni.reporting.helper.ReportTestHelper.getReportValidationGroupPojo;
-import static org.junit.Assert.assertEquals;
+//import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ReportValidationGroupApiTest extends AbstractTest {
 

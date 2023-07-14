@@ -11,13 +11,13 @@ import com.increff.omni.reporting.model.form.IntegrationOrgConnectionForm;
 import com.increff.omni.reporting.model.form.IntegrationOrgSchemaForm;
 import com.increff.omni.reporting.model.form.OrganizationForm;
 import com.nextscm.commons.spring.common.ApiException;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+//import io.swagger.annotations.Api;
+//import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 @CrossOrigin
-@Api
 @RestController
 @RequestMapping(value = "/integration")
 public class IntegrationController {
@@ -27,25 +27,25 @@ public class IntegrationController {
     @Autowired
     private OrganizationDto organizationDto;
 
-    @ApiOperation(value = "Add Connection")
+    @Operation(summary = "Add Connection")
     @RequestMapping(value = "/connections", method = RequestMethod.POST)
     public ConnectionData add(@RequestBody ConnectionForm form) throws ApiException {
         return connectionDto.add(form);
     }
 
-    @ApiOperation(value = "Add Organization")
+    @Operation(summary = "Add Organization")
     @RequestMapping(value = "/orgs", method = RequestMethod.POST)
     public OrganizationData add(@RequestBody OrganizationForm form) throws ApiException {
         return organizationDto.add(form);
     }
 
-    @ApiOperation(value = "Map organization to a connection")
+    @Operation(summary = "Map organization to a connection")
     @RequestMapping(value = "/map-connection", method = RequestMethod.POST)
     public OrgConnectionData addConnectionMapping(@RequestBody IntegrationOrgConnectionForm form) throws ApiException {
         return organizationDto.mapToConnection(form);
     }
 
-    @ApiOperation(value = "Map organization to a schema")
+    @Operation(summary = "Map organization to a schema")
     @RequestMapping(value = "/map-schema-version", method = RequestMethod.POST)
     public OrgSchemaData addSchemaMapping(@RequestBody IntegrationOrgSchemaForm form) throws ApiException {
         return organizationDto.mapToSchema(form);

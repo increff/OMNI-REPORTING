@@ -3,7 +3,7 @@ package com.increff.omni.reporting.pojo;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 @Entity
 @Setter
@@ -12,8 +12,8 @@ import javax.persistence.*;
 public class ReportQueryPojo extends AbstractVersionedPojo{
 
     @Id
-    @TableGenerator(name = "report_query", pkColumnValue = "report_query",initialValue = 100000)
-    @GeneratedValue(strategy = GenerationType.TABLE, generator = "report_query")
+    @TableGenerator(name = "report_query_sequence", pkColumnValue = "report_query_sequence",initialValue = 100000)
+    @GeneratedValue(strategy = GenerationType.TABLE, generator = "report_query_sequence")
     private Integer id;
 
     @Column(nullable = false, unique = true)

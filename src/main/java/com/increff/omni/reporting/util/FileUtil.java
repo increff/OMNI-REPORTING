@@ -1,8 +1,11 @@
 package com.increff.omni.reporting.util;
 
 import com.increff.omni.reporting.api.FolderApi;
-import com.nextscm.commons.lang.StringUtil;
+import com.increff.omni.reporting.commons.StringUtil;
+//import com.nextscm.commons.lang.StringUtil;
 import lombok.extern.log4j.Log4j;
+import lombok.extern.slf4j.Slf4j;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.csv.CSVRecord;

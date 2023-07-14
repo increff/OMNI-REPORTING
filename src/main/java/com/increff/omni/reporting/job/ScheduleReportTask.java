@@ -12,13 +12,13 @@ import com.increff.omni.reporting.util.FileUtil;
 import com.increff.omni.reporting.util.SqlCmd;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
-import lombok.extern.log4j.Log4j;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
-import javax.persistence.OptimisticLockException;
+import jakarta.persistence.OptimisticLockException;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -41,7 +41,7 @@ import static com.increff.omni.reporting.dto.CommonDtoHelper.getInputParamMapFro
 import static com.increff.omni.reporting.dto.CommonDtoHelper.getValueFromQuotes;
 
 @Component
-@Log4j
+@Slf4j
 public class ScheduleReportTask extends AbstractTask {
 
     @Autowired

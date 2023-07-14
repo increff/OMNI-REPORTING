@@ -5,13 +5,15 @@ import com.increff.omni.reporting.config.ApplicationProperties;
 import com.increff.omni.reporting.model.data.DirectoryData;
 import com.increff.omni.reporting.model.form.DirectoryForm;
 import com.nextscm.commons.spring.common.ApiException;
-import org.junit.Test;
+//import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
 import static com.increff.omni.reporting.helper.DirectoryTestHelper.getDirectoryForm;
-import static org.junit.Assert.assertEquals;
+//import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class DirectoryDtoTest extends AbstractTest {
 

@@ -6,7 +6,8 @@ import com.increff.omni.reporting.model.data.*;
 import com.increff.omni.reporting.model.form.*;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
-import org.junit.Test;
+//import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
@@ -17,7 +18,9 @@ import static com.increff.omni.reporting.helper.DirectoryTestHelper.getDirectory
 import static com.increff.omni.reporting.helper.OrgTestHelper.getOrganizationForm;
 import static com.increff.omni.reporting.helper.ReportTestHelper.getReportForm;
 import static com.increff.omni.reporting.helper.SchemaTestHelper.getSchemaForm;
-import static org.junit.Assert.assertEquals;
+//import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class CustomReportAccessDtoTest extends AbstractTest {
 
@@ -66,17 +69,16 @@ public class CustomReportAccessDtoTest extends AbstractTest {
         assertEquals(0, dataList.size());
     }
 
-    @Test(expected = ApiException.class)
+    @Test
     public void testCustomAccessForStandardReport() throws ApiException {
         ReportForm reportForm = commonSetup("Report 2", ReportType.STANDARD);
         ReportData reportData = reportDto.add(reportForm);
         CustomReportAccessForm form = getCustomReportAccessForm(reportData.getId(), 100001);
-        try {
+        ApiException exception = assertThrows(ApiException.class, () -> {
             dto.addCustomReportAccess(form);
-        } catch (ApiException e) {
-            assertEquals(ApiStatus.BAD_DATA, e.getStatus());
-            assertEquals("Report type is STANDARD, custom access is not required here.", e.getMessage());
-            throw e;
-        }
+        });
+
+        assertEquals(ApiStatus.BAD_DATA, exception.getStatus());
+        assertEquals("Report type is STANDARD, custom access is not required here.", exception.getMessage());
     }
 }

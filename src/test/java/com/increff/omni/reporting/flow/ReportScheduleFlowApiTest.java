@@ -15,7 +15,8 @@ import com.increff.omni.reporting.model.form.ValidationGroupForm;
 import com.increff.omni.reporting.pojo.*;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
-import org.junit.Test;
+//import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.ZonedDateTime;
@@ -27,11 +28,13 @@ import java.util.List;
 import static com.increff.omni.reporting.helper.DirectoryTestHelper.getDirectoryPojo;
 import static com.increff.omni.reporting.helper.InputControlTestHelper.getInputControlPojo;
 import static com.increff.omni.reporting.helper.InputControlTestHelper.getInputControlQueryPojo;
-import static com.increff.omni.reporting.helper.ReportScheduleTestHelper.*;
+import static com.increff.omni.reporting.helper.ReportScheduleTestHelper.getReportScheduleInputParamsPojo;
+import static com.increff.omni.reporting.helper.ReportScheduleTestHelper.getReportSchedulePojo;
 import static com.increff.omni.reporting.helper.ReportTestHelper.*;
 import static com.increff.omni.reporting.helper.SchemaTestHelper.getSchemaPojo;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+//import static org.junit.Assert.assertEquals;
+//import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ReportScheduleFlowApiTest extends AbstractTest {
 
@@ -104,21 +107,19 @@ public class ReportScheduleFlowApiTest extends AbstractTest {
         assertEquals("'1100002253'", scheduleInputParamsPojoList.get(0).getParamValue());
     }
 
-    @Test(expected = ApiException.class)
+    @Test
     public void testAddWithNoValidEmail() throws ApiException {
         ReportPojo reportPojo = commonSetup();
         ReportSchedulePojo schedulePojo = getReportSchedulePojo("Report 1", true, false, 0, 10, ZonedDateTime.now(),
                 100001, 100001, "0 */15 * * * ?");
         ReportScheduleInputParamsPojo paramsPojo = getReportScheduleInputParamsPojo(schedulePojo.getId(), "clientId",
                 "'1100002253'", "Client ID");
-        try {
+        ApiException e = assertThrows(ApiException.class, () -> {
             flowApi.add(schedulePojo, Arrays.asList("a.gmail.com", "b.gmail.com"), Collections.singletonList(paramsPojo),
                     reportPojo);
-        } catch (ApiException e) {
+        });
             assertEquals(ApiStatus.BAD_DATA, e.getStatus());
             assertEquals("No valid emails given, [\"a.gmail.com\",\"b.gmail.com\"]",e.getMessage());
-            throw e;
-        }
     }
 
     @Test

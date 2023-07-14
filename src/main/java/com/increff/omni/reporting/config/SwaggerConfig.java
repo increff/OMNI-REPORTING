@@ -8,12 +8,13 @@ import org.springframework.web.multipart.MultipartResolver;
 import org.springframework.web.multipart.support.StandardServletMultipartResolver;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
-import springfox.documentation.builders.PathSelectors;
-import springfox.documentation.builders.RequestHandlerSelectors;
-import springfox.documentation.spi.DocumentationType;
-import springfox.documentation.spring.web.plugins.Docket;
-import springfox.documentation.swagger2.annotations.EnableSwagger2;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+//import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+//import springfox.documentation.builders.PathSelectors;
+//import springfox.documentation.builders.RequestHandlerSelectors;
+//import springfox.documentation.spi.DocumentationType;
+//import springfox.documentation.spring.web.plugins.Docket;
+//import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 import java.time.ZonedDateTime;
 
@@ -23,21 +24,21 @@ import java.time.ZonedDateTime;
 
 @Configuration
 @EnableWebMvc
-@EnableSwagger2
+//@EnableSwagger2
 @Profile({"dev","qa"})
-public class SwaggerConfig extends WebMvcConfigurerAdapter{
+public class SwaggerConfig implements WebMvcConfigurer {
 
-    @Bean
-    public Docket api() {
-        return new Docket(DocumentationType.SWAGGER_2)//
-                .directModelSubstitute(ZonedDateTime.class, String.class)
-                .useDefaultResponseMessages(false)//
-                .select()
-                .apis(RequestHandlerSelectors
-                        .withClassAnnotation(RestController.class))//
-                .paths(PathSelectors.regex("/.*"))
-                .build();
-    }
+//    @Bean
+//    public Docket api() {
+//        return new Docket(DocumentationType.SWAGGER_2)//
+//                .directModelSubstitute(ZonedDateTime.class, String.class)
+//                .useDefaultResponseMessages(false)//
+//                .select()
+//                .apis(RequestHandlerSelectors
+//                        .withClassAnnotation(RestController.class))//
+//                .paths(PathSelectors.regex("/.*"))
+//                .build();
+//    }
 
     // Add configuration for Swagger
     @Override

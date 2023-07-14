@@ -1,6 +1,7 @@
 package com.increff.omni.reporting.config;
 
-import com.nextscm.commons.spring.server.AbstractWebInitializer;
+import com.increff.omni.reporting.commons.AbstractWebInitializer;
+//import com.nextscm.commons.spring.server.AbstractWebInitializer;
 import org.springframework.web.WebApplicationInitializer;
 
 /**

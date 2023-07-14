@@ -3,7 +3,7 @@ package com.increff.omni.reporting.pojo;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 @Entity
 @Setter
@@ -13,8 +13,8 @@ import javax.persistence.*;
 public class ReportInputParamsPojo extends AbstractVersionedPojo {
 
     @Id
-    @TableGenerator(name = "report_input_params", pkColumnValue = "report_input_params", initialValue = 100000)
-    @GeneratedValue(strategy = GenerationType.TABLE, generator = "report_input_params")
+    @TableGenerator(name = "report_input_params_sequence", pkColumnValue = "report_input_params_sequence", initialValue = 100000)
+    @GeneratedValue(strategy = GenerationType.TABLE, generator = "report_input_params_sequence")
     private Integer id;
 
     @Column(nullable = false)

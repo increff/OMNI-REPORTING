@@ -8,7 +8,8 @@ import com.increff.omni.reporting.model.data.*;
 import com.increff.omni.reporting.model.form.*;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
-import org.junit.Test;
+//import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
@@ -20,7 +21,8 @@ import static com.increff.omni.reporting.helper.InputControlTestHelper.getInputC
 import static com.increff.omni.reporting.helper.OrgTestHelper.getOrganizationForm;
 import static com.increff.omni.reporting.helper.ReportTestHelper.*;
 import static com.increff.omni.reporting.helper.SchemaTestHelper.getSchemaForm;
-import static org.junit.Assert.*;
+//import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ConnectionDtoTestIT extends AbstractTest {
 
@@ -65,6 +67,7 @@ public class ConnectionDtoTestIT extends AbstractTest {
         assertEquals("db.password", data.getPassword());
     }
 
+
     @Test
     public void testGetLiveData() throws ApiException, IOException {
         ReportForm reportForm = commonSetup("Report 2", ReportType.STANDARD);
@@ -85,23 +88,24 @@ public class ConnectionDtoTestIT extends AbstractTest {
         assertEquals(1, data.size());
     }
 
+
     @Test
     public void testConnection() throws ApiException {
         ConnectionForm form = getConnectionForm("127.0.0.1", "Test DB", username, password);
         dto.testConnection(form);
     }
 
-    @Test(expected = ApiException.class)
-    public void testConnectionWrongPassword() throws ApiException {
+    @Test
+    void testConnectionWrongPassword() {
         ConnectionForm form = getConnectionForm("127.0.0.1", "Test DB", username, "wrong_password");
-        try {
+        ApiException exception = assertThrows(ApiException.class, () -> {
             dto.testConnection(form);
-        } catch (ApiException e) {
-            assertEquals(ApiStatus.UNKNOWN_ERROR, e.getStatus());
-            assertTrue(e.getMessage().contains("Error connecting to the database"));
-            throw e;
-        }
+        });
+
+        assertEquals(ApiStatus.UNKNOWN_ERROR, exception.getStatus());
+        assertTrue(exception.getMessage().contains("Error connecting to the database"));
     }
+
 
     @Test
     public void testUpdateConnection() throws ApiException {

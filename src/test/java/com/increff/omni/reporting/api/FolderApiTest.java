@@ -4,9 +4,12 @@ import com.increff.omni.reporting.config.AbstractTest;
 import com.increff.omni.reporting.config.ApplicationProperties;
 import com.increff.omni.reporting.util.FileUtil;
 import com.nextscm.commons.spring.common.ApiException;
-import lombok.extern.log4j.Log4j;
-import org.junit.Before;
-import org.junit.Test;
+import lombok.extern.slf4j.Slf4j;
+//import org.junit.Before;
+//import org.junit.Test;
+import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.File;
@@ -14,9 +17,10 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Objects;
 
-import static org.junit.Assert.*;
+//import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
-@Log4j
+@Slf4j
 public class FolderApiTest extends AbstractTest {
 
     @Autowired
@@ -24,7 +28,7 @@ public class FolderApiTest extends AbstractTest {
     @Autowired
     private ApplicationProperties properties;
 
-    @Before
+    @BeforeEach
     public void createDir(){
         File dir = new File(properties.getOutDir());
         if(!dir.exists()){
@@ -34,8 +38,9 @@ public class FolderApiTest extends AbstractTest {
         }
     }
 
+
     @Test
-    public void testDeleteUnusedFiles() throws IOException, ApiException {
+    public void testDeleteUnusedFiles() throws IOException, ApiException{
         //clear any files in test directory if any
         File file = new File(properties.getOutDir());
         Arrays.stream(Objects.requireNonNull(file.listFiles())).forEach(FileUtil::delete);
@@ -60,7 +65,7 @@ public class FolderApiTest extends AbstractTest {
     }
 
     @Test
-    public void testFileWithExtension() throws IOException, ApiException {
+    public void testFileWithExtension() throws IOException, ApiException{
         File file = folderApi.getFileForExtension(1, ".txt");
         assertTrue(file.getName().contains(".txt"));
         FileUtil.delete(file);
@@ -68,7 +73,7 @@ public class FolderApiTest extends AbstractTest {
     }
 
     @Test
-    public void testErrFileWithExtension() throws IOException, ApiException {
+    public void testErrFileWithExtension() throws IOException, ApiException{
         File file = folderApi.getErrFile(1, ".txt");
         assertTrue(file.getName().contains(".txt"));
         assertTrue(file.getName().contains("report-err"));

@@ -16,7 +16,7 @@ import com.increff.omni.reporting.util.FileUtil;
 import com.increff.omni.reporting.util.UserPrincipalUtil;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
-import lombok.extern.log4j.Log4j;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
 import static com.increff.omni.reporting.dto.CommonDtoHelper.*;
 
 @Service
-@Log4j
+@Slf4j
 public class ReportRequestDto extends AbstractDto {
 
     @Autowired
@@ -79,7 +79,7 @@ public class ReportRequestDto extends AbstractDto {
         OrganizationPojo organizationPojo = organizationApi.getCheck(orgId);
         Map<String, String> inputParamsMap = UserPrincipalUtil.getCompleteMapWithAccessControl(form.getParamMap());
         Map<String, List<String>> inputDisplayMap = new HashMap<>();
-        ReportRequestPojo pojo = CommonDtoHelper.getReportRequestPojo(form, orgId, getUserId());
+        ReportRequestPojo pojo = getReportRequestPojo(form, orgId, getUserId());
         ReportPojo reportPojo = reportApi.getCheck(pojo.getReportId());
         if (reportPojo.getIsDashboard())
             throw new ApiException(ApiStatus.BAD_DATA, "Dashboard can't be requested here");
@@ -94,7 +94,7 @@ public class ReportRequestDto extends AbstractDto {
                 ReportRequestType.USER);
         Map<String, String> inputDisplayStringMap = UserPrincipalUtil.getStringToStringParamMap(inputDisplayMap);
         List<ReportInputParamsPojo> reportInputParamsPojoList =
-                CommonDtoHelper.getReportInputParamsPojoList(inputParamsMap, form.getTimezone(), orgId,
+                getReportInputParamsPojoList(inputParamsMap, form.getTimezone(), orgId,
                         inputDisplayStringMap);
         flow.requestReport(pojo, reportInputParamsPojoList);
         flow.saveAudit(pojo.getId().toString(), AuditActions.REQUEST_REPORT.toString(), "Request Report",

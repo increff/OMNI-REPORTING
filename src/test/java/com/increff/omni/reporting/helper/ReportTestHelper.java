@@ -93,7 +93,7 @@ public class ReportTestHelper {
         ReportQueryTestForm queryTestForm = new ReportQueryTestForm();
         queryTestForm.setQuery("select * from table where id = {{replace(id)}};");
         Map<String, List<String>> paramMap = new HashMap<>();
-        paramMap.put("id", Arrays.asList("1"));
+        paramMap.put("id", List.of("1"));
         queryTestForm.setParamMap(paramMap);
         queryTestForm.setTimezone("Asia/Kolkata");
         return queryTestForm;

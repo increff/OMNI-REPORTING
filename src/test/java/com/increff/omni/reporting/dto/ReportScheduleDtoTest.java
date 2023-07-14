@@ -11,11 +11,11 @@ import com.increff.omni.reporting.model.form.*;
 import com.increff.omni.reporting.pojo.ReportSchedulePojo;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
-import org.junit.Test;
+//import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -28,7 +28,8 @@ import static com.increff.omni.reporting.helper.ReportScheduleTestHelper.getRepo
 import static com.increff.omni.reporting.helper.ReportTestHelper.getReportForm;
 import static com.increff.omni.reporting.helper.ReportTestHelper.getReportQueryForm;
 import static com.increff.omni.reporting.helper.SchemaTestHelper.getSchemaForm;
-import static org.junit.Assert.*;
+//import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ReportScheduleDtoTest extends AbstractTest {
 
@@ -66,20 +67,20 @@ public class ReportScheduleDtoTest extends AbstractTest {
         return getReportForm("Report 1", ReportType.STANDARD, directoryData.getId(), schemaData.getId(), canSchedule);
     }
 
-    @Test(expected = ApiException.class)
+    @Test
     public void testAddWithScheduleNotAllowed() throws ApiException {
         ReportForm reportForm = commonSetup(false);
         reportDto.add(reportForm);
         List<ReportScheduleForm.InputParamMap> inputParamMaps = getInputParamList();
         ReportScheduleForm form = getReportScheduleForm("*/15", "*", "*", "Report 1", "Asia/Kolkata",
                  true, Arrays.asList("a@gmail.com", "b@gmail.com"), inputParamMaps);
-        try {
+        ApiException exception = assertThrows(ApiException.class, () -> {
             dto.scheduleReport(form);
-        } catch (ApiException e) {
-            assertEquals(ApiStatus.BAD_DATA, e.getStatus());
-            assertEquals("Report : Report 1 is not allowed to schedule", e.getMessage());
-            throw e;
-        }
+        });
+
+// Verify the expected status and error message of the exception
+        assertEquals(ApiStatus.BAD_DATA, exception.getStatus());
+        assertEquals("Report : Report 1 is not allowed to schedule", exception.getMessage());
     }
 
     @Test

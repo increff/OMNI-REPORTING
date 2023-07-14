@@ -1,5 +1,6 @@
 package com.increff.omni.reporting.job;
 
+import com.increff.commons.queryexecutor.QueryExecutorClient;
 import com.increff.omni.reporting.config.AbstractTest;
 import com.increff.omni.reporting.dao.ReportScheduleDao;
 import com.increff.omni.reporting.dto.*;
@@ -10,11 +11,11 @@ import com.increff.omni.reporting.model.data.*;
 import com.increff.omni.reporting.model.form.*;
 import com.increff.omni.reporting.pojo.ReportSchedulePojo;
 import com.nextscm.commons.spring.common.ApiException;
-import org.junit.Test;
+//import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.time.ZonedDateTime;
 import java.util.*;
 
@@ -26,8 +27,10 @@ import static com.increff.omni.reporting.helper.ReportScheduleTestHelper.getInpu
 import static com.increff.omni.reporting.helper.ReportScheduleTestHelper.getReportScheduleForm;
 import static com.increff.omni.reporting.helper.ReportTestHelper.*;
 import static com.increff.omni.reporting.helper.SchemaTestHelper.getSchemaForm;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+//import static org.junit.Assert.assertEquals;
+//import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ReportJobTest extends AbstractTest {
 
@@ -51,8 +54,13 @@ public class ReportJobTest extends AbstractTest {
     private InputControlDto inputControlDto;
     @Autowired
     private ReportScheduleDao reportScheduleDao;
+    @Mock
+    private QueryExecutorClient executorClient;
+    @Autowired
+    private UserReportTask userReportTask;
 
     private ReportForm commonSetup() throws ApiException {
+        userReportTask.setExecutorClient(executorClient);
         OrganizationForm form = getOrganizationForm(100001, "increff");
         OrganizationData organizationData = organizationDto.add(form);
         List<DirectoryData> data = directoryDto.getAllDirectories();
@@ -76,6 +84,7 @@ public class ReportJobTest extends AbstractTest {
     public void testMarkStuck() {
         reportJob.markJobsStuck();
     }
+
 
     @Test
     public void testRunReport()

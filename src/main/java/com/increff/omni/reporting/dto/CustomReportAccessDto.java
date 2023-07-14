@@ -3,6 +3,7 @@ package com.increff.omni.reporting.dto;
 import com.increff.omni.reporting.api.CustomReportAccessApi;
 import com.increff.omni.reporting.api.OrganizationApi;
 import com.increff.omni.reporting.api.ReportApi;
+import com.increff.omni.reporting.commons.ConvertUtil;
 import com.increff.omni.reporting.model.constants.ReportType;
 import com.increff.omni.reporting.model.data.CustomReportAccessData;
 import com.increff.omni.reporting.model.form.CustomReportAccessForm;
@@ -11,7 +12,7 @@ import com.increff.omni.reporting.pojo.OrganizationPojo;
 import com.increff.omni.reporting.pojo.ReportPojo;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
-import com.nextscm.commons.spring.common.ConvertUtil;
+//import com.nextscm.commons.spring.common.ConvertUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

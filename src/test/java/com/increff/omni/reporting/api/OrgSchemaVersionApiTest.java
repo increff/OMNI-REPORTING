@@ -4,13 +4,16 @@ import com.increff.omni.reporting.config.AbstractTest;
 import com.increff.omni.reporting.pojo.OrgSchemaVersionPojo;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
-import org.junit.Test;
+//import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
 import static com.increff.omni.reporting.helper.OrgTestHelper.getOrgSchemaPojo;
-import static org.junit.Assert.assertEquals;
+//import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class OrgSchemaVersionApiTest extends AbstractTest {
 
@@ -44,7 +47,7 @@ public class OrgSchemaVersionApiTest extends AbstractTest {
     }
 
     @Test
-    public void testGetCheckByOrgId() throws ApiException {
+    public void testGetCheckByOrgId() throws ApiException{
         OrgSchemaVersionPojo pojo = getOrgSchemaPojo(1, 100001);
         api.map(pojo);
         OrgSchemaVersionPojo p = api.getCheckByOrgId(1);
@@ -52,16 +55,17 @@ public class OrgSchemaVersionApiTest extends AbstractTest {
         assertEquals(100001, p.getSchemaVersionId().intValue());
     }
 
-    @Test(expected = ApiException.class)
-    public void testGetCheckByOrgIdWithException() throws ApiException {
+    @Test
+    void testGetCheckByOrgIdWithException() {
         OrgSchemaVersionPojo pojo = getOrgSchemaPojo(1, 100001);
         api.map(pojo);
-        try {
+
+        ApiException exception = assertThrows(ApiException.class, () -> {
             api.getCheckByOrgId(2);
-        } catch (ApiException e) {
-            assertEquals(ApiStatus.BAD_DATA, e.getStatus());
-            assertEquals("No schema mapped for org : 2", e.getMessage());
-            throw e;
-        }
+        });
+
+        assertEquals(ApiStatus.BAD_DATA, exception.getStatus());
+        assertEquals("No schema mapped for org : 2", exception.getMessage());
     }
+
 }

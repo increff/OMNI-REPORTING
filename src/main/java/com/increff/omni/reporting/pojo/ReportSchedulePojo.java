@@ -3,7 +3,7 @@ package com.increff.omni.reporting.pojo;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.time.ZonedDateTime;
 
 @Entity
@@ -15,9 +15,9 @@ import java.time.ZonedDateTime;
 public class ReportSchedulePojo extends AbstractVersionedPojo {
 
     @Id
-    @TableGenerator(name = "report_schedule", pkColumnValue = "report_schedule", initialValue =
+    @TableGenerator(name = "report_schedule_sequence", pkColumnValue = "report_schedule_sequence", initialValue =
             100000)
-    @GeneratedValue(strategy = GenerationType.TABLE, generator = "report_schedule")
+    @GeneratedValue(strategy = GenerationType.TABLE, generator = "report_schedule_sequence")
     private Integer id;
 
     @Column(nullable = false)

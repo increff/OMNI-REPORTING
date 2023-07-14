@@ -3,15 +3,17 @@ package com.increff.omni.reporting.dto;
 import com.increff.account.client.SecurityUtil;
 import com.increff.account.client.UserPrincipal;
 import com.increff.omni.reporting.api.*;
+import com.increff.omni.reporting.commons.AbstractDtoApi;
+import com.increff.omni.reporting.commons.StringUtil;
 import com.increff.omni.reporting.flow.InputControlFlowApi;
 import com.increff.omni.reporting.model.constants.ReportRequestType;
 import com.increff.omni.reporting.model.constants.ReportType;
 import com.increff.omni.reporting.pojo.*;
-import com.nextscm.commons.lang.StringUtil;
+//import com.nextscm.commons.lang.StringUtil;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
-import com.nextscm.commons.spring.server.AbstractDtoApi;
-import lombok.extern.log4j.Log4j;
+//import com.nextscm.commons.spring.server.AbstractDtoApi;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -20,7 +22,7 @@ import java.util.*;
 
 import static com.increff.omni.reporting.dto.CommonDtoHelper.getValueFromQuotes;
 
-@Log4j
+@Slf4j
 @Component
 public class AbstractDto extends AbstractDtoApi {
 

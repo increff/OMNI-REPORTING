@@ -13,8 +13,10 @@ import com.increff.omni.reporting.model.form.ValidationGroupForm;
 import com.increff.omni.reporting.pojo.*;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
-import org.junit.Before;
-import org.junit.Test;
+//import org.junit.Before;
+//import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
@@ -28,8 +30,9 @@ import static com.increff.omni.reporting.helper.InputControlTestHelper.getInputC
 import static com.increff.omni.reporting.helper.OrgTestHelper.getOrgSchemaPojo;
 import static com.increff.omni.reporting.helper.ReportTestHelper.*;
 import static com.increff.omni.reporting.helper.SchemaTestHelper.getSchemaPojo;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+//import static org.junit.Assert.assertEquals;
+//import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ReportFlowApiTest extends AbstractTest {
 
@@ -51,7 +54,7 @@ public class ReportFlowApiTest extends AbstractTest {
     private InputControlApi inputControlApi;
     
     SchemaVersionPojo p;
-    @Before
+    @BeforeEach
     public void initInputControlApi() throws ApiException {
         p = SchemaTestHelper.getSchemaPojo("1.0.0");
         schemaVersionApi.add(p);
@@ -72,7 +75,7 @@ public class ReportFlowApiTest extends AbstractTest {
         assertEquals("Report 1", pojo.getName());
     }
 
-    @Test(expected = ApiException.class)
+    @Test
     public void testAddSameNameWithSameSchema() throws ApiException {
         DirectoryPojo rootPojo = directoryDao.select("directoryName", properties.getRootDirectory());
         DirectoryPojo directoryPojo = getDirectoryPojo("Standard Reports", rootPojo.getId());
@@ -91,16 +94,14 @@ public class ReportFlowApiTest extends AbstractTest {
                 , directoryPojo.getId(), schemaVersionPojo1.getId());
         flowApi.addReport(reportPojo);
         flowApi.addReport(reportPojo1);
-        try {
+        ApiException e = assertThrows(ApiException.class, () -> {
             flowApi.addReport(reportPojo2);
-        } catch (ApiException e) {
+        });
             assertEquals(ApiStatus.BAD_DATA, e.getStatus());
             assertEquals("Report already present with same name, schema version and report type (normal / dashboard)", e.getMessage());
             List<ReportPojo> reportPojos = flowApi.getAll(100001, false);
             assertEquals(1, reportPojos.size());
             assertEquals("Report 1", reportPojos.get(0).getName());
-            throw e;
-        }
     }
 
     @Test
@@ -122,7 +123,7 @@ public class ReportFlowApiTest extends AbstractTest {
         assertEquals("Report 1 - 1", pojo.getName());
     }
 
-    @Test(expected = ApiException.class)
+    @Test
     public void testUpdateReportWithDuplicateName() throws ApiException {
         DirectoryPojo rootPojo = directoryDao.select("directoryName", properties.getRootDirectory());
         DirectoryPojo directoryPojo = getDirectoryPojo("Standard Reports", rootPojo.getId());
@@ -142,13 +143,11 @@ public class ReportFlowApiTest extends AbstractTest {
         ReportPojo reportPojo2 = getReportPojo("Report 1 - 1", ReportType.CUSTOM
                 , directoryPojo.getId(), schemaVersionPojo.getId());
         reportPojo2.setId(reportPojo.getId());
-        try {
+        ApiException e = assertThrows(ApiException.class, () -> {
             flowApi.editReport(reportPojo2);
-        } catch (ApiException e) {
+        });
             assertEquals(ApiStatus.BAD_DATA, e.getStatus());
             assertEquals("Report already present with same name, schema version and report type (normal / dashboard)", e.getMessage());
-            throw e;
-        }
     }
 
     @Test
@@ -183,7 +182,7 @@ public class ReportFlowApiTest extends AbstractTest {
         flowApi.mapControlToReport(controlsPojo);
     }
 
-    @Test(expected = ApiException.class)
+    @Test
     public void testMapReportToLocalControl() throws ApiException {
         InputControlPojo inputControlPojo =
                 getInputControlPojo("Client ID", "clientId", InputControlScope.LOCAL, InputControlType.MULTI_SELECT,
@@ -194,13 +193,11 @@ public class ReportFlowApiTest extends AbstractTest {
                 , 100001, 100001);
         reportApi.add(reportPojo);
         ReportControlsPojo controlsPojo = getReportControlsPojo(reportPojo.getId(), inputControlPojo.getId());
-        try {
+        ApiException e = assertThrows(ApiException.class, () -> {
             flowApi.mapControlToReport(controlsPojo);
-        } catch (ApiException e) {
+        });
             assertEquals(ApiStatus.BAD_DATA, e.getStatus());
             assertEquals("Only Global Control can be mapped to a report", e.getMessage());
-            throw e;
-        }
     }
 
     @Test
@@ -220,7 +217,7 @@ public class ReportFlowApiTest extends AbstractTest {
         flowApi.addValidationGroup(reportPojo.getId(), groupForm);
     }
 
-    @Test(expected = ApiException.class)
+    @Test
     public void testAddMandatoryValidationGroup2Times() throws ApiException {
         InputControlPojo inputControlPojo = getInputControlPojo("Client ID", "clientId"
                 , InputControlScope.GLOBAL, InputControlType.MULTI_SELECT, p.getId());
@@ -228,20 +225,18 @@ public class ReportFlowApiTest extends AbstractTest {
                 , null);
         inputControlApi.add(inputControlPojo, inputControlQueryPojo, new ArrayList<>());
         ReportPojo reportPojo = getReportPojo("Report 1", ReportType.STANDARD
-                , 100001, 100001);
+                , 100001, p.getId());
         reportApi.add(reportPojo);
         ReportControlsPojo controlsPojo = getReportControlsPojo(reportPojo.getId(), inputControlPojo.getId());
         flowApi.mapControlToReport(controlsPojo);
         ValidationGroupForm groupForm = getValidationGroupForm("group1", 0
                 , ValidationType.MANDATORY, Collections.singletonList(inputControlPojo.getId()));
         flowApi.addValidationGroup(reportPojo.getId(), groupForm);
-        try {
+        ApiException e = assertThrows(ApiException.class, () -> {
             flowApi.addValidationGroup(reportPojo.getId(), groupForm);
-        } catch (ApiException e) {
+        });
             assertEquals(ApiStatus.BAD_DATA, e.getStatus());
             assertEquals("Group name already exist for given report, group name : group1", e.getMessage());
-            throw e;
-        }
     }
 
     @Test
@@ -261,7 +256,7 @@ public class ReportFlowApiTest extends AbstractTest {
         flowApi.addValidationGroup(reportPojo.getId(), groupForm);
     }
 
-    @Test(expected = ApiException.class)
+    @Test
     public void testAddDateValidationGroupWrongControlType() throws ApiException {
         InputControlPojo inputControlPojo = getInputControlPojo("Client ID", "clientId"
                 , InputControlScope.GLOBAL, InputControlType.MULTI_SELECT, p.getId());
@@ -275,17 +270,15 @@ public class ReportFlowApiTest extends AbstractTest {
         flowApi.mapControlToReport(controlsPojo);
         ValidationGroupForm groupForm = getValidationGroupForm("group1", 0
                 , ValidationType.DATE_RANGE, Collections.singletonList(inputControlPojo.getId()));
-        try {
+        ApiException e = assertThrows(ApiException.class, () -> {
             flowApi.addValidationGroup(reportPojo.getId(), groupForm);
-        } catch (ApiException e) {
+        });
             assertEquals(ApiStatus.BAD_DATA, e.getStatus());
             assertEquals("DATE_RANGE validation can only be applied on DATE / DATE_TIME input controls",
                     e.getMessage());
-            throw e;
-        }
     }
 
-    @Test(expected = ApiException.class)
+    @Test
     public void testAddDateValidationGroupSizeError() throws ApiException {
         InputControlPojo inputControlPojo = getInputControlPojo("Client ID", "clientId"
                 , InputControlScope.GLOBAL, InputControlType.DATE, p.getId());
@@ -293,20 +286,18 @@ public class ReportFlowApiTest extends AbstractTest {
                 , null);
         inputControlApi.add(inputControlPojo, inputControlQueryPojo, new ArrayList<>());
         ReportPojo reportPojo = getReportPojo("Report 1", ReportType.STANDARD
-                , 100001, 100001);
+                , 100001, p.getId());
         reportApi.add(reportPojo);
         ReportControlsPojo controlsPojo = getReportControlsPojo(reportPojo.getId(), inputControlPojo.getId());
         flowApi.mapControlToReport(controlsPojo);
         ValidationGroupForm groupForm = getValidationGroupForm("group1", 0
                 , ValidationType.DATE_RANGE, Collections.singletonList(inputControlPojo.getId()));
-        try {
+        ApiException e = assertThrows(ApiException.class, () -> {
             flowApi.addValidationGroup(reportPojo.getId(), groupForm);
-        } catch (ApiException e) {
+        });
             assertEquals(ApiStatus.BAD_DATA, e.getStatus());
             assertEquals("DATE_RANGE validation type should have exactly 2 DATE / DATE_TIME input controls",
                     e.getMessage());
-            throw e;
-        }
     }
 
     @Test

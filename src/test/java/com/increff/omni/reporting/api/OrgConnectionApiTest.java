@@ -4,13 +4,16 @@ import com.increff.omni.reporting.config.AbstractTest;
 import com.increff.omni.reporting.pojo.OrgConnectionPojo;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
-import org.junit.Test;
+//import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
 import static com.increff.omni.reporting.helper.OrgTestHelper.getOrgConnectionPojo;
-import static org.junit.Assert.assertEquals;
+//import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class OrgConnectionApiTest extends AbstractTest {
 
@@ -52,16 +55,17 @@ public class OrgConnectionApiTest extends AbstractTest {
         assertEquals(100001, p.getConnectionId().intValue());
     }
 
-    @Test(expected = ApiException.class)
-    public void testGetCheckByOrgIdWithException() throws ApiException {
+    @Test
+    void testGetCheckByOrgIdWithException() {
         OrgConnectionPojo pojo = getOrgConnectionPojo(1, 100001);
         api.map(pojo);
-        try {
+
+        ApiException exception = assertThrows(ApiException.class, () -> {
             api.getCheckByOrgId(2);
-        } catch (ApiException e) {
-            assertEquals(ApiStatus.BAD_DATA, e.getStatus());
-            assertEquals("No connection mapped for org : 2", e.getMessage());
-            throw e;
-        }
+        });
+
+        assertEquals(ApiStatus.BAD_DATA, exception.getStatus());
+        assertEquals("No connection mapped for org : 2", exception.getMessage());
     }
+
 }

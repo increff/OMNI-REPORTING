@@ -1,7 +1,8 @@
 package com.increff.omni.reporting.dao;
 
+import com.increff.omni.reporting.commons.AbstractDao;
 import com.increff.omni.reporting.pojo.OrgSchemaVersionPojo;
-import com.nextscm.commons.spring.db.AbstractDao;
+//import com.nextscm.commons.spring.db.AbstractDao;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 

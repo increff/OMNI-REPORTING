@@ -11,8 +11,10 @@ import com.increff.omni.reporting.model.constants.ReportType;
 import com.increff.omni.reporting.pojo.*;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
-import org.junit.Before;
-import org.junit.Test;
+//import org.junit.Before;
+//import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
@@ -25,8 +27,9 @@ import static com.increff.omni.reporting.helper.DirectoryTestHelper.getDirectory
 import static com.increff.omni.reporting.helper.InputControlTestHelper.getInputControlPojo;
 import static com.increff.omni.reporting.helper.ReportTestHelper.getReportPojo;
 import static com.increff.omni.reporting.helper.SchemaTestHelper.getSchemaPojo;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+//import static org.junit.Assert.assertEquals;
+//import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class InputControlFlowApiTest extends AbstractTest {
 
@@ -50,7 +53,7 @@ public class InputControlFlowApiTest extends AbstractTest {
     private ApplicationProperties properties;
 
     SchemaVersionPojo p;
-    @Before
+    @BeforeEach
     public void initInputControlApi() throws ApiException {
         p = SchemaTestHelper.getSchemaPojo("1.0.0");
         schemaVersionApi.add(p);
@@ -74,19 +77,17 @@ public class InputControlFlowApiTest extends AbstractTest {
         assertEquals(pojo.getId(), queryPojo.getControlId());
     }
 
-    @Test(expected = ApiException.class)
+    @Test
     public void testAddLocalInputControlWithoutReport() throws ApiException {
         InputControlPojo inputControlPojo =
                 getInputControlPojo("Client ID", "clientId", InputControlScope.LOCAL, InputControlType.MULTI_SELECT,
                         p.getId());
         String query = "select * from oms.oms_orders;";
-        try {
+        ApiException exception = assertThrows(ApiException.class, () -> {
             flowApi.add(inputControlPojo, query, new ArrayList<>(), 1);
-        } catch (ApiException e) {
-            assertEquals(ApiStatus.BAD_DATA, e.getStatus());
-            assertEquals("No report present with id : 1", e.getMessage());
-            throw e;
-        }
+        });
+        assertEquals(ApiStatus.BAD_DATA, exception.getStatus());
+        assertEquals("No report present with id : 1", exception.getMessage());
     }
 
     @Test
@@ -128,15 +129,18 @@ public class InputControlFlowApiTest extends AbstractTest {
         flowApi.add(inputControlPojo2, query, new ArrayList<>(), pojo.getId());
     }
 
-    @Test(expected = ApiException.class)
+
+    @Test
     public void testAddLocalInputControlWithDuplicateReportControlDisplayName() throws ApiException {
         DirectoryPojo rootPojo = directoryDao.select("directoryName", properties.getRootDirectory());
         DirectoryPojo directoryPojo = getDirectoryPojo("Standard Reports", rootPojo.getId());
         directoryApi.add(directoryPojo);
-        SchemaVersionPojo schemaVersionPojo = getSchemaPojo("9.0.1");
-        schemaVersionApi.add(schemaVersionPojo);
+//        SchemaVersionPojo schemaVersionPojo = getSchemaPojo("9.0.1");
+//        schemaVersionApi.add(schemaVersionPojo);
+//        ReportPojo pojo = getReportPojo("CIMS Inventory Exposure Report", ReportType.STANDARD, directoryPojo.getId(),
+//                schemaVersionPojo.getId());
         ReportPojo pojo = getReportPojo("CIMS Inventory Exposure Report", ReportType.STANDARD, directoryPojo.getId(),
-                schemaVersionPojo.getId());
+                p.getId());
         reportApi.add(pojo);
 
         InputControlPojo inputControlPojo =
@@ -149,24 +153,26 @@ public class InputControlFlowApiTest extends AbstractTest {
                 getInputControlPojo("Client ID", "warehouseId", InputControlScope.LOCAL, InputControlType.MULTI_SELECT,
                         p.getId());
         query = "select * from oms.oms_orders;";
-        try {
-            flowApi.add(inputControlPojo2, query, new ArrayList<>(), pojo.getId());
-        } catch (ApiException e) {
+        String finalQuery = query;
+        ApiException e = assertThrows(ApiException.class, () -> {
+            flowApi.add(inputControlPojo2, finalQuery, new ArrayList<>(), pojo.getId());
+        });
             assertEquals(ApiStatus.BAD_DATA, e.getStatus());
             assertEquals("Another input control present with same display name or param name", e.getMessage());
-            throw e;
-        }
     }
 
-    @Test(expected = ApiException.class)
+    @Test
     public void testAddLocalInputControlWithDuplicateReportControlParamName() throws ApiException {
         DirectoryPojo rootPojo = directoryDao.select("directoryName", properties.getRootDirectory());
         DirectoryPojo directoryPojo = getDirectoryPojo("Standard Reports", rootPojo.getId());
         directoryApi.add(directoryPojo);
-        SchemaVersionPojo schemaVersionPojo = getSchemaPojo("9.0.1");
-        schemaVersionApi.add(schemaVersionPojo);
+//        SchemaVersionPojo schemaVersionPojo = getSchemaPojo("9.0.1");
+//        schemaVersionApi.add(schemaVersionPojo);
+
+//        ReportPojo pojo = getReportPojo("CIMS Inventory Exposure Report", ReportType.STANDARD, directoryPojo.getId(),
+//                schemaVersionPojo.getId());
         ReportPojo pojo = getReportPojo("CIMS Inventory Exposure Report", ReportType.STANDARD, directoryPojo.getId(),
-                schemaVersionPojo.getId());
+                p.getId());
         reportApi.add(pojo);
 
         InputControlPojo inputControlPojo =
@@ -179,13 +185,12 @@ public class InputControlFlowApiTest extends AbstractTest {
                 getInputControlPojo("Warehouse ID", "clientId", InputControlScope.LOCAL, InputControlType.MULTI_SELECT,
                         p.getId());
         query = "select * from oms.oms_orders;";
-        try {
-            flowApi.add(inputControlPojo2, query, new ArrayList<>(), pojo.getId());
-        } catch (ApiException e) {
+        String finalQuery = query;
+        ApiException e = assertThrows(ApiException.class, () -> {
+            flowApi.add(inputControlPojo2, finalQuery, new ArrayList<>(), pojo.getId());
+        });
             assertEquals(ApiStatus.BAD_DATA, e.getStatus());
             assertEquals("Another input control present with same display name or param name", e.getMessage());
-            throw e;
-        }
     }
 
     @Test

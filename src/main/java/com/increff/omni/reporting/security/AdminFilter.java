@@ -5,29 +5,27 @@ import com.increff.account.client.UserPrincipal;
 import com.increff.omni.reporting.config.ApplicationProperties;
 import com.nextscm.commons.spring.common.FieldErrorData;
 import com.nextscm.commons.spring.common.JsonUtil;
-import lombok.extern.log4j.Log4j;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.GenericFilterBean;
 
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 @Component
-@Log4j
+@Slf4j
 public class AdminFilter extends GenericFilterBean {
 
     @Autowired
     private ApplicationProperties properties;
-
     @Override
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
-            throws IOException, ServletException {
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         HttpServletResponse httpResponse = (HttpServletResponse) response;
         UserPrincipal userPrincipal = SecurityUtil.getPrincipal();
         if (userPrincipal == null) {
@@ -52,7 +50,7 @@ public class AdminFilter extends GenericFilterBean {
         try {
             response.getWriter().write(JsonUtil.serialize(errorData));
         } catch (IOException e) {
-            log.error("Error while writing un-authenticate response : ", e);
+
         }
     }
 }

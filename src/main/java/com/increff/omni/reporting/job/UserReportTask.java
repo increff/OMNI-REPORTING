@@ -5,18 +5,20 @@ import com.increff.commons.queryexecutor.form.FileUploadDetailsForm;
 import com.increff.commons.queryexecutor.form.QueryDetailsForm;
 import com.increff.commons.queryexecutor.form.QueryExecutorForm;
 import com.increff.omni.reporting.api.*;
+import com.increff.omni.reporting.commons.*;
 import com.increff.omni.reporting.config.ApplicationProperties;
 import com.increff.omni.reporting.model.constants.ReportRequestStatus;
 import com.increff.omni.reporting.pojo.*;
 import com.increff.omni.reporting.util.SqlCmd;
 import com.nextscm.commons.spring.common.ApiException;
-import lombok.extern.log4j.Log4j;
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
-import javax.persistence.OptimisticLockException;
+import jakarta.persistence.OptimisticLockException;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -25,7 +27,8 @@ import static com.increff.omni.reporting.dto.CommonDtoHelper.getInputParamMapFro
 import static com.increff.omni.reporting.dto.CommonDtoHelper.getValueFromQuotes;
 
 @Component
-@Log4j
+@Slf4j
+@Setter
 public class UserReportTask extends AbstractTask{
 
     @Autowired

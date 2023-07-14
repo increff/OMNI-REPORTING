@@ -1,7 +1,6 @@
 package com.increff.omni.reporting.util;
 
 import com.increff.omni.reporting.config.EmailProps;
-
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
 import javax.activation.FileDataSource;
@@ -11,7 +10,6 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import java.util.Properties;
-
 /**
  * Utility to send emails
  */

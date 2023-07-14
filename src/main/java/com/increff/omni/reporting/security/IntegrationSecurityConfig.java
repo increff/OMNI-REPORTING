@@ -2,19 +2,23 @@ package com.increff.omni.reporting.security;
 
 import com.increff.account.client.CredentialFilter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfiguration;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
 @Order(3)
-public class IntegrationSecurityConfig extends WebSecurityConfigurerAdapter {
+public class IntegrationSecurityConfig{
 
     @Autowired
     private CredentialFilter credentialFilter;
@@ -25,24 +29,45 @@ public class IntegrationSecurityConfig extends WebSecurityConfigurerAdapter {
     private static final String APP_INTEGRATION = "app.integration";
 
 
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
+//    @Override
+//    protected void configure(HttpSecurity http) throws Exception {
+//
+//        http// Match only these URLs
+//                .requestMatchers()//
+//                .antMatchers("/integration/**")
+//                .and().authorizeRequests()//
+//                .antMatchers("/integration/**").hasAnyAuthority(APP_INTEGRATION)//
+//                .and().cors().and().csrf().disable()
+//                .addFilterBefore(credentialFilter, BasicAuthenticationFilter.class)
+//                .addFilterBefore(adminFilter, BasicAuthenticationFilter.class)
+//                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+//        http.cors();
+//    }
 
-        http// Match only these URLs
-                .requestMatchers()//
-                .antMatchers("/integration/**")
-                .and().authorizeRequests()//
-                .antMatchers("/integration/**").hasAnyAuthority(APP_INTEGRATION)//
+    @Bean
+    @Qualifier("integrationFilterChain")
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http.securityMatchers()
+                .requestMatchers("/integration/**").and().authorizeHttpRequests()
+                .requestMatchers("/integration/**").hasAnyAuthority(APP_INTEGRATION)
                 .and().cors().and().csrf().disable()
                 .addFilterBefore(credentialFilter, BasicAuthenticationFilter.class)
                 .addFilterBefore(adminFilter, BasicAuthenticationFilter.class)
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
         http.cors();
+        return http.build();
     }
 
-    @Override
-    public void configure(WebSecurity web) throws Exception {
-        web.ignoring().antMatchers("/v2/api-docs", "/configuration/ui", "/swagger-resources", "/configuration/security",
-                "/swagger-ui.html", "/webjars/**", "/ui/**", "/session/**");
+//    @Override
+//    public void configure(WebSecurity web) throws Exception {
+//        web.ignoring().antMatchers("/v2/api-docs", "/configuration/ui", "/swagger-resources", "/configuration/security",
+//                "/swagger-ui.html", "/webjars/**", "/ui/**", "/session/**");
+//    }
+
+    @Bean
+    @Qualifier("integrationWebSecurityCustomizer")
+    public WebSecurityCustomizer webSecurityCustomizer(){
+        return web -> web.ignoring().requestMatchers("/v2/api-docs", "/configuration/ui", "/swagger-resources",
+                "/configuration/security", "/swagger-ui.html", "/webjars/**", "/ui/**", "/session/**");
     }
 }

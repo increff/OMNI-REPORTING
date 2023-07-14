@@ -1,47 +1,102 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.0.6</version>
+        <relativePath/> <!-- lookup parent from repository -->
+    </parent>
     <groupId>com.increff.omni</groupId>
     <artifactId>omni-reporting</artifactId>
-    <version>1.43-SNAPSHOT</version>
+    <version>1.44-SNAPSHOT</version>
     <packaging>war</packaging>
-    <properties>
-        <!-- Maven Properties -->
-        <java.version>1.8</java.version>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
+    <properties>
+        <java.version>17</java.version>
         <!-- Jetty -->
-        <jetty.version>9.4.51.v20230217</jetty.version>
+        <jetty.version>11.0.15</jetty.version>
         <jetty.http.port>9001</jetty.http.port>
         <jetty.http.host>0.0.0.0</jetty.http.host>
         <jetty.context>/omni-reporting/api/</jetty.context>
         <failOnMissingWebXml>false</failOnMissingWebXml>
 
-        <!-- Increff Dependencies -->
-        <fileclient.version>1.1.4</fileclient.version>
-        <nextscm-commons-spring.version>2.1</nextscm-commons-spring.version>
-        <increff-commons-logging.version>1.5</increff-commons-logging.version>
-        <increff-account.version>3.27</increff-account.version>
-        <lombok.version>1.18.22</lombok.version>
-        <swagger.version>2.7.0</swagger.version>
-        <log4j.version>1.2.17</log4j.version>
-        <increff-commons-sheet.version>1.3</increff-commons-sheet.version>
-
-        <!-- Runtime/Test Dependencies -->
-        <javax.servlet.version>3.1.0</javax.servlet.version>
-        <mockito.version>1.9.5</mockito.version>
-
+        <increff-account.version>3.33</increff-account.version>
         <!-- External Dependencies -->
         <apache-commons-csv.version>1.9.0</apache-commons-csv.version>
-        <apache-commons-compress.version>1.22</apache-commons-compress.version>
-        <javax.mail.version>1.4.7</javax.mail.version>
-
+        <hazelcaste.version>5.1</hazelcaste.version>
+        <logging.version>1.2</logging.version>
     </properties>
-
     <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-tomcat</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+            <version>2.1.0</version>
+        </dependency>
+
+        <!--		<dependency>-->
+        <!--			<groupId>org.springframework.boot</groupId>-->
+        <!--			<artifactId>spring-boot-starter-tomcat</artifactId>-->
+        <!--		</dependency>-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-mail</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-jetty</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.eclipse.jetty</groupId>
+                    <artifactId>apache-jsp</artifactId>
+                </exclusion>
+
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-ui</artifactId>
+            <version>1.6.3</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.hibernate.validator</groupId>
+            <artifactId>hibernate-validator</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>com.google.cloud</groupId>
             <artifactId>google-cloud-storage</artifactId>
@@ -54,19 +109,113 @@
             <version>${apache-commons-csv.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.nextscm.commons</groupId>
-            <artifactId>commons-spring-server</artifactId>
-            <version>${nextscm-commons-spring.version}</version>
+            <groupId>javax.mail</groupId>
+            <artifactId>javax.mail-api</artifactId>
+            <version>1.6.2</version>
         </dependency>
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <version>3.1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.mail</groupId>
+            <artifactId>javax.mail</artifactId>
+            <version>1.6.2</version>
+        </dependency>
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>5.1.38</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>4.5.13</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-dbcp2</artifactId>
+            <version>2.9.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-api</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.13.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.increff.commons</groupId>
+            <artifactId>commons-logging</artifactId>
+            <version>${logging.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.hazelcast</groupId>
+            <artifactId>hazelcast-spring</artifactId>
+            <version>${hazelcaste.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <version>2.1.214</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!--		<dependency>-->
+        <!--			<groupId>com.increff.account</groupId>-->
+        <!--			<artifactId>account-client</artifactId>-->
+        <!--			<version>${increff-account.version}</version>-->
+        <!--			<exclusions>-->
+        <!--				<exclusion>-->
+        <!--					<groupId>com.nextscm.commons</groupId>-->
+        <!--					<artifactId>commons-spring-db</artifactId>-->
+        <!--				</exclusion>-->
+        <!--				<exclusion>-->
+        <!--					<groupId>com.nextscm.commons</groupId>-->
+        <!--					<artifactId>commons-spring-test</artifactId>-->
+        <!--				</exclusion>-->
+        <!--				<exclusion>-->
+        <!--					<groupId>com.nextscm.commons</groupId>-->
+        <!--					<artifactId>commons-spring-server</artifactId>-->
+        <!--				</exclusion>-->
+        <!--			</exclusions>-->
+        <!--		</dependency>-->
         <dependency>
             <groupId>com.nextscm.commons</groupId>
             <artifactId>commons-spring-audit</artifactId>
-            <version>${nextscm-commons-spring.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.increff.account</groupId>
-            <artifactId>account-client</artifactId>
-            <version>${increff-account.version}</version>
+            <version>2.0.21</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.nextscm.commons</groupId>
+                    <artifactId>commons-spring-db</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.nextscm.commons</groupId>
+                    <artifactId>commons-spring-test</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.nextscm.commons</groupId>
+                    <artifactId>commons-spring-server</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.increff.commons</groupId>
@@ -74,63 +223,25 @@
             <version>1.0.1</version>
         </dependency>
         <dependency>
-            <groupId>com.increff.commons</groupId>
-            <artifactId>commons-logging</artifactId>
-            <version>${increff-commons-logging.version}</version>
+            <groupId>org.apache.httpcomponents.client5</groupId>
+            <artifactId>httpclient5</artifactId>
+            <version>5.2.1</version>
         </dependency>
-        <dependency>
-            <groupId>com.increff.commons</groupId>
-            <artifactId>increff-commons-sheet</artifactId>
-            <version>${increff-commons-sheet.version}</version>
-        </dependency>
+        <!--		<dependency>-->
+        <!--			<groupId>junit</groupId>-->
+        <!--			<artifactId>junit</artifactId>-->
+        <!--			<scope>test</scope>-->
+        <!--		</dependency>-->
 
-        <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>javax.servlet-api</artifactId>
-            <version>${javax.servlet.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <version>${lombok.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>javax.mail</groupId>
-            <artifactId>mail</artifactId>
-            <version>${javax.mail.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.nextscm.commons</groupId>
-            <artifactId>commons-spring-test</artifactId>
-            <version>${nextscm-commons-spring.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-all</artifactId>
-            <version>${mockito.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-compress</artifactId>
-            <version>${apache-commons-compress.version}</version>
-        </dependency>
     </dependencies>
 
     <build>
         <plugins>
-            <!-- Jetty plugin, for web application testing -->
             <plugin>
                 <groupId>org.eclipse.jetty</groupId>
                 <artifactId>jetty-maven-plugin</artifactId>
                 <version>${jetty.version}</version>
                 <configuration>
-                    <scanIntervalSeconds>5</scanIntervalSeconds>
-                    <useTestClasspath>false</useTestClasspath>
                     <httpConnector>
                         <port>${jetty.http.port}</port>
                     </httpConnector>
@@ -140,13 +251,24 @@
                 </configuration>
             </plugin>
         </plugins>
-        <resources>
-            <resource>
-                <directory>src/main/resources</directory>
-                <filtering>true</filtering>
-            </resource>
-        </resources>
     </build>
+
+    <!--	<build>-->
+    <!--		<plugins>-->
+    <!--			<plugin>-->
+    <!--				<groupId>org.eclipse.jetty</groupId>-->
+    <!--				<artifactId>jetty-maven-plugin</artifactId>-->
+    <!--				<version>11.0.15</version>-->
+    <!--			</plugin>-->
+    <!--		</plugins>-->
+
+    <!--		<resources>-->
+    <!--			<resource>-->
+    <!--				<directory>src/main/resources</directory>-->
+    <!--				<filtering>true</filtering>-->
+    <!--			</resource>-->
+    <!--		</resources>-->
+    <!--	</build>-->
 
     <repositories>
         <!-- For NextSCM -->

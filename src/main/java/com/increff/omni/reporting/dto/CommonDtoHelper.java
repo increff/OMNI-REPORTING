@@ -2,6 +2,7 @@ package com.increff.omni.reporting.dto;
 
 import com.increff.commons.queryexecutor.constants.FileFormat;
 import com.increff.commons.queryexecutor.constants.RequestStatus;
+import com.increff.omni.reporting.commons.*;
 import com.increff.omni.reporting.model.constants.ReportRequestStatus;
 import com.increff.omni.reporting.model.constants.ReportRequestType;
 import com.increff.omni.reporting.model.constants.ValidationType;
@@ -10,7 +11,7 @@ import com.increff.omni.reporting.model.form.ReportRequestForm;
 import com.increff.omni.reporting.model.form.ReportScheduleForm;
 import com.increff.omni.reporting.model.form.SqlParams;
 import com.increff.omni.reporting.pojo.*;
-import com.nextscm.commons.lang.StringUtil;
+//import com.nextscm.commons.lang.StringUtil;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
 import org.springframework.scheduling.support.CronSequenceGenerator;

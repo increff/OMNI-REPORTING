@@ -2,25 +2,32 @@ package com.increff.omni.reporting.config;
 
 import com.increff.account.client.UserPrincipal;
 import com.increff.omni.reporting.model.constants.AppResourceKeys;
-import org.junit.Before;
-import org.junit.runner.RunWith;
+//import org.junit.Before;
+//import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
-@ContextConfiguration(classes = {TestConfig.class})
-@RunWith(SpringJUnit4ClassRunner.class)
+@ExtendWith(SpringExtension.class)
+@TestPropertySource(locations = "classpath:com/increff/omni/reporting/test.properties")
 @WebAppConfiguration
 @Transactional
+@SpringBootTest(classes = {TestConfig.class})
 public abstract class AbstractTest {
 
     @Value("${testdb.username}")
@@ -29,9 +36,9 @@ public abstract class AbstractTest {
     @Value("${testdb.password}")
     protected String password;
 
-    @Before
+    @BeforeEach
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
+        MockitoAnnotations.openMocks(this);
         setSecurityContext();
     }
 

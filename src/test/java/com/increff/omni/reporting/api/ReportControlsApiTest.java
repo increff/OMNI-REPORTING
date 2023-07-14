@@ -6,14 +6,16 @@ import com.increff.omni.reporting.dao.DirectoryDao;
 import com.increff.omni.reporting.pojo.ReportControlsPojo;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
-import org.junit.Test;
+//import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Arrays;
 import java.util.List;
 
 import static com.increff.omni.reporting.helper.ReportTestHelper.getReportControlsPojo;
-import static org.junit.Assert.*;
+//import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ReportControlsApiTest extends AbstractTest {
 
@@ -77,19 +79,20 @@ public class ReportControlsApiTest extends AbstractTest {
         assertEquals(100002, reportControlsPojoList.get(1).getReportId().intValue());
     }
 
-    @Test(expected = ApiException.class)
-    public void testDelete() throws ApiException {
+    @Test
+    void testDelete() throws ApiException {
         ReportControlsPojo controlsPojo = getReportControlsPojo(100001, 100002);
         api.add(controlsPojo);
         api.delete(controlsPojo.getId());
-        try {
+
+        ApiException exception = assertThrows(ApiException.class, () -> {
             api.getCheck(controlsPojo.getId());
-        } catch (ApiException e) {
-            assertEquals(ApiStatus.BAD_DATA, e.getStatus());
-            assertEquals("Report control does not exist for id : " + controlsPojo.getId(), e.getMessage());
-            throw e;
-        }
+        });
+
+        assertEquals(ApiStatus.BAD_DATA, exception.getStatus());
+        assertEquals("Report control does not exist for id : " + controlsPojo.getId(), exception.getMessage());
     }
+
 
 
 }

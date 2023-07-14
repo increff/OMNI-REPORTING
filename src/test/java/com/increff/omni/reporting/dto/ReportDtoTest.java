@@ -9,7 +9,8 @@ import com.increff.omni.reporting.model.data.*;
 import com.increff.omni.reporting.model.form.*;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
-import org.junit.Test;
+//import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.*;
@@ -20,7 +21,8 @@ import static com.increff.omni.reporting.helper.InputControlTestHelper.getInputC
 import static com.increff.omni.reporting.helper.OrgTestHelper.getOrganizationForm;
 import static com.increff.omni.reporting.helper.ReportTestHelper.*;
 import static com.increff.omni.reporting.helper.SchemaTestHelper.getSchemaForm;
-import static org.junit.Assert.*;
+//import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ReportDtoTest extends AbstractTest {
 
@@ -191,7 +193,7 @@ public class ReportDtoTest extends AbstractTest {
         assertEquals(1, reportDataList.size());
     }
 
-    @Test(expected = ApiException.class)
+    @Test
     public void testAddValidationGroupErrorCase1() throws ApiException {
         ReportForm form = commonSetup("Report 2", ReportType.CUSTOM);
         ReportData data = dto.add(form);
@@ -201,16 +203,16 @@ public class ReportDtoTest extends AbstractTest {
         dto.mapToControl(data.getId(), inputControlData.getId());
         ValidationGroupForm groupForm = getValidationGroupForm("group1", 10, ValidationType.MANDATORY
                 , Collections.singletonList(inputControlData.getId()));
-        try {
+        ApiException exception = assertThrows(ApiException.class, () -> {
             dto.addValidationGroup(null, groupForm);
-        } catch (ApiException e) {
-            assertEquals(ApiStatus.BAD_DATA, e.getStatus());
-            assertEquals("Report id cannot be null", e.getMessage());
-            throw e;
-        }
+        });
+
+// Verify the expected status and error message of the exception
+        assertEquals(ApiStatus.BAD_DATA, exception.getStatus());
+        assertEquals("Report id cannot be null", exception.getMessage());
     }
 
-    @Test(expected = ApiException.class)
+    @Test
     public void testAddValidationGroupErrorCase2() throws ApiException {
         ReportForm form = commonSetup("Report 2", ReportType.CUSTOM);
         ReportData data = dto.add(form);
@@ -220,16 +222,18 @@ public class ReportDtoTest extends AbstractTest {
         dto.mapToControl(data.getId(), inputControlData.getId());
         ValidationGroupForm groupForm = getValidationGroupForm("group1", 10, ValidationType.MANDATORY
                 , Arrays.asList(inputControlData.getId(), inputControlData.getId()));
-        try {
+        ApiException exception = assertThrows(ApiException.class, () -> {
             dto.addValidationGroup(data.getId(), groupForm);
-        } catch (ApiException e) {
-            assertEquals(ApiStatus.BAD_DATA, e.getStatus());
-            assertEquals("Validation group contains duplicate control ids", e.getMessage());
-            throw e;
-        }
+        });
+
+// Verify the expected status and error message of the exception
+        assertEquals(ApiStatus.BAD_DATA, exception.getStatus());
+        assertEquals("Validation group contains duplicate control ids", exception.getMessage());
     }
 
-    @Test(expected = ApiException.class)
+
+
+    @Test
     public void testAddValidationGroupErrorCase3() throws ApiException {
         ReportForm form = commonSetup("Report 2", ReportType.CUSTOM);
         ReportData data = dto.add(form);
@@ -239,14 +243,16 @@ public class ReportDtoTest extends AbstractTest {
         dto.mapToControl(data.getId(), inputControlData.getId());
         ValidationGroupForm groupForm = getValidationGroupForm("group1", 0, ValidationType.DATE_RANGE
                 , Collections.singletonList(inputControlData.getId()));
-        try {
+        ApiException exception = assertThrows(ApiException.class, () -> {
             dto.addValidationGroup(data.getId(), groupForm);
-        } catch (ApiException e) {
-            assertEquals(ApiStatus.BAD_DATA, e.getStatus());
-            assertEquals("Date range validation should have positive validation value", e.getMessage());
-            throw e;
-        }
+        });
+
+// Verify the expected status and error message of the exception
+        assertEquals(ApiStatus.BAD_DATA, exception.getStatus());
+        assertEquals("Date range validation should have positive validation value", exception.getMessage());
     }
+
+
 
     @Test
     public void testAutoValidationGroupAddition() throws ApiException {

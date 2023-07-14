@@ -5,13 +5,16 @@ import com.increff.omni.reporting.model.data.SchemaVersionData;
 import com.increff.omni.reporting.model.form.SchemaVersionForm;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
-import org.junit.Test;
+//import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
 import static com.increff.omni.reporting.helper.SchemaTestHelper.getSchemaForm;
-import static org.junit.Assert.assertEquals;
+//import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class SchemaDtoTest extends AbstractTest {
 
@@ -26,16 +29,15 @@ public class SchemaDtoTest extends AbstractTest {
         assertEquals("9.0.1", data.getName());
     }
 
-    @Test(expected = ApiException.class)
+    @Test
     public void testAddSchemaValidationFail() throws ApiException {
         SchemaVersionForm form = getSchemaForm(null);
-        try {
+        ApiException exception = assertThrows(ApiException.class, () -> {
             dto.add(form);
-        } catch (ApiException e) {
-            assertEquals(ApiStatus.BAD_DATA, e.getStatus());
-            assertEquals("Input validation failed", e.getMessage());
-            throw e;
-        }
+        });
+
+        assertEquals(ApiStatus.BAD_DATA, exception.getStatus());
+        assertEquals("Input validation failed", exception.getMessage());
     }
 
     @Test
@@ -49,16 +51,16 @@ public class SchemaDtoTest extends AbstractTest {
         assertEquals("9.0.2", data.getName());
     }
 
-    @Test(expected = ApiException.class)
+    @Test
     public void testUpdateSchemaValidationFail() throws ApiException {
         SchemaVersionForm form = getSchemaForm(null);
-        try {
+        ApiException exception = assertThrows(ApiException.class, () -> {
             dto.update(1, form);
-        } catch (ApiException e) {
-            assertEquals(ApiStatus.BAD_DATA, e.getStatus());
-            assertEquals("Input validation failed", e.getMessage());
-            throw e;
-        }
+        });
+
+// Verify the expected status and error message of the exception
+        assertEquals(ApiStatus.BAD_DATA, exception.getStatus());
+        assertEquals("Input validation failed", exception.getMessage());
     }
 
     @Test

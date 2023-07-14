@@ -6,7 +6,8 @@ import com.increff.omni.reporting.pojo.ReportScheduleInputParamsPojo;
 import com.increff.omni.reporting.pojo.ReportSchedulePojo;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
-import org.junit.Test;
+//import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.ZonedDateTime;
@@ -14,8 +15,9 @@ import java.util.Arrays;
 import java.util.List;
 
 import static com.increff.omni.reporting.helper.ReportScheduleTestHelper.*;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+//import static org.junit.Assert.assertEquals;
+//import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ReportScheduleApiTest extends AbstractTest {
 
@@ -43,7 +45,7 @@ public class ReportScheduleApiTest extends AbstractTest {
         reportScheduleApi.add(schedulePojo);
         ReportScheduleInputParamsPojo paramsPojo = getReportScheduleInputParamsPojo(schedulePojo.getId(), "clientId",
                 "'1100002253'", "Client ID");
-        reportScheduleApi.addScheduleInputParams(Arrays.asList(paramsPojo), schedulePojo);
+        reportScheduleApi.addScheduleInputParams(List.of(paramsPojo), schedulePojo);
         List<ReportScheduleInputParamsPojo> scheduleInputParamsPojoList =
                 reportScheduleApi.getScheduleParams(schedulePojo.getId());
         assertEquals(1, scheduleInputParamsPojoList.size());
@@ -94,7 +96,7 @@ public class ReportScheduleApiTest extends AbstractTest {
         assertEquals("'1100002254'", scheduleInputParamsPojoList.get(1).getParamValue());
         ReportScheduleInputParamsPojo paramsPojo2 = getReportScheduleInputParamsPojo(schedulePojo.getId(), "whId",
                 "'1100002254'", "Wh ID");
-        reportScheduleApi.updateScheduleInputParams(Arrays.asList(paramsPojo2), schedulePojo);
+        reportScheduleApi.updateScheduleInputParams(List.of(paramsPojo2), schedulePojo);
         scheduleInputParamsPojoList = reportScheduleApi.getScheduleParams(schedulePojo.getId());
         assertEquals(1, scheduleInputParamsPojoList.size());
         assertEquals("whId", scheduleInputParamsPojoList.get(0).getParamKey());
@@ -148,18 +150,17 @@ public class ReportScheduleApiTest extends AbstractTest {
         assertEquals("0 */15 * * * ?", schedulePojo1.getCron());
     }
 
-    @Test(expected = ApiException.class)
+    @Test
     public void testGetCheckWithException() throws ApiException {
         ReportSchedulePojo schedulePojo = getReportSchedulePojo("Report 1", true, false, 0, 10, ZonedDateTime.now(),
                 100001, 100001, "0 */15 * * * ?");
         reportScheduleApi.add(schedulePojo);
-        try {
+        ApiException exception = assertThrows(ApiException.class, () -> {
             reportScheduleApi.getCheck(schedulePojo.getId() + 1);
-        } catch (ApiException e) {
-            assertEquals(ApiStatus.BAD_DATA, e.getStatus());
-            assertEquals("No report schedule present with id : " + (schedulePojo.getId() + 1), e.getMessage());
-            throw e;
-        }
+        });
+
+        assertEquals(ApiStatus.BAD_DATA, exception.getStatus());
+        assertEquals("No report schedule present with id : " + (schedulePojo.getId() + 1), exception.getMessage());
     }
 
     @Test

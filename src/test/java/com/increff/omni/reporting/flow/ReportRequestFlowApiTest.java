@@ -9,7 +9,8 @@ import com.increff.omni.reporting.model.form.ValidationGroupForm;
 import com.increff.omni.reporting.pojo.*;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
-import org.junit.Test;
+//import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
@@ -24,7 +25,9 @@ import static com.increff.omni.reporting.helper.InputControlTestHelper.getInputC
 import static com.increff.omni.reporting.helper.OrgTestHelper.*;
 import static com.increff.omni.reporting.helper.ReportTestHelper.*;
 import static com.increff.omni.reporting.helper.SchemaTestHelper.getSchemaPojo;
-import static org.junit.Assert.assertEquals;
+//import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class ReportRequestFlowApiTest extends AbstractTest {
 
@@ -111,7 +114,7 @@ public class ReportRequestFlowApiTest extends AbstractTest {
         flowApi.requestReport(reportRequestPojo, reportInputParamsPojoList);
     }
 
-    @Test(expected = ApiException.class)
+    @Test
     public void testCheckOpenRequests() throws ApiException {
         ReportPojo reportPojo = commonSetup();
         ReportRequestPojo reportRequestPojo = getReportRequestPojo(reportPojo.getId(), ReportRequestStatus.NEW
@@ -138,14 +141,12 @@ public class ReportRequestFlowApiTest extends AbstractTest {
         flowApi.requestReport(reportRequestPojo, reportInputParamsPojoList);
         reportRequestPojo = getReportRequestPojo(reportPojo.getId(), ReportRequestStatus.NEW
                 , 100001, 100001, ReportRequestType.USER);
-        try {
-            flowApi.requestReport(reportRequestPojo, reportInputParamsPojoList);
-        } catch (ApiException e) {
+        ReportRequestPojo finalReportRequestPojo = reportRequestPojo;
+        ApiException e = assertThrows(ApiException.class, () -> {
+            flowApi.requestReport(finalReportRequestPojo, reportInputParamsPojoList);
+        });
             assertEquals(ApiStatus.BAD_DATA, e.getStatus());
             assertEquals("Wait for existing reports to get executed", e.getMessage());
-            throw e;
-        }
-
     }
 
 

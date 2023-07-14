@@ -4,7 +4,7 @@ import com.increff.omni.reporting.model.constants.ValidationType;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 @Entity
 @Getter
@@ -15,8 +15,8 @@ import javax.persistence.*;
 public class ReportValidationGroupPojo extends AbstractVersionedPojo {
 
     @Id
-    @TableGenerator(name = "report_validation_group", pkColumnValue = "report_validation_group",initialValue = 100000)
-    @GeneratedValue(strategy = GenerationType.TABLE, generator = "report_validation_group")
+    @TableGenerator(name = "report_validation_group_sequence", pkColumnValue = "report_validation_group_sequence",initialValue = 100000)
+    @GeneratedValue(strategy = GenerationType.TABLE, generator = "report_validation_group_sequence")
     private Integer id;
 
     @Column(nullable = false)

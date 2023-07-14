@@ -7,7 +7,8 @@ import com.increff.omni.reporting.model.constants.ReportRequestType;
 import com.increff.omni.reporting.pojo.ReportRequestPojo;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
-import org.junit.Test;
+//import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.ZonedDateTime;
@@ -15,8 +16,9 @@ import java.util.Collections;
 import java.util.List;
 
 import static com.increff.omni.reporting.helper.ReportTestHelper.getReportRequestPojo;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+//import static org.junit.Assert.assertEquals;
+//import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ReportRequestApiTest extends AbstractTest {
 
@@ -87,19 +89,18 @@ public class ReportRequestApiTest extends AbstractTest {
         assertEquals(ReportRequestStatus.IN_PROGRESS, p.getStatus());
     }
 
-    @Test(expected = ApiException.class)
+    @Test
     public void testMarkProcessingWithError() throws ApiException {
         ReportRequestPojo pojo = commonSetup();
         api.markProcessingIfEligible(pojo.getId());
         ReportRequestPojo p = api.getCheck(pojo.getId());
         assertEquals(ReportRequestStatus.IN_PROGRESS, p.getStatus());
-        try {
+        ApiException exception = assertThrows(ApiException.class, () -> {
             api.markProcessingIfEligible(pojo.getId());
-        } catch (ApiException e) {
-            assertEquals(ApiStatus.UNKNOWN_ERROR, e.getStatus());
-            assertEquals("Task not in eligible state", e.getMessage());
-            throw e;
-        }
+        });
+
+        assertEquals(ApiStatus.UNKNOWN_ERROR, exception.getStatus());
+        assertEquals("Task not in eligible state", exception.getMessage());
     }
 
     @Test

@@ -3,14 +3,13 @@ package com.increff.omni.reporting.pojo;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 @Entity
 @Setter
 @Getter
 @Table(name = "connection")
 public class ConnectionPojo extends AbstractVersionedPojo{
-
     @Id
     @TableGenerator(name = "connection", pkColumnValue = "connection" ,initialValue = 100000)
     @GeneratedValue(strategy = GenerationType.TABLE, generator = "connection")

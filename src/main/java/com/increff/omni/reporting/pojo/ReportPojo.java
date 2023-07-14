@@ -4,7 +4,7 @@ import com.increff.omni.reporting.model.constants.ReportType;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 @Entity
 @Setter
@@ -18,8 +18,8 @@ import javax.persistence.*;
 public class ReportPojo extends AbstractVersionedPojo{
 
     @Id
-    @TableGenerator(name = "report", pkColumnValue = "report",initialValue = 100000)
-    @GeneratedValue(strategy = GenerationType.TABLE, generator = "report")
+    @TableGenerator(name = "report_sequence", pkColumnValue = "report_sequence",initialValue = 100000)
+    @GeneratedValue(strategy = GenerationType.TABLE, generator = "report_sequence")
     private Integer id;
 
     @Column(nullable = false)

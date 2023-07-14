@@ -3,6 +3,7 @@ package com.increff.omni.reporting.dto;
 import com.increff.omni.reporting.api.ConnectionApi;
 import com.increff.omni.reporting.api.DBConnectionApi;
 import com.increff.omni.reporting.api.FolderApi;
+import com.increff.omni.reporting.commons.ConvertUtil;
 import com.increff.omni.reporting.config.ApplicationProperties;
 import com.increff.omni.reporting.model.constants.AuditActions;
 import com.increff.omni.reporting.model.data.ConnectionData;
@@ -10,17 +11,20 @@ import com.increff.omni.reporting.model.form.ConnectionForm;
 import com.increff.omni.reporting.pojo.ConnectionPojo;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
-import com.nextscm.commons.spring.common.ConvertUtil;
-import lombok.extern.log4j.Log4j;
+//import com.nextscm.commons.spring.common.ConvertUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Objects;
 
 @Service
-@Log4j
+@Slf4j
 public class ConnectionDto extends AbstractDto {
 
     @Autowired
