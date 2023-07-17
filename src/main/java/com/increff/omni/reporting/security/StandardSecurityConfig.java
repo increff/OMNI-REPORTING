@@ -70,7 +70,7 @@ public class StandardSecurityConfig {
 
     @Bean
     @Qualifier("standardWebSecurityCustomizer")
-    public WebSecurityCustomizer webSecurityCustomizer(){
+    public WebSecurityCustomizer standardWebSecurityCustomizer(){
         return web -> web.ignoring().requestMatchers("/v2/api-docs", "/configuration/ui", "/swagger-resources", "/configuration/security", "/swagger-ui.html", "/webjars/**", "/ui/**"
                 , "/session/**");
     }

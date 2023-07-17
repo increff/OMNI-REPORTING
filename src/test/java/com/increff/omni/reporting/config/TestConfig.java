@@ -21,8 +21,10 @@ import org.apache.hc.client5.http.classic.HttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
 import org.apache.hc.core5.http.HeaderElement;
+import org.apache.hc.core5.http.io.SocketConfig;
 import org.apache.hc.core5.http.message.BasicHeaderElementIterator;
 import org.apache.hc.core5.util.TimeValue;
+import org.apache.hc.core5.util.Timeout;
 import org.apache.http.protocol.HTTP;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -107,6 +109,12 @@ public class TestConfig {
         org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager connManager = new PoolingHttpClientConnectionManager();
         connManager.setDefaultMaxPerRoute(applicationProperties.getMaxConnectionsPerRoute());
         connManager.setMaxTotal(applicationProperties.getMaxConnections());
+        /*
+        This is used to set the read timeOut as the setReadTimeOut method of HttpComponentsClientHttpRequestFactory has
+        been deprecated from spring 6
+         */
+        SocketConfig socketConfig = SocketConfig.custom().setSoTimeout(Timeout.ofMilliseconds(25 * 1000)).build();
+        connManager.setDefaultSocketConfig(socketConfig);
         ConnectionKeepAliveStrategy myStrategy = (httpResponse, httpContext) -> {
             org.apache.hc.core5.http.message.BasicHeaderElementIterator it = new BasicHeaderElementIterator(httpResponse.headerIterator(HTTP.CONN_KEEP_ALIVE));
             while (it.hasNext()){

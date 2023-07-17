@@ -46,7 +46,7 @@ public class IntegrationSecurityConfig{
 
     @Bean
     @Qualifier("integrationFilterChain")
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain integrationFilterChain(HttpSecurity http) throws Exception {
         http.securityMatchers()
                 .requestMatchers("/integration/**").and().authorizeHttpRequests()
                 .requestMatchers("/integration/**").hasAnyAuthority(APP_INTEGRATION)
@@ -66,7 +66,7 @@ public class IntegrationSecurityConfig{
 
     @Bean
     @Qualifier("integrationWebSecurityCustomizer")
-    public WebSecurityCustomizer webSecurityCustomizer(){
+    public WebSecurityCustomizer integrationWebSecurityCustomizer(){
         return web -> web.ignoring().requestMatchers("/v2/api-docs", "/configuration/ui", "/swagger-resources",
                 "/configuration/security", "/swagger-ui.html", "/webjars/**", "/ui/**", "/session/**");
     }
