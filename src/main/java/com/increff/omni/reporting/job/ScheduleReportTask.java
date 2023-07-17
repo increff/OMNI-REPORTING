@@ -83,12 +83,11 @@ public class ScheduleReportTask extends AbstractTask {
         }
         // process
         String timezone = "Asia/Kolkata";
+        ReportRequestPojo reportRequestPojo = api.getCheck(pojo.getId());
+        ReportPojo reportPojo = reportApi.getCheck(reportRequestPojo.getReportId());
         try {
-            ReportRequestPojo reportRequestPojo = api.getCheck(pojo.getId());
-
             List<ReportInputParamsPojo> reportInputParamsPojoList = reportInputParamsApi
                     .getInputParamsForReportRequest(reportRequestPojo.getId());
-            ReportPojo reportPojo = reportApi.getCheck(reportRequestPojo.getReportId());
             ReportQueryPojo reportQueryPojo = reportQueryApi.getByReportId(reportPojo.getId());
             OrgConnectionPojo orgConnectionPojo = orgConnectionApi.getCheckByOrgId(reportRequestPojo.getOrgId());
             ConnectionPojo connectionPojo = connectionApi.getCheck(orgConnectionPojo.getConnectionId());
@@ -98,7 +97,7 @@ public class ScheduleReportTask extends AbstractTask {
             timezone = getValueFromQuotes(inputParamMap.get("timezone"));
             String fQuery = SqlCmd.getFinalQuery(inputParamMap, reportQueryPojo.getQuery(), false);
             // Execute query and save results
-            prepareAndSendEmail(pojo, fQuery, connectionPojo, timezone);
+            prepareAndSendEmail(pojo, fQuery, connectionPojo, timezone, reportPojo.getName());
             reportScheduleApi.addScheduleCount(pojo.getScheduleId(), 1, 0);
         } catch (Exception e) {
             log.error("Report Request ID : " + pojo.getId() + " failed", e);
@@ -108,9 +107,9 @@ public class ScheduleReportTask extends AbstractTask {
                 List<String> toEmails = reportScheduleApi.getByScheduleId(schedulePojo.getId()).stream()
                         .map(ReportScheduleEmailsPojo::getSendTo).collect(
                                 Collectors.toList());
-                EmailProps props = createEmailProps(null, false, schedulePojo, toEmails, "Hi,<br>Please " +
+                EmailProps props = createEmailProps(null, false, toEmails, "Hi,<br>Please " +
                         "check failure reason in the latest scheduled requests. Re-submit the schedule in the " +
-                        "reporting application, which might solve the issue.", false, timezone);
+                        "reporting application, which might solve the issue.", false, timezone, reportPojo.getName());
                 EmailUtil.sendMail(props);
                 reportScheduleApi.addScheduleCount(pojo.getScheduleId(), 0, 1);
             } catch (Exception ex) {
@@ -121,7 +120,7 @@ public class ScheduleReportTask extends AbstractTask {
     }
 
     private void prepareAndSendEmail(ReportRequestPojo pojo, String fQuery, ConnectionPojo connectionPojo,
-                                     String timezone)
+                                     String timezone, String name)
             throws IOException, ApiException {
         File file = folderApi.getFileForExtension(pojo.getId(), ".csv");
         Connection connection = null;
@@ -141,7 +140,7 @@ public class ScheduleReportTask extends AbstractTask {
                         "File size " + fileSize + " MB exceeded max limit of " + properties.getMaxFileSize() +
                                 " MB" + ". Please select granular filters");
             String filePath = "NA";
-            sendEmail(fileSize, file, pojo, timezone);
+            sendEmail(fileSize, file, pojo, timezone, name);
             // update status to completed
             api.updateStatus(pojo.getId(), ReportRequestStatus.COMPLETED, filePath, noOfRows, fileSize, "",
                     ZonedDateTime.now());
@@ -168,7 +167,8 @@ public class ScheduleReportTask extends AbstractTask {
         }
     }
 
-    private void sendEmail(double fileSize, File csvFile, ReportRequestPojo pojo, String timezone)
+    private void sendEmail(double fileSize, File csvFile, ReportRequestPojo pojo, String timezone,
+                           String name)
             throws IOException, ApiException, javax.mail.MessagingException {
         File out = csvFile;
         boolean isZip = false;
@@ -201,13 +201,14 @@ public class ScheduleReportTask extends AbstractTask {
         List<String> toEmails = reportScheduleApi.getByScheduleId(schedulePojo.getId()).stream()
                 .map(ReportScheduleEmailsPojo::getSendTo).collect(
                         Collectors.toList());
-        EmailProps props = createEmailProps(out, true, schedulePojo, toEmails, "", isZip, timezone);
+        EmailProps props = createEmailProps(out, true, toEmails, "", isZip, timezone,
+                name);
         EmailUtil.sendMail(props);
     }
 
     private EmailProps createEmailProps(File out, Boolean isAttachment,
-                                        ReportSchedulePojo schedulePojo, List<String> toEmails, String content,
-                                        boolean isZip, String timezone) {
+                                        List<String> toEmails, String content,
+                                        boolean isZip, String timezone, String name) {
         EmailProps props = new EmailProps();
         props.setFromEmail(properties.getFromEmail());
         props.setUsername(properties.getUsername());
@@ -215,9 +216,9 @@ public class ScheduleReportTask extends AbstractTask {
         props.setSmtpHost(properties.getSmtpHost());
         props.setSmtpPort(properties.getSmtpPort());
         props.setToEmails(toEmails);
-        props.setSubject("Increff Reporting : " + schedulePojo.getReportName());
+        props.setSubject("Increff Reporting : " + name);
         props.setAttachment(out);
-        props.setCustomizedFileName(schedulePojo.getReportName() + " - " + ZonedDateTime.now().withZoneSameInstant(
+        props.setCustomizedFileName(name + " - " + ZonedDateTime.now().withZoneSameInstant(
                 ZoneId.of(timezone)).format(DateTimeFormatter.ofPattern(TIME_ZONE_PATTERN_WITHOUT_ZONE))
                 + ((isZip) ? ".zip" :
                 ".csv"));

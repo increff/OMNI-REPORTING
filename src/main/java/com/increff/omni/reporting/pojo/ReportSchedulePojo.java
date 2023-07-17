@@ -27,7 +27,7 @@ public class ReportSchedulePojo extends AbstractVersionedPojo {
     private Integer userId;
 
     @Column(nullable = false)
-    private String reportName;
+    private String reportAlias;
 
     @Column(nullable = false)
     private Boolean isEnabled;

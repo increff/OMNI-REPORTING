@@ -53,7 +53,7 @@ public class ReportScheduleDto extends AbstractDto {
         checkValid(form);
         checkLimitForOrg();
         OrganizationPojo organizationPojo = organizationApi.getCheck(getOrgId());
-        ReportPojo reportPojo = checkValidReport(form.getReportName());
+        ReportPojo reportPojo = checkValidReport(form.getReportAlias());
         ReportSchedulePojo pojo = convertFormToReportSchedulePojo(form, getOrgId(), getUserId());
         List<ReportScheduleInputParamsPojo> reportScheduleInputParamsPojos =
                 validateAndPrepareInputParams(form, reportPojo);
@@ -71,7 +71,7 @@ public class ReportScheduleDto extends AbstractDto {
             throw new ApiException(ApiStatus.BAD_DATA, "Org ID mismatch, existing org id : " + ex.getOrgId() + " , " +
                     "new org id : " + getOrgId());
         OrganizationPojo organizationPojo = organizationApi.getCheck(getOrgId());
-        ReportPojo reportPojo = checkValidReport(form.getReportName());
+        ReportPojo reportPojo = checkValidReport(form.getReportAlias());
         ReportSchedulePojo pojo = convertFormToReportSchedulePojo(form, getOrgId(), getUserId());
         pojo.setId(id);
         List<ReportScheduleInputParamsPojo> reportScheduleInputParamsPojos =
@@ -90,7 +90,7 @@ public class ReportScheduleDto extends AbstractDto {
             throw new ApiException(ApiStatus.BAD_DATA, "Org ID mismatch, existing org id : " + pojo.getOrgId() + " , " +
                     "new org id : " + getOrgId());
         OrganizationPojo organizationPojo = organizationApi.getCheck(getOrgId());
-        checkValidReport(pojo.getReportName());
+        checkValidReport(pojo.getReportAlias());
         pojo.setIsEnabled(isEnabled);
         api.edit(pojo);
         flowApi.saveAudit(pojo.getId().toString(), AuditActions.ENABLE_DISABLE_REPORT_SCHEDULE.toString(),
@@ -162,7 +162,7 @@ public class ReportScheduleDto extends AbstractDto {
         List<ReportScheduleData> dataList = new ArrayList<>();
         for (ReportSchedulePojo pojo : reportSchedulePojoList) {
             OrgSchemaVersionPojo orgSchemaVersionPojo = orgSchemaApi.getCheckByOrgId(pojo.getOrgId());
-            ReportPojo reportPojo = reportApi.getByNameAndSchema(pojo.getReportName(),
+            ReportPojo reportPojo = reportApi.getByAliasAndSchema(pojo.getReportAlias(),
                     orgSchemaVersionPojo.getSchemaVersionId(), false);
             List<ReportControlsPojo> reportControlsPojos = Objects.isNull(reportPojo) ?
                     new ArrayList<>() : reportControlsApi.getByReportId(reportPojo.getId());
@@ -176,6 +176,8 @@ public class ReportScheduleDto extends AbstractDto {
                     Collectors.toList()).get(0).getParamValue();
             List<InputControlFilterData> filterData = prepareFilters(paramsPojos, controlPojos);
             ReportScheduleData data = ConvertUtil.convert(pojo, ReportScheduleData.class);
+            data.setReportName(reportPojo.getName());
+            data.setReportId(reportPojo.getId());
             data.setFilters(filterData);
             CronScheduleForm cronData = new CronScheduleForm();
             cronData.setDayOfMonth(pojo.getCron().split(" ")[3]);
@@ -189,16 +191,16 @@ public class ReportScheduleDto extends AbstractDto {
         return dataList;
     }
 
-    private ReportPojo checkValidReport(String reportName) throws ApiException {
+    private ReportPojo checkValidReport(String reportAlias) throws ApiException {
         OrgSchemaVersionPojo orgSchemaVersionPojo = orgSchemaApi.getCheckByOrgId(getOrgId());
         ReportPojo reportPojo =
-                reportApi.getByNameAndSchema(reportName, orgSchemaVersionPojo.getSchemaVersionId(), false);
+                reportApi.getByAliasAndSchema(reportAlias, orgSchemaVersionPojo.getSchemaVersionId(), false);
         if (Objects.isNull(reportPojo) || !reportPojo.getCanSchedule())
-            throw new ApiException(ApiStatus.BAD_DATA, "Report : " + reportName + " is not allowed to " +
+            throw new ApiException(ApiStatus.BAD_DATA, "Report : " + reportAlias + " is not allowed to " +
                     "schedule");
         ReportQueryPojo reportQueryPojo = reportQueryApi.getByReportId(reportPojo.getId());
         if (Objects.isNull(reportQueryPojo))
-            throw new ApiException(ApiStatus.BAD_DATA, "Report : " + reportName + " doesn't have any query defined.");
+            throw new ApiException(ApiStatus.BAD_DATA, "Report : " + reportAlias + " doesn't have any query defined.");
         return reportPojo;
     }
 
