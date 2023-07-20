@@ -65,7 +65,7 @@ public class ReportRequestDto extends AbstractDto {
     @Autowired
     private QueryExecutorClientApi executorClientApi;
 
-    private static final Integer MAX_NUMBER_OF_ROWS = 100;
+    private static final Integer MAX_NUMBER_OF_ROWS = 200;
     private static final Integer MAX_LIMIT = 25;
     public static final List<String> accessControlledKeys = Arrays.asList(ResourceQueryParamKeys.clientQueryParam,
             ResourceQueryParamKeys.fulfillmentLocationQueryParamKey);
