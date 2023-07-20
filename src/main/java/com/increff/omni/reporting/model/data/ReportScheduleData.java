@@ -14,6 +14,10 @@ public class ReportScheduleData {
     private Integer id;
     private String timezone;
     private String reportName;
+    private String reportAlias;
+    private Integer reportId;
+
+
     private Boolean isEnabled;
     private CronScheduleForm cronSchedule;
     private List<InputControlFilterData> filters;

@@ -420,7 +420,7 @@ public class CommonDtoHelper {
         ReportSchedulePojo schedulePojo = new ReportSchedulePojo();
         String cron = "0" + " " + form.getCronSchedule().getMinute() + " " + form.getCronSchedule().getHour() +
                 " " + form.getCronSchedule().getDayOfMonth() + " " + "*" + " " + "?";
-        schedulePojo.setReportName(form.getReportName());
+        schedulePojo.setReportAlias(form.getReportAlias());
         schedulePojo.setIsEnabled(form.getIsEnabled());
         schedulePojo.setOrgId(orgId);
         schedulePojo.setUserId(userId);

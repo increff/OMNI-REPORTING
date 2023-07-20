@@ -30,7 +30,6 @@ public class ReportScheduleApiTest extends AbstractTest {
         List<ReportSchedulePojo> schedulePojoList = reportScheduleApi.selectByOrgIdAndEnabledStatus(100001, true, 1,
                 100);
         assertEquals(1, schedulePojoList.size());
-        assertEquals("Report 1", schedulePojoList.get(0).getReportName());
         assertEquals(true, schedulePojoList.get(0).getIsEnabled());
         assertEquals(false, schedulePojoList.get(0).getIsDeleted());
         assertEquals("0 */15 * * * ?", schedulePojoList.get(0).getCron());
@@ -113,7 +112,6 @@ public class ReportScheduleApiTest extends AbstractTest {
         schedulePojoList = reportScheduleApi.selectByOrgIdAndEnabledStatus(null, null, 1,
                 100);
         assertEquals(1, schedulePojoList.size());
-        assertEquals("Report 1", schedulePojoList.get(0).getReportName());
         assertEquals(false, schedulePojoList.get(0).getIsEnabled());
         assertEquals(false, schedulePojoList.get(0).getIsDeleted());
         assertEquals("0 */15 * * * ?", schedulePojoList.get(0).getCron());
@@ -129,7 +127,6 @@ public class ReportScheduleApiTest extends AbstractTest {
         reportScheduleApi.add(schedulePojo);
         List<ReportSchedulePojo> schedulePojoList = reportScheduleApi.getEligibleSchedules();
         assertEquals(1, schedulePojoList.size());
-        assertEquals("Report 1", schedulePojoList.get(0).getReportName());
         assertEquals(true, schedulePojoList.get(0).getIsEnabled());
         assertEquals(false, schedulePojoList.get(0).getIsDeleted());
         assertEquals("0 */15 * * * ?", schedulePojoList.get(0).getCron());
@@ -142,7 +139,6 @@ public class ReportScheduleApiTest extends AbstractTest {
         reportScheduleApi.add(schedulePojo);
         ReportSchedulePojo schedulePojo1 = reportScheduleApi.getCheck(schedulePojo.getId());
         assertNotNull(schedulePojo1);
-        assertEquals("Report 1", schedulePojo1.getReportName());
         assertEquals(true, schedulePojo1.getIsEnabled());
         assertEquals(false, schedulePojo1.getIsDeleted());
         assertEquals("0 */15 * * * ?", schedulePojo1.getCron());
@@ -171,7 +167,6 @@ public class ReportScheduleApiTest extends AbstractTest {
         reportScheduleApi.edit(schedulePojo);
         ReportSchedulePojo schedulePojo1 = reportScheduleApi.getCheck(schedulePojo.getId());
         assertNotNull(schedulePojo1);
-        assertEquals("Report 1", schedulePojo1.getReportName());
         assertEquals(true, schedulePojo1.getIsEnabled());
         assertEquals(false, schedulePojo1.getIsDeleted());
         assertEquals("0 */20 * * * ?", schedulePojo1.getCron());
@@ -212,7 +207,6 @@ public class ReportScheduleApiTest extends AbstractTest {
         reportScheduleApi.addScheduleCount(schedulePojo.getId(), 1, 0);
         ReportSchedulePojo schedulePojo1 = reportScheduleApi.getCheck(schedulePojo.getId());
         assertNotNull(schedulePojo1);
-        assertEquals("Report 1", schedulePojo1.getReportName());
         assertEquals(true, schedulePojo1.getIsEnabled());
         assertEquals(false, schedulePojo1.getIsDeleted());
         assertEquals("0 */15 * * * ?", schedulePojo1.getCron());
