@@ -23,7 +23,7 @@ public class RestControllerAdvice extends AbstractRestappControllerAdvice {
         ErrorData data = new ErrorData();
         data.setCode(ApiStatus.UNKNOWN_ERROR);
         data.setMessage("Internal error");
-//        data.setDescription(fromThrowable(t));
+        data.setDescription(fromThrowable(t));
         log.error("Internal Server Error", t);
         return data;
     }
