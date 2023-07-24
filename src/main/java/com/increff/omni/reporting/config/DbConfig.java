@@ -70,6 +70,8 @@ public class DbConfig {
 		jpaProperties.put("hibernate.jdbc.batch_size", hibernateJdbcBatchSize);
 		jpaProperties.put("hibernate.cache.use_second_level_cache", false);
 		jpaProperties.put("hibernate.physical_naming_strategy", new SnakeCaseNamingStrategy(""));
+		jpaProperties.put("hibernate.id.generator.stored_last_used", false);
+		jpaProperties.put("hibernate.model.generator_name_as_sequence_name", false);
 		bean.setJpaProperties(jpaProperties);
 		return bean;
 	}
