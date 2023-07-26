@@ -49,9 +49,9 @@ public class CommonDtoHelper {
                 InputControlFilterData filterData = new InputControlFilterData();
                 filterData.setParamName(controlPojo.get().getParamName());
                 filterData.setDisplayName(controlPojo.get().getDisplayName());
-                List<String> values = Objects.isNull(p.getDisplayValue()) ? new ArrayList<>() :
-                        ((controlPojo.get().getType().equals(InputControlType.DATE) || controlPojo.get().getType().equals(InputControlType.DATE_TIME)) ? Collections.singletonList(p.getDisplayValue()) :
-                        Arrays.stream(p.getDisplayValue().split(
+                List<String> values = Objects.isNull(p.getParamValue()) ? new ArrayList<>() :
+                        ((controlPojo.get().getType().equals(InputControlType.DATE) || controlPojo.get().getType().equals(InputControlType.DATE_TIME)) ? Collections.singletonList(p.getParamValue()) :
+                        Arrays.stream(p.getParamValue().split(
                                         ","))
                                 .map(CommonDtoHelper::getValueFromQuotes).collect(Collectors.toList()));
                 filterData.setValues(values);
