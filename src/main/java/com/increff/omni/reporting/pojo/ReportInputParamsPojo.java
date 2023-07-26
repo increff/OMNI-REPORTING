@@ -13,8 +13,8 @@ import jakarta.persistence.*;
 public class ReportInputParamsPojo extends AbstractVersionedPojo {
 
     @Id
-    @TableGenerator(name = "report_input_params_sequence", pkColumnValue = "report_input_params_sequence", initialValue = 100000)
-    @GeneratedValue(strategy = GenerationType.TABLE, generator = "report_input_params_sequence")
+    @TableGenerator(name = "report_input_params", pkColumnValue = "report_input_params", initialValue = 100000)
+    @GeneratedValue(strategy = GenerationType.TABLE, generator = "report_input_params")
     private Integer id;
 
     @Column(nullable = false)

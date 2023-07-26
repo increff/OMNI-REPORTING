@@ -12,8 +12,8 @@ import jakarta.persistence.*;
 public class OrgSchemaVersionPojo extends AbstractVersionedPojo {
 
     @Id
-    @TableGenerator(name = "org_schema_version_sequence", pkColumnValue = "org_schema_version_sequence",initialValue = 100000)
-    @GeneratedValue(strategy = GenerationType.TABLE, generator = "org_schema_version_sequence")
+    @TableGenerator(name = "org_schema_version", pkColumnValue = "org_schema_version",initialValue = 100000)
+    @GeneratedValue(strategy = GenerationType.TABLE, generator = "org_schema_version")
     private Integer id;
     @Column(nullable = false, unique = true)
     private Integer orgId;

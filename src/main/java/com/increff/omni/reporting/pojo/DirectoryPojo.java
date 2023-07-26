@@ -13,8 +13,8 @@ import lombok.Setter;
 public class DirectoryPojo extends AbstractVersionedPojo {
 
     @Id
-    @TableGenerator(name = "directory_sequence", pkColumnValue = "directory_sequence", initialValue = 100000)
-    @GeneratedValue(strategy = GenerationType.TABLE, generator = "directory_sequence")
+    @TableGenerator(name = "directory", pkColumnValue = "directory", initialValue = 100000)
+    @GeneratedValue(strategy = GenerationType.TABLE, generator = "directory")
     private Integer id;
     @Column(nullable = false, unique = true)
     private String directoryName;

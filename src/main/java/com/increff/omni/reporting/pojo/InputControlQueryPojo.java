@@ -12,9 +12,9 @@ import jakarta.persistence.*;
 public class InputControlQueryPojo extends AbstractVersionedPojo{
 
     @Id
-    @TableGenerator(name = "input_control_query_sequence", pkColumnValue = "input_control_query_sequence",
+    @TableGenerator(name = "input_control_query", pkColumnValue = "input_control_query",
             initialValue = 100000)
-    @GeneratedValue(strategy = GenerationType.TABLE, generator = "input_control_query_sequence")
+    @GeneratedValue(strategy = GenerationType.TABLE, generator = "input_control_query")
     private Integer id;
 
     @Column(nullable = false, unique = true)

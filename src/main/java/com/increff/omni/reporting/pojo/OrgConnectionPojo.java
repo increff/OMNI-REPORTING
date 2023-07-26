@@ -12,8 +12,8 @@ import jakarta.persistence.*;
 public class OrgConnectionPojo extends AbstractVersionedPojo {
 
     @Id
-    @TableGenerator(name = "org_connection_sequence", pkColumnValue = "org_connection_sequence", initialValue = 100000)
-    @GeneratedValue(strategy = GenerationType.TABLE, generator = "org_connection_sequence")
+    @TableGenerator(name = "org_connection", pkColumnValue = "org_connection", initialValue = 100000)
+    @GeneratedValue(strategy = GenerationType.TABLE, generator = "org_connection")
     private Integer id;
     @Column(nullable = false, unique = true)
     private Integer orgId;

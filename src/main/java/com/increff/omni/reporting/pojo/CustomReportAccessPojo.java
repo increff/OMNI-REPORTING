@@ -15,8 +15,8 @@ import jakarta.persistence.*;
 public class CustomReportAccessPojo extends AbstractVersionedPojo {
 
     @Id
-    @TableGenerator(name = "custom_report_access_sequence", pkColumnValue = "custom_report_access_sequence", initialValue = 100000)
-    @GeneratedValue(strategy = GenerationType.TABLE, generator = "custom_report_access_sequence")
+    @TableGenerator(name = "custom_report_access", pkColumnValue = "custom_report_access", initialValue = 100000)
+    @GeneratedValue(strategy = GenerationType.TABLE, generator = "custom_report_access")
     private Integer id;
 
     @Column(nullable = false)
@@ -25,3 +25,8 @@ public class CustomReportAccessPojo extends AbstractVersionedPojo {
     @Column(nullable = false)
     private Integer orgId;
 }
+// TODO: 17/07/23  sftp access(temp), db whitelisting
+// TODO: 17/07/23 sequence remove
+// TODO: 17/07/23 look for multiple tables with same sequence name
+// TODO: 18/07/23 hibernate logs 
+// TODO: 18/07/23  

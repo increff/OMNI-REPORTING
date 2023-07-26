@@ -15,8 +15,8 @@ import jakarta.persistence.*;
 public class ReportValidationGroupPojo extends AbstractVersionedPojo {
 
     @Id
-    @TableGenerator(name = "report_validation_group_sequence", pkColumnValue = "report_validation_group_sequence",initialValue = 100000)
-    @GeneratedValue(strategy = GenerationType.TABLE, generator = "report_validation_group_sequence")
+    @TableGenerator(name = "report_validation_group", pkColumnValue = "report_validation_group",initialValue = 100000)
+    @GeneratedValue(strategy = GenerationType.TABLE, generator = "report_validation_group")
     private Integer id;
 
     @Column(nullable = false)

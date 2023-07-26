@@ -22,8 +22,8 @@ import java.time.ZonedDateTime;
 public class ReportRequestPojo extends AbstractVersionedPojo {
 
     @Id
-    @TableGenerator(name = "report_request_sequence", pkColumnValue = "report_request_sequence", initialValue = 100000)
-    @GeneratedValue(strategy = GenerationType.TABLE, generator = "report_request_sequence")
+    @TableGenerator(name = "report_request", pkColumnValue = "report_request", initialValue = 100000)
+    @GeneratedValue(strategy = GenerationType.TABLE, generator = "report_request")
     private Integer id;
 
     @Column(nullable = false)

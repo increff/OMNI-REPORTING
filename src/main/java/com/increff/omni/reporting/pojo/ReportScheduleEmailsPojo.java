@@ -13,9 +13,9 @@ import jakarta.persistence.*;
 public class ReportScheduleEmailsPojo extends AbstractVersionedPojo {
 
     @Id
-    @TableGenerator(name = "report_schedule_emails_sequence", pkColumnValue = "report_schedule_emails_sequence",
+    @TableGenerator(name = "report_schedule_emails", pkColumnValue = "report_schedule_emails",
             initialValue = 100000)
-    @GeneratedValue(strategy = GenerationType.TABLE, generator = "report_schedule_emails_sequence")
+    @GeneratedValue(strategy = GenerationType.TABLE, generator = "report_schedule_emails")
     private Integer id;
 
     @Column(nullable = false)
