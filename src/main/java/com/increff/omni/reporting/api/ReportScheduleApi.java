@@ -69,7 +69,7 @@ public class ReportScheduleApi extends AbstractAuditApi {
 
     public void edit(ReportSchedulePojo pojo) throws ApiException {
         ReportSchedulePojo ex = getCheck(pojo.getId());
-        ex.setReportName(pojo.getReportName());
+        ex.setReportAlias(pojo.getReportAlias());
         ex.setCron(pojo.getCron());
         ex.setUserId(pojo.getUserId());
         ex.setIsEnabled(pojo.getIsEnabled());

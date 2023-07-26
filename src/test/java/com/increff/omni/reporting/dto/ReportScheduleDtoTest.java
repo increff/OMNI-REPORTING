@@ -191,7 +191,7 @@ public class ReportScheduleDtoTest extends AbstractTest {
         assertFalse(dataList.get(0).getFilters().isEmpty());
         pojo = reportScheduleDao.select(reportScheduleData.get(0).getId());
         assertTrue(ZonedDateTime.now().isBefore(pojo.getNextRuntime()));
-        pojo.setReportName("Dummy");
+        pojo.setReportAlias("dummy");
         pojo.setNextRuntime(ZonedDateTime.now().minusMinutes(1));
         scheduledJobs.addScheduleReportRequests();
         dataList = dto.getScheduledRequests(1, 100);

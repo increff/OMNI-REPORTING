@@ -373,6 +373,7 @@ public class CommonDtoHelper {
         reportPojo.setType(oldReport.getType());
         reportPojo.setCanSchedule(oldReport.getCanSchedule());
         reportPojo.setIsDashboard(oldReport.getIsDashboard());
+        reportPojo.setAlias(oldReport.getAlias());
         return reportPojo;
     }
 
@@ -420,7 +421,7 @@ public class CommonDtoHelper {
         ReportSchedulePojo schedulePojo = new ReportSchedulePojo();
         String cron = "0" + " " + form.getCronSchedule().getMinute() + " " + form.getCronSchedule().getHour() +
                 " " + form.getCronSchedule().getDayOfMonth() + " " + "*" + " " + "?";
-        schedulePojo.setReportName(form.getReportName());
+        schedulePojo.setReportAlias(form.getReportAlias());
         schedulePojo.setIsEnabled(form.getIsEnabled());
         schedulePojo.setOrgId(orgId);
         schedulePojo.setUserId(userId);

@@ -13,6 +13,7 @@ import com.increff.omni.reporting.util.SqlCmd;
 import com.increff.omni.reporting.validators.DateValidator;
 import com.increff.omni.reporting.validators.MandatoryValidator;
 import com.increff.omni.reporting.validators.SingleMandatoryValidator;
+import com.nextscm.commons.lang.StringUtil;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
 import lombok.Setter;
@@ -316,12 +317,16 @@ public class ReportFlowApi extends AbstractFlowApi {
     private void validate(ReportPojo pojo) throws ApiException {
         directoryApi.getCheck(pojo.getDirectoryId());
         schemaVersionApi.getCheck(pojo.getSchemaVersionId());
-
+        if(StringUtil.isEmpty(pojo.getAlias()) || pojo.getAlias().contains(" "))
+            throw new ApiException(ApiStatus.BAD_DATA, "Report alias can't have space, use underscore(_) instead");
         ReportPojo existing = api.getByNameAndSchema(pojo.getName(), pojo.getSchemaVersionId(), pojo.getIsDashboard());
         if (existing != null)
             throw new ApiException(ApiStatus.BAD_DATA, "Report already present with same name, schema version and " +
                     "report type (normal / dashboard)");
-
+        ReportPojo ex = api.getByAliasAndSchema(pojo.getAlias(), pojo.getSchemaVersionId(), pojo.getIsDashboard());
+        if (ex != null)
+            throw new ApiException(ApiStatus.BAD_DATA, "Report already present with same alias, schema version and " +
+                    "report type (normal / dashboard)");
     }
 
     private List<ReportValidationGroupPojo> getValidationGroupPojoList(ValidationGroupForm groupForm,

@@ -14,7 +14,8 @@ import jakarta.persistence.*;
                 unique = true),
         @Index(name = "idx_schemaVersionId_type", columnList = "schemaVersionId, type"),
         @Index(name = "idx_id_schemaVersionId", columnList = "id, schemaVersionId")
-})
+}, uniqueConstraints = {@UniqueConstraint(name = "uk_schemaVersionId_alias_isDashboard", columnNames = {
+        "schemaVersionId", "alias", "isDashboard"})})
 public class ReportPojo extends AbstractVersionedPojo{
 
     @Id
@@ -24,6 +25,9 @@ public class ReportPojo extends AbstractVersionedPojo{
 
     @Column(nullable = false)
     private String name;
+
+    @Column(nullable = false)
+    private String alias;
 
     @Column(nullable = false)
     @Enumerated(value = EnumType.STRING)

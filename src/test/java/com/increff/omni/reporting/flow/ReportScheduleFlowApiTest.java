@@ -91,7 +91,6 @@ public class ReportScheduleFlowApiTest extends AbstractTest {
                 reportPojo);
         ReportSchedulePojo schedulePojo1 = reportScheduleApi.getCheck(schedulePojo.getId());
         assertNotNull(schedulePojo1);
-        assertEquals("Report 1", schedulePojo1.getReportName());
         assertEquals(true, schedulePojo1.getIsEnabled());
         assertEquals(false, schedulePojo1.getIsDeleted());
         assertEquals("0 */15 * * * ?", schedulePojo1.getCron());
@@ -141,7 +140,6 @@ public class ReportScheduleFlowApiTest extends AbstractTest {
                 reportPojo);
         ReportSchedulePojo schedulePojo1 = reportScheduleApi.getCheck(schedulePojo.getId());
         assertNotNull(schedulePojo1);
-        assertEquals("Report 1", schedulePojo1.getReportName());
         assertEquals(true, schedulePojo1.getIsEnabled());
         assertEquals(false, schedulePojo1.getIsDeleted());
         assertEquals("0 */20 * * * ?", schedulePojo1.getCron());

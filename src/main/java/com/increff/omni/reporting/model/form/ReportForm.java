@@ -17,6 +17,8 @@ public class ReportForm {
     private ReportType type;
     @NotNull
     private Integer directoryId;
+    @NotEmpty
+    private String alias;
 
     private Integer schemaVersionId;
     @NotNull

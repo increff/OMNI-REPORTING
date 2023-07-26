@@ -19,7 +19,7 @@ public class ReportScheduleTestHelper {
                                                      ZonedDateTime nextRunTime, Integer userId, Integer orgId,
                                                            String cron) {
         ReportSchedulePojo schedulePojo = new ReportSchedulePojo();
-        schedulePojo.setReportName(reportName);
+        schedulePojo.setReportAlias(reportName.toLowerCase().replace(" ", "_"));
         schedulePojo.setIsEnabled(isEnabled);
         schedulePojo.setIsDeleted(isDeleted);
         schedulePojo.setFailureCount(failureCount);
@@ -49,7 +49,7 @@ public class ReportScheduleTestHelper {
         cronScheduleForm.setHour(hour);
         cronScheduleForm.setDayOfMonth(dayOfMonth);
         form.setCronSchedule(cronScheduleForm);
-        form.setReportName(reportName);
+        form.setReportAlias(reportName.toLowerCase().replace(" ", "_"));
         form.setTimezone(timezone);
         form.setIsEnabled(isEnabled);
         form.setSendTo(sendTo);

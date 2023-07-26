@@ -56,6 +56,11 @@ public class StandardController {
         return reportDto.selectByOrg(isDashboard);
     }
 
+    @Operation(summary = "Get Report by Alias")
+    @RequestMapping(value = "/reports/find", method = RequestMethod.GET)
+    public ReportData selectByAlias(@RequestParam Boolean isDashboard, @RequestParam String alias) throws ApiException {
+        return reportDto.selectByAlias(isDashboard, alias);
+    }
     @Operation(summary = "Get Live Data")
     @RequestMapping(value = "/reports/live", method = RequestMethod.POST)
     public List<Map<String, String>> getLiveData(@RequestBody ReportRequestForm form) throws ApiException, IOException {
@@ -112,6 +117,11 @@ public class StandardController {
         return reportScheduleDto.getScheduleReports(pageNo, pageSize);
     }
 
+    @Operation(summary = "Get Schedule by ID")
+    @RequestMapping(value = "/schedules/{id}", method = RequestMethod.GET)
+    public ReportScheduleData getScheduleReports(@PathVariable Integer id) throws ApiException {
+        return reportScheduleDto.getScheduleReport(id);
+    }
     @Operation(summary = "Get Schedule requests for an organization")
     @RequestMapping(value = "/schedules/requests", method = RequestMethod.GET)
     public List<ReportRequestData> getScheduleReportRequests(@RequestParam Integer pageNo,
