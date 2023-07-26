@@ -80,7 +80,7 @@ public class ReportScheduleDtoTest extends AbstractTest {
 
 // Verify the expected status and error message of the exception
         assertEquals(ApiStatus.BAD_DATA, exception.getStatus());
-        assertEquals("Report : Report 1 is not allowed to schedule", exception.getMessage());
+        assertEquals("Report : report_1 is not allowed to schedule", exception.getMessage());
     }
 
     @Test
