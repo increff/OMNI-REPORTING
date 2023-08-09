@@ -16,7 +16,7 @@ public class DBConnectionApi {
 
     public Connection getConnection(String dbHost, String dbUsername, String dbPassword, Integer maxConnectionTime) throws ApiException {
         try {
-            Class.forName("com.mysql.jdbc.Driver");
+            Class.forName("com.mysql.cj.jdbc.Driver");
             DriverManager.setLoginTimeout(maxConnectionTime);
             Connection connection = DriverManager.getConnection(getDbUrl(dbHost), dbUsername, dbPassword);
             connection.setAutoCommit(false);
