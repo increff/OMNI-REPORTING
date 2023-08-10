@@ -10,14 +10,14 @@ import com.nextscm.commons.spring.client.AppClientException;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
 import com.nextscm.commons.spring.common.ApiStatus;
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.log4j.Log4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 
 @Component
-@Slf4j
+@Log4j
 public class QueryExecutorClientApi {
 
     @Autowired

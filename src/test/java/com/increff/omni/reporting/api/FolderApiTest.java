@@ -4,10 +4,10 @@ import com.increff.omni.reporting.config.AbstractTest;
 import com.increff.omni.reporting.config.ApplicationProperties;
 import com.increff.omni.reporting.util.FileUtil;
 import com.nextscm.commons.spring.common.ApiException;
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.log4j.Log4j;
 //import org.junit.Before;
 //import org.junit.Test;
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.log4j.Log4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +20,7 @@ import java.util.Objects;
 //import static org.junit.Assert.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-@Slf4j
+@Log4j
 public class FolderApiTest extends AbstractTest {
 
     @Autowired

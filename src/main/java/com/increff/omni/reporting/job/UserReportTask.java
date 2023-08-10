@@ -12,7 +12,7 @@ import com.increff.omni.reporting.pojo.*;
 import com.increff.omni.reporting.util.SqlCmd;
 import com.nextscm.commons.spring.common.ApiException;
 import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.log4j.Log4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.scheduling.annotation.Async;
@@ -27,7 +27,7 @@ import static com.increff.omni.reporting.dto.CommonDtoHelper.getInputParamMapFro
 import static com.increff.omni.reporting.dto.CommonDtoHelper.getValueFromQuotes;
 
 @Component
-@Slf4j
+@Log4j
 @Setter
 public class UserReportTask extends AbstractTask{
 

@@ -20,8 +20,7 @@ public class InputControlQueryPojo extends AbstractVersionedPojo{
     @Column(nullable = false, unique = true)
     private Integer controlId;
 
-    @Lob
-    @Column(nullable = false)
+    @Column(nullable = false,columnDefinition = "LONGTEXT")
     private String query;
 
 }

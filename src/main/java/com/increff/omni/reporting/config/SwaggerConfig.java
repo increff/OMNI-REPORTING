@@ -1,5 +1,12 @@
 package com.increff.omni.reporting.config;
 
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.annotations.OpenAPI30;
+import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.servers.Server;
+import org.springdoc.core.models.GroupedOpenApi;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -23,9 +30,11 @@ import java.time.ZonedDateTime;
  */
 
 @Configuration
-@EnableWebMvc
+//@EnableWebMvc
 //@EnableSwagger2
-@Profile({"dev","qa"})
+//@Profile({"dev","qa"})
+//@OpenAPIDefinition
+//@OpenAPI30
 public class SwaggerConfig implements WebMvcConfigurer {
 
 //    @Bean
@@ -40,16 +49,24 @@ public class SwaggerConfig implements WebMvcConfigurer {
 //                .build();
 //    }
 
-    // Add configuration for Swagger
-    @Override
-    public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        registry.addResourceHandler("/swagger-ui.html").addResourceLocations("classpath:/META-INF/resources/");
-        registry.addResourceHandler("/webjars/**").addResourceLocations("classpath:/META-INF/resources/webjars/");
+    @Bean
+    public GroupedOpenApi publicApi() {
+        return GroupedOpenApi.builder()
+                .packagesToScan("com.increff")
+                .group("springshop-public")
+                .pathsToMatch("/**")
+                .build();
     }
+    // Add configuration for Swagger
+
 
     @Bean
-    public MultipartResolver multipartResolver() {
-        return new StandardServletMultipartResolver();
+    public OpenAPI springShopOpenAPI(@Value("${server.servlet.context-path}")String contextPath) {
+        return new OpenAPI()
+                .addServersItem(new Server().url(contextPath))
+                .info(new Info().title("SpringShop API")
+                        .description("Spring shop sample application")
+                        .version("3.0.0"));
     }
 
 }

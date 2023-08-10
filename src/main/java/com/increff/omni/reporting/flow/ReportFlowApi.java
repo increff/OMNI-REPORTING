@@ -18,7 +18,7 @@ import com.increff.omni.reporting.validators.SingleMandatoryValidator;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
 import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.log4j.Log4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,7 +36,7 @@ import static com.increff.omni.reporting.dto.CommonDtoHelper.*;
 
 @Service
 @Setter
-@Slf4j
+@Log4j
 public class ReportFlowApi extends AbstractFlowApi {
 
     @Autowired

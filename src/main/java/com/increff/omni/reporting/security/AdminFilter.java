@@ -10,7 +10,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.log4j.Log4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
@@ -19,7 +19,7 @@ import org.springframework.web.filter.GenericFilterBean;
 import java.io.IOException;
 
 @Component
-@Slf4j
+@Log4j
 public class AdminFilter extends GenericFilterBean {
 
     @Autowired

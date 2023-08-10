@@ -5,7 +5,7 @@ import com.increff.account.model.DomainResourceForm;
 import com.increff.account.model.QueryUserData;
 import com.increff.account.model.UrlPath;
 import com.nextscm.commons.spring.common.ApiException;
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.log4j.Log4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -25,7 +25,7 @@ import java.util.List;
 @RestController
 @RequestMapping(value = "/session")
 @CrossOrigin
-@Slf4j
+@Log4j
 public class AuthSessionController {
 
 	@Autowired

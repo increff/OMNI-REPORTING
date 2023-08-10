@@ -1,7 +1,7 @@
 package com.increff.account.client;
 
 import com.increff.account.model.QueryUserData;
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.log4j.Log4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-@Slf4j
+@Log4j
 public class AuthenticationUtil {
 
 	public static UsernamePasswordAuthenticationToken getAuthenticationToken(QueryUserData qud) {

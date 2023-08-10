@@ -16,6 +16,8 @@ import com.nextscm.commons.spring.audit.dao.AuditDao;
 import com.nextscm.commons.spring.audit.dao.DaoProvider;
 //import com.nextscm.commons.spring.server.WebMvcConfig;
 
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.servers.Server;
 import org.apache.hc.client5.http.ConnectionKeepAliveStrategy;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
@@ -62,6 +64,7 @@ import java.util.List;
 })
 @EnableAutoConfiguration
 @Import({WebMvcConfig.class})
+//@OpenAPIDefinition(servers = {@Server(url = "/", description = "Default Server URL")})
 public class SpringConfig implements WebMvcConfigurer {
 
     @Autowired

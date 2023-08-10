@@ -6,7 +6,7 @@ import com.nextscm.commons.spring.common.ApiStatus;
 //import com.nextscm.commons.spring.server.AbstractRestappControllerAdvice;
 import com.nextscm.commons.spring.common.ErrorData;
 import jakarta.servlet.http.HttpServletRequest;
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.log4j.Log4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 //import javax.servlet.http.HttpServletRequest;
 
 @ControllerAdvice
-@Slf4j
+@Log4j
 public class RestControllerAdvice extends AbstractRestappControllerAdvice {
 
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)

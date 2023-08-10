@@ -10,7 +10,7 @@
     </parent>
     <groupId>com.increff.omni</groupId>
     <artifactId>omni-reporting</artifactId>
-    <version>1.44-SNAPSHOT</version>
+    <version>1.45-SNAPSHOT</version>
     <packaging>war</packaging>
 
     <properties>
@@ -19,7 +19,7 @@
         <jetty.version>11.0.15</jetty.version>
         <jetty.http.port>9001</jetty.http.port>
         <jetty.http.host>0.0.0.0</jetty.http.host>
-        <jetty.context>/omni-reporting/api/</jetty.context>
+        <jetty.context>/reporting/api/</jetty.context>
         <failOnMissingWebXml>false</failOnMissingWebXml>
 
         <increff-account.version>3.33</increff-account.version>
@@ -37,6 +37,10 @@
                     <groupId>org.springframework.boot</groupId>
                     <artifactId>spring-boot-starter-tomcat</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-logging</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
@@ -45,6 +49,12 @@
             <version>2.1.0</version>
         </dependency>
 
+        <dependency>
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
+            <version>6.0.0</version>
+            <scope>provided</scope>
+        </dependency>
         <!--		<dependency>-->
         <!--			<groupId>org.springframework.boot</groupId>-->
         <!--			<artifactId>spring-boot-starter-tomcat</artifactId>-->
@@ -74,17 +84,17 @@
             <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-jetty</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.eclipse.jetty</groupId>
-                    <artifactId>apache-jsp</artifactId>
-                </exclusion>
+<!--        <dependency>-->
+<!--            <groupId>org.springframework.boot</groupId>-->
+<!--            <artifactId>spring-boot-starter-jetty</artifactId>-->
+<!--            <exclusions>-->
+<!--                <exclusion>-->
+<!--                    <groupId>org.eclipse.jetty</groupId>-->
+<!--                    <artifactId>apache-jsp</artifactId>-->
+<!--                </exclusion>-->
 
-            </exclusions>
-        </dependency>
+<!--            </exclusions>-->
+<!--        </dependency>-->
 
         <dependency>
             <groupId>org.springdoc</groupId>

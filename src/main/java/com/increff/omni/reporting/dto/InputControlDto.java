@@ -14,7 +14,7 @@ import com.increff.omni.reporting.pojo.*;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
 //import com.nextscm.commons.spring.common.ConvertUtil;
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.log4j.Log4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -26,7 +26,7 @@ import static com.increff.omni.reporting.dto.CommonDtoHelper.sortBasedOnReportCo
 import static com.increff.omni.reporting.dto.CommonDtoHelper.updateValidationTypes;
 
 @Service
-@Slf4j
+@Log4j
 public class InputControlDto extends AbstractDto {
 
     @Autowired
