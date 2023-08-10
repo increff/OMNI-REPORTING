@@ -19,8 +19,7 @@ public class ReportQueryPojo extends AbstractVersionedPojo{
     @Column(nullable = false, unique = true)
     private Integer reportId;
 
-    @Lob
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "LONGTEXT")
     private String query;
 
 }
