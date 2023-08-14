@@ -60,42 +60,27 @@ public class AdminSecurityConfig {
 //        http.cors();
 //    }
 
-    //    @Bean
-//    @Qualifier("adminFilterChain")
-//    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-//        http.securityMatchers()
-//                .requestMatchers("/admin/**").and().authorizeHttpRequests()
-//                .requestMatchers(HttpMethod.GET,"/admin/orgs").hasAnyAuthority(APP_ADMIN,REPORT_ADMIN)
-//                .requestMatchers(HttpMethod.POST,"/admin/request-report/orgs/**").hasAnyAuthority(APP_ADMIN,REPORT_ADMIN)
-//                .requestMatchers(HttpMethod.GET,"/admin/reports/orgs/**").hasAnyAuthority(APP_ADMIN, REPORT_ADMIN)
-//                .requestMatchers(HttpMethod.GET,"/admin/orgs/*/reports/*/controls").hasAnyAuthority(APP_ADMIN, REPORT_ADMIN)
-//                .requestMatchers(HttpMethod.GET,"/admin/orgs/*/reports/live").hasAnyAuthority(APP_ADMIN, REPORT_ADMIN)
-//                .requestMatchers("/admin/**").hasAnyAuthority(APP_ADMIN)//
-//                .and().cors().and().csrf().disable()
-//                .addFilterBefore(authTokenFilter, BasicAuthenticationFilter.class)
-//                .addFilterBefore(adminFilter, BasicAuthenticationFilter.class)
-//                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-//        http.cors();
-//        return http.build();
-//    }
     @Bean
     @Qualifier("adminFilterChain")
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.
-                .authorizeHttpRequests((requests) -> requests
-                                .requestMatchers("/admin/**").auth.aurequestMatchers(
-                                                new AntPathRequestMatcher("/admin/orgs", "GET"),
-                                                new AntPathRequestMatcher("/admin/request-report/orgs/**", "POST"),
-                                                new AntPathRequestMatcher("/admin/reports/orgs/**", "GET"),
-                                                new AntPathRequestMatcher("/admin/orgs/*/reports/*/controls", "GET"),
-                                                new AntPathRequestMatcher("/admin/orgs/*/reports/live", "GET")).hasAnyAuthority(APP_ADMIN, REPORT_ADMIN)
-                                        .requestMatchers(new AntPathRequestMatcher("/admin/**")).hasAnyAuthority(APP_ADMIN))//
-                        .cors().and().csrf().disable()
+        http.authorizeHttpRequests((requests) -> requests.requestMatchers(HttpMethod.GET, "/admin/orgs").hasAnyAuthority(APP_ADMIN, REPORT_ADMIN)
+                        .requestMatchers(HttpMethod.POST, "/admin/request-report/orgs/**").hasAnyAuthority(APP_ADMIN,
+                                REPORT_ADMIN)
+                        .requestMatchers(HttpMethod.GET, "/admin/request-report/orgs/**").hasAnyAuthority(APP_ADMIN,
+                                REPORT_ADMIN)
+                        .requestMatchers(HttpMethod.GET, "/admin/reports/orgs/**").hasAnyAuthority(APP_ADMIN,
+                                REPORT_ADMIN)
+                        .requestMatchers(HttpMethod.GET, "/admin/orgs/*/reports/*/controls").hasAnyAuthority(APP_ADMIN,
+                                REPORT_ADMIN)
+                        .requestMatchers(HttpMethod.GET, "/admin/orgs/*/reports/live").hasAnyAuthority(APP_ADMIN,
+                                REPORT_ADMIN)
+                        .requestMatchers("/admin/**").hasAnyAuthority(APP_ADMIN))//
+                .cors().and().csrf().disable()
                 .addFilterBefore(authTokenFilter, BasicAuthenticationFilter.class)
                 .addFilterBefore(adminFilter, BasicAuthenticationFilter.class)
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
         http.cors();
-         return http.build();
+        return http.build();
     }
 
     //    @Override
@@ -106,6 +91,6 @@ public class AdminSecurityConfig {
     @Bean
     @Qualifier("adminWebSecurityCustomizer")
     public WebSecurityCustomizer webSecurityCustomizer() {
-        return web -> web.ignoring().requestMatchers("/v2/api-docs", "/configuration/ui", "/swagger-resources", "/configuration/security", "/swagger-ui.html", "/webjars/**", "/ui/**", "/session/**");
+        return web -> web.ignoring().requestMatchers("/v3/api-docs/**", "/configuration/ui", "/swagger-resources", "/configuration/security", "/swagger-ui/**", "/webjars/**", "/ui/**", "/session/**");
     }
 }

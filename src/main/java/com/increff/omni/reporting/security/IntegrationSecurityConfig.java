@@ -47,10 +47,9 @@ public class IntegrationSecurityConfig{
     @Bean
     @Qualifier("integrationFilterChain")
     public SecurityFilterChain integrationFilterChain(HttpSecurity http) throws Exception {
-        http.securityMatchers()
-                .requestMatchers("/integration/**").and().authorizeHttpRequests()
-                .requestMatchers("/integration/**").hasAnyAuthority(APP_INTEGRATION)
-                .and().cors().and().csrf().disable()
+        http.authorizeHttpRequests((requests) -> requests
+                .requestMatchers("/integration/**").hasAnyAuthority(APP_INTEGRATION))
+                .cors().and().csrf().disable()
                 .addFilterBefore(credentialFilter, BasicAuthenticationFilter.class)
                 .addFilterBefore(adminFilter, BasicAuthenticationFilter.class)
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
@@ -67,7 +66,7 @@ public class IntegrationSecurityConfig{
     @Bean
     @Qualifier("integrationWebSecurityCustomizer")
     public WebSecurityCustomizer integrationWebSecurityCustomizer(){
-        return web -> web.ignoring().requestMatchers("/v2/api-docs", "/configuration/ui", "/swagger-resources",
-                "/configuration/security", "/swagger-ui.html", "/webjars/**", "/ui/**", "/session/**");
+        return web -> web.ignoring().requestMatchers("/v3/api-docs/**", "/configuration/ui", "/swagger-resources",
+                "/configuration/security", "/swagger-ui/**", "/webjars/**", "/ui/**", "/session/**");
     }
 }

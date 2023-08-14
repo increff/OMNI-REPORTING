@@ -42,13 +42,12 @@ public class AuthSecurityConfig {
     @Bean
     @Qualifier("authFilterChain")
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.securityMatchers()
+        http.authorizeHttpRequests((requests) -> requests
                 // Match only these URLs
-                .requestMatchers("/session/domain-resource/**", "/session/app-resource/**").and().authorizeHttpRequests()
                 .requestMatchers("/session/domain-resource/**").hasAnyAuthority(domain_admin,app_admin)
-                .requestMatchers("/session/app-resource/**").hasAnyAuthority(domain_admin, app_admin)
+                .requestMatchers("/session/app-resource/**").hasAnyAuthority(domain_admin, app_admin))
                 // Ignore CORS and CSRF
-                .and().cors().and().csrf().disable()
+                .cors().and().csrf().disable()
                 .addFilterBefore(credentialFilter, BasicAuthenticationFilter.class)
                 // This ensures that all calls are session(JSESSIONID)
                 // independent
@@ -66,7 +65,7 @@ public class AuthSecurityConfig {
     @Bean
     @Qualifier("authWebSecurityCustomizer")
     public WebSecurityCustomizer webSecurityCustomizer(){
-        return web -> web.ignoring().requestMatchers("/v2/api-docs", "/configuration/ui", "/swagger-resources",
-                "/configuration/security", "/swagger-ui.html", "/webjars/**");
+        return web -> web.ignoring().requestMatchers("/v3/api-docs/**", "/configuration/ui", "/swagger-resources",
+                "/configuration/security", "/swagger-ui/**", "/webjars/**");
     }
 }

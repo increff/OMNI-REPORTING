@@ -50,11 +50,10 @@ public class StandardSecurityConfig {
     @Bean
     @Qualifier("standardSecurityFilterChain")
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.securityMatchers()
-                .requestMatchers("/standard/**").and().authorizeHttpRequests()
+        http.authorizeHttpRequests((requests) -> requests
                 .requestMatchers("/standard/schedules/**").hasAnyAuthority(APP_ADMIN)
-                .requestMatchers("/standard/**").hasAnyAuthority(APP_ADMIN,REPORT_ADMIN,REPORT_STANDARD)
-                .and().cors().and().csrf().disable()
+                .requestMatchers("/standard/**").hasAnyAuthority(APP_ADMIN,REPORT_ADMIN,REPORT_STANDARD))
+                .cors().and().csrf().disable()
                 .addFilterBefore(authTokenFilter, BasicAuthenticationFilter.class)
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
         http.cors();
@@ -71,7 +70,7 @@ public class StandardSecurityConfig {
     @Bean
     @Qualifier("standardWebSecurityCustomizer")
     public WebSecurityCustomizer standardWebSecurityCustomizer(){
-        return web -> web.ignoring().requestMatchers("/v2/api-docs", "/configuration/ui", "/swagger-resources", "/configuration/security", "/swagger-ui.html", "/webjars/**", "/ui/**"
+        return web -> web.ignoring().requestMatchers("/v3/api-docs/**", "/configuration/ui", "/swagger-resources", "/configuration/security", "/swagger-ui/**", "/webjars/**", "/ui/**"
                 , "/session/**");
     }
 
