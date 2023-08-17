@@ -42,12 +42,18 @@ public abstract class AbstractTest {
         MockitoAnnotations.initMocks(this);
         setSecurityContext();
         Mockito.when(encryptionClient.encode(Mockito.any(CryptoForm.class))).thenReturn(getCryptoData());
-        Mockito.when(encryptionClient.decode(Mockito.any())).thenReturn(getCryptoData());
+        Mockito.when(encryptionClient.decode(Mockito.any())).thenReturn(getDecryptedCryptoData());
     }
 
     private CryptoData getCryptoData() {
         CryptoData cryptoData = new CryptoData();
-        cryptoData.setValue(null);
+        cryptoData.setValue("UUID");
+        return cryptoData;
+    }
+
+    private CryptoData getDecryptedCryptoData() {
+        CryptoData cryptoData = new CryptoData();
+        cryptoData.setValue("nextscm@fashion");
         return cryptoData;
     }
 

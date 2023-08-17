@@ -67,7 +67,7 @@ public class ConnectionDtoTestIT extends AbstractTest {
         assertEquals("dev-db.increff.com", data.getHost());
         assertEquals("Dev DB", data.getName());
         assertEquals("db.user", data.getUsername());
-        assertEquals("db.password", data.getPassword());
+        assertEquals("UUID", data.getPassword());
     }
 
     @Test
@@ -118,7 +118,7 @@ public class ConnectionDtoTestIT extends AbstractTest {
         assertEquals("dev-db-2.increff.com", data.getHost());
         assertEquals("Dev DB 2", data.getName());
         assertEquals("db.user2", data.getUsername());
-        assertEquals("db.password2", data.getPassword());
+        assertEquals("UUID", data.getPassword());
     }
 
     @Test
@@ -132,11 +132,11 @@ public class ConnectionDtoTestIT extends AbstractTest {
         assertEquals("dev-db.increff.com", data.get(0).getHost());
         assertEquals("Dev DB", data.get(0).getName());
         assertEquals("db.user", data.get(0).getUsername());
-        assertEquals("db.password", data.get(0).getPassword());
+        assertEquals("UUID", data.get(0).getPassword());
         assertEquals("dev-db-2.increff.com", data.get(1).getHost());
         assertEquals("Dev DB 2", data.get(1).getName());
         assertEquals("db.user2", data.get(1).getUsername());
-        assertEquals("db.password2", data.get(1).getPassword());
+        assertEquals("UUID", data.get(1).getPassword());
 
     }
 }

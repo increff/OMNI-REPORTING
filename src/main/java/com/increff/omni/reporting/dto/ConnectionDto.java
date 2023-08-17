@@ -98,8 +98,7 @@ public class ConnectionDto extends AbstractDto {
     private String encryptPassword(ConnectionForm connectionForm, Integer userId) throws ApiException {
         try {
             CryptoForm form = getCryptoForm(connectionForm.getPassword(), userId);
-            String value = encryptionClient.encode(form).getValue();
-            return StringUtil.isEmpty(value) ? connectionForm.getPassword() : value;
+            return encryptionClient.encode(form).getValue();
         } catch (AppClientException e) {
             throw new ApiException(ApiStatus.BAD_DATA, "Failed to encrypt password : " + e.getMessage());
         }
