@@ -14,7 +14,7 @@ public class ReportScheduleForm {
     @NotNull
     private String timezone = "UTC";
     @NotNull
-    private String reportName;
+    private String reportAlias;
     private List<InputParamMap> paramMap;
     private CronScheduleForm cronSchedule;
     @NotNull

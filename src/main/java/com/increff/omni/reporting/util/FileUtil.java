@@ -57,7 +57,7 @@ public class FileUtil {
         int columnCount = metaData.getColumnCount();
         List<String> headers = new ArrayList<>();
         for (int i = 1; i <= columnCount; i++) {
-            headers.add(metaData.getColumnName(i));
+            headers.add(metaData.getColumnLabel(i));
         }
         csvPrinter.printRecord(headers);
         noOfRows++;

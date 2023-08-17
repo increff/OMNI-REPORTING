@@ -81,7 +81,7 @@ public class ReportScheduleDtoTest extends AbstractTest {
             dto.scheduleReport(form);
         } catch (ApiException e) {
             assertEquals(ApiStatus.BAD_DATA, e.getStatus());
-            assertEquals("Report : Report 1 is not allowed to schedule", e.getMessage());
+            assertEquals("Report : report_1 is not allowed to schedule", e.getMessage());
             throw e;
         }
     }
@@ -194,7 +194,7 @@ public class ReportScheduleDtoTest extends AbstractTest {
         assertFalse(dataList.get(0).getFilters().isEmpty());
         pojo = reportScheduleDao.select(reportScheduleData.get(0).getId());
         assertTrue(ZonedDateTime.now().isBefore(pojo.getNextRuntime()));
-        pojo.setReportName("Dummy");
+        pojo.setReportAlias("dummy");
         pojo.setNextRuntime(ZonedDateTime.now().minusMinutes(1));
         scheduledJobs.addScheduleReportRequests();
         dataList = dto.getScheduledRequests(1, 100);

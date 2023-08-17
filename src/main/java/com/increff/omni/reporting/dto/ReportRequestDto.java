@@ -65,7 +65,7 @@ public class ReportRequestDto extends AbstractDto {
     @Autowired
     private QueryExecutorClientApi executorClientApi;
 
-    private static final Integer MAX_NUMBER_OF_ROWS = 50;
+    private static final Integer MAX_NUMBER_OF_ROWS = 200;
     private static final Integer MAX_LIMIT = 25;
     public static final List<String> accessControlledKeys = Arrays.asList(ResourceQueryParamKeys.clientQueryParam,
             ResourceQueryParamKeys.fulfillmentLocationQueryParamKey);
@@ -107,11 +107,13 @@ public class ReportRequestDto extends AbstractDto {
     public List<ReportRequestData> getAll() throws ApiException, IOException {
         List<ReportRequestData> reportRequestDataList = new ArrayList<>();
         List<ReportRequestPojo> reportRequestPojoList = reportRequestApi.getByUserId(getUserId(), MAX_LIMIT);
-        List<Integer> pendingRequestIds = reportRequestPojoList.stream().filter(r -> r.getStatus().equals(ReportRequestStatus.REQUESTED))
+        List<Integer> pendingRequestIds =
+                reportRequestPojoList.stream().filter(r -> r.getStatus().equals(ReportRequestStatus.REQUESTED))
                         .map(ReportRequestPojo::getId).collect(
-                        Collectors.toList());
+                                Collectors.toList());
         Map<Integer, Integer> referenceIdToSequenceNumber = new HashMap<>();
-        flow.updatePendingRequestStatus(pendingRequestIds, reportRequestPojoList, getUserId(), referenceIdToSequenceNumber);
+        flow.updatePendingRequestStatus(pendingRequestIds, reportRequestPojoList, getUserId(),
+                referenceIdToSequenceNumber);
         List<Integer> reportRequestIds =
                 reportRequestPojoList.stream().map(ReportRequestPojo::getId).collect(Collectors.toList());
         reportRequestPojoList = reportRequestApi.getByIds(reportRequestIds);
@@ -133,7 +135,7 @@ public class ReportRequestDto extends AbstractDto {
         for (ReportRequestPojo r : reportRequestPojoList) {
             Optional<ReportPojo> reportPojo =
                     reportPojoList.stream().filter(report -> report.getId().equals(r.getReportId())).findFirst();
-            if(!reportPojo.isPresent())
+            if (!reportPojo.isPresent())
                 continue;
             List<ReportInputParamsPojo> paramsPojoList = requestToParamsMap.get(r.getId());
             OrganizationPojo organizationPojo = orgToPojo.get(r.getOrgId());
@@ -162,7 +164,8 @@ public class ReportRequestDto extends AbstractDto {
         ReportPojo reportPojo = reportApi.getCheck(requestPojo.getReportId());
         validate(requestPojo, requestId, reportPojo, getUserId());
         if (requestPojo.getNoOfRows() >= MAX_NUMBER_OF_ROWS)
-            throw new ApiException(ApiStatus.BAD_DATA, "Data contains more than 50 rows. View option is restricted");
+            throw new ApiException(ApiStatus.BAD_DATA,
+                    "Data contains more than " + MAX_NUMBER_OF_ROWS + " rows. View option is restricted");
         String reportName = requestId + "_" + UUID.randomUUID();
         File sourceFile = folderApi.getFile(reportName + ".csv");
         byte[] bytes = getFileFromUrl(requestPojo.getUrl());
