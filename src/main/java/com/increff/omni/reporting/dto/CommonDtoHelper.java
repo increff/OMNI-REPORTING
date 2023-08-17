@@ -2,6 +2,7 @@ package com.increff.omni.reporting.dto;
 
 import com.increff.commons.queryexecutor.constants.FileFormat;
 import com.increff.commons.queryexecutor.constants.RequestStatus;
+import com.increff.omni.reporting.model.constants.InputControlType;
 import com.increff.omni.reporting.model.constants.ReportRequestStatus;
 import com.increff.omni.reporting.model.constants.ReportRequestType;
 import com.increff.omni.reporting.model.constants.ValidationType;
@@ -48,10 +49,11 @@ public class CommonDtoHelper {
                 InputControlFilterData filterData = new InputControlFilterData();
                 filterData.setParamName(controlPojo.get().getParamName());
                 filterData.setDisplayName(controlPojo.get().getDisplayName());
-                List<String> values = Objects.isNull(p.getDisplayValue()) ? new ArrayList<>() :
-                        Arrays.stream(p.getDisplayValue().split(
+                List<String> values = Objects.isNull(p.getParamValue()) ? new ArrayList<>() :
+                        ((controlPojo.get().getType().equals(InputControlType.DATE) || controlPojo.get().getType().equals(InputControlType.DATE_TIME)) ? Collections.singletonList(p.getParamValue()) :
+                        Arrays.stream(p.getParamValue().split(
                                         ","))
-                                .map(CommonDtoHelper::getValueFromQuotes).collect(Collectors.toList());
+                                .map(CommonDtoHelper::getValueFromQuotes).collect(Collectors.toList()));
                 filterData.setValues(values);
                 filterData.setType(controlPojo.get().getType());
                 inputControlFilterData.add(filterData);
