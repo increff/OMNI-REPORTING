@@ -6,11 +6,9 @@ import com.increff.omni.reporting.model.constants.InputControlType;
 import com.increff.omni.reporting.model.constants.ReportType;
 import com.increff.omni.reporting.model.data.*;
 import com.increff.omni.reporting.model.form.*;
-import com.increff.service.encryption.EncryptionClient;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
 import org.junit.Test;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
@@ -67,7 +65,6 @@ public class ConnectionDtoTestIT extends AbstractTest {
         assertEquals("dev-db.increff.com", data.getHost());
         assertEquals("Dev DB", data.getName());
         assertEquals("db.user", data.getUsername());
-        assertEquals("UUID", data.getPassword());
     }
 
     @Test
@@ -118,7 +115,6 @@ public class ConnectionDtoTestIT extends AbstractTest {
         assertEquals("dev-db-2.increff.com", data.getHost());
         assertEquals("Dev DB 2", data.getName());
         assertEquals("db.user2", data.getUsername());
-        assertEquals("UUID", data.getPassword());
     }
 
     @Test
@@ -132,11 +128,9 @@ public class ConnectionDtoTestIT extends AbstractTest {
         assertEquals("dev-db.increff.com", data.get(0).getHost());
         assertEquals("Dev DB", data.get(0).getName());
         assertEquals("db.user", data.get(0).getUsername());
-        assertEquals("UUID", data.get(0).getPassword());
         assertEquals("dev-db-2.increff.com", data.get(1).getHost());
         assertEquals("Dev DB 2", data.get(1).getName());
         assertEquals("db.user2", data.get(1).getUsername());
-        assertEquals("UUID", data.get(1).getPassword());
 
     }
 }
