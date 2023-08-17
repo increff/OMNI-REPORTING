@@ -28,6 +28,7 @@ public class OrgDtoTest extends AbstractTest {
 
     @Test
     public void testOrgCreate() throws ApiException {
+        connectionDto.setEncryptionClient(encryptionClient);
         OrganizationForm form = getOrganizationForm(1, "increff");
         dto.add(form);
         OrganizationData data = dto.getById(1);

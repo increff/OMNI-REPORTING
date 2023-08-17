@@ -37,6 +37,9 @@ public class CustomReportAccessDtoTest extends AbstractTest {
     private InputControlDto inputControlDto;
 
     private ReportForm commonSetup(String name, ReportType type) throws ApiException {
+        reportDto.setEncryptionClient(encryptionClient);
+        inputControlDto.setEncryptionClient(encryptionClient);
+        connectionDto.setEncryptionClient(encryptionClient);
         OrganizationForm form = getOrganizationForm(100001, "increff");
         OrganizationData organizationData = organizationDto.add(form);
         List<DirectoryData> data = directoryDto.getAllDirectories();

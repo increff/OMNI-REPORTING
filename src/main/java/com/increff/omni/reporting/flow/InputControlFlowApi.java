@@ -81,12 +81,12 @@ public class InputControlFlowApi extends AbstractApi {
     }
 
 
-    public Map<String, String> getValuesFromQuery(String query, ConnectionPojo connectionPojo) {
+    public Map<String, String> getValuesFromQuery(String query, ConnectionPojo connectionPojo, String password) {
         Connection connection = null;
         try {
             String fQuery = SqlCmd.getFinalQuery(new HashMap<>(), query, true);
             connection = dbConnectionApi.getConnection(connectionPojo.getHost(),
-                    connectionPojo.getUsername(), connectionPojo.getPassword(),
+                    connectionPojo.getUsername(), password,
                     properties.getMaxConnectionTime());
             PreparedStatement statement = dbConnectionApi.getStatement(connection,
                     properties.getLiveReportMaxExecutionTime(), fQuery, properties.getResultSetFetchSize());

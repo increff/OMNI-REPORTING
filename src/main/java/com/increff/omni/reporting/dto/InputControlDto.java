@@ -12,6 +12,7 @@ import com.nextscm.commons.lang.StringUtil;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
 import com.nextscm.commons.spring.common.ConvertUtil;
+import lombok.Setter;
 import lombok.extern.log4j.Log4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,6 +26,7 @@ import static com.increff.omni.reporting.dto.CommonDtoHelper.updateValidationTyp
 
 @Service
 @Log4j
+@Setter
 public class InputControlDto extends AbstractDto {
 
     @Autowired
@@ -104,6 +106,7 @@ public class InputControlDto extends AbstractDto {
 
         OrgConnectionPojo orgConnectionPojo = orgConnectionApi.getCheckByOrgId(orgId);
         ConnectionPojo connectionPojo = connectionApi.getCheck(orgConnectionPojo.getConnectionId());
+        String password = getDecryptedPassword(connectionPojo.getPassword());
         //We need queries
         List<InputControlQueryPojo> queryPojos = api.selectControlQueries(controlIds);
         Map<Integer, String> controlToQueryMapping;
@@ -126,20 +129,21 @@ public class InputControlDto extends AbstractDto {
         List<InputControlData> dataList = new ArrayList<>();
         for(InputControlPojo p : pojos) {
             SchemaVersionPojo schemaVersionPojo = schemaVersionApi.getCheck(p.getSchemaVersionId());
-            dataList.add(getDataFromPojo(p, controlToValuesMapping, controlToQueryMapping, connectionPojo, schemaVersionPojo));
+            dataList.add(getDataFromPojo(p, controlToValuesMapping, controlToQueryMapping, connectionPojo,
+                    schemaVersionPojo, password));
         }
         return dataList;
     }
 
     private InputControlData getDataFromPojo(InputControlPojo p, Map<Integer, List<String>> controlToValuesMapping
             , Map<Integer, String> controlToQueryMapping, ConnectionPojo connectionPojo,
-                                             SchemaVersionPojo schemaVersionPojo) throws ApiException {
+                                             SchemaVersionPojo schemaVersionPojo, String password) throws ApiException {
         InputControlData data = ConvertUtil.convert(p, InputControlData.class);
         data.setSchemaVersionName(schemaVersionPojo.getName());
         data.setQuery(controlToQueryMapping.getOrDefault(p.getId(), null));
         data.setValues(controlToValuesMapping.getOrDefault(p.getId(), null));
         if (!StringUtil.isEmpty(data.getQuery())) {
-            setInputControlOptions(data, flowApi.getValuesFromQuery(data.getQuery(), connectionPojo));
+            setInputControlOptions(data, flowApi.getValuesFromQuery(data.getQuery(), connectionPojo, password));
         } else {
             List<String> values = controlToValuesMapping.getOrDefault(p.getId(), null);
             if (!CollectionUtils.isEmpty(values)) {

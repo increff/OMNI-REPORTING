@@ -40,6 +40,9 @@ public class ConnectionDtoTestIT extends AbstractTest {
     private InputControlDto inputControlDto;
 
     private ReportForm commonSetup(String name, ReportType type) throws ApiException {
+        connectionDto.setEncryptionClient(encryptionClient);
+        reportDto.setEncryptionClient(encryptionClient);
+        inputControlDto.setEncryptionClient(encryptionClient);
         OrganizationForm form = getOrganizationForm(100001, "increff");
         OrganizationData organizationData = organizationDto.add(form);
         List<DirectoryData> data = directoryDto.getAllDirectories();
@@ -62,7 +65,6 @@ public class ConnectionDtoTestIT extends AbstractTest {
         assertEquals("dev-db.increff.com", data.getHost());
         assertEquals("Dev DB", data.getName());
         assertEquals("db.user", data.getUsername());
-        assertEquals("db.password", data.getPassword());
     }
 
     @Test
@@ -113,7 +115,6 @@ public class ConnectionDtoTestIT extends AbstractTest {
         assertEquals("dev-db-2.increff.com", data.getHost());
         assertEquals("Dev DB 2", data.getName());
         assertEquals("db.user2", data.getUsername());
-        assertEquals("db.password2", data.getPassword());
     }
 
     @Test
@@ -127,11 +128,9 @@ public class ConnectionDtoTestIT extends AbstractTest {
         assertEquals("dev-db.increff.com", data.get(0).getHost());
         assertEquals("Dev DB", data.get(0).getName());
         assertEquals("db.user", data.get(0).getUsername());
-        assertEquals("db.password", data.get(0).getPassword());
         assertEquals("dev-db-2.increff.com", data.get(1).getHost());
         assertEquals("Dev DB 2", data.get(1).getName());
         assertEquals("db.user2", data.get(1).getUsername());
-        assertEquals("db.password2", data.get(1).getPassword());
 
     }
 }

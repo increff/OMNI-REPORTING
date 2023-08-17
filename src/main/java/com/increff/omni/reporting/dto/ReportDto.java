@@ -58,6 +58,10 @@ public class ReportDto extends AbstractDto {
     private DirectoryApi directoryApi;
     @Autowired
     private ApplicationProperties properties;
+    @Autowired
+    private OrgConnectionApi orgConnectionApi;
+    @Autowired
+    private ConnectionApi connectionApi;
 
     public ReportData add(ReportForm form) throws ApiException {
         checkValid(form);
@@ -82,10 +86,13 @@ public class ReportDto extends AbstractDto {
             throws ApiException, IOException {
         OrganizationPojo organizationPojo = organizationApi.getCheck(orgId);
         ReportPojo reportPojo = validateReportForOrg(form, orgId);
+        OrgConnectionPojo orgConnectionPojo = orgConnectionApi.getCheckByOrgId(orgId);
+        ConnectionPojo connectionPojo = connectionApi.getCheck(orgConnectionPojo.getConnectionId());
+        String password = getDecryptedPassword(connectionPojo.getPassword());
         ZonedDateTime startTime = ZonedDateTime.now();
         try {
-            List<ReportInputParamsPojo> reportInputParamsPojoList = validateControls(form, orgId, reportPojo);
-            return flowApi.validateAndGetLiveData(reportPojo, orgId, reportInputParamsPojoList);
+            List<ReportInputParamsPojo> reportInputParamsPojoList = validateControls(form, orgId, reportPojo, password);
+            return flowApi.validateAndGetLiveData(reportPojo, reportInputParamsPojoList, connectionPojo, password);
         } finally {
             flowApi.saveAudit(reportPojo.getId().toString(), AuditActions.LIVE_REPORT.toString(),
                     "Live Report",
@@ -240,13 +247,14 @@ public class ReportDto extends AbstractDto {
     }
 
     private List<ReportInputParamsPojo> validateControls(ReportRequestForm form, Integer orgId,
-                                                         ReportPojo reportPojo) throws ApiException {
+                                                         ReportPojo reportPojo, String password) throws ApiException {
         Map<String, String> inputParamsMap = UserPrincipalUtil.getCompleteMapWithAccessControl(form.getParamMap());
         Map<String, List<String>> inputDisplayMap = new HashMap<>();
         List<ReportControlsPojo> reportControlsPojoList = reportControlsApi.getByReportId(reportPojo.getId());
         List<InputControlPojo> inputControlPojoList = inputControlApi.selectByIds(reportControlsPojoList.stream()
                 .map(ReportControlsPojo::getControlId).collect(Collectors.toList()));
-        validateInputParamValues(form.getParamMap(), inputParamsMap, orgId, inputDisplayMap, inputControlPojoList, ReportRequestType.USER);
+        validateInputParamValues(form.getParamMap(), inputParamsMap, orgId, inputDisplayMap, inputControlPojoList,
+                ReportRequestType.USER, password);
         Map<String, String> inputDisplayStringMap = UserPrincipalUtil.getStringToStringParamMap(inputDisplayMap);
         return CommonDtoHelper.getReportInputParamsPojoList(inputParamsMap, form.getTimezone(), orgId, inputDisplayStringMap);
     }

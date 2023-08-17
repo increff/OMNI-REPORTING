@@ -88,13 +88,12 @@ public class ReportFlowApi extends AbstractFlowApi {
         return api.edit(pojo);
     }
 
-    public List<Map<String, String>> validateAndGetLiveData(ReportPojo reportPojo, Integer orgId,
-                                                            List<ReportInputParamsPojo> reportInputParamsPojoList)
+    public List<Map<String, String>> validateAndGetLiveData(ReportPojo reportPojo,
+                                                            List<ReportInputParamsPojo> reportInputParamsPojoList,
+                                                            ConnectionPojo connectionPojo, String password)
             throws ApiException, IOException {
         validate(reportPojo, reportInputParamsPojoList);
         ReportQueryPojo reportQueryPojo = queryApi.getByReportId(reportPojo.getId());
-        OrgConnectionPojo orgConnectionPojo = orgConnectionApi.getCheckByOrgId(orgId);
-        ConnectionPojo connectionPojo = connectionApi.getCheck(orgConnectionPojo.getConnectionId());
         File file = folderApi.getFileForExtension(reportPojo.getId(), ".csv");
         // Creation of file
         Connection connection = null;
@@ -103,7 +102,7 @@ public class ReportFlowApi extends AbstractFlowApi {
             String fQuery = SqlCmd.getFinalQuery(inputParamMap, reportQueryPojo.getQuery(), true);
             // Execute query and save results
             connection = dbConnectionApi.getConnection(connectionPojo.getHost(), connectionPojo.getUsername(),
-                    connectionPojo.getPassword(), properties.getMaxConnectionTime());
+                    password, properties.getMaxConnectionTime());
             PreparedStatement statement = dbConnectionApi.getStatement(connection,
                     properties.getLiveReportMaxExecutionTime(), fQuery, properties.getResultSetFetchSize());
             ResultSet resultSet = statement.executeQuery();

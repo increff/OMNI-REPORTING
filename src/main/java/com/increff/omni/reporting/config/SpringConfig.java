@@ -10,6 +10,7 @@ import com.increff.account.client.AuthClient;
 import com.increff.commons.queryexecutor.QueryExecutorClient;
 import com.increff.omni.reporting.dto.CommonDtoHelper;
 import com.increff.omni.reporting.util.FileDownloadUtil;
+import com.increff.service.encryption.EncryptionClient;
 import com.nextscm.commons.spring.audit.api.AuditApi;
 import com.nextscm.commons.spring.audit.dao.AuditDao;
 import com.nextscm.commons.spring.audit.dao.DaoProvider;
@@ -68,6 +69,11 @@ public class SpringConfig extends WebMvcConfigurerAdapter {
                 applicationProperties.getQueryExecutorAuthUsername(),
                 applicationProperties.getQueryExecutorAuthPassword(),
                 new RestTemplate(getRequestFactory()));
+    }
+
+    @Bean
+    public EncryptionClient getEncryptionClient(){
+        return new EncryptionClient(applicationProperties.getCryptoBaseUrl());
     }
 
     @Bean(name = "objectMapper")

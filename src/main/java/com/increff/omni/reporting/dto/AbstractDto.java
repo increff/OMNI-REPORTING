@@ -7,10 +7,14 @@ import com.increff.omni.reporting.flow.InputControlFlowApi;
 import com.increff.omni.reporting.model.constants.ReportRequestType;
 import com.increff.omni.reporting.model.constants.ReportType;
 import com.increff.omni.reporting.pojo.*;
+import com.increff.service.encryption.EncryptionClient;
+import com.increff.service.encryption.common.CryptoCommon;
 import com.nextscm.commons.lang.StringUtil;
+import com.nextscm.commons.spring.client.AppClientException;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
 import com.nextscm.commons.spring.server.AbstractDtoApi;
+import lombok.Setter;
 import lombok.extern.log4j.Log4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -22,10 +26,12 @@ import static com.increff.omni.reporting.dto.CommonDtoHelper.getValueFromQuotes;
 
 @Log4j
 @Component
+@Setter
 public class AbstractDto extends AbstractDtoApi {
 
     private static final Integer MAX_LIST_SIZE = 1000;
-
+    @Autowired
+    protected EncryptionClient encryptionClient;
     @Autowired
     private ReportControlsApi reportControlsApi;
     @Autowired
@@ -55,7 +61,8 @@ public class AbstractDto extends AbstractDtoApi {
     protected void validateInputParamValues(Map<String, List<String>> inputParams,
                                             Map<String, String> params, int orgId,
                                             Map<String, List<String>> inputDisplayMap,
-                                            List<InputControlPojo> inputControlPojoList, ReportRequestType type) throws ApiException {
+                                            List<InputControlPojo> inputControlPojoList, ReportRequestType type,
+                                            String password) throws ApiException {
         for (InputControlPojo i : inputControlPojoList) {
             if (params.containsKey(i.getParamName())) {
                 String value = params.get(i.getParamName());
@@ -93,7 +100,7 @@ public class AbstractDto extends AbstractDtoApi {
                         break;
                     case SINGLE_SELECT:
                         values = inputParams.get(i.getParamName());
-                        allowedValuesMap = checkValidValues(i, orgId);
+                        allowedValuesMap = checkValidValues(i, orgId, password);
                         if (values.size() > 1)
                             throw new ApiException(ApiStatus.BAD_DATA, "Multiple values not allowed for filter : "
                                     + i.getDisplayName());
@@ -106,7 +113,7 @@ public class AbstractDto extends AbstractDtoApi {
                         break;
                     case ACCESS_CONTROLLED_MULTI_SELECT:
                         values = inputParams.get(i.getParamName());
-                        allowedValuesMap = checkValidValues(i, orgId);
+                        allowedValuesMap = checkValidValues(i, orgId, password);
                         for (String v : values) {
                             if (!allowedValuesMap.containsKey(v))
                                 throw new ApiException(ApiStatus.BAD_DATA, v + " is not allowed for filter : "
@@ -121,7 +128,7 @@ public class AbstractDto extends AbstractDtoApi {
                             throw new ApiException(ApiStatus.BAD_DATA,
                                     i.getDisplayName() + " can't have more than " + MAX_LIST_SIZE + " values in " +
                                             "single request");
-                        allowedValuesMap = checkValidValues(i, orgId);
+                        allowedValuesMap = checkValidValues(i, orgId, password);
                         for (String v : values) {
                             if (!allowedValuesMap.containsKey(v))
                                 throw new ApiException(ApiStatus.BAD_DATA, v + " is not allowed for filter : "
@@ -150,7 +157,17 @@ public class AbstractDto extends AbstractDtoApi {
         }
     }
 
-    private Map<String, String> checkValidValues(InputControlPojo p, int orgId) throws ApiException {
+    protected String getDecryptedPassword(String password) throws ApiException {
+        try {
+            CryptoCommon form = CommonDtoHelper.convertToCryptoForm(password);
+            String decryptedPassword = encryptionClient.decode(form).getValue();
+            return Objects.isNull(decryptedPassword) ? password : decryptedPassword;
+        } catch (AppClientException e) {
+            throw new ApiException(ApiStatus.UNKNOWN_ERROR, "Error From Crypto Service " + e.getMessage());
+        }
+    }
+
+    private Map<String, String> checkValidValues(InputControlPojo p, int orgId, String password) throws ApiException {
         Map<String, String> valuesMap = new HashMap<>();
         InputControlQueryPojo queryPojo = controlApi.selectControlQuery(p.getId());
         if (Objects.isNull(queryPojo)) {
@@ -162,7 +179,7 @@ public class AbstractDto extends AbstractDtoApi {
         } else {
             OrgConnectionPojo orgConnectionPojo = orgConnectionApi.getCheckByOrgId(orgId);
             ConnectionPojo connectionPojo = connectionApi.getCheck(orgConnectionPojo.getConnectionId());
-            valuesMap = inputControlFlowApi.getValuesFromQuery(queryPojo.getQuery(), connectionPojo);
+            valuesMap = inputControlFlowApi.getValuesFromQuery(queryPojo.getQuery(), connectionPojo, password);
         }
         return valuesMap;
     }
