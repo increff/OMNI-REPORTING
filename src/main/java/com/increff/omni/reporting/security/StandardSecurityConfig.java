@@ -22,7 +22,6 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 
 @Configuration
 @EnableWebSecurity
-@Order(2)
 @Log4j
 public class StandardSecurityConfig {
 
@@ -48,8 +47,10 @@ public class StandardSecurityConfig {
 //    }
 
     @Bean
+    @Order(3)
     @Qualifier("standardSecurityFilterChain")
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http.securityMatcher("/standard/**");
         http.authorizeHttpRequests((requests) -> requests
                 .requestMatchers("/standard/schedules/**").hasAnyAuthority(APP_ADMIN)
                 .requestMatchers("/standard/**").hasAnyAuthority(APP_ADMIN,REPORT_ADMIN,REPORT_STANDARD))

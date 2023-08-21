@@ -26,7 +26,6 @@ import java.util.Arrays;
 
 @Configuration
 @EnableWebSecurity
-@Order(1)
 //@OpenAPIDefinition(servers = {@Server(url = "/", description = "Default Server URL")})
 public class AdminSecurityConfig {
     @Autowired
@@ -61,8 +60,10 @@ public class AdminSecurityConfig {
 //    }
 
     @Bean
+    @Order(2)
     @Qualifier("adminFilterChain")
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http.securityMatcher("/admin/**");
         http.authorizeHttpRequests((requests) -> requests.requestMatchers(HttpMethod.GET, "/admin/orgs").hasAnyAuthority(APP_ADMIN, REPORT_ADMIN)
                         .requestMatchers(HttpMethod.POST, "/admin/request-report/orgs/**").hasAnyAuthority(APP_ADMIN,
                                 REPORT_ADMIN)

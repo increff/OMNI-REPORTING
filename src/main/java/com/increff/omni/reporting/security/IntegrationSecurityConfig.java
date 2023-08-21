@@ -17,7 +17,6 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationFi
 
 @Configuration
 @EnableWebSecurity
-@Order(3)
 public class IntegrationSecurityConfig{
 
     @Autowired
@@ -45,8 +44,10 @@ public class IntegrationSecurityConfig{
 //    }
 
     @Bean
+    @Order(4)
     @Qualifier("integrationFilterChain")
     public SecurityFilterChain integrationFilterChain(HttpSecurity http) throws Exception {
+        http.securityMatcher("/integration/**");
         http.authorizeHttpRequests((requests) -> requests
                 .requestMatchers("/integration/**").hasAnyAuthority(APP_INTEGRATION))
                 .cors().and().csrf().disable()

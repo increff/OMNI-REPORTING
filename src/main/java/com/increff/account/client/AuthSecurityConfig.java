@@ -3,6 +3,7 @@ package com.increff.account.client;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
@@ -40,8 +41,10 @@ public class AuthSecurityConfig {
 //    }
 
     @Bean
+    @Order(1)
     @Qualifier("authFilterChain")
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http.securityMatcher("/session/domain-resource/**", "/session/app-resource/**");
         http.authorizeHttpRequests((requests) -> requests
                 // Match only these URLs
                 .requestMatchers("/session/domain-resource/**").hasAnyAuthority(domain_admin,app_admin)
