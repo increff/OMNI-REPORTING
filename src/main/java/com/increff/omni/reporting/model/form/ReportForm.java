@@ -1,5 +1,6 @@
 package com.increff.omni.reporting.model.form;
 
+import com.increff.omni.reporting.model.constants.ChartType;
 import com.increff.omni.reporting.model.constants.ReportType;
 import lombok.Getter;
 import lombok.Setter;
@@ -27,6 +28,8 @@ public class ReportForm {
     private Boolean canSchedule = false;
     @NotNull
     private Boolean isDashboard = false;
+    @NotNull
+    private ChartType chartType;
 
 
 }

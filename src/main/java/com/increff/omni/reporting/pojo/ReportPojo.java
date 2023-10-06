@@ -1,5 +1,6 @@
 package com.increff.omni.reporting.pojo;
 
+import com.increff.omni.reporting.model.constants.ChartType;
 import com.increff.omni.reporting.model.constants.ReportType;
 import lombok.Getter;
 import lombok.Setter;
@@ -47,5 +48,8 @@ public class ReportPojo extends AbstractVersionedPojo{
 
     @Column(nullable = false)
     private Boolean isDashboard = false;
+
+    @Column(nullable = false)
+    private ChartType chartType = ChartType.TABLE;
 
 }
