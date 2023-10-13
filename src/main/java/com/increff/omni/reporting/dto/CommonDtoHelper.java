@@ -15,8 +15,10 @@ import com.increff.service.encryption.form.CryptoForm;
 import com.nextscm.commons.lang.StringUtil;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
+import org.quartz.CronExpression;
 import org.springframework.scheduling.support.CronSequenceGenerator;
 
+import java.text.ParseException;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -453,6 +455,28 @@ public class CommonDtoHelper {
                 return value;
         } catch (Exception e) {
             return null;
+        }
+    }
+
+    public static void validateCronFrequency(ReportPojo reportPojo, ReportSchedulePojo reportSchedulePojo) throws ApiException {
+        if(CommonDtoHelper.getCronFrequencyInSeconds(reportSchedulePojo.getCron()) < reportPojo.getMinFrequencyAllowedSeconds())
+            throw new ApiException(ApiStatus.BAD_DATA, "Cron frequency " + reportSchedulePojo.getCron() + " is less than " +
+                    "minimum allowed frequency " + reportPojo.getMinFrequencyAllowedSeconds() + " seconds");
+    }
+
+    public static long getCronFrequencyInSeconds(String cronExpression) throws ApiException {
+        try {
+            CronExpression cron = new CronExpression(cronExpression);
+
+            // Get the next and previous firing times
+            Date nextFireTime = cron.getNextValidTimeAfter(new Date());
+            Date previousFireTime = cron.getTimeBefore(new Date());
+
+            // Calculate the frequency in seconds
+            return (nextFireTime.getTime() - previousFireTime.getTime()) / 1000;
+        }
+        catch (ParseException e) {
+            throw new ApiException(ApiStatus.BAD_DATA, "Failed to parse cron expression: " + cronExpression);
         }
     }
 }
