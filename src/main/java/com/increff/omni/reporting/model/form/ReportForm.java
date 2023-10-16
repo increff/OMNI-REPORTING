@@ -25,7 +25,6 @@ public class ReportForm {
     private Boolean isEnabled = true;
     @NotNull
     private Boolean canSchedule = false;
-    @NotNull
     private Integer minFrequencyAllowedSeconds = 15 * 60;
     @NotNull
     private Boolean isDashboard = false;

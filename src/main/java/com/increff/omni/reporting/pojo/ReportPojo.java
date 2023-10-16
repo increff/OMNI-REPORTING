@@ -45,7 +45,6 @@ public class ReportPojo extends AbstractVersionedPojo{
     @Column(nullable = false)
     private Boolean canSchedule = false;
 
-    @Column(nullable = false)
     private Integer minFrequencyAllowedSeconds = 15 * 60;
 
     @Column(nullable = false)
