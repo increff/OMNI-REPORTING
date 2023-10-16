@@ -459,7 +459,8 @@ public class CommonDtoHelper {
     }
 
     public static void validateCronFrequency(ReportPojo reportPojo, ReportSchedulePojo reportSchedulePojo) throws ApiException {
-        if(CommonDtoHelper.getCronFrequencyInSeconds(reportSchedulePojo.getCron()) < reportPojo.getMinFrequencyAllowedSeconds())
+        if((Objects.nonNull(reportPojo.getMinFrequencyAllowedSeconds())) &&
+                (getCronFrequencyInSeconds(reportSchedulePojo.getCron()) < reportPojo.getMinFrequencyAllowedSeconds()))
             throw new ApiException(ApiStatus.BAD_DATA, "Cron frequency " + reportSchedulePojo.getCron() + " is less than " +
                     "minimum allowed frequency " + reportPojo.getMinFrequencyAllowedSeconds() + " seconds");
     }
