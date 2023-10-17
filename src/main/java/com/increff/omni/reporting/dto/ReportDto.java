@@ -29,6 +29,7 @@ import java.util.stream.Collectors;
 
 import static com.increff.omni.reporting.dto.CommonDtoHelper.getDirectoryPath;
 import static com.increff.omni.reporting.dto.CommonDtoHelper.getIdToPojoMap;
+import static com.increff.omni.reporting.util.ValidateUtil.validateForm;
 
 @Service
 @Setter
@@ -64,7 +65,7 @@ public class ReportDto extends AbstractDto {
     private ConnectionApi connectionApi;
 
     public ReportData add(ReportForm form) throws ApiException {
-        checkValid(form);
+        validateForm(form);
         ReportPojo pojo = ConvertUtil.convert(form, ReportPojo.class);
         pojo = flowApi.addReport(pojo);
         flowApi.saveAudit(pojo.getId().toString(), AuditActions.CREATE_REPORT.toString()
@@ -73,7 +74,7 @@ public class ReportDto extends AbstractDto {
     }
 
     public ReportData edit(Integer id, ReportForm form) throws ApiException {
-        checkValid(form);
+        validateForm(form);
         ReportPojo pojo = ConvertUtil.convert(form, ReportPojo.class);
         pojo.setId(id);
         pojo = flowApi.editReport(pojo);
