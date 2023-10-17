@@ -66,6 +66,8 @@ public class ReportFlowApi extends AbstractFlowApi {
     @Autowired
     private ReportControlsApi reportControlsApi;
     @Autowired
+    private ReportScheduleApi reportScheduleApi;
+    @Autowired
     private InputControlApi inputControlApi;
     @Autowired
     private ApplicationProperties properties;
@@ -81,7 +83,8 @@ public class ReportFlowApi extends AbstractFlowApi {
     @Transactional(rollbackFor = ApiException.class)
     public ReportPojo editReport(ReportPojo pojo) throws ApiException {
         ReportPojo existing = api.getCheck(pojo.getId());
-        validateForEdit(pojo);
+        List<Integer> orgIds = orgSchemaApi.getBySchemaVersionId(pojo.getSchemaVersionId()).stream().map(OrgSchemaVersionPojo::getOrgId).collect(Collectors.toList());
+        validateForEdit(pojo, reportScheduleApi.selectByOrgIdReportAlias(orgIds, pojo.getAlias()));
         // Delete custom report access if transition is happening from CUSTOM to STANDARD
         if (existing.getType().equals(ReportType.CUSTOM) && pojo.getType().equals(ReportType.STANDARD))
             customReportAccessApi.deleteByReportId(pojo.getId());
@@ -298,7 +301,12 @@ public class ReportFlowApi extends AbstractFlowApi {
                     "matching");
     }
 
-    private void validateForEdit(ReportPojo pojo) throws ApiException {
+    private void validateForEdit(ReportPojo pojo, List<ReportSchedulePojo> reportSchedulePojos) throws ApiException {
+        if(pojo.getCanSchedule()) {
+            for (ReportSchedulePojo reportSchedulePojo : reportSchedulePojos)
+                validateCronFrequency(pojo, reportSchedulePojo);
+        }
+
         directoryApi.getCheck(pojo.getDirectoryId());
         schemaVersionApi.getCheck(pojo.getSchemaVersionId());
 
