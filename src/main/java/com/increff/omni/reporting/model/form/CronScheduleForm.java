@@ -10,6 +10,6 @@ public class CronScheduleForm {
     private String dayOfMonth;
     private String hour;
     private String minute;
-    private String dayOfWeek;
+    private Boolean isWeeklySchedule;
 
 }

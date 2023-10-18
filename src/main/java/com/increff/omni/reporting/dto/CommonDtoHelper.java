@@ -425,10 +425,15 @@ public class CommonDtoHelper {
 
     public static ReportSchedulePojo convertFormToReportSchedulePojo(ReportScheduleForm form, int orgId, int userId) {
         ReportSchedulePojo schedulePojo = new ReportSchedulePojo();
+
+        String dayOfWeek = "?";
+        if(form.getCronSchedule().getIsWeeklySchedule()){
+            dayOfWeek = form.getCronSchedule().getDayOfMonth();
+            form.getCronSchedule().setDayOfMonth("*");
+        }
         String cron = "0" + " " + form.getCronSchedule().getMinute() + " " + form.getCronSchedule().getHour() +
-                " " + form.getCronSchedule().getDayOfMonth() + " " + "*" + " ";
-        if(Objects.nonNull(form.getCronSchedule().getDayOfWeek())) cron += form.getCronSchedule().getDayOfWeek();
-        else cron += "?";
+                " " + form.getCronSchedule().getDayOfMonth() + " " + "* " + dayOfWeek;
+
         schedulePojo.setReportAlias(form.getReportAlias());
         schedulePojo.setIsEnabled(form.getIsEnabled());
         schedulePojo.setOrgId(orgId);
