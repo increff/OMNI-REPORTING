@@ -54,6 +54,7 @@ public class ReportScheduleDao extends AbstractDao<ReportSchedulePojo> {
     }
 
     public List<ReportSchedulePojo> selectByOrgIdReportAlias(List<Integer> orgIds, String reportAlias) {
+        if(orgIds.isEmpty())return new ArrayList<>();
         CriteriaBuilder cb = this.em.getCriteriaBuilder();
         CriteriaQuery<ReportSchedulePojo> query = cb.createQuery(ReportSchedulePojo.class);
         Root<ReportSchedulePojo> root = query.from(ReportSchedulePojo.class);
