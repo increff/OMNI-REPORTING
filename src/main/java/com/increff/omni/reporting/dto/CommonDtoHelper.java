@@ -466,25 +466,27 @@ public class CommonDtoHelper {
     }
 
     public static void validateCronFrequency(ReportPojo reportPojo, ReportSchedulePojo reportSchedulePojo) throws ApiException {
+        Long cronFrequency = getCronFrequencyInSeconds(reportSchedulePojo.getCron());
         if((Objects.nonNull(reportPojo.getMinFrequencyAllowedSeconds())) &&
-                (getCronFrequencyInSeconds(reportSchedulePojo.getCron()) < reportPojo.getMinFrequencyAllowedSeconds()))
-            throw new ApiException(ApiStatus.BAD_DATA, "Cron frequency " + reportSchedulePojo.getCron() + " is less than " +
-                    "minimum allowed frequency " + reportPojo.getMinFrequencyAllowedSeconds() + " seconds");
+                (cronFrequency < reportPojo.getMinFrequencyAllowedSeconds()))
+            throw new ApiException(ApiStatus.BAD_DATA, "Cron frequency " + cronFrequency + " for cron " + reportSchedulePojo.getCron() +
+                    " is less than minimum allowed frequency " + reportPojo.getMinFrequencyAllowedSeconds() + " seconds");
     }
 
     public static long getCronFrequencyInSeconds(String cronExpression) throws ApiException {
         try {
             CronExpression cron = new CronExpression(cronExpression);
 
-            // Get the next and previous firing times
-            Date nextFireTime = cron.getNextValidTimeAfter(new Date());
-            Date previousFireTime = cron.getTimeBefore(new Date());
+            // Get the next firing times
+            Date today = new Date();
+            Date nextFireTime = cron.getNextValidTimeAfter(today);
+            Date nextToNextFireTime = cron.getNextValidTimeAfter(nextFireTime);
 
             // Calculate the frequency in seconds
-            return (nextFireTime.getTime() - previousFireTime.getTime()) / 1000;
+            return (nextToNextFireTime.getTime() - nextFireTime.getTime()) / 1000;
         }
         catch (ParseException e) {
-            throw new ApiException(ApiStatus.BAD_DATA, "Failed to parse cron expression: " + cronExpression);
+            throw new ApiException(ApiStatus.BAD_DATA, "Failed to parse cron expression: " + cronExpression + ". " + e.getMessage());
         }
     }
 }
