@@ -427,7 +427,7 @@ public class CommonDtoHelper {
         ReportSchedulePojo schedulePojo = new ReportSchedulePojo();
 
         String dayOfWeek = "?";
-        if(form.getCronSchedule().getIsWeeklySchedule()){
+        if(Objects.nonNull(form.getCronSchedule().getIsWeeklySchedule()) && form.getCronSchedule().getIsWeeklySchedule()){
             dayOfWeek = form.getCronSchedule().getDayOfMonth();
             form.getCronSchedule().setDayOfMonth("*");
         }
