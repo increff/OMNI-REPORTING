@@ -429,7 +429,7 @@ public class CommonDtoHelper {
         String dayOfWeek = "?";
         if(Objects.nonNull(form.getCronSchedule().getIsWeeklySchedule()) && form.getCronSchedule().getIsWeeklySchedule()){
             dayOfWeek = form.getCronSchedule().getDayOfMonth();
-            form.getCronSchedule().setDayOfMonth("*");
+            form.getCronSchedule().setDayOfMonth("?");
         }
         String cron = "0" + " " + form.getCronSchedule().getMinute() + " " + form.getCronSchedule().getHour() +
                 " " + form.getCronSchedule().getDayOfMonth() + " " + "* " + dayOfWeek;
