@@ -185,6 +185,10 @@ public class ReportScheduleDto extends AbstractDto {
             data.setFilters(filterData);
             CronScheduleForm cronData = new CronScheduleForm();
             cronData.setDayOfMonth(pojo.getCron().split(" ")[3]);
+            cronData.setIsWeeklySchedule(pojo.getCron().split(" ")[3].equals("?")); // if day of month part of the cron is '?', treat it as a weekly schedule
+            if(cronData.getIsWeeklySchedule())
+                cronData.setDayOfMonth(pojo.getCron().split(" ")[5]);
+
             cronData.setHour(pojo.getCron().split(" ")[2]);
             cronData.setMinute(pojo.getCron().split(" ")[1]);
             data.setCronSchedule(cronData);
