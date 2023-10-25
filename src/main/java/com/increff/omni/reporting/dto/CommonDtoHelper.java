@@ -469,8 +469,23 @@ public class CommonDtoHelper {
         Long cronFrequency = getCronFrequencyInSeconds(reportSchedulePojo.getCron());
         if((Objects.nonNull(reportPojo.getMinFrequencyAllowedSeconds())) &&
                 (cronFrequency < reportPojo.getMinFrequencyAllowedSeconds()))
-            throw new ApiException(ApiStatus.BAD_DATA, "Cron frequency " + cronFrequency + " for cron " + reportSchedulePojo.getCron() +
-                    " is less than minimum allowed frequency " + reportPojo.getMinFrequencyAllowedSeconds() + " seconds");
+            throw new ApiException(ApiStatus.BAD_DATA, "Cron frequency " + cronFrequency + " is less than minimum allowed frequency "
+                    + reportPojo.getMinFrequencyAllowedSeconds() + " seconds. Report name : " + reportPojo.getName() +
+                    ", Scheduled Report Alias : " + reportSchedulePojo.getReportAlias() + ", Cron : " + reportSchedulePojo.getCron() + ", Schedule ID : " + reportSchedulePojo.getId());
+    }
+
+    public static void validateCronFrequency(ReportPojo reportPojo, List<ReportSchedulePojo> reportSchedulePojos) throws ApiException {
+        StringBuilder error = new StringBuilder();
+        for(ReportSchedulePojo reportSchedulePojo : reportSchedulePojos) {
+            try {
+                validateCronFrequency(reportPojo, reportSchedulePojo);
+            }
+            catch (ApiException e) {
+                error.append(e.getMessage()).append("\n");
+            }
+        }
+        if(error.length() > 0)
+            throw new ApiException(ApiStatus.BAD_DATA,"Please change existing schedules cron frequency before updating report min frequency.\n" + error.toString());
     }
 
     public static long getCronFrequencyInSeconds(String cronExpression) throws ApiException {

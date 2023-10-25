@@ -302,10 +302,7 @@ public class ReportFlowApi extends AbstractFlowApi {
     }
 
     private void validateForEdit(ReportPojo pojo, List<ReportSchedulePojo> reportSchedulePojos) throws ApiException {
-        if(pojo.getCanSchedule()) {
-            for (ReportSchedulePojo reportSchedulePojo : reportSchedulePojos)
-                validateCronFrequency(pojo, reportSchedulePojo);
-        }
+        if(pojo.getCanSchedule()) validateCronFrequency(pojo, reportSchedulePojos);
 
         directoryApi.getCheck(pojo.getDirectoryId());
         schemaVersionApi.getCheck(pojo.getSchemaVersionId());
