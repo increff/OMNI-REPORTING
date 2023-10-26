@@ -50,6 +50,6 @@ public class ReportPojo extends AbstractVersionedPojo{
     private Boolean isDashboard = false;
 
     @Column(nullable = false)
-    private ChartType chartType = ChartType.TABLE;
+    private ChartType chartType = ChartType.REPORT;
 
 }
