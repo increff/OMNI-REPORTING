@@ -11,7 +11,6 @@ import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 @Service
 @Transactional(rollbackFor = Exception.class)
@@ -47,7 +46,7 @@ public class ReportApi extends AbstractAuditApi {
         existing.setType(pojo.getType());
         existing.setIsEnabled(pojo.getIsEnabled());
         existing.setCanSchedule(pojo.getCanSchedule());
-        existing.setIsDashboard(pojo.getIsDashboard());
+        existing.setIsReport(pojo.getIsReport());
         dao.update(existing);
         return existing;
     }

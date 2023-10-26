@@ -47,7 +47,7 @@ public class ReportPojo extends AbstractVersionedPojo{
     private Boolean canSchedule = false;
 
     @Column(nullable = false)
-    private Boolean isDashboard = false;
+    private Boolean isReport = false;
 
     @Column(nullable = false)
     private ChartType chartType = ChartType.REPORT;

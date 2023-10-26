@@ -134,7 +134,7 @@ public class ReportFlowApiTest extends AbstractTest {
         flowApi.addReport(reportPojo);
         reportPojo = getReportPojo("Report 1", ReportType.CUSTOM
                 , directoryPojo.getId(), schemaVersionPojo.getId());
-        reportPojo.setIsDashboard(true);
+        reportPojo.setIsReport(true);
         flowApi.addReport(reportPojo);
         ReportPojo reportPojo1 = getReportPojo("Report 1 - 1", ReportType.STANDARD
                 , directoryPojo.getId(), schemaVersionPojo.getId());
