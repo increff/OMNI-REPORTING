@@ -207,7 +207,7 @@ public class ReportFlowApi extends AbstractFlowApi {
         // Migrate Reports
         List<ReportPojo> oldSchemaReports = api.getBySchemaVersion(oldSchemaVersionId);
         for (ReportPojo oldReport : oldSchemaReports) {
-            ReportPojo ex = api.getByNameAndSchema(oldReport.getName(), newSchemaVersionId, oldReport.getIsDashboard());
+            ReportPojo ex = api.getByNameAndSchema(oldReport.getName(), newSchemaVersionId, oldReport.getIsReport());
             if (Objects.nonNull(ex))
                 continue;
             // Add Report
@@ -304,7 +304,7 @@ public class ReportFlowApi extends AbstractFlowApi {
 
         // validating if requested name is already present
         ReportPojo existingByName =
-                api.getByNameAndSchema(pojo.getName(), pojo.getSchemaVersionId(), pojo.getIsDashboard());
+                api.getByNameAndSchema(pojo.getName(), pojo.getSchemaVersionId(), pojo.getIsReport());
         if (Objects.nonNull(existingByName) && !existingByName.getId().equals(pojo.getId()))
             throw new ApiException(ApiStatus.BAD_DATA, "Report already present with same name, schema version and " +
                     "report type (normal / dashboard)");
@@ -315,11 +315,11 @@ public class ReportFlowApi extends AbstractFlowApi {
         schemaVersionApi.getCheck(pojo.getSchemaVersionId());
         if(StringUtil.isEmpty(pojo.getAlias()) || pojo.getAlias().contains(" "))
             throw new ApiException(ApiStatus.BAD_DATA, "Report alias can't have space, use underscore(_) instead");
-        ReportPojo existing = api.getByNameAndSchema(pojo.getName(), pojo.getSchemaVersionId(), pojo.getIsDashboard());
+        ReportPojo existing = api.getByNameAndSchema(pojo.getName(), pojo.getSchemaVersionId(), pojo.getIsReport());
         if (existing != null)
             throw new ApiException(ApiStatus.BAD_DATA, "Report already present with same name, schema version and " +
                     "report type (normal / dashboard)");
-        ReportPojo ex = api.getByAliasAndSchema(pojo.getAlias(), pojo.getSchemaVersionId(), pojo.getIsDashboard());
+        ReportPojo ex = api.getByAliasAndSchema(pojo.getAlias(), pojo.getSchemaVersionId(), pojo.getIsReport());
         if (ex != null)
             throw new ApiException(ApiStatus.BAD_DATA, "Report already present with same alias, schema version and " +
                     "report type (normal / dashboard)");
