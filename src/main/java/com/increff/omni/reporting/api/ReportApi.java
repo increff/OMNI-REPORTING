@@ -70,4 +70,10 @@ public class ReportApi extends AbstractAuditApi {
     public ReportPojo getByAliasAndSchema(String alias, Integer schemaVersionId, Boolean isReport) {
         return dao.getByAliasAndSchema(alias, schemaVersionId, isReport);
     }
+
+    public ReportPojo getCheckByAliasAndSchema(String alias, Integer schemaVersionId, Boolean isReport) throws ApiException {
+        ReportPojo pojo = dao.getByAliasAndSchema(alias, schemaVersionId, isReport);
+        checkNotNull(pojo, "No report present with alias : " + alias);
+        return pojo;
+    }
 }
