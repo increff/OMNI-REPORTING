@@ -31,12 +31,12 @@ public class ReportApi extends AbstractAuditApi {
         return pojo;
     }
 
-    public ReportPojo getByNameAndSchema(String name, Integer schemaVersionId, Boolean isDashboard){
-        return dao.getByNameAndSchema(name, schemaVersionId, isDashboard);
+    public ReportPojo getByNameAndSchema(String name, Integer schemaVersionId, Boolean isReport){
+        return dao.getByNameAndSchema(name, schemaVersionId, isReport);
     }
 
-    public List<ReportPojo> getByTypeAndSchema(ReportType type, Integer schemaVersionId, Boolean isDashboard){
-        return dao.getByTypeAndSchema(type, schemaVersionId, isDashboard);
+    public List<ReportPojo> getByTypeAndSchema(ReportType type, Integer schemaVersionId, Boolean isReport){
+        return dao.getByTypeAndSchema(type, schemaVersionId, isReport);
     }
 
     public ReportPojo edit(ReportPojo pojo) throws ApiException {
@@ -51,23 +51,23 @@ public class ReportApi extends AbstractAuditApi {
         return existing;
     }
 
-    public List<ReportPojo> getByIdsAndSchema(List<Integer> ids, Integer schemaVersionId, Boolean isDashboard){
+    public List<ReportPojo> getByIdsAndSchema(List<Integer> ids, Integer schemaVersionId, Boolean isReport){
         if(CollectionUtils.isEmpty(ids))
             return new ArrayList<>();
-        return dao.getByIdsAndSchema(ids, schemaVersionId, isDashboard);
+        return dao.getByIdsAndSchema(ids, schemaVersionId, isReport);
     }
 
-    public List<ReportPojo> getByIds(List<Integer> ids, Boolean isDashboard){
+    public List<ReportPojo> getByIds(List<Integer> ids, Boolean isReport){
         if(CollectionUtils.isEmpty(ids))
             return new ArrayList<>();
-        return dao.getByIds(ids, isDashboard);
+        return dao.getByIds(ids, isReport);
     }
 
     public List<ReportPojo> getBySchemaVersion(Integer schemaVersionId) {
         return dao.selectMultiple("schemaVersionId", schemaVersionId);
     }
 
-    public ReportPojo getByAliasAndSchema(String alias, Integer schemaVersionId, Boolean isDashboard) {
-        return dao.getByAliasAndSchema(alias, schemaVersionId, isDashboard);
+    public ReportPojo getByAliasAndSchema(String alias, Integer schemaVersionId, Boolean isReport) {
+        return dao.getByAliasAndSchema(alias, schemaVersionId, isReport);
     }
 }

@@ -145,26 +145,26 @@ public class ReportDto extends AbstractDto {
         return data;
     }
 
-    public ReportData selectByAlias(Boolean isDashboard, String alias) throws ApiException {
+    public ReportData selectByAlias(Boolean isReport, String alias) throws ApiException {
         Integer orgId = getOrgId();
         organizationApi.getCheck(orgId);
         OrgSchemaVersionPojo schemaVersionPojo = orgSchemaApi.getCheckByOrgId(orgId);
         ReportPojo reportPojo = reportApi.getByAliasAndSchema(alias, schemaVersionPojo.getSchemaVersionId(),
-                isDashboard);
+                isReport);
         if(Objects.isNull(reportPojo))
             throw new ApiException(ApiStatus.BAD_DATA,
-                    (isDashboard ? "Dashboard" : "Report")  + " not available for alias : " + alias);
+                    (isReport ? "Dashboard" : "Report")  + " not available for alias : " + alias);
         validateCustomReportAccess(reportPojo, orgId);
         return convertToReportData(Collections.singletonList(reportPojo)).get(0);
     }
 
-    public List<ReportData> selectByOrg(Boolean isDashboard) throws ApiException {
-        return selectByOrg(getOrgId(), isDashboard);
+    public List<ReportData> selectByOrg(Boolean isReport) throws ApiException {
+        return selectByOrg(getOrgId(), isReport);
     }
 
-    public List<ReportData> selectByOrg(Integer orgId, Boolean isDashboard) throws ApiException {
+    public List<ReportData> selectByOrg(Integer orgId, Boolean isReport) throws ApiException {
         organizationApi.getCheck(orgId);
-        List<ReportPojo> pojos = flowApi.getAll(orgId, isDashboard);
+        List<ReportPojo> pojos = flowApi.getAll(orgId, isReport);
         return convertToReportData(pojos);
     }
 
