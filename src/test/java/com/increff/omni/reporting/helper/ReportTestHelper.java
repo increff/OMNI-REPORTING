@@ -1,9 +1,6 @@
 package com.increff.omni.reporting.helper;
 
-import com.increff.omni.reporting.model.constants.ReportRequestStatus;
-import com.increff.omni.reporting.model.constants.ReportRequestType;
-import com.increff.omni.reporting.model.constants.ReportType;
-import com.increff.omni.reporting.model.constants.ValidationType;
+import com.increff.omni.reporting.model.constants.*;
 import com.increff.omni.reporting.model.form.*;
 import com.increff.omni.reporting.pojo.*;
 
@@ -52,6 +49,7 @@ public class ReportTestHelper {
         form.setType(type);
         form.setCanSchedule(canSchedule);
         form.setAlias(name.replace(" ", "_"));
+        form.setChartType(ChartType.REPORT);
         return form;
     }
 
