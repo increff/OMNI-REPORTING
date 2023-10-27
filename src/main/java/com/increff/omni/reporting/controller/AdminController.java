@@ -276,8 +276,8 @@ public class AdminController {
 
     @ApiOperation(value = "Get Reports")
     @RequestMapping(value = "/reports/orgs/{orgId}", method = RequestMethod.GET)
-    public List<ReportData> selectByOrgId(@PathVariable Integer orgId, @RequestParam Boolean isDashboard) throws ApiException {
-        return reportDto.selectByOrg(orgId, isDashboard);
+    public List<ReportData> selectByOrgId(@PathVariable Integer orgId, @RequestParam Boolean isReport) throws ApiException {
+        return reportDto.selectByOrg(orgId, isReport);
     }
 
     @ApiOperation(value = "Get Live Data For Any Organization")
