@@ -39,6 +39,8 @@ public class AbstractDto extends AbstractDtoApi {
     @Autowired
     private OrgConnectionApi orgConnectionApi;
     @Autowired
+    private OrgSchemaApi orgSchemaApi;
+    @Autowired
     private ConnectionApi connectionApi;
     @Autowired
     private InputControlFlowApi inputControlFlowApi;
@@ -56,6 +58,10 @@ public class AbstractDto extends AbstractDtoApi {
 
     protected static String getUserName() {
         return getPrincipal().getUsername();
+    }
+
+    protected Integer getSchemaVersionId() throws ApiException{
+        return orgSchemaApi.getCheckByOrgId(getOrgId()).getSchemaVersionId();
     }
 
     protected void validateInputParamValues(Map<String, List<String>> inputParams,
