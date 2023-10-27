@@ -75,7 +75,7 @@ public class ReportScheduleDtoTest extends AbstractTest {
         ReportForm reportForm = commonSetup(false);
         reportDto.add(reportForm);
         List<ReportScheduleForm.InputParamMap> inputParamMaps = getInputParamList();
-        ReportScheduleForm form = getReportScheduleForm("*/15", "*", "*", "Report 1", "Asia/Kolkata",
+        ReportScheduleForm form = getReportScheduleForm("*/15", "*", "*", "?", "Report 1", "Asia/Kolkata",
                  true, Arrays.asList("a@gmail.com", "b@gmail.com"), inputParamMaps);
         try {
             dto.scheduleReport(form);
@@ -93,7 +93,7 @@ public class ReportScheduleDtoTest extends AbstractTest {
         ReportQueryForm queryForm = getReportQueryForm("select version();");
         reportDto.upsertQuery(reportData.getId(), queryForm);
         List<ReportScheduleForm.InputParamMap> inputParamMaps = getInputParamList();
-        ReportScheduleForm form = getReportScheduleForm("*/15", "*", "*", "Report 1", "Asia/Kolkata",
+        ReportScheduleForm form = getReportScheduleForm("*/15", "*", "*", "?", "Report 1", "Asia/Kolkata",
                 true, Arrays.asList("a@gmail.com", "b@gmail.com"), inputParamMaps);
         dto.scheduleReport(form);
         List<ReportScheduleData> reportScheduleData = dto.getScheduleReports(1, 100);
@@ -115,7 +115,7 @@ public class ReportScheduleDtoTest extends AbstractTest {
         ReportQueryForm queryForm = getReportQueryForm("select version();");
         reportDto.upsertQuery(reportData.getId(), queryForm);
         List<ReportScheduleForm.InputParamMap> inputParamMaps = getInputParamList();
-        ReportScheduleForm form = getReportScheduleForm("*/15", "*", "*", "Report 1", "Asia/Kolkata",
+        ReportScheduleForm form = getReportScheduleForm("*/15", "*", "*", "?", "Report 1", "Asia/Kolkata",
                 true, Arrays.asList("a@gmail.com", "b@gmail.com"), inputParamMaps);
         dto.scheduleReport(form);
         ReportScheduleData reportScheduleData = dto.getScheduleReports(1, 100).get(0);
@@ -140,7 +140,7 @@ public class ReportScheduleDtoTest extends AbstractTest {
         ReportQueryForm queryForm = getReportQueryForm("select version();");
         reportDto.upsertQuery(reportData.getId(), queryForm);
         List<ReportScheduleForm.InputParamMap> inputParamMaps = getInputParamList();
-        ReportScheduleForm form = getReportScheduleForm("*/15", "*", "*", "Report 1", "Asia/Kolkata",
+        ReportScheduleForm form = getReportScheduleForm("*/15", "*", "*", "?", "Report 1", "Asia/Kolkata",
                 true, Arrays.asList("a@gmail.com", "b@gmail.com"), inputParamMaps);
         dto.scheduleReport(form);
         ReportScheduleData reportScheduleData = dto.getScheduleReports(1, 100).get(0);
@@ -157,7 +157,7 @@ public class ReportScheduleDtoTest extends AbstractTest {
         ReportQueryForm queryForm = getReportQueryForm("select version();");
         reportDto.upsertQuery(reportData.getId(), queryForm);
         List<ReportScheduleForm.InputParamMap> inputParamMaps = getInputParamList();
-        ReportScheduleForm form = getReportScheduleForm("*/15", "*", "*", "Report 1", "Asia/Kolkata",
+        ReportScheduleForm form = getReportScheduleForm("*/15", "*", "*", "?", "Report 1", "Asia/Kolkata",
                 true, Arrays.asList("a@gmail.com", "b@gmail.com"), inputParamMaps);
         dto.scheduleReport(form);
         ReportScheduleData reportScheduleData = dto.getScheduleReports(1, 100).get(0);
@@ -181,7 +181,7 @@ public class ReportScheduleDtoTest extends AbstractTest {
         InputControlData inputControlData = inputControlDto.add(inputControlForm);
         reportDto.mapToControl(reportData.getId(), inputControlData.getId());
         List<ReportScheduleForm.InputParamMap> inputParamMaps = getInputParamList();
-        ReportScheduleForm form = getReportScheduleForm("*/15", "*", "*", "Report 1", "Asia/Kolkata",
+        ReportScheduleForm form = getReportScheduleForm("*/15", "*", "*", "?", "Report 1", "Asia/Kolkata",
                 true, Arrays.asList("a@gmail.com", "b@gmail.com"), inputParamMaps);
         dto.scheduleReport(form);
         List<ReportScheduleData> reportScheduleData = dto.getScheduleReports(1, 100);
