@@ -11,7 +11,7 @@ public class ValidateUtil {
 
     public static void validateReportForm(ReportForm reportForm) throws ApiException {
         checkValid(reportForm);
-        if(reportForm.getChartType() != ChartType.REPORT && !reportForm.getIsDashboard())
+        if(reportForm.getChartType() != ChartType.REPORT && !reportForm.getIsReport())
             throw new ApiException(ApiStatus.BAD_DATA, "Chart Types are only allowed for dashboard reports");
 
     }

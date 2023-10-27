@@ -70,7 +70,7 @@ public class ConnectionDtoTestIT extends AbstractTest {
     @Test
     public void testGetLiveData() throws ApiException, IOException {
         ReportForm reportForm = commonSetup("Report 2", ReportType.STANDARD);
-        reportForm.setIsDashboard(true);
+        reportForm.setIsReport(true);
         ReportData reportData = reportDto.add(reportForm);
         ReportQueryData queryData = reportDto.getQuery(reportData.getId());
         assertEquals("", queryData.getQuery());

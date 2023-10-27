@@ -27,7 +27,7 @@ public class ReportForm {
     @NotNull
     private Boolean canSchedule = false;
     @NotNull
-    private Boolean isDashboard = false;
+    private Boolean isReport = false;
     @NotNull
     private ChartType chartType;
 
