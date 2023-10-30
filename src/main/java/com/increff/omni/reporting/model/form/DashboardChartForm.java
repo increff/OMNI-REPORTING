@@ -9,8 +9,6 @@ import javax.validation.constraints.NotNull;
 @Getter
 public class DashboardChartForm {
     @NotNull
-    private Integer dashboardId;
-    @NotNull
     private String chartAlias;
     @NotNull
     private Integer row;
