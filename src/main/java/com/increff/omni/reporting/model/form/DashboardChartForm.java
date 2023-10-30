@@ -15,6 +15,6 @@ public class DashboardChartForm {
     @NotNull
     private Integer col;
     @NotNull
-    private Integer col_width;
+    private Integer colWidth;
     //TODO : Add filters list? or just get from chartAlias
 }
