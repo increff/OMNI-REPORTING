@@ -22,4 +22,6 @@ public class DashboardChartPojo extends AbstractVersionedPojo{
     private Integer row;
     @Column(nullable = false)
     private Integer col;
+    @Column(nullable = false)
+    private Integer colWidth;
 }
