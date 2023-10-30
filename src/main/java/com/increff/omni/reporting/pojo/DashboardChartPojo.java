@@ -1,0 +1,25 @@
+package com.increff.omni.reporting.pojo;
+
+import lombok.Getter;
+import lombok.Setter;
+
+import javax.persistence.*;
+
+@Entity
+@Getter
+@Setter
+public class DashboardChartPojo extends AbstractVersionedPojo{
+    @Id
+    @TableGenerator(name = "dashboard_chart", pkColumnValue = "dashboard_chart")
+    @GeneratedValue(strategy = GenerationType.TABLE, generator = "dashboard_chart")
+    private Integer id;
+    @Column(nullable = false)
+    private Integer dashboardId;
+    @Column(nullable = false)
+    private String chartAlias;
+
+    @Column(nullable = false)
+    private Integer row;
+    @Column(nullable = false)
+    private Integer col;
+}
