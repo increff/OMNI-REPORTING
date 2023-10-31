@@ -11,10 +11,17 @@ import java.util.List;
 @Repository
 @Transactional
 public class DashboardChartDao extends AbstractDao<DashboardChartPojo> {
-    public final String SELECT_BY_DASHBOARD_ID = "select p from DashboardChartPojo p where p.dashboardId = :id";
 
+    public final String SELECT_BY_DASHBOARD_ID = "select p from DashboardChartPojo p where p.dashboardId = :id";
     public List<DashboardChartPojo> getByDashboardId(Integer id) {
         return selectMultiple(createJpqlQuery(SELECT_BY_DASHBOARD_ID)
                 .setParameter("id", id));
+    }
+
+    public final String SELECT_BY_DASHBOARD_AND_CHART_ID = "select p from DashboardChartPojo p where p.dashboardId = :dashboardId and p.chartId = :chartId";
+    public DashboardChartPojo getByDashboardAndChartId(Integer dashboardId, Integer chartId) {
+        return selectSingleOrNull(createJpqlQuery(SELECT_BY_DASHBOARD_AND_CHART_ID)
+                .setParameter("dashboardId", dashboardId)
+                .setParameter("chartId", chartId));
     }
 }
