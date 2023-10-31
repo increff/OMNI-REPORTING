@@ -15,7 +15,6 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -202,5 +201,17 @@ public class ReportScheduleDtoTest extends AbstractTest {
         assertTrue(dataList.get(0).getFilters().isEmpty());
     }
 
+    @Test(expected = ApiException.class)
+    public void testAddScheduleWithFrequencyLessThanMinimumAllowedFrequency() throws ApiException {
+        ReportForm reportForm = commonSetup(true);
+        reportForm.setMinFrequencyAllowedSeconds(86400);
+        ReportData reportData = reportDto.add(reportForm);
+        ReportQueryForm queryForm = getReportQueryForm("select version();");
+        reportDto.upsertQuery(reportData.getId(), queryForm);
+        List<ReportScheduleForm.InputParamMap> inputParamMaps = getInputParamList();
+        ReportScheduleForm form = getReportScheduleForm("*/5", "*", "*", "?", "Report 1", "Asia/Kolkata",
+                true, Arrays.asList("a@gmail.com", "b@gmail.com"), inputParamMaps);
+        dto.scheduleReport(form);
+    }
 
 }
