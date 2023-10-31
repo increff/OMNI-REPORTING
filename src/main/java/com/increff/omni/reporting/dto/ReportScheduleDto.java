@@ -193,6 +193,7 @@ public class ReportScheduleDto extends AbstractDto {
             data.setCronSchedule(cronData);
             data.setTimezone(getValueFromQuotes(timezone));
             data.setSendTo(emailsPojos.stream().map(ReportScheduleEmailsPojo::getSendTo).collect(Collectors.toList()));
+            data.setMinFrequencyAllowedSeconds(reportPojo.getMinFrequencyAllowedSeconds());
             dataList.add(data);
         }
         return dataList;

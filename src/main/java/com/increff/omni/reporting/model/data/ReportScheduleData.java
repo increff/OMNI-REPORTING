@@ -28,5 +28,7 @@ public class ReportScheduleData {
     private Integer successCount;
     private Integer failureCount;
 
+    private Integer minFrequencyAllowedSeconds;
+
 
 }
