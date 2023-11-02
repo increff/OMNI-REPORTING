@@ -2,10 +2,14 @@ package com.increff.omni.reporting.util;
 
 import com.increff.omni.reporting.dto.QueryExecutionDto;
 import com.increff.omni.reporting.model.form.SqlParams;
+import com.nextscm.commons.spring.common.ApiException;
+import com.nextscm.commons.spring.common.ApiStatus;
+import com.nextscm.commons.spring.common.JsonUtil;
 import lombok.extern.log4j.Log4j;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -62,6 +66,20 @@ public class SqlCmd {
                 break;
         }
         return finalString;
+    }
+
+    public static Integer getValueSum(List<Map<String, String>> result) throws ApiException {
+        int sum = 0;
+        for(Map<String, String> map : result) {
+            for(String value : map.values()) {
+                try {
+                    sum += Integer.parseInt(value);
+                } catch (NumberFormatException e) {
+                    throw new ApiException(ApiStatus.BAD_DATA, "Failed to parse to Integer. Value: " + value + " Row: " + JsonUtil.serialize(map));
+                }
+            }
+        }
+        return sum;
     }
 
 }
