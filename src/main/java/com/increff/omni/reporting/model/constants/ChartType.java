@@ -1,5 +1,16 @@
 package com.increff.omni.reporting.model.constants;
 
+import lombok.Getter;
+
+@Getter
 public enum ChartType {
-    REPORT, BAR, PIE, SINGLE
+    REPORT(null,null), BAR(1,null), PIE(1,null), SINGLE(1,1);
+
+    private Integer ROW;
+    private Integer COL;
+
+    ChartType(Integer row, Integer col) {
+        this.ROW = row;
+        this.COL = col;
+    }
 }
