@@ -8,6 +8,7 @@ public enum ChartType {
 
     private Integer ROW;
     private Integer COL;
+    // TODO: Add value sum validation for PIE
 
     ChartType(Integer row, Integer col) {
         this.ROW = row;
