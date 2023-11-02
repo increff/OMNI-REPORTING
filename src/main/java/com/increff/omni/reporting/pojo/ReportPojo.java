@@ -50,6 +50,7 @@ public class ReportPojo extends AbstractVersionedPojo{
     private Boolean isReport = false;
 
     @Column(nullable = false)
+    @Enumerated(value = EnumType.STRING)
     private ChartType chartType = ChartType.REPORT;
 
 }
