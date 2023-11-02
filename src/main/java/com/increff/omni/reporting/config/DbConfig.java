@@ -47,6 +47,13 @@ public class DbConfig {
 	@Value("${hibernate.max.connection:100}")
 	private Integer maxConnection;
 
+	@Value("${hibernate.id.generator.stored_last_used}")
+	private Boolean hibernateIdGeneratorStoredLastUsed;
+	@Value("${hibernate.model.generator_name_as_sequence_name}")
+	private Boolean hibernateModelGeneratorNameAsSequenceName;
+
+
+
 
 	@Bean(name = "dataSource")
 	public DataSource getDataSource() {
@@ -70,6 +77,8 @@ public class DbConfig {
 		jpaProperties.put("hibernate.jdbc.batch_size", hibernateJdbcBatchSize);
 		jpaProperties.put("hibernate.cache.use_second_level_cache", false);
 		jpaProperties.put("hibernate.physical_naming_strategy", new SnakeCaseNamingStrategy(""));
+		jpaProperties.put("hibernate.id.generator.stored_last_used", hibernateIdGeneratorStoredLastUsed);
+		jpaProperties.put("hibernate.model.generator_name_as_sequence_name", hibernateModelGeneratorNameAsSequenceName);
 		bean.setJpaProperties(jpaProperties);
 		return bean;
 	}
