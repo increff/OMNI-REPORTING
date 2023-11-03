@@ -158,13 +158,13 @@ public class ReportDto extends AbstractDto {
         return convertToReportData(Collections.singletonList(reportPojo)).get(0);
     }
 
-    public List<ReportData> selectByOrg(Boolean isReport) throws ApiException {
-        return selectByOrg(getOrgId(), isReport);
+    public List<ReportData> selectByOrg(Boolean isReport, String visualization) throws ApiException {
+        return selectByOrg(getOrgId(), isReport, visualization);
     }
 
-    public List<ReportData> selectByOrg(Integer orgId, Boolean isReport) throws ApiException {
+    public List<ReportData> selectByOrg(Integer orgId, Boolean isReport, String visualization) throws ApiException {
         organizationApi.getCheck(orgId);
-        List<ReportPojo> pojos = flowApi.getAll(orgId, isReport);
+        List<ReportPojo> pojos = flowApi.getAll(orgId, isReport, visualization);
         return convertToReportData(pojos);
     }
 
