@@ -15,5 +15,4 @@ public class DefaultValueForm {
     private Integer controlId;
     @NotNull
     private List<String> defaultValue;
-    // TODO: test how this will work with dynamic values getting from queries and how date will be handled
 }
