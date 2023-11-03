@@ -96,7 +96,7 @@ public class ReportFlowApiTest extends AbstractTest {
         } catch (ApiException e) {
             assertEquals(ApiStatus.BAD_DATA, e.getStatus());
             assertEquals("Report already present with same name, schema version and report type (normal / dashboard)", e.getMessage());
-            List<ReportPojo> reportPojos = flowApi.getAll(100001, false);
+            List<ReportPojo> reportPojos = flowApi.getAll(100001, false, null);
             assertEquals(1, reportPojos.size());
             assertEquals("Report 1", reportPojos.get(0).getName());
             throw e;

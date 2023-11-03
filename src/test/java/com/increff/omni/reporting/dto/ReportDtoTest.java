@@ -59,7 +59,7 @@ public class ReportDtoTest extends AbstractTest {
     public void testAdd() throws ApiException {
         ReportForm form = commonSetup("Report 1", ReportType.STANDARD);
         ReportData data = dto.add(form);
-        List<ReportData> reportDataList = dto.selectAllBySchemaVersion(data.getSchemaVersionId());
+        List<ReportData> reportDataList = dto.selectAllBySchemaVersion(data.getSchemaVersionId(), null);
         assertEquals(1, reportDataList.size());
         assertEquals("Report 1", reportDataList.get(0).getName());
         assertEquals(ReportType.STANDARD, reportDataList.get(0).getType());
@@ -190,7 +190,7 @@ public class ReportDtoTest extends AbstractTest {
         copyReportsForm.setOldSchemaVersionId(data.getSchemaVersionId());
         copyReportsForm.setNewSchemaVersionId(schemaData.getId());
         dto.copyReports(copyReportsForm);
-        List<ReportData> reportDataList = dto.selectAllBySchemaVersion(schemaData.getId());
+        List<ReportData> reportDataList = dto.selectAllBySchemaVersion(schemaData.getId(), null);
         assertEquals(1, reportDataList.size());
     }
 
