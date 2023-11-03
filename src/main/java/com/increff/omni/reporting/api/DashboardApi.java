@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @Transactional(rollbackFor = Exception.class)
 public class DashboardApi extends AbstractApi {
@@ -26,6 +28,10 @@ public class DashboardApi extends AbstractApi {
         if(!pojo.getOrgId().equals(orgId))
             throw new ApiException(ApiStatus.BAD_DATA, "Dashboard does not belong to orgId: " + orgId);
         return pojo;
+    }
+
+    public List<DashboardPojo> getByOrgId(Integer orgId) {
+        return dao.getByOrgId(orgId);
     }
 
     private DashboardPojo getCheck(Integer id) throws ApiException {
