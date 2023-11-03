@@ -1,5 +1,6 @@
 package com.increff.omni.reporting.dao;
 
+import com.increff.omni.reporting.model.constants.ChartType;
 import com.increff.omni.reporting.model.constants.ReportType;
 import com.increff.omni.reporting.pojo.ReportPojo;
 import com.nextscm.commons.spring.db.AbstractDao;
@@ -10,13 +11,17 @@ import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Repository
 @Transactional
 public class ReportDao extends AbstractDao<ReportPojo> {
 
-    public List<ReportPojo> getByTypeAndSchema(ReportType type, Integer schemaVersionId, Boolean isReport) {
+    public List<ReportPojo> getByTypeAndSchema(ReportType type, Integer schemaVersionId, Boolean isReport, String visualization) {
         CriteriaBuilder cb = this.em.getCriteriaBuilder();
         CriteriaQuery<ReportPojo> query = cb.createQuery(ReportPojo.class);
         Root<ReportPojo> root = query.from(ReportPojo.class);
@@ -25,7 +30,8 @@ public class ReportDao extends AbstractDao<ReportPojo> {
                         cb.equal(root.get("type"), type),
                         cb.equal(root.get("schemaVersionId"), schemaVersionId),
                         cb.equal(root.get("isEnabled"), true),
-                        cb.equal(root.get("isReport"), isReport)
+                        cb.equal(root.get("isReport"), isReport),
+                        root.get("chartType").in(parseVisualization(visualization))
                 )
         );
         TypedQuery<ReportPojo> tQuery = createQuery(query);
@@ -106,5 +112,15 @@ public class ReportDao extends AbstractDao<ReportPojo> {
         return selectMultiple(tQuery);
     }
 
+    private List<ChartType> parseVisualization(String visualization){
+        if(Objects.isNull(visualization)) // TODO: add functuinaklity for all charts as well
+            return Arrays.stream(ChartType.values()).collect(Collectors.toList());
+        if(visualization.equals("REPORTS"))
+            return Collections.singletonList(ChartType.REPORT);
+        if(visualization.equals("CHARTS"))
+            return Arrays.stream(ChartType.values()).filter(chartType -> chartType != ChartType.REPORT)
+                .collect(Collectors.toList());
 
+        return Collections.singletonList(ChartType.valueOf(visualization));
+    }
 }
