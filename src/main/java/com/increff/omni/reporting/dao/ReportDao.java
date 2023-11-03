@@ -91,4 +91,20 @@ public class ReportDao extends AbstractDao<ReportPojo> {
         TypedQuery<ReportPojo> tQuery = createQuery(query);
         return selectSingleOrNull(tQuery);
     }
+
+    public List<ReportPojo> getBySchemaVersionAndTypes(Integer schemaVersionId, List<String> chartTypes){
+        CriteriaBuilder cb = this.em.getCriteriaBuilder();
+        CriteriaQuery<ReportPojo> query = cb.createQuery(ReportPojo.class);
+        Root<ReportPojo> root = query.from(ReportPojo.class);
+        query.where(
+                cb.and(
+                        cb.equal(root.get("schemaVersionId"), schemaVersionId),
+                        root.get("chartType").in(chartTypes)
+                )
+        );
+        TypedQuery<ReportPojo> tQuery = createQuery(query);
+        return selectMultiple(tQuery);
+    }
+
+
 }
