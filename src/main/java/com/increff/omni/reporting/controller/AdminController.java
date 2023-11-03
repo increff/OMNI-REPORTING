@@ -136,6 +136,7 @@ public class AdminController {
     @ApiOperation(value = "Get All Report")
     @RequestMapping(value = "/reports/schema-versions/{schemaVersionId}", method = RequestMethod.GET)
     public List<ReportData> getAll(@PathVariable Integer schemaVersionId) throws ApiException {
+        // todo : add vis param to api
         return reportDto.selectAllBySchemaVersion(schemaVersionId);
     }
 
@@ -276,8 +277,8 @@ public class AdminController {
 
     @ApiOperation(value = "Get Reports")
     @RequestMapping(value = "/reports/orgs/{orgId}", method = RequestMethod.GET)
-    public List<ReportData> selectByOrgId(@PathVariable Integer orgId, @RequestParam Boolean isReport) throws ApiException {
-        return reportDto.selectByOrg(orgId, isReport);
+    public List<ReportData> selectByOrgId(@PathVariable Integer orgId, @RequestParam Boolean isReport, @RequestParam String visualization) throws ApiException {
+        return reportDto.selectByOrg(orgId, isReport, visualization);
     }
 
     @ApiOperation(value = "Get Live Data For Any Organization")
