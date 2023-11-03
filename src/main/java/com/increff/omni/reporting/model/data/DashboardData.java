@@ -13,5 +13,5 @@ public class DashboardData {
     private Integer id;
     private DashboardForm dashboardDetails;
     private List<InputControlData> filterDetails;
-    private List<List<DashboardChartData>> grid;
+    private List<List<DashboardGridData>> grid;
 }
