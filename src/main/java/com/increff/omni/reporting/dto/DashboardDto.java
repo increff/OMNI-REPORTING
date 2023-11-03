@@ -43,7 +43,6 @@ public class DashboardDto extends AbstractDto {
     @Autowired
     private DefaultValueApi defaultValueApi;
 
-
     public DashboardData addDashboard(DashboardForm form) throws ApiException {
         checkValid(form);
         DashboardPojo dashboardPojo = ConvertUtil.convert(form, DashboardPojo.class);
@@ -51,5 +50,9 @@ public class DashboardDto extends AbstractDto {
         return getDashboard(api.add(dashboardPojo).getId());
     }
 
-
-}
+    public List<DashboardListData> getDashboardsByOrgId() {
+        return getDashboardsByOrgId(getOrgId());
+    }
+    public List<DashboardListData> getDashboardsByOrgId(Integer orgId) {
+        return ConvertUtil.convert(api.getByOrgId(orgId), DashboardListData.class);
+    }
