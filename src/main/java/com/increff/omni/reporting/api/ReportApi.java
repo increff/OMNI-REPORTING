@@ -65,8 +65,8 @@ public class ReportApi extends AbstractAuditApi {
         return dao.getByIds(ids, isReport);
     }
 
-    public List<ReportPojo> getBySchemaVersion(Integer schemaVersionId) {
-        return dao.selectMultiple("schemaVersionId", schemaVersionId);
+    public List<ReportPojo> getBySchemaVersion(Integer schemaVersionId, String visualization) {
+        return dao.getBySchemaVersionAndTypes(schemaVersionId, visualization);
     }
 
     public ReportPojo getByAliasAndSchema(String alias, Integer schemaVersionId, Boolean isReport) {
