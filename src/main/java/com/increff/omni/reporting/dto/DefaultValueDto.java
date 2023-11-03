@@ -49,7 +49,7 @@ public class DefaultValueDto extends AbstractDto {
     }
 
     private void validateControlIdExistsForDashboard(Integer dashboardId, Integer controlId) throws ApiException {
-        List<InputControlData> inputControlDatas = dashboardDto.getFilterDetails(getOrgId(), dashboardApi.getCheck(dashboardId, getOrgId()),
+        List<InputControlData> inputControlDatas = dashboardDto.getFilterDetails(dashboardApi.getCheck(dashboardId, getOrgId()),
                 dashboardChartApi.getByDashboardId(dashboardId));
         if(inputControlDatas.stream().noneMatch(inputControlData -> inputControlData.getId().equals(controlId))){
             throw new ApiException(ApiStatus.BAD_DATA, "Control Id does not exist for dashboard id: " + dashboardId + " control id: " + controlId);
