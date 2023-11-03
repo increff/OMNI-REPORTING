@@ -54,8 +54,8 @@ public class StandardController {
 
     @ApiOperation(value = "Get Reports")
     @RequestMapping(value = "/reports", method = RequestMethod.GET)
-    public List<ReportData> selectByOrgId(@RequestParam Boolean isReport) throws ApiException {
-        return reportDto.selectByOrg(isReport);
+    public List<ReportData> selectByOrgId(@RequestParam Boolean isReport, @RequestParam String visualization) throws ApiException {
+        return reportDto.selectByOrg(isReport, visualization);
     }
 
     @ApiOperation(value = "Get Report by Alias")

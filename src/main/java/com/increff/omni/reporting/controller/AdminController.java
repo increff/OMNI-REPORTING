@@ -135,9 +135,8 @@ public class AdminController {
 
     @ApiOperation(value = "Get All Report")
     @RequestMapping(value = "/reports/schema-versions/{schemaVersionId}", method = RequestMethod.GET)
-    public List<ReportData> getAll(@PathVariable Integer schemaVersionId) throws ApiException {
-        // todo : add vis param to api
-        return reportDto.selectAllBySchemaVersion(schemaVersionId);
+    public List<ReportData> getAll(@PathVariable Integer schemaVersionId, @RequestParam String visualization) throws ApiException {
+        return reportDto.selectAllBySchemaVersion(schemaVersionId, visualization);
     }
 
     @ApiOperation(value = "Copy Schema Reports")
