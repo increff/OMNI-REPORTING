@@ -490,7 +490,6 @@ public class CommonDtoHelper {
             Date nextFireTime = cron.getNextValidTimeAfter(new Date());
             Date nextToNextFireTime;
 
-            // TODO: Calculate the no. of times to iterate over the for loop instead of 100
             for(int i=0;i<100;i++){ // loop over multiple consecutive fire times to get the minimum frequency as cron expression can be non-periodic
                 nextToNextFireTime = cron.getNextValidTimeAfter(nextFireTime);
                 freqIntervalSecondsMin = Math.min(freqIntervalSecondsMin, ((nextToNextFireTime.getTime() - nextFireTime.getTime()) / 1000) );
