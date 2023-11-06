@@ -214,4 +214,20 @@ public class ReportScheduleDtoTest extends AbstractTest {
         dto.scheduleReport(form);
     }
 
+    @Test(expected = ApiException.class)
+    public void testEditReportMinFrequencyWithConflictingSchedulerFrequency() throws ApiException {
+        ReportForm reportForm = commonSetup(true);
+        reportForm.setAlias(reportForm.getAlias().toLowerCase());
+        reportForm.setMinFrequencyAllowedSeconds(300);
+        ReportData reportData = reportDto.add(reportForm);
+        ReportQueryForm queryForm = getReportQueryForm("select version();");
+        reportDto.upsertQuery(reportData.getId(), queryForm);
+        List<ReportScheduleForm.InputParamMap> inputParamMaps = getInputParamList();
+        ReportScheduleForm form = getReportScheduleForm("*/5", "*", "*", "?", "Report 1", "Asia/Kolkata",
+                true, Arrays.asList("a@gmail.com", "b@gmail.com"), inputParamMaps);
+        dto.scheduleReport(form);
+
+        reportForm.setMinFrequencyAllowedSeconds(301);
+        reportDto.edit(reportData.getId(), reportForm);
+    }
 }
