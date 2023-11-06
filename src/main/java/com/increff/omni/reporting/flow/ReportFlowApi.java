@@ -68,6 +68,8 @@ public class ReportFlowApi extends AbstractFlowApi {
     @Autowired
     private InputControlApi inputControlApi;
     @Autowired
+    private ChartLegendsApi chartLegendsApi;
+    @Autowired
     private ApplicationProperties properties;
 
     private static final Integer MAX_NUMBER_OF_ROWS = 300;
@@ -214,6 +216,11 @@ public class ReportFlowApi extends AbstractFlowApi {
             ReportPojo pojo = getReportPojoFromExistingPojo(oldReport);
             pojo.setSchemaVersionId(newSchemaVersionId);
             addReport(pojo);
+
+            // Copy Legends
+            List<ChartLegendsPojo> legendsPojoList = chartLegendsApi.getByChartId(oldReport.getId());
+            chartLegendsApi.put(pojo.getId(), legendsPojoList.stream().collect(Collectors.toMap(ChartLegendsPojo::getLegendKey, ChartLegendsPojo::getValue)));
+
             // Add Report Query
             ReportQueryPojo exQuery = queryApi.getByReportId(oldReport.getId());
             if (Objects.nonNull(exQuery)) {
