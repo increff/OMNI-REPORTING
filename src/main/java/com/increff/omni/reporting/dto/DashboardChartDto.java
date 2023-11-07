@@ -5,15 +5,13 @@ import com.increff.omni.reporting.api.DashboardChartApi;
 import com.increff.omni.reporting.api.DefaultValueApi;
 import com.increff.omni.reporting.api.ReportApi;
 import com.increff.omni.reporting.model.data.DashboardChartData;
-import com.increff.omni.reporting.model.data.DashboardData;
 import com.increff.omni.reporting.model.data.InputControlData;
 import com.increff.omni.reporting.model.form.DashboardChartForm;
 import com.increff.omni.reporting.pojo.DashboardChartPojo;
-import com.increff.omni.reporting.pojo.InputControlPojo;
+import com.increff.omni.reporting.pojo.ReportPojo;
 import com.increff.omni.reporting.util.ValidateUtil;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ConvertUtil;
-import io.swagger.models.auth.In;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,26 +44,28 @@ public class DashboardChartDto extends AbstractDto {
         ValidateUtil.validateDashboardChartForms(forms);
         dashboardApi.getCheck(dashboardId, getOrgId());
         List<DashboardChartPojo> pojos = new ArrayList<>();
+        List<Integer> reportIds = new ArrayList<>();
 
-        dashboardChartApi.deleteByDashboardId(dashboardId);
+        dashboardChartApi.deleteByDashboardId(dashboardId); // Delete all existing charts
 
-        for(DashboardChartForm form : forms){
-            reportApi.getCheckByAliasAndSchema(form.getChartAlias(), getSchemaVersionId(),false);
+        for(DashboardChartForm form : forms){ // Add all new charts
+            ReportPojo report = reportApi.getCheckByAliasAndSchema(form.getChartAlias(), getSchemaVersionId(),true);
             DashboardChartPojo pojo = ConvertUtil.convert(form, DashboardChartPojo.class);
             pojo.setDashboardId(dashboardId);
             pojos.add(dashboardChartApi.addDashboardChart(pojo));
+
+            reportIds.add(report.getId());
         }
 
-        defaultValueApi.deleteByDashboardIdAndControlIdNotIn(dashboardId,
-                getInputControlIds(forms.stream().map(DashboardChartForm::getChartAlias).collect(Collectors.toList())));
+        // Delete default values for all input controls not used in any of the updated charts
+        defaultValueApi.deleteByDashboardIdAndControlIdNotIn(dashboardId, getInputControlIdsUnion(reportIds));
 
         return ConvertUtil.convert(pojos, DashboardChartData.class);
     }
 
-    private List<Integer> getInputControlIds(List<String> chartAliases) throws ApiException {
+    private List<Integer> getInputControlIdsUnion(List<Integer> reportIds) throws ApiException {
         Set<Integer> inputControlIds = new HashSet<>();
-        for(String chartAlias : chartAliases){
-            Integer reportId = reportApi.getCheckByAliasAndSchema(chartAlias, getSchemaVersionId(), false).getId();
+        for(Integer reportId : reportIds){
             List<InputControlData> inputControlDatas = inputControlDto.selectForReport(reportId);
             inputControlIds.addAll(inputControlDatas.stream().map(InputControlData::getId).collect(Collectors.toList()));
         }
