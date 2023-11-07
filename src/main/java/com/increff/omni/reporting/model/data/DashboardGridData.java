@@ -10,4 +10,5 @@ import lombok.Setter;
 public class DashboardGridData extends DashboardChartForm {
     private ChartType chartType;
     private String name;
+    private Integer chartId;
 }
