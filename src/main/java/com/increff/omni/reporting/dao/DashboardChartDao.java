@@ -18,10 +18,10 @@ public class DashboardChartDao extends AbstractDao<DashboardChartPojo> {
                 .setParameter("id", id));
     }
 
-    public final String SELECT_BY_DASHBOARD_AND_CHART_ID = "select p from DashboardChartPojo p where p.dashboardId = :dashboardId and p.chartId = :chartId";
-    public DashboardChartPojo getByDashboardAndChartId(Integer dashboardId, Integer chartId) {
-        return selectSingleOrNull(createJpqlQuery(SELECT_BY_DASHBOARD_AND_CHART_ID)
+    public final String SELECT_BY_DASHBOARD_AND_CHART_ALIAS = "select p from DashboardChartPojo p where p.dashboardId = :dashboardId and p.chartAlias = :chartAlias";
+    public DashboardChartPojo getByDashboardAndChartAlias(Integer dashboardId, String chartAlias) {
+        return selectSingleOrNull(createJpqlQuery(SELECT_BY_DASHBOARD_AND_CHART_ALIAS)
                 .setParameter("dashboardId", dashboardId)
-                .setParameter("chartId", chartId));
+                .setParameter("chartAlias", chartAlias));
     }
 }
