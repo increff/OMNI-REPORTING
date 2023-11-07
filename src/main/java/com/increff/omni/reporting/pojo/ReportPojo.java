@@ -47,7 +47,7 @@ public class ReportPojo extends AbstractVersionedPojo{
     private Boolean canSchedule = false;
 
     @Column(nullable = false)
-    private Boolean isReport = false;
+    private Boolean isReport = false; // TODO: rename to isChart
 
     @Column(nullable = false)
     @Enumerated(value = EnumType.STRING)
