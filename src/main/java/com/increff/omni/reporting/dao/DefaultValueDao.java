@@ -21,6 +21,7 @@ public class DefaultValueDao extends AbstractDao<DefaultValuePojo> {
 
     private static final String DELETE_BY_DASHBOARD_CONTROL = "delete from DefaultValuePojo p where p.dashboardId=:dashboardId and p.controlId not in (:controlId)";
     public void deleteByDashboardIdAndControlIdNotIn(Integer dashboardId, List<Integer> controlIds) {
+        if (controlIds.isEmpty()) return;
         createQuery(DELETE_BY_DASHBOARD_CONTROL)
                 .setParameter("dashboardId", dashboardId)
                 .setParameter("controlId", controlIds)
