@@ -9,6 +9,7 @@ import java.util.Map;
 @Getter
 @Setter
 public class BarChartData {
-    Map<String, String> data;
-    // TODO: Add legends
+    List<String> labels;
+    List<Integer> data;
+//    Map<String, String> data;
 }
