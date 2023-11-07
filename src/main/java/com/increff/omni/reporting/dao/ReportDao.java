@@ -113,7 +113,7 @@ public class ReportDao extends AbstractDao<ReportPojo> {
     }
 
     private List<ChartType> parseVisualization(String visualization){
-        if(Objects.isNull(visualization)) // TODO: add functuinaklity for all charts as well
+        if(Objects.isNull(visualization) || visualization.equals("ALL"))
             return Arrays.stream(ChartType.values()).collect(Collectors.toList());
         if(visualization.equals("REPORTS"))
             return Collections.singletonList(ChartType.REPORT);
