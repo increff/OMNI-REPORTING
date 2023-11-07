@@ -4,6 +4,8 @@ import com.increff.omni.reporting.model.constants.ChartType;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.Map;
+
 @Setter
 @Getter
 public class ViewDashboardData {
@@ -13,4 +15,5 @@ public class ViewDashboardData {
     private Integer col;
     private Integer colWidth;
     private Object chartData;
+    private Map<String, String> legends;
 }
