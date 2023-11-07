@@ -27,9 +27,9 @@ public class DashboardChartApi extends AbstractApi {
     }
 
     //getByDashboardAndChartId
-    public DashboardChartPojo getCheckByDashboardAndChartId(Integer dashboardId, Integer chartId) throws ApiException {
-        DashboardChartPojo pojo = dao.getByDashboardAndChartId(dashboardId, chartId);
-        checkNotNull(pojo, "DashboardChart does not exist dashboardId: " + dashboardId + " chartId: " + chartId);
+    public DashboardChartPojo getCheckByDashboardAndChartAlias(Integer dashboardId, String chartAlias) throws ApiException {
+        DashboardChartPojo pojo = dao.getByDashboardAndChartAlias(dashboardId, chartAlias);
+        checkNotNull(pojo, "DashboardChart does not exist dashboardId: " + dashboardId + " chartAlias: " + chartAlias);
         return pojo;
     }
 
