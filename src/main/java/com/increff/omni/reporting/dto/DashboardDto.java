@@ -130,6 +130,7 @@ public class DashboardDto extends AbstractDto {
                 ReportPojo report = reportApi.getCheckByAliasAndSchema(chart.getChartAlias(), schemaVersionId, true);
                 chart.setName(report.getName());
                 chart.setChartType(report.getChartType());
+                chart.setChartId(report.getId());
             }
             chartData.add(chartRowData);
         }
