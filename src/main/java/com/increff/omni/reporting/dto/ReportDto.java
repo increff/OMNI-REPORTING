@@ -242,6 +242,7 @@ public class ReportDto extends AbstractDto {
             data.setDirectoryName(directoryPojo.getDirectoryName());
             data.setDirectoryPath(getDirectoryPath(directoryPojo.getId(), idToDirectoryPojoList));
             data.setSchemaVersionName(schemaVersionPojo.getName());
+            if(Objects.isNull(data.getMinFrequencyAllowedSeconds())) data.setMinFrequencyAllowedSeconds(0);
             dataList.add(data);
         }
         return dataList;
