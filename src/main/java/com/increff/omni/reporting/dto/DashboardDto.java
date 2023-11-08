@@ -136,4 +136,50 @@ public class DashboardDto extends AbstractDto {
         return chartData;
     }
 
+    public List<ViewDashboardData> viewDashboard(ReportRequestForm form, Integer dashboardId) throws ApiException, IOException {
+        DashboardPojo dashboard = api.getCheck(dashboardId, getOrgId());
+        ReportPojo report = reportApi.getCheck(form.getReportId());
+        DashboardChartPojo charts = dashboardChartApi.getCheckByDashboardAndChartAlias(dashboardId, report.getAlias());
+        ChartType type = report.getChartType();
+
+        List<Map<String, String>> data = reportDto.getLiveData(form);
+
+        ChartInterface chartInterface = getChartData(type);
+        chartInterface.validate(data, type);
+
+        ViewDashboardData viewData = new ViewDashboardData();
+        viewData.setChartData(chartInterface.transform(data));
+        viewData.setLegends(convertChartLegendsPojoToChartLegendsData(
+                chartLegendsApi.getByChartId(report.getId())).getLegends());
+        viewData.setChartId(report.getId());
+        viewData.setType(type);
+        viewData.setRow(charts.getRow());
+        viewData.setCol(charts.getCol());
+        viewData.setColWidth(charts.getColWidth()); // TODO: Move get view data to another function
+
+        return Collections.singletonList(viewData);
+    }
+
+    private ChartInterface getChartData(ChartType type) throws ApiException {
+        switch (type) {
+            case REPORT:
+            case CARD:
+
+            case BAR:
+            case LINE:
+
+            case PIE:
+            case DOUGHNUT:
+                return new MapSingleValueChartDataImpl();
+
+            case GROUPED_BAR:
+            case STACKED_BAR:
+            case MULTI_LINE:
+                return new MapMultiValuesChartDataImpl();
+
+            default:
+                throw new ApiException(ApiStatus.BAD_DATA, "Chart Data Implementation not found for type: " + type);
+        }
+    }
+
 }
