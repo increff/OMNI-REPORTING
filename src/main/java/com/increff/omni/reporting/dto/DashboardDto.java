@@ -127,7 +127,7 @@ public class DashboardDto extends AbstractDto {
         for (List<DashboardChartPojo> chartRow : chartList){
             List<DashboardGridData> chartRowData = ConvertUtil.convert(chartRow, DashboardGridData.class);
             for (DashboardGridData chart : chartRowData) {
-                ReportPojo report = reportApi.getCheckByAliasAndSchema(chart.getChartAlias(), schemaVersionId, false);
+                ReportPojo report = reportApi.getCheckByAliasAndSchema(chart.getChartAlias(), schemaVersionId, true);
                 chart.setName(report.getName());
                 chart.setChartType(report.getChartType());
             }
