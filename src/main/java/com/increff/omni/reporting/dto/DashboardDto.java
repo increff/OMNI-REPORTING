@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.increff.omni.reporting.util.ChartUtil.getChartData;
 import static com.increff.omni.reporting.util.ConvertUtil.convertChartLegendsPojoToChartLegendsData;
 
 @Service
@@ -183,28 +184,6 @@ public class DashboardDto extends AbstractDto {
         viewData.setCol(charts.getCol());
         viewData.setColWidth(charts.getColWidth());
         return viewData;
-    }
-
-    private ChartInterface getChartData(ChartType type) throws ApiException {
-        switch (type) {
-            case REPORT:
-            case CARD:
-
-            case BAR:
-            case LINE:
-
-            case PIE:
-            case DOUGHNUT:
-                return new MapSingleValueChartDataImpl();
-
-            case GROUPED_BAR:
-            case STACKED_BAR:
-            case MULTI_LINE:
-                return new MapMultiValuesChartDataImpl();
-
-            default:
-                throw new ApiException(ApiStatus.BAD_DATA, "Chart Data Implementation not found for type: " + type);
-        }
     }
 
 }

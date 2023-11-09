@@ -1,7 +1,9 @@
 package com.increff.omni.reporting.util;
 
-import com.increff.omni.reporting.model.data.Charts.MapMultiValueChartData;
-import com.increff.omni.reporting.model.data.Charts.MapSingleValueChartData;
+import com.increff.omni.reporting.model.constants.ChartType;
+import com.increff.omni.reporting.model.data.Charts.*;
+import com.nextscm.commons.spring.common.ApiException;
+import com.nextscm.commons.spring.common.ApiStatus;
 import lombok.extern.log4j.Log4j;
 
 import java.util.ArrayList;
@@ -42,5 +44,28 @@ public class ChartUtil {
         }
         chart.setData(data);
         return chart;
+    }
+
+
+    public static ChartInterface getChartData(ChartType type) throws ApiException {
+        switch (type) {
+            case REPORT:
+            case CARD:
+
+            case BAR:
+            case LINE:
+
+            case PIE:
+            case DOUGHNUT:
+                return new MapSingleValueChartDataImpl();
+
+            case GROUPED_BAR:
+            case STACKED_BAR:
+            case MULTI_LINE:
+                return new MapMultiValuesChartDataImpl();
+
+            default:
+                throw new ApiException(ApiStatus.BAD_DATA, "Chart Data Implementation not found for type: " + type);
+        }
     }
 }
