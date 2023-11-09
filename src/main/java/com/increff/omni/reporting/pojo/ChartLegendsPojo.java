@@ -8,8 +8,8 @@ import javax.persistence.*;
 @Entity
 @Getter
 @Setter
-@Table(name = "chart_legends")
-// TODO: Add indexes wherever required
+@Table(name = "chart_legends",indexes = {@Index(name = "idx_chart_id", columnList = "chartId")})
+// TODO: Add indexes
 public class ChartLegendsPojo extends AbstractVersionedPojo {
     @Id
     @TableGenerator(name = "chart_legends", pkColumnValue = "chart_legends")
