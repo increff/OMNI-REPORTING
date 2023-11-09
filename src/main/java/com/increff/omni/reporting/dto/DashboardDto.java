@@ -80,33 +80,17 @@ public class DashboardDto extends AbstractDto {
         Map<Integer, String> controlDefaultValueMap = defaultValueApi.getByDashboardId(dashboard.getId())
                 .stream().collect(Collectors.toMap(DefaultValuePojo::getControlId, DefaultValuePojo::getDefaultValue));
 
-        //HashMap<Integer, InputControlData> inputControlDataMap = new HashMap<>();
         for(DashboardChartPojo chart: charts){
             ReportPojo report = reportApi.getCheckByAliasAndSchema(chart.getChartAlias(), orgSchemaVersionId, true);
-            filterDetails.put(report.getAlias().toString(), new ArrayList<>());
+            filterDetails.put(report.getAlias(), new ArrayList<>());
             inputControlDto.selectForReport(report.getId()).forEach(inputControlData -> {
                 inputControlData.setDefaultValue(controlDefaultValueMap.getOrDefault(inputControlData.getId(), null));
-                filterDetails.get(report.getAlias().toString()).add(inputControlData);
+                filterDetails.get(report.getAlias()).add(inputControlData);
             });
-        } // TODO: Group filters by report ids
+        }
 
         extractCommonFilters(charts, filterDetails);
-//
-//        inputControlDataMap.values().forEach(inputControlData -> {
-//            inputControlData.setDefaultValue(null);
-//            DefaultValuePojo defaultValuePojo = defaultValueApi.getByDashboardAndControl(dashboard.getId(), inputControlData.getId());
-//            if(Objects.nonNull(defaultValuePojo))
-//                inputControlData.setDefaultValue(defaultValuePojo.getDefaultValue());
-//        });
-//        // add default values to filterDetails
-//        for(DashboardChartPojo chart: charts){
-//            for(InputControlData inputControlData: filterDetails.get(chart.getChartAlias())){
-//                inputControlData.setDefaultValue(null);
-//                DefaultValuePojo defaultValuePojo = defaultValueApi.getByDashboardAndControl(dashboard.getId(), inputControlData.getId());
-//                if(Objects.nonNull(defaultValuePojo))
-//                    inputControlData.setDefaultValue(defaultValuePojo.getDefaultValue());
-//            }
-//        } // TODO: see how default values would be added as they are on dashbaord id control id level and not on db id chart id control id level.
+
         return filterDetails;
     }
 
