@@ -3,10 +3,9 @@ package com.increff.omni.reporting.dto;
 import com.increff.omni.reporting.api.*;
 import com.increff.omni.reporting.model.constants.ChartType;
 import com.increff.omni.reporting.model.data.*;
-import com.increff.omni.reporting.model.data.Charts.BarChartImpl;
 import com.increff.omni.reporting.model.data.Charts.ChartInterface;
-import com.increff.omni.reporting.model.data.Charts.PieChartImpl;
-import com.increff.omni.reporting.model.data.Charts.StackedBarChartImpl;
+import com.increff.omni.reporting.model.data.Charts.MapSingleValueChartDataImpl;
+import com.increff.omni.reporting.model.data.Charts.MapMultiValuesChartDataImpl;
 import com.increff.omni.reporting.model.form.DashboardForm;
 import com.increff.omni.reporting.model.form.ReportRequestForm;
 import com.increff.omni.reporting.pojo.DashboardChartPojo;
@@ -75,23 +74,60 @@ public class DashboardDto extends AbstractDto {
         return dashboardData;
     }
 
-    public List<InputControlData> getFilterDetails(DashboardPojo dashboard, List<DashboardChartPojo> charts) throws ApiException {
+    public Map<String,List<InputControlData>> getFilterDetails(DashboardPojo dashboard, List<DashboardChartPojo> charts) throws ApiException {
+        Map<String,List<InputControlData>> filterDetails = new HashMap<>();
         Integer orgSchemaVersionId = orgSchemaApi.getCheckByOrgId(dashboard.getOrgId()).getSchemaVersionId();
-        HashMap<Integer, InputControlData> inputControlDataMap = new HashMap<>();
-        for(DashboardChartPojo chart: charts){
-            ReportPojo report = reportApi.getCheckByAliasAndSchema(chart.getChartAlias(), orgSchemaVersionId, false);
-            inputControlDto.selectForReport(report.getId()).forEach(inputControlData -> {
-                inputControlDataMap.put(inputControlData.getId(), inputControlData);
-            });
-        }
+        Map<Integer, String> controlDefaultValueMap = defaultValueApi.getByDashboardId(dashboard.getId())
+                .stream().collect(Collectors.toMap(DefaultValuePojo::getControlId, DefaultValuePojo::getDefaultValue));
 
-        inputControlDataMap.values().forEach(inputControlData -> {
-            inputControlData.setDefaultValue(null);
-            DefaultValuePojo defaultValuePojo = defaultValueApi.getByDashboardAndControl(dashboard.getId(), inputControlData.getId());
-            if(Objects.nonNull(defaultValuePojo))
-                inputControlData.setDefaultValue(defaultValuePojo.getDefaultValue());
-        });
-        return new ArrayList<>(inputControlDataMap.values());
+        //HashMap<Integer, InputControlData> inputControlDataMap = new HashMap<>();
+        for(DashboardChartPojo chart: charts){
+            ReportPojo report = reportApi.getCheckByAliasAndSchema(chart.getChartAlias(), orgSchemaVersionId, true);
+            filterDetails.put(report.getAlias().toString(), new ArrayList<>());
+            inputControlDto.selectForReport(report.getId()).forEach(inputControlData -> {
+                inputControlData.setDefaultValue(controlDefaultValueMap.getOrDefault(inputControlData.getId(), null));
+                filterDetails.get(report.getAlias().toString()).add(inputControlData);
+            });
+        } // TODO: Group filters by report ids
+
+        extractCommonFilters(charts, filterDetails);
+//
+//        inputControlDataMap.values().forEach(inputControlData -> {
+//            inputControlData.setDefaultValue(null);
+//            DefaultValuePojo defaultValuePojo = defaultValueApi.getByDashboardAndControl(dashboard.getId(), inputControlData.getId());
+//            if(Objects.nonNull(defaultValuePojo))
+//                inputControlData.setDefaultValue(defaultValuePojo.getDefaultValue());
+//        });
+//        // add default values to filterDetails
+//        for(DashboardChartPojo chart: charts){
+//            for(InputControlData inputControlData: filterDetails.get(chart.getChartAlias())){
+//                inputControlData.setDefaultValue(null);
+//                DefaultValuePojo defaultValuePojo = defaultValueApi.getByDashboardAndControl(dashboard.getId(), inputControlData.getId());
+//                if(Objects.nonNull(defaultValuePojo))
+//                    inputControlData.setDefaultValue(defaultValuePojo.getDefaultValue());
+//            }
+//        } // TODO: see how default values would be added as they are on dashbaord id control id level and not on db id chart id control id level.
+        return filterDetails;
+    }
+
+    private void extractCommonFilters(List<DashboardChartPojo> charts, Map<String, List<InputControlData>> filterDetails) {
+        List<InputControlData> commonFilters = new ArrayList<>();
+        for(InputControlData filter: filterDetails.get(charts.get(0).getChartAlias())){
+            boolean isCommon = true;
+            for(DashboardChartPojo chart: charts){
+                if(filterDetails.get(chart.getChartAlias()).stream().noneMatch(filter1 -> filter1.getId().equals(filter.getId()))){
+                    isCommon = false; // if filter is not present in a chart, it is not common
+                    break;
+                }
+            }
+            if(isCommon){
+                commonFilters.add(filter);
+                for(DashboardChartPojo chart: charts){ // remove common filter from chart level filters
+                    filterDetails.get(chart.getChartAlias()).removeIf(filter1 -> filter1.getId().equals(filter.getId()));
+                }
+            }
+        }
+        filterDetails.put("common", commonFilters);
     }
 
     /**
@@ -148,6 +184,11 @@ public class DashboardDto extends AbstractDto {
         ChartInterface chartInterface = getChartData(type);
         chartInterface.validate(data, type);
 
+        ViewDashboardData viewData = getViewDashboardData(report, charts, type, data, chartInterface);
+        return Collections.singletonList(viewData);
+    }
+
+    private ViewDashboardData getViewDashboardData(ReportPojo report, DashboardChartPojo charts, ChartType type, List<Map<String, String>> data, ChartInterface chartInterface) throws ApiException {
         ViewDashboardData viewData = new ViewDashboardData();
         viewData.setChartData(chartInterface.transform(data));
         viewData.setLegends(convertChartLegendsPojoToChartLegendsData(
@@ -156,9 +197,8 @@ public class DashboardDto extends AbstractDto {
         viewData.setType(type);
         viewData.setRow(charts.getRow());
         viewData.setCol(charts.getCol());
-        viewData.setColWidth(charts.getColWidth()); // TODO: Move get view data to another function
-
-        return Collections.singletonList(viewData);
+        viewData.setColWidth(charts.getColWidth());
+        return viewData;
     }
 
     private ChartInterface getChartData(ChartType type) throws ApiException {
