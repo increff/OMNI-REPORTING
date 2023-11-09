@@ -7,6 +7,6 @@ import java.util.Map;
 
 @Getter
 @Setter
-public class GenericChartData { // TODO: Rename to MapSingleValueChartData
+public class MapSingleValueChartData {
     Map<String, String> data;
 }
