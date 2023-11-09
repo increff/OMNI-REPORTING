@@ -8,6 +8,6 @@ import java.util.Map;
 
 @Getter
 @Setter
-public class MapListValuesChartData { // TODO: Rename to map multi value chart data
+public class MapMultiValueChartData {
     private Map<String, List<String>> data;
 }
