@@ -11,12 +11,12 @@ import javax.persistence.*;
 @Setter
 @Getter
 @Table(name = "report", indexes = {
-        @Index(name = "idx_schemaVersionId_name_isReport", columnList = "schemaVersionId, name, isReport",
+        @Index(name = "idx_schemaVersionId_name_isChart", columnList = "schemaVersionId, name, isChart",
                 unique = true),
         @Index(name = "idx_schemaVersionId_type", columnList = "schemaVersionId, type"),
         @Index(name = "idx_id_schemaVersionId", columnList = "id, schemaVersionId")
-}, uniqueConstraints = {@UniqueConstraint(name = "uk_schemaVersionId_alias_isReport", columnNames = {
-        "schemaVersionId", "alias", "isReport"})})
+}, uniqueConstraints = {@UniqueConstraint(name = "uk_schemaVersionId_alias_isChart", columnNames = {
+        "schemaVersionId", "alias", "isChart"})})
 public class ReportPojo extends AbstractVersionedPojo{
 
     @Id
@@ -47,7 +47,7 @@ public class ReportPojo extends AbstractVersionedPojo{
     private Boolean canSchedule = false;
 
     @Column(nullable = false)
-    private Boolean isChart = false; // TODO: rename to isChart
+    private Boolean isChart = false;
 
     @Column(nullable = false)
     @Enumerated(value = EnumType.STRING)
