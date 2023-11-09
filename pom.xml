@@ -44,7 +44,7 @@
     </properties>
 
     <dependencies>
-        <!-- https://mvnrepository.com/artifact/org.quartz-scheduler/quartz -->
+        <!-- https://mvnrepository.com/artifact/org.quartz-scheduler/quartz TODO: Remove this ?-->
         <dependency>
             <groupId>org.quartz-scheduler</groupId>
             <artifactId>quartz</artifactId>

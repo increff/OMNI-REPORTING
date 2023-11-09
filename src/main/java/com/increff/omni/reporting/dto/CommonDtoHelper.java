@@ -15,10 +15,8 @@ import com.increff.service.encryption.form.CryptoForm;
 import com.nextscm.commons.lang.StringUtil;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
-import org.quartz.CronExpression;
 import org.springframework.scheduling.support.CronSequenceGenerator;
 
-import java.text.ParseException;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -484,21 +482,19 @@ public class CommonDtoHelper {
     }
 
     public static long getCronFrequencyInSeconds(String cronExpression) throws ApiException {
-        try {
-            CronExpression cron = new CronExpression(cronExpression);
-            long freqIntervalSecondsMin = 1000000000;
-            Date nextFireTime = cron.getNextValidTimeAfter(new Date());
-            Date nextToNextFireTime;
+        CronSequenceGenerator generator = new CronSequenceGenerator(cronExpression);
+        long freqIntervalSecondsMin = 1000000000;
 
-            for(int i=0;i<100;i++){ // loop over multiple consecutive fire times to get the minimum frequency as cron expression can be non-periodic
-                nextToNextFireTime = cron.getNextValidTimeAfter(nextFireTime);
-                freqIntervalSecondsMin = Math.min(freqIntervalSecondsMin, ((nextToNextFireTime.getTime() - nextFireTime.getTime()) / 1000) );
-                nextFireTime = nextToNextFireTime;
-            }
-            return freqIntervalSecondsMin;
+        Instant instant = generator.next(new Date()).toInstant();
+        ZonedDateTime nextFireTime = ZonedDateTime.ofInstant(instant, ZoneId.of("UTC"));
+
+        ZonedDateTime nextToNextFireTime;
+        for(int i=0;i<100;i++){ // loop over multiple consecutive fire times to get the minimum frequency as cron expression can be non-periodic
+            instant = generator.next(Date.from(nextFireTime.toInstant())).toInstant();
+            nextToNextFireTime = ZonedDateTime.ofInstant(instant, ZoneId.of("UTC"));
+            freqIntervalSecondsMin = Math.min(freqIntervalSecondsMin, (nextToNextFireTime.toEpochSecond() - nextFireTime.toEpochSecond()) );
+            nextFireTime = nextToNextFireTime;
         }
-        catch (ParseException e) {
-            throw new ApiException(ApiStatus.BAD_DATA, "Failed to parse cron expression: " + cronExpression + ". " + e.getMessage());
-        }
+        return freqIntervalSecondsMin;
     }
 }
