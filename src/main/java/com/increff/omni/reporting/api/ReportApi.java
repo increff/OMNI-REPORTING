@@ -1,7 +1,6 @@
 package com.increff.omni.reporting.api;
 
 import com.increff.omni.reporting.dao.ReportDao;
-import com.increff.omni.reporting.model.constants.ChartType;
 import com.increff.omni.reporting.model.constants.ReportType;
 import com.increff.omni.reporting.pojo.ReportPojo;
 import com.nextscm.commons.spring.common.ApiException;
@@ -12,7 +11,6 @@ import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 @Service
 @Transactional(rollbackFor = Exception.class)
@@ -48,7 +46,7 @@ public class ReportApi extends AbstractAuditApi {
         existing.setType(pojo.getType());
         existing.setIsEnabled(pojo.getIsEnabled());
         existing.setCanSchedule(pojo.getCanSchedule());
-        existing.setIsReport(pojo.getIsReport());
+        existing.setIsChart(pojo.getIsChart());
         dao.update(existing);
         return existing;
     }

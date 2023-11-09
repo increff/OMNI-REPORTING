@@ -263,7 +263,7 @@ public class ReportDto extends AbstractDto {
     private ReportPojo validateReportForOrg(ReportRequestForm form, Integer orgId) throws ApiException {
         ReportPojo reportPojo = reportApi.getCheck(form.getReportId());
         validateCustomReportAccess(reportPojo, orgId);
-        if(!reportPojo.getIsReport())
+        if(!reportPojo.getIsChart())
             throw new ApiException(ApiStatus.BAD_DATA, "Live data is only available for dashboards");
         ReportQueryPojo reportQueryPojo = reportQueryApi.getByReportId(reportPojo.getId());
         if (Objects.isNull(reportQueryPojo))
