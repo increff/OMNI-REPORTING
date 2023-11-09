@@ -147,12 +147,12 @@ public class ReportFlowApi extends AbstractFlowApi {
     }
 
     @Transactional(readOnly = true)
-    public List<ReportPojo> getAll(Integer orgId, Boolean isReport, String visualization) throws ApiException {
+    public List<ReportPojo> getAll(Integer orgId, Boolean isChart, String visualization) throws ApiException {
 
         OrgSchemaVersionPojo orgSchemaVersionPojo = orgSchemaApi.getCheckByOrgId(orgId);
         //All standard
         List<ReportPojo> standard =
-                api.getByTypeAndSchema(ReportType.STANDARD, orgSchemaVersionPojo.getSchemaVersionId(), isReport, visualization);
+                api.getByTypeAndSchema(ReportType.STANDARD, orgSchemaVersionPojo.getSchemaVersionId(), isChart, visualization);
 
         //All custom
         List<CustomReportAccessPojo> customAccess = customReportAccessApi.getByOrgId(orgId);
@@ -160,7 +160,7 @@ public class ReportFlowApi extends AbstractFlowApi {
                 .collect(Collectors.toList());
 
         List<ReportPojo> custom =
-                api.getByIdsAndSchema(customIds, orgSchemaVersionPojo.getSchemaVersionId(), isReport);
+                api.getByIdsAndSchema(customIds, orgSchemaVersionPojo.getSchemaVersionId(), isChart);
 
         //combined 2 list
         standard.addAll(custom);

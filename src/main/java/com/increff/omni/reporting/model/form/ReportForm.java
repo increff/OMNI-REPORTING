@@ -27,7 +27,7 @@ public class ReportForm {
     @NotNull
     private Boolean canSchedule = false;
     @NotNull
-    private Boolean isChart = false; // TODO: Rename to is Chart
+    private Boolean isChart = false;
     @NotNull
     private ChartType chartType;
 

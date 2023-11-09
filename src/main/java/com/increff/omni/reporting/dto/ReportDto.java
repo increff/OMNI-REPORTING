@@ -145,26 +145,26 @@ public class ReportDto extends AbstractDto {
         return data;
     }
 
-    public ReportData selectByAlias(Boolean isReport, String alias) throws ApiException {
+    public ReportData selectByAlias(Boolean isChart, String alias) throws ApiException {
         Integer orgId = getOrgId();
         organizationApi.getCheck(orgId);
         OrgSchemaVersionPojo schemaVersionPojo = orgSchemaApi.getCheckByOrgId(orgId);
         ReportPojo reportPojo = reportApi.getByAliasAndSchema(alias, schemaVersionPojo.getSchemaVersionId(),
-                isReport);
+                isChart);
         if(Objects.isNull(reportPojo))
             throw new ApiException(ApiStatus.BAD_DATA,
-                    (isReport ? "Dashboard" : "Report")  + " not available for alias : " + alias);
+                    (isChart ? "Dashboard" : "Report")  + " not available for alias : " + alias);
         validateCustomReportAccess(reportPojo, orgId);
         return convertToReportData(Collections.singletonList(reportPojo)).get(0);
     }
 
-    public List<ReportData> selectByOrg(Boolean isReport, String visualization) throws ApiException {
-        return selectByOrg(getOrgId(), isReport, visualization);
+    public List<ReportData> selectByOrg(Boolean isChart, String visualization) throws ApiException {
+        return selectByOrg(getOrgId(), isChart, visualization);
     }
 
-    public List<ReportData> selectByOrg(Integer orgId, Boolean isReport, String visualization) throws ApiException {
+    public List<ReportData> selectByOrg(Integer orgId, Boolean isChart, String visualization) throws ApiException {
         organizationApi.getCheck(orgId);
-        List<ReportPojo> pojos = flowApi.getAll(orgId, isReport, visualization);
+        List<ReportPojo> pojos = flowApi.getAll(orgId, isChart, visualization);
         return convertToReportData(pojos);
     }
 

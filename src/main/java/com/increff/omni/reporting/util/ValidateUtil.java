@@ -14,7 +14,7 @@ public class ValidateUtil {
     public static void validateReportForm(ReportForm reportForm) throws ApiException {
         checkValid(reportForm);
         if(reportForm.getChartType() != ChartType.REPORT && !reportForm.getIsChart())
-            throw new ApiException(ApiStatus.BAD_DATA, "IsReport should be true for Chart Type: " + reportForm.getChartType());
+            throw new ApiException(ApiStatus.BAD_DATA, "isChart should be true for Chart Type: " + reportForm.getChartType());
 
     }
 
