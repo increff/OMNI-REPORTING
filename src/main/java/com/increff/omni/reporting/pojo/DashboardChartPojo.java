@@ -23,5 +23,5 @@ public class DashboardChartPojo extends AbstractVersionedPojo{
     @Column(nullable = false)
     private Integer col;
     @Column(nullable = false)
-    private Integer colWidth;//TODO: add validation for accepted values
+    private Integer colWidth;
 }
