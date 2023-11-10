@@ -165,7 +165,6 @@ public class StandardController {
         return properties.getVersion();
     }
 
-
     @ApiOperation(value = "Add Dashboard")
     @RequestMapping(value = "/dashboards", method = RequestMethod.POST)
     public DashboardData addDashboard(@RequestBody DashboardForm form) throws ApiException {
@@ -202,6 +201,7 @@ public class StandardController {
         return dashboardDto.viewDashboard(form, dashboardId);
     }
 
+    //Todo: merge this with report creation API
     @ApiOperation(value = "Update Chart Legends")
     @RequestMapping(value = "/charts/{chartId}/legends", method = RequestMethod.PUT)
     public ChartLegendsData updateChartLegends(@PathVariable Integer chartId, @RequestBody ChartLegendsForm form) throws ApiException {

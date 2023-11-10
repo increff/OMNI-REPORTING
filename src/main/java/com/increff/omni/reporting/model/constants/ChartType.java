@@ -2,6 +2,8 @@ package com.increff.omni.reporting.model.constants;
 
 import lombok.Getter;
 
+// ToDo: add validations for all types of charts and their return values
+//todo: add if we require legends and how many
 @Getter
 public enum ChartType {
     REPORT(null,null, null), // TODO: RENAME TO TABLE ??
@@ -19,8 +21,8 @@ public enum ChartType {
     MULTI_LINE(null,null, null);
 
 
-    private Integer ROW;
-    private Integer COL;
+    private Integer ROW;//TODO: rename
+    private Integer COL;//todo: renmae
     private Integer VALUE_SUM;
 
     ChartType(Integer row, Integer col, Integer valueSum) {

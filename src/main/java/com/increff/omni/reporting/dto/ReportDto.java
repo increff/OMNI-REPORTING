@@ -63,7 +63,7 @@ public class ReportDto extends AbstractDto {
     private OrgConnectionApi orgConnectionApi;
     @Autowired
     private ConnectionApi connectionApi;
-
+//todo: add test query flow end-to-end
     public ReportData add(ReportForm form) throws ApiException {
         validateReportForm(form);
         ReportPojo pojo = ConvertUtil.convert(form, ReportPojo.class);
@@ -73,6 +73,8 @@ public class ReportDto extends AbstractDto {
         return convertToReportData(Collections.singletonList(pojo)).get(0);
     }
 
+
+    //todo: think of case when chart type is edited
     public ReportData edit(Integer id, ReportForm form) throws ApiException {
         validateReportForm(form);
         ReportPojo pojo = ConvertUtil.convert(form, ReportPojo.class);
