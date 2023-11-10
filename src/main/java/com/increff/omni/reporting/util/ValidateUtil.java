@@ -7,14 +7,17 @@ import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
 
 import java.util.List;
+import java.util.Objects;
 
 import static com.nextscm.commons.spring.server.DtoHelper.checkValid;
 
 public class ValidateUtil {
-    public static void validateReportForm(ReportForm reportForm) throws ApiException {
-        checkValid(reportForm);
-        if(reportForm.getChartType() != ChartType.TABLE && !reportForm.getIsChart())
-            throw new ApiException(ApiStatus.BAD_DATA, "isChart should be true for Chart Type: " + reportForm.getChartType());
+    public static void validateReportForm(ReportForm form) throws ApiException {
+        checkValid(form);
+        if(Objects.nonNull(form.getChartType().getLEGENDS_COUNT_VALIDATION()) && form.getLegends().size() != form.getChartType().getLEGENDS_COUNT_VALIDATION())
+            throw new ApiException(ApiStatus.BAD_DATA, "Invalid legend count. Expected: " + form.getChartType().getLEGENDS_COUNT_VALIDATION() + " Actual: " + form.getLegends().size());
+        if(form.getChartType() != ChartType.TABLE && !form.getIsChart())
+            throw new ApiException(ApiStatus.BAD_DATA, "isChart should be true for Chart Type: " + form.getChartType());
 
     }
 
