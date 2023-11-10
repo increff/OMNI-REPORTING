@@ -39,7 +39,6 @@
         <apache-commons-csv.version>1.9.0</apache-commons-csv.version>
         <apache-commons-compress.version>1.22</apache-commons-compress.version>
         <javax.mail.version>1.4.7</javax.mail.version>
-        <org.quartz-scheduler.version>2.3.2</org.quartz-scheduler.version>
 
     </properties>
 
