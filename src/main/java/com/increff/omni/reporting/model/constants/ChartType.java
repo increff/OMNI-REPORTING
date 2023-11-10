@@ -21,13 +21,13 @@ public enum ChartType {
     MULTI_LINE(null,null, null);
 
 
-    private Integer ROW;//TODO: rename
-    private Integer COL;//todo: renmae
-    private Integer VALUE_SUM;
+    private Integer ROW_COUNT_VALIDATION;
+    private Integer COL_COUNT_VALIDATION;
+    private Integer VALUE_SUM_VALIDATION;
 
     ChartType(Integer row, Integer col, Integer valueSum) {
-        this.ROW = row;
-        this.COL = col;
-        this.VALUE_SUM = valueSum;
+        this.ROW_COUNT_VALIDATION = row;
+        this.COL_COUNT_VALIDATION = col;
+        this.VALUE_SUM_VALIDATION = valueSum;
     }
 }
