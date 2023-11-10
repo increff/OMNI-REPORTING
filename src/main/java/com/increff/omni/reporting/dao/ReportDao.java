@@ -116,9 +116,9 @@ public class ReportDao extends AbstractDao<ReportPojo> {
         if(Objects.isNull(visualization) || visualization.equals("ALL"))
             return Arrays.stream(ChartType.values()).collect(Collectors.toList());
         if(visualization.equals("REPORTS"))//todo: check and remove this or make an enum
-            return Collections.singletonList(ChartType.REPORT);
+            return Collections.singletonList(ChartType.TABLE);
         if(visualization.equals("CHARTS"))
-            return Arrays.stream(ChartType.values()).filter(chartType -> chartType != ChartType.REPORT)
+            return Arrays.stream(ChartType.values()).filter(chartType -> chartType != ChartType.TABLE)
                 .collect(Collectors.toList());
 
         return Collections.singletonList(ChartType.valueOf(visualization));

@@ -13,7 +13,7 @@ import static com.nextscm.commons.spring.server.DtoHelper.checkValid;
 public class ValidateUtil {
     public static void validateReportForm(ReportForm reportForm) throws ApiException {
         checkValid(reportForm);
-        if(reportForm.getChartType() != ChartType.REPORT && !reportForm.getIsChart())
+        if(reportForm.getChartType() != ChartType.TABLE && !reportForm.getIsChart())
             throw new ApiException(ApiStatus.BAD_DATA, "isChart should be true for Chart Type: " + reportForm.getChartType());
 
     }

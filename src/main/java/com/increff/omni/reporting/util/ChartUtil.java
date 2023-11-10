@@ -49,7 +49,7 @@ public class ChartUtil {
 
     public static ChartInterface getChartData(ChartType type) throws ApiException {
         switch (type) {
-            case REPORT:
+            case TABLE:
             case CARD:
 
             case BAR:

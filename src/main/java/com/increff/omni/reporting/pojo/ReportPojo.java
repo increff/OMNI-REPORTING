@@ -51,6 +51,6 @@ public class ReportPojo extends AbstractVersionedPojo{
 
     @Column(nullable = false)
     @Enumerated(value = EnumType.STRING)
-    private ChartType chartType = ChartType.REPORT;
+    private ChartType chartType = ChartType.TABLE;
 
 }

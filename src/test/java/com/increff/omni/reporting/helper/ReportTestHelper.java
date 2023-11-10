@@ -49,7 +49,7 @@ public class ReportTestHelper {
         form.setType(type);
         form.setCanSchedule(canSchedule);
         form.setAlias(name.replace(" ", "_"));
-        form.setChartType(ChartType.REPORT);
+        form.setChartType(ChartType.TABLE);
         return form;
     }
 

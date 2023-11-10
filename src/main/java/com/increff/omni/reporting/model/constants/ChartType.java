@@ -6,7 +6,7 @@ import lombok.Getter;
 //todo: add if we require legends and how many
 @Getter
 public enum ChartType {
-    REPORT(null,null, null), // TODO: RENAME TO TABLE ??
+    TABLE(null,null, null), // TODO: RENAME TO TABLE ??
 
     BAR(1,null, null),
     GROUPED_BAR(null,null, null),
