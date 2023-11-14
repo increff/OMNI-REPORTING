@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 // Todo internationalization
 @CrossOrigin
@@ -135,8 +136,8 @@ public class AdminController {
 
     @ApiOperation(value = "Get All Report")
     @RequestMapping(value = "/reports/schema-versions/{schemaVersionId}", method = RequestMethod.GET)
-    public List<ReportData> getAll(@PathVariable Integer schemaVersionId, @RequestParam String visualization) throws ApiException {
-        return reportDto.selectAllBySchemaVersion(schemaVersionId, visualization);
+    public List<ReportData> getAll(@PathVariable Integer schemaVersionId, @RequestParam Optional<String> visualization) throws ApiException {
+        return reportDto.selectAllBySchemaVersion(schemaVersionId, visualization.orElse(null));
     }
 
     @ApiOperation(value = "Copy Schema Reports")
@@ -276,8 +277,8 @@ public class AdminController {
 
     @ApiOperation(value = "Get Reports")
     @RequestMapping(value = "/reports/orgs/{orgId}", method = RequestMethod.GET)
-    public List<ReportData> selectByOrgId(@PathVariable Integer orgId, @RequestParam Boolean isChart, @RequestParam String visualization) throws ApiException {
-        return reportDto.selectByOrg(orgId, isChart, visualization);
+    public List<ReportData> selectByOrgId(@PathVariable Integer orgId, @RequestParam Boolean isChart, @RequestParam Optional<String> visualization) throws ApiException {
+        return reportDto.selectByOrg(orgId, isChart, visualization.orElse(null));
     }
 
     @ApiOperation(value = "Get Live Data For Any Organization")
