@@ -183,7 +183,7 @@ public class StandardController {
     //todo check how we can apply validations in default values set by clients
     //todo check how reports are handling this above point
     public List<DefaultValueData> addDefaults(@RequestBody List<DefaultValueForm> forms) throws ApiException {
-        return defaultValueDto.upsert(forms);//todo add null in case we need to unset any controlId
+        return defaultValueDto.upsert(forms);
     }
 
     @ApiOperation(value = "Get Dashboard")

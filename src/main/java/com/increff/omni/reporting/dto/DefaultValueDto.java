@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @Service
 @Log4j
@@ -43,7 +44,8 @@ public class DefaultValueDto extends AbstractDto {
             validateControlIdExistsForDashboard(form.getDashboardId(), form.getControlId());
 
             DefaultValuePojo pojo = ConvertUtil.convert(form, DefaultValuePojo.class);
-            pojo.setDefaultValue(String.join(",", form.getDefaultValue()));
+            if(Objects.nonNull(form.getDefaultValue()))
+                pojo.setDefaultValue(String.join(",", form.getDefaultValue()));
             pojos.add(api.upsert(pojo));
         }
         return ConvertUtil.convert(pojos, DefaultValueData.class);
