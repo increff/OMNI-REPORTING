@@ -75,13 +75,15 @@ public class ReportFlowApi extends AbstractFlowApi {
     private static final Integer MAX_NUMBER_OF_ROWS = 300;
 
     @Transactional(rollbackFor = ApiException.class)
-    public ReportPojo addReport(ReportPojo pojo) throws ApiException {
+    public ReportPojo addReport(ReportPojo pojo, Map<String, String> legends) throws ApiException {
         validate(pojo);
-        return api.add(pojo);
+        api.add(pojo);
+        chartLegendsApi.put(pojo.getId(), legends);
+        return pojo;
     }
 
     @Transactional(rollbackFor = ApiException.class)
-    public ReportPojo editReport(ReportPojo pojo) throws ApiException {
+    public ReportPojo editReport(ReportPojo pojo, Map<String, String> legends) throws ApiException {
         ReportPojo existing = api.getCheck(pojo.getId());
         validateForEdit(pojo);
         if(existing.getChartType() != pojo.getChartType())
@@ -90,6 +92,7 @@ public class ReportFlowApi extends AbstractFlowApi {
         // Delete custom report access if transition is happening from CUSTOM to STANDARD
         if (existing.getType().equals(ReportType.CUSTOM) && pojo.getType().equals(ReportType.STANDARD))
             customReportAccessApi.deleteByReportId(pojo.getId());
+        chartLegendsApi.put(pojo.getId(), legends);
         return api.edit(pojo);
     }
 
@@ -206,7 +209,7 @@ public class ReportFlowApi extends AbstractFlowApi {
     @Transactional(rollbackFor = ApiException.class)
     public void copyReports(Integer oldSchemaVersionId, Integer newSchemaVersionId) throws ApiException {
         schemaVersionApi.getCheck(oldSchemaVersionId);
-        schemaVersionApi.getCheck(newSchemaVersionId);
+        schemaVersionApi.getCheck(newSchemaVersionId); 
         // Migrate Input controls
         Map<Integer, Integer> oldToNewControlIds = migrateInputControls(oldSchemaVersionId, newSchemaVersionId);
         // Migrate Reports
@@ -218,7 +221,7 @@ public class ReportFlowApi extends AbstractFlowApi {
             // Add Report
             ReportPojo pojo = getReportPojoFromExistingPojo(oldReport);
             pojo.setSchemaVersionId(newSchemaVersionId);
-            addReport(pojo);
+            addReport(pojo, new HashMap<>());
 
             // Copy Legends
             List<ChartLegendsPojo> legendsPojoList = chartLegendsApi.getByChartId(oldReport.getId());

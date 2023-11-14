@@ -7,6 +7,8 @@ import lombok.Setter;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.validation.constraints.NotNull;
+import java.util.HashMap;
+import java.util.Map;
 
 @Setter
 @Getter
@@ -30,6 +32,8 @@ public class ReportForm {
     private Boolean isChart = false;
     @NotNull
     private ChartType chartType;
+    @NotNull
+    private Map<String, String> legends = new HashMap<>();
 
 
 }
