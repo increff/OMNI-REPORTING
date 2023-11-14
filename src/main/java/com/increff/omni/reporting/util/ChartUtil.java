@@ -2,6 +2,10 @@ package com.increff.omni.reporting.util;
 
 import com.increff.omni.reporting.model.constants.ChartType;
 import com.increff.omni.reporting.model.data.Charts.*;
+import com.increff.omni.reporting.model.data.DashboardData;
+import com.increff.omni.reporting.model.data.DashboardGridData;
+import com.increff.omni.reporting.model.data.InputControlData;
+import com.increff.omni.reporting.model.form.DashboardForm;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
 import lombok.extern.log4j.Log4j;
@@ -67,5 +71,15 @@ public class ChartUtil {
             default:
                 throw new ApiException(ApiStatus.BAD_DATA, "Chart Data Implementation not found for type: " + type);
         }
+    }
+
+
+    public static DashboardData getDashboardData(Integer dashboardId, DashboardForm form, Map<String, List<InputControlData>> filters, List<List<DashboardGridData>> grid) {
+        DashboardData dashboardData = new DashboardData();
+        dashboardData.setDashboardDetails(form);
+        dashboardData.setFilterDetails(filters);
+        dashboardData.setGrid(grid);
+        dashboardData.setId(dashboardId);
+        return dashboardData;
     }
 }

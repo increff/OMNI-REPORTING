@@ -12,6 +12,7 @@ import com.increff.omni.reporting.pojo.DashboardChartPojo;
 import com.increff.omni.reporting.pojo.DashboardPojo;
 import com.increff.omni.reporting.pojo.DefaultValuePojo;
 import com.increff.omni.reporting.pojo.ReportPojo;
+import com.increff.omni.reporting.util.ChartUtil;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
 import com.nextscm.commons.spring.common.ConvertUtil;
@@ -25,6 +26,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.increff.omni.reporting.util.ChartUtil.getChartData;
+import static com.increff.omni.reporting.util.ChartUtil.getDashboardData;
 import static com.increff.omni.reporting.util.ConvertUtil.convertChartLegendsPojoToChartLegendsData;
 
 @Service
@@ -66,14 +68,8 @@ public class DashboardDto extends AbstractDto {
         DashboardPojo dashboard = api.getCheck(id, getOrgId());
         List<DashboardChartPojo> charts = dashboardChartApi.getByDashboardId(id);
 
-        //todo move this to helper
-        DashboardData dashboardData = new DashboardData();
-        dashboardData.setDashboardDetails(ConvertUtil.convert(dashboard, DashboardForm.class));
-        dashboardData.setFilterDetails(getFilterDetails(dashboard, charts));
-        dashboardData.setGrid(getChartLayout(charts, getSchemaVersionId()));
-        dashboardData.setId(dashboard.getId());
-
-        return dashboardData;
+        return ChartUtil.getDashboardData(dashboard.getId(), ConvertUtil.convert(dashboard, DashboardForm.class),
+                getFilterDetails(dashboard, charts), getChartLayout(charts, getSchemaVersionId()));
     }
 
     public Map<String,List<InputControlData>> getFilterDetails(DashboardPojo dashboard, List<DashboardChartPojo> charts) throws ApiException {
