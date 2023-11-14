@@ -22,7 +22,7 @@ public enum ChartType {
     private Integer ROW_COUNT_VALIDATION; // No. of rows query output
     private Integer COL_COUNT_VALIDATION; // No. of cols query output
     private Integer VALUE_SUM_VALIDATION; // Sum of data for all rows (Eg. PIE CHART VALUES should sum to 100)
-    private Integer LEGENDS_COUNT_VALIDATION; // No. of legends required for displaying this chart type
+    private Integer LEGENDS_COUNT_VALIDATION; // No. of legends required for creating this chart type
 
     ChartType(Integer row, Integer col, Integer valueSum, Integer legendsCount) {
         this.ROW_COUNT_VALIDATION = row;
