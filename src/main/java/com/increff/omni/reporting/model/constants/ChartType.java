@@ -25,6 +25,7 @@ public enum ChartType {
     private Integer VALUE_SUM_VALIDATION;
     private Integer LEGENDS_COUNT_VALIDATION;
 
+    //todo add definations of these columns in comments
     ChartType(Integer row, Integer col, Integer valueSum, Integer legendsCount) {
         this.ROW_COUNT_VALIDATION = row;
         this.COL_COUNT_VALIDATION = col;
