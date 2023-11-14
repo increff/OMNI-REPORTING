@@ -6,7 +6,7 @@ import lombok.Getter;
 @Getter
 public enum ChartType {
     TABLE(null,null, null, null),
-
+    // todo: set legends count to 2 for all bar/line charts before QA
     BAR(1,null, null, null),
     GROUPED_BAR(null,null, null, null),
     STACKED_BAR(null,null, null, null),
@@ -20,10 +20,10 @@ public enum ChartType {
     MULTI_LINE(null,null, null, null);
 
 
-    private Integer ROW_COUNT_VALIDATION;
-    private Integer COL_COUNT_VALIDATION;
-    private Integer VALUE_SUM_VALIDATION;
-    private Integer LEGENDS_COUNT_VALIDATION;
+    private Integer ROW_COUNT_VALIDATION; // No. of rows query output
+    private Integer COL_COUNT_VALIDATION; // No. of cols query output
+    private Integer VALUE_SUM_VALIDATION; // Sum of data for all rows (Eg. PIE CHART VALUES should sum to 100)
+    private Integer LEGENDS_COUNT_VALIDATION; // No. of legends required for displaying this chart type
 
     //todo add definations of these columns in comments
     ChartType(Integer row, Integer col, Integer valueSum, Integer legendsCount) {
