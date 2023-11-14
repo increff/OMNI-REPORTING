@@ -16,7 +16,7 @@ public class ChartLegendsPojo extends AbstractVersionedPojo {
     @GeneratedValue( strategy = GenerationType.TABLE, generator = "chart_legends")
     private Integer id;
     @Column(nullable = false)
-    private Integer chartId; // TODO: Check if this can be converted to chart alias
+    private Integer chartId;
     @Column(nullable = false)
     private String legendKey;
     @Column(nullable = false)
