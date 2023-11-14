@@ -22,10 +22,10 @@ public class ValidateUtil {
     }
 
     public static void validateDashboardChartForms(List<DashboardChartForm> forms) throws ApiException {
-        int MAX_DASHBOARD_CHARTS = 10;
+        int MAX_DASHBOARD_CHARTS = 10;//todo move this to property file and use default value and confirm value
         if(forms.size() > MAX_DASHBOARD_CHARTS)
             throw new ApiException(ApiStatus.BAD_DATA, "Maximum " + MAX_DASHBOARD_CHARTS + " charts allowed in a dashboard");
-        for(DashboardChartForm form : forms){
+        for(DashboardChartForm form : forms) {
             checkValid(form);
         }
     }

@@ -165,6 +165,7 @@ public class StandardController {
         return properties.getVersion();
     }
 
+    //todo merge this and the next controller
     @ApiOperation(value = "Add Dashboard")
     @RequestMapping(value = "/dashboards", method = RequestMethod.POST)
     public DashboardData addDashboard(@RequestBody DashboardForm form) throws ApiException {
@@ -179,8 +180,10 @@ public class StandardController {
 
     @ApiOperation(value = "Add/Edit Defaults in Dashboard")
     @RequestMapping(value = "/dashboards/defaults", method = RequestMethod.PATCH)
+    //todo check how we can apply validations in default values set by clients
+    //todo check how reports are handling this above point
     public List<DefaultValueData> addDefaults(@RequestBody List<DefaultValueForm> forms) throws ApiException {
-        return defaultValueDto.upsert(forms);
+        return defaultValueDto.upsert(forms);//todo add null in case we need to unset any controlId
     }
 
     @ApiOperation(value = "Get Dashboard")
@@ -195,7 +198,8 @@ public class StandardController {
         return dashboardDto.getDashboardsByOrgId();
     }
 
-    @ApiOperation(value = "View Dashboard")
+    @ApiOperation(value = "View Dashboard") //todo load testing and check rate limiting
+    //todo check report rate limiting
     @RequestMapping(value = "/dashboards/{dashboardId}/view", method = RequestMethod.GET)
     public List<ViewDashboardData> viewDashboard(@PathVariable Integer dashboardId, @RequestBody ReportRequestForm form) throws ApiException, IOException {
         return dashboardDto.viewDashboard(form, dashboardId);

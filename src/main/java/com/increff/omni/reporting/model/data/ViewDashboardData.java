@@ -14,6 +14,6 @@ public class ViewDashboardData {
     private Integer row;
     private Integer col;
     private Integer colWidth;
-    private Object chartData;
+    private Object chartData;//todo check what is being done in UI for handling java object
     private Map<String, String> legends;
 }

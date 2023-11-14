@@ -66,6 +66,7 @@ public class DashboardDto extends AbstractDto {
         DashboardPojo dashboard = api.getCheck(id, getOrgId());
         List<DashboardChartPojo> charts = dashboardChartApi.getByDashboardId(id);
 
+        //todo move this to helper
         DashboardData dashboardData = new DashboardData();
         dashboardData.setDashboardDetails(ConvertUtil.convert(dashboard, DashboardForm.class));
         dashboardData.setFilterDetails(getFilterDetails(dashboard, charts));

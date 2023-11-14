@@ -17,6 +17,8 @@ import javax.persistence.*;
         @Index(name = "idx_id_schemaVersionId", columnList = "id, schemaVersionId")
 }, uniqueConstraints = {@UniqueConstraint(name = "uk_schemaVersionId_alias_isChart", columnNames = {
         "schemaVersionId", "alias", "isChart"})})
+
+//todo change the name of this pojo later
 public class ReportPojo extends AbstractVersionedPojo{
 
     @Id
