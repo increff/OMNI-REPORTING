@@ -2,7 +2,6 @@ package com.increff.omni.reporting.model.constants;
 
 import lombok.Getter;
 
-// ToDo: add validations for all types of charts and their return values
 @Getter
 public enum ChartType {
     TABLE(null,null, null, null),
@@ -25,7 +24,6 @@ public enum ChartType {
     private Integer VALUE_SUM_VALIDATION; // Sum of data for all rows (Eg. PIE CHART VALUES should sum to 100)
     private Integer LEGENDS_COUNT_VALIDATION; // No. of legends required for displaying this chart type
 
-    //todo add definations of these columns in comments
     ChartType(Integer row, Integer col, Integer valueSum, Integer legendsCount) {
         this.ROW_COUNT_VALIDATION = row;
         this.COL_COUNT_VALIDATION = col;

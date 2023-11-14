@@ -13,9 +13,11 @@ public class DashboardChartForm {
     @NotNull
     private String chartAlias;
     @NotNull
-    private Integer row; //todo validate min for both col and row
+    @Min(0)
+    private Integer row;
     @NotNull
-    private Integer col; // todo check zero or one based indexing
+    @Min(0)
+    private Integer col;
     @NotNull
     @Min(0)
     @Max(12)
