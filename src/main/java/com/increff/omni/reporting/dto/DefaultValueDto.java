@@ -44,8 +44,7 @@ public class DefaultValueDto extends AbstractDto {
             validateControlIdExistsForDashboard(form.getDashboardId(), form.getControlId());
 
             DefaultValuePojo pojo = ConvertUtil.convert(form, DefaultValuePojo.class);
-            if(Objects.nonNull(form.getDefaultValue()))
-                pojo.setDefaultValue(String.join(",", form.getDefaultValue()));
+            pojo.setDefaultValue(String.join(",", form.getDefaultValue()));
             pojos.add(api.upsert(pojo));
         }
         return ConvertUtil.convert(pojos, DefaultValueData.class);

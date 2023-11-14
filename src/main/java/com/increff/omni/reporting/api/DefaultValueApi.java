@@ -21,7 +21,7 @@ public class DefaultValueApi extends AbstractApi {
     public DefaultValuePojo upsert(DefaultValuePojo pojo) {
         DefaultValuePojo existing = getByDashboardAndControl(pojo.getDashboardId(), pojo.getControlId());
         if (Objects.nonNull(existing)) {
-            if(Objects.isNull(pojo.getDefaultValue())){
+            if(pojo.getDefaultValue().isEmpty()){
                 dao.remove(existing);
                 return new DefaultValuePojo();
             }

@@ -13,5 +13,6 @@ public class DefaultValueForm {
     private Integer dashboardId;
     @NotNull
     private Integer controlId;
+    @NotNull
     private List<String> defaultValue;
 }
