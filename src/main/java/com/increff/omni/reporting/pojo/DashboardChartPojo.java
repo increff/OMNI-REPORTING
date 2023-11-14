@@ -1,5 +1,6 @@
 package com.increff.omni.reporting.pojo;
 
+import com.increff.omni.reporting.model.constants.RowHeight;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -24,4 +25,7 @@ public class DashboardChartPojo extends AbstractVersionedPojo{
     private Integer col;
     @Column(nullable = false)
     private Integer colWidth;
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private RowHeight rowHeight;
 }

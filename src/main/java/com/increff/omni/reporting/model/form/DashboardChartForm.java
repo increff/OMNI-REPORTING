@@ -1,5 +1,6 @@
 package com.increff.omni.reporting.model.form;
 
+import com.increff.omni.reporting.model.constants.RowHeight;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -21,5 +22,7 @@ public class DashboardChartForm {
     @NotNull
     @Min(0)
     @Max(12)
-    private Integer colWidth; // todo handle rowHeight and col width in same place wither complete bcakend or UI
+    private Integer colWidth;
+    @NotNull
+    private RowHeight rowHeight;
 }
