@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @CrossOrigin
 @Api
@@ -61,8 +62,8 @@ public class StandardController {
 
     @ApiOperation(value = "Get Reports")
     @RequestMapping(value = "/reports", method = RequestMethod.GET)
-    public List<ReportData> selectByOrgId(@RequestParam Boolean isChart, @RequestParam String visualization) throws ApiException {
-        return reportDto.selectByOrg(isChart, visualization);
+    public List<ReportData> selectByOrgId(@RequestParam Boolean isChart, @RequestParam Optional<String> visualization) throws ApiException {
+        return reportDto.selectByOrg(isChart, visualization.orElse(null));
     }
 
     @ApiOperation(value = "Get Report by Alias")
