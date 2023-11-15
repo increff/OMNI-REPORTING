@@ -6,6 +6,8 @@ import com.increff.omni.reporting.model.data.*;
 import com.increff.omni.reporting.model.data.Charts.ChartInterface;
 import com.increff.omni.reporting.model.data.Charts.MapSingleValueChartDataImpl;
 import com.increff.omni.reporting.model.data.Charts.MapMultiValuesChartDataImpl;
+import com.increff.omni.reporting.model.form.DashboardAddForm;
+import com.increff.omni.reporting.model.form.DashboardChartForm;
 import com.increff.omni.reporting.model.form.DashboardForm;
 import com.increff.omni.reporting.model.form.ReportRequestForm;
 import com.increff.omni.reporting.pojo.DashboardChartPojo;
@@ -13,6 +15,7 @@ import com.increff.omni.reporting.pojo.DashboardPojo;
 import com.increff.omni.reporting.pojo.DefaultValuePojo;
 import com.increff.omni.reporting.pojo.ReportPojo;
 import com.increff.omni.reporting.util.ChartUtil;
+import com.increff.omni.reporting.util.ValidateUtil;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
 import com.nextscm.commons.spring.common.ConvertUtil;
@@ -28,6 +31,7 @@ import java.util.stream.Collectors;
 import static com.increff.omni.reporting.util.ChartUtil.getChartData;
 import static com.increff.omni.reporting.util.ChartUtil.getDashboardData;
 import static com.increff.omni.reporting.util.ConvertUtil.convertChartLegendsPojoToChartLegendsData;
+import static com.increff.omni.reporting.util.ValidateUtil.validateDashboardAdForm;
 
 @Service
 @Log4j
@@ -49,12 +53,18 @@ public class DashboardDto extends AbstractDto {
     private DefaultValueApi defaultValueApi;
     @Autowired
     private ChartLegendsApi chartLegendsApi;
+    @Autowired
+    private DashboardChartDto dashboardChartDto;
 
-    public DashboardData addDashboard(DashboardForm form) throws ApiException {
-        checkValid(form);
+    public DashboardData addDashboard(DashboardAddForm form) throws ApiException {
+        validateDashboardAdForm(form);
         DashboardPojo dashboardPojo = ConvertUtil.convert(form, DashboardPojo.class);
+
         dashboardPojo.setOrgId(getOrgId());
-        return getDashboard(api.add(dashboardPojo).getId());
+        api.add(dashboardPojo);
+        dashboardChartDto.addDashboardChart(form.getCharts(), dashboardPojo.getId());
+
+        return getDashboard(dashboardPojo.getId());
     }
 
     public List<DashboardListData> getDashboardsByOrgId() {

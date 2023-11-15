@@ -169,7 +169,7 @@ public class StandardController {
     //todo merge this and the next controller
     @ApiOperation(value = "Add Dashboard")
     @RequestMapping(value = "/dashboards", method = RequestMethod.POST)
-    public DashboardData addDashboard(@RequestBody DashboardForm form) throws ApiException {
+    public DashboardData addDashboard(@RequestBody DashboardAddForm form) throws ApiException {
         return dashboardDto.addDashboard(form);
     }
 
