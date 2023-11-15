@@ -94,22 +94,25 @@ public class DashboardDto extends AbstractDto {
 
     private void extractCommonFilters(List<DashboardChartPojo> charts, Map<String, List<InputControlData>> filterDetails) {
         List<InputControlData> commonFilters = new ArrayList<>();
-        for(InputControlData filter: filterDetails.get(charts.get(0).getChartAlias())){
+        for (InputControlData filter : filterDetails.get(charts.get(0).getChartAlias())) {
             boolean isCommon = true;
-            for(DashboardChartPojo chart: charts){
-                if(filterDetails.get(chart.getChartAlias()).stream().noneMatch(filter1 -> filter1.getId().equals(filter.getId()))){
+            for (DashboardChartPojo chart : charts) {
+                if (filterDetails.get(chart.getChartAlias()).stream().noneMatch(filter1 -> filter1.getId().equals(filter.getId()))) {
                     isCommon = false; // if filter is not present in a chart, it is not common
                     break;
                 }
             }
-            if(isCommon){
+            if (isCommon) {
                 commonFilters.add(filter);
-                for(DashboardChartPojo chart: charts){ // remove common filter from chart level filters
-                    filterDetails.get(chart.getChartAlias()).removeIf(filter1 -> filter1.getId().equals(filter.getId()));
-                }
             }
         }
         filterDetails.put("common", commonFilters);
+
+        for (InputControlData filter : commonFilters){
+            for (DashboardChartPojo chart : charts) { // remove common filter from chart level filters
+                filterDetails.get(chart.getChartAlias()).removeIf(filter1 -> filter1.getId().equals(filter.getId()));
+            }
+        }
     }
 
     /**
