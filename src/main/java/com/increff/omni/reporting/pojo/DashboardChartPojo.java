@@ -9,6 +9,7 @@ import javax.persistence.*;
 @Entity
 @Getter
 @Setter
+@Table(name = "dashboard_chart",indexes = {@Index(name = "idx_dashboard_id_chart_alias", columnList = "dashboardId, chartAlias")})
 public class DashboardChartPojo extends AbstractVersionedPojo{
     @Id
     @TableGenerator(name = "dashboard_chart", pkColumnValue = "dashboard_chart")
