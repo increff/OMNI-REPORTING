@@ -166,7 +166,6 @@ public class StandardController {
         return properties.getVersion();
     }
 
-    //todo merge this and the next controller
     @ApiOperation(value = "Add Dashboard")
     @RequestMapping(value = "/dashboards", method = RequestMethod.POST)
     public DashboardData addDashboard(@RequestBody DashboardAddForm form) throws ApiException {
