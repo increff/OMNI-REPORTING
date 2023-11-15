@@ -4,7 +4,7 @@
 
     <groupId>com.increff.omni</groupId>
     <artifactId>omni-reporting</artifactId>
-    <version>1.47-SNAPSHOT</version>
+    <version>1.47</version>
     <packaging>war</packaging>
     <properties>
         <!-- Maven Properties -->
@@ -205,7 +205,7 @@
         <url>https://bitbucket.org/increff/omni-reporting/src</url>
         <connection>scm:git:https://nextscm_jenkins@bitbucket.org/increff/omni-reporting.git</connection>
         <developerConnection>scm:git:https://nextscm_jenkins@bitbucket.org/increff/omni-reporting.git</developerConnection>
-        <tag>HEAD</tag>
+        <tag>omni-reporting-1.47</tag>
     </scm>
 
 
