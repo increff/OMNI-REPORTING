@@ -63,6 +63,11 @@ public class DashboardChartDto extends AbstractDto {
         return ConvertUtil.convert(pojos, DashboardChartData.class);
     }
 
+    public List<DashboardChartData> getDashboardCharts(Integer dashboardId) throws ApiException {
+        dashboardApi.getCheck(dashboardId, getOrgId());
+        return ConvertUtil.convert(dashboardChartApi.getByDashboardId(dashboardId), DashboardChartData.class);
+    }
+
     private List<Integer> getInputControlIdsUnion(List<Integer> reportIds) throws ApiException {
         Set<Integer> inputControlIds = new HashSet<>();
         for(Integer reportId : reportIds){
@@ -71,5 +76,7 @@ public class DashboardChartDto extends AbstractDto {
         }
         return new ArrayList<>(inputControlIds);
     }
+
+
 
 }

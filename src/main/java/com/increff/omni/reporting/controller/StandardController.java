@@ -178,7 +178,12 @@ public class StandardController {
         return dashboardChartDto.addDashboardChart(forms, dashboardId);
     }
 
-    // todo: get charts for dashboard API
+    @ApiOperation(value = "Get Charts in Dashboard")
+    @RequestMapping(value = "/dashboards/{dashboardId}/charts", method = RequestMethod.GET)
+    public List<DashboardChartData> getCharts(@PathVariable Integer dashboardId) throws ApiException {
+        return dashboardChartDto.getDashboardCharts(dashboardId);
+    }
+
 
     @ApiOperation(value = "Add/Edit Defaults in Dashboard")
     @RequestMapping(value = "/dashboards/defaults", method = RequestMethod.PATCH)
