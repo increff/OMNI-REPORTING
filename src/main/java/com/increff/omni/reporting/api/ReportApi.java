@@ -48,6 +48,7 @@ public class ReportApi extends AbstractAuditApi {
         existing.setIsEnabled(pojo.getIsEnabled());
         existing.setCanSchedule(pojo.getCanSchedule());
         existing.setIsDashboard(pojo.getIsDashboard());
+        existing.setMinFrequencyAllowedSeconds(pojo.getMinFrequencyAllowedSeconds());
         dao.update(existing);
         return existing;
     }

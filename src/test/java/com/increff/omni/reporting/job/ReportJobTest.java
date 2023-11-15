@@ -109,7 +109,7 @@ public class ReportJobTest extends AbstractTest {
         ReportQueryForm queryForm = getReportQueryForm("select version();");
         reportDto.upsertQuery(reportData.getId(), queryForm);
         List<ReportScheduleForm.InputParamMap> inputParamMaps = getInputParamList();
-        ReportScheduleForm form = getReportScheduleForm("*/15", "*", "*", "Report 2", "Asia/Kolkata",
+        ReportScheduleForm form = getReportScheduleForm("*/15", "*", "*", "?", "Report 2", "Asia/Kolkata",
                 true, Arrays.asList("a@gmail.com", "b@gmail.com"), inputParamMaps);
         scheduleDto.scheduleReport(form);
         List<ReportScheduleData> reportScheduleData = scheduleDto.getScheduleReports(1, 100);

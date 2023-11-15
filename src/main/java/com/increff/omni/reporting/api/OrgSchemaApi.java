@@ -39,6 +39,10 @@ public class OrgSchemaApi extends AbstractAuditApi {
         return pojo;
     }
 
+    public List<OrgSchemaVersionPojo> getBySchemaVersionId(Integer schemaVersionId)  {
+        return dao.selectMultiple("schemaVersionId", schemaVersionId);
+    }
+
     private OrgSchemaVersionPojo getByOrgId(Integer orgId) {
         return dao.select("orgId", orgId);
     }
