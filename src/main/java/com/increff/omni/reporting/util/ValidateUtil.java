@@ -1,6 +1,7 @@
 package com.increff.omni.reporting.util;
 
 import com.increff.omni.reporting.model.constants.ChartType;
+import com.increff.omni.reporting.model.form.DashboardAddForm;
 import com.increff.omni.reporting.model.form.DashboardChartForm;
 import com.increff.omni.reporting.model.form.ReportForm;
 import com.nextscm.commons.spring.common.ApiException;
@@ -12,6 +13,7 @@ import java.util.Objects;
 import static com.nextscm.commons.spring.server.DtoHelper.checkValid;
 
 public class ValidateUtil {
+    public static int MAX_DASHBOARD_CHARTS = 10;
     public static void validateReportForm(ReportForm form) throws ApiException {
         checkValid(form);
         if(Objects.nonNull(form.getChartType().getLEGENDS_COUNT_VALIDATION()) && form.getLegends().size() != form.getChartType().getLEGENDS_COUNT_VALIDATION())
@@ -22,11 +24,18 @@ public class ValidateUtil {
     }
 
     public static void validateDashboardChartForms(List<DashboardChartForm> forms) throws ApiException {
-        int MAX_DASHBOARD_CHARTS = 10;//todo move this to property file and use default value and confirm value - cannot autowire application properties and use it in static function
+        //todo move this to property file and use default value and confirm value - cannot autowire application properties and use it in static function
         if(forms.size() > MAX_DASHBOARD_CHARTS)
             throw new ApiException(ApiStatus.BAD_DATA, "Maximum " + MAX_DASHBOARD_CHARTS + " charts allowed in a dashboard");
         for(DashboardChartForm form : forms) {
             checkValid(form);
         }
+    }
+
+    public static void validateDashboardAdForm(DashboardAddForm form) throws ApiException {
+        checkValid(form);
+        if(form.getCharts().size() == 0)
+            throw new ApiException(ApiStatus.BAD_DATA, "Atleast one chart is required in a dashboard");
+        validateDashboardChartForms(form.getCharts());
     }
 }
