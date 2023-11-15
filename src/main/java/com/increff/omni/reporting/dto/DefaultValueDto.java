@@ -16,6 +16,7 @@ import lombok.extern.log4j.Log4j;
 import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,6 +37,7 @@ public class DefaultValueDto extends AbstractDto {
     @Autowired
     private DashboardChartApi dashboardChartApi;
 
+    @Transactional(rollbackFor = ApiException.class)
     public List<DefaultValueData> upsert(List<DefaultValueForm> forms) throws ApiException {
         List<DefaultValuePojo> pojos = new ArrayList<>();
         for(DefaultValueForm form : forms) {

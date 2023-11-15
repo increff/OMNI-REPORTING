@@ -23,6 +23,7 @@ import lombok.Setter;
 import lombok.extern.log4j.Log4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.util.*;
@@ -56,6 +57,7 @@ public class DashboardDto extends AbstractDto {
     @Autowired
     private DashboardChartDto dashboardChartDto;
 
+    @Transactional(rollbackFor = ApiException.class)
     public DashboardData addDashboard(DashboardAddForm form) throws ApiException {
         validateDashboardAdForm(form);
         DashboardPojo dashboardPojo = ConvertUtil.convert(form, DashboardPojo.class);
@@ -67,6 +69,7 @@ public class DashboardDto extends AbstractDto {
         return getDashboard(dashboardPojo.getId());
     }
 
+    @Transactional(rollbackFor = ApiException.class)
     public List<DashboardListData> getDashboardsByOrgId() {
         return getDashboardsByOrgId(getOrgId());
     }
@@ -74,6 +77,7 @@ public class DashboardDto extends AbstractDto {
         return ConvertUtil.convert(api.getByOrgId(orgId), DashboardListData.class);
     }
 
+    @Transactional(rollbackFor = ApiException.class)
     public DashboardData getDashboard(Integer id) throws ApiException {
         DashboardPojo dashboard = api.getCheck(id, getOrgId());
         List<DashboardChartPojo> charts = dashboardChartApi.getByDashboardId(id);
@@ -82,6 +86,7 @@ public class DashboardDto extends AbstractDto {
                 getFilterDetails(dashboard, charts), getChartLayout(charts, getSchemaVersionId()));
     }
 
+    @Transactional(rollbackFor = ApiException.class)
     public Map<String,List<InputControlData>> getFilterDetails(DashboardPojo dashboard, List<DashboardChartPojo> charts) throws ApiException {
         Map<String,List<InputControlData>> filterDetails = new HashMap<>();
         Integer orgSchemaVersionId = orgSchemaApi.getCheckByOrgId(dashboard.getOrgId()).getSchemaVersionId();
@@ -168,6 +173,7 @@ public class DashboardDto extends AbstractDto {
         return chartData;
     }
 
+    @Transactional(rollbackFor = ApiException.class)
     public List<ViewDashboardData> viewDashboard(ReportRequestForm form, Integer dashboardId) throws ApiException, IOException {
         DashboardPojo dashboard = api.getCheck(dashboardId, getOrgId());
         ReportPojo report = reportApi.getCheck(form.getReportId());

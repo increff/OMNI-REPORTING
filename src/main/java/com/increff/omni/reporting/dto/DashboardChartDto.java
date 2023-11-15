@@ -16,6 +16,7 @@ import lombok.Setter;
 import lombok.extern.log4j.Log4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -40,6 +41,7 @@ public class DashboardChartDto extends AbstractDto {
     private InputControlDto inputControlDto;
 
 
+    @Transactional(rollbackFor = ApiException.class)
     public List<DashboardChartData> addDashboardChart(List<DashboardChartForm> forms, Integer dashboardId) throws ApiException {
         ValidateUtil.validateDashboardChartForms(forms);
         dashboardApi.getCheck(dashboardId, getOrgId());
@@ -63,6 +65,7 @@ public class DashboardChartDto extends AbstractDto {
         return ConvertUtil.convert(pojos, DashboardChartData.class);
     }
 
+    @Transactional(rollbackFor = ApiException.class)
     public List<DashboardChartData> getDashboardCharts(Integer dashboardId) throws ApiException {
         dashboardApi.getCheck(dashboardId, getOrgId());
         return ConvertUtil.convert(dashboardChartApi.getByDashboardId(dashboardId), DashboardChartData.class);

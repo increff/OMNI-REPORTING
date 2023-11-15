@@ -9,6 +9,7 @@ import lombok.Setter;
 import lombok.extern.log4j.Log4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -22,6 +23,7 @@ public class ChartLegendsDto extends AbstractDto {
     @Autowired
     private ChartLegendsApi api;
 
+    @Transactional(rollbackFor = ApiException.class)
     public ChartLegendsData put(Integer chartId, ChartLegendsForm form) throws ApiException {
         checkValid(form);
         List<ChartLegendsPojo> pojos = api.put(chartId, form.getLegends());
