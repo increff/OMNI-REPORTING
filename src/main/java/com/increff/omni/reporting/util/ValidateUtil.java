@@ -13,7 +13,7 @@ import java.util.Objects;
 import static com.nextscm.commons.spring.server.DtoHelper.checkValid;
 
 public class ValidateUtil {
-    public static int MAX_DASHBOARD_CHARTS = 10;
+    public static int MAX_DASHBOARD_CHARTS = 6;
     public static void validateReportForm(ReportForm form) throws ApiException {
         checkValid(form);
         if(Objects.nonNull(form.getChartType().getLEGENDS_COUNT_VALIDATION()) && form.getLegends().size() != form.getChartType().getLEGENDS_COUNT_VALIDATION())
