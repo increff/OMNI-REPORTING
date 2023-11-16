@@ -5,13 +5,13 @@ import lombok.Getter;
 @Getter
 public enum ChartType {
     TABLE(null,null, null, null),
-    CARD(1,1, null, null),
+    CARD(1,null, null, null),
 
     BAR(null,2, null, 2),
     GROUPED_BAR(null,null, null, 2),
     STACKED_BAR(null,null, null, 2),
 
-    PIE(1,null, 100, null),
+    PIE(1,null, null, null),
     DOUGHNUT(null,null, null, null),
 
     LINE(2,null, null, 2),
