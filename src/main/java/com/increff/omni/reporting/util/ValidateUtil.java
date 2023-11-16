@@ -16,6 +16,11 @@ public class ValidateUtil {
     public static int MAX_DASHBOARD_CHARTS = 6;
     public static void validateReportForm(ReportForm form) throws ApiException {
         checkValid(form);
+        if(form.getIsChart() && form.getCanSchedule())
+            throw new ApiException(ApiStatus.BAD_DATA, "Dashboard Reports can't be scheduled");
+        if(!form.getCanSchedule() && Objects.nonNull(form.getMinFrequencyAllowedSeconds()))
+            throw new ApiException(ApiStatus.BAD_DATA, "Min Frequency Allowed Seconds " + form.getMinFrequencyAllowedSeconds() + " should be null for non-scheduled reports");
+
         if(Objects.nonNull(form.getChartType().getLEGENDS_COUNT_VALIDATION()) && form.getLegends().size() != form.getChartType().getLEGENDS_COUNT_VALIDATION())
             throw new ApiException(ApiStatus.BAD_DATA, "Invalid legend count. Expected: " + form.getChartType().getLEGENDS_COUNT_VALIDATION() + " Actual: " + form.getLegends().size());
         if(form.getChartType() != ChartType.TABLE && !form.getIsChart())
@@ -34,7 +39,7 @@ public class ValidateUtil {
 
     public static void validateDashboardAdForm(DashboardAddForm form) throws ApiException {
         checkValid(form);
-        if(form.getCharts().size() == 0)
+        if (form.getCharts().size() == 0)
             throw new ApiException(ApiStatus.BAD_DATA, "Atleast one chart is required in a dashboard");
         validateDashboardChartForms(form.getCharts());
     }

@@ -63,6 +63,8 @@ public class ReportFlowApi extends AbstractFlowApi {
     @Autowired
     private ReportControlsApi reportControlsApi;
     @Autowired
+    private ReportScheduleApi reportScheduleApi;
+    @Autowired
     private InputControlApi inputControlApi;
     @Autowired
     private ChartLegendsApi chartLegendsApi;
@@ -82,7 +84,8 @@ public class ReportFlowApi extends AbstractFlowApi {
     @Transactional(rollbackFor = ApiException.class)
     public ReportPojo editReport(ReportPojo pojo, Map<String, String> legends) throws ApiException {
         ReportPojo existing = api.getCheck(pojo.getId());
-        validateForEdit(pojo);
+        List<Integer> orgIds = orgSchemaApi.getBySchemaVersionId(pojo.getSchemaVersionId()).stream().map(OrgSchemaVersionPojo::getOrgId).collect(Collectors.toList());
+        validateForEdit(pojo, reportScheduleApi.selectByOrgIdReportAlias(orgIds, pojo.getAlias()));
         if(existing.getChartType() != pojo.getChartType())
             throw new ApiException(ApiStatus.BAD_DATA, "Chart type can't be changed." +
                     " Current : " + existing.getChartType() + " New : " + pojo.getChartType());
@@ -206,7 +209,7 @@ public class ReportFlowApi extends AbstractFlowApi {
     @Transactional(rollbackFor = ApiException.class)
     public void copyReports(Integer oldSchemaVersionId, Integer newSchemaVersionId) throws ApiException {
         schemaVersionApi.getCheck(oldSchemaVersionId);
-        schemaVersionApi.getCheck(newSchemaVersionId); 
+        schemaVersionApi.getCheck(newSchemaVersionId);
         // Migrate Input controls
         Map<Integer, Integer> oldToNewControlIds = migrateInputControls(oldSchemaVersionId, newSchemaVersionId);
         // Migrate Reports
@@ -308,7 +311,10 @@ public class ReportFlowApi extends AbstractFlowApi {
                     "matching");
     }
 
-    private void validateForEdit(ReportPojo pojo) throws ApiException {
+    private void validateForEdit(ReportPojo pojo, List<ReportSchedulePojo> reportSchedulePojos) throws ApiException {
+        if(pojo.getCanSchedule())
+            validateCronFrequency(pojo, reportSchedulePojos);
+
         directoryApi.getCheck(pojo.getDirectoryId());
         schemaVersionApi.getCheck(pojo.getSchemaVersionId());
 

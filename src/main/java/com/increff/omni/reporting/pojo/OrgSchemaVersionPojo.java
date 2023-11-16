@@ -8,7 +8,7 @@ import javax.persistence.*;
 @Entity
 @Setter
 @Getter
-@Table(name = "orgSchemaVersion")
+@Table(name = "orgSchemaVersion", indexes = {@Index(name = "idx_schemaVersionId", columnList = "schemaVersionId")})
 public class OrgSchemaVersionPojo extends AbstractVersionedPojo {
 
     @Id
