@@ -18,7 +18,7 @@ import java.util.Map;
 @Log4j
 public class ChartUtil {
 
-    public static MapSingleValueChartData getGenericChartData(List<Map<String, String>> result) {
+    public static MapSingleValueChartData getMapSingleValueChartData(List<Map<String, String>> result) {
         MapSingleValueChartData chartData = new MapSingleValueChartData();
         chartData.setData(result.get(0));
         return chartData;
