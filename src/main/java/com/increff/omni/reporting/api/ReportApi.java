@@ -2,6 +2,7 @@ package com.increff.omni.reporting.api;
 
 import com.increff.omni.reporting.dao.ReportDao;
 import com.increff.omni.reporting.model.constants.ReportType;
+import com.increff.omni.reporting.model.constants.VisualizationType;
 import com.increff.omni.reporting.pojo.ReportPojo;
 import com.nextscm.commons.spring.common.ApiException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +36,7 @@ public class ReportApi extends AbstractAuditApi {
         return dao.getByNameAndSchema(name, schemaVersionId, isChart);
     }
 
-    public List<ReportPojo> getByTypeAndSchema(ReportType type, Integer schemaVersionId, Boolean isChart, String visualization){
+    public List<ReportPojo> getByTypeAndSchema(ReportType type, Integer schemaVersionId, Boolean isChart, VisualizationType visualization){
         return dao.getByTypeAndSchema(type, schemaVersionId, isChart, visualization);
     }
 
@@ -63,7 +64,7 @@ public class ReportApi extends AbstractAuditApi {
         return dao.getByIds(ids, isChart);
     }
 
-    public List<ReportPojo> getBySchemaVersion(Integer schemaVersionId, String visualization) {
+    public List<ReportPojo> getBySchemaVersion(Integer schemaVersionId, VisualizationType visualization) {
         return dao.getBySchemaVersionAndTypes(schemaVersionId, visualization);
     }
 

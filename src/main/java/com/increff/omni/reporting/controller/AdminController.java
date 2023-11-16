@@ -1,6 +1,7 @@
 package com.increff.omni.reporting.controller;
 
 import com.increff.omni.reporting.dto.*;
+import com.increff.omni.reporting.model.constants.VisualizationType;
 import com.increff.omni.reporting.model.data.*;
 import com.increff.omni.reporting.model.form.*;
 import com.nextscm.commons.spring.common.ApiException;
@@ -136,7 +137,7 @@ public class AdminController {
 
     @ApiOperation(value = "Get All Report")
     @RequestMapping(value = "/reports/schema-versions/{schemaVersionId}", method = RequestMethod.GET)
-    public List<ReportData> getAll(@PathVariable Integer schemaVersionId, @RequestParam Optional<String> visualization) throws ApiException {
+    public List<ReportData> getAll(@PathVariable Integer schemaVersionId, @RequestParam Optional<VisualizationType> visualization) throws ApiException {
         return reportDto.selectAllBySchemaVersion(schemaVersionId, visualization.orElse(null));
     }
 
@@ -277,7 +278,7 @@ public class AdminController {
 
     @ApiOperation(value = "Get Reports")
     @RequestMapping(value = "/reports/orgs/{orgId}", method = RequestMethod.GET)
-    public List<ReportData> selectByOrgId(@PathVariable Integer orgId, @RequestParam Boolean isChart, @RequestParam Optional<String> visualization) throws ApiException {
+    public List<ReportData> selectByOrgId(@PathVariable Integer orgId, @RequestParam Boolean isChart, @RequestParam Optional<VisualizationType> visualization) throws ApiException {
         return reportDto.selectByOrg(orgId, isChart, visualization.orElse(null));
     }
 

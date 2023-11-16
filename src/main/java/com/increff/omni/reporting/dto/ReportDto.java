@@ -7,6 +7,7 @@ import com.increff.omni.reporting.flow.ReportRequestFlowApi;
 import com.increff.omni.reporting.model.constants.AuditActions;
 import com.increff.omni.reporting.model.constants.ReportRequestType;
 import com.increff.omni.reporting.model.constants.ValidationType;
+import com.increff.omni.reporting.model.constants.VisualizationType;
 import com.increff.omni.reporting.model.data.ReportData;
 import com.increff.omni.reporting.model.data.ReportQueryData;
 import com.increff.omni.reporting.model.data.ValidationGroupData;
@@ -158,17 +159,17 @@ public class ReportDto extends AbstractDto {
         return convertToReportData(Collections.singletonList(reportPojo)).get(0);
     }
 
-    public List<ReportData> selectByOrg(Boolean isChart, String visualization) throws ApiException {
+    public List<ReportData> selectByOrg(Boolean isChart, VisualizationType visualization) throws ApiException {
         return selectByOrg(getOrgId(), isChart, visualization);
     }
 
-    public List<ReportData> selectByOrg(Integer orgId, Boolean isChart, String visualization) throws ApiException {
+    public List<ReportData> selectByOrg(Integer orgId, Boolean isChart, VisualizationType visualization) throws ApiException {
         organizationApi.getCheck(orgId);
         List<ReportPojo> pojos = flowApi.getAll(orgId, isChart, visualization);
         return convertToReportData(pojos);
     }
 
-    public List<ReportData> selectAllBySchemaVersion(Integer schemaVersionId, String visualization) throws ApiException {
+    public List<ReportData> selectAllBySchemaVersion(Integer schemaVersionId, VisualizationType visualization) throws ApiException {
         List<ReportPojo> pojos = flowApi.getAllBySchemaVersionId(schemaVersionId, visualization);
         return convertToReportData(pojos);
     }

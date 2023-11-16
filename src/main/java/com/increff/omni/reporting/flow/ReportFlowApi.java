@@ -2,10 +2,7 @@ package com.increff.omni.reporting.flow;
 
 import com.increff.omni.reporting.api.*;
 import com.increff.omni.reporting.config.ApplicationProperties;
-import com.increff.omni.reporting.model.constants.InputControlScope;
-import com.increff.omni.reporting.model.constants.InputControlType;
-import com.increff.omni.reporting.model.constants.ReportType;
-import com.increff.omni.reporting.model.constants.ValidationType;
+import com.increff.omni.reporting.model.constants.*;
 import com.increff.omni.reporting.model.form.ValidationGroupForm;
 import com.increff.omni.reporting.pojo.*;
 import com.increff.omni.reporting.util.FileUtil;
@@ -148,12 +145,12 @@ public class ReportFlowApi extends AbstractFlowApi {
     }
 
     @Transactional(readOnly = true)
-    public List<ReportPojo> getAllBySchemaVersionId(Integer schemaVersionId, String visualization) {
+    public List<ReportPojo> getAllBySchemaVersionId(Integer schemaVersionId, VisualizationType visualization) {
         return api.getBySchemaVersion(schemaVersionId, visualization);
     }
 
     @Transactional(readOnly = true)
-    public List<ReportPojo> getAll(Integer orgId, Boolean isChart, String visualization) throws ApiException {
+    public List<ReportPojo> getAll(Integer orgId, Boolean isChart, VisualizationType visualization) throws ApiException {
 
         OrgSchemaVersionPojo orgSchemaVersionPojo = orgSchemaApi.getCheckByOrgId(orgId);
         //All standard

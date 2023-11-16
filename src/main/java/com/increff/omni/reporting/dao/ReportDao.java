@@ -2,6 +2,7 @@ package com.increff.omni.reporting.dao;
 
 import com.increff.omni.reporting.model.constants.ChartType;
 import com.increff.omni.reporting.model.constants.ReportType;
+import com.increff.omni.reporting.model.constants.VisualizationType;
 import com.increff.omni.reporting.pojo.ReportPojo;
 import com.nextscm.commons.spring.db.AbstractDao;
 import org.springframework.stereotype.Repository;
@@ -21,7 +22,7 @@ import java.util.stream.Collectors;
 @Transactional
 public class ReportDao extends AbstractDao<ReportPojo> {
 
-    public List<ReportPojo> getByTypeAndSchema(ReportType type, Integer schemaVersionId, Boolean isChart, String visualization) {
+    public List<ReportPojo> getByTypeAndSchema(ReportType type, Integer schemaVersionId, Boolean isChart, VisualizationType visualization) {
         CriteriaBuilder cb = this.em.getCriteriaBuilder();
         CriteriaQuery<ReportPojo> query = cb.createQuery(ReportPojo.class);
         Root<ReportPojo> root = query.from(ReportPojo.class);
@@ -98,7 +99,7 @@ public class ReportDao extends AbstractDao<ReportPojo> {
         return selectSingleOrNull(tQuery);
     }
 
-    public List<ReportPojo> getBySchemaVersionAndTypes(Integer schemaVersionId, String visualization) {
+    public List<ReportPojo> getBySchemaVersionAndTypes(Integer schemaVersionId, VisualizationType visualization) {
         CriteriaBuilder cb = this.em.getCriteriaBuilder();
         CriteriaQuery<ReportPojo> query = cb.createQuery(ReportPojo.class);
         Root<ReportPojo> root = query.from(ReportPojo.class);
@@ -112,15 +113,15 @@ public class ReportDao extends AbstractDao<ReportPojo> {
         return selectMultiple(tQuery);
     }
 
-    private List<ChartType> parseVisualization(String visualization){
-        if(Objects.isNull(visualization) || visualization.equals("ALL"))
+    private List<ChartType> parseVisualization(VisualizationType visualization){
+        if(Objects.isNull(visualization) || visualization.equals(VisualizationType.ALL))
             return Arrays.stream(ChartType.values()).collect(Collectors.toList());
-        if(visualization.equals("REPORTS"))//todo: check and remove this or make an enum - not needed now but may need later thus not removing
+        if(visualization.equals(VisualizationType.REPORTS))
             return Collections.singletonList(ChartType.TABLE);
-        if(visualization.equals("CHARTS"))
+        if(visualization.equals(VisualizationType.CHARTS))
             return Arrays.stream(ChartType.values()).filter(chartType -> chartType != ChartType.TABLE)
                 .collect(Collectors.toList());
 
-        return Collections.singletonList(ChartType.valueOf(visualization));
+        return Collections.singletonList(ChartType.valueOf(visualization.name()));
     }
 }

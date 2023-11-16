@@ -4,6 +4,7 @@ package com.increff.omni.reporting.controller;
 import com.increff.account.client.AuthClient;
 import com.increff.omni.reporting.config.ApplicationProperties;
 import com.increff.omni.reporting.dto.*;
+import com.increff.omni.reporting.model.constants.VisualizationType;
 import com.increff.omni.reporting.model.data.*;
 import com.increff.omni.reporting.model.form.*;
 import com.nextscm.commons.spring.common.ApiException;
@@ -58,11 +59,9 @@ public class StandardController {
         return inputControlDto.selectForReport(reportId);
     }
 
-
-
     @ApiOperation(value = "Get Reports")
     @RequestMapping(value = "/reports", method = RequestMethod.GET)
-    public List<ReportData> selectByOrgId(@RequestParam Boolean isChart, @RequestParam Optional<String> visualization) throws ApiException {
+    public List<ReportData> selectByOrgId(@RequestParam Boolean isChart, @RequestParam Optional<VisualizationType> visualization) throws ApiException {
         return reportDto.selectByOrg(isChart, visualization.orElse(null));
     }
 
