@@ -8,6 +8,7 @@ import com.increff.omni.reporting.model.constants.AuditActions;
 import com.increff.omni.reporting.model.constants.ReportRequestType;
 import com.increff.omni.reporting.model.constants.ValidationType;
 import com.increff.omni.reporting.model.constants.VisualizationType;
+import com.increff.omni.reporting.model.data.Charts.ChartInterface;
 import com.increff.omni.reporting.model.data.ReportData;
 import com.increff.omni.reporting.model.data.ReportQueryData;
 import com.increff.omni.reporting.model.data.ValidationGroupData;
@@ -30,6 +31,7 @@ import java.util.stream.Collectors;
 
 import static com.increff.omni.reporting.dto.CommonDtoHelper.getDirectoryPath;
 import static com.increff.omni.reporting.dto.CommonDtoHelper.getIdToPojoMap;
+import static com.increff.omni.reporting.util.ChartUtil.getChartData;
 import static com.increff.omni.reporting.util.ValidateUtil.validateReportForm;
 
 @Service
@@ -64,7 +66,7 @@ public class ReportDto extends AbstractDto {
     private OrgConnectionApi orgConnectionApi;
     @Autowired
     private ConnectionApi connectionApi;
-//todo: add test query flow end-to-end
+
     public ReportData add(ReportForm form) throws ApiException {
         validateReportForm(form);
         ReportPojo pojo = ConvertUtil.convert(form, ReportPojo.class);
@@ -144,6 +146,16 @@ public class ReportDto extends AbstractDto {
         data.setQuery(Objects.isNull(queryPojo) ? "" : queryPojo.getQuery());
         data.setUpdatedAt(Objects.isNull(queryPojo) ? null : queryPojo.getUpdatedAt());
         return data;
+    }
+
+    public void testQueryLive(ReportRequestForm form) throws IOException, ApiException {
+        ReportPojo report = reportApi.getCheck(form.getReportId());
+        Integer schemaVersionId = report.getSchemaVersionId();
+        Integer orgId = orgSchemaApi.getCheckBySchemaVersionId(schemaVersionId).get(0).getOrgId();
+
+        List<Map<String, String>> data = getLiveDataForAnyOrganization(form, orgId);
+        ChartInterface chartInterface = getChartData(report.getChartType());
+        chartInterface.validate(data, report.getChartType());
     }
 
     public ReportData selectByAlias(Boolean isChart, String alias) throws ApiException {

@@ -159,6 +159,12 @@ public class AdminController {
         return reportDto.getTransformedQuery(form);
     }
 
+    @ApiOperation(value = "Test Query Live")
+    @RequestMapping(value = "/reports/query/try-live", method = RequestMethod.POST)
+    public void testQueryLive(@RequestBody ReportRequestForm form) throws ApiException, IOException {
+        reportDto.testQueryLive(form);
+    }
+
     @ApiOperation(value = "Get Report Query")
     @RequestMapping(value = "/reports/{reportId}/query", method = RequestMethod.GET)
     public ReportQueryData getQuery(@PathVariable Integer reportId) throws ApiException {
