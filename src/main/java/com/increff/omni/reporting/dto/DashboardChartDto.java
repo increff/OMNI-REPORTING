@@ -27,7 +27,6 @@ import java.util.stream.Collectors;
 @Service
 @Log4j
 @Setter
-// TODO: Add transactional in every dto (ask if function level or class level)
 public class DashboardChartDto extends AbstractDto {
     @Autowired
     private ReportApi reportApi;
