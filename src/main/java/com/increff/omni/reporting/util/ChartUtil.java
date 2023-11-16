@@ -56,12 +56,12 @@ public class ChartUtil {
             case TABLE:
             case CARD:
 
-            case BAR:
-            case LINE:
-
             case PIE:
             case DOUGHNUT:
                 return new MapSingleValueChartDataImpl();
+
+            case BAR:
+            case LINE:
 
             case GROUPED_BAR:
             case STACKED_BAR:
