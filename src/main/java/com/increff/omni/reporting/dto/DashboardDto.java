@@ -4,10 +4,7 @@ import com.increff.omni.reporting.api.*;
 import com.increff.omni.reporting.model.constants.ChartType;
 import com.increff.omni.reporting.model.data.*;
 import com.increff.omni.reporting.model.data.Charts.ChartInterface;
-import com.increff.omni.reporting.model.data.Charts.MapSingleValueChartDataImpl;
-import com.increff.omni.reporting.model.data.Charts.MapMultiValuesChartDataImpl;
 import com.increff.omni.reporting.model.form.DashboardAddForm;
-import com.increff.omni.reporting.model.form.DashboardChartForm;
 import com.increff.omni.reporting.model.form.DashboardForm;
 import com.increff.omni.reporting.model.form.ReportRequestForm;
 import com.increff.omni.reporting.pojo.DashboardChartPojo;
@@ -15,9 +12,7 @@ import com.increff.omni.reporting.pojo.DashboardPojo;
 import com.increff.omni.reporting.pojo.DefaultValuePojo;
 import com.increff.omni.reporting.pojo.ReportPojo;
 import com.increff.omni.reporting.util.ChartUtil;
-import com.increff.omni.reporting.util.ValidateUtil;
 import com.nextscm.commons.spring.common.ApiException;
-import com.nextscm.commons.spring.common.ApiStatus;
 import com.nextscm.commons.spring.common.ConvertUtil;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j;
@@ -30,7 +25,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.increff.omni.reporting.util.ChartUtil.getChartData;
-import static com.increff.omni.reporting.util.ChartUtil.getDashboardData;
 import static com.increff.omni.reporting.util.ConvertUtil.convertChartLegendsPojoToChartLegendsData;
 import static com.increff.omni.reporting.util.ValidateUtil.validateDashboardAdForm;
 
@@ -67,6 +61,14 @@ public class DashboardDto extends AbstractDto {
         dashboardChartDto.addDashboardChart(form.getCharts(), dashboardPojo.getId());
 
         return getDashboard(dashboardPojo.getId());
+    }
+
+    @Transactional(rollbackFor = ApiException.class)
+    public DashboardData updateDashboard(DashboardForm form, Integer dashboardId) throws ApiException {
+        checkValid(form);
+        api.getCheck(dashboardId, getOrgId());
+        DashboardPojo dashboard = api.update(dashboardId, ConvertUtil.convert(form, DashboardPojo.class));
+        return getDashboard(dashboard.getId());
     }
 
     @Transactional(rollbackFor = ApiException.class)
@@ -183,7 +185,7 @@ public class DashboardDto extends AbstractDto {
         List<Map<String, String>> data = reportDto.getLiveData(form);
 
         ChartInterface chartInterface = getChartData(type);
-        chartInterface.validate(data, type);
+        chartInterface.validateNormalize(data, type);
 
         ViewDashboardData viewData = getViewDashboardData(report, charts, type, data, chartInterface);
         return Collections.singletonList(viewData);

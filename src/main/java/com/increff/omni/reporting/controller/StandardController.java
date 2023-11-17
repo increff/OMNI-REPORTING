@@ -171,6 +171,12 @@ public class StandardController {
         return dashboardDto.addDashboard(form);
     }
 
+    @ApiOperation(value = "Edit Dashboard")
+    @RequestMapping(value = "/dashboards/{dashboardId}", method = RequestMethod.PUT)
+    public DashboardData editDashboard(@RequestBody DashboardForm form, @PathVariable Integer dashboardId) throws ApiException {
+        return dashboardDto.updateDashboard(form, dashboardId);
+    }
+
     @ApiOperation(value = "Add/Edit Charts in Dashboard")
     @RequestMapping(value = "/dashboards/{dashboardId}/charts", method = RequestMethod.PUT)
     public List<DashboardChartData> addChart(@RequestBody List<DashboardChartForm> forms, @PathVariable Integer dashboardId) throws ApiException {

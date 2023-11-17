@@ -23,6 +23,12 @@ public class DashboardApi extends AbstractApi {
         return pojo;
     }
 
+    public DashboardPojo update(Integer id, DashboardPojo updated) throws ApiException {
+        DashboardPojo existing = getCheck(id);
+        existing.setName(updated.getName());
+        return existing;
+    }
+
     public DashboardPojo getCheck(Integer id, Integer orgId) throws ApiException {
         DashboardPojo pojo = getCheck(id);
         if(!pojo.getOrgId().equals(orgId))
