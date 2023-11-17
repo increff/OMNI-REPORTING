@@ -29,7 +29,12 @@ public interface ChartInterface {
     }
 
     default void normalize(List<Map<String, String>> result, ChartType type) throws ApiException {
-
+        if(Objects.equals(type, ChartType.PIE) || Objects.equals(type, ChartType.DOUGHNUT)){
+            double sum = getValueSum(result);
+            for(Map<String, String> row: result){
+                row.put("value", String.valueOf((Double.parseDouble(row.get("value"))/sum)*100));
+            }
+        }
     }
 
 }
