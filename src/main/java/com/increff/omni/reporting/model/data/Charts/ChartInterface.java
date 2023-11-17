@@ -30,11 +30,25 @@ public interface ChartInterface {
 
     default void normalize(List<Map<String, String>> result, ChartType type) throws ApiException {
         if(Objects.equals(type, ChartType.PIE) || Objects.equals(type, ChartType.DOUGHNUT)){
+
             double sum = getValueSum(result);
-            for(Map<String, String> row: result){
-                row.put("value", String.valueOf((Double.parseDouble(row.get("value"))/sum)*100));
+            for(Map.Entry<String, String> e: result.get(0).entrySet()){ // Normalize each value such that sum is 100
+                if(!Objects.equals(e.getKey(), "label"))
+                    e.setValue(getNormalizedValue(e.getValue(), sum));
+            }
+
+            double finalSum = getValueSum(result);
+            double difference = 100 - finalSum;
+            if(difference != 0){ // if final sum is not 100, add the difference to firstColumnValue
+                Map<String, String> lastRow = result.get(0);
+                String firstColumnName = lastRow.keySet().iterator().next();
+                lastRow.put(firstColumnName, String.format("%.2f", Double.parseDouble(lastRow.get(firstColumnName)) + difference));
             }
         }
+    }
+
+    default String getNormalizedValue(String value, Double sum){
+        return String.format("%.2f", (Double.parseDouble(value)/sum)*100); // returns rounding off to 2 decimals
     }
 
 }

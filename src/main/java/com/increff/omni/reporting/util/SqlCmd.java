@@ -68,14 +68,14 @@ public class SqlCmd {
         return finalString;
     }
 
-    public static Integer getValueSum(List<Map<String, String>> result) throws ApiException {
-        int sum = 0;
+    public static Double getValueSum(List<Map<String, String>> result) throws ApiException {
+        double sum = 0;
         for(Map<String, String> map : result) {
             for(String value : map.values()) {
                 try {
-                    sum += Integer.parseInt(value);
+                    sum += Double.parseDouble(value);
                 } catch (NumberFormatException e) {
-                    throw new ApiException(ApiStatus.BAD_DATA, "Failed to parse to Integer. Value: " + value + " Row: " + JsonUtil.serialize(map));
+                    throw new ApiException(ApiStatus.BAD_DATA, "Failed to parse to Double. Value: " + value + " Row: " + JsonUtil.serialize(map));
                 }
             }
         }
