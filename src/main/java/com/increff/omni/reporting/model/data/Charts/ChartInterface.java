@@ -13,6 +13,11 @@ import static com.increff.omni.reporting.util.SqlCmd.getValueSum;
 public interface ChartInterface {
     Object transform(List<Map<String, String>> data) throws ApiException;
 
+    default void validateNormalize(List<Map<String, String>> result, ChartType type) throws ApiException {
+        validate(result, type);
+        normalize(result, type);
+    }
+
     default void validate(List<Map<String, String>> result, ChartType type) throws ApiException {
         if(Objects.nonNull(type.getROW_COUNT_VALIDATION()) && (result.size() != type.getROW_COUNT_VALIDATION()) )
             throw new ApiException(ApiStatus.BAD_DATA, "Invalid row count for type: " + type + ". Expected: " + type.getROW_COUNT_VALIDATION() + " Received: " + result.size());
@@ -21,7 +26,9 @@ public interface ChartInterface {
 
         if(Objects.nonNull(type.getVALUE_SUM_VALIDATION()) && (!Objects.equals(getValueSum(result), type.getVALUE_SUM_VALIDATION())) )
             throw new ApiException(ApiStatus.BAD_DATA, "Invalid value sum for type: " + type + ". Expected: " + type.getVALUE_SUM_VALIDATION() + " Received: " + getValueSum(result));
+    }
 
+    default void normalize(List<Map<String, String>> result, ChartType type) throws ApiException {
 
     }
 
