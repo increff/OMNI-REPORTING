@@ -39,6 +39,9 @@ public class DashboardApi extends AbstractApi {
     public List<DashboardPojo> getByOrgId(Integer orgId) {
         return dao.getByOrgId(orgId);
     }
+    public DashboardPojo getByOrgIdName(Integer orgId, String name) {
+        return dao.getByOrgIdName(orgId, name);
+    }
 
     private DashboardPojo getCheck(Integer id) throws ApiException {
         DashboardPojo pojo = dao.getCheck(id);

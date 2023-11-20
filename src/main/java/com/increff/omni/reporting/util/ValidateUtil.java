@@ -37,7 +37,7 @@ public class ValidateUtil {
         }
     }
 
-    public static void validateDashboardAdForm(DashboardAddForm form) throws ApiException {
+    public static void validateDashboardAddForm(DashboardAddForm form) throws ApiException {
         checkValid(form);
         if (form.getCharts().size() == 0)
             throw new ApiException(ApiStatus.BAD_DATA, "Atleast one chart is required in a dashboard");

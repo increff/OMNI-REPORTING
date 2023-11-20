@@ -12,7 +12,9 @@ import com.increff.omni.reporting.pojo.DashboardPojo;
 import com.increff.omni.reporting.pojo.DefaultValuePojo;
 import com.increff.omni.reporting.pojo.ReportPojo;
 import com.increff.omni.reporting.util.ChartUtil;
+import com.increff.omni.reporting.util.ValidateUtil;
 import com.nextscm.commons.spring.common.ApiException;
+import com.nextscm.commons.spring.common.ApiStatus;
 import com.nextscm.commons.spring.common.ConvertUtil;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j;
@@ -26,7 +28,6 @@ import java.util.stream.Collectors;
 
 import static com.increff.omni.reporting.util.ChartUtil.getChartData;
 import static com.increff.omni.reporting.util.ConvertUtil.convertChartLegendsPojoToChartLegendsData;
-import static com.increff.omni.reporting.util.ValidateUtil.validateDashboardAdForm;
 
 @Service
 @Log4j
@@ -53,7 +54,8 @@ public class DashboardDto extends AbstractDto {
 
     @Transactional(rollbackFor = ApiException.class)
     public DashboardData addDashboard(DashboardAddForm form) throws ApiException {
-        validateDashboardAdForm(form);
+        validateDashboardAddForm(form);
+
         DashboardPojo dashboardPojo = ConvertUtil.convert(form, DashboardPojo.class);
 
         dashboardPojo.setOrgId(getOrgId());
@@ -65,7 +67,7 @@ public class DashboardDto extends AbstractDto {
 
     @Transactional(rollbackFor = ApiException.class)
     public DashboardData updateDashboard(DashboardForm form, Integer dashboardId) throws ApiException {
-        checkValid(form);
+        validateDashboardForm(form);
         api.getCheck(dashboardId, getOrgId());
         DashboardPojo dashboard = api.update(dashboardId, ConvertUtil.convert(form, DashboardPojo.class));
         return getDashboard(dashboard.getId());
@@ -202,6 +204,18 @@ public class DashboardDto extends AbstractDto {
         viewData.setCol(charts.getCol());
         viewData.setColWidth(charts.getColWidth());
         return viewData;
+    }
+
+    private void validateDashboardForm(DashboardForm form) throws ApiException {
+        checkValid(form);
+        if(Objects.nonNull(api.getByOrgIdName(getOrgId(), form.getName())))
+            throw new ApiException(ApiStatus.BAD_DATA, "Dashboard name already exists: " + form.getName() + " OrgId: " + getOrgId());
+    }
+
+    private void validateDashboardAddForm(DashboardAddForm form) throws ApiException {
+        ValidateUtil.validateDashboardAddForm(form);
+        if(Objects.nonNull(api.getByOrgIdName(getOrgId(), form.getName())))
+            throw new ApiException(ApiStatus.BAD_DATA, "Dashboard name already exists: " + form.getName() + " OrgId: " + getOrgId());
     }
 
 }
