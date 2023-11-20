@@ -26,7 +26,7 @@ public class ChartLegendsApi extends AbstractAuditApi {
 
     public List<ChartLegendsPojo> put(Integer chartId, Map<String, String> map) throws ApiException {
         List<ChartLegendsPojo> pojos = new ArrayList<>();
-        if(Objects.isNull(map))return pojos;
+        if(Objects.isNull(map) || map.isEmpty())return pojos;
 
         deleteByChartId(chartId); // Delete Existing Legends
         for (Map.Entry<String, String> entry : map.entrySet()) {

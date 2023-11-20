@@ -4,6 +4,8 @@ import lombok.Getter;
 
 @Getter
 public enum ChartType {
+    REPORT(null, null, null, null), // Used for normal reports
+
     TABLE(null,null, null, null),
     CARD(1,null, null, null),
 
