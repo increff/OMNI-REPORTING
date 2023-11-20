@@ -117,9 +117,9 @@ public class ReportDao extends AbstractDao<ReportPojo> {
         if(Objects.isNull(visualization) || visualization.equals(VisualizationType.ALL))
             return Arrays.stream(ChartType.values()).collect(Collectors.toList());
         if(visualization.equals(VisualizationType.REPORTS))
-            return Collections.singletonList(ChartType.TABLE);
+            return Collections.singletonList(ChartType.REPORT);
         if(visualization.equals(VisualizationType.CHARTS))
-            return Arrays.stream(ChartType.values()).filter(chartType -> chartType != ChartType.TABLE)
+            return Arrays.stream(ChartType.values()).filter(chartType -> chartType != ChartType.REPORT)
                 .collect(Collectors.toList());
 
         return Collections.singletonList(ChartType.valueOf(visualization.name()));

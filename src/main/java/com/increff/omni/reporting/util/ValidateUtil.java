@@ -23,7 +23,7 @@ public class ValidateUtil {
 
         if(Objects.nonNull(form.getChartType().getLEGENDS_COUNT_VALIDATION()) && form.getLegends().size() != form.getChartType().getLEGENDS_COUNT_VALIDATION())
             throw new ApiException(ApiStatus.BAD_DATA, "Invalid legend count. Expected: " + form.getChartType().getLEGENDS_COUNT_VALIDATION() + " Actual: " + form.getLegends().size());
-        if(form.getChartType() != ChartType.TABLE && !form.getIsChart())
+        if(form.getChartType() != ChartType.REPORT && !form.getIsChart())
             throw new ApiException(ApiStatus.BAD_DATA, "isChart should be true for Chart Type: " + form.getChartType());
 
     }
