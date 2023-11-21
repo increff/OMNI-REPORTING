@@ -125,7 +125,9 @@ public class ReportDto extends AbstractDto {
 
     public ReportData get(Integer id) throws ApiException {
         ReportPojo pojo = reportApi.getCheck(id);
-        return convertToReportData(Collections.singletonList(pojo)).get(0);
+        ReportData reportData = convertToReportData(Collections.singletonList(pojo)).get(0);
+        reportData.setLegends(convertChartLegendsPojoToChartLegendsData(chartLegendsApi.getByChartId(pojo.getId())).getLegends());
+        return reportData;
     }
 
     public ReportQueryData upsertQuery(Integer reportId, ReportQueryForm form) throws ApiException {
