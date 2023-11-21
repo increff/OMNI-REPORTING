@@ -22,7 +22,7 @@ public class DashboardDao extends AbstractDao<DashboardPojo> {
     public List<DashboardPojo> getByOrgId(Integer orgId) {
         TypedQuery<DashboardPojo> q = createJpqlQuery(SELECT_BY_ORG_ID);
         q.setParameter("orgId", orgId);
-        return q.getResultList();
+        return selectMultiple(q);
     }
 
     private static final String SELECT_BY_ORG_ID_NAME = "SELECT o FROM DashboardPojo o WHERE o.orgId=:orgId AND o.name=:name";
@@ -30,6 +30,6 @@ public class DashboardDao extends AbstractDao<DashboardPojo> {
         TypedQuery<DashboardPojo> q = createJpqlQuery(SELECT_BY_ORG_ID_NAME);
         q.setParameter("orgId", orgId);
         q.setParameter("name", name);
-        return q.getSingleResult();
+        return selectSingleOrNull(q);
     }
 }
