@@ -32,6 +32,7 @@ import java.util.stream.Collectors;
 import static com.increff.omni.reporting.dto.CommonDtoHelper.getDirectoryPath;
 import static com.increff.omni.reporting.dto.CommonDtoHelper.getIdToPojoMap;
 import static com.increff.omni.reporting.util.ChartUtil.getChartData;
+import static com.increff.omni.reporting.util.ConvertUtil.convertChartLegendsPojoToChartLegendsData;
 import static com.increff.omni.reporting.util.ValidateUtil.validateReportForm;
 
 @Service
@@ -73,7 +74,9 @@ public class ReportDto extends AbstractDto {
         pojo = flowApi.addReport(pojo, form.getLegends());
         flowApi.saveAudit(pojo.getId().toString(), AuditActions.CREATE_REPORT.toString()
                 , "Create Report", "Report : " + pojo.getName() + " created", getUserName());
-        return convertToReportData(Collections.singletonList(pojo)).get(0);
+        ReportData reportData = convertToReportData(Collections.singletonList(pojo)).get(0);
+        reportData.setLegends(convertChartLegendsPojoToChartLegendsData(chartLegendsApi.getByChartId(pojo.getId())).getLegends());
+        return reportData;
     }
 
     public ReportData edit(Integer id, ReportForm form) throws ApiException {
@@ -83,7 +86,9 @@ public class ReportDto extends AbstractDto {
         pojo = flowApi.editReport(pojo, form.getLegends());
         flowApi.saveAudit(pojo.getId().toString(), AuditActions.EDIT_REPORT.toString()
                 , "Update Report", "Report : " + pojo.getName() + " updated", getUserName());
-        return convertToReportData(Collections.singletonList(pojo)).get(0);
+        ReportData reportData = convertToReportData(Collections.singletonList(pojo)).get(0);
+        reportData.setLegends(convertChartLegendsPojoToChartLegendsData(chartLegendsApi.getByChartId(pojo.getId())).getLegends());
+        return reportData;
     }
 
     public List<Map<String, String>> getLiveDataForAnyOrganization(ReportRequestForm form, Integer orgId)
