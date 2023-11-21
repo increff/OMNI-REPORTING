@@ -1,7 +1,10 @@
 package com.increff.omni.reporting.dao;
 
+import com.increff.omni.reporting.config.ApplicationProperties;
+import com.increff.omni.reporting.model.constants.ScheduleStatus;
 import com.increff.omni.reporting.pojo.ReportSchedulePojo;
 import com.nextscm.commons.spring.db.AbstractDao;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.TypedQuery;
@@ -17,6 +20,9 @@ import java.util.Objects;
 @Repository
 public class ReportScheduleDao extends AbstractDao<ReportSchedulePojo> {
 
+    @Autowired
+    private ApplicationProperties properties;
+
     public List<ReportSchedulePojo> getEligibleSchedules() {
         CriteriaBuilder cb = this.em.getCriteriaBuilder();
         CriteriaQuery<ReportSchedulePojo> query = cb.createQuery(ReportSchedulePojo.class);
@@ -25,7 +31,23 @@ public class ReportScheduleDao extends AbstractDao<ReportSchedulePojo> {
                 cb.and(
                         cb.isTrue(root.get("isEnabled")),
                         cb.isFalse(root.get("isDeleted")),
-                        cb.lessThanOrEqualTo(root.get("nextRuntime"), ZonedDateTime.now()))
+                        cb.lessThanOrEqualTo(root.get("nextRuntime"), ZonedDateTime.now())),
+                        cb.equal(root.get("status"), ScheduleStatus.NEW)
+        );
+        TypedQuery<ReportSchedulePojo> tQuery = createQuery(query);
+        return tQuery.getResultList();
+    }
+
+    public List<ReportSchedulePojo> getStuckSchedules() {
+        CriteriaBuilder cb = this.em.getCriteriaBuilder();
+        CriteriaQuery<ReportSchedulePojo> query = cb.createQuery(ReportSchedulePojo.class);
+        Root<ReportSchedulePojo> root = query.from(ReportSchedulePojo.class);
+        query.where(
+                cb.and(
+                        cb.isTrue(root.get("isEnabled")),
+                        cb.isFalse(root.get("isDeleted")),
+                        cb.lessThanOrEqualTo(root.get("updatedAt"), ZonedDateTime.now().minusSeconds(properties.getStuckScheduleSeconds()))),
+                        cb.equal(root.get("status"), ScheduleStatus.RUNNING)
         );
         TypedQuery<ReportSchedulePojo> tQuery = createQuery(query);
         return tQuery.getResultList();

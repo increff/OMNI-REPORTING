@@ -5,6 +5,7 @@ import com.increff.omni.reporting.api.*;
 import com.increff.omni.reporting.config.ApplicationProperties;
 import com.increff.omni.reporting.flow.ReportRequestFlowApi;
 import com.increff.omni.reporting.model.constants.ReportRequestType;
+import com.increff.omni.reporting.model.constants.ScheduleStatus;
 import com.increff.omni.reporting.pojo.*;
 import com.nextscm.commons.spring.common.ApiException;
 import lombok.extern.log4j.Log4j;
@@ -82,6 +83,17 @@ public class ScheduledJobs {
     @Scheduled(fixedDelay = 1000)
     public void addScheduleReportRequests() throws ApiException {
         List<ReportSchedulePojo> schedulePojos = reportScheduleApi.getEligibleSchedules();
+        List<ReportSchedulePojo> alreadyExecutedSchedules = new ArrayList<>();
+        schedulePojos.forEach(s -> { // mark schedule status to RUNNING to prevent same schedule getting picked bp multiple times by horizontally scaled servers
+            try {
+                scheduleApi.updateStatus(s.getId(), ScheduleStatus.RUNNING);
+            } catch (OptimisticLockException | ObjectOptimisticLockingFailureException | ApiException e) {
+                log.debug("Error occurred while marking status " + ScheduleStatus.RUNNING + " for schedule id : " + s.getId() + " " + e.getMessage());
+                alreadyExecutedSchedules.add(s);
+            }
+        });
+        schedulePojos.removeAll(alreadyExecutedSchedules);
+
         log.debug("Eligible schedules : " + schedulePojos.size());
         for(ReportSchedulePojo s : schedulePojos) {
             OrgSchemaVersionPojo orgSchemaVersionPojo = orgSchemaApi.getCheckByOrgId(s.getOrgId());
@@ -103,8 +115,22 @@ public class ScheduledJobs {
             }
             reportRequestFlowApi.requestReportWithoutValidation(reportRequestPojo, reportInputParamsPojoList);
             s.setNextRuntime(getNextRunTime(s.getCron(), timezone));
+            s.setStatus(ScheduleStatus.NEW);
             scheduleApi.edit(s);
         }
+
+    }
+
+    @Scheduled(fixedDelay = 5 * 60 * 1000)
+    public void refreshScheduleStatus() {
+        List<ReportSchedulePojo> stuckSchedules = scheduleApi.getStuckSchedules();
+        stuckSchedules.forEach(s -> {
+            try {
+                scheduleApi.updateStatus(s.getId(), ScheduleStatus.NEW);
+            } catch (OptimisticLockException | ObjectOptimisticLockingFailureException | ApiException e) {
+                log.debug("Error occurred while refreshing status " + ScheduleStatus.NEW + " for schedule id : " + s.getId() + " " + e.getMessage());
+            }
+        });
     }
 
     @Scheduled(fixedDelay = 5 * 60 * 1000)

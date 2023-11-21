@@ -3,6 +3,7 @@ package com.increff.omni.reporting.api;
 import com.increff.omni.reporting.dao.ReportScheduleDao;
 import com.increff.omni.reporting.dao.ReportScheduleEmailsDao;
 import com.increff.omni.reporting.dao.ReportScheduleInputParamsDao;
+import com.increff.omni.reporting.model.constants.ScheduleStatus;
 import com.increff.omni.reporting.pojo.ReportScheduleEmailsPojo;
 import com.increff.omni.reporting.pojo.ReportScheduleInputParamsPojo;
 import com.increff.omni.reporting.pojo.ReportSchedulePojo;
@@ -60,6 +61,16 @@ public class ReportScheduleApi extends AbstractAuditApi {
         return dao.getEligibleSchedules();
     }
 
+    public List<ReportSchedulePojo> getStuckSchedules() {
+        return dao.getStuckSchedules();
+    }
+
+    public void updateStatus(Integer id, ScheduleStatus status) throws ApiException {
+        ReportSchedulePojo pojo = getCheck(id);
+        pojo.setStatus(status);
+        dao.update(pojo);
+    }
+
     public ReportSchedulePojo getCheck(Integer id) throws ApiException {
         ReportSchedulePojo pojo = dao.select(id);
         checkNotNull(pojo, "No report schedule present with id : " + id);
@@ -74,6 +85,7 @@ public class ReportScheduleApi extends AbstractAuditApi {
         ex.setIsEnabled(pojo.getIsEnabled());
         ex.setNextRuntime(pojo.getNextRuntime());
         ex.setIsDeleted(pojo.getIsDeleted());
+        ex.setStatus(pojo.getStatus());
         dao.update(ex);
     }
 
