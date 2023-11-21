@@ -29,17 +29,18 @@ public interface ChartInterface {
     }
 
     default void normalize(List<Map<String, String>> result, ChartType type) throws ApiException {
+        // Normalize pie chart values so that their sum is 100
         if(Objects.equals(type, ChartType.PIE) || Objects.equals(type, ChartType.DOUGHNUT)){
 
             double sum = getValueSum(result);
-            for(Map.Entry<String, String> e: result.get(0).entrySet()){ // Normalize each value such that sum is 100
+            for(Map.Entry<String, String> e: result.get(0).entrySet()){
                 if(!Objects.equals(e.getKey(), "label"))
                     e.setValue(getNormalizedValue(e.getValue(), sum));
             }
 
             double finalSum = getValueSum(result);
             double difference = 100 - finalSum;
-            if(difference != 0){ // if final sum is not 100, add the difference to firstColumnValue
+            if(difference != 0){ // As the final sum can be between(99.01 to 100.99) due to precision, add the offset to firstColumnValue
                 Map<String, String> lastRow = result.get(0);
                 String firstColumnName = lastRow.keySet().iterator().next();
                 lastRow.put(firstColumnName, String.format("%.2f", Double.parseDouble(lastRow.get(firstColumnName)) + difference));
