@@ -213,7 +213,7 @@ public class StandardController {
     // todo rate limiting
     // check report rate limiting - limit on max requested reports on user level (get pending requsts by user id)
     // we can add a table to store dashboard id requests and their timestamp. If a request is made for a dashboard id, we check no of requests made in last 5 mins and if it is more than X, we throw an error
-    @RequestMapping(value = "/dashboards/{dashboardId}/view", method = RequestMethod.GET)
+    @RequestMapping(value = "/dashboards/{dashboardId}/view", method = RequestMethod.POST)
     public List<ViewDashboardData> viewDashboard(@PathVariable Integer dashboardId, @RequestBody ReportRequestForm form) throws ApiException, IOException {
         return dashboardDto.viewDashboard(form, dashboardId);
     }
