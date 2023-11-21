@@ -74,4 +74,20 @@ public class ReportScheduleDao extends AbstractDao<ReportSchedulePojo> {
         return tQuery.setFirstResult((pageNo - 1) * pageSize)
                 .setMaxResults(pageSize).getResultList();
     }
+
+    public List<ReportSchedulePojo> selectByOrgIdReportAlias(List<Integer> orgIds, String reportAlias) {
+        if(orgIds.isEmpty())return new ArrayList<>();
+        CriteriaBuilder cb = this.em.getCriteriaBuilder();
+        CriteriaQuery<ReportSchedulePojo> query = cb.createQuery(ReportSchedulePojo.class);
+        Root<ReportSchedulePojo> root = query.from(ReportSchedulePojo.class);
+        List<Predicate> predicates = new ArrayList<>();
+        predicates.add(root.get("orgId").in(orgIds));
+        predicates.add(cb.equal(root.get("reportAlias"), reportAlias));
+        predicates.add(cb.isFalse(root.get("isDeleted")));
+        query.where(
+                cb.and(predicates.toArray(new Predicate[0]))
+        );
+        TypedQuery<ReportSchedulePojo> tQuery = createQuery(query);
+        return tQuery.getResultList();
+    }
 }

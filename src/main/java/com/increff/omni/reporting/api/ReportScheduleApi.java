@@ -57,6 +57,10 @@ public class ReportScheduleApi extends AbstractAuditApi {
         return dao.selectByOrgId(orgId, isEnabled, pageNo, pageSize);
     }
 
+    public List<ReportSchedulePojo> selectByOrgIdReportAlias(List<Integer> orgIds, String reportAlias) {
+        return dao.selectByOrgIdReportAlias(orgIds, reportAlias);
+    }
+
     public List<ReportSchedulePojo> getEligibleSchedules() {
         return dao.getEligibleSchedules();
     }

@@ -1,6 +1,7 @@
 package com.increff.omni.reporting.flow;
 
 import com.increff.omni.reporting.api.*;
+import com.increff.omni.reporting.dto.CommonDtoHelper;
 import com.increff.omni.reporting.model.constants.ReportRequestType;
 import com.increff.omni.reporting.model.constants.ValidationType;
 import com.increff.omni.reporting.pojo.*;
@@ -37,6 +38,7 @@ public class ReportScheduleFlowApi extends AbstractFlowApi {
     public void add(ReportSchedulePojo pojo, List<String> sendTo,
                     List<ReportScheduleInputParamsPojo> reportScheduleInputParamsPojos,
                     ReportPojo reportPojo) throws ApiException {
+        CommonDtoHelper.validateCronFrequency(reportPojo, pojo);
         validateGroups(reportPojo, reportScheduleInputParamsPojos);
         reportScheduleApi.add(pojo);
         addEmails(pojo, sendTo);
@@ -46,6 +48,7 @@ public class ReportScheduleFlowApi extends AbstractFlowApi {
     public void edit(ReportSchedulePojo pojo, List<String> sendTo,
                      List<ReportScheduleInputParamsPojo> reportScheduleInputParamsPojos,
                      ReportPojo reportPojo) throws ApiException {
+        CommonDtoHelper.validateCronFrequency(reportPojo, pojo);
         validateGroups(reportPojo, reportScheduleInputParamsPojos);
         reportScheduleApi.edit(pojo);
         reportScheduleApi.removeExistingEmails(pojo.getId());
@@ -96,4 +99,5 @@ public class ReportScheduleFlowApi extends AbstractFlowApi {
             throw new ApiException(ApiStatus.BAD_DATA, "No valid emails given, " + JsonUtil.serialize(sendTo));
         reportScheduleApi.addEmails(emailsPojos);
     }
+
 }

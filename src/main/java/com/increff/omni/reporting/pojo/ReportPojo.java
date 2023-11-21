@@ -45,6 +45,8 @@ public class ReportPojo extends AbstractVersionedPojo{
     @Column(nullable = false)
     private Boolean canSchedule = false;
 
+    private Integer minFrequencyAllowedSeconds;
+
     @Column(nullable = false)
     private Boolean isDashboard = false;
 
