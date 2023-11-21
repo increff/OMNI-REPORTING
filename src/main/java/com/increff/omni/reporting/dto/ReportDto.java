@@ -67,6 +67,8 @@ public class ReportDto extends AbstractDto {
     private OrgConnectionApi orgConnectionApi;
     @Autowired
     private ConnectionApi connectionApi;
+    @Autowired
+    private ChartLegendsApi chartLegendsApi;
 
     public ReportData add(ReportForm form) throws ApiException {
         validateReportForm(form);
