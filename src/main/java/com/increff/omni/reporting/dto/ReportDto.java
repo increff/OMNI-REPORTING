@@ -157,14 +157,15 @@ public class ReportDto extends AbstractDto {
         return data;
     }
 
-    public void testQueryLive(ReportRequestForm form) throws IOException, ApiException {
+    public Object testQueryLive(ReportRequestForm form) throws IOException, ApiException {
         ReportPojo report = reportApi.getCheck(form.getReportId());
         Integer schemaVersionId = report.getSchemaVersionId();
         Integer orgId = orgSchemaApi.getCheckBySchemaVersionId(schemaVersionId).get(0).getOrgId();
 
         List<Map<String, String>> data = getLiveDataForAnyOrganization(form, orgId);
         ChartInterface chartInterface = getChartData(report.getChartType());
-        chartInterface.validate(data, report.getChartType());
+        chartInterface.validateNormalize(data, report.getChartType());
+        return chartInterface.transform(data);
     }
 
     public ReportData selectByAlias(Boolean isChart, String alias) throws ApiException {
