@@ -103,7 +103,7 @@ public class ReportDto extends AbstractDto {
         ZonedDateTime startTime = ZonedDateTime.now();
         try {
             List<ReportInputParamsPojo> reportInputParamsPojoList = validateControls(form, orgId, reportPojo, password);
-            return flowApi.validateAndGetLiveData(reportPojo, reportInputParamsPojoList, connectionPojo, password);
+            return flowApi.validateAndGetLiveData(reportPojo, reportInputParamsPojoList, connectionPojo, password, form.getQuery());
         } finally {
             flowApi.saveAudit(reportPojo.getId().toString(), AuditActions.LIVE_REPORT.toString(),
                     "Live Report",
@@ -289,7 +289,7 @@ public class ReportDto extends AbstractDto {
         if(!reportPojo.getIsChart())
             throw new ApiException(ApiStatus.BAD_DATA, "Live data is only available for dashboards");
         ReportQueryPojo reportQueryPojo = reportQueryApi.getByReportId(reportPojo.getId());
-        if (Objects.isNull(reportQueryPojo))
+        if (Objects.isNull(reportQueryPojo) && Objects.isNull(form.getQuery()))
             throw new ApiException(ApiStatus.BAD_DATA, "No query defined for report : " + reportPojo.getName());
         return reportPojo;
     }
