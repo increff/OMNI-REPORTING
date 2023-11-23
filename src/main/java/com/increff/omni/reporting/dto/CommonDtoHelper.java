@@ -423,8 +423,10 @@ public class CommonDtoHelper {
 
     public static ReportSchedulePojo convertFormToReportSchedulePojo(ReportScheduleForm form, int orgId, int userId) {
         ReportSchedulePojo schedulePojo = new ReportSchedulePojo();
+
         String cron = "0" + " " + form.getCronSchedule().getMinute() + " " + form.getCronSchedule().getHour() +
-                " " + form.getCronSchedule().getDayOfMonth() + " " + "*" + " " + "?";
+                " " + form.getCronSchedule().getDayOfMonth() + " " + "* " + form.getCronSchedule().getDayOfWeek();
+
         schedulePojo.setReportAlias(form.getReportAlias());
         schedulePojo.setIsEnabled(form.getIsEnabled());
         schedulePojo.setOrgId(orgId);
@@ -454,5 +456,45 @@ public class CommonDtoHelper {
         } catch (Exception e) {
             return null;
         }
+    }
+
+    public static void validateCronFrequency(ReportPojo reportPojo, ReportSchedulePojo reportSchedulePojo) throws ApiException {
+        long cronFrequency = getCronFrequencyInSeconds(reportSchedulePojo.getCron());
+        if((Objects.nonNull(reportPojo.getMinFrequencyAllowedSeconds())) &&
+                (cronFrequency < reportPojo.getMinFrequencyAllowedSeconds()))
+            throw new ApiException(ApiStatus.BAD_DATA, "Cron frequency " + cronFrequency + " is less than minimum allowed frequency "
+                    + reportPojo.getMinFrequencyAllowedSeconds() + " seconds. Report name : " + reportPojo.getName() +
+                    ", Scheduled Report Alias : " + reportSchedulePojo.getReportAlias() + ", Cron : " + reportSchedulePojo.getCron() + ", Schedule ID : " + reportSchedulePojo.getId());
+    }
+
+    public static void validateCronFrequency(ReportPojo reportPojo, List<ReportSchedulePojo> reportSchedulePojos) throws ApiException {
+        StringBuilder error = new StringBuilder();
+        for(ReportSchedulePojo reportSchedulePojo : reportSchedulePojos) {
+            try {
+                validateCronFrequency(reportPojo, reportSchedulePojo);
+            }
+            catch (ApiException e) {
+                error.append(e.getMessage()).append("\n");
+            }
+        }
+        if(error.length() > 0)
+            throw new ApiException(ApiStatus.BAD_DATA,"Please change existing schedules cron frequency before updating report min frequency.\n" + error.toString());
+    }
+
+    public static long getCronFrequencyInSeconds(String cronExpression) throws ApiException {
+        CronSequenceGenerator generator = new CronSequenceGenerator(cronExpression);
+        long freqIntervalSecondsMin = 1000000000;
+
+        Instant instant = generator.next(new Date()).toInstant();
+        ZonedDateTime nextFireTime = ZonedDateTime.ofInstant(instant, ZoneId.of("UTC"));
+
+        ZonedDateTime nextToNextFireTime;
+        for(int i=0;i<100;i++){ // loop over multiple consecutive fire times to get the minimum frequency as cron expression can be non-periodic
+            instant = generator.next(Date.from(nextFireTime.toInstant())).toInstant();
+            nextToNextFireTime = ZonedDateTime.ofInstant(instant, ZoneId.of("UTC"));
+            freqIntervalSecondsMin = Math.min(freqIntervalSecondsMin, (nextToNextFireTime.toEpochSecond() - nextFireTime.toEpochSecond()) );
+            nextFireTime = nextToNextFireTime;
+        }
+        return freqIntervalSecondsMin;
     }
 }

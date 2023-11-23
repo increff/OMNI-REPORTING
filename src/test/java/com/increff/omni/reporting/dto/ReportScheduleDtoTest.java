@@ -15,7 +15,6 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -75,7 +74,7 @@ public class ReportScheduleDtoTest extends AbstractTest {
         ReportForm reportForm = commonSetup(false);
         reportDto.add(reportForm);
         List<ReportScheduleForm.InputParamMap> inputParamMaps = getInputParamList();
-        ReportScheduleForm form = getReportScheduleForm("*/15", "*", "*", "Report 1", "Asia/Kolkata",
+        ReportScheduleForm form = getReportScheduleForm("*/15", "*", "*", "?", "Report 1", "Asia/Kolkata",
                  true, Arrays.asList("a@gmail.com", "b@gmail.com"), inputParamMaps);
         try {
             dto.scheduleReport(form);
@@ -93,7 +92,7 @@ public class ReportScheduleDtoTest extends AbstractTest {
         ReportQueryForm queryForm = getReportQueryForm("select version();");
         reportDto.upsertQuery(reportData.getId(), queryForm);
         List<ReportScheduleForm.InputParamMap> inputParamMaps = getInputParamList();
-        ReportScheduleForm form = getReportScheduleForm("*/15", "*", "*", "Report 1", "Asia/Kolkata",
+        ReportScheduleForm form = getReportScheduleForm("*/15", "*", "*", "?", "Report 1", "Asia/Kolkata",
                 true, Arrays.asList("a@gmail.com", "b@gmail.com"), inputParamMaps);
         dto.scheduleReport(form);
         List<ReportScheduleData> reportScheduleData = dto.getScheduleReports(1, 100);
@@ -115,7 +114,7 @@ public class ReportScheduleDtoTest extends AbstractTest {
         ReportQueryForm queryForm = getReportQueryForm("select version();");
         reportDto.upsertQuery(reportData.getId(), queryForm);
         List<ReportScheduleForm.InputParamMap> inputParamMaps = getInputParamList();
-        ReportScheduleForm form = getReportScheduleForm("*/15", "*", "*", "Report 1", "Asia/Kolkata",
+        ReportScheduleForm form = getReportScheduleForm("*/15", "*", "*", "?", "Report 1", "Asia/Kolkata",
                 true, Arrays.asList("a@gmail.com", "b@gmail.com"), inputParamMaps);
         dto.scheduleReport(form);
         ReportScheduleData reportScheduleData = dto.getScheduleReports(1, 100).get(0);
@@ -140,7 +139,7 @@ public class ReportScheduleDtoTest extends AbstractTest {
         ReportQueryForm queryForm = getReportQueryForm("select version();");
         reportDto.upsertQuery(reportData.getId(), queryForm);
         List<ReportScheduleForm.InputParamMap> inputParamMaps = getInputParamList();
-        ReportScheduleForm form = getReportScheduleForm("*/15", "*", "*", "Report 1", "Asia/Kolkata",
+        ReportScheduleForm form = getReportScheduleForm("*/15", "*", "*", "?", "Report 1", "Asia/Kolkata",
                 true, Arrays.asList("a@gmail.com", "b@gmail.com"), inputParamMaps);
         dto.scheduleReport(form);
         ReportScheduleData reportScheduleData = dto.getScheduleReports(1, 100).get(0);
@@ -157,7 +156,7 @@ public class ReportScheduleDtoTest extends AbstractTest {
         ReportQueryForm queryForm = getReportQueryForm("select version();");
         reportDto.upsertQuery(reportData.getId(), queryForm);
         List<ReportScheduleForm.InputParamMap> inputParamMaps = getInputParamList();
-        ReportScheduleForm form = getReportScheduleForm("*/15", "*", "*", "Report 1", "Asia/Kolkata",
+        ReportScheduleForm form = getReportScheduleForm("*/15", "*", "*", "?", "Report 1", "Asia/Kolkata",
                 true, Arrays.asList("a@gmail.com", "b@gmail.com"), inputParamMaps);
         dto.scheduleReport(form);
         ReportScheduleData reportScheduleData = dto.getScheduleReports(1, 100).get(0);
@@ -181,7 +180,7 @@ public class ReportScheduleDtoTest extends AbstractTest {
         InputControlData inputControlData = inputControlDto.add(inputControlForm);
         reportDto.mapToControl(reportData.getId(), inputControlData.getId());
         List<ReportScheduleForm.InputParamMap> inputParamMaps = getInputParamList();
-        ReportScheduleForm form = getReportScheduleForm("*/15", "*", "*", "Report 1", "Asia/Kolkata",
+        ReportScheduleForm form = getReportScheduleForm("*/15", "*", "*", "?", "Report 1", "Asia/Kolkata",
                 true, Arrays.asList("a@gmail.com", "b@gmail.com"), inputParamMaps);
         dto.scheduleReport(form);
         List<ReportScheduleData> reportScheduleData = dto.getScheduleReports(1, 100);
@@ -202,5 +201,33 @@ public class ReportScheduleDtoTest extends AbstractTest {
         assertTrue(dataList.get(0).getFilters().isEmpty());
     }
 
+    @Test(expected = ApiException.class)
+    public void testAddScheduleWithFrequencyLessThanMinimumAllowedFrequency() throws ApiException {
+        ReportForm reportForm = commonSetup(true);
+        reportForm.setMinFrequencyAllowedSeconds(86400);
+        ReportData reportData = reportDto.add(reportForm);
+        ReportQueryForm queryForm = getReportQueryForm("select version();");
+        reportDto.upsertQuery(reportData.getId(), queryForm);
+        List<ReportScheduleForm.InputParamMap> inputParamMaps = getInputParamList();
+        ReportScheduleForm form = getReportScheduleForm("*/5", "*", "*", "?", "Report 1", "Asia/Kolkata",
+                true, Arrays.asList("a@gmail.com", "b@gmail.com"), inputParamMaps);
+        dto.scheduleReport(form);
+    }
 
+    @Test(expected = ApiException.class)
+    public void testEditReportMinFrequencyWithConflictingSchedulerFrequency() throws ApiException {
+        ReportForm reportForm = commonSetup(true);
+        reportForm.setAlias(reportForm.getAlias().toLowerCase());
+        reportForm.setMinFrequencyAllowedSeconds(300);
+        ReportData reportData = reportDto.add(reportForm);
+        ReportQueryForm queryForm = getReportQueryForm("select version();");
+        reportDto.upsertQuery(reportData.getId(), queryForm);
+        List<ReportScheduleForm.InputParamMap> inputParamMaps = getInputParamList();
+        ReportScheduleForm form = getReportScheduleForm("*/5", "*", "*", "?", "Report 1", "Asia/Kolkata",
+                true, Arrays.asList("a@gmail.com", "b@gmail.com"), inputParamMaps);
+        dto.scheduleReport(form);
+
+        reportForm.setMinFrequencyAllowedSeconds(301);
+        reportDto.edit(reportData.getId(), reportForm);
+    }
 }

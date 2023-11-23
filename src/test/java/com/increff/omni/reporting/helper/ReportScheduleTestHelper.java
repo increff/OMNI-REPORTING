@@ -41,13 +41,14 @@ public class ReportScheduleTestHelper {
         return inputParamsPojo;
     }
 
-    public static ReportScheduleForm getReportScheduleForm(String minute, String hour, String dayOfMonth, String reportName
+    public static ReportScheduleForm getReportScheduleForm(String minute, String hour, String dayOfMonth, String dayOfWeek, String reportName
             , String timezone, Boolean isEnabled, List<String> sendTo, List<ReportScheduleForm.InputParamMap> inputParamMaps) {
         ReportScheduleForm form = new ReportScheduleForm();
         CronScheduleForm cronScheduleForm = new CronScheduleForm();
         cronScheduleForm.setMinute(minute);
         cronScheduleForm.setHour(hour);
         cronScheduleForm.setDayOfMonth(dayOfMonth);
+        cronScheduleForm.setDayOfWeek(dayOfWeek);
         form.setCronSchedule(cronScheduleForm);
         form.setReportAlias(reportName.toLowerCase().replace(" ", "_"));
         form.setTimezone(timezone);
