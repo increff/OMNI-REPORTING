@@ -7,8 +7,11 @@ import com.increff.omni.reporting.model.form.ReportForm;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static com.nextscm.commons.spring.server.DtoHelper.checkValid;
 
@@ -35,6 +38,14 @@ public class ValidateUtil {
         for(DashboardChartForm form : forms) {
             checkValid(form);
         }
+        validateChartAliasesAreUnique(forms);
+    }
+
+    private static void validateChartAliasesAreUnique(List<DashboardChartForm> forms) throws ApiException {
+        Set<String> aliases = new HashSet<>();
+        List<DashboardChartForm> duplicateAliases = forms.stream().filter(form -> !aliases.add(form.getChartAlias())).collect(Collectors.toList());
+        if(duplicateAliases.size() > 0)
+            throw new ApiException(ApiStatus.BAD_DATA, "Same chart cannot be added twice. Duplicate chart alias: " + duplicateAliases.get(0).getChartAlias());
     }
 
     public static void validateDashboardAddForm(DashboardAddForm form) throws ApiException {
