@@ -189,17 +189,18 @@ public class DashboardDto extends AbstractDto {
         ChartInterface chartInterface = getChartData(type);
         chartInterface.validateNormalize(data, type);
 
-        ViewDashboardData viewData = getViewDashboardData(report, charts, type, data, chartInterface);
+        ViewDashboardData viewData = getViewDashboardData(report, charts, data, chartInterface);
         return Collections.singletonList(viewData);
     }
 
-    private ViewDashboardData getViewDashboardData(ReportPojo report, DashboardChartPojo charts, ChartType type, List<Map<String, String>> data, ChartInterface chartInterface) throws ApiException {
+    private ViewDashboardData getViewDashboardData(ReportPojo report, DashboardChartPojo charts,
+                                                   List<Map<String, String>> data, ChartInterface chartInterface) throws ApiException {
         ViewDashboardData viewData = new ViewDashboardData();
         viewData.setChartData(chartInterface.transform(data));
-        viewData.setLegends(convertChartLegendsPojoToChartLegendsData(
-                chartLegendsApi.getByChartId(report.getId())).getLegends());
+        viewData.setLegends(convertChartLegendsPojoToChartLegendsData(chartLegendsApi.getByChartId(report.getId()))
+                .getLegends());
         viewData.setChartId(report.getId());
-        viewData.setType(type);
+        viewData.setType(report.getChartType());
         viewData.setRow(charts.getRow());
         viewData.setCol(charts.getCol());
         viewData.setColWidth(charts.getColWidth());

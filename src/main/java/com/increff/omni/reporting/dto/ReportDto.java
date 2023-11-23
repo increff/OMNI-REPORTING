@@ -12,6 +12,7 @@ import com.increff.omni.reporting.model.data.Charts.ChartInterface;
 import com.increff.omni.reporting.model.data.ReportData;
 import com.increff.omni.reporting.model.data.ReportQueryData;
 import com.increff.omni.reporting.model.data.ValidationGroupData;
+import com.increff.omni.reporting.model.data.ViewDashboardData;
 import com.increff.omni.reporting.model.form.*;
 import com.increff.omni.reporting.pojo.*;
 import com.increff.omni.reporting.util.SqlCmd;
@@ -157,7 +158,7 @@ public class ReportDto extends AbstractDto {
         return data;
     }
 
-    public Object testQueryLive(ReportRequestForm form) throws IOException, ApiException {
+    public List<ViewDashboardData> testQueryLive(ReportRequestForm form) throws IOException, ApiException {
         ReportPojo report = reportApi.getCheck(form.getReportId());
         Integer schemaVersionId = report.getSchemaVersionId();
         Integer orgId = orgSchemaApi.getCheckBySchemaVersionId(schemaVersionId).get(0).getOrgId();
@@ -165,7 +166,17 @@ public class ReportDto extends AbstractDto {
         List<Map<String, String>> data = getLiveDataForAnyOrganization(form, orgId);
         ChartInterface chartInterface = getChartData(report.getChartType());
         chartInterface.validateNormalize(data, report.getChartType());
-        return chartInterface.transform(data);
+
+        return Collections.singletonList(getTestQueryLiveData(report, data, chartInterface));
+    }
+
+    private ViewDashboardData getTestQueryLiveData(ReportPojo report, List<Map<String, String>> data, ChartInterface chartInterface) throws ApiException {
+        ViewDashboardData viewData = new ViewDashboardData();
+        viewData.setChartData(chartInterface.transform(data));
+        viewData.setLegends(convertChartLegendsPojoToChartLegendsData(chartLegendsApi.getByChartId(report.getId())).getLegends());
+        viewData.setChartId(report.getId());
+        viewData.setType(report.getChartType());
+        return viewData;
     }
 
     public ReportData selectByAlias(Boolean isChart, String alias) throws ApiException {
