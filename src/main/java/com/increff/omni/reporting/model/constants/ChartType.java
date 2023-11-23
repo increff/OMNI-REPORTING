@@ -14,7 +14,7 @@ public enum ChartType {
     STACKED_BAR(null,null, null, 2),
 
     PIE(1,null, null, null),
-    DOUGHNUT(null,null, null, null),
+    DOUGHNUT(1,null, null, null),
 
     LINE(2,null, null, 2),
     MULTI_LINE(null,null, null, 2);

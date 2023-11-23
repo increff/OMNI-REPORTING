@@ -20,7 +20,7 @@ public class ChartUtil {
 
     public static MapSingleValueChartData getMapSingleValueChartData(List<Map<String, String>> result) {
         MapSingleValueChartData chartData = new MapSingleValueChartData();
-        chartData.setData(result.get(0));
+        chartData.setData(result);
         return chartData;
     }
 
