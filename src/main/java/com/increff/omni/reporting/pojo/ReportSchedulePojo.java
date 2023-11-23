@@ -50,6 +50,6 @@ public class ReportSchedulePojo extends AbstractVersionedPojo {
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private ScheduleStatus status;
+    private ScheduleStatus status = ScheduleStatus.NEW;
 
 }
