@@ -86,7 +86,7 @@ public class ScheduledJobs {
         List<ReportSchedulePojo> alreadyExecutedSchedules = new ArrayList<>();
         schedulePojos.forEach(s -> { // mark schedule status to RUNNING to prevent same schedule getting picked bp multiple times by horizontally scaled servers
             try {
-                scheduleApi.updateStatus(s.getId(), ScheduleStatus.RUNNING);
+                scheduleApi.updateStatusToRunning(s.getId());
             } catch (OptimisticLockException | ObjectOptimisticLockingFailureException | ApiException e) {
                 log.debug("Error occurred while marking status " + ScheduleStatus.RUNNING + " for schedule id : " + s.getId() + " " + e.getMessage());
                 alreadyExecutedSchedules.add(s);
@@ -121,12 +121,12 @@ public class ScheduledJobs {
 
     }
 
-    @Scheduled(fixedDelay = 5 * 60 * 1000)
+    @Scheduled(fixedDelay = 10 * 60 * 1000)
     public void refreshScheduleStatus() {
         List<ReportSchedulePojo> stuckSchedules = scheduleApi.getStuckSchedules();
         stuckSchedules.forEach(s -> {
             try {
-                scheduleApi.updateStatus(s.getId(), ScheduleStatus.NEW);
+                scheduleApi.updateStatusToNew(s.getId());
             } catch (OptimisticLockException | ObjectOptimisticLockingFailureException | ApiException e) {
                 log.debug("Error occurred while refreshing status " + ScheduleStatus.NEW + " for schedule id : " + s.getId() + " " + e.getMessage());
             }

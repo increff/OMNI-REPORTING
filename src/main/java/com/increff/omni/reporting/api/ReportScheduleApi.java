@@ -8,6 +8,7 @@ import com.increff.omni.reporting.pojo.ReportScheduleEmailsPojo;
 import com.increff.omni.reporting.pojo.ReportScheduleInputParamsPojo;
 import com.increff.omni.reporting.pojo.ReportSchedulePojo;
 import com.nextscm.commons.spring.common.ApiException;
+import com.nextscm.commons.spring.common.ApiStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -69,9 +70,21 @@ public class ReportScheduleApi extends AbstractAuditApi {
         return dao.getStuckSchedules();
     }
 
-    public void updateStatus(Integer id, ScheduleStatus status) throws ApiException {
+    public void updateStatusToRunning(Integer id) throws ApiException {
         ReportSchedulePojo pojo = getCheck(id);
-        pojo.setStatus(status);
+        if(pojo.getStatus()!=ScheduleStatus.NEW){
+            throw new ApiException(ApiStatus.BAD_DATA, "Optimistic Lock. Failed to change Schedule id:" + id + " status to " + ScheduleStatus.RUNNING + "Cur Status is not " + ScheduleStatus.NEW);
+        }
+        pojo.setStatus(ScheduleStatus.RUNNING);
+        dao.update(pojo);
+    }
+
+    public void updateStatusToNew(Integer id) throws ApiException {
+        ReportSchedulePojo pojo = getCheck(id);
+        if(pojo.getStatus()!=ScheduleStatus.RUNNING){
+            throw new ApiException(ApiStatus.BAD_DATA, "Optimistic Lock. Failed to change Schedule id:" + id + " status to " + ScheduleStatus.NEW + "Cur Status is not " + ScheduleStatus.RUNNING);
+        }
+        pojo.setStatus(ScheduleStatus.NEW);
         dao.update(pojo);
     }
 
