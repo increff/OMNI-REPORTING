@@ -113,4 +113,7 @@ public class ApplicationProperties {
     @Value("${crypto.base.url}")
     private String cryptoBaseUrl;
 
+    @Value("${max.dashboards.per.org:10}")
+    private Integer maxDashboardsPerOrg;
+
 }

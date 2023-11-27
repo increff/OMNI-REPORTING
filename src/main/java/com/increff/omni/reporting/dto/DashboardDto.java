@@ -1,6 +1,7 @@
 package com.increff.omni.reporting.dto;
 
 import com.increff.omni.reporting.api.*;
+import com.increff.omni.reporting.config.ApplicationProperties;
 import com.increff.omni.reporting.model.constants.ChartType;
 import com.increff.omni.reporting.model.data.*;
 import com.increff.omni.reporting.model.data.Charts.ChartInterface;
@@ -52,6 +53,8 @@ public class DashboardDto extends AbstractDto {
     private ChartLegendsApi chartLegendsApi;
     @Autowired
     private DashboardChartDto dashboardChartDto;
+    @Autowired
+    private ApplicationProperties properties;
 
     @Transactional(rollbackFor = ApiException.class)
     public List<DefaultValueData> upsertDefaultValues(List<DefaultValueForm> forms) throws ApiException {
@@ -235,6 +238,8 @@ public class DashboardDto extends AbstractDto {
         ValidateUtil.validateDashboardAddForm(form);
         if(Objects.nonNull(api.getByOrgIdName(getOrgId(), form.getName())))
             throw new ApiException(ApiStatus.BAD_DATA, "Dashboard name already exists: " + form.getName() + " OrgId: " + getOrgId());
+        if(api.getByOrgId(getOrgId()).size() >= properties.getMaxDashboardsPerOrg())
+            throw new ApiException(ApiStatus.BAD_DATA, "Max limit of dashboards reached: " + properties.getMaxDashboardsPerOrg());
     }
 
 
