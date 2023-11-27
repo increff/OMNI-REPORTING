@@ -16,7 +16,7 @@ public enum ChartType {
     PIE(1,null, null, null),
     DOUGHNUT(1,null, null, null),
 
-    LINE(2,null, null, 2),
+    LINE(null,null, null, 2),
     MULTI_LINE(null,null, null, 2);
 
 
