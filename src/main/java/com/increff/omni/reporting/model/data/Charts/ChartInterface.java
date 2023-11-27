@@ -33,6 +33,8 @@ public interface ChartInterface {
         if(Objects.equals(type, ChartType.PIE) || Objects.equals(type, ChartType.DOUGHNUT)){
 
             double sum = getValueSum(result);
+            if(sum == 0)
+                return;
             for(Map.Entry<String, String> e: result.get(0).entrySet()){
                 if(!Objects.equals(e.getKey(), "label"))
                     e.setValue(getNormalizedValue(e.getValue(), sum));
