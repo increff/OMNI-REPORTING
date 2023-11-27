@@ -1,6 +1,7 @@
 package com.increff.omni.reporting.dto;
 
 import com.increff.omni.reporting.config.AbstractTest;
+import com.increff.omni.reporting.model.constants.ChartType;
 import com.increff.omni.reporting.model.constants.InputControlScope;
 import com.increff.omni.reporting.model.constants.InputControlType;
 import com.increff.omni.reporting.model.constants.ReportType;
@@ -54,7 +55,7 @@ public class ConnectionDtoTestIT extends AbstractTest {
         ConnectionData connectionData = connectionDto.add(connectionForm);
         organizationDto.mapToConnection(organizationData.getId(), connectionData.getId());
         organizationDto.mapToSchema(organizationData.getId(), schemaData.getId());
-        return getReportForm(name, type, directoryData.getId(), schemaData.getId(), false);
+        return getReportForm(name, type, directoryData.getId(), schemaData.getId(), false, ChartType.REPORT);
     }
 
     @Test

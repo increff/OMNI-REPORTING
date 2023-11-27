@@ -41,7 +41,7 @@ public class ReportTestHelper {
     }
 
     public static ReportForm getReportForm(String name, ReportType type, Integer directoryId, Integer schemaVersionId,
-                                           boolean canSchedule) {
+                                           boolean canSchedule, ChartType chartType) {
         ReportForm form = new ReportForm();
         form.setDirectoryId(directoryId);
         form.setSchemaVersionId(schemaVersionId);
@@ -49,7 +49,22 @@ public class ReportTestHelper {
         form.setType(type);
         form.setCanSchedule(canSchedule);
         form.setAlias(name.replace(" ", "_"));
-        form.setChartType(ChartType.REPORT);
+        form.setChartType(chartType);
+        return form;
+    }
+
+    public static ReportForm getChartForm(String name, ReportType type, Integer directoryId, Integer schemaVersionId,
+                                           boolean canSchedule, ChartType chartType, Map<String, String> legends) {
+        ReportForm form = new ReportForm();
+        form.setDirectoryId(directoryId);
+        form.setSchemaVersionId(schemaVersionId);
+        form.setName(name);
+        form.setType(type);
+        form.setCanSchedule(canSchedule);
+        form.setAlias(name.replace(" ", "_"));
+        form.setChartType(chartType);
+        form.setIsChart(true);
+        form.setLegends(legends);
         return form;
     }
 

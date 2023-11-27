@@ -1,10 +1,7 @@
 package com.increff.omni.reporting.dto;
 
 import com.increff.omni.reporting.config.AbstractTest;
-import com.increff.omni.reporting.model.constants.InputControlScope;
-import com.increff.omni.reporting.model.constants.InputControlType;
-import com.increff.omni.reporting.model.constants.ReportType;
-import com.increff.omni.reporting.model.constants.ValidationType;
+import com.increff.omni.reporting.model.constants.*;
 import com.increff.omni.reporting.model.data.*;
 import com.increff.omni.reporting.model.form.*;
 import com.nextscm.commons.spring.common.ApiException;
@@ -52,7 +49,7 @@ public class ReportDtoTest extends AbstractTest {
         ConnectionData connectionData = connectionDto.add(connectionForm);
         organizationDto.mapToConnection(organizationData.getId(), connectionData.getId());
         organizationDto.mapToSchema(organizationData.getId(), schemaData.getId());
-        return getReportForm(name, type, directoryData.getId(), schemaData.getId(), false);
+        return getReportForm(name, type, directoryData.getId(), schemaData.getId(), false, ChartType.REPORT);
     }
 
     @Test
@@ -70,7 +67,7 @@ public class ReportDtoTest extends AbstractTest {
         ReportForm form = commonSetup("Report 2", ReportType.CUSTOM);
         ReportData data = dto.add(form);
         ReportForm updateForm =
-                getReportForm("Report 3", ReportType.CUSTOM, form.getDirectoryId(), form.getSchemaVersionId(), false);
+                getReportForm("Report 3", ReportType.CUSTOM, form.getDirectoryId(), form.getSchemaVersionId(), false, ChartType.REPORT);
         dto.edit(data.getId(), updateForm);
         ReportData fData = dto.get(data.getId());
         assertNotNull(fData);
