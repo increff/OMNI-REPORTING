@@ -39,8 +39,6 @@ public class StandardController {
     @Autowired
     private DashboardDto dashboardDto;
     @Autowired
-    private DefaultValueDto defaultValueDto;
-    @Autowired
     private ApplicationProperties properties;
     @Autowired
     private AuthClient authClient;
@@ -192,7 +190,7 @@ public class StandardController {
     @RequestMapping(value = "/dashboards/defaults", method = RequestMethod.PATCH)
     //todo check how we can apply validations in default values set by clients - we can try to hit a query to check if query is running after defualt value
     public List<DefaultValueData> addDefaults(@RequestBody List<DefaultValueForm> forms) throws ApiException {
-        return defaultValueDto.upsert(forms);
+        return dashboardDto.upsertDefaultValues(forms);
     }
 
     @ApiOperation(value = "Get Dashboard")

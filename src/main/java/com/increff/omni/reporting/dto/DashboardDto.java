@@ -6,6 +6,7 @@ import com.increff.omni.reporting.model.data.*;
 import com.increff.omni.reporting.model.data.Charts.ChartInterface;
 import com.increff.omni.reporting.model.form.DashboardAddForm;
 import com.increff.omni.reporting.model.form.DashboardForm;
+import com.increff.omni.reporting.model.form.DefaultValueForm;
 import com.increff.omni.reporting.model.form.ReportRequestForm;
 import com.increff.omni.reporting.pojo.DashboardChartPojo;
 import com.increff.omni.reporting.pojo.DashboardPojo;
@@ -51,6 +52,26 @@ public class DashboardDto extends AbstractDto {
     private ChartLegendsApi chartLegendsApi;
     @Autowired
     private DashboardChartDto dashboardChartDto;
+
+    @Autowired
+    private DefaultValueApi defaultValueApi1;
+
+    @Transactional(rollbackFor = ApiException.class)
+    public List<DefaultValueData> upsertDefaultValues(List<DefaultValueForm> forms) throws ApiException {
+        List<DefaultValuePojo> pojos = new ArrayList<>();
+        for(DefaultValueForm form : forms) {
+            checkValid(form);
+            api.getCheck(form.getDashboardId(), getOrgId());
+            validateControlIdExistsForDashboard(form.getDashboardId(), form.getControlId());
+
+            DefaultValuePojo pojo = ConvertUtil.convert(form, DefaultValuePojo.class);
+            pojo.setDefaultValue(String.join(",", form.getDefaultValue()));
+            pojos.add(defaultValueApi1.upsert(pojo));
+        }
+        return ConvertUtil.convert(pojos, DefaultValueData.class);
+    }
+
+
 
     @Transactional(rollbackFor = ApiException.class)
     public DashboardData addDashboard(DashboardAddForm form) throws ApiException {
@@ -218,5 +239,15 @@ public class DashboardDto extends AbstractDto {
         if(Objects.nonNull(api.getByOrgIdName(getOrgId(), form.getName())))
             throw new ApiException(ApiStatus.BAD_DATA, "Dashboard name already exists: " + form.getName() + " OrgId: " + getOrgId());
     }
+
+
+    private void validateControlIdExistsForDashboard(Integer dashboardId, Integer controlId) throws ApiException {
+        Map<String,List<InputControlData>> filterDetails = getFilterDetails(api.getCheck(dashboardId, getOrgId()),
+                dashboardChartApi.getByDashboardId(dashboardId));
+        if(filterDetails.values().stream().flatMap(List::stream).noneMatch(inputControlData -> inputControlData.getId().equals(controlId))){
+            throw new ApiException(ApiStatus.BAD_DATA, "Control Id does not exist for dashboard id: " + dashboardId + " control id: " + controlId);
+        }
+    }
+
 
 }

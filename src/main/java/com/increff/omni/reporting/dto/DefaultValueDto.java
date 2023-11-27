@@ -28,38 +28,6 @@ import java.util.Objects;
 @Setter
 public class DefaultValueDto extends AbstractDto {
 
-    @Autowired
-    private DefaultValueApi api;
-    @Autowired
-    private DashboardApi dashboardApi;
-    @Autowired
-    private DashboardDto dashboardDto;
-    @Autowired
-    private DashboardChartApi dashboardChartApi;
-
-    @Transactional(rollbackFor = ApiException.class)
-    public List<DefaultValueData> upsert(List<DefaultValueForm> forms) throws ApiException {
-        List<DefaultValuePojo> pojos = new ArrayList<>();
-        for(DefaultValueForm form : forms) {
-            checkValid(form);
-            dashboardApi.getCheck(form.getDashboardId(), getOrgId());
-            validateControlIdExistsForDashboard(form.getDashboardId(), form.getControlId());
-
-            DefaultValuePojo pojo = ConvertUtil.convert(form, DefaultValuePojo.class);
-            pojo.setDefaultValue(String.join(",", form.getDefaultValue()));
-            pojos.add(api.upsert(pojo));
-        }
-        return ConvertUtil.convert(pojos, DefaultValueData.class);
-    }
-
-    private void validateControlIdExistsForDashboard(Integer dashboardId, Integer controlId) throws ApiException {
-        Map<String,List<InputControlData>> filterDetails = dashboardDto.getFilterDetails(dashboardApi.getCheck(dashboardId, getOrgId()),
-                dashboardChartApi.getByDashboardId(dashboardId));
-        if(filterDetails.values().stream().flatMap(List::stream).noneMatch(inputControlData -> inputControlData.getId().equals(controlId))){
-            throw new ApiException(ApiStatus.BAD_DATA, "Control Id does not exist for dashboard id: " + dashboardId + " control id: " + controlId);
-        }
-    }
-
 
 
 }
