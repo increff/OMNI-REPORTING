@@ -53,9 +53,6 @@ public class DashboardDto extends AbstractDto {
     @Autowired
     private DashboardChartDto dashboardChartDto;
 
-    @Autowired
-    private DefaultValueApi defaultValueApi1;
-
     @Transactional(rollbackFor = ApiException.class)
     public List<DefaultValueData> upsertDefaultValues(List<DefaultValueForm> forms) throws ApiException {
         List<DefaultValuePojo> pojos = new ArrayList<>();
@@ -66,7 +63,7 @@ public class DashboardDto extends AbstractDto {
 
             DefaultValuePojo pojo = ConvertUtil.convert(form, DefaultValuePojo.class);
             pojo.setDefaultValue(String.join(",", form.getDefaultValue()));
-            pojos.add(defaultValueApi1.upsert(pojo));
+            pojos.add(defaultValueApi.upsert(pojo));
         }
         return ConvertUtil.convert(pojos, DefaultValueData.class);
     }
