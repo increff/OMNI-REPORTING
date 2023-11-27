@@ -37,8 +37,6 @@ public class StandardController {
     @Autowired
     private DashboardChartDto dashboardChartDto;
     @Autowired
-    private ChartLegendsDto chartLegendsDto;
-    @Autowired
     private DashboardDto dashboardDto;
     @Autowired
     private DefaultValueDto defaultValueDto;
