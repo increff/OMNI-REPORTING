@@ -41,6 +41,13 @@ public class DefaultValueApi extends AbstractApi {
 
     }
 
+    public void deleteByDashboardId(Integer dashboardId) {
+        List<DefaultValuePojo> pojos = dao.selectMultiple("dashboardId", dashboardId);
+        for (DefaultValuePojo pojo : pojos) {
+            dao.remove(pojo);
+        }
+    }
+
     public void deleteByDashboardIdAndControlIdNotIn(Integer dashboardId, List<Integer> controlId) throws ApiException {
         dao.deleteByDashboardIdAndControlIdNotIn(dashboardId, controlId);
     }

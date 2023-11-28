@@ -29,6 +29,11 @@ public class DashboardApi extends AbstractApi {
         return existing;
     }
 
+    public void delete(Integer id) throws ApiException {
+        DashboardPojo pojo = getCheck(id);
+        dao.remove(pojo);
+    }
+
     public DashboardPojo getCheck(Integer id, Integer orgId) throws ApiException {
         DashboardPojo pojo = getCheck(id);
         if(!pojo.getOrgId().equals(orgId))

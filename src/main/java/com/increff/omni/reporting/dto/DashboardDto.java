@@ -95,6 +95,13 @@ public class DashboardDto extends AbstractDto {
     }
 
     @Transactional(rollbackFor = ApiException.class)
+    public void deleteDashboard(Integer dashboardId) throws ApiException {
+        dashboardChartApi.deleteByDashboardId(dashboardId);
+        defaultValueApi.deleteByDashboardId(dashboardId);
+        api.delete(dashboardId);
+    }
+
+    @Transactional(rollbackFor = ApiException.class)
     public List<DashboardListData> getDashboardsByOrgId() {
         return getDashboardsByOrgId(getOrgId());
     }

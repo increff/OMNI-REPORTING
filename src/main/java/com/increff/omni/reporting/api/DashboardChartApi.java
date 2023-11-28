@@ -26,14 +26,13 @@ public class DashboardChartApi extends AbstractApi {
         return dao.getByDashboardId(id);
     }
 
-    //getByDashboardAndChartId
     public DashboardChartPojo getCheckByDashboardAndChartAlias(Integer dashboardId, String chartAlias) throws ApiException {
         DashboardChartPojo pojo = dao.getByDashboardAndChartAlias(dashboardId, chartAlias);
         checkNotNull(pojo, "DashboardChart does not exist dashboardId: " + dashboardId + " chartAlias: " + chartAlias);
         return pojo;
     }
 
-    public void deleteByDashboardId(Integer id) throws ApiException {
+    public void deleteByDashboardId(Integer id) {
         List<DashboardChartPojo> pojos = dao.getByDashboardId(id);
         for(DashboardChartPojo pojo : pojos){
             dao.remove(pojo);

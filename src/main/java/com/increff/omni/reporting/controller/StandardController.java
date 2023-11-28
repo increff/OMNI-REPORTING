@@ -167,6 +167,12 @@ public class StandardController {
         return dashboardDto.addDashboard(form);
     }
 
+    @ApiOperation(value = "Delete Dashboard")
+    @RequestMapping(value = "/dashboards/{dashboardId}", method = RequestMethod.DELETE)
+    public void deleteDashboard(@PathVariable Integer dashboardId) throws ApiException {
+        dashboardDto.deleteDashboard(dashboardId);
+    }
+
     @ApiOperation(value = "Edit Dashboard")
     @RequestMapping(value = "/dashboards/{dashboardId}", method = RequestMethod.PUT)
     public DashboardData editDashboard(@RequestBody DashboardForm form, @PathVariable Integer dashboardId) throws ApiException {
