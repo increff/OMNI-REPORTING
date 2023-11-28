@@ -94,8 +94,9 @@ public class AbstractDto extends AbstractDtoApi {
                         break;
                     case DATE:
                     case DATE_TIME:
-                        value = getValueFromQuotes(value);
                         // not checking for valid date by parsing it as date object as this can contain dynamic date SQL format as well (now() etc.)
+                        value = getValueFromQuotes(value);
+                        break;
                     case SINGLE_SELECT:
                         values = inputParams.get(i.getParamName());
                         allowedValuesMap = checkValidValues(i, orgId, password);
