@@ -94,8 +94,15 @@ public class AbstractDto extends AbstractDtoApi {
                         break;
                     case DATE:
                     case DATE_TIME:
-                        // not checking for valid date by parsing it as date object as this can contain dynamic date SQL format as well (now() etc.)
-                        value = getValueFromQuotes(value);
+                        try {
+                            if(type.equals(ReportRequestType.USER)) {
+                                value = getValueFromQuotes(value);
+                                ZonedDateTime.parse(value);
+                            }
+                        } catch (Exception e) {
+                            throw new ApiException(ApiStatus.BAD_DATA,
+                                    value + " is not in valid date format for filter : " + i.getDisplayName());
+                        }
                         break;
                     case SINGLE_SELECT:
                         values = inputParams.get(i.getParamName());
