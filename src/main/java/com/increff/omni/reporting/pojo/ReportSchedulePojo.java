@@ -1,5 +1,6 @@
 package com.increff.omni.reporting.pojo;
 
+import com.increff.omni.reporting.model.constants.ScheduleStatus;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -12,7 +13,8 @@ import java.time.ZonedDateTime;
 @Table(name = "report_schedule", indexes = {@Index(name = "idx_orgId_isEnabled", columnList = "orgId, isEnabled"),
                 @Index(name = "idx_isDeleted", columnList = "isDeleted"),
                 @Index(name = "idx_nextRuntime_isEnabled", columnList = "nextRuntime, isEnabled"),
-                @Index(name = "idx_orgId_reportAlias", columnList = "orgId, reportAlias")})
+                @Index(name = "idx_status_updated_at_isEnabled_isDeleted", columnList = "status, updatedAt, isEnabled, isDeleted")})
+
 public class ReportSchedulePojo extends AbstractVersionedPojo {
 
     @Id
@@ -45,5 +47,9 @@ public class ReportSchedulePojo extends AbstractVersionedPojo {
     private Integer successCount = 0;
 
     private Integer failureCount = 0;
+
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private ScheduleStatus status = ScheduleStatus.NEW;
 
 }
