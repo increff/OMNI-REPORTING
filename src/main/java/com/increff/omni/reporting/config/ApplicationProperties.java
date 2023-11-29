@@ -116,4 +116,9 @@ public class ApplicationProperties {
     @Value("${max.dashboards.per.org:20}")
     private Integer maxDashboardsPerOrg;
 
+    @Value("${rate.limit.tokens.refill.amount:3}")
+    private Integer tokens;
+    @Value("${rate.limit.tokens.refill.rate.seconds:60}")
+    private Integer tokensRefillRateSeconds;
+
 }
