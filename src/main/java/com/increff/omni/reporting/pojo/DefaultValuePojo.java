@@ -18,6 +18,6 @@ public class DefaultValuePojo extends AbstractVersionedPojo{
     private Integer dashboardId;
     @Column(nullable = false)
     private Integer controlId;
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "LONGTEXT")
     private String defaultValue;
 }
