@@ -20,9 +20,6 @@ import java.util.Objects;
 @Repository
 public class ReportScheduleDao extends AbstractDao<ReportSchedulePojo> {
 
-    @Autowired
-    private ApplicationProperties properties;
-
     public List<ReportSchedulePojo> getEligibleSchedules() {
         CriteriaBuilder cb = this.em.getCriteriaBuilder();
         CriteriaQuery<ReportSchedulePojo> query = cb.createQuery(ReportSchedulePojo.class);
@@ -38,7 +35,7 @@ public class ReportScheduleDao extends AbstractDao<ReportSchedulePojo> {
         return tQuery.getResultList();
     }
 
-    public List<ReportSchedulePojo> getStuckSchedules() {
+    public List<ReportSchedulePojo> getStuckSchedules(Integer stuckScheduleSeconds) {
         CriteriaBuilder cb = this.em.getCriteriaBuilder();
         CriteriaQuery<ReportSchedulePojo> query = cb.createQuery(ReportSchedulePojo.class);
         Root<ReportSchedulePojo> root = query.from(ReportSchedulePojo.class);
@@ -46,7 +43,7 @@ public class ReportScheduleDao extends AbstractDao<ReportSchedulePojo> {
                 cb.and(
                         cb.isTrue(root.get("isEnabled")),
                         cb.isFalse(root.get("isDeleted")),
-                        cb.lessThanOrEqualTo(root.get("updatedAt"), ZonedDateTime.now().minusSeconds(properties.getStuckScheduleSeconds()))),
+                        cb.lessThanOrEqualTo(root.get("updatedAt"), ZonedDateTime.now().minusSeconds(stuckScheduleSeconds))),
                         cb.equal(root.get("status"), ScheduleStatus.RUNNING)
         );
         TypedQuery<ReportSchedulePojo> tQuery = createQuery(query);

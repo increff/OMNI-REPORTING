@@ -66,8 +66,8 @@ public class ReportScheduleApi extends AbstractAuditApi {
         return dao.getEligibleSchedules();
     }
 
-    public List<ReportSchedulePojo> getStuckSchedules() {
-        return dao.getStuckSchedules();
+    public List<ReportSchedulePojo> getStuckSchedules(Integer stuckScheduleSeconds) {
+        return dao.getStuckSchedules(stuckScheduleSeconds);
     }
 
     public void updateStatusToRunning(Integer id) throws ApiException {

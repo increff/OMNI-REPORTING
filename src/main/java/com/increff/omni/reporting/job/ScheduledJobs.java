@@ -123,7 +123,7 @@ public class ScheduledJobs {
 
     @Scheduled(fixedDelay = 10 * 60 * 1000)
     public void refreshScheduleStatus() {
-        List<ReportSchedulePojo> stuckSchedules = scheduleApi.getStuckSchedules();
+        List<ReportSchedulePojo> stuckSchedules = scheduleApi.getStuckSchedules(properties.getStuckScheduleSeconds());
         stuckSchedules.forEach(s -> {
             try {
                 scheduleApi.updateStatusToNew(s.getId());
