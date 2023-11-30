@@ -112,7 +112,7 @@ public class DashboardDto extends AbstractDto {
     @Transactional(rollbackFor = ApiException.class)
     public DashboardData getDashboard(Integer id) throws ApiException {
         DashboardPojo dashboard = api.getCheck(id, getOrgId());
-        List<DashboardChartPojo> charts = dashboardChartApi.getByDashboardId(id);
+        List<DashboardChartPojo> charts = dashboardChartApi.getCheckByDashboardId(id);
 
         return ChartUtil.getDashboardData(dashboard.getId(), ConvertUtil.convert(dashboard, DashboardForm.class),
                 getFilterDetails(dashboard, charts), getChartLayout(charts, getSchemaVersionId()));
@@ -209,6 +209,8 @@ public class DashboardDto extends AbstractDto {
     public List<ViewDashboardData> viewDashboard(ReportRequestForm form, Integer dashboardId) throws ApiException, IOException {
         DashboardPojo dashboard = api.getCheck(dashboardId, getOrgId());
         ReportPojo report = reportApi.getCheck(form.getReportId());
+        if(!report.getIsEnabled())
+            throw new ApiException(ApiStatus.BAD_DATA, "Chart disabled: " + report.getName());
         DashboardChartPojo charts = dashboardChartApi.getCheckByDashboardAndChartAlias(dashboardId, report.getAlias());
         ChartType type = report.getChartType();
 
