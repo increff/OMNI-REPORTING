@@ -64,7 +64,7 @@ public class SqlCmd {
         return finalString;
     }
 
-    public static Double getPieValueSum(List<Map<String, String>> result, String valueColumn) throws ApiException {
+    public static Double getValueSum(List<Map<String, String>> result, String valueColumn) throws ApiException {
         double sum = 0;
         for (Map<String, String> map : result) {
             try {
