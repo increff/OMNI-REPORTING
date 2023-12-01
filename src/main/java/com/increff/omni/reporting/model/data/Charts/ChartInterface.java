@@ -24,6 +24,7 @@ public interface ChartInterface {
     }
 
     default void normalize(List<Map<String, String>> result, ChartType type) throws ApiException {
+        // Placeholder for future use
         return;
     }
 
