@@ -79,6 +79,7 @@ public class SqlCmd {
                 }
             }
         }
+        log.debug("getValueSum sum: " + sum);
         return sum;
     }
 
