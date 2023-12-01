@@ -13,7 +13,7 @@ public enum ChartType {
     GROUPED_BAR(null,null, null, 2),
     STACKED_BAR(null,null, null, 2),
 
-    PIE(1,null, null, null),
+    PIE(null,2, null, null),
     DOUGHNUT(1,null, null, null),
 
     LINE(null,null, null, 2),
