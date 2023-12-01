@@ -218,4 +218,10 @@ public class StandardController {
         return dashboardDto.viewDashboard(form, dashboardId);
     }
 
+    @ApiOperation(value = "Get Properties")
+    @RequestMapping(value = "/properties", method = RequestMethod.GET)
+    public ApplicationPropertiesData getProperties() {
+        return dashboardDto.getProperties();
+    }
+
 }

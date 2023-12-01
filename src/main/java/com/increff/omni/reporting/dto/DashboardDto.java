@@ -57,6 +57,14 @@ public class DashboardDto extends AbstractDto {
     private ApplicationProperties properties;
 
     @Transactional(rollbackFor = ApiException.class)
+    public ApplicationPropertiesData getProperties() {
+        ApplicationPropertiesData data = new ApplicationPropertiesData();
+        data.setMaxDashboardsPerOrg(properties.getMaxDashboardsPerOrg());
+        data.setMaxChartsPerDashboard(ValidateUtil.MAX_DASHBOARD_CHARTS);
+        return data;
+    }
+
+    @Transactional(rollbackFor = ApiException.class)
     public List<DefaultValueData> upsertDefaultValues(List<DefaultValueForm> forms) throws ApiException {
         List<DefaultValuePojo> pojos = new ArrayList<>();
         for(DefaultValueForm form : forms) {
