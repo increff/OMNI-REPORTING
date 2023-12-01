@@ -363,6 +363,8 @@ public class CommonDtoHelper {
         reportPojo.setCanSchedule(oldReport.getCanSchedule());
         reportPojo.setIsChart(oldReport.getIsChart());
         reportPojo.setAlias(oldReport.getAlias());
+        reportPojo.setChartType(oldReport.getChartType());
+        reportPojo.setMinFrequencyAllowedSeconds(oldReport.getMinFrequencyAllowedSeconds());
         return reportPojo;
     }
 
