@@ -113,6 +113,9 @@ public class ApplicationProperties {
     @Value("${crypto.base.url}")
     private String cryptoBaseUrl;
 
+    @Value("${stuck.schedule.time.seconds:600}")
+    private Integer stuckScheduleSeconds;
+
     @Value("${max.dashboards.per.org:20}")
     private Integer maxDashboardsPerOrg;
 
