@@ -194,7 +194,6 @@ public class StandardController {
 
     @ApiOperation(value = "Add/Edit Defaults in Dashboard")
     @RequestMapping(value = "/dashboards/defaults", method = RequestMethod.PATCH)
-    //todo check how we can apply validations in default values set by clients - we can try to hit a query to check if query is running after defualt value
     public List<DefaultValueData> addDefaults(@RequestBody List<DefaultValueForm> forms) throws ApiException {
         return dashboardDto.upsertDefaultValues(forms);
     }

@@ -261,4 +261,42 @@ public class ReportDtoTest extends AbstractTest {
         assertEquals(1, validationGroupData.size());
         assertTrue(validationGroupData.get(0).getIsSystemValidation());
     }
+
+    @Test
+    public void testAddTableChartWithoutLegends() throws ApiException {
+        ReportForm form = commonSetup("Report 1", ReportType.STANDARD);
+        form.setIsChart(true);
+        form.setChartType(ChartType.TABLE);
+        dto.add(form);
+    }
+
+    @Test(expected = ApiException.class)
+    public void testAddChartWithIsChartFalse() throws ApiException {
+        ReportForm form = commonSetup("Report 1", ReportType.STANDARD);
+        form.setIsChart(false);
+        form.setChartType(ChartType.TABLE);
+        dto.add(form);
+    }
+
+    @Test(expected = ApiException.class)
+    public void testAddBarChartWithoutLegends() throws ApiException {
+        ReportForm form = commonSetup("Report 1", ReportType.STANDARD);
+        form.setIsChart(true);
+        form.setChartType(ChartType.BAR);
+        dto.add(form);
+    }
+
+    @Test
+    public void testAddBarChartWithLegends() throws ApiException {
+        ReportForm form = commonSetup("Report 1", ReportType.STANDARD);
+        form.setIsChart(true);
+        form.setChartType(ChartType.BAR);
+        HashMap<String, String> legends = new HashMap<>();
+        legends.put("Xkey", "Xvalue");
+        legends.put("Ykey", "Yvalue");
+        form.setLegends(legends);
+        dto.add(form);
+    }
+
+
 }

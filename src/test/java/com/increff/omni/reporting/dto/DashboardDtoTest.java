@@ -57,6 +57,7 @@ public class DashboardDtoTest extends AbstractTest {
 
 
     Integer schemaVersionId;
+    Integer connectionId;
     private List<ReportData> commonSetup( ReportType type) throws ApiException {
         reportDto.setEncryptionClient(encryptionClient);
         connectionDto.setEncryptionClient(encryptionClient);
@@ -72,6 +73,7 @@ public class DashboardDtoTest extends AbstractTest {
         ConnectionForm connectionForm = getConnectionForm("127.0.0.1", "Test DB", username, password);
         ConnectionData connectionData = connectionDto.add(connectionForm);
         organizationDto.mapToConnection(organizationData.getId(), connectionData.getId());
+        connectionId = connectionData.getId();
         organizationDto.mapToSchema(organizationData.getId(), schemaData.getId());
         List<ReportForm> forms = new ArrayList<>();
         List<ReportData> datas = new ArrayList<>();
@@ -150,28 +152,32 @@ public class DashboardDtoTest extends AbstractTest {
         dashboardDto.getDashboard(data.getId());
     }
 
-//    @Test
-//    public void testGetByOrgId() throws ApiException {
-//        List<ReportData> chartDatas = commonSetup(ReportType.STANDARD);
-//        DashboardData data = dashboardDto.addDashboard(getDashboardAddForm("Dashboard_1",
-//                Arrays.asList(getDashboardChartForm(chartDatas.get(0).getAlias(), 0, 0, 0, RowHeight.HALF))));
-//
-//        Integer oldDomainId = SecurityUtil.getPrincipal().getDomainId();
-//        Integer newDomainId = 100002;
-//        SecurityContext securityContext = Mockito.mock(SecurityContext.class, Mockito.withSettings().serializable());
-//        Authentication authentication = Mockito.mock(Authentication.class);
-//        Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
-//        UserPrincipal principal = new UserPrincipal();
-//        principal.setDomainId(newDomainId);
-//        Mockito.when(securityContext.getAuthentication().getPrincipal()).thenReturn(principal);
-//        SecurityContextHolder.setContext(securityContext);
-//        DashboardData data2 = dashboardDto.addDashboard(getDashboardAddForm("Dashboard_2",
-//                Arrays.asList(getDashboardChartForm(chartDatas.get(0).getAlias(), 0, 0, 0, RowHeight.HALF))));
-// // No schema mapped for org : 100002
-//        assertEquals(1, dashboardDto.getDashboardsByOrgId(oldDomainId).size());
-//        assertEquals(1, dashboardDto.getDashboardsByOrgId(newDomainId).size());
-//
-//    }
+    @Test
+    public void testGetByOrgId() throws ApiException {
+        List<ReportData> chartDatas = commonSetup(ReportType.STANDARD);
+        DashboardData data = dashboardDto.addDashboard(getDashboardAddForm("Dashboard_1",
+                Arrays.asList(getDashboardChartForm(chartDatas.get(0).getAlias(), 0, 0, 0, RowHeight.HALF))));
+
+        Integer oldDomainId = SecurityUtil.getPrincipal().getDomainId();
+        Integer newDomainId = 100002;
+        OrganizationForm form = getOrganizationForm(newDomainId, "increff_2");
+        OrganizationData organizationData = organizationDto.add(form);
+        organizationDto.mapToConnection(organizationData.getId(), connectionId);
+        organizationDto.mapToSchema(organizationData.getId(), schemaVersionId);
+
+        SecurityContext securityContext = Mockito.mock(SecurityContext.class, Mockito.withSettings().serializable());
+        Authentication authentication = Mockito.mock(Authentication.class);
+        Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+        UserPrincipal principal = new UserPrincipal();
+        principal.setDomainId(newDomainId);
+        Mockito.when(securityContext.getAuthentication().getPrincipal()).thenReturn(principal);
+        SecurityContextHolder.setContext(securityContext);
+        DashboardData data2 = dashboardDto.addDashboard(getDashboardAddForm("Dashboard_2",
+                Arrays.asList(getDashboardChartForm(chartDatas.get(0).getAlias(), 0, 0, 0, RowHeight.HALF))));
+        assertEquals(1, dashboardDto.getDashboardsByOrgId(oldDomainId).size());
+        assertEquals(1, dashboardDto.getDashboardsByOrgId(newDomainId).size());
+
+    }
 
     @Test
     public void testAddDefaultValue() throws ApiException {
