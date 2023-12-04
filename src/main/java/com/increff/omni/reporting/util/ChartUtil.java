@@ -27,6 +27,7 @@ public class ChartUtil {
 
     public static MapSingleValueChartData getPieChartData(List<Map<String, String>> result) throws ApiException {
         MapSingleValueChartData chartData = new MapSingleValueChartData();
+        if(result.size() == 0) return chartData;
 
         result.forEach(row -> row.put(PCT_VAL_COL, "0")); // initialize the percentage column to 0
         List<String> columns = new ArrayList<>(result.get(0).keySet());
@@ -35,6 +36,8 @@ public class ChartUtil {
         // This contains a shallow copy of the maps!! Changes in maps in the list will reflect in maps contained in result variable in input params
         List<Map<String, String>> columnNameRowRemoved = result.subList(1, result.size());
         normalizeSumTo100(result, valueColumn, columnNameRowRemoved);
+
+        result.remove(0); // remove the first row
 
         chartData.setData(result);
         return chartData;
@@ -52,7 +55,7 @@ public class ChartUtil {
             log.debug("difference: " + difference);
             if (difference != 0) { // As the final sum can be between(99.xx to 100.xx) due to precision, add the offset to first value
                 columnNameRowRemoved.get(0).put(PCT_VAL_COL, String.format("%.2f", Double.parseDouble(columnNameRowRemoved.get(0).get(valueColumn)) + difference));
-            }
+            } // TODO: Make pct sum 100 by calculating final row pct after  from sum of the rest instead of doing above BS
             log.debug("result: " + result.size());
         }
     }

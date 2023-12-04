@@ -19,7 +19,7 @@ public interface ChartInterface {
     default void validate(List<Map<String, String>> result, ChartType type) throws ApiException {
         if(Objects.nonNull(type.getROW_COUNT_VALIDATION()) && (result.size() != type.getROW_COUNT_VALIDATION()) )
             throw new ApiException(ApiStatus.BAD_DATA, "Invalid row count for type: " + type + ". Expected: " + type.getROW_COUNT_VALIDATION() + " Received: " + result.size());
-        if(Objects.nonNull(type.getCOL_COUNT_VALIDATION()) && (result.get(0).size() != type.getCOL_COUNT_VALIDATION()) )
+        if(Objects.nonNull(type.getCOL_COUNT_VALIDATION()) && (result.size() > 0) && (result.get(0).size() != type.getCOL_COUNT_VALIDATION()) )
             throw new ApiException(ApiStatus.BAD_DATA, "Invalid column count for type: " + type + ". Expected: " + type.getCOL_COUNT_VALIDATION() + " Received: " + result.get(0).size());
     }
 
