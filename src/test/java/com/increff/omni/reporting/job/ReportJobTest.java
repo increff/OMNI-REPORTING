@@ -1,11 +1,14 @@
 package com.increff.omni.reporting.job;
 
+import com.increff.omni.reporting.api.ReportScheduleApi;
 import com.increff.omni.reporting.config.AbstractTest;
+import com.increff.omni.reporting.config.ApplicationProperties;
 import com.increff.omni.reporting.dao.ReportScheduleDao;
 import com.increff.omni.reporting.dto.*;
 import com.increff.omni.reporting.model.constants.InputControlScope;
 import com.increff.omni.reporting.model.constants.InputControlType;
 import com.increff.omni.reporting.model.constants.ReportType;
+import com.increff.omni.reporting.model.constants.ScheduleStatus;
 import com.increff.omni.reporting.model.data.*;
 import com.increff.omni.reporting.model.form.*;
 import com.increff.omni.reporting.pojo.ReportSchedulePojo;
@@ -51,6 +54,8 @@ public class ReportJobTest extends AbstractTest {
     private InputControlDto inputControlDto;
     @Autowired
     private ReportScheduleDao reportScheduleDao;
+    @Autowired
+    private ReportScheduleApi reportScheduleApi;
 
     private ReportForm commonSetup() throws ApiException {
         OrganizationForm form = getOrganizationForm(100001, "increff");
@@ -79,7 +84,7 @@ public class ReportJobTest extends AbstractTest {
 
     @Test
     public void testRunReport()
-            throws ApiException{
+            throws ApiException {
         ReportForm reportForm = commonSetup();
         ReportData reportData = reportDto.add(reportForm);
         ReportQueryForm queryForm = getReportQueryForm("select version();");
@@ -109,7 +114,7 @@ public class ReportJobTest extends AbstractTest {
         ReportQueryForm queryForm = getReportQueryForm("select version();");
         reportDto.upsertQuery(reportData.getId(), queryForm);
         List<ReportScheduleForm.InputParamMap> inputParamMaps = getInputParamList();
-        ReportScheduleForm form = getReportScheduleForm("*/15", "*", "*", "Report 2", "Asia/Kolkata",
+        ReportScheduleForm form = getReportScheduleForm("*/15", "*", "*", "?", "Report 2", "Asia/Kolkata",
                 true, Arrays.asList("a@gmail.com", "b@gmail.com"), inputParamMaps);
         scheduleDto.scheduleReport(form);
         List<ReportScheduleData> reportScheduleData = scheduleDto.getScheduleReports(1, 100);
@@ -123,4 +128,44 @@ public class ReportJobTest extends AbstractTest {
         assertTrue(ZonedDateTime.now().isBefore(pojo.getNextRuntime()));
     }
 
+    @Test
+    public void testReportNotRunIfStatusAlreadyRunning() throws ApiException {
+        ReportForm reportForm = commonSetup();
+        reportForm.setCanSchedule(true);
+        ReportData reportData = reportDto.add(reportForm);
+        ReportQueryForm queryForm = getReportQueryForm("select version();");
+        reportDto.upsertQuery(reportData.getId(), queryForm);
+        List<ReportScheduleForm.InputParamMap> inputParamMaps = getInputParamList();
+        ReportScheduleForm form = getReportScheduleForm("*/15", "*", "*", "?", "Report 2", "Asia/Kolkata",
+                true, Arrays.asList("a@gmail.com", "b@gmail.com"), inputParamMaps);
+        scheduleDto.scheduleReport(form);
+        List<ReportScheduleData> reportScheduleData = scheduleDto.getScheduleReports(1, 100);
+        assertEquals(1, reportScheduleData.size());
+
+        ReportSchedulePojo pojo = reportScheduleDao.select(reportScheduleData.get(0).getId());
+        pojo.setNextRuntime(ZonedDateTime.now().minusMinutes(1));
+        reportScheduleApi.edit(pojo);
+        reportJob.addScheduleReportRequests();
+
+        List<ReportRequestData> dataList = scheduleDto.getScheduledRequests(1, 100);
+        assertEquals(1, dataList.size());
+
+        pojo = reportScheduleDao.select(reportScheduleData.get(0).getId());
+        pojo.setNextRuntime(ZonedDateTime.now().minusMinutes(1));
+        reportScheduleApi.edit(pojo);
+        reportJob.addScheduleReportRequests();
+
+        dataList = scheduleDto.getScheduledRequests(1, 100);
+        assertEquals(2, dataList.size());
+
+        pojo = reportScheduleDao.select(reportScheduleData.get(0).getId());
+        pojo.setNextRuntime(ZonedDateTime.now().minusMinutes(1));
+        pojo.setStatus(ScheduleStatus.RUNNING);
+        reportScheduleApi.edit(pojo);
+        reportJob.addScheduleReportRequests();
+
+        dataList = scheduleDto.getScheduledRequests(1, 100);
+        assertEquals(2, dataList.size());
+
+    }
 }

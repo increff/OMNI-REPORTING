@@ -16,6 +16,8 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @CrossOrigin
 @Api
 @RestController
@@ -51,4 +53,9 @@ public class IntegrationController {
         return organizationDto.mapToSchema(form);
     }
 
+    @ApiOperation(value = "Get All Organizations")
+    @RequestMapping(value = "/orgs", method = RequestMethod.GET)
+    public List<OrganizationData> selectAllOrgs() {
+        return organizationDto.selectAll();
+    }
 }
