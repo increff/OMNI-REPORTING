@@ -30,6 +30,7 @@ public class RateLimitingFilter extends GenericFilterBean {
     @Autowired
     private ApplicationProperties properties;
 
+    // Can cause heap space issues if the number of users is large!
     private final ConcurrentHashMap<String, Bucket> userRateLimiters = new ConcurrentHashMap<>();
 
     public Bucket bucketB() {
@@ -46,8 +47,8 @@ public class RateLimitingFilter extends GenericFilterBean {
 
         if(httpRequest.getRequestURI().matches(".*/dashboards/\\d+/view$") && Objects.nonNull(user)) {
             int dashboard_id = getDashboardId(httpRequest);
-            Bucket bucket = userRateLimiters.computeIfAbsent(user+dashboard_id, k -> bucketB());
-            log.debug("RateLimitingFilter.doFilter: " + user + dashboard_id);
+            Bucket bucket = userRateLimiters.computeIfAbsent(user + ":" + dashboard_id, k -> bucketB());
+            log.debug("RateLimitingFilter.doFilter: " + user + ":" + dashboard_id);
             if (bucket.tryConsume(1)) {
                 chain.doFilter(request, response);  // If the user is within the rate limit, proceed with the request
             } else {
