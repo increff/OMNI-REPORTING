@@ -127,7 +127,7 @@ public class ScheduledJobs {
 
     private String getIp() {
         try {
-            return InetAddress.getLocalHost().getHostAddress();
+            return InetAddress.getLocalHost().getHostAddress() + "_" + InetAddress.getLocalHost().getHostName();
         } catch (UnknownHostException e) {
             log.error("Error while getting ip address", e);
             return "Error while getting ip address " + e;
