@@ -17,6 +17,8 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 
 import javax.persistence.OptimisticLockException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.concurrent.Executor;
@@ -114,13 +116,22 @@ public class ScheduledJobs {
                 ip.setParamValue(sp.getParamValue());
                 reportInputParamsPojoList.add(ip);
             }
-            reportRequestPojo.setServerName(ZonedDateTime.now() + "_" + properties.getServerName());
+            reportRequestPojo.setServerName(ZonedDateTime.now() + "_" + properties.getServerName() + "_" + getIp());
             reportRequestFlowApi.requestReportWithoutValidation(reportRequestPojo, reportInputParamsPojoList);
             s.setNextRuntime(getNextRunTime(s.getCron(), timezone));
             s.setStatus(ScheduleStatus.NEW);
             scheduleApi.edit(s);
         }
 
+    }
+
+    private String getIp() {
+        try {
+            return InetAddress.getLocalHost().getHostAddress();
+        } catch (UnknownHostException e) {
+            log.error("Error while getting ip address", e);
+            return "Error while getting ip address " + e;
+        }
     }
 
     @Scheduled(fixedDelay = 10 * 60 * 1000)
