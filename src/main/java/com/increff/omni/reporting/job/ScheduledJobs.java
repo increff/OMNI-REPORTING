@@ -89,7 +89,7 @@ public class ScheduledJobs {
         List<ReportSchedulePojo> alreadyExecutedSchedules = new ArrayList<>();
         schedulePojos.forEach(s -> { // mark schedule status to RUNNING to prevent same schedule getting picked bp multiple times by horizontally scaled servers
             try {
-                scheduleApi.updateStatusToRunning(s.getId());
+                scheduleApi.updateStatusToRunning(s.getId(), s.getVersion());
             } catch (OptimisticLockException | ObjectOptimisticLockingFailureException | ApiException e) {
                 log.debug("Error occurred while marking status " + ScheduleStatus.RUNNING + " for schedule id : " + s.getId() + " " + e.getMessage());
                 alreadyExecutedSchedules.add(s);
