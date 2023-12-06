@@ -113,6 +113,7 @@ public class ScheduledJobs {
                 ip.setParamValue(sp.getParamValue());
                 reportInputParamsPojoList.add(ip);
             }
+            reportRequestPojo.setServerName(properties.getServerName());
             reportRequestFlowApi.requestReportWithoutValidation(reportRequestPojo, reportInputParamsPojoList);
             s.setNextRuntime(getNextRunTime(s.getCron(), timezone));
             s.setStatus(ScheduleStatus.NEW);
