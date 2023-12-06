@@ -17,6 +17,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 
 import javax.persistence.OptimisticLockException;
+import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
@@ -113,7 +114,7 @@ public class ScheduledJobs {
                 ip.setParamValue(sp.getParamValue());
                 reportInputParamsPojoList.add(ip);
             }
-            reportRequestPojo.setServerName(properties.getServerName());
+            reportRequestPojo.setServerName(ZonedDateTime.now() + "_" + properties.getServerName());
             reportRequestFlowApi.requestReportWithoutValidation(reportRequestPojo, reportInputParamsPojoList);
             s.setNextRuntime(getNextRunTime(s.getCron(), timezone));
             s.setStatus(ScheduleStatus.NEW);
