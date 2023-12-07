@@ -66,6 +66,22 @@ public class ReportScheduleDao extends AbstractDao<ReportSchedulePojo> {
         return tQuery.getResultList();
     }
 
+    public List<ReportSchedulePojo> getStuckSchedulesById(Integer stuckScheduleSeconds, Integer id) {
+        CriteriaBuilder cb = this.em.getCriteriaBuilder();
+        CriteriaQuery<ReportSchedulePojo> query = cb.createQuery(ReportSchedulePojo.class);
+        Root<ReportSchedulePojo> root = query.from(ReportSchedulePojo.class);
+        query.where(
+                cb.and(
+                        cb.isTrue(root.get("isEnabled")),
+                        cb.isFalse(root.get("isDeleted")),
+                        cb.lessThanOrEqualTo(root.get("updatedAt"), ZonedDateTime.now().minusSeconds(stuckScheduleSeconds))),
+                cb.equal(root.get("status"), ScheduleStatus.RUNNING),
+                cb.equal(root.get("id"), id)
+        );
+        TypedQuery<ReportSchedulePojo> tQuery = createQuery(query);
+        return tQuery.getResultList();
+    }
+
     public List<ReportSchedulePojo> selectByOrgId(Integer orgId, Boolean isEnabled, Integer pageNo, Integer pageSize) {
         if(Objects.isNull(pageNo))
             pageNo = 1;

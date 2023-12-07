@@ -116,7 +116,4 @@ public class ApplicationProperties {
     @Value("${stuck.schedule.time.seconds:600}")
     private Integer stuckScheduleSeconds;
 
-    @Value("${server.name}")
-    private String serverName;
-
 }

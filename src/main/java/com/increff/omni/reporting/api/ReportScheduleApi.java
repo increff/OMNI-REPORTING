@@ -72,26 +72,28 @@ public class ReportScheduleApi extends AbstractAuditApi {
     public ReportSchedulePojo getEligibleSchedulesById(Integer id) throws ApiException {
         List<ReportSchedulePojo> pojos = dao.getEligibleSchedulesById(id);
         if(pojos.size() > 1)
-            throw new ApiException(ApiStatus.BAD_DATA, "More than one schedule found for id : " + id);
+            throw new ApiException(ApiStatus.BAD_DATA, "More than one eligible schedule found for id : " + id);
         if(pojos.size() == 0)
             throw new ApiException(ApiStatus.BAD_DATA, "No eligible schedule found for id : " + id);
         return pojos.get(0);
-//        if(pojos.size() == 1) return pojos.get(0);
-//        return null;
     }
 
     public List<ReportSchedulePojo> getStuckSchedules(Integer stuckScheduleSeconds) {
         return dao.getStuckSchedules(stuckScheduleSeconds);
     }
 
-    public void updateStatusToRunning(Integer id, Integer oldVersion) throws ApiException {
-        ReportSchedulePojo pojo = getCheck(id);
-        if(pojo.getVersion() != oldVersion){
-            log.debug("Version mismatch for schedule id : " + id + " old version : " + oldVersion + " new version : " + pojo.getVersion());
-        }
+    public ReportSchedulePojo getStuckSchedulesById(Integer stuckScheduleSeconds, Integer id) throws ApiException {
+        List<ReportSchedulePojo> pojos = dao.getStuckSchedulesById(stuckScheduleSeconds, id);
+        if(pojos.size() > 1)
+            throw new ApiException(ApiStatus.BAD_DATA, "More than one stuck schedule found for id : " + id);
+        if(pojos.size() == 0)
+            throw new ApiException(ApiStatus.BAD_DATA, "No stuck schedule found for id : " + id);
+        return pojos.get(0);
+    }
 
-        pojo = getEligibleSchedulesById(id);
-        if(pojo.getStatus()!=(ScheduleStatus.NEW)){
+    public void updateStatusToRunning(Integer id) throws ApiException {
+        ReportSchedulePojo pojo = getEligibleSchedulesById(id);
+        if(pojo.getStatus()!=(ScheduleStatus.NEW)){ // This check may be redundant
             throw new ApiException(ApiStatus.BAD_DATA, "Optimistic Lock. Failed to change Schedule id:" + id +
                     " status to " + ScheduleStatus.RUNNING + "Cur Status is not " + ScheduleStatus.NEW);
         }
@@ -99,8 +101,8 @@ public class ReportScheduleApi extends AbstractAuditApi {
         dao.update(pojo);
     }
 
-    public void updateStatusToNew(Integer id) throws ApiException {
-        ReportSchedulePojo pojo = getCheck(id);
+    public void updateStatusToNew(Integer stuckScheduleSeconds, Integer id) throws ApiException {
+        ReportSchedulePojo pojo = getStuckSchedulesById(stuckScheduleSeconds, id);
         if(pojo.getStatus()!=ScheduleStatus.RUNNING){
             throw new ApiException(ApiStatus.BAD_DATA, "Optimistic Lock. Failed to change Schedule id:" + id + " status to " + ScheduleStatus.NEW + "Cur Status is not " + ScheduleStatus.RUNNING);
         }
