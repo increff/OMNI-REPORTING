@@ -83,7 +83,7 @@ public class ScheduledJobs {
         folderApi.deleteOlderFiles();
     }
 
-    @Scheduled(fixedDelay = 1000)
+    @Scheduled(fixedDelay = 10000)
     public void addScheduleReportRequests() throws ApiException {
         List<ReportSchedulePojo> schedulePojos = reportScheduleApi.getEligibleSchedules();
         List<ReportSchedulePojo> alreadyExecutedSchedules = new ArrayList<>();
@@ -91,7 +91,7 @@ public class ScheduledJobs {
             try {
                 scheduleApi.updateStatusToRunning(s.getId());
             } catch (OptimisticLockException | ObjectOptimisticLockingFailureException | ApiException e) {
-                log.debug("Error occurred while marking status " + ScheduleStatus.RUNNING + " for schedule id : " + s.getId() + " " + e.getMessage());
+                log.trace("Error occurred while marking status " + ScheduleStatus.RUNNING + " for schedule id : " + s.getId() + " " + e.getMessage());
                 alreadyExecutedSchedules.add(s);
             }
         });
@@ -116,7 +116,6 @@ public class ScheduledJobs {
                 ip.setParamValue(sp.getParamValue());
                 reportInputParamsPojoList.add(ip);
             }
-            reportRequestPojo.setServerName(ZonedDateTime.now() + "_" + properties.getServerName() + "_" + getIp());
             reportRequestFlowApi.requestReportWithoutValidation(reportRequestPojo, reportInputParamsPojoList);
             s.setNextRuntime(getNextRunTime(s.getCron(), timezone));
             s.setStatus(ScheduleStatus.NEW);
@@ -125,23 +124,14 @@ public class ScheduledJobs {
 
     }
 
-    private String getIp() {
-        try {
-            return InetAddress.getLocalHost().getHostAddress() + "_" + InetAddress.getLocalHost().getHostName();
-        } catch (Exception e) {
-            log.error("Error while getting ip address", e);
-            return "Error while getting ip address " + e;
-        }
-    }
-
     @Scheduled(fixedDelay = 10 * 60 * 1000)
     public void refreshScheduleStatus() {
         List<ReportSchedulePojo> stuckSchedules = scheduleApi.getStuckSchedules(properties.getStuckScheduleSeconds());
         stuckSchedules.forEach(s -> {
             try {
-                scheduleApi.updateStatusToNew(s.getId());
+                scheduleApi.updateStatusToNew(properties.getStuckScheduleSeconds(), s.getId());
             } catch (OptimisticLockException | ObjectOptimisticLockingFailureException | ApiException e) {
-                log.debug("Error occurred while refreshing status " + ScheduleStatus.NEW + " for schedule id : " + s.getId() + " " + e.getMessage());
+                log.trace("Error occurred while refreshing status " + ScheduleStatus.NEW + " for schedule id : " + s.getId() + " " + e.getMessage());
             }
         });
     }

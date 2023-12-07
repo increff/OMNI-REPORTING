@@ -9,12 +9,14 @@ import com.increff.omni.reporting.pojo.ReportScheduleInputParamsPojo;
 import com.increff.omni.reporting.pojo.ReportSchedulePojo;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
+import lombok.extern.log4j.Log4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+@Log4j
 @Service
 @Transactional(rollbackFor = ApiException.class)
 public class ReportScheduleApi extends AbstractAuditApi {
@@ -66,21 +68,40 @@ public class ReportScheduleApi extends AbstractAuditApi {
         return dao.getEligibleSchedules();
     }
 
+    public ReportSchedulePojo getCheckEligibleSchedulesById(Integer id) throws ApiException {
+        List<ReportSchedulePojo> pojos = dao.getEligibleSchedulesById(id);
+        if(pojos.size() > 1)
+            throw new ApiException(ApiStatus.BAD_DATA, "More than one eligible schedule found for id : " + id);
+        if(pojos.size() == 0)
+            throw new ApiException(ApiStatus.BAD_DATA, "No eligible schedule found for id : " + id);
+        return pojos.get(0);
+    }
+
     public List<ReportSchedulePojo> getStuckSchedules(Integer stuckScheduleSeconds) {
         return dao.getStuckSchedules(stuckScheduleSeconds);
     }
 
+    public ReportSchedulePojo getCheckStuckSchedulesById(Integer stuckScheduleSeconds, Integer id) throws ApiException {
+        List<ReportSchedulePojo> pojos = dao.getStuckSchedulesById(stuckScheduleSeconds, id);
+        if(pojos.size() > 1)
+            throw new ApiException(ApiStatus.BAD_DATA, "More than one stuck schedule found for id : " + id);
+        if(pojos.size() == 0)
+            throw new ApiException(ApiStatus.BAD_DATA, "No stuck schedule found for id : " + id);
+        return pojos.get(0);
+    }
+
     public void updateStatusToRunning(Integer id) throws ApiException {
-        ReportSchedulePojo pojo = getCheck(id);
-        if(pojo.getStatus()!=ScheduleStatus.NEW){
-            throw new ApiException(ApiStatus.BAD_DATA, "Optimistic Lock. Failed to change Schedule id:" + id + " status to " + ScheduleStatus.RUNNING + "Cur Status is not " + ScheduleStatus.NEW);
+        ReportSchedulePojo pojo = getCheckEligibleSchedulesById(id);
+        if(pojo.getStatus()!=(ScheduleStatus.NEW)){ // This check may be redundant
+            throw new ApiException(ApiStatus.BAD_DATA, "Optimistic Lock. Failed to change Schedule id:" + id +
+                    " status to " + ScheduleStatus.RUNNING + "Cur Status is not " + ScheduleStatus.NEW);
         }
         pojo.setStatus(ScheduleStatus.RUNNING);
         dao.update(pojo);
     }
 
-    public void updateStatusToNew(Integer id) throws ApiException {
-        ReportSchedulePojo pojo = getCheck(id);
+    public void updateStatusToNew(Integer stuckScheduleSeconds, Integer id) throws ApiException {
+        ReportSchedulePojo pojo = getCheckStuckSchedulesById(stuckScheduleSeconds, id);
         if(pojo.getStatus()!=ScheduleStatus.RUNNING){
             throw new ApiException(ApiStatus.BAD_DATA, "Optimistic Lock. Failed to change Schedule id:" + id + " status to " + ScheduleStatus.NEW + "Cur Status is not " + ScheduleStatus.RUNNING);
         }

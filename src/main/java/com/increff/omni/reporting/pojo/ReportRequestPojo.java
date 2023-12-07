@@ -58,6 +58,4 @@ public class ReportRequestPojo extends AbstractVersionedPojo {
 
     private ZonedDateTime requestCompletionTime;
 
-    private String serverName;
-
 }
