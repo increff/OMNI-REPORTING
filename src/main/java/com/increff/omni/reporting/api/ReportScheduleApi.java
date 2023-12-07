@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Objects;
 
 @Log4j
 @Service
@@ -69,7 +68,7 @@ public class ReportScheduleApi extends AbstractAuditApi {
         return dao.getEligibleSchedules();
     }
 
-    public ReportSchedulePojo getEligibleSchedulesById(Integer id) throws ApiException {
+    public ReportSchedulePojo getCheckEligibleSchedulesById(Integer id) throws ApiException {
         List<ReportSchedulePojo> pojos = dao.getEligibleSchedulesById(id);
         if(pojos.size() > 1)
             throw new ApiException(ApiStatus.BAD_DATA, "More than one eligible schedule found for id : " + id);
@@ -82,7 +81,7 @@ public class ReportScheduleApi extends AbstractAuditApi {
         return dao.getStuckSchedules(stuckScheduleSeconds);
     }
 
-    public ReportSchedulePojo getStuckSchedulesById(Integer stuckScheduleSeconds, Integer id) throws ApiException {
+    public ReportSchedulePojo getCheckStuckSchedulesById(Integer stuckScheduleSeconds, Integer id) throws ApiException {
         List<ReportSchedulePojo> pojos = dao.getStuckSchedulesById(stuckScheduleSeconds, id);
         if(pojos.size() > 1)
             throw new ApiException(ApiStatus.BAD_DATA, "More than one stuck schedule found for id : " + id);
@@ -92,7 +91,7 @@ public class ReportScheduleApi extends AbstractAuditApi {
     }
 
     public void updateStatusToRunning(Integer id) throws ApiException {
-        ReportSchedulePojo pojo = getEligibleSchedulesById(id);
+        ReportSchedulePojo pojo = getCheckEligibleSchedulesById(id);
         if(pojo.getStatus()!=(ScheduleStatus.NEW)){ // This check may be redundant
             throw new ApiException(ApiStatus.BAD_DATA, "Optimistic Lock. Failed to change Schedule id:" + id +
                     " status to " + ScheduleStatus.RUNNING + "Cur Status is not " + ScheduleStatus.NEW);
@@ -102,7 +101,7 @@ public class ReportScheduleApi extends AbstractAuditApi {
     }
 
     public void updateStatusToNew(Integer stuckScheduleSeconds, Integer id) throws ApiException {
-        ReportSchedulePojo pojo = getStuckSchedulesById(stuckScheduleSeconds, id);
+        ReportSchedulePojo pojo = getCheckStuckSchedulesById(stuckScheduleSeconds, id);
         if(pojo.getStatus()!=ScheduleStatus.RUNNING){
             throw new ApiException(ApiStatus.BAD_DATA, "Optimistic Lock. Failed to change Schedule id:" + id + " status to " + ScheduleStatus.NEW + "Cur Status is not " + ScheduleStatus.RUNNING);
         }

@@ -91,7 +91,7 @@ public class ScheduledJobs {
             try {
                 scheduleApi.updateStatusToRunning(s.getId());
             } catch (OptimisticLockException | ObjectOptimisticLockingFailureException | ApiException e) {
-                log.debug("Error occurred while marking status " + ScheduleStatus.RUNNING + " for schedule id : " + s.getId() + " " + e.getMessage());
+                log.trace("Error occurred while marking status " + ScheduleStatus.RUNNING + " for schedule id : " + s.getId() + " " + e.getMessage());
                 alreadyExecutedSchedules.add(s);
             }
         });
@@ -131,7 +131,7 @@ public class ScheduledJobs {
             try {
                 scheduleApi.updateStatusToNew(properties.getStuckScheduleSeconds(), s.getId());
             } catch (OptimisticLockException | ObjectOptimisticLockingFailureException | ApiException e) {
-                log.debug("Error occurred while refreshing status " + ScheduleStatus.NEW + " for schedule id : " + s.getId() + " " + e.getMessage());
+                log.trace("Error occurred while refreshing status " + ScheduleStatus.NEW + " for schedule id : " + s.getId() + " " + e.getMessage());
             }
         });
     }
