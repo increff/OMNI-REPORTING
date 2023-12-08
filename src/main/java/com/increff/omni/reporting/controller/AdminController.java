@@ -42,6 +42,8 @@ public class AdminController {
     private ReportRequestDto reportRequestDto;
     @Autowired
     private ReportScheduleDto reportScheduleDto;
+    @Autowired
+    private DashboardDto dashboardDto;
 
     // App admin APIs
 
@@ -305,6 +307,12 @@ public class AdminController {
     @RequestMapping(value = "/schedules", method = RequestMethod.GET)
     public List<ReportScheduleData> getScheduleReports(@RequestParam Integer pageNo, @RequestParam Integer pageSize) throws ApiException {
         return reportScheduleDto.getScheduleReportsForAllOrgs(pageNo, pageSize);
+    }
+
+    @ApiOperation(value = "Copy Dashboard to all organizations. This copies charts only! NOT default values!")
+    @RequestMapping(value = "/copy-dashboard", method = RequestMethod.POST)
+    public void copyDashboardToAllOrgs(@RequestParam Integer dashboardId, @RequestParam Integer orgId) throws ApiException {
+        dashboardDto.copyDashboardToAllOrgs(dashboardId, orgId);
     }
 
 }

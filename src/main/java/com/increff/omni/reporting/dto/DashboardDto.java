@@ -9,10 +9,7 @@ import com.increff.omni.reporting.model.form.DashboardAddForm;
 import com.increff.omni.reporting.model.form.DashboardForm;
 import com.increff.omni.reporting.model.form.DefaultValueForm;
 import com.increff.omni.reporting.model.form.ReportRequestForm;
-import com.increff.omni.reporting.pojo.DashboardChartPojo;
-import com.increff.omni.reporting.pojo.DashboardPojo;
-import com.increff.omni.reporting.pojo.DefaultValuePojo;
-import com.increff.omni.reporting.pojo.ReportPojo;
+import com.increff.omni.reporting.pojo.*;
 import com.increff.omni.reporting.util.ChartUtil;
 import com.increff.omni.reporting.util.ValidateUtil;
 import com.nextscm.commons.spring.common.ApiException;
@@ -45,6 +42,8 @@ public class DashboardDto extends AbstractDto {
     private InputControlDto inputControlDto;
     @Autowired
     private ReportDto reportDto;
+    @Autowired
+    private OrganizationApi organizationApi;
     @Autowired
     private OrgSchemaApi orgSchemaApi;
     @Autowired
@@ -266,6 +265,38 @@ public class DashboardDto extends AbstractDto {
         if(filterDetails.values().stream().flatMap(List::stream).noneMatch(inputControlData -> inputControlData.getId().equals(controlId))){
             throw new ApiException(ApiStatus.BAD_DATA, "Control Id does not exist for dashboard id: " + dashboardId + " control id: " + controlId);
         }
+    }
+
+
+    @Transactional(rollbackFor = ApiException.class)
+    public void copyDashboardToAllOrgs(Integer dbIdToCopy, Integer orgIdToCopy) throws ApiException {
+        // NOTE : This copies charts only! NOT default values!
+    	DashboardPojo oldDb = api.getCheck(dbIdToCopy, orgIdToCopy);
+        Set<Integer> orgIds = organizationApi.getAll().stream().map(OrganizationPojo::getId).collect(Collectors.toSet());
+        orgIds.remove(orgIdToCopy);
+
+        for(Integer orgId : orgIds) {
+            DashboardPojo newDbPojo = duplicateDashboard(oldDb, orgId);
+            duplicateDashboardCharts(dbIdToCopy, newDbPojo.getId());
+        }
+    }
+
+    private void duplicateDashboardCharts(Integer oldDbId, Integer newDbId) {
+        List<DashboardChartPojo> charts = dashboardChartApi.getByDashboardId(oldDbId);
+        for(DashboardChartPojo chart : charts) {
+            DashboardChartPojo dashboardChartPojo = ConvertUtil.convert(chart, DashboardChartPojo.class);
+            dashboardChartPojo.setId(null);
+            dashboardChartPojo.setDashboardId(newDbId);
+            dashboardChartApi.addDashboardChart(dashboardChartPojo);
+        }
+    }
+
+    private DashboardPojo duplicateDashboard(DashboardPojo dashboard, Integer orgId) throws ApiException {
+        DashboardPojo dashboardPojo = ConvertUtil.convert(dashboard, DashboardPojo.class);
+        dashboardPojo.setOrgId(orgId);
+        dashboardPojo.setId(null);
+        api.add(dashboardPojo);
+        return dashboardPojo;
     }
 
 
