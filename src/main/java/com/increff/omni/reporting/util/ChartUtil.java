@@ -20,15 +20,15 @@ public class ChartUtil {
     private static final String PCT_VAL_COL = "percentageVal";
 
     public static MapSingleValueChartData getMapSingleValueChartData(List<Map<String, String>> result) {
+        if (result.isEmpty()) return null;
         MapSingleValueChartData chartData = new MapSingleValueChartData();
-        if (result.isEmpty()) return chartData;
         chartData.setData(result);
         return chartData;
     }
 
     public static MapSingleValueChartData getPieChartData(List<Map<String, String>> result) throws ApiException {
+        if(result.isEmpty()) return null;
         MapSingleValueChartData chartData = new MapSingleValueChartData();
-        if(result.size() == 0) return chartData;
 
         result.forEach(row -> row.put(PCT_VAL_COL, "0")); // initialize the percentage column to 0
         List<String> columns = new ArrayList<>(result.get(0).keySet());
@@ -67,6 +67,7 @@ public class ChartUtil {
     }
 
     public static MapMultiValueChartData getMapMultiValueChartData(List<Map<String, String>> result) {
+        if(result.isEmpty()) return null;
         MapMultiValueChartData chartData = new MapMultiValueChartData();
         if (result.isEmpty()) return chartData;
         // first column values is treated as labels
