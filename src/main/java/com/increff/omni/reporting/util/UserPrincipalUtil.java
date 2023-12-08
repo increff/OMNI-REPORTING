@@ -14,6 +14,7 @@ public class UserPrincipalUtil {
     private static final String APP_ADMIN = "app.admin";
     private static final String REPORT_ADMIN = "report.admin";
     private static final List<String> ADMIN_AUTHORITIES = Arrays.asList(APP_ADMIN, REPORT_ADMIN);
+    private static final String SQL_FUNC_PREFIX = "SQLF#";
 
     public static Map<String, String> getCompleteMapWithAccessControl(Map<String, List<String>> params) {
         Map<String, String> finalMap = new HashMap<>(getStringToStringParamMap(params));
@@ -73,7 +74,7 @@ public class UserPrincipalUtil {
         }
         List<String> fList = new ArrayList<>();
         for (String s : value) {
-            if (s.equals("NULL") || s.equals("null") || (Objects.nonNull(type) &&
+            if (s.equals("NULL") || s.equals("null") || isSqlFunc(key) || (Objects.nonNull(type) &&
                     Arrays.asList(InputControlType.DATE_TIME, InputControlType.DATE).contains(type))) {
                 fList.add(s);
                 continue;
@@ -82,5 +83,9 @@ public class UserPrincipalUtil {
             fList.add("'" + s + "'");
         }
         finalMap.put(key, String.join(",", fList));
+    }
+
+    public static boolean isSqlFunc(String s) {
+        return s.startsWith(SQL_FUNC_PREFIX);
     }
 }
