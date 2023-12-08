@@ -86,6 +86,6 @@ public class UserPrincipalUtil {
     }
 
     public static boolean isSqlFunc(String s) {
-        return s.startsWith(SQL_FUNC_PREFIX);
+        return s.toUpperCase().startsWith(SQL_FUNC_PREFIX);
     }
 }
