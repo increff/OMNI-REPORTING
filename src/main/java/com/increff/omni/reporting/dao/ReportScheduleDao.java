@@ -35,6 +35,22 @@ public class ReportScheduleDao extends AbstractDao<ReportSchedulePojo> {
         return tQuery.getResultList();
     }
 
+    public List<ReportSchedulePojo> getEligibleSchedulesById(Integer id) {
+        CriteriaBuilder cb = this.em.getCriteriaBuilder();
+        CriteriaQuery<ReportSchedulePojo> query = cb.createQuery(ReportSchedulePojo.class);
+        Root<ReportSchedulePojo> root = query.from(ReportSchedulePojo.class);
+        query.where(
+                cb.and(
+                        cb.isTrue(root.get("isEnabled")),
+                        cb.isFalse(root.get("isDeleted")),
+                        cb.lessThanOrEqualTo(root.get("nextRuntime"), ZonedDateTime.now())),
+                cb.equal(root.get("status"), ScheduleStatus.NEW),
+                cb.equal(root.get("id"), id)
+        );
+        TypedQuery<ReportSchedulePojo> tQuery = createQuery(query);
+        return tQuery.getResultList();
+    }
+
     public List<ReportSchedulePojo> getStuckSchedules(Integer stuckScheduleSeconds) {
         CriteriaBuilder cb = this.em.getCriteriaBuilder();
         CriteriaQuery<ReportSchedulePojo> query = cb.createQuery(ReportSchedulePojo.class);
@@ -45,6 +61,22 @@ public class ReportScheduleDao extends AbstractDao<ReportSchedulePojo> {
                         cb.isFalse(root.get("isDeleted")),
                         cb.lessThanOrEqualTo(root.get("updatedAt"), ZonedDateTime.now().minusSeconds(stuckScheduleSeconds))),
                         cb.equal(root.get("status"), ScheduleStatus.RUNNING)
+        );
+        TypedQuery<ReportSchedulePojo> tQuery = createQuery(query);
+        return tQuery.getResultList();
+    }
+
+    public List<ReportSchedulePojo> getStuckSchedulesById(Integer stuckScheduleSeconds, Integer id) {
+        CriteriaBuilder cb = this.em.getCriteriaBuilder();
+        CriteriaQuery<ReportSchedulePojo> query = cb.createQuery(ReportSchedulePojo.class);
+        Root<ReportSchedulePojo> root = query.from(ReportSchedulePojo.class);
+        query.where(
+                cb.and(
+                        cb.isTrue(root.get("isEnabled")),
+                        cb.isFalse(root.get("isDeleted")),
+                        cb.lessThanOrEqualTo(root.get("updatedAt"), ZonedDateTime.now().minusSeconds(stuckScheduleSeconds))),
+                cb.equal(root.get("status"), ScheduleStatus.RUNNING),
+                cb.equal(root.get("id"), id)
         );
         TypedQuery<ReportSchedulePojo> tQuery = createQuery(query);
         return tQuery.getResultList();

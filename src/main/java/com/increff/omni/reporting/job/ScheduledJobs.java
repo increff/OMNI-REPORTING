@@ -17,6 +17,9 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 
 import javax.persistence.OptimisticLockException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
@@ -80,7 +83,7 @@ public class ScheduledJobs {
         folderApi.deleteOlderFiles();
     }
 
-    @Scheduled(fixedDelay = 1000)
+    @Scheduled(fixedDelay = 10000)
     public void addScheduleReportRequests() throws ApiException {
         List<ReportSchedulePojo> schedulePojos = reportScheduleApi.getEligibleSchedules();
         List<ReportSchedulePojo> alreadyExecutedSchedules = new ArrayList<>();
@@ -88,7 +91,7 @@ public class ScheduledJobs {
             try {
                 scheduleApi.updateStatusToRunning(s.getId());
             } catch (OptimisticLockException | ObjectOptimisticLockingFailureException | ApiException e) {
-                log.debug("Error occurred while marking status " + ScheduleStatus.RUNNING + " for schedule id : " + s.getId() + " " + e.getMessage());
+                log.trace("Error occurred while marking status " + ScheduleStatus.RUNNING + " for schedule id : " + s.getId() + " " + e.getMessage());
                 alreadyExecutedSchedules.add(s);
             }
         });
@@ -126,9 +129,9 @@ public class ScheduledJobs {
         List<ReportSchedulePojo> stuckSchedules = scheduleApi.getStuckSchedules(properties.getStuckScheduleSeconds());
         stuckSchedules.forEach(s -> {
             try {
-                scheduleApi.updateStatusToNew(s.getId());
+                scheduleApi.updateStatusToNew(properties.getStuckScheduleSeconds(), s.getId());
             } catch (OptimisticLockException | ObjectOptimisticLockingFailureException | ApiException e) {
-                log.debug("Error occurred while refreshing status " + ScheduleStatus.NEW + " for schedule id : " + s.getId() + " " + e.getMessage());
+                log.trace("Error occurred while refreshing status " + ScheduleStatus.NEW + " for schedule id : " + s.getId() + " " + e.getMessage());
             }
         });
     }
