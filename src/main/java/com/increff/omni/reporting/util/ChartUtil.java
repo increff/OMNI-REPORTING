@@ -21,6 +21,7 @@ public class ChartUtil {
 
     public static MapSingleValueChartData getMapSingleValueChartData(List<Map<String, String>> result) {
         MapSingleValueChartData chartData = new MapSingleValueChartData();
+        if (result.isEmpty()) return chartData;
         chartData.setData(result);
         return chartData;
     }
@@ -66,7 +67,8 @@ public class ChartUtil {
     }
 
     public static MapMultiValueChartData getMapMultiValueChartData(List<Map<String, String>> result) {
-        MapMultiValueChartData chart = new MapMultiValueChartData();
+        MapMultiValueChartData chartData = new MapMultiValueChartData();
+        if (result.isEmpty()) return chartData;
         // first column values is treated as labels
         // each column is a dataset
         // each row has 1 value for each dataset and the label corresponding to that value
@@ -86,8 +88,8 @@ public class ChartUtil {
                 data.get(valueColumn).add(row.get(valueColumn));
             }
         }
-        chart.setData(data);
-        return chart;
+        chartData.setData(data);
+        return chartData;
     }
 
 
