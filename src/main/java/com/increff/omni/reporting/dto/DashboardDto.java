@@ -110,7 +110,9 @@ public class DashboardDto extends AbstractDto {
 
     @Transactional(rollbackFor = ApiException.class)
     public List<DashboardListData> getDashboardsByOrgId() {
-        return getDashboardsByOrgId(getOrgId());
+        List<DashboardListData> data = getDashboardsByOrgId(getOrgId());
+        data.sort(Comparator.comparing(DashboardListData::getName));
+        return data;
     }
     public List<DashboardListData> getDashboardsByOrgId(Integer orgId) {
         return ConvertUtil.convert(api.getByOrgId(orgId), DashboardListData.class);
