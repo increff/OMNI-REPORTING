@@ -35,16 +35,16 @@ public class ChartUtil {
         String valueColumn = columns.get(1);
 
         // This contains a shallow copy of the maps!! Changes in maps in the list will reflect in maps contained in result variable in input params
-        List<Map<String, String>> columnNameRowRemoved = result.subList(1, result.size());
-        normalizeSumTo100(result, valueColumn, columnNameRowRemoved);
+//        List<Map<String, String>> columnNameRowRemoved = result.subList(1, result.size());
+        normalizeSumTo100(valueColumn, result);
 
-        result.remove(0); // remove the first row
+//        result.remove(0); // remove the first row
 
         chartData.setData(result);
         return chartData;
     }
 
-    private static void normalizeSumTo100(List<Map<String, String>> result, String valueColumn, List<Map<String, String>> columnNameRowRemoved) throws ApiException {
+    private static void normalizeSumTo100(String valueColumn, List<Map<String, String>> columnNameRowRemoved) throws ApiException {
         double sum = getValueSum(columnNameRowRemoved, valueColumn);
         if(sum != 0) {
             for (Map<String, String> map : columnNameRowRemoved) {
@@ -55,9 +55,8 @@ public class ChartUtil {
             double difference = 100 - finalSum;
             log.debug("difference: " + difference);
             if (difference != 0) { // As the final sum can be between(99.xx to 100.xx) due to precision, add the offset to first value
-                columnNameRowRemoved.get(0).put(PCT_VAL_COL, String.format("%.2f", Double.parseDouble(columnNameRowRemoved.get(0).get(valueColumn)) + difference));
+                columnNameRowRemoved.get(0).put(PCT_VAL_COL, String.format("%.2f", Double.parseDouble(columnNameRowRemoved.get(0).get(PCT_VAL_COL)) + difference));
             } // TODO: Make pct sum 100 by calculating final row pct after  from sum of the rest instead of doing above BS
-            log.debug("result: " + result.size());
         }
     }
 
