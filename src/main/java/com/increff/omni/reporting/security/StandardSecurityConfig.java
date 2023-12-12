@@ -22,6 +22,7 @@ public class StandardSecurityConfig extends WebSecurityConfigurerAdapter {
     private static final String APP_ADMIN = "app.admin";
     private static final String REPORT_ADMIN = "report.admin";
     private static final String REPORT_STANDARD = "report.standard";
+    public static final String REPORT_CUSTOM = "report.custom";
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -30,7 +31,7 @@ public class StandardSecurityConfig extends WebSecurityConfigurerAdapter {
                 .requestMatchers()//
                 .antMatchers("/standard/**").and().authorizeRequests()//
                 .antMatchers("/standard/schedules/**").hasAnyAuthority(APP_ADMIN)
-                .antMatchers("/standard/**").hasAnyAuthority(APP_ADMIN, REPORT_ADMIN, REPORT_STANDARD)//
+                .antMatchers("/standard/**").hasAnyAuthority(APP_ADMIN, REPORT_ADMIN, REPORT_STANDARD, REPORT_CUSTOM)//
                 .and().cors().and().csrf().disable()
                 .addFilterBefore(authTokenFilter, BasicAuthenticationFilter.class)
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
