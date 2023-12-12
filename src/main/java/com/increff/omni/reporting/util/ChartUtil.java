@@ -34,11 +34,7 @@ public class ChartUtil {
         List<String> columns = new ArrayList<>(result.get(0).keySet());
         String valueColumn = columns.get(1);
 
-        // This contains a shallow copy of the maps!! Changes in maps in the list will reflect in maps contained in result variable in input params
-//        List<Map<String, String>> columnNameRowRemoved = result.subList(1, result.size());
         normalizeSumTo100(valueColumn, result);
-
-//        result.remove(0); // remove the first row
 
         chartData.setData(result);
         return chartData;
