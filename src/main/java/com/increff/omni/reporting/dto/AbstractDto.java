@@ -23,6 +23,7 @@ import java.time.ZonedDateTime;
 import java.util.*;
 
 import static com.increff.omni.reporting.dto.CommonDtoHelper.getValueFromQuotes;
+import static com.increff.omni.reporting.security.StandardSecurityConfig.REPORT_CUSTOM;
 
 @Log4j
 @Component
@@ -45,6 +46,9 @@ public class AbstractDto extends AbstractDtoApi {
     @Autowired
     private CustomReportAccessApi customReportAccessApi;
 
+    public static boolean isCustomReportUser() {
+        return getPrincipal().getRoles().contains(REPORT_CUSTOM);
+    }
 
     protected static int getOrgId() {
         return getPrincipal().getDomainId();
