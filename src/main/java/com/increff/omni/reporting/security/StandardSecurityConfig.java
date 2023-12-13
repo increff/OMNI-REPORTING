@@ -34,7 +34,7 @@ public class StandardSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/standard/**").and().authorizeRequests()//
                 .antMatchers("/standard/schedules/**").hasAnyAuthority(APP_ADMIN)
                 .antMatchers("/standard/**").hasAnyAuthority(APP_ADMIN, REPORT_ADMIN, REPORT_STANDARD)//
-                .antMatchers("/standard/dashboards/**").hasAnyAuthority(APP_ADMIN, REPORT_ADMIN)//
+                .antMatchers("/standard/dashboards/**").hasAnyAuthority(APP_ADMIN)//
                 .antMatchers(HttpMethod.GET, "/standard/dashboards/**").hasAnyAuthority(APP_ADMIN, REPORT_ADMIN, REPORT_STANDARD)//
                 .antMatchers(HttpMethod.POST, "/standard/dashboards/{dashboardId}/view").hasAnyAuthority(APP_ADMIN, REPORT_ADMIN, REPORT_STANDARD)//
                 .and().cors().and().csrf().disable()
