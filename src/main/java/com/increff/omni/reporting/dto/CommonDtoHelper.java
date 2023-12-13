@@ -168,14 +168,15 @@ public class CommonDtoHelper {
         return orgToPojo;
     }
 
-    public static void sortBasedOnReportControlMappedTime(List<InputControlData> inputControlDataList,
+    public static void
+    sortBasedOnReportControlMappedTime(List<InputControlData> inputControlDataList,
                                                           List<ReportControlsPojo> reportControlsPojos) {
         inputControlDataList.sort((o1, o2) -> {
             ReportControlsPojo p1 = reportControlsPojos.stream().filter(r -> r.getControlId().equals(o1.getId()))
                     .collect(Collectors.toList()).get(0);
             ReportControlsPojo p2 = reportControlsPojos.stream().filter(r -> r.getControlId().equals(o2.getId()))
                     .collect(Collectors.toList()).get(0);
-            return Objects.equals(p1.getId(), p2.getId()) ? 0 : (p1.getId() > p2.getId() ? 1 : -1);
+            return Objects.equals(p1.getId(), p2.getId()) ? 0 : (p1.getCreatedAt().isAfter(p2.getCreatedAt()) ? 1 : -1);
         });
     }
 
