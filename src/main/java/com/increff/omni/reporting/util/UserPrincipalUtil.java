@@ -14,7 +14,7 @@ public class UserPrincipalUtil {
     private static final String APP_ADMIN = "app.admin";
     private static final String REPORT_ADMIN = "report.admin";
     private static final List<String> ADMIN_AUTHORITIES = Arrays.asList(APP_ADMIN, REPORT_ADMIN);
-    private static final String SQL_FUNC_PREFIX = "SQLF#";
+    private static final String SQL_FUNC_PREFIX = "SQLF_";
 
     public static Map<String, String> getCompleteMapWithAccessControl(Map<String, List<String>> params) {
         Map<String, String> finalMap = new HashMap<>(getStringToStringParamMap(params));
