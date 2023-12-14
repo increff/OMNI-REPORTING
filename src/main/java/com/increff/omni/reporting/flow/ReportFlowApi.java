@@ -28,6 +28,7 @@ import java.sql.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.increff.omni.reporting.dto.AbstractDto.isCustomReportUser;
 import static com.increff.omni.reporting.dto.CommonDtoHelper.*;
 
 @Service
@@ -151,6 +152,7 @@ public class ReportFlowApi extends AbstractFlowApi {
     public List<ReportPojo> getAll(Integer orgId, Boolean isDashboard) throws ApiException {
 
         OrgSchemaVersionPojo orgSchemaVersionPojo = orgSchemaApi.getCheckByOrgId(orgId);
+        List<ReportPojo> reportPojoList = new ArrayList<>();
         //All standard
         List<ReportPojo> standard =
                 api.getByTypeAndSchema(ReportType.STANDARD, orgSchemaVersionPojo.getSchemaVersionId(), isDashboard);
@@ -163,9 +165,10 @@ public class ReportFlowApi extends AbstractFlowApi {
         List<ReportPojo> custom =
                 api.getByIdsAndSchema(customIds, orgSchemaVersionPojo.getSchemaVersionId(), isDashboard);
 
-        //combined 2 list
-        standard.addAll(custom);
-        return standard;
+        if(!isCustomReportUser()) // Add standard reports only if user in not custom report user
+            reportPojoList.addAll(standard);
+        reportPojoList.addAll(custom);
+        return reportPojoList;
     }
 
     @Transactional(rollbackFor = ApiException.class)
