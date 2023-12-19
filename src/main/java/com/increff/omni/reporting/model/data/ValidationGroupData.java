@@ -14,5 +14,6 @@ public class ValidationGroupData {
     private ValidationType validationType;
     private Integer validationValue;
     private Boolean isSystemValidation;
+    private Boolean canDelete;
     private List<String> controls;
 }

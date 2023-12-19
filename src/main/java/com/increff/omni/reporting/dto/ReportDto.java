@@ -4,15 +4,9 @@ import com.increff.omni.reporting.api.*;
 import com.increff.omni.reporting.config.ApplicationProperties;
 import com.increff.omni.reporting.flow.ReportFlowApi;
 import com.increff.omni.reporting.flow.ReportRequestFlowApi;
-import com.increff.omni.reporting.model.constants.AuditActions;
-import com.increff.omni.reporting.model.constants.ReportRequestType;
-import com.increff.omni.reporting.model.constants.ValidationType;
-import com.increff.omni.reporting.model.constants.VisualizationType;
+import com.increff.omni.reporting.model.constants.*;
+import com.increff.omni.reporting.model.data.*;
 import com.increff.omni.reporting.model.data.Charts.ChartInterface;
-import com.increff.omni.reporting.model.data.ReportData;
-import com.increff.omni.reporting.model.data.ReportQueryData;
-import com.increff.omni.reporting.model.data.ValidationGroupData;
-import com.increff.omni.reporting.model.data.ViewDashboardData;
 import com.increff.omni.reporting.model.form.*;
 import com.increff.omni.reporting.pojo.*;
 import com.increff.omni.reporting.util.SqlCmd;
@@ -248,9 +242,14 @@ public class ReportDto extends AbstractDto {
             data.setGroupName(k);
             data.setValidationType(v.get(0).getType());
             data.setControls(pojos.stream().map(InputControlPojo::getDisplayName).collect(Collectors.toList()));
+            data.setCanDelete(!hasAccessControlledMultiSelect(pojos));
             validationGroupDataList.add(data);
         });
         return validationGroupDataList;
+    }
+
+    private boolean hasAccessControlledMultiSelect(List<InputControlPojo> pojos) {
+        return pojos.stream().anyMatch(pojo -> pojo.getType().equals(InputControlType.ACCESS_CONTROLLED_MULTI_SELECT));
     }
 
     private void validate(Integer reportId, ValidationGroupForm groupForm) throws ApiException {
