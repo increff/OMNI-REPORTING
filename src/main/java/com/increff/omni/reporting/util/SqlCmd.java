@@ -2,14 +2,14 @@ package com.increff.omni.reporting.util;
 
 import com.increff.omni.reporting.dto.QueryExecutionDto;
 import com.increff.omni.reporting.model.form.SqlParams;
-import lombok.extern.log4j.Log4j;
+import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-@Log4j
+@Log4j2
 public class SqlCmd {
 
     public static String getFinalQuery(Map<String, String> inputParamMap, String query,

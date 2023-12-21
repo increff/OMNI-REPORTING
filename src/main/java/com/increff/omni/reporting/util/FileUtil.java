@@ -1,8 +1,9 @@
 package com.increff.omni.reporting.util;
 
 import com.increff.omni.reporting.api.FolderApi;
-import com.nextscm.commons.lang.StringUtil;
-import lombok.extern.log4j.Log4j;
+//import com.nextscm.commons.lang.StringUtil;
+import com.increff.omni.reporting.commons.StringUtil;
+import lombok.extern.log4j.Log4j2;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.csv.CSVRecord;
@@ -17,7 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Log4j
+@Log4j2
 public class FileUtil {
 
     @Autowired

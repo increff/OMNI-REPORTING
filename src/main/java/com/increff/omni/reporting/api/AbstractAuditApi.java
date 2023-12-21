@@ -1,12 +1,13 @@
 package com.increff.omni.reporting.api;
 
 import com.nextscm.commons.spring.audit.api.AuditApi;
-import com.nextscm.commons.spring.server.AbstractApi;
-import lombok.extern.log4j.Log4j;
+//import com.nextscm.commons.spring.server.AbstractApi;
+import com.increff.omni.reporting.commons.AbstractApi;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-@Log4j
+@Log4j2
 @Service
 public class AbstractAuditApi extends AbstractApi {
 

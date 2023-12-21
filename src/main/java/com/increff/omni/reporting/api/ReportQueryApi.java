@@ -2,7 +2,8 @@ package com.increff.omni.reporting.api;
 
 import com.increff.omni.reporting.dao.ReportQueryDao;
 import com.increff.omni.reporting.pojo.ReportQueryPojo;
-import com.nextscm.commons.spring.server.AbstractApi;
+//import com.nextscm.commons.spring.server.AbstractApi;
+import com.increff.omni.reporting.commons.AbstractApi;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

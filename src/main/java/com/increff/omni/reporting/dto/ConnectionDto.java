@@ -10,13 +10,14 @@ import com.increff.omni.reporting.model.form.ConnectionForm;
 import com.increff.omni.reporting.pojo.ConnectionPojo;
 import com.increff.service.encryption.EncryptionClient;
 import com.increff.service.encryption.form.CryptoForm;
-import com.nextscm.commons.lang.StringUtil;
+//import com.nextscm.commons.lang.StringUtil;
 import com.nextscm.commons.spring.client.AppClientException;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
 import com.nextscm.commons.spring.common.ConvertUtil;
 import lombok.Setter;
-import lombok.extern.log4j.Log4j;
+//import lombok.extern.log4j.Log4j;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -30,7 +31,7 @@ import java.util.Objects;
 import static com.increff.omni.reporting.dto.CommonDtoHelper.getCryptoForm;
 
 @Service
-@Log4j
+@Log4j2
 @Setter
 public class ConnectionDto extends AbstractDto {
 

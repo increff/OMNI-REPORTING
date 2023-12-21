@@ -23,7 +23,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.time.ZonedDateTime;
-import java.time.temporal.ChronoUnit;
+//import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -95,11 +95,11 @@ public class ReportDto extends AbstractDto {
             List<ReportInputParamsPojo> reportInputParamsPojoList = validateControls(form, orgId, reportPojo, password);
             return flowApi.validateAndGetLiveData(reportPojo, reportInputParamsPojoList, connectionPojo, password);
         } finally {
-            flowApi.saveAudit(reportPojo.getId().toString(), AuditActions.LIVE_REPORT.toString(),
-                    "Live Report",
-                    "Live Report request submitted for organization : " + organizationPojo.getName()
-                     + " , duration : " + (int) ChronoUnit.MILLIS.between(startTime, ZonedDateTime.now()) ,
-                    getUserName());
+//            flowApi.saveAudit(reportPojo.getId().toString(), AuditActions.LIVE_REPORT.toString(),
+//                    "Live Report",
+//                    "Live Report request submitted for organization : " + organizationPojo.getName()
+//                     + " , duration : " + (int) ChronoUnit.MILLIS.between(startTime, ZonedDateTime.now()) ,
+//                    getUserName());
         }
     }
 

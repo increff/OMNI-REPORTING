@@ -1,7 +1,7 @@
 package com.increff.omni.reporting.dto;
 
-import com.increff.account.client.SecurityUtil;
-import com.increff.account.client.UserPrincipal;
+//import com.increff.account.client.SecurityUtil;
+//import com.increff.account.client.UserPrincipal;
 import com.increff.omni.reporting.api.*;
 import com.increff.omni.reporting.flow.InputControlFlowApi;
 import com.increff.omni.reporting.model.constants.ReportRequestType;
@@ -9,13 +9,15 @@ import com.increff.omni.reporting.model.constants.ReportType;
 import com.increff.omni.reporting.pojo.*;
 import com.increff.service.encryption.EncryptionClient;
 import com.increff.service.encryption.common.CryptoCommon;
-import com.nextscm.commons.lang.StringUtil;
+//import com.nextscm.commons.lang.StringUtil;
+import com.increff.omni.reporting.commons.StringUtil;
 import com.nextscm.commons.spring.client.AppClientException;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
-import com.nextscm.commons.spring.server.AbstractDtoApi;
+//import com.nextscm.commons.spring.server.AbstractDtoApi;
+import com.increff.omni.reporting.commons.AbstractDtoApi;
 import lombok.Setter;
-import lombok.extern.log4j.Log4j;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -24,7 +26,7 @@ import java.util.*;
 
 import static com.increff.omni.reporting.dto.CommonDtoHelper.getValueFromQuotes;
 
-@Log4j
+@Log4j2
 @Component
 @Setter
 public class AbstractDto extends AbstractDtoApi {
@@ -46,17 +48,17 @@ public class AbstractDto extends AbstractDtoApi {
     private CustomReportAccessApi customReportAccessApi;
 
 
-    protected static int getOrgId() {
-        return getPrincipal().getDomainId();
-    }
-
-    protected static int getUserId() {
-        return getPrincipal().getId();
-    }
-
-    protected static String getUserName() {
-        return getPrincipal().getUsername();
-    }
+//    protected static int getOrgId() {
+//        return getPrincipal().getDomainId();
+//    }
+//
+//    protected static int getUserId() {
+//        return getPrincipal().getId();
+//    }
+//
+//    protected static String getUserName() {
+//        return getPrincipal().getUsername();
+//    }
 
     protected void validateInputParamValues(Map<String, List<String>> inputParams,
                                             Map<String, String> params, int orgId,
@@ -184,9 +186,9 @@ public class AbstractDto extends AbstractDtoApi {
         return valuesMap;
     }
 
-    private static UserPrincipal getPrincipal() {
-        return SecurityUtil.getPrincipal();
-    }
+//    private static UserPrincipal getPrincipal() {
+//        return SecurityUtil.getPrincipal();
+//    }
 
 
 }

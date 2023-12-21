@@ -6,8 +6,8 @@ import com.nextscm.commons.spring.common.ApiStatus;
 
 import java.util.Objects;
 
-import static com.nextscm.commons.spring.server.DtoHelper.checkValid;
-
+//import static com.nextscm.commons.spring.server.DtoHelper.checkValid;
+import static com.increff.omni.reporting.commons.DtoHelper.checkValid;
 public class ValidateUtil {
 
     public static void validateForm(ReportForm form) throws ApiException {

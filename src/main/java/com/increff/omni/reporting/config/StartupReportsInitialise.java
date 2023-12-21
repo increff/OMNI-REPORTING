@@ -2,7 +2,8 @@ package com.increff.omni.reporting.config;
 
 import com.increff.omni.reporting.dao.DirectoryDao;
 import com.increff.omni.reporting.pojo.DirectoryPojo;
-import lombok.extern.log4j.Log4j;
+//import lombok.extern.log4j.Log4j;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -11,7 +12,7 @@ import org.springframework.stereotype.Component;
 import java.util.Objects;
 
 @Component
-@Log4j
+@Log4j2
 public class StartupReportsInitialise implements ApplicationListener<ContextRefreshedEvent> {
 
     @Autowired

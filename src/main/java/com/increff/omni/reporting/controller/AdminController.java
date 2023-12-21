@@ -4,10 +4,11 @@ import com.increff.omni.reporting.dto.*;
 import com.increff.omni.reporting.model.data.*;
 import com.increff.omni.reporting.model.form.*;
 import com.nextscm.commons.spring.common.ApiException;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import org.apache.log4j.Level;
-import org.apache.log4j.LogManager;
+//import io.swagger.annotations.Api;
+//import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+//import org.apache.log4j.Level;
+//import org.apache.log4j.LogManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -253,11 +254,11 @@ public class AdminController {
         return customReportAccessDto.getAllDataByReport(reportId);
     }
 
-    @ApiOperation(value = "Change Log Level")
-    @RequestMapping(value = "/log", method = RequestMethod.PUT)
-    public void changeLogLevel(@RequestParam Level level) {
-        LogManager.getRootLogger().setLevel(level);
-    }
+//    @ApiOperation(value = "Change Log Level")
+//    @RequestMapping(value = "/log", method = RequestMethod.PUT)
+//    public void changeLogLevel(@RequestParam Level level) {
+//        LogManager.getRootLogger().setLevel(level);
+//    }
 
 
     // Report admin APIs
@@ -294,6 +295,7 @@ public class AdminController {
     }
 
     @ApiOperation(value = "Get Schedules for all organizations")
+    @Operation(value = "Get Schedules for all organizations")
     @RequestMapping(value = "/schedules", method = RequestMethod.GET)
     public List<ReportScheduleData> getScheduleReports(@RequestParam Integer pageNo, @RequestParam Integer pageSize) throws ApiException {
         return reportScheduleDto.getScheduleReportsForAllOrgs(pageNo, pageSize);

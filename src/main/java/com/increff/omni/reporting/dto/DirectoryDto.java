@@ -6,7 +6,8 @@ import com.increff.omni.reporting.model.form.DirectoryForm;
 import com.increff.omni.reporting.pojo.DirectoryPojo;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ConvertUtil;
-import com.nextscm.commons.spring.server.AbstractDtoApi;
+//import com.nextscm.commons.spring.server.AbstractDtoApi;
+import com.increff.omni.reporting.commons.AbstractDtoApi;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
