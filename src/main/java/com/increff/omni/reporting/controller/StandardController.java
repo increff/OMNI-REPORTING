@@ -1,13 +1,12 @@
 package com.increff.omni.reporting.controller;
 
 
-import com.increff.account.client.AuthClient;
 import com.increff.omni.reporting.config.ApplicationProperties;
 import com.increff.omni.reporting.dto.*;
 import com.increff.omni.reporting.model.data.*;
 import com.increff.omni.reporting.model.form.ReportRequestForm;
 import com.increff.omni.reporting.model.form.ReportScheduleForm;
-import com.nextscm.commons.spring.common.ApiException;
+import com.increff.commons.springboot.common.ApiException;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,8 +34,6 @@ public class StandardController {
     private DirectoryDto directoryDto;
     @Autowired
     private ApplicationProperties properties;
-    @Autowired
-    private AuthClient authClient;
 
     @ApiOperation(value = "Get all available timezones")
     @RequestMapping(value = "/timeZones", method = RequestMethod.GET)

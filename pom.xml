@@ -8,9 +8,9 @@
     <packaging>war</packaging>
     <properties>
         <!-- Maven Properties -->
-        <java.version>1.8</java.version>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
+        <java.version>21</java.version>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <!-- Jetty -->
@@ -23,10 +23,10 @@
         <!-- Increff Dependencies -->
         <fileclient.version>1.1.4</fileclient.version>
         <nextscm-commons-spring.version>2.1</nextscm-commons-spring.version>
-        <crypto-client.version>RELEASE</crypto-client.version>
+        <crypto-client.version>0.0.1-SNAPSHOT</crypto-client.version>
         <increff-commons-logging.version>1.5</increff-commons-logging.version>
-        <increff-account.version>3.27</increff-account.version>
-        <lombok.version>1.18.22</lombok.version>
+        <increff-account.version>0.0.1-SNAPSHOT</increff-account.version>
+        <lombok.version>1.18.30</lombok.version>
         <swagger.version>2.7.0</swagger.version>
         <log4j.version>1.2.17</log4j.version>
         <increff-commons-sheet.version>1.3</increff-commons-sheet.version>
@@ -43,6 +43,7 @@
     </properties>
 
     <dependencies>
+<!--      These are dependencies for Spring
         <dependency>
             <groupId>com.google.cloud</groupId>
             <artifactId>google-cloud-storage</artifactId>
@@ -131,11 +132,108 @@
             <artifactId>commons-compress</artifactId>
             <version>${apache-commons-compress.version}</version>
         </dependency>
+    -->
+        <dependency>
+            <groupId>com.increff.commons</groupId>
+            <artifactId>commons-springboot-server</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.increff.commons</groupId>
+            <artifactId>commons-springboot-db</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+            <version>1.2.17</version> <!-- or the version you need -->
+        </dependency>
+
+        <dependency>
+            <groupId>com.increff.commons</groupId>
+            <artifactId>commons-springboot-audit</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.increff.commons</groupId>
+            <artifactId>commons-springboot-client</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.increff.commons</groupId>
+            <artifactId>commons-springboot-test</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>${lombok.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.springframework/spring-context-support -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context-support</artifactId>
+            <version>3.1.0.RELEASE</version>
+        </dependency>
+
+        <dependency>
+            <groupId>javax.mail</groupId>
+            <artifactId>mail</artifactId>
+            <version>${javax.mail.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.cloud</groupId>
+            <artifactId>google-cloud-storage</artifactId>
+            <version>2.20.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-csv</artifactId>
+            <version>${apache-commons-csv.version}</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/commons-io/commons-io -->
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.7</version>
+        </dependency>
+
+        <!-- Increff Dependencies -->
+        <dependency>
+            <groupId>com.nextscm.commons</groupId>
+            <artifactId>nextscm-commons-lang</artifactId>
+            <version>1.3</version>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>com.increff.service</groupId>
+            <artifactId>encryption-client</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.increff.account</groupId>
+            <artifactId>account-client</artifactId>
+            <version>${increff-account.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.increff.commons</groupId>
+            <artifactId>query-executor-client</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
     </dependencies>
 
+    <!--    Jetty Plugin Setup for local testing
     <build>
         <plugins>
-            <!-- Jetty plugin, for web application testing -->
             <plugin>
                 <groupId>org.eclipse.jetty</groupId>
                 <artifactId>jetty-maven-plugin</artifactId>
@@ -159,6 +257,7 @@
             </resource>
         </resources>
     </build>
+    -->
 
     <repositories>
         <!-- For NextSCM -->

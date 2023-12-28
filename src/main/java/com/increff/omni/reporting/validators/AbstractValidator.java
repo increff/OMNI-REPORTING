@@ -4,8 +4,8 @@ import com.increff.omni.reporting.model.constants.InputControlType;
 import com.increff.omni.reporting.model.constants.ReportRequestType;
 import com.increff.omni.reporting.model.constants.ValidationType;
 import com.nextscm.commons.lang.StringUtil;
-import com.nextscm.commons.spring.common.ApiException;
-import com.nextscm.commons.spring.common.JsonUtil;
+import com.increff.commons.springboot.common.ApiException;
+import com.increff.commons.springboot.common.JsonUtil;
 
 import java.util.List;
 

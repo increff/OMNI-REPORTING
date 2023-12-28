@@ -1,7 +1,7 @@
 package com.increff.omni.reporting.job;
 
 import com.increff.omni.reporting.pojo.ReportRequestPojo;
-import com.nextscm.commons.spring.common.ApiException;
+import com.increff.commons.springboot.common.ApiException;
 
 public abstract class AbstractTask {
 

@@ -2,8 +2,8 @@ package com.increff.omni.reporting.api;
 
 import com.increff.omni.reporting.dao.OrganizationDao;
 import com.increff.omni.reporting.pojo.OrganizationPojo;
-import com.nextscm.commons.spring.common.ApiException;
-import com.nextscm.commons.spring.server.AbstractApi;
+import com.increff.commons.springboot.common.ApiException;
+import com.increff.commons.springboot.server.AbstractApi;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

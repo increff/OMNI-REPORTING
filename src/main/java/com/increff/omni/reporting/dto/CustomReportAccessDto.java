@@ -9,9 +9,9 @@ import com.increff.omni.reporting.model.form.CustomReportAccessForm;
 import com.increff.omni.reporting.pojo.CustomReportAccessPojo;
 import com.increff.omni.reporting.pojo.OrganizationPojo;
 import com.increff.omni.reporting.pojo.ReportPojo;
-import com.nextscm.commons.spring.common.ApiException;
-import com.nextscm.commons.spring.common.ApiStatus;
-import com.nextscm.commons.spring.common.ConvertUtil;
+import com.increff.commons.springboot.common.ApiException;
+import com.increff.commons.springboot.common.ApiStatus;
+import com.increff.commons.springboot.common.ConvertUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

@@ -1,12 +1,12 @@
 package com.increff.omni.reporting.util;
 
 import com.increff.omni.reporting.model.form.ReportForm;
-import com.nextscm.commons.spring.common.ApiException;
-import com.nextscm.commons.spring.common.ApiStatus;
+import com.increff.commons.springboot.common.ApiException;
+import com.increff.commons.springboot.common.ApiStatus;
 
 import java.util.Objects;
 
-import static com.nextscm.commons.spring.server.DtoHelper.checkValid;
+import static com.increff.commons.springboot.server.DtoHelper.checkValid;
 
 public class ValidateUtil {
 

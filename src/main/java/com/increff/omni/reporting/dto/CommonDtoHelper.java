@@ -13,8 +13,8 @@ import com.increff.omni.reporting.pojo.*;
 import com.increff.service.encryption.common.CryptoCommon;
 import com.increff.service.encryption.form.CryptoForm;
 import com.nextscm.commons.lang.StringUtil;
-import com.nextscm.commons.spring.common.ApiException;
-import com.nextscm.commons.spring.common.ApiStatus;
+import com.increff.commons.springboot.common.ApiException;
+import com.increff.commons.springboot.common.ApiStatus;
 import org.springframework.scheduling.support.CronSequenceGenerator;
 
 import java.time.Instant;
@@ -482,7 +482,7 @@ public class CommonDtoHelper {
     }
 
     public static long getCronFrequencyInSeconds(String cronExpression) throws ApiException {
-        CronSequenceGenerator generator = new CronSequenceGenerator(cronExpression);
+        CronSequenceGenerator generator = new CronSequenceGenerator(cronExpression, TimeZone.getDefault());
         long freqIntervalSecondsMin = 1000000000;
 
         Instant instant = generator.next(new Date()).toInstant();

@@ -3,9 +3,9 @@ package com.increff.omni.reporting.pojo;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.persistence.MappedSuperclass;
-import javax.persistence.PreUpdate;
-import javax.persistence.Version;
+import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.PreUpdate;
+import jakarta.persistence.Version;
 import java.time.ZonedDateTime;
 
 @Setter

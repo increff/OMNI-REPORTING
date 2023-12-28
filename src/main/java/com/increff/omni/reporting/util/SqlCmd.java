@@ -30,7 +30,7 @@ public class SqlCmd {
         for (Map.Entry<String, String> e : functionValueMap.entrySet()) {
             query = query.replace(e.getKey(), e.getValue());
         }
-        log.debug("Query formed : " + query);
+//        log.debug("Query formed : " + query);
         return query;
     }
 

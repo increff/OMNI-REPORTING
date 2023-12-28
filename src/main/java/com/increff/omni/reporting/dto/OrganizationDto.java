@@ -9,9 +9,9 @@ import com.increff.omni.reporting.model.form.IntegrationOrgConnectionForm;
 import com.increff.omni.reporting.model.form.IntegrationOrgSchemaForm;
 import com.increff.omni.reporting.model.form.OrganizationForm;
 import com.increff.omni.reporting.pojo.*;
-import com.nextscm.commons.spring.common.ApiException;
-import com.nextscm.commons.spring.common.ApiStatus;
-import com.nextscm.commons.spring.common.ConvertUtil;
+import com.increff.commons.springboot.common.ApiException;
+import com.increff.commons.springboot.common.ApiStatus;
+import com.increff.commons.springboot.common.ConvertUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
