@@ -52,15 +52,22 @@ public class RateLimitingFilter extends GenericFilterBean {
             if (bucket.tryConsume(1)) {
                 chain.doFilter(request, response);  // If the user is within the rate limit, proceed with the request
             } else {
-                // If the user has exceeded the rate limit, return a 429 (Too Many Requests) response
-                HttpServletResponse httpResponse = (HttpServletResponse) response;
-                httpResponse.getWriter().write("Too many requests. Please try again after " + properties.getTokensRefillRateSeconds() + " Second(s)");
-                httpResponse.setStatus(429);
+                setRateLimitResponse((HttpServletResponse) response);
             }
 
         } else {
             chain.doFilter(request, response); // Proceed with the request
         }
+    }
+
+    private void setRateLimitResponse(HttpServletResponse response) throws IOException {
+        // If the user has exceeded the rate limit, return a 429 (Too Many Requests) response
+        int responseCode = 429;
+        HttpServletResponse httpResponse = response;
+        httpResponse.setContentType("application/json");
+        httpResponse.setCharacterEncoding("UTF-8");
+        httpResponse.getWriter().write("{\"status\":\"" + responseCode + "\",\"message\":\"Too many requests. Please try again after " + properties.getTokensRefillRateSeconds() + " Second(s)\"}");
+        httpResponse.setStatus(responseCode);
     }
 
     private int getDashboardId(HttpServletRequest httpRequest) {
