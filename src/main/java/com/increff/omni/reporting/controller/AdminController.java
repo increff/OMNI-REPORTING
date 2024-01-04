@@ -310,9 +310,14 @@ public class AdminController {
     }
 
     @ApiOperation(value = "Copy Dashboard to all organizations. This copies charts only! NOT default values!")
-    @RequestMapping(value = "/copy-dashboard", method = RequestMethod.POST)
+    @RequestMapping(value = "/copy-dashboard-all-orgs", method = RequestMethod.POST)
     public void copyDashboardToAllOrgs(@RequestParam Integer dashboardId, @RequestParam Integer orgId) throws ApiException {
         dashboardDto.copyDashboardToAllOrgs(dashboardId, orgId);
     }
 
+    @ApiOperation(value = "Copy Dashboard to all organizations. This copies charts only! NOT default values!")
+    @RequestMapping(value = "/copy-dashboard-some-orgs", method = RequestMethod.POST)
+    public void copyDashboardToSomeOrgs(@RequestParam Integer dashboardId, @RequestParam Integer orgId, @RequestParam List<Integer> orgIds) throws ApiException {
+        dashboardDto.copyDashboardToSomeOrgs(dashboardId, orgId, orgIds);
+    }
 }

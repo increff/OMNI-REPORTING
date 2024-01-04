@@ -283,6 +283,16 @@ public class DashboardDto extends AbstractDto {
         }
     }
 
+    @Transactional(rollbackFor = ApiException.class)
+    public void copyDashboardToSomeOrgs(Integer dbIdToCopy, Integer orgIdToCopy, List<Integer> orgIds) throws ApiException {
+        // NOTE : This copies charts only! NOT default values!
+    	DashboardPojo oldDb = api.getCheck(dbIdToCopy, orgIdToCopy);
+        for(Integer orgId : orgIds) {
+            DashboardPojo newDbPojo = duplicateDashboard(oldDb, orgId);
+            duplicateDashboardCharts(dbIdToCopy, newDbPojo.getId());
+        }
+    }
+
     private void duplicateDashboardCharts(Integer oldDbId, Integer newDbId) {
         List<DashboardChartPojo> charts = dashboardChartApi.getByDashboardId(oldDbId);
         for(DashboardChartPojo chart : charts) {
