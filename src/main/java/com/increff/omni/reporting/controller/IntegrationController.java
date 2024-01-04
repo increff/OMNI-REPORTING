@@ -1,6 +1,7 @@
 package com.increff.omni.reporting.controller;
 
 import com.increff.omni.reporting.dto.ConnectionDto;
+import com.increff.omni.reporting.dto.DashboardDto;
 import com.increff.omni.reporting.dto.OrganizationDto;
 import com.increff.omni.reporting.model.data.ConnectionData;
 import com.increff.omni.reporting.model.data.OrgConnectionData;
@@ -28,6 +29,8 @@ public class IntegrationController {
     private ConnectionDto connectionDto;
     @Autowired
     private OrganizationDto organizationDto;
+    @Autowired
+    private DashboardDto dashboardDto;
 
     @ApiOperation(value = "Add Connection")
     @RequestMapping(value = "/connections", method = RequestMethod.POST)
@@ -57,5 +60,11 @@ public class IntegrationController {
     @RequestMapping(value = "/orgs", method = RequestMethod.GET)
     public List<OrganizationData> selectAllOrgs() {
         return organizationDto.selectAll();
+    }
+
+    @ApiOperation(value = "Copy Dashboard to all organizations. This copies charts only! NOT default values!")
+    @RequestMapping(value = "/copy-dashboard-some-orgs", method = RequestMethod.POST)
+    public void copyDashboardToSomeOrgs(@RequestParam Integer dashboardId, @RequestParam Integer orgId, @RequestParam List<Integer> orgIds) throws ApiException {
+        dashboardDto.copyDashboardToSomeOrgs(dashboardId, orgId, orgIds);
     }
 }
