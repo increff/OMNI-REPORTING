@@ -157,6 +157,7 @@ public class AbstractDto extends AbstractDtoApi {
             if(isCustomReportUser())
                 throw new ApiException(ApiStatus.BAD_DATA, "Custom Report User can't access standard report : "
                         + reportPojo.getName());
+            return;
         }
         CustomReportAccessPojo customReportAccessPojo =
                 customReportAccessApi.getByReportAndOrg(reportPojo.getId(), orgId);
