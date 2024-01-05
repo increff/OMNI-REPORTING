@@ -317,7 +317,7 @@ public class AdminController {
 
     @ApiOperation(value = "Copy Dashboard to all organizations. This copies charts only! NOT default values!")
     @RequestMapping(value = "/copy-dashboard-some-orgs", method = RequestMethod.POST)
-    public void copyDashboardToSomeOrgs(@RequestParam Integer dashboardId, @RequestParam Integer orgId, @RequestParam List<Integer> orgIds) throws ApiException {
-        dashboardDto.copyDashboardToSomeOrgs(dashboardId, orgId, orgIds);
+    public void copyDashboardToSomeOrgs(@RequestParam Integer dashboardId, @RequestParam Integer sourceOrgId, @RequestParam List<Integer> destinationOrgIds) throws ApiException {
+        dashboardDto.copyDashboardToSomeOrgs(dashboardId, sourceOrgId, destinationOrgIds);
     }
 }

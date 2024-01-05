@@ -293,6 +293,7 @@ public class DashboardDto extends AbstractDto {
         }
     }
 
+    @Transactional(rollbackFor = ApiException.class)
     private void duplicateDashboardCharts(Integer oldDbId, Integer newDbId) {
         List<DashboardChartPojo> charts = dashboardChartApi.getByDashboardId(oldDbId);
         for(DashboardChartPojo chart : charts) {
@@ -303,6 +304,7 @@ public class DashboardDto extends AbstractDto {
         }
     }
 
+    @Transactional(rollbackFor = ApiException.class)
     private DashboardPojo duplicateDashboard(DashboardPojo dashboard, Integer orgId) throws ApiException {
         DashboardPojo dashboardPojo = ConvertUtil.convert(dashboard, DashboardPojo.class);
         dashboardPojo.setOrgId(orgId);
