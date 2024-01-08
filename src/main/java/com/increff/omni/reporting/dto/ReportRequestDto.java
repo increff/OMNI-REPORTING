@@ -80,21 +80,27 @@ public class ReportRequestDto extends AbstractDto {
         OrgConnectionPojo orgConnectionPojo = orgConnectionApi.getCheckByOrgId(orgId);
         ConnectionPojo connectionPojo = connectionApi.getCheck(orgConnectionPojo.getConnectionId());
         String password = getDecryptedPassword(connectionPojo.getPassword());
+
         Map<String, String> inputParamsMap = UserPrincipalUtil.getCompleteMapWithAccessControl(form.getParamMap());
         Map<String, List<String>> inputDisplayMap = new HashMap<>();
+
         ReportRequestPojo pojo = CommonDtoHelper.getReportRequestPojo(form, orgId, getUserId());
         ReportPojo reportPojo = reportApi.getCheck(pojo.getReportId());
         if (reportPojo.getIsDashboard())
             throw new ApiException(ApiStatus.BAD_DATA, "Dashboard can't be requested here");
+
         ReportQueryPojo reportQueryPojo = queryApi.getByReportId(reportPojo.getId());
+        if (Objects.isNull(reportQueryPojo))
+            throw new ApiException(ApiStatus.BAD_DATA, "No query defined for report : " + reportPojo.getName());
+
         List<ReportControlsPojo> reportControlsPojoList = reportControlsApi.getByReportId(reportPojo.getId());
         List<InputControlPojo> inputControlPojoList = controlApi.selectByIds(reportControlsPojoList.stream()
                 .map(ReportControlsPojo::getControlId).collect(Collectors.toList()));
-        if (Objects.isNull(reportQueryPojo))
-            throw new ApiException(ApiStatus.BAD_DATA, "No query defined for report : " + reportPojo.getName());
+
         validateCustomReportAccess(reportPojo, orgId);
         validateInputParamValues(form.getParamMap(), inputParamsMap, orgId, inputDisplayMap, inputControlPojoList,
                 ReportRequestType.USER, password);
+
         Map<String, String> inputDisplayStringMap = UserPrincipalUtil.getStringToStringParamMap(inputDisplayMap);
         List<ReportInputParamsPojo> reportInputParamsPojoList =
                 CommonDtoHelper.getReportInputParamsPojoList(inputParamsMap, form.getTimezone(), orgId,
