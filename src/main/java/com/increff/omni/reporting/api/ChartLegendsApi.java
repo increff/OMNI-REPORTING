@@ -13,7 +13,7 @@ import java.util.Map;
 import java.util.Objects;
 
 @Service
-@Transactional(rollbackFor = Exception.class)
+@Transactional(rollbackFor = ApiException.class)
 public class ChartLegendsApi extends AbstractAuditApi {
 
     @Autowired
