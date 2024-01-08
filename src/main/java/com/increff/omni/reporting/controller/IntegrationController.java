@@ -62,9 +62,10 @@ public class IntegrationController {
         return organizationDto.selectAll();
     }
 
-    @ApiOperation(value = "Copy Dashboard to all organizations. This copies charts only! NOT default values!")
-    @RequestMapping(value = "/copy-dashboard-some-orgs", method = RequestMethod.POST)
-    public void copyDashboardToSomeOrgs(@RequestParam Integer dashboardId, @RequestParam Integer orgId, @RequestParam List<Integer> orgIds) throws ApiException {
-        dashboardDto.copyDashboardToSomeOrgs(dashboardId, orgId, orgIds);
+    @ApiOperation(value = "Copy Dashboard to new organizations. This copies charts only! NOT default values!")
+    @RequestMapping(value = "/copy-dashboard-new-orgs", method = RequestMethod.POST)
+    public void copyDashboardToNewOrgs(@RequestParam List<Integer> orgIds) throws ApiException {
+        dashboardDto.copyDashboardToNewOrgs(orgIds);
     }
+
 }

@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
+import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -294,12 +295,23 @@ public class DashboardDto extends AbstractDto {
     }
 
     @Transactional(rollbackFor = ApiException.class)
+    public void copyDashboardToNewOrgs(List<Integer> orgIds) throws ApiException {
+        // Copies all dashboards created in Increff org (Admin org set in properties file) to new orgs
+        List<DashboardPojo> dashboards = api.getByOrgId(properties.getIncreffOrgId());
+        for(DashboardPojo dashboard : dashboards)
+            copyDashboardToSomeOrgs(dashboard.getId(), dashboard.getOrgId(), orgIds);
+    }
+
+    @Transactional(rollbackFor = ApiException.class)
     private void duplicateDashboardCharts(Integer oldDbId, Integer newDbId) throws ApiException{
         List<DashboardChartPojo> charts = dashboardChartApi.getByDashboardId(oldDbId);
         for(DashboardChartPojo chart : charts) {
             DashboardChartPojo dashboardChartPojo = ConvertUtil.convert(chart, DashboardChartPojo.class);
-            dashboardChartPojo.setId(null);
             dashboardChartPojo.setDashboardId(newDbId);
+            dashboardChartPojo.setId(null);
+            dashboardChartPojo.setCreatedAt(ZonedDateTime.now());
+            dashboardChartPojo.setUpdatedAt(ZonedDateTime.now());
+            dashboardChartPojo.setVersion(0);
             dashboardChartApi.addDashboardChart(dashboardChartPojo);
         }
     }
@@ -309,6 +321,9 @@ public class DashboardDto extends AbstractDto {
         DashboardPojo dashboardPojo = ConvertUtil.convert(dashboard, DashboardPojo.class);
         dashboardPojo.setOrgId(orgId);
         dashboardPojo.setId(null);
+        dashboardPojo.setVersion(0);
+        dashboardPojo.setCreatedAt(ZonedDateTime.now());
+        dashboardPojo.setUpdatedAt(ZonedDateTime.now());
         api.add(dashboardPojo);
         return dashboardPojo;
     }
