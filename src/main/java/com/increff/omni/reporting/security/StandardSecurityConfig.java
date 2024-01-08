@@ -19,9 +19,9 @@ public class StandardSecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private AuthTokenFilter authTokenFilter;
 
-    private static final String APP_ADMIN = "app.admin";
-    private static final String REPORT_ADMIN = "report.admin";
-    private static final String REPORT_STANDARD = "report.standard";
+    public static final String APP_ADMIN = "app.admin";
+    public static final String REPORT_ADMIN = "report.admin";
+    public static final String REPORT_STANDARD = "report.standard";
     public static final String REPORT_CUSTOM = "report.custom";
 
     @Override
