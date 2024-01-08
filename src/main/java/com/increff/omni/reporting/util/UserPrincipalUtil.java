@@ -43,6 +43,7 @@ public class UserPrincipalUtil {
         accessControlMap.put(ResourceQueryParamKeys.fulfillmentLocationQueryParamKey
                 , new ArrayList<>(Collections.singletonList("")));
         accessControlMap.put(ResourceQueryParamKeys.clientQueryParam, new ArrayList<>(Collections.singletonList("")));
+        accessControlMap.put(ResourceQueryParamKeys.attributeXQueryParam, new ArrayList<>(Collections.singletonList("")));
         if(resourceRoles.containsKey(AppResourceKeys.fulfillmentLocationKey)) {
             List<String> resourceValues = new ArrayList<>(resourceRoles.get(AppResourceKeys.fulfillmentLocationKey)
                     .keySet());
@@ -51,6 +52,10 @@ public class UserPrincipalUtil {
         if(resourceRoles.containsKey(AppResourceKeys.clientKey)) {
             List<String> resourceValues = new ArrayList<>(resourceRoles.get(AppResourceKeys.clientKey).keySet());
             accessControlMap.put(ResourceQueryParamKeys.clientQueryParam, resourceValues);
+        }
+        if(resourceRoles.containsKey(AppResourceKeys.attributeX)) {
+            List<String> resourceValues = new ArrayList<>(resourceRoles.get(AppResourceKeys.attributeX).keySet());
+            accessControlMap.put(ResourceQueryParamKeys.attributeXQueryParam, resourceValues);
         }
         return getStringToStringParamMap(accessControlMap);
     }
