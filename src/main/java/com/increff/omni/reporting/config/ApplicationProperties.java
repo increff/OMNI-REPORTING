@@ -86,7 +86,7 @@ public class ApplicationProperties {
     @Value("${query.outDir:omni-reporting-files}")
     private String outDir;
 
-    @Value("${reporting.version}")
+    @Value("${reporting.version:1.5}")
     private String version;
 
     @Value("${from.email}")

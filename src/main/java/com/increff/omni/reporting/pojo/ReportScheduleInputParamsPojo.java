@@ -13,7 +13,8 @@ import jakarta.persistence.*;
 public class ReportScheduleInputParamsPojo extends AbstractVersionedPojo {
 
     @Id
-    @TableGenerator(name = "report_schedule_input_params", pkColumnValue = "report_schedule_input_params", initialValue = 100000)
+    @TableGenerator(name = "report_schedule_input_params", pkColumnValue = "report_schedule_input_params", initialValue = 100000,
+            table = "hibernate_sequences", pkColumnName = "sequence_name", valueColumnName = "next_val")
     @GeneratedValue(strategy = GenerationType.TABLE, generator = "report_schedule_input_params")
     private Integer id;
 

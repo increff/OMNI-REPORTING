@@ -15,7 +15,8 @@ import jakarta.persistence.*;
 public class CustomReportAccessPojo extends AbstractVersionedPojo {
 
     @Id
-    @TableGenerator(name = "custom_report_access", pkColumnValue = "custom_report_access", initialValue = 100000)
+    @TableGenerator(name = "custom_report_access", pkColumnValue = "custom_report_access", initialValue = 100000,
+            table = "hibernate_sequences", pkColumnName = "sequence_name", valueColumnName = "next_val")
     @GeneratedValue(strategy = GenerationType.TABLE, generator = "custom_report_access")
     private Integer id;
 

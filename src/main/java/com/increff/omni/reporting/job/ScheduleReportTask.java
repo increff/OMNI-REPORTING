@@ -78,7 +78,7 @@ public class ScheduleReportTask extends AbstractTask {
     private final static String TIME_ZONE_PATTERN_WITHOUT_ZONE = "yyyy-MM-dd HH:mm:ss";
 
     @Override
-    @Async("scheduleReportRequestExecutor")
+//    @Async("scheduleReportRequestExecutor")
     protected void runReportAsync(ReportRequestPojo pojo) throws ApiException {
         // mark as processing - locking
         try {

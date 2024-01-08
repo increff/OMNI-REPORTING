@@ -46,7 +46,7 @@ public class UserReportTask extends AbstractTask{
     private QueryExecutorClient executorClient;
 
     @Override
-    @Async("userReportRequestExecutor")
+//    @Async("userReportRequestExecutor")
     protected void runReportAsync(ReportRequestPojo pojo) throws ApiException {
         // mark as processing - locking
         try {

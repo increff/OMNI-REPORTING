@@ -7,8 +7,8 @@ import com.increff.omni.reporting.model.data.*;
 import com.increff.omni.reporting.model.form.ReportRequestForm;
 import com.increff.omni.reporting.model.form.ReportScheduleForm;
 import com.increff.commons.springboot.common.ApiException;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+//import io.swagger.annotations.Api;
+import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,7 +17,6 @@ import java.util.List;
 import java.util.Map;
 
 @CrossOrigin
-@Api
 @RestController
 @RequestMapping(value = "/standard")
 public class StandardController {
@@ -35,13 +34,13 @@ public class StandardController {
     @Autowired
     private ApplicationProperties properties;
 
-    @ApiOperation(value = "Get all available timezones")
+    @Operation(summary = "Get all available timezones")
     @RequestMapping(value = "/timeZones", method = RequestMethod.GET)
     public List<TimeZoneData> getAllAvailableTimeZones() throws ApiException {
         return reportRequestDto.getAllAvailableTimeZones();
     }
 
-    @ApiOperation(value = "Select controls for a report")
+    @Operation(summary = "Select controls for a report")
     @RequestMapping(value = "/reports/{reportId}/controls", method = RequestMethod.GET)
     public List<InputControlData> selectByReportId(@PathVariable Integer reportId) throws ApiException {
         return inputControlDto.selectForReport(reportId);
@@ -49,81 +48,81 @@ public class StandardController {
 
 
 
-    @ApiOperation(value = "Get Reports")
+    @Operation(summary = "Get Reports")
     @RequestMapping(value = "/reports", method = RequestMethod.GET)
     public List<ReportData> selectByOrgId(@RequestParam Boolean isDashboard) throws ApiException {
         return reportDto.selectByOrg(isDashboard);
     }
 
-    @ApiOperation(value = "Get Report by Alias")
+    @Operation(summary = "Get Report by Alias")
     @RequestMapping(value = "/reports/find", method = RequestMethod.GET)
     public ReportData selectByAlias(@RequestParam Boolean isDashboard, @RequestParam String alias) throws ApiException {
         return reportDto.selectByAlias(isDashboard, alias);
     }
 
-    @ApiOperation(value = "Get Live Data")
+    @Operation(summary = "Get Live Data")
     @RequestMapping(value = "/reports/live", method = RequestMethod.POST)
     public List<Map<String, String>> getLiveData(@RequestBody ReportRequestForm form) throws ApiException, IOException {
         return reportDto.getLiveData(form);
     }
 
-    @ApiOperation(value = "Get validation group")
+    @Operation(summary = "Get validation group")
     @RequestMapping(value = "/reports/{reportId}/controls/validations", method = RequestMethod.GET)
     public List<ValidationGroupData> getValidationGroups(@PathVariable Integer reportId) {
         return reportDto.getValidationGroups(reportId);
     }
 
-    @ApiOperation(value = "Get All Directories")
+    @Operation(summary = "Get All Directories")
     @RequestMapping(value = "/directories", method = RequestMethod.GET)
     public List<DirectoryData> selectAllDirectories() throws ApiException {
         return directoryDto.getAllDirectories();
     }
 
-    @ApiOperation(value = "Request Report")
+    @Operation(summary = "Request Report")
     @RequestMapping(value = "/request-report", method = RequestMethod.POST)
     public void requestReport(@RequestBody ReportRequestForm form) throws ApiException {
         reportRequestDto.requestReport(form);
     }
 
-    @ApiOperation(value = "Get All Request data")
+    @Operation(summary = "Get All Request data")
     @RequestMapping(value = "/request-report", method = RequestMethod.GET)
     public List<ReportRequestData> getAllRequests() throws ApiException, IOException {
         return reportRequestDto.getAll();
     }
 
-    @ApiOperation(value = "Get Result of Request")
+    @Operation(summary = "Get Result of Request")
     @RequestMapping(value = "/request-report/{requestId}", method = RequestMethod.GET)
     public String getFile(@PathVariable Integer requestId) throws
             ApiException, IOException {
         return reportRequestDto.getReportFile(requestId);
     }
 
-    @ApiOperation(value = "View CSV of Request")
+    @Operation(summary = "View CSV of Request")
     @RequestMapping(value = "/request-report/{requestId}/view", method = RequestMethod.GET)
     public List<Map<String, String>> viewFile(@PathVariable Integer requestId) throws ApiException, IOException {
         return reportRequestDto.viewReport(requestId);
     }
 
     // Scheduling a Report
-    @ApiOperation(value = "Schedule a Report")
+    @Operation(summary = "Schedule a Report")
     @RequestMapping(value = "/schedules", method = RequestMethod.POST)
     public void scheduleReport(@RequestBody ReportScheduleForm form) throws ApiException {
         reportScheduleDto.scheduleReport(form);
     }
 
-    @ApiOperation(value = "Get Schedules for an organization")
+    @Operation(summary = "Get Schedules for an organization")
     @RequestMapping(value = "/schedules", method = RequestMethod.GET)
     public List<ReportScheduleData> getScheduleReports(@RequestParam Integer pageNo, @RequestParam Integer pageSize) throws ApiException {
         return reportScheduleDto.getScheduleReports(pageNo, pageSize);
     }
 
-    @ApiOperation(value = "Get Schedule by ID")
+    @Operation(summary = "Get Schedule by ID")
     @RequestMapping(value = "/schedules/{id}", method = RequestMethod.GET)
     public ReportScheduleData getScheduleReports(@PathVariable Integer id) throws ApiException {
         return reportScheduleDto.getScheduleReport(id);
     }
 
-    @ApiOperation(value = "Get Schedule requests for an organization")
+    @Operation(summary = "Get Schedule requests for an organization")
     @RequestMapping(value = "/schedules/requests", method = RequestMethod.GET)
     public List<ReportRequestData> getScheduleReportRequests(@RequestParam Integer pageNo,
                                                          @RequestParam Integer pageSize) throws ApiException {
@@ -131,25 +130,25 @@ public class StandardController {
     }
 
     // Scheduling a Report
-    @ApiOperation(value = "Edit Schedule of a Report")
+    @Operation(summary = "Edit Schedule of a Report")
     @RequestMapping(value = "/schedules/{id}", method = RequestMethod.PUT)
     public void editScheduleReport(@PathVariable Integer id, @RequestBody ReportScheduleForm form) throws ApiException {
         reportScheduleDto.editScheduleReport(id, form);
     }
 
-    @ApiOperation(value = "Delete Schedule of a Report")
+    @Operation(summary = "Delete Schedule of a Report")
     @RequestMapping(value = "/schedules/{id}", method = RequestMethod.DELETE)
     public void deleteSchedule(@PathVariable Integer id) throws ApiException {
         reportScheduleDto.deleteSchedule(id);
     }
 
-    @ApiOperation(value = "Enable / Disable Report Schedule")
+    @Operation(summary = "Enable / Disable Report Schedule")
     @RequestMapping(value = "/schedules/{id}/status", method = RequestMethod.PATCH)
     public void editStatus(@PathVariable Integer id, @RequestParam Boolean isEnabled) throws ApiException {
         reportScheduleDto.updateStatus(id, isEnabled);
     }
 
-    @ApiOperation(value = "Get Application Version")
+    @Operation(summary = "Get Application Version")
     @RequestMapping(value = "/version", method = RequestMethod.GET)
     public String getVersion() {
         return properties.getVersion();
