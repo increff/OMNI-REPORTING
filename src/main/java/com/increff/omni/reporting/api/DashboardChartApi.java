@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @Transactional(rollbackFor = ApiException.class)
@@ -18,7 +19,10 @@ public class DashboardChartApi extends AbstractApi {
     @Autowired
     private DashboardChartDao dao;
 
-    public DashboardChartPojo addDashboardChart(DashboardChartPojo pojo) {
+    public DashboardChartPojo addDashboardChart(DashboardChartPojo pojo) throws ApiException{
+        DashboardChartPojo existing = dao.getByDashboardAndChartAlias(pojo.getDashboardId(), pojo.getChartAlias());
+        if(Objects.nonNull(existing))
+            throw new ApiException(ApiStatus.BAD_DATA, "DashboardChart already exists with dashboardId: " + pojo.getDashboardId() + " chartAlias: " + pojo.getChartAlias());
         dao.persist(pojo);
         return pojo;
     }
