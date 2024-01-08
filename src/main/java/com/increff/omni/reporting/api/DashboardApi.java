@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @Transactional(rollbackFor = ApiException.class)
@@ -19,6 +20,9 @@ public class DashboardApi extends AbstractApi {
     private DashboardDao dao;
 
     public DashboardPojo add(DashboardPojo pojo) throws ApiException {
+        DashboardPojo existing = getByOrgIdName(pojo.getOrgId(), pojo.getName());
+        if(Objects.nonNull(existing))
+            throw new ApiException(ApiStatus.BAD_DATA, "Dashboard already exists with name: " + pojo.getName() + " for orgId: " + pojo.getOrgId());
         dao.persist(pojo);
         return pojo;
     }
