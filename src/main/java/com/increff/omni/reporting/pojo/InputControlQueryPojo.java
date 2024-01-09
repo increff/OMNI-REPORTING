@@ -13,8 +13,7 @@ public class InputControlQueryPojo extends AbstractVersionedPojo{
 
     @Id
     @TableGenerator(name = "input_control_query", pkColumnValue = "input_control_query",
-            initialValue = 100000,
-            table = "hibernate_sequences", pkColumnName = "sequence_name", valueColumnName = "next_val")
+            initialValue = 100000)
     @GeneratedValue(strategy = GenerationType.TABLE, generator = "input_control_query")
     private Integer id;
 

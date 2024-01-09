@@ -12,8 +12,7 @@ import jakarta.persistence.*;
 public class ReportQueryPojo extends AbstractVersionedPojo{
 
     @Id
-    @TableGenerator(name = "report_query", pkColumnValue = "report_query",initialValue = 100000,
-            table = "hibernate_sequences", pkColumnName = "sequence_name", valueColumnName = "next_val")
+    @TableGenerator(name = "report_query", pkColumnValue = "report_query",initialValue = 100000)
     @GeneratedValue(strategy = GenerationType.TABLE, generator = "report_query")
     private Integer id;
 

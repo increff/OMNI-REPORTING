@@ -14,8 +14,7 @@ public class ReportScheduleEmailsPojo extends AbstractVersionedPojo {
 
     @Id
     @TableGenerator(name = "report_schedule_emails", pkColumnValue = "report_schedule_emails",
-            initialValue = 100000,
-            table = "hibernate_sequences", pkColumnName = "sequence_name", valueColumnName = "next_val")
+            initialValue = 100000)
     @GeneratedValue(strategy = GenerationType.TABLE, generator = "report_schedule_emails")
     private Integer id;
 
