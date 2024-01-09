@@ -86,10 +86,13 @@ public class ReportDto extends AbstractDto {
     public List<Map<String, String>> getLiveDataForAnyOrganization(ReportRequestForm form, Integer orgId)
             throws ApiException, IOException {
         OrganizationPojo organizationPojo = organizationApi.getCheck(orgId);
-        ReportPojo reportPojo = validateReportForOrg(form, orgId);
-        OrgConnectionPojo orgConnectionPojo = orgConnectionApi.getCheckByOrgId(orgId);
-        ConnectionPojo connectionPojo = connectionApi.getCheck(orgConnectionPojo.getConnectionId());
+        ReportPojo reportPojo = reportApi.getCheck(form.getReportId());
+
+        validateReportForOrg(reportPojo, orgId);
+
+        ConnectionPojo connectionPojo = connectionApi.getCheck(orgConnectionApi.getCheckByOrgId(orgId).getConnectionId());
         String password = getDecryptedPassword(connectionPojo.getPassword());
+
         ZonedDateTime startTime = ZonedDateTime.now();
         try {
             List<ReportInputParamsPojo> reportInputParamsPojoList = validateControls(form, orgId, reportPojo, password);
@@ -261,8 +264,7 @@ public class ReportDto extends AbstractDto {
         return CommonDtoHelper.getReportInputParamsPojoList(inputParamsMap, form.getTimezone(), orgId, inputDisplayStringMap);
     }
 
-    private ReportPojo validateReportForOrg(ReportRequestForm form, Integer orgId) throws ApiException {
-        ReportPojo reportPojo = reportApi.getCheck(form.getReportId());
+    private ReportPojo validateReportForOrg(ReportPojo reportPojo, Integer orgId) throws ApiException {
         validateCustomReportAccess(reportPojo, orgId);
         if(!reportPojo.getIsDashboard())
             throw new ApiException(ApiStatus.BAD_DATA, "Live data is only available for dashboards");
