@@ -2,10 +2,7 @@ package com.increff.omni.reporting.flow;
 
 import com.increff.omni.reporting.api.*;
 import com.increff.omni.reporting.config.ApplicationProperties;
-import com.increff.omni.reporting.model.constants.InputControlScope;
-import com.increff.omni.reporting.model.constants.InputControlType;
-import com.increff.omni.reporting.model.constants.ReportType;
-import com.increff.omni.reporting.model.constants.ValidationType;
+import com.increff.omni.reporting.model.constants.*;
 import com.increff.omni.reporting.model.form.ValidationGroupForm;
 import com.increff.omni.reporting.pojo.*;
 import com.increff.omni.reporting.util.FileUtil;
@@ -71,39 +68,49 @@ public class ReportFlowApi extends AbstractFlowApi {
     @Autowired
     private InputControlApi inputControlApi;
     @Autowired
+    private ChartLegendsApi chartLegendsApi;
+    @Autowired
     private ApplicationProperties properties;
 
     private static final Integer MAX_NUMBER_OF_ROWS = 300;
 
     @Transactional(rollbackFor = ApiException.class)
-    public ReportPojo addReport(ReportPojo pojo) throws ApiException {
+    public ReportPojo addReport(ReportPojo pojo, Map<String, String> legends) throws ApiException {
         validate(pojo);
-        return api.add(pojo);
+        api.add(pojo);
+        chartLegendsApi.put(pojo.getId(), legends);
+        return pojo;
     }
 
     @Transactional(rollbackFor = ApiException.class)
-    public ReportPojo editReport(ReportPojo pojo) throws ApiException {
+    public ReportPojo editReport(ReportPojo pojo, Map<String, String> legends) throws ApiException {
         ReportPojo existing = api.getCheck(pojo.getId());
         List<Integer> orgIds = orgSchemaApi.getBySchemaVersionId(pojo.getSchemaVersionId()).stream().map(OrgSchemaVersionPojo::getOrgId).collect(Collectors.toList());
         validateForEdit(pojo, reportScheduleApi.selectByOrgIdReportAlias(orgIds, pojo.getAlias()));
+        if(existing.getChartType() != pojo.getChartType())
+            throw new ApiException(ApiStatus.BAD_DATA, "Chart type can't be changed." +
+                    " Current : " + existing.getChartType() + " New : " + pojo.getChartType());
         // Delete custom report access if transition is happening from CUSTOM to STANDARD
         if (existing.getType().equals(ReportType.CUSTOM) && pojo.getType().equals(ReportType.STANDARD))
             customReportAccessApi.deleteByReportId(pojo.getId());
+        chartLegendsApi.put(pojo.getId(), legends);
         return api.edit(pojo);
     }
 
     public List<Map<String, String>> validateAndGetLiveData(ReportPojo reportPojo,
                                                             List<ReportInputParamsPojo> reportInputParamsPojoList,
-                                                            ConnectionPojo connectionPojo, String password)
+                                                            ConnectionPojo connectionPojo, String password, String query)
             throws ApiException, IOException {
         validate(reportPojo, reportInputParamsPojoList);
-        ReportQueryPojo reportQueryPojo = queryApi.getByReportId(reportPojo.getId());
+
+        if(Objects.isNull(query))
+            query = queryApi.getByReportId(reportPojo.getId()).getQuery();
         File file = folderApi.getFileForExtension(reportPojo.getId(), ".csv");
         // Creation of file
         Connection connection = null;
         try {
             Map<String, String> inputParamMap = getInputParamMapFromPojoList(reportInputParamsPojoList);
-            String fQuery = SqlCmd.getFinalQuery(inputParamMap, reportQueryPojo.getQuery(), true);
+            String fQuery = SqlCmd.getFinalQuery(inputParamMap, query, true);
             // Execute query and save results
             connection = dbConnectionApi.getConnection(connectionPojo.getHost(), connectionPojo.getUsername(),
                     password, properties.getMaxConnectionTime());
@@ -144,18 +151,18 @@ public class ReportFlowApi extends AbstractFlowApi {
     }
 
     @Transactional(readOnly = true)
-    public List<ReportPojo> getAllBySchemaVersionId(Integer schemaVersionId) {
-        return api.getBySchemaVersion(schemaVersionId);
+    public List<ReportPojo> getAllBySchemaVersionId(Integer schemaVersionId, VisualizationType visualization) {
+        return api.getBySchemaVersion(schemaVersionId, visualization);
     }
 
     @Transactional(readOnly = true)
-    public List<ReportPojo> getAll(Integer orgId, Boolean isDashboard) throws ApiException {
+    public List<ReportPojo> getAll(Integer orgId, Boolean isChart, VisualizationType visualization) throws ApiException {
 
         OrgSchemaVersionPojo orgSchemaVersionPojo = orgSchemaApi.getCheckByOrgId(orgId);
         List<ReportPojo> reportPojoList = new ArrayList<>();
         //All standard
         List<ReportPojo> standard =
-                api.getByTypeAndSchema(ReportType.STANDARD, orgSchemaVersionPojo.getSchemaVersionId(), isDashboard);
+                api.getByTypeAndSchema(ReportType.STANDARD, orgSchemaVersionPojo.getSchemaVersionId(), isChart, visualization);
 
         //All custom
         List<CustomReportAccessPojo> customAccess = customReportAccessApi.getByOrgId(orgId);
@@ -163,7 +170,7 @@ public class ReportFlowApi extends AbstractFlowApi {
                 .collect(Collectors.toList());
 
         List<ReportPojo> custom =
-                api.getByIdsAndSchema(customIds, orgSchemaVersionPojo.getSchemaVersionId(), isDashboard);
+                api.getByIdsAndSchema(customIds, orgSchemaVersionPojo.getSchemaVersionId(), isChart);
 
         if(!isCustomReportUser()) // Add standard reports only if user in not custom report user
             reportPojoList.addAll(standard);
@@ -211,15 +218,20 @@ public class ReportFlowApi extends AbstractFlowApi {
         // Migrate Input controls
         Map<Integer, Integer> oldToNewControlIds = migrateInputControls(oldSchemaVersionId, newSchemaVersionId);
         // Migrate Reports
-        List<ReportPojo> oldSchemaReports = api.getBySchemaVersion(oldSchemaVersionId);
+        List<ReportPojo> oldSchemaReports = api.getBySchemaVersion(oldSchemaVersionId, null);
         for (ReportPojo oldReport : oldSchemaReports) {
-            ReportPojo ex = api.getByNameAndSchema(oldReport.getName(), newSchemaVersionId, oldReport.getIsDashboard());
+            ReportPojo ex = api.getByNameAndSchema(oldReport.getName(), newSchemaVersionId, oldReport.getIsChart());
             if (Objects.nonNull(ex))
                 continue;
             // Add Report
             ReportPojo pojo = getReportPojoFromExistingPojo(oldReport);
             pojo.setSchemaVersionId(newSchemaVersionId);
-            addReport(pojo);
+            addReport(pojo, new HashMap<>());
+
+            // Copy Legends
+            List<ChartLegendsPojo> legendsPojoList = chartLegendsApi.getByChartId(oldReport.getId());
+            chartLegendsApi.put(pojo.getId(), legendsPojoList.stream().collect(Collectors.toMap(ChartLegendsPojo::getLegendKey, ChartLegendsPojo::getValue)));
+
             // Add Report Query
             ReportQueryPojo exQuery = queryApi.getByReportId(oldReport.getId());
             if (Objects.nonNull(exQuery)) {
@@ -313,7 +325,7 @@ public class ReportFlowApi extends AbstractFlowApi {
 
         // validating if requested name is already present
         ReportPojo existingByName =
-                api.getByNameAndSchema(pojo.getName(), pojo.getSchemaVersionId(), pojo.getIsDashboard());
+                api.getByNameAndSchema(pojo.getName(), pojo.getSchemaVersionId(), pojo.getIsChart());
         if (Objects.nonNull(existingByName) && !existingByName.getId().equals(pojo.getId()))
             throw new ApiException(ApiStatus.BAD_DATA, "Report already present with same name, schema version and " +
                     "report type (normal / dashboard)");
@@ -324,11 +336,11 @@ public class ReportFlowApi extends AbstractFlowApi {
         schemaVersionApi.getCheck(pojo.getSchemaVersionId());
         if(StringUtil.isEmpty(pojo.getAlias()) || pojo.getAlias().contains(" "))
             throw new ApiException(ApiStatus.BAD_DATA, "Report alias can't have space, use underscore(_) instead");
-        ReportPojo existing = api.getByNameAndSchema(pojo.getName(), pojo.getSchemaVersionId(), pojo.getIsDashboard());
+        ReportPojo existing = api.getByNameAndSchema(pojo.getName(), pojo.getSchemaVersionId(), pojo.getIsChart());
         if (existing != null)
             throw new ApiException(ApiStatus.BAD_DATA, "Report already present with same name, schema version and " +
                     "report type (normal / dashboard)");
-        ReportPojo ex = api.getByAliasAndSchema(pojo.getAlias(), pojo.getSchemaVersionId(), pojo.getIsDashboard());
+        ReportPojo ex = api.getByAliasAndSchema(pojo.getAlias(), pojo.getSchemaVersionId(), pojo.getIsChart());
         if (ex != null)
             throw new ApiException(ApiStatus.BAD_DATA, "Report already present with same alias, schema version and " +
                     "report type (normal / dashboard)");

@@ -4,9 +4,9 @@ package com.increff.omni.reporting.controller;
 import com.increff.account.client.AuthClient;
 import com.increff.omni.reporting.config.ApplicationProperties;
 import com.increff.omni.reporting.dto.*;
+import com.increff.omni.reporting.model.constants.VisualizationType;
 import com.increff.omni.reporting.model.data.*;
-import com.increff.omni.reporting.model.form.ReportRequestForm;
-import com.increff.omni.reporting.model.form.ReportScheduleForm;
+import com.increff.omni.reporting.model.form.*;
 import com.nextscm.commons.spring.common.ApiException;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @CrossOrigin
 @Api
@@ -34,6 +35,10 @@ public class StandardController {
     @Autowired
     private DirectoryDto directoryDto;
     @Autowired
+    private DashboardChartDto dashboardChartDto;
+    @Autowired
+    private DashboardDto dashboardDto;
+    @Autowired
     private ApplicationProperties properties;
     @Autowired
     private AuthClient authClient;
@@ -50,18 +55,16 @@ public class StandardController {
         return inputControlDto.selectForReport(reportId);
     }
 
-
-
     @ApiOperation(value = "Get Reports")
     @RequestMapping(value = "/reports", method = RequestMethod.GET)
-    public List<ReportData> selectByOrgId(@RequestParam Boolean isDashboard) throws ApiException {
-        return reportDto.selectByOrg(isDashboard);
+    public List<ReportData> selectByOrgId(@RequestParam Boolean isChart, @RequestParam Optional<VisualizationType> visualization) throws ApiException {
+        return reportDto.selectByOrg(isChart, visualization.orElse(null));
     }
 
     @ApiOperation(value = "Get Report by Alias")
     @RequestMapping(value = "/reports/find", method = RequestMethod.GET)
-    public ReportData selectByAlias(@RequestParam Boolean isDashboard, @RequestParam String alias) throws ApiException {
-        return reportDto.selectByAlias(isDashboard, alias);
+    public ReportData selectByAlias(@RequestParam Boolean isChart, @RequestParam String alias) throws ApiException {
+        return reportDto.selectByAlias(isChart, alias);
     }
 
     @ApiOperation(value = "Get Live Data")
@@ -156,6 +159,68 @@ public class StandardController {
     @RequestMapping(value = "/version", method = RequestMethod.GET)
     public String getVersion() {
         return properties.getVersion();
+    }
+
+    @ApiOperation(value = "Add Dashboard")
+    @RequestMapping(value = "/dashboards", method = RequestMethod.POST)
+    public DashboardData addDashboard(@RequestBody DashboardAddForm form) throws ApiException {
+        return dashboardDto.addDashboard(form);
+    }
+
+    @ApiOperation(value = "Delete Dashboard")
+    @RequestMapping(value = "/dashboards/{dashboardId}", method = RequestMethod.DELETE)
+    public void deleteDashboard(@PathVariable Integer dashboardId) throws ApiException {
+        dashboardDto.deleteDashboard(dashboardId);
+    }
+
+    @ApiOperation(value = "Edit Dashboard")
+    @RequestMapping(value = "/dashboards/{dashboardId}", method = RequestMethod.PUT)
+    public DashboardData editDashboard(@RequestBody DashboardForm form, @PathVariable Integer dashboardId) throws ApiException {
+        return dashboardDto.updateDashboard(form, dashboardId);
+    }
+
+    @ApiOperation(value = "Add/Edit Charts in Dashboard")
+    @RequestMapping(value = "/dashboards/{dashboardId}/charts", method = RequestMethod.PUT)
+    public List<DashboardChartData> addChart(@RequestBody List<DashboardChartForm> forms, @PathVariable Integer dashboardId) throws ApiException {
+        return dashboardChartDto.addDashboardChart(forms, dashboardId);
+    }
+
+    @ApiOperation(value = "Get Charts in Dashboard")
+    @RequestMapping(value = "/dashboards/{dashboardId}/charts", method = RequestMethod.GET)
+    public List<DashboardChartData> getCharts(@PathVariable Integer dashboardId) throws ApiException {
+        return dashboardChartDto.getDashboardCharts(dashboardId);
+    }
+
+
+    @ApiOperation(value = "Add/Edit Defaults in Dashboard")
+    @RequestMapping(value = "/dashboards/defaults", method = RequestMethod.PATCH)
+    public List<DefaultValueData> addDefaults(@RequestBody List<DefaultValueForm> forms) throws ApiException {
+        return dashboardDto.upsertDefaultValues(forms);
+    }
+
+    @ApiOperation(value = "Get Dashboard")
+    @RequestMapping(value = "/dashboards/{dashboardId}", method = RequestMethod.GET)
+    public DashboardData getDashboard(@PathVariable Integer dashboardId) throws ApiException {
+        return dashboardDto.getDashboard(dashboardId);
+    }
+
+    @ApiOperation(value = "Get Dashboards For Org")
+    @RequestMapping(value = "/dashboards", method = RequestMethod.GET)
+    public List<DashboardListData> getDashboards() {
+        return dashboardDto.getDashboardsByOrgId();
+    }
+
+    // Change rate limiter filter URL when changing endpoint URL
+    @ApiOperation(value = "View Dashboard")
+    @RequestMapping(value = "/dashboards/{dashboardId}/view", method = RequestMethod.POST)
+    public List<ViewDashboardData> viewDashboard(@PathVariable Integer dashboardId, @RequestBody ReportRequestForm form) throws ApiException, IOException {
+        return dashboardDto.viewDashboard(form, dashboardId);
+    }
+
+    @ApiOperation(value = "Get Properties")
+    @RequestMapping(value = "/properties", method = RequestMethod.GET)
+    public ApplicationPropertiesData getProperties() {
+        return dashboardDto.getProperties();
     }
 
 }

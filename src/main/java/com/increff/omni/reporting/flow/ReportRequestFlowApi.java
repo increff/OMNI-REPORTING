@@ -42,7 +42,7 @@ public class ReportRequestFlowApi extends AbstractFlowApi {
 
     private final static Integer MAX_OPEN_REPORT_REQUESTS = 5;
 
-    @Transactional(rollbackFor = Exception.class)
+    @Transactional(rollbackFor = ApiException.class)
     public void requestReport(ReportRequestPojo pojo, List<ReportInputParamsPojo> reportInputParamsPojoList)
             throws ApiException {
         List<ReportRequestPojo> pendingReports = api.getPendingByUserId(pojo.getUserId());
@@ -53,7 +53,7 @@ public class ReportRequestFlowApi extends AbstractFlowApi {
         requestReportWithoutValidation(pojo, reportInputParamsPojoList);
     }
 
-    @Transactional(rollbackFor = Exception.class)
+    @Transactional(rollbackFor = ApiException.class)
     public void requestReportWithoutValidation(ReportRequestPojo pojo,
                                                List<ReportInputParamsPojo> reportInputParamsPojoList) {
         api.add(pojo);

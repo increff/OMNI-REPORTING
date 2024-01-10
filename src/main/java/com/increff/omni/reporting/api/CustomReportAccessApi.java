@@ -2,6 +2,7 @@ package com.increff.omni.reporting.api;
 
 import com.increff.omni.reporting.dao.CustomReportAccessDao;
 import com.increff.omni.reporting.pojo.CustomReportAccessPojo;
+import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.server.AbstractApi;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -11,7 +12,7 @@ import java.util.List;
 import java.util.Objects;
 
 @Service
-@Transactional(rollbackFor = Exception.class)
+@Transactional(rollbackFor = ApiException.class)
 public class CustomReportAccessApi extends AbstractApi {
 
     @Autowired

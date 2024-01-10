@@ -1,10 +1,7 @@
 package com.increff.omni.reporting.dto;
 
 import com.increff.omni.reporting.config.AbstractTest;
-import com.increff.omni.reporting.model.constants.InputControlScope;
-import com.increff.omni.reporting.model.constants.InputControlType;
-import com.increff.omni.reporting.model.constants.ReportType;
-import com.increff.omni.reporting.model.constants.ValidationType;
+import com.increff.omni.reporting.model.constants.*;
 import com.increff.omni.reporting.model.data.*;
 import com.increff.omni.reporting.model.form.*;
 import com.nextscm.commons.spring.common.ApiException;
@@ -52,14 +49,14 @@ public class ReportDtoTest extends AbstractTest {
         ConnectionData connectionData = connectionDto.add(connectionForm);
         organizationDto.mapToConnection(organizationData.getId(), connectionData.getId());
         organizationDto.mapToSchema(organizationData.getId(), schemaData.getId());
-        return getReportForm(name, type, directoryData.getId(), schemaData.getId(), false);
+        return getReportForm(name, type, directoryData.getId(), schemaData.getId(), false, ChartType.REPORT);
     }
 
     @Test
     public void testAdd() throws ApiException {
         ReportForm form = commonSetup("Report 1", ReportType.STANDARD);
         ReportData data = dto.add(form);
-        List<ReportData> reportDataList = dto.selectAllBySchemaVersion(data.getSchemaVersionId());
+        List<ReportData> reportDataList = dto.selectAllBySchemaVersion(data.getSchemaVersionId(), null);
         assertEquals(1, reportDataList.size());
         assertEquals("Report 1", reportDataList.get(0).getName());
         assertEquals(ReportType.STANDARD, reportDataList.get(0).getType());
@@ -70,7 +67,7 @@ public class ReportDtoTest extends AbstractTest {
         ReportForm form = commonSetup("Report 2", ReportType.CUSTOM);
         ReportData data = dto.add(form);
         ReportForm updateForm =
-                getReportForm("Report 3", ReportType.CUSTOM, form.getDirectoryId(), form.getSchemaVersionId(), false);
+                getReportForm("Report 3", ReportType.CUSTOM, form.getDirectoryId(), form.getSchemaVersionId(), false, ChartType.REPORT);
         dto.edit(data.getId(), updateForm);
         ReportData fData = dto.get(data.getId());
         assertNotNull(fData);
@@ -190,7 +187,7 @@ public class ReportDtoTest extends AbstractTest {
         copyReportsForm.setOldSchemaVersionId(data.getSchemaVersionId());
         copyReportsForm.setNewSchemaVersionId(schemaData.getId());
         dto.copyReports(copyReportsForm);
-        List<ReportData> reportDataList = dto.selectAllBySchemaVersion(schemaData.getId());
+        List<ReportData> reportDataList = dto.selectAllBySchemaVersion(schemaData.getId(), null);
         assertEquals(1, reportDataList.size());
     }
 
@@ -264,4 +261,42 @@ public class ReportDtoTest extends AbstractTest {
         assertEquals(1, validationGroupData.size());
         assertTrue(validationGroupData.get(0).getIsSystemValidation());
     }
+
+    @Test
+    public void testAddTableChartWithoutLegends() throws ApiException {
+        ReportForm form = commonSetup("Report 1", ReportType.STANDARD);
+        form.setIsChart(true);
+        form.setChartType(ChartType.TABLE);
+        dto.add(form);
+    }
+
+    @Test(expected = ApiException.class)
+    public void testAddChartWithIsChartFalse() throws ApiException {
+        ReportForm form = commonSetup("Report 1", ReportType.STANDARD);
+        form.setIsChart(false);
+        form.setChartType(ChartType.TABLE);
+        dto.add(form);
+    }
+
+    @Test(expected = ApiException.class)
+    public void testAddBarChartWithoutLegends() throws ApiException {
+        ReportForm form = commonSetup("Report 1", ReportType.STANDARD);
+        form.setIsChart(true);
+        form.setChartType(ChartType.BAR);
+        dto.add(form);
+    }
+
+    @Test
+    public void testAddBarChartWithLegends() throws ApiException {
+        ReportForm form = commonSetup("Report 1", ReportType.STANDARD);
+        form.setIsChart(true);
+        form.setChartType(ChartType.BAR);
+        HashMap<String, String> legends = new HashMap<>();
+        legends.put("Xkey", "Xvalue");
+        legends.put("Ykey", "Yvalue");
+        form.setLegends(legends);
+        dto.add(form);
+    }
+
+
 }

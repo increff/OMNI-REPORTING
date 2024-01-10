@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 @Service
-@Transactional(rollbackFor = Exception.class)
+@Transactional(rollbackFor = ApiException.class)
 public class DirectoryApi extends AbstractApi {
 
     @Autowired

@@ -4,6 +4,7 @@ import com.increff.account.client.AuthTokenFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -18,6 +19,8 @@ public class StandardSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
     private AuthTokenFilter authTokenFilter;
+    @Autowired
+    private RateLimitingFilter rateLimitingFilter;
 
     public static final String APP_ADMIN = "app.admin";
     public static final String REPORT_ADMIN = "report.admin";
@@ -31,9 +34,13 @@ public class StandardSecurityConfig extends WebSecurityConfigurerAdapter {
                 .requestMatchers()//
                 .antMatchers("/standard/**").and().authorizeRequests()//
                 .antMatchers("/standard/schedules/**").hasAnyAuthority(APP_ADMIN)
+                .antMatchers(HttpMethod.POST, "/standard/dashboards/{dashboardId}/view").hasAnyAuthority(APP_ADMIN, REPORT_ADMIN, REPORT_STANDARD, REPORT_CUSTOM)//
+                .antMatchers(HttpMethod.GET, "/standard/dashboards/**").hasAnyAuthority(APP_ADMIN, REPORT_ADMIN, REPORT_STANDARD, REPORT_CUSTOM)//
+                .antMatchers("/standard/dashboards/**").hasAnyAuthority(APP_ADMIN)//
                 .antMatchers("/standard/**").hasAnyAuthority(APP_ADMIN, REPORT_ADMIN, REPORT_STANDARD, REPORT_CUSTOM)//
                 .and().cors().and().csrf().disable()
                 .addFilterBefore(authTokenFilter, BasicAuthenticationFilter.class)
+                .addFilterAfter(rateLimitingFilter, AuthTokenFilter.class)
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
         http.cors();
     }

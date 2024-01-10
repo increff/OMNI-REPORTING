@@ -81,9 +81,9 @@ public class ReportApiTest extends AbstractTest {
         ReportPojo pojo = getReportPojo("CIMS Inventory Exposure Report", ReportType.STANDARD, directoryPojo.getId(),
                 schemaVersionPojo.getId());
         api.add(pojo);
-        List<ReportPojo> r = api.getByTypeAndSchema(ReportType.CUSTOM, schemaVersionPojo.getId(), false);
+        List<ReportPojo> r = api.getByTypeAndSchema(ReportType.CUSTOM, schemaVersionPojo.getId(), false, null);
         assertEquals(0, r.size());
-        r = api.getByTypeAndSchema(ReportType.STANDARD, schemaVersionPojo.getId(), false);
+        r = api.getByTypeAndSchema(ReportType.STANDARD, schemaVersionPojo.getId(), false, null);
         assertEquals(1, r.size());
         assertEquals("CIMS Inventory Exposure Report", r.get(0).getName());
         assertEquals(ReportType.STANDARD, r.get(0).getType());

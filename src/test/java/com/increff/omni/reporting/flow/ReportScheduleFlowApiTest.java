@@ -19,10 +19,7 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 import static com.increff.omni.reporting.helper.DirectoryTestHelper.getDirectoryPojo;
 import static com.increff.omni.reporting.helper.InputControlTestHelper.getInputControlPojo;
@@ -60,7 +57,7 @@ public class ReportScheduleFlowApiTest extends AbstractTest {
         schemaVersionApi.add(schemaVersionPojo);
         ReportPojo reportPojo = getReportPojo("Report 1", ReportType.STANDARD
                 , directoryPojo.getId(), schemaVersionPojo.getId());
-        ReportPojo pojo = reportFlowApi.addReport(reportPojo);
+        ReportPojo pojo = reportFlowApi.addReport(reportPojo, new HashMap<>());
         assertNotNull(pojo);
         assertEquals(ReportType.STANDARD, pojo.getType());
         assertEquals("Report 1", pojo.getName());

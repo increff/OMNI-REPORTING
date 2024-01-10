@@ -1,6 +1,7 @@
 package com.increff.omni.reporting.controller;
 
 import com.increff.omni.reporting.dto.*;
+import com.increff.omni.reporting.model.constants.VisualizationType;
 import com.increff.omni.reporting.model.data.*;
 import com.increff.omni.reporting.model.form.*;
 import com.nextscm.commons.spring.common.ApiException;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 // Todo internationalization
 @CrossOrigin
@@ -40,6 +42,8 @@ public class AdminController {
     private ReportRequestDto reportRequestDto;
     @Autowired
     private ReportScheduleDto reportScheduleDto;
+    @Autowired
+    private DashboardDto dashboardDto;
 
     // App admin APIs
 
@@ -135,8 +139,8 @@ public class AdminController {
 
     @ApiOperation(value = "Get All Report")
     @RequestMapping(value = "/reports/schema-versions/{schemaVersionId}", method = RequestMethod.GET)
-    public List<ReportData> getAll(@PathVariable Integer schemaVersionId) throws ApiException {
-        return reportDto.selectAllBySchemaVersion(schemaVersionId);
+    public List<ReportData> getAll(@PathVariable Integer schemaVersionId, @RequestParam Optional<VisualizationType> visualization) throws ApiException {
+        return reportDto.selectAllBySchemaVersion(schemaVersionId, visualization.orElse(null));
     }
 
     @ApiOperation(value = "Copy Schema Reports")
@@ -155,6 +159,12 @@ public class AdminController {
     @RequestMapping(value = "/reports/query/try", method = RequestMethod.POST)
     public ReportQueryData getTransformedQuery(@RequestBody ReportQueryTestForm form) {
         return reportDto.getTransformedQuery(form);
+    }
+
+    @ApiOperation(value = "Test Query Live")
+    @RequestMapping(value = "/reports/query/try-live", method = RequestMethod.POST)
+    public List<ViewDashboardData> testQueryLive(@RequestBody ReportRequestForm form) throws ApiException, IOException {
+        return reportDto.testQueryLive(form);
     }
 
     @ApiOperation(value = "Get Report Query")
@@ -276,8 +286,8 @@ public class AdminController {
 
     @ApiOperation(value = "Get Reports")
     @RequestMapping(value = "/reports/orgs/{orgId}", method = RequestMethod.GET)
-    public List<ReportData> selectByOrgId(@PathVariable Integer orgId, @RequestParam Boolean isDashboard) throws ApiException {
-        return reportDto.selectByOrg(orgId, isDashboard);
+    public List<ReportData> selectByOrgId(@PathVariable Integer orgId, @RequestParam Boolean isChart, @RequestParam Optional<VisualizationType> visualization) throws ApiException {
+        return reportDto.selectByOrg(orgId, isChart, visualization.orElse(null));
     }
 
     @ApiOperation(value = "Get Live Data For Any Organization")
@@ -299,4 +309,15 @@ public class AdminController {
         return reportScheduleDto.getScheduleReportsForAllOrgs(pageNo, pageSize);
     }
 
+    @ApiOperation(value = "Copy Dashboard to all organizations. This copies charts only! NOT default values!")
+    @RequestMapping(value = "/copy-dashboard-all-orgs", method = RequestMethod.POST)
+    public void copyDashboardToAllOrgs(@RequestParam Integer dashboardId, @RequestParam Integer orgId) throws ApiException {
+        dashboardDto.copyDashboardToAllOrgs(dashboardId, orgId);
+    }
+
+    @ApiOperation(value = "Copy Dashboard to some organizations. This copies charts only! NOT default values!")
+    @RequestMapping(value = "/copy-dashboard-some-orgs", method = RequestMethod.POST)
+    public void copyDashboardToSomeOrgs(@RequestParam Integer dashboardId, @RequestParam Integer sourceOrgId, @RequestParam List<Integer> destinationOrgIds) throws ApiException {
+        dashboardDto.copyDashboardToSomeOrgs(dashboardId, sourceOrgId, destinationOrgIds);
+    }
 }
