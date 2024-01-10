@@ -94,6 +94,7 @@ public class ReportDto extends AbstractDto {
         ReportPojo reportPojo = reportApi.getCheck(form.getReportId());
 
         validateReportForOrg(reportPojo, orgId);
+        validateQueryExists(reportPojo, form);
 
         ConnectionPojo connectionPojo = connectionApi.getCheck(orgConnectionApi.getCheckByOrgId(orgId).getConnectionId());
         String password = getDecryptedPassword(connectionPojo.getPassword());
@@ -301,9 +302,13 @@ public class ReportDto extends AbstractDto {
         validateCustomReportAccess(reportPojo, orgId);
         if(!reportPojo.getIsChart())
             throw new ApiException(ApiStatus.BAD_DATA, "Live data is only available for dashboards");
+        return reportPojo;
+    }
+
+    private void validateQueryExists(ReportPojo reportPojo, ReportRequestForm form) throws ApiException {
         ReportQueryPojo reportQueryPojo = reportQueryApi.getByReportId(reportPojo.getId());
         if (Objects.isNull(reportQueryPojo) && Objects.isNull(form.getQuery()))
             throw new ApiException(ApiStatus.BAD_DATA, "No query defined for report : " + reportPojo.getName());
-        return reportPojo;
     }
+
 }
