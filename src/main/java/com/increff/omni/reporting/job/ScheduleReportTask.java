@@ -16,7 +16,7 @@ import com.increff.service.encryption.common.CryptoCommon;
 import com.increff.commons.springboot.client.AppClientException;
 import com.increff.commons.springboot.common.ApiException;
 import com.increff.commons.springboot.common.ApiStatus;
-import lombok.extern.log4j.Log4j;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.scheduling.annotation.Async;
@@ -45,7 +45,7 @@ import static com.increff.omni.reporting.dto.CommonDtoHelper.getInputParamMapFro
 import static com.increff.omni.reporting.dto.CommonDtoHelper.getValueFromQuotes;
 
 @Component
-@Log4j
+@Log4j2
 public class ScheduleReportTask extends AbstractTask {
 
     @Autowired

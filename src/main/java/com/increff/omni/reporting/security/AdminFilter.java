@@ -5,7 +5,7 @@
 //import com.increff.omni.reporting.config.ApplicationProperties;
 //import com.nextscm.commons.spring.common.FieldErrorData;
 //import com.nextscm.commons.spring.common.JsonUtil;
-//import lombok.extern.log4j.Log4j;
+//import lombok.extern.log4j.Log4j2;
 //import org.springframework.beans.factory.annotation.Autowired;
 //import org.springframework.http.HttpStatus;
 //import org.springframework.stereotype.Component;
@@ -19,7 +19,7 @@
 //import java.io.IOException;
 //
 //@Component
-//@Log4j
+//@Log4j2
 //public class AdminFilter extends GenericFilterBean {
 //
 //    @Autowired

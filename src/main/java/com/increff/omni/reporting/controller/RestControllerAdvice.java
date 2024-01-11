@@ -3,7 +3,7 @@ package com.increff.omni.reporting.controller;
 import com.increff.commons.springboot.common.ApiStatus;
 import com.increff.commons.springboot.common.ErrorData;
 import com.increff.commons.springboot.server.AbstractRestappControllerAdvice;
-import lombok.extern.log4j.Log4j;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -15,7 +15,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 
 @ControllerAdvice
-@Log4j
+@Log4j2
 public class RestControllerAdvice extends AbstractRestappControllerAdvice {
 
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)

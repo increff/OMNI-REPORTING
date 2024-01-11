@@ -8,7 +8,7 @@ import com.increff.omni.reporting.model.constants.ReportRequestType;
 import com.increff.omni.reporting.model.constants.ScheduleStatus;
 import com.increff.omni.reporting.pojo.*;
 import com.increff.commons.springboot.common.ApiException;
-import lombok.extern.log4j.Log4j;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 
 import static com.increff.omni.reporting.dto.CommonDtoHelper.*;
 
-@Log4j
+@Log4j2
 @Component
 public class ScheduledJobs {
 

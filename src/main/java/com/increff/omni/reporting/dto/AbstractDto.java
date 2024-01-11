@@ -15,7 +15,7 @@ import com.increff.commons.springboot.common.ApiException;
 import com.increff.commons.springboot.common.ApiStatus;
 import com.increff.commons.springboot.server.AbstractDtoApi;
 import lombok.Setter;
-import lombok.extern.log4j.Log4j;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -24,7 +24,7 @@ import java.util.*;
 
 import static com.increff.omni.reporting.dto.CommonDtoHelper.getValueFromQuotes;
 
-@Log4j
+@Log4j2
 @Component
 @Setter
 public class AbstractDto extends AbstractDtoApi {

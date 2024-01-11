@@ -71,17 +71,16 @@ public class main {
         SpringApplication.run(main.class, args);
     }
 
-    @Bean
-    public AuditDao auditDao(){
-        AuditDao auditDao = new AuditDao();
-        return auditDao;
-    }
+//    @Bean
+//    public AuditDao auditDao(){
+//        AuditDao auditDao = new AuditDao();
+//        return auditDao;
+//    }
 
     @Bean
-    @Autowired
-    public AuditApi auditApi(DaoProvider daoProvider) {
+    public AuditApi auditApi() {
         AuditApi auditApi = new AuditApi();
-        auditApi.setProvider(daoProvider);
+//        auditApi.setProvider(daoProvider);
         return auditApi;
     }
 
@@ -205,10 +204,5 @@ public class main {
         return jsonConverter;
     }
 
-//    @Override
-//    public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
-//        converters.add(customJackson2HttpMessageConverter());
-//        super.configureMessageConverters(converters);
-//    }
 
 }
