@@ -74,7 +74,7 @@ public abstract class AbstractTest {
         fulfillmentLocationResourceMap.put("w2", new ArrayList<>());
         resourceRoles.put(AppResourceKeys.fulfillmentLocationKey, fulfillmentLocationResourceMap);
         resourceRoles.put(AppResourceKeys.clientKey, fulfillmentLocationResourceMap);
-        resourceRoles.put(AppResourceKeys.attributeX, fulfillmentLocationResourceMap);
+        resourceRoles.put(AppResourceKeys.restrictedResourceKey, fulfillmentLocationResourceMap);
         principal.setResourceRoles(resourceRoles);
         principal.setRoles(Arrays.asList("app.admin", "report.admin"));
         SecurityContext securityContext = Mockito.mock(SecurityContext.class, Mockito.withSettings().serializable());
