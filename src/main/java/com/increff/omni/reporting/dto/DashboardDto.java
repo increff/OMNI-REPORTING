@@ -135,6 +135,15 @@ public class DashboardDto extends AbstractDto {
     @Transactional(rollbackFor = ApiException.class)
     public Map<String,List<InputControlData>> getFilterDetails(DashboardPojo dashboard, List<DashboardChartPojo> charts) throws ApiException {
         Map<String,List<InputControlData>> filterDetails = new HashMap<>();
+
+        setFilterDefaults(dashboard, charts, filterDetails);
+
+        extractCommonFilters(charts, filterDetails);
+
+        return filterDetails;
+    }
+
+    private void setFilterDefaults(DashboardPojo dashboard, List<DashboardChartPojo> charts, Map<String, List<InputControlData>> filterDetails) throws ApiException {
         Integer orgSchemaVersionId = orgSchemaApi.getCheckByOrgId(dashboard.getOrgId()).getSchemaVersionId();
         Map<String, Map<Integer, String>> chartDefaultValueMap = defaultValueApi.getByDashboardId(dashboard.getId())
                 .stream().collect(Collectors.groupingBy(DefaultValuePojo::getChartAlias,
@@ -155,10 +164,6 @@ public class DashboardDto extends AbstractDto {
                 filterDetails.get(report.getAlias()).add(inputControlData);
             });
         }
-
-        extractCommonFilters(charts, filterDetails);
-
-        return filterDetails;
     }
 
     private List<String> getAllowedValuesInDefaults(Map<Integer, String> controlDefaultValueMap, InputControlData inputControlData) {
