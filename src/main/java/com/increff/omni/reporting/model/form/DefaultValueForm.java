@@ -14,5 +14,7 @@ public class DefaultValueForm {
     @NotNull
     private Integer controlId;
     @NotNull
+    private String chartAlias;
+    @NotNull
     private List<String> defaultValue;
 }

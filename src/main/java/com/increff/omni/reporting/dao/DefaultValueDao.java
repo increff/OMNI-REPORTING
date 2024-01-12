@@ -12,11 +12,12 @@ import java.util.List;
 @Transactional
 public class DefaultValueDao extends AbstractDao<DefaultValuePojo> {
 
-    private static final String SELECT_BY_DASHBOARD_CONTROL = "select p from DefaultValuePojo p where p.dashboardId=:dashboardId and p.controlId=:controlId";
-    public DefaultValuePojo getByDashboardAndControl(Integer dashboardId, Integer controlId) {
-        return selectSingleOrNull(createJpqlQuery(SELECT_BY_DASHBOARD_CONTROL)
+    private static final String SELECT_BY_DASHBOARD_CONTROL_CHART_ALIAS = "select p from DefaultValuePojo p where p.dashboardId=:dashboardId and p.controlId=:controlId and p.chartAlias=:chartAlias";
+    public DefaultValuePojo getByDashboardControlChartAlias(Integer dashboardId, Integer controlId, String chartAlias) {
+        return selectSingleOrNull(createJpqlQuery(SELECT_BY_DASHBOARD_CONTROL_CHART_ALIAS)
                 .setParameter("dashboardId", dashboardId)
-                .setParameter("controlId", controlId));
+                .setParameter("controlId", controlId)
+                .setParameter("chartAlias", chartAlias));
     }
 
     private static final String DELETE_BY_DASHBOARD_CONTROL = "delete from DefaultValuePojo p where p.dashboardId=:dashboardId and p.controlId not in (:controlId)";
