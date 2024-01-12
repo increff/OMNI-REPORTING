@@ -17,6 +17,7 @@ import static com.increff.omni.reporting.util.SqlCmd.getValueSum;
 @Log4j
 public class ChartUtil {
 
+    public static final String DEFAULT_VALUE_COMMON_KEY = "COMMON";
     private static final String PCT_VAL_COL = "percentageVal";
 
     public static MapSingleValueChartData getMapSingleValueChartData(List<Map<String, String>> result) {

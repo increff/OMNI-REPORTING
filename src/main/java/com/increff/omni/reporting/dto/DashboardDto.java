@@ -27,6 +27,7 @@ import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.increff.omni.reporting.util.ChartUtil.DEFAULT_VALUE_COMMON_KEY;
 import static com.increff.omni.reporting.util.ChartUtil.getChartData;
 import static com.increff.omni.reporting.util.ConvertUtil.convertChartLegendsPojoToChartLegendsData;
 
@@ -74,7 +75,7 @@ public class DashboardDto extends AbstractDto {
             checkValid(form);
             api.getCheck(form.getDashboardId(), getOrgId());
             validateControlIdExistsForDashboard(form.getDashboardId(), form.getControlId());
-
+            // TODO : Handle common alias
             DefaultValuePojo pojo = ConvertUtil.convert(form, DefaultValuePojo.class);
             pojo.setDefaultValue(String.join(",", form.getDefaultValue()));
             pojos.add(defaultValueApi.upsert(pojo));
@@ -141,6 +142,8 @@ public class DashboardDto extends AbstractDto {
 
         for(DashboardChartPojo chart: charts){
             Map<Integer, String> controlDefaultValueMap = chartDefaultValueMap.getOrDefault(chart.getChartAlias(), new HashMap<>());
+            controlDefaultValueMap.putAll(chartDefaultValueMap.getOrDefault(DEFAULT_VALUE_COMMON_KEY, new HashMap<>()));
+
             ReportPojo report = reportApi.getCheckByAliasAndSchema(chart.getChartAlias(), orgSchemaVersionId, true);
 
             filterDetails.put(report.getAlias(), new ArrayList<>());
