@@ -66,6 +66,7 @@ public class DashboardChartDto extends AbstractDto {
     private void updateDefaultValues(Integer dashboardId, List<DashboardChartForm> forms) throws ApiException {
         Map<String, Map<Integer, InputControlData>> chartAliasControlMap = new HashMap<>();
         Set<Integer> newCommonControlIds = new HashSet<>();
+        Set<Integer> existingCommonControlIds = new HashSet<>();
 
         for(DashboardChartForm form : forms) {
             ReportPojo report = reportApi.getCheckByAliasAndSchema(form.getChartAlias(), getSchemaVersionId(), true);
@@ -85,7 +86,14 @@ public class DashboardChartDto extends AbstractDto {
                 defaultValueApi.deleteByDashboardControlChartAlias(dashboardId, commonDefaultPojo.getControlId(), DEFAULT_VALUE_COMMON_KEY);
                 List<String> aliases = chartAliasControlMap.entrySet().stream().filter(x -> x.getValue().containsKey(commonDefaultPojo.getControlId())).map(Map.Entry::getKey).collect(Collectors.toList());
                 aliases.forEach(alias -> defaultValueApi.upsert(new DefaultValuePojo(dashboardId, commonDefaultPojo.getControlId(), alias, commonDefaultPojo.getDefaultValue())));
-            }
+            } else existingCommonControlIds.add(commonDefaultPojo.getControlId());
+
+        }
+
+        newCommonControlIds.removeAll(existingCommonControlIds); // Remove common input controls that already exist
+        for(Integer commonControlId : newCommonControlIds) { // Add default values for newly created common input controls
+            defaultValueApi.upsert(new DefaultValuePojo(dashboardId, commonControlId, DEFAULT_VALUE_COMMON_KEY,
+                    commonDefaultPojos.stream().filter(x -> x.getControlId().equals(commonControlId)).findFirst().map(DefaultValuePojo::getDefaultValue).orElse("")));
         }
     }
 
