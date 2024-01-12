@@ -12,6 +12,7 @@ import com.increff.omni.reporting.model.form.ReportRequestForm;
 import com.increff.omni.reporting.pojo.*;
 import com.increff.omni.reporting.util.ChartUtil;
 import com.increff.omni.reporting.util.ValidateUtil;
+import com.nextscm.commons.lang.StringUtil;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
 import com.nextscm.commons.spring.common.ConvertUtil;
@@ -35,6 +36,8 @@ import static com.increff.omni.reporting.util.ConvertUtil.convertChartLegendsPoj
 public class DashboardDto extends AbstractDto {
     @Autowired
     private ReportApi reportApi;
+    @Autowired
+    private InputControlApi inputControlApi;
     @Autowired
     private DashboardApi api;
     @Autowired
@@ -140,6 +143,9 @@ public class DashboardDto extends AbstractDto {
             filterDetails.put(report.getAlias(), new ArrayList<>());
             inputControlDto.selectForReport(report.getId()).forEach(inputControlData -> {
                 inputControlData.setDefaultValue(controlDefaultValueMap.getOrDefault(inputControlData.getId(), null));
+                if(Objects.nonNull(inputControlData.getDefaultValue()) && Objects.nonNull(inputControlData.getQuery()))
+                    inputControlData.setDefaultValue(String.join(",", getAllowedValuesInDefaults(controlDefaultValueMap, inputControlData)));
+
                 filterDetails.get(report.getAlias()).add(inputControlData);
             });
         }
@@ -147,6 +153,19 @@ public class DashboardDto extends AbstractDto {
         extractCommonFilters(charts, filterDetails);
 
         return filterDetails;
+    }
+
+    private List<String> getAllowedValuesInDefaults(Map<Integer, String> controlDefaultValueMap, InputControlData inputControlData) {
+        List<String> allowedValues = inputControlData.getOptions().stream().map(InputControlData.InputControlDataValue::getLabelName).collect(Collectors.toList());
+        List<String> defaults = getValuesFromList(controlDefaultValueMap.get(inputControlData.getId()));
+        defaults.removeIf(defaultValue -> !allowedValues.contains(defaultValue));
+        return defaults;
+    }
+
+    private List<String> getValuesFromList(String values) {
+        if (StringUtil.isEmpty(values))
+            return new ArrayList<>();
+        return Arrays.asList(values.split(","));
     }
 
     private void extractCommonFilters(List<DashboardChartPojo> charts, Map<String, List<InputControlData>> filterDetails) {

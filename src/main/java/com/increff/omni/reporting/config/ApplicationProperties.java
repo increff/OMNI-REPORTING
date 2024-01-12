@@ -38,7 +38,7 @@ public class ApplicationProperties {
     @Value("${max.execution.time.seconds:300}")
     private Integer maxExecutionTime;
 
-    @Value("${live.report.max.execution.time.seconds:30}")
+    @Value("${live.report.max.execution.time.seconds:300}")
     private Integer liveReportMaxExecutionTime;
 
     @Value("${max.file.size.mb:200}")
@@ -119,7 +119,7 @@ public class ApplicationProperties {
     @Value("${max.dashboards.per.org:20}")
     private Integer maxDashboardsPerOrg;
 
-    @Value("${rate.limit.tokens.refill.amount:3}")
+    @Value("${rate.limit.tokens.refill.amount:20}")
     private Integer tokens;
     @Value("${rate.limit.tokens.refill.rate.seconds:60}")
     private Integer tokensRefillRateSeconds;

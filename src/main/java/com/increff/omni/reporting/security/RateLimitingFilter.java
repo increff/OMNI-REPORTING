@@ -19,6 +19,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.time.Duration;
+import java.time.ZonedDateTime;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -30,6 +31,7 @@ public class RateLimitingFilter extends GenericFilterBean {
     @Autowired
     private ApplicationProperties properties;
 
+    private ZonedDateTime nextLogTime = ZonedDateTime.now().minusMinutes(1);
     // Can cause heap space issues if the number of users is large!
     private final ConcurrentHashMap<String, Bucket> userRateLimiters = new ConcurrentHashMap<>();
 
@@ -42,6 +44,12 @@ public class RateLimitingFilter extends GenericFilterBean {
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
+
+        if(nextLogTime.isBefore(ZonedDateTime.now())) {
+            log.info("RateLimitingFilter.stats: " + " userRateLimitersMap.size " + userRateLimiters.size() + " RateLimiting" + properties.getTokens() + " tokens per " + properties.getTokensRefillRateSeconds() + " seconds");
+            nextLogTime = ZonedDateTime.now().plusMinutes(10);
+        }
+
         HttpServletRequest httpRequest = (HttpServletRequest) request;
         String user = getUserIdFromRequest();
 
@@ -81,6 +89,11 @@ public class RateLimitingFilter extends GenericFilterBean {
             user_id = String.valueOf(SecurityUtil.getPrincipal().getId());
         log.debug("RateLimitingFilter.getUserIdFromRequest: " + user_id);
         return user_id;
+    }
+
+    public void clearUserRateLimiterMap() {
+        log.debug("RateLimitingFilter.clearUserRateLimiterMap: " + " userRateLimitersMap.size " + userRateLimiters.size() + " RateLimiting" + properties.getTokens() + " tokens per " + properties.getTokensRefillRateSeconds() + " seconds");
+        userRateLimiters.entrySet().removeIf(entry -> entry.getValue().getAvailableTokens() == properties.getTokens());
     }
 
 }
