@@ -31,11 +31,12 @@ public class DashboardDtoTestHelper {
         return form;
     }
 
-    public static DefaultValueForm getDefaultValueForm(Integer dashboardId, Integer controlId, List<String> defaultValue) {
+    public static DefaultValueForm getDefaultValueForm(Integer dashboardId, Integer controlId, List<String> defaultValue, String chartAlias) {
         DefaultValueForm form = new DefaultValueForm();
         form.setDashboardId(dashboardId);
         form.setControlId(controlId);
         form.setDefaultValue(defaultValue);
+        form.setChartAlias(chartAlias);
         return form;
     }
 }
