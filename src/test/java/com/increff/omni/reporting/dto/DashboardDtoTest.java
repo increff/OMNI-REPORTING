@@ -191,7 +191,7 @@ public class DashboardDtoTest extends AbstractTest {
         reportDto.mapToControl(chartDatas.get(0).getId(), inputControlData.getId());
 
         List<DefaultValueForm> defaultValueForms = new ArrayList<>();
-        defaultValueForms.add(getDefaultValueForm(data.getId(), inputControlData.getId(), Arrays.asList("1", "2", "3")));
+        defaultValueForms.add(getDefaultValueForm(data.getId(), inputControlData.getId(), Arrays.asList("1", "2", "3"), "chartAlias"));
         List<DefaultValueData> defaultValueData = dashboardDto.upsertDefaultValues(defaultValueForms);
         assertEquals(1, defaultValueData.size());
         assertEquals(String.join(",", defaultValueForms.get(0).getDefaultValue()), defaultValueData.get(0).getDefaultValue());
@@ -204,7 +204,7 @@ public class DashboardDtoTest extends AbstractTest {
                 Arrays.asList(getDashboardChartForm(chartDatas.get(0).getAlias(), 0, 0, 0, RowHeight.HALF))));
 
         List<DefaultValueForm> defaultValueForms = new ArrayList<>();
-        defaultValueForms.add(getDefaultValueForm(data.getId(), -1, Arrays.asList("1", "2", "3")));
+        defaultValueForms.add(getDefaultValueForm(data.getId(), -1, Arrays.asList("1", "2", "3"), "chartAlias"));
         List<DefaultValueData> defaultValueData = dashboardDto.upsertDefaultValues(defaultValueForms);
         assertEquals(1, defaultValueData.size());
         assertEquals(String.join(",", defaultValueForms.get(0).getDefaultValue()), defaultValueData.get(0).getDefaultValue());
@@ -223,7 +223,7 @@ public class DashboardDtoTest extends AbstractTest {
         reportDto.mapToControl(chartDatas.get(0).getId(), inputControlData.getId());
 
         List<DefaultValueForm> defaultValueForms = new ArrayList<>();
-        defaultValueForms.add(getDefaultValueForm(data.getId(), inputControlData.getId(), Arrays.asList("1", "2", "3")));
+        defaultValueForms.add(getDefaultValueForm(data.getId(), inputControlData.getId(), Arrays.asList("1", "2", "3"), "chartAlias"));
         List<DefaultValueData> defaultValueData = dashboardDto.upsertDefaultValues(defaultValueForms);
         assertEquals(1, defaultValueData.size());
         assertEquals(String.join(",", defaultValueForms.get(0).getDefaultValue()), defaultValueData.get(0).getDefaultValue());
@@ -244,7 +244,7 @@ public class DashboardDtoTest extends AbstractTest {
         reportDto.mapToControl(chartDatas.get(0).getId(), inputControlData.getId());
 
         List<DefaultValueForm> defaultValueForms = new ArrayList<>();
-        defaultValueForms.add(getDefaultValueForm(data.getId(), inputControlData.getId(), Arrays.asList("1", "2", "3")));
+        defaultValueForms.add(getDefaultValueForm(data.getId(), inputControlData.getId(), Arrays.asList("1", "2", "3"), "chartAlias"));
         List<DefaultValueData> defaultValueData = dashboardDto.upsertDefaultValues(defaultValueForms);
         assertEquals(1, defaultValueData.size());
         assertEquals(String.join(",", defaultValueForms.get(0).getDefaultValue()), defaultValueData.get(0).getDefaultValue());
@@ -253,7 +253,7 @@ public class DashboardDtoTest extends AbstractTest {
         assertEquals(String.join(",", defaultValueForms.get(0).getDefaultValue()), defaultValuePojoList.get(0).getDefaultValue());
 
         defaultValueForms = new ArrayList<>();
-        defaultValueForms.add(getDefaultValueForm(data.getId(), inputControlData.getId(), Arrays.asList("4", "5", "6")));
+        defaultValueForms.add(getDefaultValueForm(data.getId(), inputControlData.getId(), Arrays.asList("4", "5", "6"), "chartAlias"));
         defaultValueData = dashboardDto.upsertDefaultValues(defaultValueForms);
         assertEquals(1, defaultValueData.size());
         assertEquals(String.join(",", defaultValueForms.get(0).getDefaultValue()), defaultValueData.get(0).getDefaultValue());
@@ -274,7 +274,7 @@ public class DashboardDtoTest extends AbstractTest {
     	reportDto.mapToControl(chartDatas.get(0).getId(), inputControlData.getId());
 
     	List<DefaultValueForm> defaultValueForms = new ArrayList<>();
-    	defaultValueForms.add(getDefaultValueForm(data.getId(), inputControlData.getId(), Arrays.asList("1", "2", "3")));
+    	defaultValueForms.add(getDefaultValueForm(data.getId(), inputControlData.getId(), Arrays.asList("1", "2", "3"), "chartAlias"));
     	List<DefaultValueData> defaultValueData = dashboardDto.upsertDefaultValues(defaultValueForms);
     	assertEquals(1, defaultValueData.size());
     	assertEquals(String.join(",", defaultValueForms.get(0).getDefaultValue()), defaultValueData.get(0).getDefaultValue());
@@ -283,7 +283,7 @@ public class DashboardDtoTest extends AbstractTest {
     	assertEquals(String.join(",", defaultValueForms.get(0).getDefaultValue()), defaultValuePojoList.get(0).getDefaultValue());
 
         defaultValueForms = new ArrayList<>();
-        defaultValueForms.add(getDefaultValueForm(data.getId(), inputControlData.getId(), new ArrayList<>()));
+        defaultValueForms.add(getDefaultValueForm(data.getId(), inputControlData.getId(), new ArrayList<>(), "chartAlias"));
         defaultValueData = dashboardDto.upsertDefaultValues(defaultValueForms);
         assertEquals(1, defaultValueData.size());
 
@@ -304,7 +304,7 @@ public class DashboardDtoTest extends AbstractTest {
         reportDto.mapToControl(chartDatas.get(0).getId(), inputControlData.getId());
 
         List<DefaultValueForm> defaultValueForms = new ArrayList<>();
-        defaultValueForms.add(getDefaultValueForm(data.getId(), inputControlData.getId(), Arrays.asList("1", "2", "3")));
+        defaultValueForms.add(getDefaultValueForm(data.getId(), inputControlData.getId(), Arrays.asList("1", "2", "3"), "chartAlias"));
         List<DefaultValueData> defaultValueData = dashboardDto.upsertDefaultValues(defaultValueForms);
         assertEquals(1, defaultValueData.size());
         assertEquals(String.join(",", defaultValueForms.get(0).getDefaultValue()), defaultValueData.get(0).getDefaultValue());
