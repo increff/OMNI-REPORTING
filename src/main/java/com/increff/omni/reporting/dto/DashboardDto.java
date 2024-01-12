@@ -135,11 +135,14 @@ public class DashboardDto extends AbstractDto {
     public Map<String,List<InputControlData>> getFilterDetails(DashboardPojo dashboard, List<DashboardChartPojo> charts) throws ApiException {
         Map<String,List<InputControlData>> filterDetails = new HashMap<>();
         Integer orgSchemaVersionId = orgSchemaApi.getCheckByOrgId(dashboard.getOrgId()).getSchemaVersionId();
-        Map<Integer, String> controlDefaultValueMap = defaultValueApi.getByDashboardId(dashboard.getId())
-                .stream().collect(Collectors.toMap(DefaultValuePojo::getControlId, DefaultValuePojo::getDefaultValue));
+        Map<String, Map<Integer, String>> chartDefaultValueMap = defaultValueApi.getByDashboardId(dashboard.getId())
+                .stream().collect(Collectors.groupingBy(DefaultValuePojo::getChartAlias,
+                        Collectors.toMap(DefaultValuePojo::getControlId, DefaultValuePojo::getDefaultValue)));
 
         for(DashboardChartPojo chart: charts){
+            Map<Integer, String> controlDefaultValueMap = chartDefaultValueMap.getOrDefault(chart.getChartAlias(), new HashMap<>());
             ReportPojo report = reportApi.getCheckByAliasAndSchema(chart.getChartAlias(), orgSchemaVersionId, true);
+
             filterDetails.put(report.getAlias(), new ArrayList<>());
             inputControlDto.selectForReport(report.getId()).forEach(inputControlData -> {
                 inputControlData.setDefaultValue(controlDefaultValueMap.getOrDefault(inputControlData.getId(), null));

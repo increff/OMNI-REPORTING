@@ -19,7 +19,7 @@ public class DefaultValueApi extends AbstractApi {
     private DefaultValueDao dao;
 
     public DefaultValuePojo upsert(DefaultValuePojo pojo) {
-        DefaultValuePojo existing = getByDashboardAndControl(pojo.getDashboardId(), pojo.getControlId());
+        DefaultValuePojo existing = getByDashboardControlChartAlias(pojo.getDashboardId(), pojo.getControlId(), pojo.getChartAlias());
         if (Objects.nonNull(existing)) {
             if(pojo.getDefaultValue().isEmpty()){
                 dao.remove(existing);
@@ -32,8 +32,8 @@ public class DefaultValueApi extends AbstractApi {
         return pojo;
     }
 
-    public DefaultValuePojo getByDashboardAndControl(Integer dashboardId, Integer controlId)  {
-        return dao.getByDashboardAndControl(dashboardId, controlId);
+    public DefaultValuePojo getByDashboardControlChartAlias(Integer dashboardId, Integer controlId, String chartAlias) {
+        return dao.getByDashboardControlChartAlias(dashboardId, controlId, chartAlias);
     }
 
     public List<DefaultValuePojo> getByDashboardId(Integer dashboardId) {

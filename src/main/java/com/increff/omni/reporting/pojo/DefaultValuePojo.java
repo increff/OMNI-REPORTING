@@ -8,7 +8,7 @@ import javax.persistence.*;
 @Entity
 @Getter
 @Setter
-@Table(name = "default_value", indexes = {@Index(name = "idx_dashboard_control_id", columnList = "dashboardId, controlId")})
+@Table(name = "default_value", indexes = {@Index(name = "idx_dashboard_control_id_chart_alias", columnList = "dashboardId, controlId, chartAlias")})
 public class DefaultValuePojo extends AbstractVersionedPojo{
     @Id
     @TableGenerator(name = "default_value", pkColumnValue = "default_value")
@@ -18,6 +18,8 @@ public class DefaultValuePojo extends AbstractVersionedPojo{
     private Integer dashboardId;
     @Column(nullable = false)
     private Integer controlId;
+    @Column(nullable = false)
+    private String chartAlias;
     @Column(nullable = false, columnDefinition = "LONGTEXT")
     private String defaultValue;
 }
