@@ -51,4 +51,11 @@ public class DefaultValueApi extends AbstractApi {
     public void deleteByDashboardIdAndControlIdNotIn(Integer dashboardId, List<Integer> controlId) throws ApiException {
         dao.deleteByDashboardIdAndControlIdNotIn(dashboardId, controlId);
     }
+
+    public void deleteByDashboardControlChartAlias(Integer dashboardId, Integer controlId, String chartAlias) {
+        DefaultValuePojo pojo = getByDashboardControlChartAlias(dashboardId, controlId, chartAlias);
+        if (Objects.nonNull(pojo)) {
+            dao.remove(pojo);
+        }
+    }
 }

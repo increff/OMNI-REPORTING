@@ -1,5 +1,6 @@
 package com.increff.omni.reporting.pojo;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -22,4 +23,16 @@ public class DefaultValuePojo extends AbstractVersionedPojo{
     private String chartAlias;
     @Column(nullable = false, columnDefinition = "LONGTEXT")
     private String defaultValue;
+
+    public DefaultValuePojo() {
+    }
+
+    public DefaultValuePojo(Integer dashboardId, Integer controlId, String chartAlias, String defaultValue) {
+        this.dashboardId = dashboardId;
+        this.controlId = controlId;
+        this.chartAlias = chartAlias;
+        this.defaultValue = defaultValue;
+    }
+
+
 }
