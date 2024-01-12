@@ -75,7 +75,7 @@ public class DashboardDto extends AbstractDto {
             checkValid(form);
             api.getCheck(form.getDashboardId(), getOrgId());
             validateControlIdExistsForDashboard(form.getDashboardId(), form.getControlId());
-            // TODO : Handle common alias
+
             DefaultValuePojo pojo = ConvertUtil.convert(form, DefaultValuePojo.class);
             pojo.setDefaultValue(String.join(",", form.getDefaultValue()));
             pojos.add(defaultValueApi.upsert(pojo));
