@@ -87,13 +87,12 @@ public class DashboardChartDto extends AbstractDto {
                 List<String> aliases = chartAliasControlMap.entrySet().stream().filter(x -> x.getValue().containsKey(commonDefaultPojo.getControlId())).map(Map.Entry::getKey).collect(Collectors.toList());
                 aliases.forEach(alias -> defaultValueApi.upsert(new DefaultValuePojo(dashboardId, commonDefaultPojo.getControlId(), alias, commonDefaultPojo.getDefaultValue())));
             } else existingCommonControlIds.add(commonDefaultPojo.getControlId());
-
         }
 
         newCommonControlIds.removeAll(existingCommonControlIds); // Remove common input controls that already exist
-        for(Integer commonControlId : newCommonControlIds) { // Add default values for newly created common input controls
-            defaultValueApi.upsert(new DefaultValuePojo(dashboardId, commonControlId, DEFAULT_VALUE_COMMON_KEY,
-                    commonDefaultPojos.stream().filter(x -> x.getControlId().equals(commonControlId)).findFirst().map(DefaultValuePojo::getDefaultValue).orElse("")));
+        for(Integer commonControlId : newCommonControlIds) { // Delete chart level default values for newly created common input controls
+            defaultValueApi.deleteByDashboardControlChartAliasNotIn(dashboardId, commonControlId, Collections.singletonList(DEFAULT_VALUE_COMMON_KEY));
+            // Note :- Do not add default values for newly created common input controls as there may be separate default values on chart level (V1, V2, V3, etc.) and we won't know which one to use for common
         }
     }
 
