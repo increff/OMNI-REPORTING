@@ -77,19 +77,21 @@ public class DashboardChartDto extends AbstractDto {
         // Delete default values for all input controls not used in any of the updated charts
         defaultValueApi.deleteByDashboardIdAndControlIdNotIn(dashboardId, chartAliasControlMap.values().stream().flatMap(x -> x.keySet().stream()).collect(Collectors.toList()));
 
-        chartAliasControlMap.values().stream().map(x -> x.keySet()).reduce((x, y) -> {x.retainAll(y); return x;}).orElse(new HashSet<>()).forEach
-                (newCommonControlIds::add);// Get common input control ids for all charts
+        chartAliasControlMap.values().stream().map(Map::keySet).collect(Collectors.toList()).forEach(newCommonControlIds::addAll);
+        for(Map<Integer, InputControlData> controlMap : chartAliasControlMap.values()) {
+            newCommonControlIds.retainAll(controlMap.keySet()); // Get common input control ids for all charts
+        }
 
         List<DefaultValuePojo> commonDefaultPojos = defaultValueApi.getByDashboardId(dashboardId).stream().filter(x -> x.getChartAlias().equals(DEFAULT_VALUE_COMMON_KEY)).collect(Collectors.toList());
-        for(DefaultValuePojo commonDefaultPojo : commonDefaultPojos){
-            if(!newCommonControlIds.contains(commonDefaultPojo.getControlId())) { // Delete common default values for input controls not common anymore
+        for(DefaultValuePojo commonDefaultPojo : commonDefaultPojos){ // Delete common default values for input controls not common anymore and migrate to chart level
+            if(!newCommonControlIds.contains(commonDefaultPojo.getControlId())) {
                 defaultValueApi.deleteByDashboardControlChartAlias(dashboardId, commonDefaultPojo.getControlId(), DEFAULT_VALUE_COMMON_KEY);
                 List<String> aliases = chartAliasControlMap.entrySet().stream().filter(x -> x.getValue().containsKey(commonDefaultPojo.getControlId())).map(Map.Entry::getKey).collect(Collectors.toList());
                 aliases.forEach(alias -> defaultValueApi.upsert(new DefaultValuePojo(dashboardId, commonDefaultPojo.getControlId(), alias, commonDefaultPojo.getDefaultValue())));
             } else existingCommonControlIds.add(commonDefaultPojo.getControlId());
         }
 
-        newCommonControlIds.removeAll(existingCommonControlIds); // Remove common input controls that already exist
+        newCommonControlIds.removeAll(existingCommonControlIds); // Do nothing if common input control is still common
         for(Integer commonControlId : newCommonControlIds) { // Delete chart level default values for newly created common input controls
             defaultValueApi.deleteByDashboardControlChartAliasNotIn(dashboardId, commonControlId, Collections.singletonList(DEFAULT_VALUE_COMMON_KEY));
             // Note :- Do not add default values for newly created common input controls as there may be separate default values on chart level (V1, V2, V3, etc.) and we won't know which one to use for common
