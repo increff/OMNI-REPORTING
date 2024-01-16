@@ -28,6 +28,8 @@ public class DefaultValueApi extends AbstractApi {
             existing.setDefaultValue(pojo.getDefaultValue());
             return existing;
         }
+        if(pojo.getDefaultValue().isEmpty())
+            return new DefaultValuePojo(); // If default value is empty, don't add it
         dao.persist(pojo);
         return pojo;
     }
