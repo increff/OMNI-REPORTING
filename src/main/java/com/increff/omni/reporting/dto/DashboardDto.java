@@ -172,7 +172,7 @@ public class DashboardDto extends AbstractDto {
     private List<String> getAllowedValuesInDefaults(Map<Integer, String> controlDefaultValueMap, InputControlData inputControlData) {
         List<String> allowedValues = inputControlData.getOptions().stream().map(InputControlData.InputControlDataValue::getLabelName).collect(Collectors.toList());
         List<String> defaults = getValuesFromList(controlDefaultValueMap.get(inputControlData.getId()));
-        defaults.removeIf(defaultValue -> !allowedValues.contains(defaultValue));
+        defaults = defaults.stream().filter(allowedValues::contains).collect(Collectors.toList());
         return defaults;
     }
 
