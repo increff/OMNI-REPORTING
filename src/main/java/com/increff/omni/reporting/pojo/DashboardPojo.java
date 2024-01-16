@@ -8,7 +8,7 @@ import javax.persistence.*;
 @Entity
 @Getter
 @Setter
-@Table(name = "dashboard", indexes = {@Index(name = "idx_dashboard_org_id", columnList = "orgId")}, // TODO: redundant index?
+@Table(name = "dashboard",
 uniqueConstraints = @UniqueConstraint(name = "uk_org_id_dashboard_name", columnNames = {"orgId", "name"}))
 public class DashboardPojo extends AbstractVersionedPojo {
     @Id
