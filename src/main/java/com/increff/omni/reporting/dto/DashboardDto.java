@@ -71,6 +71,9 @@ public class DashboardDto extends AbstractDto {
     @Transactional(rollbackFor = ApiException.class)
     public List<DefaultValueData> upsertDefaultValues(List<DefaultValueForm> forms) throws ApiException {
         List<DefaultValuePojo> pojos = new ArrayList<>();
+
+        defaultValueApi.deleteByDashboardId(forms.get(0).getDashboardId()); // Delete all existing default values for dashboard
+
         for(DefaultValueForm form : forms) {
             checkValid(form);
             api.getCheck(form.getDashboardId(), getOrgId());
