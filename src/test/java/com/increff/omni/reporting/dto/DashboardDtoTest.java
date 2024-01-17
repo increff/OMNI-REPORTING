@@ -170,6 +170,7 @@ public class DashboardDtoTest extends AbstractTest {
         Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
         UserPrincipal principal = new UserPrincipal();
         principal.setDomainId(newDomainId);
+        principal.setRoles(new ArrayList<>());
         Mockito.when(securityContext.getAuthentication().getPrincipal()).thenReturn(principal);
         SecurityContextHolder.setContext(securityContext);
         DashboardData data2 = dashboardDto.addDashboard(getDashboardAddForm("Dashboard_2",
