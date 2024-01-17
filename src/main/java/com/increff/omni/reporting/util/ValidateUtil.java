@@ -32,7 +32,6 @@ public class ValidateUtil {
     }
 
     public static void validateDashboardChartForms(List<DashboardChartForm> forms) throws ApiException {
-        //todo move this to property file and use default value and confirm value - cannot autowire application properties and use it in static function
         if(forms.size() > MAX_DASHBOARD_CHARTS)
             throw new ApiException(ApiStatus.BAD_DATA, "Maximum " + MAX_DASHBOARD_CHARTS + " charts allowed in a dashboard");
         for(DashboardChartForm form : forms) {

@@ -192,8 +192,8 @@ public class StandardController {
     }
 
 
-    @ApiOperation(value = "Add/Edit Defaults in Dashboard")
-    @RequestMapping(value = "/dashboards/defaults", method = RequestMethod.PATCH)
+    @ApiOperation(value = "Update Defaults in Dashboard. Also deletes all existing defaults for that dashboard")
+    @RequestMapping(value = "/dashboards/defaults", method = RequestMethod.PUT)
     public List<DefaultValueData> addDefaults(@RequestBody List<DefaultValueForm> forms) throws ApiException {
         return dashboardDto.upsertDefaultValues(forms);
     }

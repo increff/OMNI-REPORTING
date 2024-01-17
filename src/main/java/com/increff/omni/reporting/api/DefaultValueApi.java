@@ -28,6 +28,8 @@ public class DefaultValueApi extends AbstractApi {
             existing.setDefaultValue(pojo.getDefaultValue());
             return existing;
         }
+        if(pojo.getDefaultValue().isEmpty())
+            return new DefaultValuePojo(); // If default value is empty, don't add it
         dao.persist(pojo);
         return pojo;
     }
@@ -50,5 +52,16 @@ public class DefaultValueApi extends AbstractApi {
 
     public void deleteByDashboardIdAndControlIdNotIn(Integer dashboardId, List<Integer> controlId) throws ApiException {
         dao.deleteByDashboardIdAndControlIdNotIn(dashboardId, controlId);
+    }
+
+    public void deleteByDashboardControlChartAlias(Integer dashboardId, Integer controlId, String chartAlias) {
+        DefaultValuePojo pojo = getByDashboardControlChartAlias(dashboardId, controlId, chartAlias);
+        if (Objects.nonNull(pojo)) {
+            dao.remove(pojo);
+        }
+    }
+
+    public void deleteByDashboardControlChartAliasNotIn(Integer dashboardId, Integer controlId, List<String> chartAlias) {
+        dao.deleteByDashboardControlChartAliasNotIn(dashboardId, controlId, chartAlias);
     }
 }
