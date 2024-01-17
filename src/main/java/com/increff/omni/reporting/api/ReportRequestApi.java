@@ -17,7 +17,7 @@ import java.util.Arrays;
 import java.util.List;
 
 @Service
-@Transactional(rollbackFor = Exception.class)
+@Transactional(rollbackFor = ApiException.class)
 public class ReportRequestApi extends AbstractApi {
 
     @Autowired

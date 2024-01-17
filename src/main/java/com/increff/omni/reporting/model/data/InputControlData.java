@@ -26,6 +26,7 @@ public class InputControlData {
     private List<ValidationType> validationTypes = new ArrayList<>();
     private List<InputControlDataValue> options = new ArrayList<>();
 
+    private String defaultValue;
     @Setter
     @Getter
     public static class InputControlDataValue {

@@ -84,7 +84,7 @@ public class ReportRequestDto extends AbstractDto {
         Map<String, List<String>> inputDisplayMap = new HashMap<>();
         ReportRequestPojo pojo = CommonDtoHelper.getReportRequestPojo(form, orgId, getUserId());
         ReportPojo reportPojo = reportApi.getCheck(pojo.getReportId());
-        if (reportPojo.getIsDashboard())
+        if (reportPojo.getIsChart())
             throw new ApiException(ApiStatus.BAD_DATA, "Dashboard can't be requested here");
         ReportQueryPojo reportQueryPojo = queryApi.getByReportId(reportPojo.getId());
         List<ReportControlsPojo> reportControlsPojoList = reportControlsApi.getByReportId(reportPojo.getId());

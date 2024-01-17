@@ -3,6 +3,7 @@ package com.increff.omni.reporting.dto;
 import com.increff.omni.reporting.config.AbstractTest;
 import com.increff.omni.reporting.dao.ReportScheduleDao;
 import com.increff.omni.reporting.job.ScheduledJobs;
+import com.increff.omni.reporting.model.constants.ChartType;
 import com.increff.omni.reporting.model.constants.InputControlScope;
 import com.increff.omni.reporting.model.constants.InputControlType;
 import com.increff.omni.reporting.model.constants.ReportType;
@@ -66,7 +67,7 @@ public class ReportScheduleDtoTest extends AbstractTest {
         ConnectionData connectionData = connectionDto.add(connectionForm);
         organizationDto.mapToConnection(organizationData.getId(), connectionData.getId());
         organizationDto.mapToSchema(organizationData.getId(), schemaData.getId());
-        return getReportForm("Report 1", ReportType.STANDARD, directoryData.getId(), schemaData.getId(), canSchedule);
+        return getReportForm("Report 1", ReportType.STANDARD, directoryData.getId(), schemaData.getId(), canSchedule, ChartType.REPORT);
     }
 
     @Test(expected = ApiException.class)
