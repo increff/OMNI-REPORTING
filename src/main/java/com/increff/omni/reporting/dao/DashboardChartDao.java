@@ -5,6 +5,7 @@ import com.nextscm.commons.spring.db.AbstractDao;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -24,4 +25,13 @@ public class DashboardChartDao extends AbstractDao<DashboardChartPojo> {
                 .setParameter("dashboardId", dashboardId)
                 .setParameter("chartAlias", chartAlias));
     }
+
+    public final String SELECT_BY_MULTIPLE_DASHBOARD_ID_LIST = "select p from DashboardChartPojo p where p.dashboardId in :dashboardIds";
+    public List<DashboardChartPojo> getByDashboardIds(List<Integer> dashboardIds) {
+        if(dashboardIds.isEmpty())
+            return new ArrayList<>();
+        return selectMultiple(createJpqlQuery(SELECT_BY_MULTIPLE_DASHBOARD_ID_LIST)
+                .setParameter("dashboardIds", dashboardIds));
+    }
+
 }

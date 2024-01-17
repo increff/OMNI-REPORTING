@@ -3,6 +3,7 @@ package com.increff.omni.reporting.dto;
 import com.increff.omni.reporting.api.*;
 import com.increff.omni.reporting.config.ApplicationProperties;
 import com.increff.omni.reporting.model.constants.ChartType;
+import com.increff.omni.reporting.model.constants.ReportType;
 import com.increff.omni.reporting.model.data.*;
 import com.increff.omni.reporting.model.data.Charts.ChartInterface;
 import com.increff.omni.reporting.model.form.DashboardAddForm;
@@ -114,13 +115,20 @@ public class DashboardDto extends AbstractDto {
     }
 
     @Transactional(rollbackFor = ApiException.class)
-    public List<DashboardListData> getDashboardsByOrgId() {
-        List<DashboardListData> data = getDashboardsByOrgId(getOrgId());
+    public List<DashboardListData> getDashboardsByOrgId() throws ApiException {
+        return getDashboardsByOrgId(getOrgId());
+    }
+
+    public List<DashboardListData> getDashboardsByOrgId(Integer orgId) throws ApiException {
+        List<DashboardListData> data = ConvertUtil.convert(api.getByOrgId(orgId), DashboardListData.class);
+
+        if (isCustomReportUser()) { // Filter out standard dashboards for custom users
+            List<Integer> customDashboardIds = getCustomDashboardIds(orgSchemaApi.getCheckByOrgId(orgId).getSchemaVersionId(),
+                    data.stream().map(DashboardListData::getId).collect(Collectors.toList()));
+            data = data.stream().filter(dashboard -> customDashboardIds.contains(dashboard.getId())).collect(Collectors.toList());
+        }
         data.sort(Comparator.comparing(DashboardListData::getName));
         return data;
-    }
-    public List<DashboardListData> getDashboardsByOrgId(Integer orgId) {
-        return ConvertUtil.convert(api.getByOrgId(orgId), DashboardListData.class);
     }
 
     @Transactional(rollbackFor = ApiException.class)
@@ -351,6 +359,35 @@ public class DashboardDto extends AbstractDto {
         dashboardPojo.setUpdatedAt(ZonedDateTime.now());
         api.add(dashboardPojo);
         return dashboardPojo;
+    }
+
+    /**
+     * Returns dashboardIds which have at least one chart of type CUSTOM
+     */
+    private List<Integer> getCustomDashboardIds(Integer schemaVersionId, List<Integer> dashboardIds) throws ApiException {
+        List<DashboardChartPojo> dashboardCharts = dashboardChartApi.getByDashboardIds(dashboardIds);
+        Map<Integer, List<String>> dashboardChartAliasMap = dashboardCharts.stream().collect(Collectors.groupingBy(DashboardChartPojo::getDashboardId,
+                Collectors.mapping(DashboardChartPojo::getChartAlias, Collectors.toList())));
+
+        List<ReportPojo> charts = reportApi.getByAliasAndSchema(dashboardCharts.stream().map(DashboardChartPojo::getChartAlias).collect(Collectors.toList()),
+                schemaVersionId, true);
+        Map<String, ReportType> chartAliasReportTypeMap = charts.stream().collect(Collectors.toMap(ReportPojo::getAlias, ReportPojo::getType));
+
+
+        List<Integer> customDashboardIds = new ArrayList<>();
+        for(Integer dashboardId : dashboardIds){
+            boolean customChartExists = false;
+            for(String chartAlias : dashboardChartAliasMap.getOrDefault(dashboardId, new ArrayList<>())){
+                if(!chartAliasReportTypeMap.containsKey(chartAlias))
+                    throw new ApiException(ApiStatus.BAD_DATA, "Chart alias not found: " + chartAlias + " for schema version: " + schemaVersionId + " isChart: true");
+                if(chartAliasReportTypeMap.get(chartAlias).equals(ReportType.CUSTOM)){
+                    customChartExists = true;
+                    break;
+                }
+            }
+            if(customChartExists) customDashboardIds.add(dashboardId);
+        }
+        return customDashboardIds;
     }
 
 

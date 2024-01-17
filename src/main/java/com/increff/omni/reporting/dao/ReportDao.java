@@ -12,10 +12,7 @@ import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Repository
@@ -97,6 +94,23 @@ public class ReportDao extends AbstractDao<ReportPojo> {
         );
         TypedQuery<ReportPojo> tQuery = createQuery(query);
         return selectSingleOrNull(tQuery);
+    }
+
+    public List<ReportPojo> getByAliasAndSchema(List<String> aliasList, Integer schemaVersionId, Boolean isChart) {
+        if(aliasList.isEmpty())
+            return new ArrayList<>();
+        CriteriaBuilder cb = this.em.getCriteriaBuilder();
+        CriteriaQuery<ReportPojo> query = cb.createQuery(ReportPojo.class);
+        Root<ReportPojo> root = query.from(ReportPojo.class);
+        query.where(
+                cb.and(
+                        root.get("alias").in(aliasList),
+                        cb.equal(root.get("schemaVersionId"), schemaVersionId),
+                        cb.equal(root.get("isChart"), isChart)
+                )
+        );
+        TypedQuery<ReportPojo> tQuery = createQuery(query);
+        return selectMultiple(tQuery);
     }
 
     public List<ReportPojo> getBySchemaVersionAndTypes(Integer schemaVersionId, VisualizationType visualization) {
