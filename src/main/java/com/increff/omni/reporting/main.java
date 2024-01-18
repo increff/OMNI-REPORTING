@@ -11,10 +11,13 @@ import com.increff.commons.queryexecutor.QueryExecutorClient;
 import com.increff.commons.springboot.audit.api.AuditApi;
 import com.increff.commons.springboot.audit.dao.AuditDao;
 import com.increff.commons.springboot.audit.dao.DaoProvider;
+import com.increff.commons.springboot.common.JsonUtil;
 import com.increff.omni.reporting.config.ApplicationProperties;
 import com.increff.omni.reporting.dto.CommonDtoHelper;
 import com.increff.omni.reporting.util.FileDownloadUtil;
 import com.increff.service.encryption.EncryptionClient;
+import lombok.extern.log4j.Log4j2;
+import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.hc.client5.http.ConnectionKeepAliveStrategy;
 import org.apache.hc.client5.http.classic.HttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
@@ -31,6 +34,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -46,11 +50,13 @@ import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.client.RestTemplate;
 
+import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
 import java.io.IOException;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -67,6 +73,9 @@ public class main {
     @Autowired
     private ApplicationProperties applicationProperties;
 
+    @Autowired
+    private DataSource dataSource;
+
     public static void main(String[] args) {
         SpringApplication.run(main.class, args);
     }
@@ -82,6 +91,12 @@ public class main {
         AuditApi auditApi = new AuditApi();
 //        auditApi.setProvider(daoProvider);
         return auditApi;
+    }
+
+    @PostConstruct
+    public void printDataSourceProps() throws SQLException {
+        System.out.println("DataSource Name :" + JsonUtil.serialize(dataSource.getClass().getName()));
+        System.out.println("DataSource Metadata :" + dataSource.getConnection().getMetaData());
     }
 
     @Bean

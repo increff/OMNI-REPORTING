@@ -47,13 +47,13 @@ public class StandardController {
 
     @Operation(summary = "Get Reports")
     @GetMapping(value = "/reports")
-    public List<ReportData> selectByOrgId(@RequestParam(value = "isDashboard") Boolean isDashboard) throws ApiException {
+    public List<ReportData> selectByOrgId(@RequestParam Boolean isDashboard) throws ApiException {
         return reportDto.selectByOrg(isDashboard);
     }
 
     @Operation(summary = "Get Report by Alias")
     @GetMapping(value = "/reports/find")
-    public ReportData selectByAlias(@RequestParam(value = "isDashboard") Boolean isDashboard, @RequestParam(value = "alias") String alias) throws ApiException {
+    public ReportData selectByAlias(@RequestParam Boolean isDashboard, @RequestParam String alias) throws ApiException {
         return reportDto.selectByAlias(isDashboard, alias);
     }
 
@@ -109,7 +109,7 @@ public class StandardController {
 
     @Operation(summary = "Get Schedules for an organization")
     @GetMapping(value = "/schedules")
-    public List<ReportScheduleData> getScheduleReports(@RequestParam(value = "pageNo") Integer pageNo, @RequestParam(value = "pageSize") Integer pageSize) throws ApiException {
+    public List<ReportScheduleData> getScheduleReports(@RequestParam Integer pageNo, @RequestParam Integer pageSize) throws ApiException {
         return reportScheduleDto.getScheduleReports(pageNo, pageSize);
     }
 
@@ -121,8 +121,7 @@ public class StandardController {
 
     @Operation(summary = "Get Schedule requests for an organization")
     @GetMapping(value = "/schedules/requests")
-    public List<ReportRequestData> getScheduleReportRequests(@RequestParam(value = "pageNo") Integer pageNo,
-                                                         @RequestParam(value = "pageSize") Integer pageSize) throws ApiException {
+    public List<ReportRequestData> getScheduleReportRequests(@RequestParam Integer pageNo, @RequestParam Integer pageSize) throws ApiException {
         return reportScheduleDto.getScheduledRequests(pageNo, pageSize);
     }
 
@@ -141,7 +140,7 @@ public class StandardController {
 
     @Operation(summary = "Enable / Disable Report Schedule")
     @PatchMapping(value = "/schedules/{id}/status")
-    public void editStatus(@PathVariable(value = "id") Integer id, @RequestParam(value = "isEnabled") Boolean isEnabled) throws ApiException {
+    public void editStatus(@PathVariable(value = "id") Integer id, @RequestParam Boolean isEnabled) throws ApiException {
         reportScheduleDto.updateStatus(id, isEnabled);
     }
 

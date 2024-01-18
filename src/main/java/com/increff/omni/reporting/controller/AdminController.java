@@ -6,7 +6,7 @@ import com.increff.omni.reporting.model.form.*;
 import com.increff.commons.springboot.common.ApiException;
 import io.swagger.v3.oas.annotations.Operation;
 import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.config.Configurator;
 import io.swagger.v3.oas.annotations.Parameter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -256,12 +256,12 @@ public class AdminController {
         return customReportAccessDto.getAllDataByReport(reportId);
     }
 
-//    @Operation(summary = "Change Log Level")
-//    @RequestMapping(value = "/log", method = RequestMethod.PUT)
-//    public void changeLogLevel(@RequestParam Level level) {
-//        LogManager.getRootLogger().setLevel(level);
-//    }
-
+    @Operation(description = "Change log level")
+    @RequestMapping(value = "", method = RequestMethod.PUT)
+    public String changeLogLevel(@RequestParam("level") Level level) {
+        Configurator.setLevel("com.increff.omni.reporting", level);
+        return String.format("Log level changed successfully to %s", level.toString());
+    }
 
     // Report admin APIs
 
