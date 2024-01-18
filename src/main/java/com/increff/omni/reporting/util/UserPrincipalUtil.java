@@ -35,9 +35,6 @@ public class UserPrincipalUtil {
         UserPrincipal principal = SecurityUtil.getPrincipal();
         List<String> accessRoles = principal.getRoles();
         accessRoles.retainAll(ADMIN_AUTHORITIES);
-        // !!!!!!!!!!!!!!!!!!!!!
-        accessRoles = new ArrayList<>(); // TODO : REMOVE BEFORE RELEASE !!!!!!
-        // !!!!!!!!!!!!!!!!!!!!!
 
         // If user has admin authorities, then do not set any param as query will have default value as column name
         // Which will make sure all values are selected
