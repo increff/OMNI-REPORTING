@@ -15,6 +15,7 @@ import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
 import com.nextscm.commons.spring.common.ConvertUtil;
 import lombok.Setter;
+import lombok.extern.log4j.Log4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -32,6 +33,7 @@ import static com.increff.omni.reporting.util.ValidateUtil.validateReportForm;
 
 @Service
 @Setter
+@Log4j
 public class ReportDto extends AbstractDto {
 
     @Autowired
@@ -160,6 +162,7 @@ public class ReportDto extends AbstractDto {
         ReportPojo report = reportApi.getCheck(form.getReportId());
         Integer schemaVersionId = report.getSchemaVersionId();
         Integer orgId = orgSchemaApi.getCheckBySchemaVersionId(schemaVersionId).get(0).getOrgId();
+        log.info("Testing query on orgId : " + orgId + " schemaVersionId : " + schemaVersionId + " reportName : " + report.getName() + " reportId : " + report.getId());
 
         List<Map<String, String>> data = getLiveDataForAnyOrganization(form, orgId);
         ChartInterface chartInterface = getChartData(report.getChartType());
