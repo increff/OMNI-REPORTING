@@ -7,7 +7,6 @@ import com.increff.commons.springboot.common.ApiException;
 import io.swagger.v3.oas.annotations.Operation;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.config.Configurator;
-import io.swagger.v3.oas.annotations.Parameter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -56,8 +55,7 @@ public class AdminController {
 
     @Operation(summary = "Update Connection")
     @PutMapping(value = "/connections/{id}")
-    public ConnectionData update(@Parameter(description = "id to be updated") @PathVariable("id") Integer id,
-                                 @RequestBody ConnectionForm form) throws ApiException {
+    public ConnectionData update(@PathVariable Integer id, @RequestBody ConnectionForm form) throws ApiException {
         return connectionDto.update(id, form);
     }
 
@@ -75,21 +73,19 @@ public class AdminController {
 
     @Operation(summary = "Edit Input Control")
     @PutMapping(value = "/controls/{id}")
-    public InputControlData updateInputControl(@Parameter(description = "id to be updated") @PathVariable("id") Integer id,
-                                               @RequestBody InputControlUpdateForm form) throws ApiException {
+    public InputControlData updateInputControl(@PathVariable Integer id, @RequestBody InputControlUpdateForm form) throws ApiException {
         return inputControlDto.update(id, form);
     }
 
     @Operation(summary = "Get Input Control")
     @GetMapping(value = "/controls/{id}")
-    public InputControlData getInputControl(@Parameter(description = "id to fetch corresponding data")
-                                                @PathVariable("id") Integer id) throws ApiException {
+    public InputControlData getInputControl(@PathVariable Integer id) throws ApiException {
         return inputControlDto.getById(id);
     }
 
     @Operation(summary = "Select all global controls")
     @GetMapping(value = "/schemas/{schemaVersionId}/controls/global")
-    public List<InputControlData> selectAllGlobal(@PathVariable("schemaVersionId") Integer schemaVersionId) throws ApiException {
+    public List<InputControlData> selectAllGlobal(@PathVariable Integer schemaVersionId) throws ApiException {
         return inputControlDto.selectAllGlobal(schemaVersionId);
     }
 
@@ -101,7 +97,7 @@ public class AdminController {
 
     @Operation(summary = "Update Schema")
     @PutMapping(value = "/schema/{schemaVersionId}")
-    public SchemaVersionData updateSchema(@PathVariable("schemaVersionId") Integer schemaVersionId, @RequestBody SchemaVersionForm form) throws ApiException {
+    public SchemaVersionData updateSchema(@PathVariable Integer schemaVersionId, @RequestBody SchemaVersionForm form) throws ApiException {
         return schemaDto.update(schemaVersionId, form);
     }
 
@@ -119,26 +115,25 @@ public class AdminController {
 
     @Operation(summary = "Edit Report")
     @PutMapping(value = "/reports/{reportId}")
-    public ReportData edit(@PathVariable("reportId") Integer reportId, @RequestBody ReportForm form) throws ApiException {
+    public ReportData edit(@PathVariable Integer reportId, @RequestBody ReportForm form) throws ApiException {
         return reportDto.edit(reportId, form);
     }
 
     @Operation(summary = "Enable / Disable Report")
     @PutMapping(value = "/reports/{reportId}/status")
-    public void editStatus(@Parameter(description = "reportId to be enabled/disabled") @PathVariable("reportId") Integer reportId,
-                           @Parameter(description = "enabled/disabled flag") @RequestParam("isEnabled") Boolean isEnabled) throws ApiException {
+    public void editStatus(@PathVariable Integer reportId, @RequestParam Boolean isEnabled) throws ApiException {
          reportDto.updateStatus(reportId, isEnabled);
     }
 
     @Operation(summary = "Get Report")
     @GetMapping(value = "/reports/{reportId}")
-    public ReportData get(@PathVariable("reportId") Integer reportId) throws ApiException {
+    public ReportData get(@PathVariable Integer reportId) throws ApiException {
         return reportDto.get(reportId);
     }
 
     @Operation(summary = "Get All Report")
     @GetMapping(value = "/reports/schema-versions/{schemaVersionId}")
-    public List<ReportData> getAll(@PathVariable("schemaVersionId") Integer schemaVersionId) throws ApiException {
+    public List<ReportData> getAll(@PathVariable Integer schemaVersionId) throws ApiException {
         return reportDto.selectAllBySchemaVersion(schemaVersionId);
     }
 
@@ -162,31 +157,31 @@ public class AdminController {
 
     @Operation(summary = "Get Report Query")
     @GetMapping(value = "/reports/{reportId}/query")
-    public ReportQueryData getQuery(@PathVariable("reportId") Integer reportId) throws ApiException {
+    public ReportQueryData getQuery(@PathVariable Integer reportId) throws ApiException {
         return reportDto.getQuery(reportId);
     }
 
     @Operation(summary = "Map control to a report")
     @PostMapping(value = "/reports/{reportId}/controls/{controlId}")
-    public void mapReportToControl(@PathVariable("reportId") Integer reportId, @PathVariable("controlId") Integer controlId) throws ApiException {
+    public void mapReportToControl(@PathVariable Integer reportId, @PathVariable Integer controlId) throws ApiException {
         reportDto.mapToControl(reportId, controlId);
     }
 
     @Operation(summary = "Delete report control")
     @DeleteMapping(value = "/reports/{reportId}/controls/{controlId}")
-    public void deleteReportToControl(@PathVariable("reportId") Integer reportId, @PathVariable("controlId") Integer controlId) throws ApiException {
+    public void deleteReportToControl(@PathVariable Integer reportId, @PathVariable Integer controlId) throws ApiException {
         reportDto.deleteReportControl(reportId, controlId);
     }
 
     @Operation(summary = "Add validation group")
     @PostMapping(value = "/reports/{reportId}/controls/validations")
-    public void addValidationGroup(@PathVariable("reportId") Integer reportId, @RequestBody ValidationGroupForm groupForm) throws ApiException {
+    public void addValidationGroup(@PathVariable Integer reportId, @RequestBody ValidationGroupForm groupForm) throws ApiException {
         reportDto.addValidationGroup(reportId, groupForm);
     }
 
     @Operation(summary = "Delete validation group")
     @DeleteMapping(value = "/reports/{reportId}/controls/validations")
-    public void deleteValidationGroup(@PathVariable("reportId") Integer reportId, @RequestParam("groupName") String groupName) throws ApiException {
+    public void deleteValidationGroup(@PathVariable Integer reportId, @RequestParam String groupName) throws ApiException {
         reportDto.deleteValidationGroup(reportId, groupName);
     }
 
@@ -204,13 +199,13 @@ public class AdminController {
 
     @Operation(summary = "Map organization to a schema")
     @PostMapping(value = "/orgs/{orgId}/schema/{schemaVersionId}")
-    public OrgSchemaData addSchemaMapping(@PathVariable("orgId") Integer orgId, @PathVariable("schemaVersionId") Integer schemaVersionId) throws ApiException {
+    public OrgSchemaData addSchemaMapping(@PathVariable Integer orgId, @PathVariable Integer schemaVersionId) throws ApiException {
         return organizationDto.mapToSchema(orgId, schemaVersionId);
     }
 
     @Operation(summary = "Map organization to a connection")
     @PostMapping(value = "/orgs/{orgId}/connections/{connectionId}")
-    public OrgConnectionData addConnectionMapping(@PathVariable("orgId") Integer orgId, @PathVariable("connectionId") Integer connectionId) throws ApiException {
+    public OrgConnectionData addConnectionMapping(@PathVariable Integer orgId, @PathVariable Integer connectionId) throws ApiException {
         return organizationDto.mapToConnection(orgId, connectionId);
     }
 
@@ -234,7 +229,7 @@ public class AdminController {
 
     @Operation(summary = "Update Directory")
     @PutMapping(value = "/directories/{directoryId}")
-    public DirectoryData update(@PathVariable("directoryId") Integer directoryId, @RequestBody DirectoryForm form) throws ApiException {
+    public DirectoryData update(@PathVariable Integer directoryId, @RequestBody DirectoryForm form) throws ApiException {
         return directoryDto.update(directoryId, form);
     }
 
@@ -246,19 +241,19 @@ public class AdminController {
 
     @Operation(summary = "Delete Custom Report Access")
     @DeleteMapping(value = "/reports/custom-access/{id}")
-    public void deleteCustomAccess(@PathVariable("id") Integer id) {
+    public void deleteCustomAccess(@PathVariable Integer id) {
         customReportAccessDto.deleteCustomReportAccess(id);
     }
 
     @Operation(summary = "Get all Custom Report Access")
     @GetMapping(value = "/reports/{reportId}/custom-access")
-    public List<CustomReportAccessData> getAllCustomAccess(@PathVariable("reportId") Integer reportId) throws ApiException {
+    public List<CustomReportAccessData> getAllCustomAccess(@PathVariable Integer reportId) throws ApiException {
         return customReportAccessDto.getAllDataByReport(reportId);
     }
 
     @Operation(description = "Change log level")
-    @RequestMapping(value = "", method = RequestMethod.PUT)
-    public String changeLogLevel(@RequestParam("level") Level level) {
+    @PutMapping(value = "/log")
+    public String changeLogLevel(@RequestParam Level level) {
         Configurator.setLevel("com.increff.omni.reporting", level);
         return String.format("Log level changed successfully to %s", level.toString());
     }
@@ -273,13 +268,13 @@ public class AdminController {
 
     @Operation(summary = "Request Report")
     @PostMapping(value = "/request-report/orgs/{orgId}")
-    public void requestReport(@RequestBody ReportRequestForm form, @PathVariable("orgId") Integer orgId) throws ApiException {
+    public void requestReport(@RequestBody ReportRequestForm form, @PathVariable Integer orgId) throws ApiException {
         reportRequestDto.requestReportForAnyOrg(form, orgId);
     }
 
     @Operation(summary = "Get Reports")
     @GetMapping(value = "/reports/orgs/{orgId}")
-    public List<ReportData> selectByOrgId(@PathVariable("orgId") Integer orgId, @RequestParam("isDashboard") Boolean isDashboard) throws ApiException {
+    public List<ReportData> selectByOrgId(@PathVariable Integer orgId, @RequestParam Boolean isDashboard) throws ApiException {
         return reportDto.selectByOrg(orgId, isDashboard);
     }
 
@@ -292,13 +287,13 @@ public class AdminController {
 
     @Operation(summary = "Select controls for a report for given organization")
     @GetMapping(value = "/orgs/{orgId}/reports/{reportId}/controls")
-    public List<InputControlData> selectByReportId(@PathVariable("reportId") Integer reportId, @PathVariable("orgId") Integer orgId) throws ApiException {
+    public List<InputControlData> selectByReportId(@PathVariable Integer reportId, @PathVariable Integer orgId) throws ApiException {
         return inputControlDto.selectForReport(reportId, orgId);
     }
 
     @Operation(summary = "Get Schedules for all organizations")
     @GetMapping(value = "/schedules")
-    public List<ReportScheduleData> getScheduleReports(@RequestParam("pageNo") Integer pageNo, @RequestParam("pageSize") Integer pageSize) throws ApiException {
+    public List<ReportScheduleData> getScheduleReports(@RequestParam Integer pageNo, @RequestParam Integer pageSize) throws ApiException {
         return reportScheduleDto.getScheduleReportsForAllOrgs(pageNo, pageSize);
     }
 

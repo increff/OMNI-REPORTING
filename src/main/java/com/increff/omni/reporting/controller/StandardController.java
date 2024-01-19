@@ -41,7 +41,7 @@ public class StandardController {
 
     @Operation(summary = "Select controls for a report")
     @GetMapping(value = "/reports/{reportId}/controls")
-    public List<InputControlData> selectByReportId(@PathVariable(value = "reportId") Integer reportId) throws ApiException {
+    public List<InputControlData> selectByReportId(@PathVariable Integer reportId) throws ApiException {
         return inputControlDto.selectForReport(reportId);
     }
 
@@ -65,7 +65,7 @@ public class StandardController {
 
     @Operation(summary = "Get validation group")
     @GetMapping(value = "/reports/{reportId}/controls/validations")
-    public List<ValidationGroupData> getValidationGroups(@PathVariable(value = "reportId") Integer reportId) {
+    public List<ValidationGroupData> getValidationGroups(@PathVariable Integer reportId) {
         return reportDto.getValidationGroups(reportId);
     }
 
@@ -89,14 +89,14 @@ public class StandardController {
 
     @Operation(summary = "Get Result of Request")
     @GetMapping(value = "/request-report/{requestId}")
-    public String getFile(@PathVariable(value = "requestId") Integer requestId) throws
+    public String getFile(@PathVariable Integer requestId) throws
             ApiException, IOException {
         return reportRequestDto.getReportFile(requestId);
     }
 
     @Operation(summary = "View CSV of Request")
     @GetMapping(value = "/request-report/{requestId}/view")
-    public List<Map<String, String>> viewFile(@PathVariable(value = "requestId") Integer requestId) throws ApiException, IOException {
+    public List<Map<String, String>> viewFile(@PathVariable Integer requestId) throws ApiException, IOException {
         return reportRequestDto.viewReport(requestId);
     }
 
@@ -115,7 +115,7 @@ public class StandardController {
 
     @Operation(summary = "Get Schedule by ID")
     @GetMapping(value = "/schedules/{id}")
-    public ReportScheduleData getScheduleReports(@PathVariable(value = "id") Integer id) throws ApiException {
+    public ReportScheduleData getScheduleReports(@PathVariable Integer id) throws ApiException {
         return reportScheduleDto.getScheduleReport(id);
     }
 
@@ -128,19 +128,19 @@ public class StandardController {
     // Scheduling a Report
     @Operation(summary = "Edit Schedule of a Report")
     @PutMapping(value = "/schedules/{id}")
-    public void editScheduleReport(@PathVariable(value = "id") Integer id, @RequestBody ReportScheduleForm form) throws ApiException {
+    public void editScheduleReport(@PathVariable Integer id, @RequestBody ReportScheduleForm form) throws ApiException {
         reportScheduleDto.editScheduleReport(id, form);
     }
 
     @Operation(summary = "Delete Schedule of a Report")
     @DeleteMapping(value = "/schedules/{id}")
-    public void deleteSchedule(@PathVariable(value = "id") Integer id) throws ApiException {
+    public void deleteSchedule(@PathVariable Integer id) throws ApiException {
         reportScheduleDto.deleteSchedule(id);
     }
 
     @Operation(summary = "Enable / Disable Report Schedule")
     @PatchMapping(value = "/schedules/{id}/status")
-    public void editStatus(@PathVariable(value = "id") Integer id, @RequestParam Boolean isEnabled) throws ApiException {
+    public void editStatus(@PathVariable Integer id, @RequestParam Boolean isEnabled) throws ApiException {
         reportScheduleDto.updateStatus(id, isEnabled);
     }
 

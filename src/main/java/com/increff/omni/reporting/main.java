@@ -9,15 +9,11 @@ import com.fasterxml.jackson.datatype.jsr310.ser.ZonedDateTimeSerializer;
 import com.increff.account.client.AuthClient;
 import com.increff.commons.queryexecutor.QueryExecutorClient;
 import com.increff.commons.springboot.audit.api.AuditApi;
-import com.increff.commons.springboot.audit.dao.AuditDao;
-import com.increff.commons.springboot.audit.dao.DaoProvider;
 import com.increff.commons.springboot.common.JsonUtil;
 import com.increff.omni.reporting.config.ApplicationProperties;
 import com.increff.omni.reporting.dto.CommonDtoHelper;
 import com.increff.omni.reporting.util.FileDownloadUtil;
 import com.increff.service.encryption.EncryptionClient;
-import lombok.extern.log4j.Log4j2;
-import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.hc.client5.http.ConnectionKeepAliveStrategy;
 import org.apache.hc.client5.http.classic.HttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
@@ -34,19 +30,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
-import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.jdbc.datasource.DriverManagerDataSource;
-import org.springframework.orm.jpa.JpaVendorAdapter;
-import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
-import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.client.RestTemplate;
 
@@ -120,8 +109,7 @@ public class main {
 
     @Bean
     public AuthClient authClient() throws NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
-        return new AuthClient(applicationProperties.getAuthBaseUrl(), applicationProperties.getAuthAppToken(),
-                new RestTemplate(getRequestFactory()));
+        return new AuthClient(applicationProperties.getAuthBaseUrl(), applicationProperties.getAuthAppToken());
     }
 
     private ClientHttpRequestFactory getRequestFactory() {
