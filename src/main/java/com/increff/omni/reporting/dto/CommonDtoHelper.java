@@ -176,7 +176,7 @@ public class CommonDtoHelper {
                     .collect(Collectors.toList()).get(0);
             ReportControlsPojo p2 = reportControlsPojos.stream().filter(r -> r.getControlId().equals(o2.getId()))
                     .collect(Collectors.toList()).get(0);
-            return Objects.equals(p1.getId(), p2.getId()) ? 0 : (p1.getCreatedAt().isAfter(p2.getCreatedAt()) ? 1 : -1);
+            return Objects.equals(p1.getId(), p2.getId()) ? 0 : (p1.getId() > p2.getId() ? 1 : -1);
         });
     }
 

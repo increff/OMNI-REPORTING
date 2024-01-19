@@ -20,7 +20,7 @@ public class DashboardChartPojo extends AbstractVersionedPojo{
     @Column(nullable = false)
     private String chartAlias;
 
-    @Column(nullable = false)
+    @Column(name = "row_no", nullable = false)
     private Integer row;
     @Column(nullable = false)
     private Integer col;
