@@ -10,6 +10,7 @@ import com.increff.omni.reporting.config.ApplicationProperties;
 import com.increff.omni.reporting.model.constants.*;
 import com.increff.omni.reporting.model.data.*;
 import com.increff.omni.reporting.model.form.*;
+import com.increff.omni.reporting.pojo.DashboardPojo;
 import com.increff.omni.reporting.pojo.DefaultValuePojo;
 import com.nextscm.commons.spring.common.ApiException;
 import org.junit.Test;
@@ -22,16 +23,20 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import java.util.*;
 
 import static com.increff.omni.reporting.helper.ConnectionTestHelper.getConnectionForm;
+import static com.increff.omni.reporting.helper.CustomReportAccessTestHelper.getCustomReportAccessForm;
 import static com.increff.omni.reporting.helper.DashboardDtoTestHelper.*;
 import static com.increff.omni.reporting.helper.DirectoryTestHelper.getDirectoryForm;
 import static com.increff.omni.reporting.helper.InputControlTestHelper.getInputControlForm;
 import static com.increff.omni.reporting.helper.OrgTestHelper.getOrganizationForm;
 import static com.increff.omni.reporting.helper.ReportTestHelper.*;
 import static com.increff.omni.reporting.helper.SchemaTestHelper.getSchemaForm;
+import static com.increff.omni.reporting.security.StandardSecurityConfig.REPORT_CUSTOM;
 import static org.junit.Assert.*;
 
 public class DashboardDtoTest extends AbstractTest {
 
+    @Autowired
+    private CustomReportAccessDto customReportAccessDto;
     @Autowired
     private ReportDto reportDto;
     @Autowired
@@ -53,7 +58,11 @@ public class DashboardDtoTest extends AbstractTest {
     @Autowired
     private DefaultValueApi defaultValueApi;
     @Autowired
+    private DashboardApi dashboardApi;
+    @Autowired
     private ApplicationProperties properties;
+
+    private final Integer orgId = 100001;
 
 
     Integer schemaVersionId;
@@ -62,7 +71,7 @@ public class DashboardDtoTest extends AbstractTest {
         reportDto.setEncryptionClient(encryptionClient);
         connectionDto.setEncryptionClient(encryptionClient);
         inputControlDto.setEncryptionClient(encryptionClient);
-        OrganizationForm form = getOrganizationForm(100001, "increff");
+        OrganizationForm form = getOrganizationForm(orgId, "increff");
         OrganizationData organizationData = organizationDto.add(form);
         List<DirectoryData> data = directoryDto.getAllDirectories();
         DirectoryForm directoryForm = getDirectoryForm("Standard Reports", data.get(0).getId());
@@ -319,5 +328,30 @@ public class DashboardDtoTest extends AbstractTest {
         assertEquals(0, dashboardDto.getDashboardsByOrgId().size());
         assertEquals(0, defaultValueApi.getByDashboardId(data.getId()).size());
         assertEquals(0, dashboardChartApi.getByDashboardId(data.getId()).size());
+    }
+
+    @Test
+    public void testDashboardsWithAllStandardChartsNotVisibleForCustomReportUsers() throws ApiException {
+        List<ReportData> chartDatas = commonSetup(ReportType.STANDARD);
+        DashboardData data = dashboardDto.addDashboard(getDashboardAddForm("Dashboard_1",
+                Arrays.asList(getDashboardChartForm(chartDatas.get(0).getAlias(), 0, 0, 0, RowHeight.HALF),
+                        getDashboardChartForm(chartDatas.get(1).getAlias(), 0, 1, 0, RowHeight.HALF),
+                        getDashboardChartForm(chartDatas.get(2).getAlias(), 1, 0, 0, RowHeight.HALF))));
+
+        // Create Role Report.Custom User
+        SecurityContext securityContext = Mockito.mock(SecurityContext.class, Mockito.withSettings().serializable());
+        Authentication authentication = Mockito.mock(Authentication.class);
+        Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+        UserPrincipal principal = new UserPrincipal();
+        principal.setDomainId(orgId);
+        principal.setRoles(Collections.singletonList(REPORT_CUSTOM));
+        Mockito.when(securityContext.getAuthentication().getPrincipal()).thenReturn(principal);
+        SecurityContextHolder.setContext(securityContext);
+
+        List<DashboardPojo> dashboardPojos = dashboardApi.getByOrgId(orgId);
+        assertEquals(1, dashboardPojos.size());
+
+        List<DashboardListData> dashboardData = dashboardDto.getDashboardsByOrgId();
+        assertEquals(0, dashboardData.size());
     }
 }
