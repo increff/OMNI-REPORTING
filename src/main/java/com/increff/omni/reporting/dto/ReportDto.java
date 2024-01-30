@@ -162,7 +162,7 @@ public class ReportDto extends AbstractDto {
         ReportPojo report = reportApi.getCheck(form.getReportId());
         Integer schemaVersionId = report.getSchemaVersionId();
         Integer orgId = orgSchemaApi.getCheckBySchemaVersionId(schemaVersionId).get(0).getOrgId();
-        log.info("Testing query on orgId : " + orgId + " schemaVersionId : " + schemaVersionId + " reportName : " + report.getName() + " reportId : " + report.getId());
+        log.debug("Testing query on orgId : " + orgId + " schemaVersionId : " + schemaVersionId + " reportName : " + report.getName() + " reportId : " + report.getId());
 
         List<Map<String, String>> data = getLiveDataForAnyOrganization(form, orgId);
         ChartInterface chartInterface = getChartData(report.getChartType());
