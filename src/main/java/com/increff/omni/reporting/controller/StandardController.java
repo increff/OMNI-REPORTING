@@ -206,7 +206,7 @@ public class StandardController {
 
     @ApiOperation(value = "Get Dashboards For Org")
     @RequestMapping(value = "/dashboards", method = RequestMethod.GET)
-    public List<DashboardListData> getDashboards() {
+    public List<DashboardListData> getDashboards() throws ApiException {
         return dashboardDto.getDashboardsByOrgId();
     }
 

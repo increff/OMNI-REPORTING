@@ -22,9 +22,10 @@ public class StandardSecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private RateLimitingFilter rateLimitingFilter;
 
-    private static final String APP_ADMIN = "app.admin";
-    private static final String REPORT_ADMIN = "report.admin";
-    private static final String REPORT_STANDARD = "report.standard";
+    public static final String APP_ADMIN = "app.admin";
+    public static final String REPORT_ADMIN = "report.admin";
+    public static final String REPORT_STANDARD = "report.standard";
+    public static final String REPORT_CUSTOM = "report.custom";
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -33,10 +34,10 @@ public class StandardSecurityConfig extends WebSecurityConfigurerAdapter {
                 .requestMatchers()//
                 .antMatchers("/standard/**").and().authorizeRequests()//
                 .antMatchers("/standard/schedules/**").hasAnyAuthority(APP_ADMIN)
-                .antMatchers(HttpMethod.POST, "/standard/dashboards/{dashboardId}/view").hasAnyAuthority(APP_ADMIN, REPORT_ADMIN, REPORT_STANDARD)//
-                .antMatchers(HttpMethod.GET, "/standard/dashboards/**").hasAnyAuthority(APP_ADMIN, REPORT_ADMIN, REPORT_STANDARD)//
+                .antMatchers(HttpMethod.POST, "/standard/dashboards/{dashboardId}/view").hasAnyAuthority(APP_ADMIN, REPORT_ADMIN, REPORT_STANDARD, REPORT_CUSTOM)//
+                .antMatchers(HttpMethod.GET, "/standard/dashboards/**").hasAnyAuthority(APP_ADMIN, REPORT_ADMIN, REPORT_STANDARD, REPORT_CUSTOM)//
                 .antMatchers("/standard/dashboards/**").hasAnyAuthority(APP_ADMIN)//
-                .antMatchers("/standard/**").hasAnyAuthority(APP_ADMIN, REPORT_ADMIN, REPORT_STANDARD)//
+                .antMatchers("/standard/**").hasAnyAuthority(APP_ADMIN, REPORT_ADMIN, REPORT_STANDARD, REPORT_CUSTOM)//
                 .and().cors().and().csrf().disable()
                 .addFilterBefore(authTokenFilter, BasicAuthenticationFilter.class)
                 .addFilterAfter(rateLimitingFilter, AuthTokenFilter.class)

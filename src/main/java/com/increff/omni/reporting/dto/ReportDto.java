@@ -15,6 +15,7 @@ import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
 import com.nextscm.commons.spring.common.ConvertUtil;
 import lombok.Setter;
+import lombok.extern.log4j.Log4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -32,6 +33,7 @@ import static com.increff.omni.reporting.util.ValidateUtil.validateReportForm;
 
 @Service
 @Setter
+@Log4j
 public class ReportDto extends AbstractDto {
 
     @Autowired
@@ -91,10 +93,14 @@ public class ReportDto extends AbstractDto {
     public List<Map<String, String>> getLiveDataForAnyOrganization(ReportRequestForm form, Integer orgId)
             throws ApiException, IOException {
         OrganizationPojo organizationPojo = organizationApi.getCheck(orgId);
-        ReportPojo reportPojo = validateReportForOrg(form, orgId);
-        OrgConnectionPojo orgConnectionPojo = orgConnectionApi.getCheckByOrgId(orgId);
-        ConnectionPojo connectionPojo = connectionApi.getCheck(orgConnectionPojo.getConnectionId());
+        ReportPojo reportPojo = reportApi.getCheck(form.getReportId());
+
+        validateReportForOrg(reportPojo, orgId);
+        validateQueryExists(reportPojo, form);
+
+        ConnectionPojo connectionPojo = connectionApi.getCheck(orgConnectionApi.getCheckByOrgId(orgId).getConnectionId());
         String password = getDecryptedPassword(connectionPojo.getPassword());
+
         ZonedDateTime startTime = ZonedDateTime.now();
         try {
             List<ReportInputParamsPojo> reportInputParamsPojoList = validateControls(form, orgId, reportPojo, password);
@@ -156,6 +162,7 @@ public class ReportDto extends AbstractDto {
         ReportPojo report = reportApi.getCheck(form.getReportId());
         Integer schemaVersionId = report.getSchemaVersionId();
         Integer orgId = orgSchemaApi.getCheckBySchemaVersionId(schemaVersionId).get(0).getOrgId();
+        log.debug("Testing query on orgId : " + orgId + " schemaVersionId : " + schemaVersionId + " reportName : " + report.getName() + " reportId : " + report.getId());
 
         List<Map<String, String>> data = getLiveDataForAnyOrganization(form, orgId);
         ChartInterface chartInterface = getChartData(report.getChartType());
@@ -294,14 +301,17 @@ public class ReportDto extends AbstractDto {
         return CommonDtoHelper.getReportInputParamsPojoList(inputParamsMap, form.getTimezone(), orgId, inputDisplayStringMap);
     }
 
-    private ReportPojo validateReportForOrg(ReportRequestForm form, Integer orgId) throws ApiException {
-        ReportPojo reportPojo = reportApi.getCheck(form.getReportId());
+    private ReportPojo validateReportForOrg(ReportPojo reportPojo, Integer orgId) throws ApiException {
         validateCustomReportAccess(reportPojo, orgId);
         if(!reportPojo.getIsChart())
             throw new ApiException(ApiStatus.BAD_DATA, "Live data is only available for dashboards");
+        return reportPojo;
+    }
+
+    private void validateQueryExists(ReportPojo reportPojo, ReportRequestForm form) throws ApiException {
         ReportQueryPojo reportQueryPojo = reportQueryApi.getByReportId(reportPojo.getId());
         if (Objects.isNull(reportQueryPojo) && Objects.isNull(form.getQuery()))
             throw new ApiException(ApiStatus.BAD_DATA, "No query defined for report : " + reportPojo.getName());
-        return reportPojo;
     }
+
 }

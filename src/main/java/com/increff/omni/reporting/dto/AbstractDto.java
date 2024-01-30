@@ -23,6 +23,7 @@ import java.time.ZonedDateTime;
 import java.util.*;
 
 import static com.increff.omni.reporting.dto.CommonDtoHelper.getValueFromQuotes;
+import static com.increff.omni.reporting.security.StandardSecurityConfig.*;
 
 @Log4j
 @Component
@@ -47,6 +48,11 @@ public class AbstractDto extends AbstractDtoApi {
     @Autowired
     private CustomReportAccessApi customReportAccessApi;
 
+    public static boolean isCustomReportUser() {
+        if(getPrincipal().getRoles().contains(REPORT_ADMIN) || getPrincipal().getRoles().contains(APP_ADMIN))
+            return false;
+        return getPrincipal().getRoles().contains(REPORT_CUSTOM);
+    }
 
     protected static int getOrgId() {
         return getPrincipal().getDomainId();
@@ -153,8 +159,12 @@ public class AbstractDto extends AbstractDtoApi {
     }
 
     protected void validateCustomReportAccess(ReportPojo reportPojo, Integer orgId) throws ApiException {
-        if (reportPojo.getType().equals(ReportType.STANDARD))
+        if (reportPojo.getType().equals(ReportType.STANDARD)){
+            if(isCustomReportUser())
+                throw new ApiException(ApiStatus.BAD_DATA, "Custom Report User can't access standard report : "
+                        + reportPojo.getName());
             return;
+        }
         CustomReportAccessPojo customReportAccessPojo =
                 customReportAccessApi.getByReportAndOrg(reportPojo.getId(), orgId);
         if (Objects.isNull(customReportAccessPojo)) {

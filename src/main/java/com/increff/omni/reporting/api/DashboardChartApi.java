@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional(rollbackFor = ApiException.class)
@@ -25,6 +26,10 @@ public class DashboardChartApi extends AbstractApi {
             throw new ApiException(ApiStatus.BAD_DATA, "DashboardChart already exists with dashboardId: " + pojo.getDashboardId() + " chartAlias: " + pojo.getChartAlias());
         dao.persist(pojo);
         return pojo;
+    }
+
+    public List<DashboardChartPojo> getByDashboardIds(List<Integer> dashboardIds) {
+        return dao.getByDashboardIds(dashboardIds).stream().distinct().collect(Collectors.toList());
     }
 
     public List<DashboardChartPojo> getByDashboardId(Integer id) {
