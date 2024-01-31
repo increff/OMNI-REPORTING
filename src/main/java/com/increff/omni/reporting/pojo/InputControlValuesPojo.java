@@ -13,8 +13,8 @@ import jakarta.persistence.*;
 public class InputControlValuesPojo extends AbstractVersionedPojo {
 
     @Id
-    @TableGenerator(name = "organization", pkColumnValue = "organization", initialValue = 100000)
-    @GeneratedValue(strategy = GenerationType.TABLE, generator = "organization")
+    @TableGenerator(name = "organization_1", pkColumnValue = "organization_1", initialValue = 100000)
+    @GeneratedValue(strategy = GenerationType.TABLE, generator = "organization_1")
     private Integer id;
     @Column(nullable = false)
     private Integer controlId;

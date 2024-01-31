@@ -1,4 +1,4 @@
-package com.increff.omni.reporting;
+package com.increff.omni.reporting.config;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -9,8 +9,6 @@ import com.fasterxml.jackson.datatype.jsr310.ser.ZonedDateTimeSerializer;
 import com.increff.account.client.AuthClient;
 import com.increff.commons.queryexecutor.QueryExecutorClient;
 import com.increff.commons.springboot.audit.api.AuditApi;
-import com.increff.commons.springboot.common.JsonUtil;
-import com.increff.omni.reporting.config.ApplicationProperties;
 import com.increff.omni.reporting.dto.CommonDtoHelper;
 import com.increff.omni.reporting.util.FileDownloadUtil;
 import com.increff.service.encryption.EncryptionClient;
@@ -27,11 +25,8 @@ import org.apache.hc.core5.http.protocol.HttpContext;
 import org.apache.hc.core5.util.TimeValue;
 import org.apache.hc.core5.util.Timeout;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
@@ -39,54 +34,32 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.client.RestTemplate;
 
-import javax.annotation.PostConstruct;
-import javax.sql.DataSource;
 import java.io.IOException;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
-import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Iterator;
-import java.util.List;
-import java.util.Properties;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
-@SpringBootApplication(exclude = { SecurityAutoConfiguration.class })
-@ComponentScan({"com.increff.omni.reporting", "com.increff.account.client", "com.increff.commons.queryexecutor", "com.increff.commons.springboot.audit"})
-public class main {
+
+@Configuration
+public class BeanConfig {
 
     @Autowired
     private ApplicationProperties applicationProperties;
 
-    @Autowired
-    private DataSource dataSource;
-
-    public static void main(String[] args) {
-        SpringApplication.run(main.class, args);
-    }
-
-//    @Bean
-//    public AuditDao auditDao(){
-//        AuditDao auditDao = new AuditDao();
-//        return auditDao;
-//    }
-
     @Bean
     public AuditApi auditApi() {
         AuditApi auditApi = new AuditApi();
-//        auditApi.setProvider(daoProvider);
         return auditApi;
     }
 
-    @PostConstruct
-    public void printDataSourceProps() throws SQLException {
-        System.out.println("DataSource Name :" + JsonUtil.serialize(dataSource.getClass().getName()));
-        System.out.println("DataSource Metadata :" + dataSource.getConnection().getMetaData());
-    }
 
     @Bean
     public QueryExecutorClient getQueryExecutorClient() {
@@ -94,7 +67,7 @@ public class main {
                 applicationProperties.getQueryExecutorAuthDomain(),
                 applicationProperties.getQueryExecutorAuthUsername(),
                 applicationProperties.getQueryExecutorAuthPassword(),
-                new RestTemplate(getRequestFactory()));
+                new RestTemplate(getRequestFactory(applicationProperties)));
     }
 
     @Bean
@@ -108,11 +81,56 @@ public class main {
     }
 
     @Bean
-    public AuthClient authClient() throws NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
+    public AuthClient authClient(ApplicationProperties applicationProperties) throws NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
         return new AuthClient(applicationProperties.getAuthBaseUrl(), applicationProperties.getAuthAppToken());
     }
 
-    private ClientHttpRequestFactory getRequestFactory() {
+    @Bean
+    public Executor getScheduledThreadPool() {
+        return Executors.newScheduledThreadPool(6);
+    }
+
+    @Bean(name = "userReportRequestExecutor")
+    public Executor getReportRequestAsyncExecutor() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(applicationProperties.getUserReportRequestCorePool());
+        executor.setMaxPoolSize(applicationProperties.getUserReportRequestMaxPool());
+        executor.setQueueCapacity(applicationProperties.getUserReportRequestQueueCapacity());
+        executor.setWaitForTasksToCompleteOnShutdown(true);
+        executor.initialize();
+        return executor;
+    }
+
+    @Bean(name = "scheduleReportRequestExecutor")
+    public Executor getReportScheduleAsyncExecutor() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(applicationProperties.getScheduleReportRequestCorePool());
+        executor.setMaxPoolSize(applicationProperties.getScheduleReportRequestMaxPool());
+        executor.setQueueCapacity(applicationProperties.getScheduleReportRequestQueueCapacity());
+        executor.initialize();
+        return executor;
+    }
+
+    @Bean(name = "objectMapper")
+    public ObjectMapper getMapper(){
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        JavaTimeModule javaTimeModule=new JavaTimeModule();
+        javaTimeModule.addSerializer(ZonedDateTime.class,
+                new ZonedDateTimeSerializer(DateTimeFormatter.ofPattern(CommonDtoHelper.TIME_ZONE_PATTERN)));
+        javaTimeModule.addDeserializer(LocalDateTime.class, new LocalDateTimeDeserializer(DateTimeFormatter.ISO_DATE_TIME));
+        return Jackson2ObjectMapperBuilder.json().featuresToDisable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS) // ISODate
+                .modules(javaTimeModule).build();
+    }
+
+    @Bean
+    public MappingJackson2HttpMessageConverter customJackson2HttpMessageConverter() {
+        MappingJackson2HttpMessageConverter jsonConverter = new MappingJackson2HttpMessageConverter();
+        jsonConverter.setObjectMapper(getMapper());
+        return jsonConverter;
+    }
+
+    private ClientHttpRequestFactory getRequestFactory(ApplicationProperties applicationProperties) {
 
         /* HttpClient by default uses BasicHttpClientConnectionManager which uses single connection object and hence
          * is not preferred to be used in case the application is heavy on rest call.
@@ -161,51 +179,4 @@ public class main {
 
         return factory;
     }
-
-    @Bean
-    public Executor getScheduledThreadPool() {
-        return Executors.newScheduledThreadPool(6);
-    }
-
-    @Bean(name = "userReportRequestExecutor")
-    public Executor getReportRequestAsyncExecutor() {
-        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(applicationProperties.getUserReportRequestCorePool());
-        executor.setMaxPoolSize(applicationProperties.getUserReportRequestMaxPool());
-        executor.setQueueCapacity(applicationProperties.getUserReportRequestQueueCapacity());
-        executor.setWaitForTasksToCompleteOnShutdown(true);
-        executor.initialize();
-        return executor;
-    }
-
-    @Bean(name = "scheduleReportRequestExecutor")
-    public Executor getReportScheduleAsyncExecutor() {
-        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(applicationProperties.getScheduleReportRequestCorePool());
-        executor.setMaxPoolSize(applicationProperties.getScheduleReportRequestMaxPool());
-        executor.setQueueCapacity(applicationProperties.getScheduleReportRequestQueueCapacity());
-        executor.initialize();
-        return executor;
-    }
-
-    @Bean(name = "objectMapper")
-    public ObjectMapper getMapper(){
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        JavaTimeModule javaTimeModule=new JavaTimeModule();
-        javaTimeModule.addSerializer(ZonedDateTime.class,
-                new ZonedDateTimeSerializer(DateTimeFormatter.ofPattern(CommonDtoHelper.TIME_ZONE_PATTERN)));
-        javaTimeModule.addDeserializer(LocalDateTime.class, new LocalDateTimeDeserializer(DateTimeFormatter.ISO_DATE_TIME));
-        return Jackson2ObjectMapperBuilder.json().featuresToDisable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS) // ISODate
-                .modules(javaTimeModule).build();
-    }
-
-    @Bean
-    public MappingJackson2HttpMessageConverter customJackson2HttpMessageConverter() {
-        MappingJackson2HttpMessageConverter jsonConverter = new MappingJackson2HttpMessageConverter();
-        jsonConverter.setObjectMapper(getMapper());
-        return jsonConverter;
-    }
-
-
 }
