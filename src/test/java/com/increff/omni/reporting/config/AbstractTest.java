@@ -12,12 +12,14 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 @Transactional
 @SpringBootTest(properties = "spring.config.location=classpath:application-test.properties")
@@ -29,8 +31,13 @@ public abstract class AbstractTest {
     @Value("${testdb.password}")
     protected String password;
 
-    @Mock
+    @MockBean
     protected EncryptionClient encryptionClient;
+
+//    @Bean
+//    public EncryptionClient getEncryptionClient() {
+//        return Mockito.mock(EncryptionClient.class);
+//    }
 
     @BeforeEach
     public void setUp() throws AppClientException {
@@ -38,6 +45,7 @@ public abstract class AbstractTest {
         setSecurityContext();
         Mockito.when(encryptionClient.encode(Mockito.any(CryptoForm.class))).thenReturn(getCryptoData());
         Mockito.when(encryptionClient.decode(Mockito.any())).thenReturn(getDecryptedCryptoData());
+        verifyNoMoreInteractions(encryptionClient);
     }
 
     private CryptoData getCryptoData() {
