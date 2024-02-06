@@ -19,8 +19,8 @@ public class FileDownloadUtil {
     public FileDownloadUtil(String bucketName, String credentialFilePath)
             throws IOException {
         this.bucketName = bucketName;
-        GoogleCredentials credentials = ServiceAccountCredentials.fromStream(new FileInputStream(credentialFilePath));
-        storage = StorageOptions.newBuilder().setCredentials(credentials).build().getService();
+//        GoogleCredentials credentials = ServiceAccountCredentials.fromStream(new FileInputStream(c
+//        storage = StorageOptions.newBuilder().setCredentials(credentials).build().getService();
     }
 
     public URL getSignedUri(String filePath) {

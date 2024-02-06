@@ -47,9 +47,9 @@ public class DbConfig {
 	@Value("${hibernate.max.connection:100}")
 	private Integer maxConnection;
 
-	@Value("${hibernate.id.generator.stored_last_used}")
+	@Value("${hibernate.id.generator.stored_last_used:false}")
 	private Boolean hibernateIdGeneratorStoredLastUsed;
-	@Value("${hibernate.model.generator_name_as_sequence_name}")
+	@Value("${hibernate.model.generator_name_as_sequence_name:false}")
 	private Boolean hibernateModelGeneratorNameAsSequenceName;
 
 
