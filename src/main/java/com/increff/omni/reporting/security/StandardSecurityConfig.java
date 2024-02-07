@@ -33,7 +33,8 @@ public class StandardSecurityConfig extends WebSecurityConfigurerAdapter {
         http// Match only these URLs
                 .requestMatchers()//
                 .antMatchers("/standard/**").and().authorizeRequests()//
-                .antMatchers("/standard/schedules/**").hasAnyAuthority(APP_ADMIN)
+                .antMatchers("/standard/schedules/**").hasAnyAuthority(APP_ADMIN)//
+                .antMatchers("/standard/pipelines/**").hasAnyAuthority(APP_ADMIN)//
                 .antMatchers(HttpMethod.POST, "/standard/dashboards/{dashboardId}/view").hasAnyAuthority(APP_ADMIN, REPORT_ADMIN, REPORT_STANDARD, REPORT_CUSTOM)//
                 .antMatchers(HttpMethod.GET, "/standard/dashboards/**").hasAnyAuthority(APP_ADMIN, REPORT_ADMIN, REPORT_STANDARD, REPORT_CUSTOM)//
                 .antMatchers("/standard/dashboards/**").hasAnyAuthority(APP_ADMIN)//

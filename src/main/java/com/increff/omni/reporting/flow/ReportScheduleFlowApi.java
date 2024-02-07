@@ -31,28 +31,43 @@ public class ReportScheduleFlowApi extends AbstractFlowApi {
     private ReportControlsApi reportControlsApi;
     @Autowired
     private InputControlApi controlApi;
+    @Autowired
+    private SchedulePipelineApi schedulePipelineApi;
 
     private static final Pattern VALID_EMAIL_ADDRESS_REGEX =
             Pattern.compile("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$", Pattern.CASE_INSENSITIVE);
 
     public void add(ReportSchedulePojo pojo, List<String> sendTo,
                     List<ReportScheduleInputParamsPojo> reportScheduleInputParamsPojos,
-                    ReportPojo reportPojo) throws ApiException {
+                    ReportPojo reportPojo, List<Integer> pipelineIds) throws ApiException {
         CommonDtoHelper.validateCronFrequency(reportPojo, pojo);
         validateGroups(reportPojo, reportScheduleInputParamsPojos);
         reportScheduleApi.add(pojo);
-        addEmails(pojo, sendTo);
+
+        addEmailOrPipeline(pojo, sendTo, pipelineIds);
         reportScheduleApi.addScheduleInputParams(reportScheduleInputParamsPojos, pojo);
+    }
+
+    private void addEmailOrPipeline(ReportSchedulePojo pojo, List<String> sendTo, List<Integer> pipelineIds) throws ApiException {
+        if(!sendTo.isEmpty())
+            addEmails(pojo, sendTo);
+        else if(!pipelineIds.isEmpty())
+            upsertSchedulePipelines(pojo.getId(), pipelineIds);
+        else
+            throw new ApiException(ApiStatus.BAD_DATA, "No emails or pipelines given");
     }
 
     public void edit(ReportSchedulePojo pojo, List<String> sendTo,
                      List<ReportScheduleInputParamsPojo> reportScheduleInputParamsPojos,
-                     ReportPojo reportPojo) throws ApiException {
+                     ReportPojo reportPojo, List<Integer> pipelineIds) throws ApiException {
         CommonDtoHelper.validateCronFrequency(reportPojo, pojo);
         validateGroups(reportPojo, reportScheduleInputParamsPojos);
         reportScheduleApi.edit(pojo);
         reportScheduleApi.removeExistingEmails(pojo.getId());
-        addEmails(pojo, sendTo);
+        schedulePipelineApi.deleteByScheduleId(pojo.getId());
+
+        addEmailOrPipeline(pojo, sendTo, pipelineIds);
+
         reportScheduleApi.updateScheduleInputParams(reportScheduleInputParamsPojos, pojo);
     }
 
@@ -98,6 +113,11 @@ public class ReportScheduleFlowApi extends AbstractFlowApi {
         if(emailsPojos.isEmpty())
             throw new ApiException(ApiStatus.BAD_DATA, "No valid emails given, " + JsonUtil.serialize(sendTo));
         reportScheduleApi.addEmails(emailsPojos);
+    }
+
+    @Transactional(rollbackFor = ApiException.class)
+    public void upsertSchedulePipelines(Integer scheduleId, List<Integer> pipelineIds) throws ApiException{
+        schedulePipelineApi.upsert(scheduleId, pipelineIds);
     }
 
 }

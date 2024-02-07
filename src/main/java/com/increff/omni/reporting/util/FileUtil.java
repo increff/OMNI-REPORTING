@@ -136,4 +136,10 @@ public class FileUtil {
     public static double roundOff(double value) {
         return Math.round(value * 10000.0) / 10000.0;
     }
+
+    public static void writeDummyContentToFile(File file) throws IOException {
+        BufferedWriter writer = new BufferedWriter(new FileWriter(file));
+        writer.write("dummy"); // Write "dummy" to the file
+        writer.close();
+    }
 }

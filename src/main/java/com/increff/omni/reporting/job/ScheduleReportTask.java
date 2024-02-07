@@ -1,11 +1,18 @@
 package com.increff.omni.reporting.job;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.increff.commons.fileclient.AbstractFileProvider;
+import com.increff.commons.fileclient.AwsFileProvider;
+import com.increff.commons.fileclient.GcpFileProvider;
 import com.increff.commons.queryexecutor.QueryExecutorClient;
 import com.increff.omni.reporting.api.*;
 import com.increff.omni.reporting.config.ApplicationProperties;
 import com.increff.omni.reporting.config.EmailProps;
 import com.increff.omni.reporting.dto.CommonDtoHelper;
+import com.increff.omni.reporting.model.constants.FileProviderType;
 import com.increff.omni.reporting.model.constants.ReportRequestStatus;
+import com.increff.omni.reporting.model.form.FileProviderFolder.AwsFileProviderForm;
+import com.increff.omni.reporting.model.form.FileProviderFolder.GcpFileProviderForm;
 import com.increff.omni.reporting.pojo.*;
 import com.increff.omni.reporting.util.EmailUtil;
 import com.increff.omni.reporting.util.FileDownloadUtil;
@@ -23,9 +30,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import javax.persistence.OptimisticLockException;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -34,9 +39,7 @@ import java.sql.SQLException;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -70,6 +73,10 @@ public class ScheduleReportTask extends AbstractTask {
     private ApplicationProperties properties;
     @Autowired
     private ReportScheduleApi reportScheduleApi;
+    @Autowired
+    private SchedulePipelineApi schedulePipelineApi;
+    @Autowired
+    private PipelineApi pipelineApi;
     @Autowired
     private QueryExecutorClient executorClient;
     @Autowired
@@ -125,6 +132,7 @@ public class ScheduleReportTask extends AbstractTask {
 
     }
 
+    // TODO  : Rename function
     private void prepareAndSendEmail(ReportRequestPojo pojo, String fQuery, ConnectionPojo connectionPojo,
                                      String timezone, String name)
             throws IOException, ApiException {
@@ -147,7 +155,16 @@ public class ScheduleReportTask extends AbstractTask {
                         "File size " + fileSize + " MB exceeded max limit of " + properties.getMaxFileSize() +
                                 " MB" + ". Please select granular filters");
             String filePath = "NA";
-            sendEmail(fileSize, file, pojo, timezone, name);
+
+            List<PipelinePojo> pipelinePojos = pipelineApi.getByPipelineIds(schedulePipelineApi.getByScheduleId(pojo.getScheduleId()).stream()
+                    .map(SchedulePipelinePojo::getPipelineId).collect(Collectors.toList()));
+            if(pipelinePojos.isEmpty())
+                sendEmail(fileSize, file, pojo, timezone, name);
+            else {
+                for (PipelinePojo pipelinePojo : pipelinePojos)
+                    uploadScheduleFiles(pipelinePojo.getType(), pipelinePojo.getConfigs().toString(), file);
+            }
+
             // update status to completed
             api.updateStatus(pojo.getId(), ReportRequestStatus.COMPLETED, filePath, noOfRows, fileSize, "",
                     ZonedDateTime.now());
@@ -171,6 +188,42 @@ public class ScheduleReportTask extends AbstractTask {
             } catch (Exception e) {
                 e.printStackTrace();
             }
+        }
+    }
+
+    public void uploadScheduleFiles(FileProviderType type, String configs, File file) throws ApiException {
+        try {
+            AbstractFileProvider fileProvider = getFileProvider(type, configs);
+            fileProvider.create(file.getPath(), Files.newInputStream(file.toPath()));
+        } catch (Exception e) {
+            throw new ApiException(ApiStatus.BAD_DATA, "Error while uploadScheduleFiles : " + e.getMessage());
+        }
+
+    }
+
+    private AbstractFileProvider getFileProvider(FileProviderType type, String configs) throws ApiException {
+        try {
+            switch (type) {
+                case AWS:
+                    AwsFileProviderForm awsForm = getJavaObjectFromJson(configs, AwsFileProviderForm.class);
+                    return new AwsFileProvider(awsForm.getAwsRegion(), awsForm.getAwsAccessKey(), awsForm.getAwsSecretKey(), awsForm.getAwsBucketName(), awsForm.getAwsBucketUrl());
+                case GCP:
+                    GcpFileProviderForm gcpForm = getJavaObjectFromJson(configs, GcpFileProviderForm.class);
+                    return new GcpFileProvider(gcpForm.getBaseUrl(), gcpForm.getBucketName(), new ByteArrayInputStream(gcpForm.getCredentialsJson().toString().getBytes()));
+                default:
+                    throw new ApiException(ApiStatus.BAD_DATA, "Unsupported File Provider Type " + type);
+            }
+        } catch (Exception e) {
+            throw new ApiException(ApiStatus.BAD_DATA, "Error while getting file provider : " + e + " " + Arrays.toString(e.getStackTrace()));
+        }
+    }
+
+    private <T> T getJavaObjectFromJson(String credentialsJson, Class<T> fileProviderFormClass) throws ApiException {
+        try {
+            ObjectMapper obj = new ObjectMapper();
+            return obj.readValue(credentialsJson, fileProviderFormClass);
+        } catch (Exception e) {
+            throw new ApiException(ApiStatus.BAD_DATA, "Error while parsing credentials : " + e.getMessage());
         }
     }
 

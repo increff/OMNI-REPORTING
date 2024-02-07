@@ -52,6 +52,8 @@ public class ReportScheduleDto extends AbstractDto {
     private OrgConnectionApi orgConnectionApi;
     @Autowired
     private ConnectionApi connectionApi;
+    @Autowired
+    private SchedulePipelineApi schedulePipelineApi;
 
     public void scheduleReport(ReportScheduleForm form) throws ApiException {
         checkValid(form);
@@ -61,7 +63,7 @@ public class ReportScheduleDto extends AbstractDto {
         ReportSchedulePojo pojo = convertFormToReportSchedulePojo(form, getOrgId(), getUserId());
         List<ReportScheduleInputParamsPojo> reportScheduleInputParamsPojos =
                 validateAndPrepareInputParams(form, reportPojo);
-        flowApi.add(pojo, form.getSendTo(), reportScheduleInputParamsPojos, reportPojo);
+        flowApi.add(pojo, form.getSendTo(), reportScheduleInputParamsPojos, reportPojo, form.getPipelineIds());
         flowApi.saveAudit(pojo.getId().toString(), AuditActions.CREATE_REPORT_SCHEDULE.toString(),
                 "Create Report Schedule",
                 "Report schedule created for organization : " + organizationPojo.getName(), getUserName());
@@ -80,7 +82,7 @@ public class ReportScheduleDto extends AbstractDto {
         pojo.setId(id);
         List<ReportScheduleInputParamsPojo> reportScheduleInputParamsPojos =
                 validateAndPrepareInputParams(form, reportPojo);
-        flowApi.edit(pojo, form.getSendTo(), reportScheduleInputParamsPojos, reportPojo);
+        flowApi.edit(pojo, form.getSendTo(), reportScheduleInputParamsPojos, reportPojo, form.getPipelineIds());
         flowApi.saveAudit(pojo.getId().toString(), AuditActions.EDIT_REPORT_SCHEDULE.toString(), "Edit Report Schedule",
                 "Report schedule updated for organization : " + organizationPojo.getName() +
                         " with cron : " + pojo.getCron(), getUserName());
@@ -193,6 +195,7 @@ public class ReportScheduleDto extends AbstractDto {
             data.setCronSchedule(cronData);
             data.setTimezone(getValueFromQuotes(timezone));
             data.setSendTo(emailsPojos.stream().map(ReportScheduleEmailsPojo::getSendTo).collect(Collectors.toList()));
+            data.setPipelineIds(schedulePipelineApi.getByScheduleId(pojo.getId()).stream().map(SchedulePipelinePojo::getPipelineId).collect(Collectors.toList()));
             data.setMinFrequencyAllowedSeconds(reportPojo.getMinFrequencyAllowedSeconds());
             dataList.add(data);
         }

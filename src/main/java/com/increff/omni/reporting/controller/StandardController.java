@@ -25,6 +25,8 @@ import java.util.Optional;
 public class StandardController {
 
     @Autowired
+    private PipelineDto pipelineDto;
+    @Autowired
     private ReportRequestDto reportRequestDto;
     @Autowired
     private ReportScheduleDto reportScheduleDto;
@@ -153,6 +155,36 @@ public class StandardController {
     @RequestMapping(value = "/schedules/{id}/status", method = RequestMethod.PATCH)
     public void editStatus(@PathVariable Integer id, @RequestParam Boolean isEnabled) throws ApiException {
         reportScheduleDto.updateStatus(id, isEnabled);
+    }
+
+    @ApiOperation(value = "Add Pipeline")
+    @RequestMapping(value = "/pipelines", method = RequestMethod.POST)
+    public PipelineData addPipeline(@RequestBody PipelineForm form) throws ApiException {
+        return pipelineDto.add(form);
+    }
+
+    @ApiOperation(value = "Edit Pipeline")
+    @RequestMapping(value = "/pipelines/{id}", method = RequestMethod.PUT)
+    public PipelineData editPipeline(@RequestBody PipelineForm form, @PathVariable Integer id) throws ApiException {
+        return pipelineDto.update(id, form);
+    }
+
+    @ApiOperation(value = "Get All Pipelines")
+    @RequestMapping(value = "/pipelines", method = RequestMethod.GET)
+    public List<PipelineData> getAllPipelines() {
+        return pipelineDto.getAllPipelines();
+    }
+
+    @ApiOperation(value = "Get Pipeline by ID")
+    @RequestMapping(value = "/pipelines/{id}", method = RequestMethod.GET)
+    public PipelineData getPipelineById(@PathVariable Integer id) throws ApiException {
+        return pipelineDto.getPipelineById(id);
+    }
+
+    @ApiOperation(value = "Test Pipeline")
+    @RequestMapping(value = "/pipelines/test", method = RequestMethod.POST)
+    public void testPipeline(@RequestBody PipelineForm form) throws ApiException {
+        pipelineDto.testConnection(form);
     }
 
     @ApiOperation(value = "Get Application Version")

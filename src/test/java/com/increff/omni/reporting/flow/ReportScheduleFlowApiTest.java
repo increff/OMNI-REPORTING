@@ -82,7 +82,7 @@ public class ReportScheduleFlowApiTest extends AbstractTest {
         ReportScheduleInputParamsPojo paramsPojo = getReportScheduleInputParamsPojo(schedulePojo.getId(), "clientId",
                 "'1100002253'", "Client ID");
         flowApi.add(schedulePojo, Arrays.asList("a@gmail.com", "b@gmail.com"), Collections.singletonList(paramsPojo),
-                reportPojo);
+                reportPojo, new ArrayList<>());
         ReportSchedulePojo schedulePojo1 = reportScheduleApi.getCheck(schedulePojo.getId());
         assertNotNull(schedulePojo1);
         assertEquals(true, schedulePojo1.getIsEnabled());
@@ -109,7 +109,7 @@ public class ReportScheduleFlowApiTest extends AbstractTest {
                 "'1100002253'", "Client ID");
         try {
             flowApi.add(schedulePojo, Arrays.asList("a.gmail.com", "b.gmail.com"), Collections.singletonList(paramsPojo),
-                    reportPojo);
+                    reportPojo, new ArrayList<>());
         } catch (ApiException e) {
             assertEquals(ApiStatus.BAD_DATA, e.getStatus());
             assertEquals("No valid emails given, [\"a.gmail.com\",\"b.gmail.com\"]",e.getMessage());
@@ -125,7 +125,7 @@ public class ReportScheduleFlowApiTest extends AbstractTest {
         ReportScheduleInputParamsPojo paramsPojo = getReportScheduleInputParamsPojo(schedulePojo.getId(), "clientId",
                 "'1100002253'", "Client ID");
         flowApi.add(schedulePojo, Arrays.asList("a@gmail.com", "b@gmail.com"), Collections.singletonList(paramsPojo),
-                reportPojo);
+                reportPojo, new ArrayList<>());
         Integer id = schedulePojo.getId();
         schedulePojo = getReportSchedulePojo("Report 1", true, false, 0, 10, ZonedDateTime.now(),
                 100001, 100001, "0 */20 * * * ?");
@@ -133,7 +133,7 @@ public class ReportScheduleFlowApiTest extends AbstractTest {
         paramsPojo = getReportScheduleInputParamsPojo(schedulePojo.getId(), "clientId",
                 "'1100002254'", "Wh ID");
         flowApi.edit(schedulePojo, Arrays.asList("a@gmail.com", "b.gmail.com"), Collections.singletonList(paramsPojo),
-                reportPojo);
+                reportPojo, new ArrayList<>());
         ReportSchedulePojo schedulePojo1 = reportScheduleApi.getCheck(schedulePojo.getId());
         assertNotNull(schedulePojo1);
         assertEquals(true, schedulePojo1.getIsEnabled());
