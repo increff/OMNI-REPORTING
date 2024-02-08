@@ -156,13 +156,11 @@ public class ScheduleReportTask extends AbstractTask {
                                 " MB" + ". Please select granular filters");
             String filePath = "NA";
 
-            List<PipelinePojo> pipelinePojos = pipelineApi.getByPipelineIds(schedulePipelineApi.getByScheduleId(pojo.getScheduleId()).stream()
-                    .map(SchedulePipelinePojo::getPipelineId).collect(Collectors.toList()));
-            if(pipelinePojos.isEmpty())
+            List<SchedulePipelinePojo> schedulePipelinePojos = schedulePipelineApi.getByScheduleId(pojo.getScheduleId());
+            if(schedulePipelinePojos.isEmpty())
                 sendEmail(fileSize, file, pojo, timezone, name);
             else {
-                for (PipelinePojo pipelinePojo : pipelinePojos)
-                    uploadScheduleFiles(pipelinePojo.getType(), pipelinePojo.getConfigs().toString(), file);
+                processPipelines(file, schedulePipelinePojos);
             }
 
             // update status to completed
@@ -191,14 +189,32 @@ public class ScheduleReportTask extends AbstractTask {
         }
     }
 
-    public void uploadScheduleFiles(PipelineType type, String configs, File file) throws ApiException {
+    private void processPipelines(File file, List<SchedulePipelinePojo> schedulePipelinePojos) throws ApiException {
+        List<PipelinePojo> pipelinePojos = pipelineApi.getByPipelineIds(schedulePipelinePojos.stream()
+                .map(SchedulePipelinePojo::getPipelineId).collect(Collectors.toList()));
+        Map<Integer, SchedulePipelinePojo> pipelineIdToSchedulePipelinePojoMap = schedulePipelinePojos.stream()
+                .collect(Collectors.toMap(SchedulePipelinePojo::getPipelineId, x -> x));
+
+        for (PipelinePojo pipelinePojo : pipelinePojos)
+            uploadScheduleFiles(pipelinePojo.getType(), pipelinePojo.getConfigs().toString(), file,
+                    pipelineIdToSchedulePipelinePojoMap.get(pipelinePojo.getId()).getFolderName());
+    }
+
+    public void uploadScheduleFiles(PipelineType type, String configs, File file, String folderName) throws ApiException {
         try {
             AbstractFileProvider fileProvider = getFileProvider(type, configs);
-            fileProvider.create(file.getPath(), Files.newInputStream(file.toPath()));
+            fileProvider.create(getFilepathWithFolder(file, folderName), Files.newInputStream(file.toPath()));
         } catch (Exception e) {
             throw new ApiException(ApiStatus.BAD_DATA, "Error while uploadScheduleFiles : " + e.getMessage());
         }
+    }
 
+    private static String getFilepathWithFolder(File file, String folderName) {
+        String filePath = file.getPath();
+        if (folderName != null && !folderName.isEmpty()) {
+            filePath = folderName + "/" + file.getPath();
+        }
+        return filePath;
     }
 
     private AbstractFileProvider getFileProvider(PipelineType type, String configs) throws ApiException {

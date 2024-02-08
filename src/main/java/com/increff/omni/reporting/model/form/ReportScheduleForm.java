@@ -19,7 +19,7 @@ public class ReportScheduleForm {
     private List<InputParamMap> paramMap;
     private CronScheduleForm cronSchedule;
     private List<String> sendTo = new ArrayList<>();
-    private List<Integer> pipelineIds = new ArrayList<>();
+    private List<PipelineDetailsForm> pipelineDetails = new ArrayList<>();
 
     @NotNull
     private Boolean isEnabled;

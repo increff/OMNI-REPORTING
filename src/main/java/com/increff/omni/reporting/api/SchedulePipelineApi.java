@@ -1,6 +1,7 @@
 package com.increff.omni.reporting.api;
 
 import com.increff.omni.reporting.dao.SchedulePipelineDao;
+import com.increff.omni.reporting.model.data.PipelineFlowData;
 import com.increff.omni.reporting.pojo.SchedulePipelinePojo;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.server.AbstractApi;
@@ -10,7 +11,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional(rollbackFor = ApiException.class)
@@ -29,14 +29,14 @@ public class SchedulePipelineApi extends AbstractApi {
         dao.remove(pojo);
     }
 
-    public List<SchedulePipelinePojo> upsert(Integer scheduleId, List<Integer> pipelineIds) throws ApiException {
+    public List<SchedulePipelinePojo> upsert(Integer scheduleId, List<PipelineFlowData> pipelineFlowData) throws ApiException {
         List<SchedulePipelinePojo> existing = dao.selectMultiple("scheduleId", scheduleId);
         existing.forEach(e -> dao.remove(e));
         dao.flush();
 
         List<SchedulePipelinePojo> newPojos = new ArrayList<>();
-        for(Integer pipelineId : pipelineIds) {
-            newPojos.add(add(new SchedulePipelinePojo(scheduleId, pipelineId)));
+        for(PipelineFlowData data : pipelineFlowData) {
+            newPojos.add(add(new SchedulePipelinePojo(scheduleId, data.getPipelineId(), data.getFolderName())));
         }
         return newPojos;
     }
@@ -58,5 +58,6 @@ public class SchedulePipelineApi extends AbstractApi {
     public void deleteByScheduleId(Integer scheduleId) {
         List<SchedulePipelinePojo> pojos = getByScheduleId(scheduleId);
         pojos.forEach(p -> dao.remove(p));
+        dao.flush();
     }
 }

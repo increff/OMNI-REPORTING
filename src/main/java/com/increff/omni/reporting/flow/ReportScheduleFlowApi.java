@@ -4,6 +4,8 @@ import com.increff.omni.reporting.api.*;
 import com.increff.omni.reporting.dto.CommonDtoHelper;
 import com.increff.omni.reporting.model.constants.ReportRequestType;
 import com.increff.omni.reporting.model.constants.ValidationType;
+import com.increff.omni.reporting.model.data.PipelineFlowData;
+import com.increff.omni.reporting.model.form.PipelineDetailsForm;
 import com.increff.omni.reporting.pojo.*;
 import com.nextscm.commons.lang.StringUtil;
 import com.nextscm.commons.spring.common.ApiException;
@@ -39,34 +41,34 @@ public class ReportScheduleFlowApi extends AbstractFlowApi {
 
     public void add(ReportSchedulePojo pojo, List<String> sendTo,
                     List<ReportScheduleInputParamsPojo> reportScheduleInputParamsPojos,
-                    ReportPojo reportPojo, List<Integer> pipelineIds) throws ApiException {
+                    ReportPojo reportPojo, List<PipelineFlowData> pipelineFlowData) throws ApiException {
         CommonDtoHelper.validateCronFrequency(reportPojo, pojo);
         validateGroups(reportPojo, reportScheduleInputParamsPojos);
         reportScheduleApi.add(pojo);
 
-        addEmailOrPipeline(pojo, sendTo, pipelineIds);
+        addEmailOrPipeline(pojo, sendTo, pipelineFlowData);
         reportScheduleApi.addScheduleInputParams(reportScheduleInputParamsPojos, pojo);
     }
 
-    private void addEmailOrPipeline(ReportSchedulePojo pojo, List<String> sendTo, List<Integer> pipelineIds) throws ApiException {
+    private void addEmailOrPipeline(ReportSchedulePojo pojo, List<String> sendTo, List<PipelineFlowData> pipelineFlowData) throws ApiException {
         if(!sendTo.isEmpty())
             addEmails(pojo, sendTo);
-        else if(!pipelineIds.isEmpty())
-            upsertSchedulePipelines(pojo.getId(), pipelineIds);
+        else if(!pipelineFlowData.isEmpty())
+            upsertSchedulePipelines(pojo.getId(), pipelineFlowData);
         else
             throw new ApiException(ApiStatus.BAD_DATA, "No emails or pipelines given");
     }
 
     public void edit(ReportSchedulePojo pojo, List<String> sendTo,
                      List<ReportScheduleInputParamsPojo> reportScheduleInputParamsPojos,
-                     ReportPojo reportPojo, List<Integer> pipelineIds) throws ApiException {
+                     ReportPojo reportPojo, List<PipelineFlowData> pipelineFlowData) throws ApiException {
         CommonDtoHelper.validateCronFrequency(reportPojo, pojo);
         validateGroups(reportPojo, reportScheduleInputParamsPojos);
         reportScheduleApi.edit(pojo);
         reportScheduleApi.removeExistingEmails(pojo.getId());
         schedulePipelineApi.deleteByScheduleId(pojo.getId());
 
-        addEmailOrPipeline(pojo, sendTo, pipelineIds);
+        addEmailOrPipeline(pojo, sendTo, pipelineFlowData);
 
         reportScheduleApi.updateScheduleInputParams(reportScheduleInputParamsPojos, pojo);
     }
@@ -116,8 +118,8 @@ public class ReportScheduleFlowApi extends AbstractFlowApi {
     }
 
     @Transactional(rollbackFor = ApiException.class)
-    public void upsertSchedulePipelines(Integer scheduleId, List<Integer> pipelineIds) throws ApiException{
-        schedulePipelineApi.upsert(scheduleId, pipelineIds);
+    public void upsertSchedulePipelines(Integer scheduleId, List<PipelineFlowData> pipelineFlowData) throws ApiException{
+        schedulePipelineApi.upsert(scheduleId, pipelineFlowData);
     }
 
 }

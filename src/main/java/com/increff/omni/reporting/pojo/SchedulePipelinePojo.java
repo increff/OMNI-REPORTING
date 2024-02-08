@@ -25,8 +25,12 @@ public class SchedulePipelinePojo extends AbstractVersionedPojo {
     @Column(nullable = false)
     private Integer pipelineId;
 
-    public SchedulePipelinePojo(Integer scheduleId, Integer pipelineId) {
+    @Column(nullable = false)
+    private String folderName;
+
+    public SchedulePipelinePojo(Integer scheduleId, Integer pipelineId, String folderName) {
         this.scheduleId = scheduleId;
         this.pipelineId = pipelineId;
+        this.folderName = folderName;
     }
 }

@@ -22,7 +22,7 @@ public class ReportScheduleData {
     private CronScheduleForm cronSchedule;
     private List<InputControlFilterData> filters;
     private List<String> sendTo;
-    private List<Integer> pipelineIds;
+    private List<PipelineFlowData> pipelineDetails;
 
     private ZonedDateTime nextRuntime;
     private ZonedDateTime createdAt;
