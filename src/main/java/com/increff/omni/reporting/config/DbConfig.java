@@ -24,41 +24,15 @@ public class DbConfig {
 	public static final String PACKAGE_POJO = "com.increff.omni.reporting.pojo";
 	public static final String AUDIT_POJO = "com.nextscm.commons.spring.audit.pojo";
 
-	@Value("${jdbc.driverClassName:com.mysql.jdbc.Driver}")
-	private String jdbcDriver;
-	@Value("${jdbc.url}")
-	private String jdbcUrl;
-	@Value("${jdbc.username}")
-	private String jdbcUsername;
-	@Value("${jdbc.password}")
-	private String jdbcPassword;
-	@Value("${hibernate.dialect:org.hibernate.dialect.MySQLDialect}")
-	private String hibernateDialect;
-	@Value("${hibernate.show_sql:false}")
-	private String hibernateShowSql;
-	@Value("${hibernate.jdbc.batch_size:50}")
-	private String hibernateJdbcBatchSize;
-	@Value("${hibernate.hbm2ddl.auto}")
-	private String hibernateHbm2ddl;
-	@Value("${hibernate.jdbc.time_zone}")
-	private String hibernateTimezone;
-	@Value("${hibernate.min.connection:50}")
-	private Integer minConnection;
-	@Value("${hibernate.max.connection:100}")
-	private Integer maxConnection;
-
-	@Value("${hibernate.id.generator.stored_last_used}")
-	private Boolean hibernateIdGeneratorStoredLastUsed;
-	@Value("${hibernate.model.generator_name_as_sequence_name}")
-	private Boolean hibernateModelGeneratorNameAsSequenceName;
-
+	@Autowired
+	private ApplicationProperties properties;
 
 
 
 	@Bean(name = "dataSource")
 	public DataSource getDataSource() {
-		return DbPoolUtil.initDataSource(jdbcDriver, jdbcUrl, jdbcUsername, jdbcPassword, minConnection,
-				maxConnection);
+		return DbPoolUtil.initDataSource(properties.getJdbcDriver(), properties.getJdbcUrl(), properties.getJdbcUsername(),
+				properties.getJdbcPassword(), properties.getMinConnection(), properties.getMaxConnection());
 	}
 
 	@Bean(name = "entityManagerFactory")
@@ -70,15 +44,15 @@ public class DbConfig {
 		HibernateJpaVendorAdapter jpaAdapter = new HibernateJpaVendorAdapter();
 		bean.setJpaVendorAdapter(jpaAdapter);
 		Properties jpaProperties = new Properties();
-		jpaProperties.put("hibernate.dialect", hibernateDialect);
-		jpaProperties.put("hibernate.show_sql", hibernateShowSql);
-		jpaProperties.put("hibernate.hbm2ddl.auto", hibernateHbm2ddl);
-		jpaProperties.put("hibernate.jdbc.time_zone", hibernateTimezone);
-		jpaProperties.put("hibernate.jdbc.batch_size", hibernateJdbcBatchSize);
+		jpaProperties.put("hibernate.dialect", properties.getHibernateDialect());
+		jpaProperties.put("hibernate.show_sql", properties.getHibernateShowSql());
+		jpaProperties.put("hibernate.hbm2ddl.auto", properties.getHibernateHbm2ddl());
+		jpaProperties.put("hibernate.jdbc.time_zone", properties.getHibernateTimezone());
+		jpaProperties.put("hibernate.jdbc.batch_size", properties.getHibernateJdbcBatchSize());
 		jpaProperties.put("hibernate.cache.use_second_level_cache", false);
 		jpaProperties.put("hibernate.physical_naming_strategy", new SnakeCaseNamingStrategy(""));
-		jpaProperties.put("hibernate.id.generator.stored_last_used", hibernateIdGeneratorStoredLastUsed);
-		jpaProperties.put("hibernate.model.generator_name_as_sequence_name", hibernateModelGeneratorNameAsSequenceName);
+		jpaProperties.put("hibernate.id.generator.stored_last_used", properties.getHibernateIdGeneratorStoredLastUsed());
+		jpaProperties.put("hibernate.model.generator_name_as_sequence_name", properties.getHibernateModelGeneratorNameAsSequenceName());
 		bean.setJpaProperties(jpaProperties);
 		return bean;
 	}

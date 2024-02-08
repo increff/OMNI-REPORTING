@@ -10,6 +10,36 @@ import org.springframework.stereotype.Component;
 @Component
 public class ApplicationProperties {
 
+    @Value("${jdbc.driverClassName:com.mysql.jdbc.Driver}")
+	private String jdbcDriver;
+	@Value("${jdbc.url}")
+	private String jdbcUrl;
+	@Value("${jdbc.username}")
+	private String jdbcUsername;
+	@Value("${jdbc.password}")
+	private String jdbcPassword;
+	@Value("${hibernate.dialect:org.hibernate.dialect.MySQLDialect}")
+	private String hibernateDialect;
+	@Value("${hibernate.show_sql:false}")
+	private String hibernateShowSql;
+	@Value("${hibernate.jdbc.batch_size:50}")
+	private String hibernateJdbcBatchSize;
+	@Value("${hibernate.hbm2ddl.auto}")
+	private String hibernateHbm2ddl;
+	@Value("${hibernate.jdbc.time_zone}")
+	private String hibernateTimezone;
+	@Value("${hibernate.min.connection:50}")
+	private Integer minConnection;
+	@Value("${hibernate.max.connection:100}")
+	private Integer maxConnection;
+
+	@Value("${hibernate.id.generator.stored_last_used}")
+	private Boolean hibernateIdGeneratorStoredLastUsed;
+	@Value("${hibernate.model.generator_name_as_sequence_name}")
+	private Boolean hibernateModelGeneratorNameAsSequenceName;
+
+
+
     @Value("${user.report.request.corePoolSize:100}")
     private Integer userReportRequestCorePool;
 
@@ -123,5 +153,11 @@ public class ApplicationProperties {
     private Integer tokens;
     @Value("${rate.limit.tokens.refill.rate.seconds:60}")
     private Integer tokensRefillRateSeconds;
+
+    @Value("${crypto.health.url}")
+    private String cryptoHealthUrl;
+
+    @Value("${account.health.url}")
+    private String accountHealthUrl;
 
 }
