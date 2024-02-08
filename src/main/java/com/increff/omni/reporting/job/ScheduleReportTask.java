@@ -1,6 +1,5 @@
 package com.increff.omni.reporting.job;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.increff.commons.fileclient.AbstractFileProvider;
 import com.increff.commons.fileclient.AwsFileProvider;
 import com.increff.commons.fileclient.GcpFileProvider;
@@ -11,8 +10,8 @@ import com.increff.omni.reporting.config.EmailProps;
 import com.increff.omni.reporting.dto.CommonDtoHelper;
 import com.increff.omni.reporting.model.constants.FileProviderType;
 import com.increff.omni.reporting.model.constants.ReportRequestStatus;
-import com.increff.omni.reporting.model.form.FileProviderFolder.AwsFileProviderForm;
-import com.increff.omni.reporting.model.form.FileProviderFolder.GcpFileProviderForm;
+import com.increff.omni.reporting.model.form.FileProviderFolder.AwsPipelineConfigForm;
+import com.increff.omni.reporting.model.form.FileProviderFolder.GcpPipelineConfigForm;
 import com.increff.omni.reporting.pojo.*;
 import com.increff.omni.reporting.util.EmailUtil;
 import com.increff.omni.reporting.util.FileDownloadUtil;
@@ -46,6 +45,7 @@ import java.util.zip.ZipOutputStream;
 
 import static com.increff.omni.reporting.dto.CommonDtoHelper.getInputParamMapFromPojoList;
 import static com.increff.omni.reporting.dto.CommonDtoHelper.getValueFromQuotes;
+import static com.increff.omni.reporting.util.ConvertUtil.getJavaObjectFromJson;
 
 @Component
 @Log4j
@@ -205,11 +205,11 @@ public class ScheduleReportTask extends AbstractTask {
         try {
             switch (type) {
                 case AWS:
-                    AwsFileProviderForm awsForm = getJavaObjectFromJson(configs, AwsFileProviderForm.class);
-                    return new AwsFileProvider(awsForm.getAwsRegion(), awsForm.getAwsAccessKey(), awsForm.getAwsSecretKey(), awsForm.getAwsBucketName(), awsForm.getAwsBucketUrl());
+                    AwsPipelineConfigForm awsForm = getJavaObjectFromJson(configs, AwsPipelineConfigForm.class);
+                    return new AwsFileProvider(awsForm.getRegion(), awsForm.getAccessKey(), awsForm.getSecretKey(), awsForm.getBucketName(), awsForm.getBucketUrl());
                 case GCP:
-                    GcpFileProviderForm gcpForm = getJavaObjectFromJson(configs, GcpFileProviderForm.class);
-                    return new GcpFileProvider(gcpForm.getBaseUrl(), gcpForm.getBucketName(), new ByteArrayInputStream(gcpForm.getCredentialsJson().toString().getBytes()));
+                    GcpPipelineConfigForm gcpForm = getJavaObjectFromJson(configs, GcpPipelineConfigForm.class);
+                    return new GcpFileProvider(gcpForm.getBucketUrl(), gcpForm.getBucketName(), new ByteArrayInputStream(gcpForm.getCredentialsJson().toString().getBytes()));
                 default:
                     throw new ApiException(ApiStatus.BAD_DATA, "Unsupported File Provider Type " + type);
             }
@@ -218,14 +218,7 @@ public class ScheduleReportTask extends AbstractTask {
         }
     }
 
-    private <T> T getJavaObjectFromJson(String credentialsJson, Class<T> fileProviderFormClass) throws ApiException {
-        try {
-            ObjectMapper obj = new ObjectMapper();
-            return obj.readValue(credentialsJson, fileProviderFormClass);
-        } catch (Exception e) {
-            throw new ApiException(ApiStatus.BAD_DATA, "Error while parsing credentials : " + e.getMessage());
-        }
-    }
+
 
     private String getDecryptedPassword(String password) throws ApiException {
         try {

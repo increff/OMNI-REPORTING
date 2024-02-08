@@ -1,13 +1,13 @@
 package com.increff.omni.reporting.util;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.RuntimeJsonMappingException;
 import com.increff.omni.reporting.model.data.ChartLegendsData;
+import com.increff.omni.reporting.model.data.PipelineConfigData;
 import com.increff.omni.reporting.model.data.PipelineData;
-import com.increff.omni.reporting.model.form.PipelineForm;
 import com.increff.omni.reporting.pojo.ChartLegendsPojo;
 import com.increff.omni.reporting.pojo.PipelinePojo;
+import com.nextscm.commons.spring.common.ApiException;
+import com.nextscm.commons.spring.common.ApiStatus;
 import lombok.extern.log4j.Log4j;
 
 import java.util.ArrayList;
@@ -24,27 +24,28 @@ public class ConvertUtil {
         return data;
     }
 
-    public static PipelineData convertToPipelineData(PipelinePojo pojo) {
+    public static PipelineData convertToPipelineData(PipelinePojo pojo) throws ApiException {
         PipelineData data = com.nextscm.commons.spring.common.ConvertUtil.convert(pojo, PipelineData.class);
-        // data.setConfigs(convertStringToJsonNode(pojo.getConfigs())); Do not send configs in response as it contains passwords!!
-        data.setConfigs(convertStringToJsonNode("{}"));
+
+        data.setConfigs(getJavaObjectFromJson(pojo.getConfigs(), PipelineConfigData.class));
+
         return data;
     }
 
-    public static List<PipelineData> convertToPipelineData(List<PipelinePojo> pojo) {
+    public static List<PipelineData> convertToPipelineData(List<PipelinePojo> pojo) throws ApiException {
         List<PipelineData> datas = new ArrayList<>();
-        pojo.forEach(p -> {
-            datas.add(convertToPipelineData(p));
-        });
+        for (PipelinePojo pipelinePojo : pojo) {
+            datas.add(convertToPipelineData(pipelinePojo));
+        }
         return datas;
     }
 
-    public static JsonNode convertStringToJsonNode(String jsonString) {
+    public static <T> T getJavaObjectFromJson(String credentialsJson, Class<T> fileProviderFormClass) throws ApiException {
         try {
-            ObjectMapper objectMapper = new ObjectMapper();
-            return objectMapper.readTree(jsonString);
+            ObjectMapper obj = new ObjectMapper();
+            return obj.readValue(credentialsJson, fileProviderFormClass);
         } catch (Exception e) {
-            throw new RuntimeJsonMappingException("Error in converting string to json node" + e.getMessage());
+            throw new ApiException(ApiStatus.BAD_DATA, "Error while parsing credentials : " + e.getMessage());
         }
     }
 

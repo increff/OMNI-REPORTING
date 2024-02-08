@@ -6,8 +6,6 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class GcpFileProviderForm extends AbstractFileProviderForm{
-    private String baseUrl;
-    private String bucketName;
+public class GcpPipelineConfigForm extends AbstractPipelineConfigForm {
     private JsonNode credentialsJson;
 }

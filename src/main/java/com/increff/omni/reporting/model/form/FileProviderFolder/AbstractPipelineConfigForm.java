@@ -5,5 +5,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class AbstractFileProviderForm {
+public class AbstractPipelineConfigForm {
+    private String bucketUrl;
+    private String bucketName;
 }

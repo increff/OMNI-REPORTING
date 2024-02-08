@@ -171,7 +171,7 @@ public class StandardController {
 
     @ApiOperation(value = "Get All Pipelines")
     @RequestMapping(value = "/pipelines", method = RequestMethod.GET)
-    public List<PipelineData> getAllPipelines() {
+    public List<PipelineData> getAllPipelines() throws ApiException{
         return pipelineDto.getAllPipelines();
     }
 

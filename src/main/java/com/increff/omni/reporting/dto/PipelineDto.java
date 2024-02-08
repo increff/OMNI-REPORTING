@@ -45,7 +45,7 @@ public class PipelineDto extends AbstractDto {
         return convertToPipelineData(pojo);
     }
 
-    public List<PipelineData> getAllPipelines() {
+    public List<PipelineData> getAllPipelines() throws ApiException{
         List<PipelinePojo> pipelinePojoList = api.getByOrgId(getOrgId());
         return convertToPipelineData(pipelinePojoList);
     }
