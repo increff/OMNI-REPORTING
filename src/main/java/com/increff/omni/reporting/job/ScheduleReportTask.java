@@ -8,7 +8,7 @@ import com.increff.omni.reporting.api.*;
 import com.increff.omni.reporting.config.ApplicationProperties;
 import com.increff.omni.reporting.config.EmailProps;
 import com.increff.omni.reporting.dto.CommonDtoHelper;
-import com.increff.omni.reporting.model.constants.FileProviderType;
+import com.increff.omni.reporting.model.constants.PipelineType;
 import com.increff.omni.reporting.model.constants.ReportRequestStatus;
 import com.increff.omni.reporting.model.form.FileProviderFolder.AwsPipelineConfigForm;
 import com.increff.omni.reporting.model.form.FileProviderFolder.GcpPipelineConfigForm;
@@ -191,7 +191,7 @@ public class ScheduleReportTask extends AbstractTask {
         }
     }
 
-    public void uploadScheduleFiles(FileProviderType type, String configs, File file) throws ApiException {
+    public void uploadScheduleFiles(PipelineType type, String configs, File file) throws ApiException {
         try {
             AbstractFileProvider fileProvider = getFileProvider(type, configs);
             fileProvider.create(file.getPath(), Files.newInputStream(file.toPath()));
@@ -201,7 +201,7 @@ public class ScheduleReportTask extends AbstractTask {
 
     }
 
-    private AbstractFileProvider getFileProvider(FileProviderType type, String configs) throws ApiException {
+    private AbstractFileProvider getFileProvider(PipelineType type, String configs) throws ApiException {
         try {
             switch (type) {
                 case AWS:
