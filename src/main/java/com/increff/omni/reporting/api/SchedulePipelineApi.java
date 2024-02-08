@@ -30,7 +30,7 @@ public class SchedulePipelineApi extends AbstractApi {
     }
 
     public List<SchedulePipelinePojo> upsert(Integer scheduleId, List<Integer> pipelineIds) throws ApiException {
-        List<SchedulePipelinePojo> existing = dao.getByScheduleId(scheduleId);
+        List<SchedulePipelinePojo> existing = dao.selectMultiple("scheduleId", scheduleId);
         existing.forEach(e -> dao.remove(e));
         dao.flush();
 
@@ -42,17 +42,17 @@ public class SchedulePipelineApi extends AbstractApi {
     }
     
     private SchedulePipelinePojo getCheck(Integer id) throws ApiException {
-        SchedulePipelinePojo pojo = dao.getCheck(id);
+        SchedulePipelinePojo pojo = dao.select(id);
         checkNotNull(pojo, "SchedulePipeline does not exist id: " + id);
         return pojo;
     }
 
     public List<SchedulePipelinePojo> getByScheduleId(Integer scheduleId) {
-        return dao.getByScheduleId(scheduleId);
+        return dao.selectMultiple("scheduleId", scheduleId);
     }
 
     public List<SchedulePipelinePojo> getByPipelineId(Integer pipelineId) {
-        return dao.getByPipelineId(pipelineId);
+        return dao.selectMultiple("pipelineId", pipelineId);
     }
 
     public void deleteByScheduleId(Integer scheduleId) {

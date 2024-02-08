@@ -20,12 +20,22 @@ public class PipelineApi extends AbstractApi {
     private PipelineDao dao;
 
     public PipelinePojo add(PipelinePojo pojo) throws ApiException {
+        PipelinePojo existing = dao.getByOrgIdName(pojo.getOrgId(), pojo.getName());
+        if(Objects.nonNull(existing))
+            throw new ApiException(ApiStatus.BAD_DATA, "Pipeline with name " + pojo.getName() + " already exists for org id: " + pojo.getOrgId());
+
         dao.persist(pojo);
         return pojo;
     }
 
     public PipelinePojo update(Integer id, PipelinePojo pojo) throws ApiException {
         PipelinePojo existing = getCheck(id);
+        if(!Objects.equals(existing.getName(), pojo.getName())) {
+            PipelinePojo newNamePojo = dao.getByOrgIdName(pojo.getOrgId(), pojo.getName());
+            if(Objects.nonNull(newNamePojo))
+                throw new ApiException(ApiStatus.BAD_DATA, "Pipeline with name " + pojo.getName() + " already exists for org id: " + pojo.getOrgId());
+        }
+
         existing.setConfigs(pojo.getConfigs());
         existing.setName(pojo.getName());
         existing.setOrgId(pojo.getOrgId());
@@ -39,11 +49,11 @@ public class PipelineApi extends AbstractApi {
     }
 
     public List<PipelinePojo> getByOrgId(Integer orgId) {
-        return dao.getByOrgId(orgId);
+        return dao.selectMultiple("orgId", orgId);
     }
 
     private PipelinePojo getCheck(Integer id) throws ApiException {
-        PipelinePojo pojo = dao.getCheck(id);
+        PipelinePojo pojo = dao.select(id);
         checkNotNull(pojo, "Pipeline does not exist id: " + id);
         return pojo;
     }
@@ -57,6 +67,6 @@ public class PipelineApi extends AbstractApi {
     }
 
     public List<PipelinePojo> getByPipelineIds(List<Integer> pipelineIds) {
-        return dao.getByPipelineIds(pipelineIds);
+        return dao.selectMultiple("id", pipelineIds);
     }
 }

@@ -1,7 +1,5 @@
 package com.increff.omni.reporting.pojo;
 
-import com.increff.omni.reporting.model.constants.FileProviderType;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
