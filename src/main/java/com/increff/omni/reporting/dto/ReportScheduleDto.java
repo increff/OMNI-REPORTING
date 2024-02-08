@@ -171,7 +171,7 @@ public class ReportScheduleDto extends AbstractDto {
         List<ReportScheduleData> dataList = new ArrayList<>();
         for (ReportSchedulePojo pojo : reportSchedulePojoList) {
             OrgSchemaVersionPojo orgSchemaVersionPojo = orgSchemaApi.getCheckByOrgId(pojo.getOrgId());
-            ReportPojo reportPojo = reportApi.getByAliasAndSchema(pojo.getReportAlias(),
+            ReportPojo reportPojo = reportApi.getCheckByAliasAndSchema(pojo.getReportAlias(),
                     orgSchemaVersionPojo.getSchemaVersionId(), false);
             List<ReportControlsPojo> reportControlsPojos = Objects.isNull(reportPojo) ?
                     new ArrayList<>() : reportControlsApi.getByReportId(reportPojo.getId());
