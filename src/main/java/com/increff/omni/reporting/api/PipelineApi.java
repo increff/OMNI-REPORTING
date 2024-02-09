@@ -13,6 +13,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Objects;
 
+import static com.increff.omni.reporting.dto.AbstractDto.getOrgId;
+
 @Log4j
 @Service
 @Transactional(rollbackFor = ApiException.class)
@@ -31,6 +33,7 @@ public class PipelineApi extends AbstractApi {
 
     public PipelinePojo update(Integer id, PipelinePojo pojo) throws ApiException {
         PipelinePojo existing = getCheck(id);
+        getCheckPipelineOrg(id, getOrgId());
         if(!Objects.equals(existing.getName(), pojo.getName())) {
             PipelinePojo newNamePojo = dao.getByOrgIdName(pojo.getOrgId(), pojo.getName());
             if(Objects.nonNull(newNamePojo))

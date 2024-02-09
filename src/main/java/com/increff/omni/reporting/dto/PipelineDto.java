@@ -37,7 +37,6 @@ public class PipelineDto extends AbstractDto {
 
     public PipelineData update(Integer id, PipelineForm form) throws ApiException {
         checkValid(form);
-        api.getCheckPipelineOrg(id, getOrgId());
         PipelinePojo pojo = ConvertUtil.convert(form, PipelinePojo.class);
         pojo.setConfigs(form.getConfigs().toString());
         pojo.setOrgId(getOrgId());
