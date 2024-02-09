@@ -23,6 +23,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.increff.omni.reporting.dto.CommonDtoHelper.*;
+import static com.increff.omni.reporting.util.ValidateUtil.validateReportScheduleForm;
 
 @Component
 public class ReportScheduleDto extends AbstractDto {
@@ -57,7 +58,7 @@ public class ReportScheduleDto extends AbstractDto {
     private SchedulePipelineApi schedulePipelineApi;
 
     public void scheduleReport(ReportScheduleForm form) throws ApiException {
-        checkValid(form);
+        validateReportScheduleForm(form);
         checkLimitForOrg();
         OrganizationPojo organizationPojo = organizationApi.getCheck(getOrgId());
         ReportPojo reportPojo = checkValidReport(form.getReportAlias());
@@ -72,7 +73,7 @@ public class ReportScheduleDto extends AbstractDto {
     }
 
     public void editScheduleReport(Integer id, ReportScheduleForm form) throws ApiException {
-        checkValid(form);
+        validateReportScheduleForm(form);
         checkLimitForOrg();
         ReportSchedulePojo ex = api.getCheck(id);
         if (!ex.getOrgId().equals(getOrgId()))

@@ -160,4 +160,7 @@ public class ApplicationProperties {
     @Value("${account.health.url}")
     private String accountHealthUrl;
 
+    @Value("${query.executor.health.url}")
+    private String queryExecutorHealthUrl;
+
 }

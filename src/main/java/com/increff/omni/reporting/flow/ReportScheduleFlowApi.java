@@ -55,8 +55,6 @@ public class ReportScheduleFlowApi extends AbstractFlowApi {
             addEmails(pojo, sendTo);
         else if(!pipelineFlowData.isEmpty())
             upsertSchedulePipelines(pojo.getId(), pipelineFlowData);
-        else
-            throw new ApiException(ApiStatus.BAD_DATA, "No emails or pipelines given");
     }
 
     public void edit(ReportSchedulePojo pojo, List<String> sendTo,

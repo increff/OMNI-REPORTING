@@ -1,8 +1,5 @@
 package com.increff.omni.reporting.dto;
 
-//import com.increff.assure.config.ApplicationProperties;
-//import com.nextscm.commons.spring.common.HealthBulkData;
-//import com.nextscm.commons.spring.server.AbstractHealthDto;
 import com.increff.omni.reporting.config.ApplicationProperties;
 import com.nextscm.commons.spring.common.HealthBulkData;
 import com.nextscm.commons.spring.server.AbstractHealthDto;
@@ -29,6 +26,7 @@ public class HealthDto extends AbstractHealthDto {
         if(Objects.nonNull(dependencies) && dependencies) {
             healthBulkData.getHealthDataMap().put("crypto", serviceHealthCheck(applicationProperties.getCryptoHealthUrl()));
             healthBulkData.getHealthDataMap().put("account", serviceHealthCheck(applicationProperties.getAccountHealthUrl()));
+            healthBulkData.getHealthDataMap().put("queryExecutor", serviceHealthCheck(applicationProperties.getQueryExecutorHealthUrl()));
             healthBulkData.getHealthDataMap().put("db", dbHealthCheck(applicationProperties.getJdbcUrl(),
                     applicationProperties.getJdbcUsername(), applicationProperties.getJdbcPassword()));
             // TODO - add connection pojo health checks later if required

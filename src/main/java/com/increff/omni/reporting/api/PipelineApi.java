@@ -5,6 +5,7 @@ import com.increff.omni.reporting.pojo.PipelinePojo;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
 import com.nextscm.commons.spring.server.AbstractApi;
+import lombok.extern.log4j.Log4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Objects;
 
+@Log4j
 @Service
 @Transactional(rollbackFor = ApiException.class)
 public class PipelineApi extends AbstractApi {
@@ -21,8 +23,7 @@ public class PipelineApi extends AbstractApi {
 
     public PipelinePojo add(PipelinePojo pojo) throws ApiException {
         PipelinePojo existing = dao.getByOrgIdName(pojo.getOrgId(), pojo.getName());
-        if(Objects.nonNull(existing))
-            throw new ApiException(ApiStatus.BAD_DATA, "Pipeline with name " + pojo.getName() + " already exists for org id: " + pojo.getOrgId());
+        checkNull(existing, "Pipeline with name " + pojo.getName() + " already exists for this org");
 
         dao.persist(pojo);
         return pojo;
@@ -43,11 +44,6 @@ public class PipelineApi extends AbstractApi {
         return existing;
     }
 
-    public void delete(Integer id) throws ApiException {
-        PipelinePojo pojo = getCheck(id);
-        dao.remove(pojo);
-    }
-
     public List<PipelinePojo> getByOrgId(Integer orgId) {
         return dao.selectMultiple("orgId", orgId);
     }
@@ -61,7 +57,8 @@ public class PipelineApi extends AbstractApi {
     public PipelinePojo getCheckPipelineOrg(Integer id, Integer orgId) throws ApiException {
         PipelinePojo pojo = getCheck(id);
         if(!Objects.equals(pojo.getOrgId(), orgId)) {
-            throw new ApiException(ApiStatus.BAD_DATA, "Pipeline " + id + " does not belong to org id: " + orgId);
+            log.error("Pipeline " + id + " does not belong to org id: " + orgId);
+            throw new ApiException(ApiStatus.BAD_DATA, "Pipeline does not belong to this org");
         }
         return pojo;
     }
