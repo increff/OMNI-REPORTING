@@ -40,7 +40,7 @@ public class PipelineDto extends AbstractDto {
         PipelinePojo pojo = ConvertUtil.convert(form, PipelinePojo.class);
         pojo.setConfigs(form.getConfigs().toString());
         pojo.setOrgId(getOrgId());
-        pojo = api.update(id, pojo);
+        pojo = api.updateWithUserOrgCheck(id, pojo);
         return convertToPipelineData(pojo);
     }
 

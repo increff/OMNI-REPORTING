@@ -31,7 +31,7 @@ public class PipelineApi extends AbstractApi {
         return pojo;
     }
 
-    public PipelinePojo update(Integer id, PipelinePojo pojo) throws ApiException {
+    public PipelinePojo updateWithUserOrgCheck(Integer id, PipelinePojo pojo) throws ApiException {
         PipelinePojo existing = getCheck(id);
         getCheckPipelineOrg(id, getOrgId());
         if(!Objects.equals(existing.getName(), pojo.getName())) {
