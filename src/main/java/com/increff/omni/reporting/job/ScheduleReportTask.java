@@ -212,7 +212,7 @@ public class ScheduleReportTask extends AbstractTask {
     private static String getFilepathWithFolder(File file, String folderName) {
         String filePath = file.getPath();
         if (folderName != null && !folderName.isEmpty()) {
-            filePath = folderName + "/" + file.getPath();
+            filePath = folderName + "/" + file.getName();
         }
         return filePath;
     }
