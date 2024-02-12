@@ -62,7 +62,7 @@ public class PipelineDto extends AbstractDto {
 
         try {
             FileUtil.writeDummyContentToFile(file);
-            scheduleReportTask.uploadScheduleFiles(form.getType(), form.getConfigs().toString(), file, "increff-pipeline-test");
+            scheduleReportTask.uploadScheduleFiles(form.getType(), form.getConfigs().toString(), file, "increff-pipeline-test", file.getName());
         } catch (Exception e) {
             if (file.exists()) // If an exception occurs, delete the file if it exists
                 FileUtil.delete(file);

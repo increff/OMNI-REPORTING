@@ -82,7 +82,6 @@ public class ScheduleReportTask extends AbstractTask {
     @Autowired
     private EncryptionClient encryptionClient;
 
-    private final static String TIME_ZONE_PATTERN_WITHOUT_ZONE = "yyyy-MM-dd HH:mm:ss";
 
     @Override
     @Async("scheduleReportRequestExecutor")
@@ -110,7 +109,7 @@ public class ScheduleReportTask extends AbstractTask {
             timezone = getValueFromQuotes(inputParamMap.get("timezone"));
             String fQuery = SqlCmd.getFinalQuery(inputParamMap, reportQueryPojo.getQuery(), false);
             // Execute query and save results
-            prepareAndSendEmail(pojo, fQuery, connectionPojo, timezone, reportPojo.getName());
+            prepareAndSendEmail(pojo, fQuery, connectionPojo, timezone, reportPojo);
             reportScheduleApi.addScheduleCount(pojo.getScheduleId(), 1, 0);
         } catch (Exception e) {
             log.error("Report Request ID : " + pojo.getId() + " failed", e);
@@ -134,7 +133,7 @@ public class ScheduleReportTask extends AbstractTask {
 
     // TODO  : Rename function
     private void prepareAndSendEmail(ReportRequestPojo pojo, String fQuery, ConnectionPojo connectionPojo,
-                                     String timezone, String name)
+                                     String timezone, ReportPojo reportPojo)
             throws IOException, ApiException {
         File file = folderApi.getFileForExtension(pojo.getId(), ".csv");
         Connection connection = null;
@@ -158,9 +157,9 @@ public class ScheduleReportTask extends AbstractTask {
 
             List<SchedulePipelinePojo> schedulePipelinePojos = schedulePipelineApi.getByScheduleId(pojo.getScheduleId());
             if(schedulePipelinePojos.isEmpty())
-                sendEmail(fileSize, file, pojo, timezone, name);
+                sendEmail(fileSize, file, pojo, timezone, reportPojo.getName());
             else {
-                processPipelines(file, schedulePipelinePojos);
+                processPipelines(file, schedulePipelinePojos, FileUtil.getPipelineFilename(reportPojo.getId(), reportPojo.getName(), timezone));
             }
 
             // update status to completed
@@ -189,7 +188,7 @@ public class ScheduleReportTask extends AbstractTask {
         }
     }
 
-    private void processPipelines(File file, List<SchedulePipelinePojo> schedulePipelinePojos) throws ApiException {
+    private void processPipelines(File file, List<SchedulePipelinePojo> schedulePipelinePojos, String filename) throws ApiException {
         List<PipelinePojo> pipelinePojos = pipelineApi.getByPipelineIds(schedulePipelinePojos.stream()
                 .map(SchedulePipelinePojo::getPipelineId).collect(Collectors.toList()));
         Map<Integer, SchedulePipelinePojo> pipelineIdToSchedulePipelinePojoMap = schedulePipelinePojos.stream()
@@ -197,22 +196,22 @@ public class ScheduleReportTask extends AbstractTask {
 
         for (PipelinePojo pipelinePojo : pipelinePojos)
             uploadScheduleFiles(pipelinePojo.getType(), pipelinePojo.getConfigs().toString(), file,
-                    pipelineIdToSchedulePipelinePojoMap.get(pipelinePojo.getId()).getFolderName());
+                    pipelineIdToSchedulePipelinePojoMap.get(pipelinePojo.getId()).getFolderName(), filename);
     }
 
-    public void uploadScheduleFiles(PipelineType type, String configs, File file, String folderName) throws ApiException {
+    public void uploadScheduleFiles(PipelineType type, String configs, File file, String folderName, String filename) throws ApiException {
         try {
             AbstractFileProvider fileProvider = getFileProvider(type, configs);
-            fileProvider.create(getFilepathWithFolder(file, folderName), Files.newInputStream(file.toPath()));
+            fileProvider.create(getFilepathWithFolder(filename, folderName), Files.newInputStream(file.toPath()));
         } catch (Exception e) {
             throw new ApiException(ApiStatus.BAD_DATA, "Error while uploadScheduleFiles : " + e.getMessage());
         }
     }
 
-    private static String getFilepathWithFolder(File file, String folderName) {
-        String filePath = file.getPath();
+    private static String getFilepathWithFolder(String filename, String folderName) {
+        String filePath = filename;
         if (folderName != null && !folderName.isEmpty()) {
-            filePath = folderName + "/" + file.getName();
+            filePath = folderName + "/" + filename;
         }
         return filePath;
     }
@@ -297,10 +296,7 @@ public class ScheduleReportTask extends AbstractTask {
         props.setToEmails(toEmails);
         props.setSubject("Increff Reporting : " + name);
         props.setAttachment(out);
-        props.setCustomizedFileName(name + " - " + ZonedDateTime.now().withZoneSameInstant(
-                ZoneId.of(timezone)).format(DateTimeFormatter.ofPattern(TIME_ZONE_PATTERN_WITHOUT_ZONE))
-                + ((isZip) ? ".zip" :
-                ".csv"));
+        props.setCustomizedFileName(FileUtil.getCustomizedFileName(isZip, timezone, name));
         props.setIsAttachment(isAttachment);
         props.setContent(content);
         return props;
