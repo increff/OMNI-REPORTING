@@ -60,6 +60,6 @@ public class ValidateUtil {
         if(form.getSendTo().isEmpty() && form.getPipelineDetails().isEmpty())
             throw new ApiException(ApiStatus.BAD_DATA, "Atleast one email or pipeline is required");
         if(form.getSendTo().size() > 0 && form.getPipelineDetails().size() > 0)
-            throw new ApiException(ApiStatus.BAD_DATA, "Either sendTo or pipelineDetails should be given, not both");
+            throw new ApiException(ApiStatus.BAD_DATA, "Only one of email or pipeline should be given, not both");
     }
 }

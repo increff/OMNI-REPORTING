@@ -169,10 +169,10 @@ public class StandardController {
         return pipelineDto.update(id, form);
     }
 
-    @ApiOperation(value = "Get All Pipelines")
+    @ApiOperation(value = "Get Pipelines By User Org")
     @RequestMapping(value = "/pipelines", method = RequestMethod.GET)
-    public List<PipelineData> getAllPipelines() throws ApiException{
-        return pipelineDto.getAllPipelines();
+    public List<PipelineData> getPipelinesByUserOrg() throws ApiException{
+        return pipelineDto.getPipelinesByUserOrg();
     }
 
     @ApiOperation(value = "Get Pipeline by ID")

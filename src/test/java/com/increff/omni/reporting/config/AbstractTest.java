@@ -2,6 +2,9 @@ package com.increff.omni.reporting.config;
 
 import com.increff.account.client.UserPrincipal;
 import com.increff.omni.reporting.model.constants.AppResourceKeys;
+import com.increff.omni.reporting.model.constants.ChartType;
+import com.increff.omni.reporting.model.constants.PipelineType;
+import com.increff.omni.reporting.model.form.PipelineForm;
 import com.increff.service.encryption.EncryptionClient;
 import com.increff.service.encryption.data.CryptoData;
 import com.increff.service.encryption.form.CryptoForm;
@@ -27,6 +30,8 @@ import java.util.*;
 @WebAppConfiguration
 @Transactional
 public abstract class AbstractTest {
+
+    public Integer orgId = 100001;
 
     @Value("${testdb.username}")
     protected String username;
@@ -60,7 +65,7 @@ public abstract class AbstractTest {
     private void setSecurityContext() {
         Authentication authentication = Mockito.mock(Authentication.class);
         UserPrincipal principal = new UserPrincipal();
-        principal.setDomainId(100001);
+        principal.setDomainId(orgId);
         principal.setDomainName("increff");
         principal.setId(100001);
         principal.setUsername("test_user");

@@ -1,7 +1,12 @@
 package com.increff.omni.reporting.helper;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.increff.omni.reporting.model.constants.InputControlType;
+import com.increff.omni.reporting.model.constants.PipelineType;
+import com.increff.omni.reporting.model.data.PipelineData;
 import com.increff.omni.reporting.model.form.CronScheduleForm;
+import com.increff.omni.reporting.model.form.PipelineDetailsForm;
+import com.increff.omni.reporting.model.form.PipelineForm;
 import com.increff.omni.reporting.model.form.ReportScheduleForm;
 import com.increff.omni.reporting.pojo.ReportScheduleEmailsPojo;
 import com.increff.omni.reporting.pojo.ReportScheduleInputParamsPojo;
@@ -42,7 +47,8 @@ public class ReportScheduleTestHelper {
     }
 
     public static ReportScheduleForm getReportScheduleForm(String minute, String hour, String dayOfMonth, String dayOfWeek, String reportName
-            , String timezone, Boolean isEnabled, List<String> sendTo, List<ReportScheduleForm.InputParamMap> inputParamMaps) {
+            , String timezone, Boolean isEnabled, List<String> sendTo, List<ReportScheduleForm.InputParamMap> inputParamMaps,
+                                                           List<PipelineDetailsForm> pipelineDetails) {
         ReportScheduleForm form = new ReportScheduleForm();
         CronScheduleForm cronScheduleForm = new CronScheduleForm();
         cronScheduleForm.setMinute(minute);
@@ -54,6 +60,7 @@ public class ReportScheduleTestHelper {
         form.setTimezone(timezone);
         form.setIsEnabled(isEnabled);
         form.setSendTo(sendTo);
+        form.setPipelineDetails(pipelineDetails);
         form.setParamMap(inputParamMaps);
         return form;
     }

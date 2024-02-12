@@ -44,7 +44,7 @@ public class SchedulePipelineApi extends AbstractApi {
         return newPojos;
     }
     
-    private SchedulePipelinePojo getCheck(Integer id) throws ApiException {
+    public SchedulePipelinePojo getCheck(Integer id) throws ApiException {
         SchedulePipelinePojo pojo = dao.select(id);
         checkNotNull(pojo, "SchedulePipeline does not exist id: " + id);
         return pojo;

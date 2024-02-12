@@ -51,7 +51,7 @@ public class PipelineApi extends AbstractApi {
         return dao.selectMultiple("orgId", orgId);
     }
 
-    private PipelinePojo getCheck(Integer id) throws ApiException {
+    public PipelinePojo getCheck(Integer id) throws ApiException {
         PipelinePojo pojo = dao.select(id);
         checkNotNull(pojo, "Pipeline does not exist id: " + id);
         return pojo;
@@ -67,6 +67,6 @@ public class PipelineApi extends AbstractApi {
     }
 
     public List<PipelinePojo> getByPipelineIds(List<Integer> pipelineIds) {
-        return dao.selectMultiple("id", pipelineIds);
+        return dao.getByIds(pipelineIds);
     }
 }

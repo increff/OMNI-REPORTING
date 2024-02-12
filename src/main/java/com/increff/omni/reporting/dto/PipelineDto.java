@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import java.io.File;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Comparator;
 import java.util.List;
 
 import static com.increff.omni.reporting.util.ConvertUtil.convertToPipelineData;
@@ -44,9 +45,12 @@ public class PipelineDto extends AbstractDto {
         return convertToPipelineData(pojo);
     }
 
-    public List<PipelineData> getAllPipelines() throws ApiException{
-        List<PipelinePojo> pipelinePojoList = api.getByOrgId(getOrgId());
-        return convertToPipelineData(pipelinePojoList);
+    public List<PipelineData> getPipelinesByUserOrg() throws ApiException {
+        return getPipelinesByOrgId(getOrgId());
+    }
+
+    public List<PipelineData> getPipelinesByOrgId(Integer orgId) throws ApiException{
+        return sortPipelines(convertToPipelineData(api.getByOrgId(orgId)));
     }
 
     public PipelineData getPipelineById(Integer id) throws ApiException {
@@ -66,5 +70,10 @@ public class PipelineDto extends AbstractDto {
         } finally {
             FileUtil.delete(file);
         }
+    }
+
+    private List<PipelineData> sortPipelines(List<PipelineData> pipelineDataList) {
+        pipelineDataList.sort(Comparator.comparing(PipelineData::getName));
+        return pipelineDataList;
     }
 }

@@ -116,7 +116,7 @@ public class ReportJobTest extends AbstractTest {
         reportDto.upsertQuery(reportData.getId(), queryForm);
         List<ReportScheduleForm.InputParamMap> inputParamMaps = getInputParamList();
         ReportScheduleForm form = getReportScheduleForm("*/15", "*", "*", "?", "Report 2", "Asia/Kolkata",
-                true, Arrays.asList("a@gmail.com", "b@gmail.com"), inputParamMaps);
+                true, Arrays.asList("a@gmail.com", "b@gmail.com"), inputParamMaps, new ArrayList<>());
         scheduleDto.scheduleReport(form);
         List<ReportScheduleData> reportScheduleData = scheduleDto.getScheduleReports(1, 100);
 
@@ -138,7 +138,7 @@ public class ReportJobTest extends AbstractTest {
         reportDto.upsertQuery(reportData.getId(), queryForm);
         List<ReportScheduleForm.InputParamMap> inputParamMaps = getInputParamList();
         ReportScheduleForm form = getReportScheduleForm("*/15", "*", "*", "?", "Report 2", "Asia/Kolkata",
-                true, Arrays.asList("a@gmail.com", "b@gmail.com"), inputParamMaps);
+                true, Arrays.asList("a@gmail.com", "b@gmail.com"), inputParamMaps, new ArrayList<>());
         scheduleDto.scheduleReport(form);
         List<ReportScheduleData> reportScheduleData = scheduleDto.getScheduleReports(1, 100);
         assertEquals(1, reportScheduleData.size());
