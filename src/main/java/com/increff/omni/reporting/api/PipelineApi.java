@@ -36,8 +36,10 @@ public class PipelineApi extends AbstractApi {
         getCheckPipelineOrg(id, getOrgId());
         if(!Objects.equals(existing.getName(), pojo.getName())) {
             PipelinePojo newNamePojo = dao.getByOrgIdName(pojo.getOrgId(), pojo.getName());
-            if(Objects.nonNull(newNamePojo))
-                throw new ApiException(ApiStatus.BAD_DATA, "Pipeline with name " + pojo.getName() + " already exists for org id: " + pojo.getOrgId());
+            if(Objects.nonNull(newNamePojo)) {
+                log.error("Pipeline with name " + pojo.getName() + " already exists for user's org id: " + pojo.getOrgId());
+                throw new ApiException(ApiStatus.BAD_DATA, "Pipeline with name " + pojo.getName() + " already exists for user's org");
+            }
         }
 
         existing.setConfigs(pojo.getConfigs());
