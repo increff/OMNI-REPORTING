@@ -87,6 +87,8 @@ public class PipelineApiTest extends AbstractTest {
                 getGCPConfigString("bucket.com", "testBucket", "abc"), orgId);
         pipelineApi.add(pojo);
         pojo.setName("Pipeline 2");
+        pojo.setConfigs(getGCPConfigString("bucket.com", "testBucket", "abc_updated"));
+        pojo.setType(PipelineType.AWS);
         pipelineApi.updateWithUserOrgCheck(pojo.getId(), pojo);
         PipelinePojo existing = pipelineApi.getCheck(pojo.getId());
         assertEquals(pojo, existing);

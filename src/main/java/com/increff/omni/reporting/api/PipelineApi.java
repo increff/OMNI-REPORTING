@@ -43,6 +43,7 @@ public class PipelineApi extends AbstractApi {
         }
 
         existing.setConfigs(pojo.getConfigs());
+        existing.setType(pojo.getType());
         existing.setName(pojo.getName());
         existing.setOrgId(pojo.getOrgId());
         dao.update(existing);

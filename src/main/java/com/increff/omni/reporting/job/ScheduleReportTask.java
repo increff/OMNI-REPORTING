@@ -114,16 +114,18 @@ public class ScheduleReportTask extends AbstractTask {
         } catch (Exception e) {
             log.error("Report Request ID : " + pojo.getId() + " failed", e);
             api.markFailed(pojo.getId(), ReportRequestStatus.FAILED, e.getMessage(), 0, 0.0);
+            reportScheduleApi.addScheduleCount(pojo.getScheduleId(), 0, 1);
             try {
                 ReportSchedulePojo schedulePojo = reportScheduleApi.getCheck(pojo.getScheduleId());
                 List<String> toEmails = reportScheduleApi.getByScheduleId(schedulePojo.getId()).stream()
                         .map(ReportScheduleEmailsPojo::getSendTo).collect(
                                 Collectors.toList());
-                EmailProps props = createEmailProps(null, false, toEmails, "Hi,<br>Please " +
-                        "check failure reason in the latest scheduled requests. Re-submit the schedule in the " +
-                        "reporting application, which might solve the issue.", false, timezone, reportPojo.getName());
-                EmailUtil.sendMail(props);
-                reportScheduleApi.addScheduleCount(pojo.getScheduleId(), 0, 1);
+                if(!toEmails.isEmpty()) {
+                    EmailProps props = createEmailProps(null, false, toEmails, "Hi,<br>Please " +
+                            "check failure reason in the latest scheduled requests. Re-submit the schedule in the " +
+                            "reporting application, which might solve the issue.", false, timezone, reportPojo.getName());
+                    EmailUtil.sendMail(props);
+                }
             } catch (Exception ex) {
                 log.error("Report Request ID : " + pojo.getId() + ". Failed to send email. ", ex);
             }
