@@ -25,9 +25,6 @@ public class ConnectionPojo extends AbstractVersionedPojo{
     @Column(nullable = false)
     private String password;
 
-    @Column
-    private String dbName;
-
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private DBType dbType;
