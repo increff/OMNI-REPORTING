@@ -1,5 +1,6 @@
 package com.increff.omni.reporting.pojo;
 
+import com.increff.omni.reporting.model.constants.AppName;
 import com.increff.omni.reporting.model.constants.ChartType;
 import com.increff.omni.reporting.model.constants.ReportType;
 import lombok.Getter;
@@ -56,5 +57,10 @@ public class ReportPojo extends AbstractVersionedPojo{
     @Column(nullable = false)
     @Enumerated(value = EnumType.STRING)
     private ChartType chartType = ChartType.REPORT;
+
+    @Column
+    @Enumerated(value = EnumType.STRING)
+    private AppName appName;
+
 
 }
