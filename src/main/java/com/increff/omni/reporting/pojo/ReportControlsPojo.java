@@ -13,7 +13,7 @@ import javax.persistence.*;
 public class ReportControlsPojo extends AbstractVersionedPojo{
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     @Column(nullable = false)
