@@ -85,7 +85,6 @@ public class UserPrincipalUtil {
                 continue;
             }
             s = s.replace("'", "\\'");
-            s = s.replace("\\", "\\\\"); // replaces single backslash with double backslash
             fList.add("'" + s + "'");
         }
         finalMap.put(key, String.join(",", fList));
