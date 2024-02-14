@@ -2,6 +2,7 @@ package com.increff.omni.reporting.util;
 
 import com.increff.account.client.SecurityUtil;
 import com.increff.account.client.UserPrincipal;
+import com.increff.omni.reporting.model.constants.AppName;
 import com.increff.omni.reporting.model.constants.AppResourceKeys;
 import com.increff.omni.reporting.model.constants.InputControlType;
 import com.increff.omni.reporting.model.constants.ResourceQueryParamKeys;
@@ -88,5 +89,23 @@ public class UserPrincipalUtil {
             fList.add("'" + s + "'");
         }
         finalMap.put(key, String.join(",", fList));
+    }
+
+
+    public static boolean validateReportAppAccess(String appName) {
+        Set<AppName> accessibleApps = getAccessibleApps();
+        return accessibleApps.contains(AppName.valueOf(appName));
+    }
+
+    public static Set<AppName> getAccessibleApps() {
+        Set<AppName> accessibleApps = new HashSet<>();
+        for (String role : getPrincipal().getRoles()) {
+            accessibleApps.add(AppName.valueOf(role.split("\\.")[0]));
+        }
+        return accessibleApps;
+    }
+
+    public static UserPrincipal getPrincipal() {
+        return SecurityUtil.getPrincipal();
     }
 }
