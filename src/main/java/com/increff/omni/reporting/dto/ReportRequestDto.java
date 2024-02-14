@@ -60,6 +60,7 @@ public class ReportRequestDto extends AbstractDto {
     private OrganizationApi organizationApi;
     @Autowired
     private FileDownloadUtil fileDownloadUtil;
+
     @Autowired
     private ReportInputParamsApi reportInputParamsApi;
     @Autowired

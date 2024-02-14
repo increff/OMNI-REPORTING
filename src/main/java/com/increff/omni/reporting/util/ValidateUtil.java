@@ -4,6 +4,7 @@ import com.increff.omni.reporting.model.constants.ChartType;
 import com.increff.omni.reporting.model.form.DashboardAddForm;
 import com.increff.omni.reporting.model.form.DashboardChartForm;
 import com.increff.omni.reporting.model.form.ReportForm;
+import com.increff.omni.reporting.model.form.ReportScheduleForm;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
 
@@ -52,5 +53,13 @@ public class ValidateUtil {
         if (form.getCharts().size() == 0)
             throw new ApiException(ApiStatus.BAD_DATA, "Atleast one chart is required in a dashboard");
         validateDashboardChartForms(form.getCharts());
+    }
+
+    public static void validateReportScheduleForm(ReportScheduleForm form) throws ApiException {
+        checkValid(form);
+        if(form.getSendTo().isEmpty() && form.getPipelineDetails().isEmpty())
+            throw new ApiException(ApiStatus.BAD_DATA, "Atleast one email or pipeline is required");
+        if(form.getSendTo().size() > 0 && form.getPipelineDetails().size() > 0)
+            throw new ApiException(ApiStatus.BAD_DATA, "Only one of email or pipeline should be given, not both");
     }
 }

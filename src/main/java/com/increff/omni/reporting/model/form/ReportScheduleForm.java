@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import javax.validation.constraints.NotNull;
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -17,8 +18,9 @@ public class ReportScheduleForm {
     private String reportAlias;
     private List<InputParamMap> paramMap;
     private CronScheduleForm cronSchedule;
-    @NotNull
-    private List<String> sendTo;
+    private List<String> sendTo = new ArrayList<>();
+    private List<PipelineDetailsForm> pipelineDetails = new ArrayList<>();
+
     @NotNull
     private Boolean isEnabled;
 

@@ -45,7 +45,7 @@ import java.util.List;
 @Configuration
 @EnableScheduling
 @EnableAsync
-@ComponentScan({"com.increff.omni.reporting", "com.increff.account.client", "com.increff.commons.queryexecutor"})
+@ComponentScan({"com.increff.omni.reporting", "com.increff.account.client", "com.increff.commons.queryexecutor", "com.nextscm.commons.spring.server"})
 @PropertySource(value = "file:omni-reporting.properties")
 @PropertySources({ //
         @PropertySource(value = "classpath:config.properties"), //

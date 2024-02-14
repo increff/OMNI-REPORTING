@@ -12,10 +12,10 @@ import java.io.*;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 
 @Log4j
 public class FileUtil {
@@ -24,6 +24,7 @@ public class FileUtil {
     private FolderApi folderApi;
 
     private static final double MB = 1024 * 1024;
+    private final static String TIME_ZONE_PATTERN_WITHOUT_ZONE = "yyyy-MM-dd HH:mm:ss";
 
     public static void closeQuietly(Closeable c) {
         if (c == null) {
@@ -135,5 +136,22 @@ public class FileUtil {
 
     public static double roundOff(double value) {
         return Math.round(value * 10000.0) / 10000.0;
+    }
+
+    public static void writeDummyContentToFile(File file) throws IOException {
+        BufferedWriter writer = new BufferedWriter(new FileWriter(file));
+        writer.write("dummy"); // Write "dummy" to the file
+        writer.close();
+    }
+
+    public static String getCustomizedFileName(boolean isZip, String timezone, String name) {
+        return name + " - " + ZonedDateTime.now().withZoneSameInstant(
+                ZoneId.of(timezone)).format(DateTimeFormatter.ofPattern(TIME_ZONE_PATTERN_WITHOUT_ZONE))
+                + (isZip ? ".zip" :
+                ".csv");
+    }
+
+    public static String getPipelineFilename(Integer reportId, String name, String timezone) {
+        return "reportId_" + reportId + "_" + getCustomizedFileName(false, timezone, name);
     }
 }

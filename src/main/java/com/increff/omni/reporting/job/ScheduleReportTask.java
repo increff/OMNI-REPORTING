@@ -1,11 +1,17 @@
 package com.increff.omni.reporting.job;
 
+import com.increff.commons.fileclient.AbstractFileProvider;
+import com.increff.commons.fileclient.AwsFileProvider;
+import com.increff.commons.fileclient.GcpFileProvider;
 import com.increff.commons.queryexecutor.QueryExecutorClient;
 import com.increff.omni.reporting.api.*;
 import com.increff.omni.reporting.config.ApplicationProperties;
 import com.increff.omni.reporting.config.EmailProps;
 import com.increff.omni.reporting.dto.CommonDtoHelper;
+import com.increff.omni.reporting.model.constants.PipelineType;
 import com.increff.omni.reporting.model.constants.ReportRequestStatus;
+import com.increff.omni.reporting.model.form.FileProviderFolder.AwsPipelineConfigForm;
+import com.increff.omni.reporting.model.form.FileProviderFolder.GcpPipelineConfigForm;
 import com.increff.omni.reporting.pojo.*;
 import com.increff.omni.reporting.util.EmailUtil;
 import com.increff.omni.reporting.util.FileDownloadUtil;
@@ -23,9 +29,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import javax.persistence.OptimisticLockException;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -34,15 +38,14 @@ import java.sql.SQLException;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import static com.increff.omni.reporting.dto.CommonDtoHelper.getInputParamMapFromPojoList;
 import static com.increff.omni.reporting.dto.CommonDtoHelper.getValueFromQuotes;
+import static com.increff.omni.reporting.util.ConvertUtil.getJavaObjectFromJson;
 
 @Component
 @Log4j
@@ -71,11 +74,14 @@ public class ScheduleReportTask extends AbstractTask {
     @Autowired
     private ReportScheduleApi reportScheduleApi;
     @Autowired
+    private SchedulePipelineApi schedulePipelineApi;
+    @Autowired
+    private PipelineApi pipelineApi;
+    @Autowired
     private QueryExecutorClient executorClient;
     @Autowired
     private EncryptionClient encryptionClient;
 
-    private final static String TIME_ZONE_PATTERN_WITHOUT_ZONE = "yyyy-MM-dd HH:mm:ss";
 
     @Override
     @Async("scheduleReportRequestExecutor")
@@ -103,21 +109,23 @@ public class ScheduleReportTask extends AbstractTask {
             timezone = getValueFromQuotes(inputParamMap.get("timezone"));
             String fQuery = SqlCmd.getFinalQuery(inputParamMap, reportQueryPojo.getQuery(), false);
             // Execute query and save results
-            prepareAndSendEmail(pojo, fQuery, connectionPojo, timezone, reportPojo.getName());
+            prepareAndSendEmail(pojo, fQuery, connectionPojo, timezone, reportPojo);
             reportScheduleApi.addScheduleCount(pojo.getScheduleId(), 1, 0);
         } catch (Exception e) {
             log.error("Report Request ID : " + pojo.getId() + " failed", e);
             api.markFailed(pojo.getId(), ReportRequestStatus.FAILED, e.getMessage(), 0, 0.0);
+            reportScheduleApi.addScheduleCount(pojo.getScheduleId(), 0, 1);
             try {
                 ReportSchedulePojo schedulePojo = reportScheduleApi.getCheck(pojo.getScheduleId());
                 List<String> toEmails = reportScheduleApi.getByScheduleId(schedulePojo.getId()).stream()
                         .map(ReportScheduleEmailsPojo::getSendTo).collect(
                                 Collectors.toList());
-                EmailProps props = createEmailProps(null, false, toEmails, "Hi,<br>Please " +
-                        "check failure reason in the latest scheduled requests. Re-submit the schedule in the " +
-                        "reporting application, which might solve the issue.", false, timezone, reportPojo.getName());
-                EmailUtil.sendMail(props);
-                reportScheduleApi.addScheduleCount(pojo.getScheduleId(), 0, 1);
+                if(!toEmails.isEmpty()) {
+                    EmailProps props = createEmailProps(null, false, toEmails, "Hi,<br>Please " +
+                            "check failure reason in the latest scheduled requests. Re-submit the schedule in the " +
+                            "reporting application, which might solve the issue.", false, timezone, reportPojo.getName());
+                    EmailUtil.sendMail(props);
+                }
             } catch (Exception ex) {
                 log.error("Report Request ID : " + pojo.getId() + ". Failed to send email. ", ex);
             }
@@ -125,8 +133,9 @@ public class ScheduleReportTask extends AbstractTask {
 
     }
 
+    // TODO  : Rename function
     private void prepareAndSendEmail(ReportRequestPojo pojo, String fQuery, ConnectionPojo connectionPojo,
-                                     String timezone, String name)
+                                     String timezone, ReportPojo reportPojo)
             throws IOException, ApiException {
         File file = folderApi.getFileForExtension(pojo.getId(), ".csv");
         Connection connection = null;
@@ -147,7 +156,14 @@ public class ScheduleReportTask extends AbstractTask {
                         "File size " + fileSize + " MB exceeded max limit of " + properties.getMaxFileSize() +
                                 " MB" + ". Please select granular filters");
             String filePath = "NA";
-            sendEmail(fileSize, file, pojo, timezone, name);
+
+            List<SchedulePipelinePojo> schedulePipelinePojos = schedulePipelineApi.getByScheduleId(pojo.getScheduleId());
+            if(schedulePipelinePojos.isEmpty())
+                sendEmail(fileSize, file, pojo, timezone, reportPojo.getName());
+            else {
+                processPipelines(file, schedulePipelinePojos, FileUtil.getPipelineFilename(reportPojo.getId(), reportPojo.getName(), timezone));
+            }
+
             // update status to completed
             api.updateStatus(pojo.getId(), ReportRequestStatus.COMPLETED, filePath, noOfRows, fileSize, "",
                     ZonedDateTime.now());
@@ -173,6 +189,54 @@ public class ScheduleReportTask extends AbstractTask {
             }
         }
     }
+
+    private void processPipelines(File file, List<SchedulePipelinePojo> schedulePipelinePojos, String filename) throws ApiException {
+        List<PipelinePojo> pipelinePojos = pipelineApi.getByPipelineIds(schedulePipelinePojos.stream()
+                .map(SchedulePipelinePojo::getPipelineId).collect(Collectors.toList()));
+        Map<Integer, SchedulePipelinePojo> pipelineIdToSchedulePipelinePojoMap = schedulePipelinePojos.stream()
+                .collect(Collectors.toMap(SchedulePipelinePojo::getPipelineId, x -> x));
+
+        for (PipelinePojo pipelinePojo : pipelinePojos)
+            uploadScheduleFiles(pipelinePojo.getType(), pipelinePojo.getConfigs().toString(), file,
+                    pipelineIdToSchedulePipelinePojoMap.get(pipelinePojo.getId()).getFolderName(), filename);
+    }
+
+    public void uploadScheduleFiles(PipelineType type, String configs, File file, String folderName, String filename) throws ApiException {
+        try {
+            AbstractFileProvider fileProvider = getFileProvider(type, configs);
+            fileProvider.create(getFilepathWithFolder(filename, folderName), Files.newInputStream(file.toPath()));
+        } catch (Exception e) {
+            throw new ApiException(ApiStatus.BAD_DATA, "Error while uploadScheduleFiles : " + e.getMessage());
+        }
+    }
+
+    private static String getFilepathWithFolder(String filename, String folderName) {
+        String filePath = filename;
+        if (folderName != null && !folderName.isEmpty()) {
+            filePath = folderName + "/" + filename;
+        }
+        return filePath;
+    }
+
+    private AbstractFileProvider getFileProvider(PipelineType type, String configs) throws ApiException {
+        try {
+            switch (type) {
+                case AWS:
+                    AwsPipelineConfigForm awsForm = getJavaObjectFromJson(configs, AwsPipelineConfigForm.class);
+                    return new AwsFileProvider(awsForm.getRegion(), awsForm.getAccessKey(), awsForm.getSecretKey(), awsForm.getBucketName(), awsForm.getBucketUrl());
+                case GCP:
+                    GcpPipelineConfigForm gcpForm = getJavaObjectFromJson(configs, GcpPipelineConfigForm.class);
+                    return new GcpFileProvider(gcpForm.getBucketUrl(), gcpForm.getBucketName(), new ByteArrayInputStream(gcpForm.getCredentialsJson().toString().getBytes()));
+                default:
+                    throw new ApiException(ApiStatus.BAD_DATA, "Unsupported File Provider Type " + type);
+            }
+        } catch (Exception e) {
+            log.error("Error while getting file provider : " + e + " " + Arrays.toString(e.getStackTrace()));
+            throw new ApiException(ApiStatus.BAD_DATA, "Error while getting file provider : " + e);
+        }
+    }
+
+
 
     private String getDecryptedPassword(String password) throws ApiException {
         try {
@@ -235,10 +299,7 @@ public class ScheduleReportTask extends AbstractTask {
         props.setToEmails(toEmails);
         props.setSubject("Increff Reporting : " + name);
         props.setAttachment(out);
-        props.setCustomizedFileName(name + " - " + ZonedDateTime.now().withZoneSameInstant(
-                ZoneId.of(timezone)).format(DateTimeFormatter.ofPattern(TIME_ZONE_PATTERN_WITHOUT_ZONE))
-                + ((isZip) ? ".zip" :
-                ".csv"));
+        props.setCustomizedFileName(FileUtil.getCustomizedFileName(isZip, timezone, name));
         props.setIsAttachment(isAttachment);
         props.setContent(content);
         return props;
