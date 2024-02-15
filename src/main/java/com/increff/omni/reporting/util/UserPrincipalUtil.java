@@ -99,7 +99,14 @@ public class UserPrincipalUtil {
 
     public static Set<AppName> getAccessibleApps() {
         Set<AppName> accessibleApps = new HashSet<>();
-        for (String role : getPrincipal().getRoles()) {
+        List<String> userRoles = getPrincipal().getRoles();
+
+        if(userRoles.contains(APP_ADMIN)) { // ques : do not add report.admin here as report.admin will be appName.report.admin right?
+            return new HashSet<>( Arrays.asList(AppName.UNIFY, AppName.OMS)); // todo : change after testing
+            // return new HashSet<>(Arrays.asList(AppName.values()));
+        }
+
+        for (String role : userRoles) {
             accessibleApps.add(AppName.valueOf(role.split("\\.")[0]));
         }
         return accessibleApps;
