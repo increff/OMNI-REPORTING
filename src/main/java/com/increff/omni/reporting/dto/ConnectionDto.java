@@ -81,6 +81,7 @@ public class ConnectionDto extends AbstractDto {
                     properties.getLiveReportMaxExecutionTime(), "select version();",
                     properties.getResultSetFetchSize());
             ResultSet resultSet = statement.executeQuery();
+            // todo : add mongo test connection
             resultSet.close();
         } catch (SQLException e) {
             throw new ApiException(ApiStatus.UNKNOWN_ERROR, "Error connecting to database : " + e.getMessage());
