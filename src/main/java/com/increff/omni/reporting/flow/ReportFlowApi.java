@@ -162,7 +162,8 @@ public class ReportFlowApi extends AbstractFlowApi {
         List<ReportPojo> reportPojoList = new ArrayList<>();
         //All standard
         List<ReportPojo> standard =
-                api.getByTypeAndSchema(ReportType.STANDARD, orgSchemaVersionPojo.getSchemaVersionId(), isChart, visualization);
+                api.getByTypeAndSchema(ReportType.STANDARD, orgSchemaVersionPojo.getSchemaVersionId(), isChart,
+                        visualization, getAccessibleApps());
 
         //All custom
         List<CustomReportAccessPojo> customAccess = customReportAccessApi.getByOrgId(orgId);
@@ -170,7 +171,7 @@ public class ReportFlowApi extends AbstractFlowApi {
                 .collect(Collectors.toList());
 
         List<ReportPojo> custom =
-                api.getByIdsAndSchema(customIds, orgSchemaVersionPojo.getSchemaVersionId(), isChart);
+                api.getByIdsAndSchema(customIds, orgSchemaVersionPojo.getSchemaVersionId(), isChart); // todo : filter accessible apps for custom also
 
         if(!isCustomReportUser()) // Add standard reports only if user in not custom report user
             reportPojoList.addAll(standard);

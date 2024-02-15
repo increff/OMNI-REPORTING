@@ -1,5 +1,6 @@
 package com.increff.omni.reporting.dao;
 
+import com.increff.omni.reporting.model.constants.AppName;
 import com.increff.omni.reporting.model.constants.ChartType;
 import com.increff.omni.reporting.model.constants.ReportType;
 import com.increff.omni.reporting.model.constants.VisualizationType;
@@ -19,7 +20,8 @@ import java.util.stream.Collectors;
 @Transactional
 public class ReportDao extends AbstractDao<ReportPojo> {
 
-    public List<ReportPojo> getByTypeAndSchema(ReportType type, Integer schemaVersionId, Boolean isChart, VisualizationType visualization) {
+    public List<ReportPojo> getByTypeAndSchema(ReportType type, Integer schemaVersionId, Boolean isChart,
+                                               VisualizationType visualization, Set<AppName> appName) {
         CriteriaBuilder cb = this.em.getCriteriaBuilder();
         CriteriaQuery<ReportPojo> query = cb.createQuery(ReportPojo.class);
         Root<ReportPojo> root = query.from(ReportPojo.class);
@@ -29,7 +31,8 @@ public class ReportDao extends AbstractDao<ReportPojo> {
                         cb.equal(root.get("schemaVersionId"), schemaVersionId),
                         cb.equal(root.get("isEnabled"), true),
                         cb.equal(root.get("isChart"), isChart),
-                        root.get("chartType").in(parseVisualization(visualization))
+                        root.get("chartType").in(parseVisualization(visualization)),
+                        root.get("appName").in(appName)
                 )
         );
         TypedQuery<ReportPojo> tQuery = createQuery(query);

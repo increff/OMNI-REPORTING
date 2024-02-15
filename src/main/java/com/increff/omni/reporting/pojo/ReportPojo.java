@@ -58,7 +58,7 @@ public class ReportPojo extends AbstractVersionedPojo{
     @Enumerated(value = EnumType.STRING)
     private ChartType chartType = ChartType.REPORT;
 
-    @Column
+    @Column // todo : make this non null. ques - will need to migrate all roles in account server from report.admin to omni.report.admin etc.
     @Enumerated(value = EnumType.STRING)
     private AppName appName;
 

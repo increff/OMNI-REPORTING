@@ -1,5 +1,6 @@
 package com.increff.omni.reporting.model.form;
 
+import com.increff.omni.reporting.model.constants.AppName;
 import com.increff.omni.reporting.model.constants.ChartType;
 import com.increff.omni.reporting.model.constants.ReportType;
 import lombok.Getter;
@@ -35,6 +36,8 @@ public class ReportForm {
     private ChartType chartType;
     @NotNull
     private Map<String, String> legends = new HashMap<>();
+    @NotNull
+    private AppName appName;
 
 
 }
