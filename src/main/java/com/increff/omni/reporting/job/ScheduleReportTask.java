@@ -231,7 +231,8 @@ public class ScheduleReportTask extends AbstractTask {
                     throw new ApiException(ApiStatus.BAD_DATA, "Unsupported File Provider Type " + type);
             }
         } catch (Exception e) {
-            throw new ApiException(ApiStatus.BAD_DATA, "Error while getting file provider : " + e + " " + Arrays.toString(e.getStackTrace()));
+            log.error("Error while getting file provider : " + e + " " + Arrays.toString(e.getStackTrace()));
+            throw new ApiException(ApiStatus.BAD_DATA, "Error while getting file provider : " + e);
         }
     }
 
