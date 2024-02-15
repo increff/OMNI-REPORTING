@@ -1,10 +1,12 @@
 package com.increff.omni.reporting.api;
 
 import com.increff.omni.reporting.dao.ReportDao;
+import com.increff.omni.reporting.model.constants.AppName;
 import com.increff.omni.reporting.model.constants.ReportType;
 import com.increff.omni.reporting.model.constants.VisualizationType;
 import com.increff.omni.reporting.pojo.ReportPojo;
 import com.nextscm.commons.spring.common.ApiException;
+import com.nextscm.commons.spring.common.ApiStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,6 +14,7 @@ import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @Transactional(rollbackFor = ApiException.class)
@@ -32,12 +35,20 @@ public class ReportApi extends AbstractAuditApi {
         return pojo;
     }
 
+    public ReportPojo getCheckAppAccess(Integer id, Set<AppName> appNames) throws ApiException {
+        ReportPojo pojo = getCheck(id);
+        if(!appNames.contains(pojo.getAppName()))
+            throw new ApiException(ApiStatus.AUTH_ERROR, "Report Forbidden for App Name : " + pojo.getAppName());
+        return pojo;
+    }
+
     public ReportPojo getByNameAndSchema(String name, Integer schemaVersionId, Boolean isChart){
         return dao.getByNameAndSchema(name, schemaVersionId, isChart);
     }
 
-    public List<ReportPojo> getByTypeAndSchema(ReportType type, Integer schemaVersionId, Boolean isChart, VisualizationType visualization){
-        return dao.getByTypeAndSchema(type, schemaVersionId, isChart, visualization);
+    public List<ReportPojo> getByTypeAndSchema(ReportType type, Integer schemaVersionId, Boolean isChart,
+                                               VisualizationType visualization, Set<AppName> appName){
+        return dao.getByTypeAndSchema(type, schemaVersionId, isChart, visualization, appName);
     }
 
     public ReportPojo edit(ReportPojo pojo) throws ApiException {
@@ -49,6 +60,7 @@ public class ReportApi extends AbstractAuditApi {
         existing.setCanSchedule(pojo.getCanSchedule());
         existing.setMinFrequencyAllowedSeconds(pojo.getMinFrequencyAllowedSeconds());
         existing.setIsChart(pojo.getIsChart());
+        existing.setAppName(pojo.getAppName());
         dao.update(existing);
         return existing;
     }
