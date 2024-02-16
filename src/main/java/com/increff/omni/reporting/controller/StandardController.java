@@ -4,6 +4,7 @@ package com.increff.omni.reporting.controller;
 import com.increff.account.client.AuthClient;
 import com.increff.omni.reporting.config.ApplicationProperties;
 import com.increff.omni.reporting.dto.*;
+import com.increff.omni.reporting.model.constants.AppName;
 import com.increff.omni.reporting.model.constants.VisualizationType;
 import com.increff.omni.reporting.model.data.*;
 import com.increff.omni.reporting.model.form.*;
@@ -14,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -223,4 +225,9 @@ public class StandardController {
         return dashboardDto.getProperties();
     }
 
+    @ApiOperation(value = "Get App Names")
+    @RequestMapping(value = "/app-names", method = RequestMethod.GET)
+    public List<AppName> getAppNames() {
+        return Arrays.asList(AppName.values());
+    }
 }
