@@ -4,6 +4,7 @@ import com.increff.account.client.SecurityUtil;
 import com.increff.account.client.UserPrincipal;
 import com.increff.omni.reporting.api.*;
 import com.increff.omni.reporting.flow.InputControlFlowApi;
+import com.increff.omni.reporting.model.constants.AppName;
 import com.increff.omni.reporting.model.constants.ReportRequestType;
 import com.increff.omni.reporting.model.constants.ReportType;
 import com.increff.omni.reporting.pojo.*;
@@ -74,7 +75,7 @@ public class AbstractDto extends AbstractDtoApi {
                                             Map<String, String> params, int orgId,
                                             Map<String, List<String>> inputDisplayMap,
                                             List<InputControlPojo> inputControlPojoList, ReportRequestType type,
-                                            String password) throws ApiException {
+                                            String password, ReportPojo reportPojo) throws ApiException {
         for (InputControlPojo i : inputControlPojoList) {
             if (params.containsKey(i.getParamName())) {
                 String value = params.get(i.getParamName());
@@ -112,7 +113,7 @@ public class AbstractDto extends AbstractDtoApi {
                         break;
                     case SINGLE_SELECT:
                         values = inputParams.get(i.getParamName());
-                        allowedValuesMap = checkValidValues(i, orgId, password);
+                        allowedValuesMap = checkValidValues(i, orgId, password, reportPojo.getAppName());
                         if (values.size() > 1)
                             throw new ApiException(ApiStatus.BAD_DATA, "Multiple values not allowed for filter : "
                                     + i.getDisplayName());
@@ -125,7 +126,7 @@ public class AbstractDto extends AbstractDtoApi {
                         break;
                     case ACCESS_CONTROLLED_MULTI_SELECT:
                         values = inputParams.get(i.getParamName());
-                        allowedValuesMap = checkValidValues(i, orgId, password);
+                        allowedValuesMap = checkValidValues(i, orgId, password, reportPojo.getAppName());
                         for (String v : values) {
                             if (!allowedValuesMap.containsKey(v))
                                 throw new ApiException(ApiStatus.BAD_DATA, v + " is not allowed for filter : "
@@ -140,7 +141,7 @@ public class AbstractDto extends AbstractDtoApi {
                             throw new ApiException(ApiStatus.BAD_DATA,
                                     i.getDisplayName() + " can't have more than " + MAX_LIST_SIZE + " values in " +
                                             "single request");
-                        allowedValuesMap = checkValidValues(i, orgId, password);
+                        allowedValuesMap = checkValidValues(i, orgId, password, reportPojo.getAppName());
                         for (String v : values) {
                             if (!allowedValuesMap.containsKey(v))
                                 throw new ApiException(ApiStatus.BAD_DATA, v + " is not allowed for filter : "
@@ -183,7 +184,7 @@ public class AbstractDto extends AbstractDtoApi {
         }
     }
 
-    private Map<String, String> checkValidValues(InputControlPojo p, int orgId, String password) throws ApiException {
+    private Map<String, String> checkValidValues(InputControlPojo p, int orgId, String password, AppName appName) throws ApiException {
         Map<String, String> valuesMap = new HashMap<>();
         InputControlQueryPojo queryPojo = controlApi.selectControlQuery(p.getId());
         if (Objects.isNull(queryPojo)) {
@@ -193,7 +194,7 @@ public class AbstractDto extends AbstractDtoApi {
                 valuesMap.put(pojo.getValue(), pojo.getValue());
             }
         } else {
-            OrgConnectionPojo orgConnectionPojo = orgConnectionApi.getCheckByOrgId(orgId);
+            OrgConnectionPojo orgConnectionPojo = orgConnectionApi.getCheckByOrgIdAppName(orgId, appName);
             ConnectionPojo connectionPojo = connectionApi.getCheck(orgConnectionPojo.getConnectionId());
             valuesMap = inputControlFlowApi.getValuesFromQuery(queryPojo.getQuery(), connectionPojo, password);
         }

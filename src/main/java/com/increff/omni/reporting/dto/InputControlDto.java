@@ -53,6 +53,9 @@ public class InputControlDto extends AbstractDto {
     @Autowired
     private SchemaVersionApi schemaVersionApi;
 
+    @Autowired
+    private ReportApi reportApi;
+
     public InputControlData add(InputControlForm form) throws ApiException {
         validate(form);
         InputControlPojo pojo = ConvertUtil.convert(form, InputControlPojo.class);
@@ -91,22 +94,23 @@ public class InputControlDto extends AbstractDto {
 
         List<InputControlPojo> pojos = api.selectByIds(controlIds);
 
-        List<InputControlData> inputControlDataList = getInputControlDatas(pojos, orgId);
+        List<InputControlData> inputControlDataList = getInputControlDatas(pojos, orgId, reportId);
         sortBasedOnReportControlMappedTime(inputControlDataList, reportControlsPojos);
         updateValidationTypes(inputControlDataList, validationGroupPojoList, reportControlsPojos);
         return inputControlDataList;
     }
 
     private List<InputControlData> getInputControlDatas(List<InputControlPojo> pojos, Integer orgId) throws ApiException {
+        return getInputControlDatas(pojos, orgId, null);
+    }
+
+    private List<InputControlData> getInputControlDatas(List<InputControlPojo> pojos, Integer orgId, Integer reportId) throws ApiException {
         if (CollectionUtils.isEmpty(pojos))
             return new ArrayList<>();
 
         List<Integer> controlIds = pojos.stream()
                 .map(InputControlPojo::getId).collect(Collectors.toList());
 
-        OrgConnectionPojo orgConnectionPojo = orgConnectionApi.getCheckByOrgId(orgId);
-        ConnectionPojo connectionPojo = connectionApi.getCheck(orgConnectionPojo.getConnectionId());
-        String password = getDecryptedPassword(connectionPojo.getPassword());
         //We need queries
         List<InputControlQueryPojo> queryPojos = api.selectControlQueries(controlIds);
         Map<Integer, String> controlToQueryMapping;
@@ -127,10 +131,17 @@ public class InputControlDto extends AbstractDto {
                             InputControlValuesPojo::getControlId,
                             Collectors.mapping(InputControlValuesPojo::getValue, Collectors.toList())));
         List<InputControlData> dataList = new ArrayList<>();
-        for(InputControlPojo p : pojos) {
-            SchemaVersionPojo schemaVersionPojo = schemaVersionApi.getCheck(p.getSchemaVersionId());
-            dataList.add(getDataFromPojo(p, controlToValuesMapping, controlToQueryMapping, connectionPojo,
-                    schemaVersionPojo, password));
+        if(Objects.nonNull(reportId)) {
+            ReportPojo reportPojo = reportApi.getCheck(reportId);
+            for (InputControlPojo p : pojos) {
+                OrgConnectionPojo orgConnectionPojo = orgConnectionApi.getCheckByOrgIdAppName(orgId, reportPojo.getAppName());
+                ConnectionPojo connectionPojo = connectionApi.getCheck(orgConnectionPojo.getConnectionId());
+                String password = getDecryptedPassword(connectionPojo.getPassword());
+
+                SchemaVersionPojo schemaVersionPojo = schemaVersionApi.getCheck(p.getSchemaVersionId());
+                dataList.add(getDataFromPojo(p, controlToValuesMapping, controlToQueryMapping, connectionPojo,
+                        schemaVersionPojo, password));
+            }
         }
         return dataList;
     }

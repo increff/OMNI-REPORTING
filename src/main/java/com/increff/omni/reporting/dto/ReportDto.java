@@ -98,7 +98,7 @@ public class ReportDto extends AbstractDto {
         validateReportForOrg(reportPojo, orgId);
         validateQueryExists(reportPojo, form);
 
-        ConnectionPojo connectionPojo = connectionApi.getCheck(orgConnectionApi.getCheckByOrgId(orgId).getConnectionId());
+        ConnectionPojo connectionPojo = connectionApi.getCheck(orgConnectionApi.getCheckByOrgIdAppName(orgId, reportPojo.getAppName()).getConnectionId());
         String password = getDecryptedPassword(connectionPojo.getPassword());
 
         ZonedDateTime startTime = ZonedDateTime.now();
@@ -296,7 +296,7 @@ public class ReportDto extends AbstractDto {
         List<InputControlPojo> inputControlPojoList = inputControlApi.selectByIds(reportControlsPojoList.stream()
                 .map(ReportControlsPojo::getControlId).collect(Collectors.toList()));
         validateInputParamValues(form.getParamMap(), inputParamsMap, orgId, inputDisplayMap, inputControlPojoList,
-                ReportRequestType.USER, password);
+                ReportRequestType.USER, password, reportPojo);
         Map<String, String> inputDisplayStringMap = UserPrincipalUtil.getStringToStringParamMap(inputDisplayMap);
         return CommonDtoHelper.getReportInputParamsPojoList(inputParamsMap, form.getTimezone(), orgId, inputDisplayStringMap);
     }

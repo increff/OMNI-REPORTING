@@ -63,7 +63,7 @@ public class UserReportTask extends AbstractTask{
                     .getInputParamsForReportRequest(reportRequestPojo.getId());
             ReportPojo reportPojo = reportApi.getCheck(reportRequestPojo.getReportId());
             ReportQueryPojo reportQueryPojo = reportQueryApi.getByReportId(reportPojo.getId());
-            OrgConnectionPojo orgConnectionPojo = orgConnectionApi.getCheckByOrgId(reportRequestPojo.getOrgId());
+            OrgConnectionPojo orgConnectionPojo = orgConnectionApi.getCheckByOrgIdAppName(reportRequestPojo.getOrgId(), reportPojo.getAppName());
             ConnectionPojo connectionPojo = connectionApi.getCheck(orgConnectionPojo.getConnectionId());
 
             // Creation of file

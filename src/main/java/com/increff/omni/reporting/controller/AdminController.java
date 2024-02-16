@@ -1,6 +1,7 @@
 package com.increff.omni.reporting.controller;
 
 import com.increff.omni.reporting.dto.*;
+import com.increff.omni.reporting.model.constants.AppName;
 import com.increff.omni.reporting.model.constants.VisualizationType;
 import com.increff.omni.reporting.model.data.*;
 import com.increff.omni.reporting.model.form.*;
@@ -217,8 +218,8 @@ public class AdminController {
 
     @ApiOperation(value = "Map organization to a connection")
     @RequestMapping(value = "/orgs/{orgId}/connections/{connectionId}", method = RequestMethod.POST)
-    public OrgConnectionData addConnectionMapping(@PathVariable Integer orgId, @PathVariable Integer connectionId) throws ApiException {
-        return organizationDto.mapToConnection(orgId, connectionId);
+    public OrgConnectionData addConnectionMapping(@PathVariable Integer orgId, @PathVariable Integer connectionId, @RequestParam AppName appName) throws ApiException {
+        return organizationDto.mapToConnection(orgId, connectionId, appName);
     }
 
     @ApiOperation(value = "Get all org schema mapping")

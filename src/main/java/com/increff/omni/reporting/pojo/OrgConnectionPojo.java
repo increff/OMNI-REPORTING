@@ -1,5 +1,6 @@
 package com.increff.omni.reporting.pojo;
 
+import com.increff.omni.reporting.model.constants.AppName;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -19,4 +20,7 @@ public class OrgConnectionPojo extends AbstractVersionedPojo {
     private Integer orgId;
     @Column(nullable = false)
     private Integer connectionId;
+    @Enumerated(value = EnumType.STRING)
+    @Column(nullable = false)
+    private AppName appName;
 }

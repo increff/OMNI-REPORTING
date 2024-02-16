@@ -1,6 +1,7 @@
 package com.increff.omni.reporting.api;
 
 import com.increff.omni.reporting.dao.OrgConnectionDao;
+import com.increff.omni.reporting.model.constants.AppName;
 import com.increff.omni.reporting.pojo.OrgConnectionPojo;
 import com.nextscm.commons.spring.common.ApiException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,10 +34,14 @@ public class OrgConnectionApi extends AbstractAuditApi {
         return dao.selectAll();
     }
 
-    public OrgConnectionPojo getCheckByOrgId(Integer orgId) throws ApiException {
-        OrgConnectionPojo pojo = getByOrgId(orgId);
-        checkNotNull(pojo, "No connection mapped for org : " + orgId);
+    public OrgConnectionPojo getCheckByOrgIdAppName(Integer orgId, AppName appName) throws ApiException {
+        OrgConnectionPojo pojo = getByOrgIdAppName(orgId, appName);
+        checkNotNull(pojo, "No connection mapped for org : " + orgId + " and app : " + appName);
         return pojo;
+    }
+
+    private OrgConnectionPojo getByOrgIdAppName(Integer orgId, AppName appName) {
+        return dao.getByOrgIdAndAppName(orgId, appName);
     }
 
     private OrgConnectionPojo getByOrgId(Integer orgId) {

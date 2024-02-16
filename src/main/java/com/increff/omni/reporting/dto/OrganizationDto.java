@@ -1,6 +1,7 @@
 package com.increff.omni.reporting.dto;
 
 import com.increff.omni.reporting.api.*;
+import com.increff.omni.reporting.model.constants.AppName;
 import com.increff.omni.reporting.model.constants.AuditActions;
 import com.increff.omni.reporting.model.data.OrgConnectionData;
 import com.increff.omni.reporting.model.data.OrgSchemaData;
@@ -104,7 +105,7 @@ public class OrganizationDto extends AbstractDto {
         return CommonDtoHelper.getOrgConnectionDataList(pojos, allPojos);
     }
 
-    public OrgConnectionData mapToConnection(Integer id, Integer connectionId) throws ApiException {
+    public OrgConnectionData mapToConnection(Integer id, Integer connectionId, AppName appName) throws ApiException {
         //validation
         OrganizationPojo orgPojo = api.getCheck(id);
         ConnectionPojo connectionPojo = connectionApi.getCheck(connectionId);
@@ -112,7 +113,7 @@ public class OrganizationDto extends AbstractDto {
                 "Map Org to Connection", "Mapping org : " + orgPojo.getName() +
                         " to connection : " + connectionPojo.getName(),
                 getUserName());
-        OrgConnectionPojo pojo = createPojo(orgPojo, connectionPojo);
+        OrgConnectionPojo pojo = createPojo(orgPojo, connectionPojo, appName);
         return CommonDtoHelper.getOrgConnectionData(pojo, connectionPojo);
     }
 
@@ -132,7 +133,7 @@ public class OrganizationDto extends AbstractDto {
                 "Map Org to Connection", "Mapping org : " + organizationPojo.getName() +
                         " to connection : " + connectionPojo.getName(),
                 getUserName());
-        OrgConnectionPojo pojo = createPojo(organizationPojo, connectionPojo);
+        OrgConnectionPojo pojo = createPojo(organizationPojo, connectionPojo, form.getAppName());
         return CommonDtoHelper.getOrgConnectionData(pojo, connectionPojo);
     }
 
@@ -143,10 +144,11 @@ public class OrganizationDto extends AbstractDto {
         return orgSchemaApi.map(pojo);
     }
 
-    private OrgConnectionPojo createPojo(OrganizationPojo orgPojo, ConnectionPojo connectionPojo) {
+    private OrgConnectionPojo createPojo(OrganizationPojo orgPojo, ConnectionPojo connectionPojo, AppName appName) {
         OrgConnectionPojo pojo = new OrgConnectionPojo();
         pojo.setOrgId(orgPojo.getId());
         pojo.setConnectionId(connectionPojo.getId());
+        pojo.setAppName(appName);
         return orgConnectionApi.map(pojo);
     }
 
