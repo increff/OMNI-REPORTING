@@ -2,6 +2,7 @@ package com.increff.omni.reporting.dto;
 
 import com.increff.omni.reporting.api.*;
 import com.increff.omni.reporting.config.ApplicationProperties;
+import com.increff.omni.reporting.model.constants.AppName;
 import com.increff.omni.reporting.model.constants.ChartType;
 import com.increff.omni.reporting.model.constants.ReportType;
 import com.increff.omni.reporting.model.data.*;
@@ -12,6 +13,7 @@ import com.increff.omni.reporting.model.form.DefaultValueForm;
 import com.increff.omni.reporting.model.form.ReportRequestForm;
 import com.increff.omni.reporting.pojo.*;
 import com.increff.omni.reporting.util.ChartUtil;
+import com.increff.omni.reporting.util.UserPrincipalUtil;
 import com.increff.omni.reporting.util.ValidateUtil;
 import com.nextscm.commons.lang.StringUtil;
 import com.nextscm.commons.spring.common.ApiException;
@@ -125,12 +127,20 @@ public class DashboardDto extends AbstractDto {
 
     public List<DashboardListData> getDashboardsByOrgId(Integer orgId) throws ApiException {
         List<DashboardListData> data = ConvertUtil.convert(api.getByOrgId(orgId), DashboardListData.class);
+        List<Integer> dashboardIds = data.stream().map(DashboardListData::getId).collect(Collectors.toList());
+        Integer schemaVersionId = orgSchemaApi.getCheckByOrgId(orgId).getSchemaVersionId();
+
+        // Only keep dashboards containing at least 1 chart with app name in user accessible apps
+        List<Integer> appDashboardIds = getDashboardsWithAppNames(schemaVersionId, dashboardIds, UserPrincipalUtil.getAccessibleApps());
+        data = data.stream().filter(dashboard -> appDashboardIds.contains(dashboard.getId())).collect(Collectors.toList());
 
         if (isCustomReportUser()) { // Filter out standard dashboards for custom users
-            List<Integer> customDashboardIds = getCustomDashboardIds(orgSchemaApi.getCheckByOrgId(orgId).getSchemaVersionId(),
-                    data.stream().map(DashboardListData::getId).collect(Collectors.toList()));
+            List<Integer> customDashboardIds = getCustomDashboardIds(schemaVersionId, dashboardIds);
             data = data.stream().filter(dashboard -> customDashboardIds.contains(dashboard.getId())).collect(Collectors.toList());
         }
+
+
+
         data.sort(Comparator.comparing(DashboardListData::getName));
         return data;
     }
@@ -399,5 +409,31 @@ public class DashboardDto extends AbstractDto {
         return customDashboardIds;
     }
 
+    /**
+     * Returns dashboardIds which have at least one chart with AppName in appNames
+     */
+    private List<Integer> getDashboardsWithAppNames(Integer schemaVersionId, List<Integer> dashboardIds, Set<AppName> appNames) throws ApiException {
+        List<DashboardChartPojo> dashboardCharts = dashboardChartApi.getByDashboardIds(dashboardIds);
+        Map<Integer, List<String>> dashboardChartAliasMap = dashboardCharts.stream().collect(Collectors.groupingBy(DashboardChartPojo::getDashboardId,
+                Collectors.mapping(DashboardChartPojo::getChartAlias, Collectors.toList())));
 
+        List<ReportPojo> charts = reportApi.getByAliasAndSchema(dashboardCharts.stream().map(DashboardChartPojo::getChartAlias).collect(Collectors.toList()),
+                schemaVersionId, true);
+        Map<String, ReportPojo> chartAliasChartMap = charts.stream().collect(Collectors.toMap(ReportPojo::getAlias, report -> report));
+
+        List<Integer> dashboardIdsWithAppNames = new ArrayList<>();
+        for(Integer dashboardId : dashboardIds){
+            boolean appChartExists = false;
+            for(String chartAlias : dashboardChartAliasMap.getOrDefault(dashboardId, new ArrayList<>())){
+                if(!chartAliasChartMap.containsKey(chartAlias))
+                    throw new ApiException(ApiStatus.BAD_DATA, "Chart alias not found: " + chartAlias + " for schema version: " + schemaVersionId + " isChart: true");
+                if(appNames.contains(chartAliasChartMap.get(chartAlias).getAppName())){
+                    appChartExists = true;
+                    break;
+                }
+            }
+            if(appChartExists) dashboardIdsWithAppNames.add(dashboardId);
+        }
+        return dashboardIdsWithAppNames;
+    }
 }

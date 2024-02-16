@@ -15,6 +15,7 @@ import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j;
+import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,6 +28,8 @@ import java.util.stream.Collectors;
 
 import static com.increff.omni.reporting.dto.AbstractDto.isCustomReportUser;
 import static com.increff.omni.reporting.dto.CommonDtoHelper.*;
+import static com.increff.omni.reporting.util.MongoUtil.executeMongoPipeline;
+import static com.increff.omni.reporting.util.UserPrincipalUtil.getAccessibleApps;
 
 @Service
 @Setter
@@ -111,13 +114,21 @@ public class ReportFlowApi extends AbstractFlowApi {
         try {
             Map<String, String> inputParamMap = getInputParamMapFromPojoList(reportInputParamsPojoList);
             String fQuery = SqlCmd.getFinalQuery(inputParamMap, query, true);
-            // Execute query and save results
-            connection = dbConnectionApi.getConnection(connectionPojo.getHost(), connectionPojo.getUsername(),
-                    password, properties.getMaxConnectionTime());
-            PreparedStatement statement = dbConnectionApi.getStatement(connection,
-                    properties.getLiveReportMaxExecutionTime(), fQuery, properties.getResultSetFetchSize());
-            ResultSet resultSet = statement.executeQuery();
-            int noOfRows = FileUtil.writeCsvFromResultSet(resultSet, file);
+            int noOfRows = 0;
+            if(connectionPojo.getDbType().equals(DBType.MYSQL)) {
+                connection = dbConnectionApi.getConnection(connectionPojo.getHost(), connectionPojo.getUsername(),
+                        password, properties.getMaxConnectionTime());
+                PreparedStatement statement = dbConnectionApi.getStatement(connection,
+                        properties.getLiveReportMaxExecutionTime(), fQuery, properties.getResultSetFetchSize());
+                ResultSet resultSet = statement.executeQuery();
+                noOfRows = FileUtil.writeCsvFromResultSet(resultSet, file);
+            } else if (connectionPojo.getDbType().equals(DBType.MONGO)) {
+                List<Document> docs = executeMongoPipeline(connectionPojo.getHost(), connectionPojo.getUsername(),
+                        password, fQuery);
+                noOfRows = FileUtil.writeCsvFromMongoDocuments(docs, file);
+            }
+
+
             if (noOfRows > MAX_NUMBER_OF_ROWS) {
                 throw new ApiException(ApiStatus.BAD_DATA, "Data exceeded " + MAX_NUMBER_OF_ROWS + " Rows, select " +
                         "granular filters.");
@@ -171,7 +182,7 @@ public class ReportFlowApi extends AbstractFlowApi {
                 .collect(Collectors.toList());
 
         List<ReportPojo> custom =
-                api.getByIdsAndSchema(customIds, orgSchemaVersionPojo.getSchemaVersionId(), isChart); // todo : filter accessible apps for custom also
+                api.getByIdsAndSchema(customIds, orgSchemaVersionPojo.getSchemaVersionId(), isChart, getAccessibleApps());
 
         if(!isCustomReportUser()) // Add standard reports only if user in not custom report user
             reportPojoList.addAll(standard);

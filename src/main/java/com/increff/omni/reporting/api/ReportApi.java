@@ -65,7 +65,7 @@ public class ReportApi extends AbstractAuditApi {
         return existing;
     }
 
-    public List<ReportPojo> getByIdsAndSchema(List<Integer> ids, Integer schemaVersionId, Boolean isChart){
+    public List<ReportPojo> getByIdsAndSchema(List<Integer> ids, Integer schemaVersionId, Boolean isChart, Set<AppName> appNames){
         if(CollectionUtils.isEmpty(ids))
             return new ArrayList<>();
         return dao.getByIdsAndSchema(ids, schemaVersionId, isChart);
