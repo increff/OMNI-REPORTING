@@ -16,7 +16,7 @@ public class SqlCmd {
                                        Boolean isUserPrincipalAvailable) {
         if(isUserPrincipalAvailable)
             inputParamMap.putAll(UserPrincipalUtil.getAccessControlMap());
-        String[] matchingFunctions = StringUtils.substringsBetween(query, "{{", "}}");
+        String[] matchingFunctions = StringUtils.substringsBetween(query, "<<", ">>");
         if (Objects.isNull(matchingFunctions)) {
             log.debug("Query formed : " + query);
             return query;
