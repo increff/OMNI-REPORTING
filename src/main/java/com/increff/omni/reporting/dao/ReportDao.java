@@ -39,6 +39,23 @@ public class ReportDao extends AbstractDao<ReportPojo> {
         return selectMultiple(tQuery);
     }
 
+
+    public ReportPojo getByAliasSchemaIsChartAppName(String alias, Integer schemaVersionId, Boolean isChart, AppName appName){
+        CriteriaBuilder cb = this.em.getCriteriaBuilder();
+        CriteriaQuery<ReportPojo> query = cb.createQuery(ReportPojo.class);
+        Root<ReportPojo> root = query.from(ReportPojo.class);
+        query.where(
+                cb.and(
+                        cb.equal(root.get("alias"), alias),
+                        cb.equal(root.get("schemaVersionId"), schemaVersionId),
+                        cb.equal(root.get("isChart"), isChart),
+                        cb.equal(root.get("appName"), appName)
+                )
+        );
+        TypedQuery<ReportPojo> tQuery = createQuery(query);
+        return selectSingleOrNull(tQuery);
+    }
+
     public ReportPojo getByNameAndSchema(String name, Integer schemaVersionId, Boolean isChart) {
         CriteriaBuilder cb = this.em.getCriteriaBuilder();
         CriteriaQuery<ReportPojo> query = cb.createQuery(ReportPojo.class);
@@ -54,7 +71,7 @@ public class ReportDao extends AbstractDao<ReportPojo> {
         return selectSingleOrNull(tQuery);
     }
 
-    public List<ReportPojo> getByIdsAndSchema(List<Integer> ids, Integer schemaVersionId, Boolean isChart) {
+    public List<ReportPojo> getByIdsAndSchema(List<Integer> ids, Integer schemaVersionId, Boolean isChart, Set<AppName> appName) {
         CriteriaBuilder cb = this.em.getCriteriaBuilder();
         CriteriaQuery<ReportPojo> query = cb.createQuery(ReportPojo.class);
         Root<ReportPojo> root = query.from(ReportPojo.class);
@@ -63,7 +80,8 @@ public class ReportDao extends AbstractDao<ReportPojo> {
                         root.get("id").in(ids),
                         cb.equal(root.get("schemaVersionId"), schemaVersionId),
                         cb.equal(root.get("isEnabled"), true),
-                        cb.equal(root.get("isChart"), isChart)
+                        cb.equal(root.get("isChart"), isChart),
+                        root.get("appName").in(appName)
                 )
         );
         TypedQuery<ReportPojo> tQuery = createQuery(query);
@@ -141,4 +159,5 @@ public class ReportDao extends AbstractDao<ReportPojo> {
 
         return Collections.singletonList(ChartType.valueOf(visualization.name()));
     }
+
 }

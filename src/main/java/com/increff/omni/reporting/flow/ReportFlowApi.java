@@ -29,6 +29,7 @@ import java.util.stream.Collectors;
 import static com.increff.omni.reporting.dto.AbstractDto.isCustomReportUser;
 import static com.increff.omni.reporting.dto.CommonDtoHelper.*;
 import static com.increff.omni.reporting.util.MongoUtil.executeMongoPipeline;
+import static com.increff.omni.reporting.util.UserPrincipalUtil.NULL_SCHEMA_VERSION_APPS;
 import static com.increff.omni.reporting.util.UserPrincipalUtil.getAccessibleApps;
 
 @Service
@@ -356,6 +357,9 @@ public class ReportFlowApi extends AbstractFlowApi {
         if (ex != null)
             throw new ApiException(ApiStatus.BAD_DATA, "Report already present with same alias, schema version and " +
                     "report type (normal / dashboard)");
+
+        if(NULL_SCHEMA_VERSION_APPS.contains(pojo.getAppName()) && Objects.nonNull(pojo.getSchemaVersionId()))
+            throw new ApiException(ApiStatus.BAD_DATA, "Null schema version app " + pojo.getAppName() + " can't have schema version id : " + pojo.getSchemaVersionId());
     }
 
     private List<ReportValidationGroupPojo> getValidationGroupPojoList(ValidationGroupForm groupForm,

@@ -12,6 +12,9 @@ import java.util.*;
 
 public class UserPrincipalUtil {
 
+    public static final Set<AppName> NULL_SCHEMA_VERSION_APPS = Collections.singleton(AppName.UNIFY);
+
+
     private static final String APP_ADMIN = "app.admin";
     private static final String REPORT_ADMIN = "report.admin";
     private static final List<String> ADMIN_AUTHORITIES = Arrays.asList(APP_ADMIN, REPORT_ADMIN);
