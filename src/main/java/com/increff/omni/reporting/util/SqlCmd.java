@@ -25,7 +25,7 @@ public class SqlCmd {
         for (String f : matchingFunctions) {
             String methodName = f.split("\\(")[0].trim();
             String finalString = getValueFromMethod(inputParamMap, f, methodName);
-            functionValueMap.put("{{" + f + "}}", finalString);
+            functionValueMap.put("<<" + f + ">>", finalString);
         }
         for (Map.Entry<String, String> e : functionValueMap.entrySet()) {
             query = query.replace(e.getKey(), e.getValue());
@@ -36,6 +36,7 @@ public class SqlCmd {
 
     private static String getValueFromMethod(Map<String, String> inputParamMap, String f, String methodName) {
         String paramKey, paramValue, columnName, operator, condition;
+        Boolean keepQuotes;
         String finalString = "{{" + f + "}}";
         switch (methodName) {
             case "filter":
@@ -59,6 +60,13 @@ public class SqlCmd {
                 operator = f.split("\\(")[1].split(",")[2].trim();
                 condition = f.split("\\(")[1].split(",")[3].split("\\)")[0].trim();
                 finalString = QueryExecutionDto.filterAppend(columnName, operator, paramValue, condition);
+                break;
+            case "mongoFilter":
+                paramKey = f.split("\\(")[1].split(",")[0].trim();
+                paramValue = inputParamMap.get(paramKey);
+                columnName = f.split("\\(")[1].split(",")[1].trim();
+                keepQuotes = f.split("\\(")[1].split(",")[2].split("\\)")[0].trim().equalsIgnoreCase("t");
+                finalString = QueryExecutionDto.mongoFilter(columnName, paramKey, paramValue, keepQuotes);
                 break;
         }
         return finalString;
