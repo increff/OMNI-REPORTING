@@ -91,8 +91,8 @@ public class AdminController {
     }
 
     @ApiOperation(value = "Select all global controls")
-    @RequestMapping(value = "/schemas/{schemaVersionId}/controls/global", method = RequestMethod.GET)
-    public List<InputControlData> selectAllGlobal(@PathVariable Integer schemaVersionId) throws ApiException {
+    @RequestMapping(value = "/controls/global", method = RequestMethod.GET)
+    public List<InputControlData> selectAllGlobal(@RequestParam(required = false) Integer schemaVersionId) throws ApiException {
         return inputControlDto.selectAllGlobal(schemaVersionId);
     }
 
