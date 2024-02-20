@@ -8,6 +8,7 @@ import com.increff.omni.reporting.model.constants.AppName;
 import com.increff.omni.reporting.model.constants.ReportRequestType;
 import com.increff.omni.reporting.model.constants.ReportType;
 import com.increff.omni.reporting.pojo.*;
+import com.increff.omni.reporting.util.UserPrincipalUtil;
 import com.increff.service.encryption.EncryptionClient;
 import com.increff.service.encryption.common.CryptoCommon;
 import com.nextscm.commons.lang.StringUtil;
@@ -48,6 +49,8 @@ public class AbstractDto extends AbstractDtoApi {
     private InputControlFlowApi inputControlFlowApi;
     @Autowired
     private CustomReportAccessApi customReportAccessApi;
+    @Autowired
+    private ReportApi reportApi;
 
     public static boolean isCustomReportUser() {
         if(getPrincipal().getRoles().contains(REPORT_ADMIN) || getPrincipal().getRoles().contains(APP_ADMIN))
@@ -172,6 +175,10 @@ public class AbstractDto extends AbstractDtoApi {
             throw new ApiException(ApiStatus.BAD_DATA,
                     "Organization does not have access to view this report : " + reportPojo.getName());
         }
+    }
+
+    public void validateReportForUser(ReportPojo reportPojo) throws ApiException {
+        reportApi.getCheckAppAccess(reportPojo.getId(), UserPrincipalUtil.getAccessibleApps());
     }
 
     protected String getDecryptedPassword(String password) throws ApiException {

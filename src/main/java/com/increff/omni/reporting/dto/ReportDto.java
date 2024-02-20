@@ -95,6 +95,7 @@ public class ReportDto extends AbstractDto {
         OrganizationPojo organizationPojo = organizationApi.getCheck(orgId);
         ReportPojo reportPojo = reportApi.getCheck(form.getReportId());
 
+        validateReportForUser(reportPojo);
         validateReportForOrg(reportPojo, orgId);
         validateQueryExists(reportPojo, form);
 

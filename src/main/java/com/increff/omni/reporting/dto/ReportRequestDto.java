@@ -98,6 +98,7 @@ public class ReportRequestDto extends AbstractDto {
         List<InputControlPojo> inputControlPojoList = controlApi.selectByIds(reportControlsPojoList.stream()
                 .map(ReportControlsPojo::getControlId).collect(Collectors.toList()));
 
+        validateReportForUser(reportPojo);
         validateCustomReportAccess(reportPojo, orgId);
         validateInputParamValues(form.getParamMap(), inputParamsMap, orgId, inputDisplayMap, inputControlPojoList,
                 ReportRequestType.USER, password, reportPojo);
