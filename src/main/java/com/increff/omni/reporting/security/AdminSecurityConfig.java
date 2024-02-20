@@ -1,6 +1,7 @@
 package com.increff.omni.reporting.security;
 
 import com.increff.account.client.AuthTokenFilter;
+import com.increff.omni.reporting.model.constants.Roles;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -23,10 +24,6 @@ public class AdminSecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private AdminFilter adminFilter;
 
-    private static final String APP_ADMIN = "app.admin"; // todo : change app.admin to appName.report.superadmin role
-    private static final String REPORT_ADMIN = "report.admin";
-
-
     @Override
     protected void configure(HttpSecurity http) throws Exception {
 
@@ -34,13 +31,13 @@ public class AdminSecurityConfig extends WebSecurityConfigurerAdapter {
                 .requestMatchers()//
                 .antMatchers("/admin/**")
                 .and().authorizeRequests()//
-                .antMatchers(HttpMethod.GET,"/admin/orgs").hasAnyAuthority(APP_ADMIN, REPORT_ADMIN)
-                .antMatchers(HttpMethod.POST, "/admin/request-report/orgs/**").hasAnyAuthority(APP_ADMIN,
-                                REPORT_ADMIN)
-                .antMatchers(HttpMethod.GET,"/admin/reports/orgs/**").hasAnyAuthority(APP_ADMIN, REPORT_ADMIN)
-                .antMatchers(HttpMethod.GET,"/admin/orgs/*/reports/*/controls").hasAnyAuthority(APP_ADMIN, REPORT_ADMIN)
-                .antMatchers(HttpMethod.GET,"/admin/orgs/*/reports/live").hasAnyAuthority(APP_ADMIN, REPORT_ADMIN)
-                .antMatchers("/admin/**").hasAnyAuthority(APP_ADMIN)//
+                .antMatchers(HttpMethod.GET,"/admin/orgs").hasAnyAuthority(Roles.APP_ADMIN.getRole(), Roles.REPORT_ADMIN.getRole())
+                .antMatchers(HttpMethod.POST, "/admin/request-report/orgs/**").hasAnyAuthority(Roles.APP_ADMIN.getRole(),
+                                Roles.REPORT_ADMIN.getRole())
+                .antMatchers(HttpMethod.GET,"/admin/reports/orgs/**").hasAnyAuthority(Roles.APP_ADMIN.getRole(), Roles.REPORT_ADMIN.getRole())
+                .antMatchers(HttpMethod.GET,"/admin/orgs/*/reports/*/controls").hasAnyAuthority(Roles.APP_ADMIN.getRole(), Roles.REPORT_ADMIN.getRole())
+                .antMatchers(HttpMethod.GET,"/admin/orgs/*/reports/live").hasAnyAuthority(Roles.APP_ADMIN.getRole(), Roles.REPORT_ADMIN.getRole())
+                .antMatchers("/admin/**").hasAnyAuthority(Roles.APP_ADMIN.getRole())//
                 .and().cors().and().csrf().disable()
                 .addFilterBefore(authTokenFilter, BasicAuthenticationFilter.class)
                 .addFilterBefore(adminFilter, BasicAuthenticationFilter.class)

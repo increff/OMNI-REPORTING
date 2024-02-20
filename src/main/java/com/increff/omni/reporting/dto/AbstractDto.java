@@ -7,6 +7,7 @@ import com.increff.omni.reporting.flow.InputControlFlowApi;
 import com.increff.omni.reporting.model.constants.AppName;
 import com.increff.omni.reporting.model.constants.ReportRequestType;
 import com.increff.omni.reporting.model.constants.ReportType;
+import com.increff.omni.reporting.model.constants.Roles;
 import com.increff.omni.reporting.pojo.*;
 import com.increff.omni.reporting.util.UserPrincipalUtil;
 import com.increff.service.encryption.EncryptionClient;
@@ -53,9 +54,9 @@ public class AbstractDto extends AbstractDtoApi {
     private ReportApi reportApi;
 
     public static boolean isCustomReportUser() {
-        if(getPrincipal().getRoles().contains(REPORT_ADMIN) || getPrincipal().getRoles().contains(APP_ADMIN))
+        if(getPrincipal().getRoles().contains(Roles.REPORT_ADMIN.getRole()) || getPrincipal().getRoles().contains(Roles.APP_ADMIN.getRole()))
             return false;
-        return getPrincipal().getRoles().contains(REPORT_CUSTOM);
+        return getPrincipal().getRoles().contains(Roles.REPORT_CUSTOM.getRole());
     }
 
     protected static int getOrgId() {
