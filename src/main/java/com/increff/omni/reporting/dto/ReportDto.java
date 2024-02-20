@@ -204,8 +204,8 @@ public class ReportDto extends AbstractDto {
         return convertToReportData(pojos);
     }
 
-    public List<ReportData> selectAllBySchemaVersion(Integer schemaVersionId, VisualizationType visualization) throws ApiException {
-        List<ReportPojo> pojos = flowApi.getAllBySchemaVersionId(schemaVersionId, visualization);
+    public List<ReportData> selectAllBySchemaVersion(Integer schemaVersionId, AppName appName) throws ApiException {
+        List<ReportPojo> pojos = flowApi.getAllBySchemaVersionIdAppName(schemaVersionId, appName, null);
         return convertToReportData(pojos);
     }
 

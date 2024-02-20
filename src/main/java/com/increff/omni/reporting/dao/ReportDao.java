@@ -134,13 +134,14 @@ public class ReportDao extends AbstractDao<ReportPojo> {
         return selectMultiple(tQuery);
     }
 
-    public List<ReportPojo> getBySchemaVersionAndTypes(Integer schemaVersionId, VisualizationType visualization) {
+    public List<ReportPojo> getBySchemaVersionAppNameAndTypes(Integer schemaVersionId, Set<AppName> appNames, VisualizationType visualization) {
         CriteriaBuilder cb = this.em.getCriteriaBuilder();
         CriteriaQuery<ReportPojo> query = cb.createQuery(ReportPojo.class);
         Root<ReportPojo> root = query.from(ReportPojo.class);
         query.where(
                 cb.and(
                         cb.equal(root.get("schemaVersionId"), schemaVersionId),
+                        root.get("appName").in(appNames),
                         root.get("chartType").in(parseVisualization(visualization))
                 )
         );

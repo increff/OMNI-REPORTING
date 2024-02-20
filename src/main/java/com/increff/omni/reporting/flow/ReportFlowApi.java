@@ -163,8 +163,8 @@ public class ReportFlowApi extends AbstractFlowApi {
     }
 
     @Transactional(readOnly = true)
-    public List<ReportPojo> getAllBySchemaVersionId(Integer schemaVersionId, VisualizationType visualization) {
-        return api.getBySchemaVersion(schemaVersionId, visualization);
+    public List<ReportPojo> getAllBySchemaVersionIdAppName(Integer schemaVersionId, AppName appName, VisualizationType visualization) {
+        return api.getBySchemaVersion(schemaVersionId, Collections.singleton(appName), visualization);
     }
 
     @Transactional(readOnly = true)
@@ -231,7 +231,7 @@ public class ReportFlowApi extends AbstractFlowApi {
         // Migrate Input controls
         Map<Integer, Integer> oldToNewControlIds = migrateInputControls(oldSchemaVersionId, newSchemaVersionId);
         // Migrate Reports
-        List<ReportPojo> oldSchemaReports = api.getBySchemaVersion(oldSchemaVersionId, null);
+        List<ReportPojo> oldSchemaReports = api.getBySchemaVersion(oldSchemaVersionId, Arrays.stream(AppName.values()).collect(Collectors.toSet()), null);
         for (ReportPojo oldReport : oldSchemaReports) {
             ReportPojo ex = api.getByNameAndSchema(oldReport.getName(), newSchemaVersionId, oldReport.getIsChart());
             if (Objects.nonNull(ex))

@@ -40,7 +40,7 @@ public class ReportPojo extends AbstractVersionedPojo{
     @Column(nullable = false)
     private Integer directoryId;
 
-    @Column(nullable = false)
+    @Column
     private Integer schemaVersionId;
 
     @Column(nullable = false)

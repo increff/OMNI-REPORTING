@@ -101,8 +101,8 @@ public class ReportApi extends AbstractAuditApi {
         return dao.getByIds(ids, isChart);
     }
 
-    public List<ReportPojo> getBySchemaVersion(Integer schemaVersionId, VisualizationType visualization) {
-        return dao.getBySchemaVersionAndTypes(schemaVersionId, visualization);
+    public List<ReportPojo> getBySchemaVersion(Integer schemaVersionId, Set<AppName> appNames, VisualizationType visualization) {
+        return dao.getBySchemaVersionAppNameAndTypes(schemaVersionId, appNames, visualization);
     }
 
     public ReportPojo getByAliasAndSchema(String alias, Integer schemaVersionId, Boolean isChart) throws ApiException {

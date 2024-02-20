@@ -138,10 +138,10 @@ public class AdminController {
         return reportDto.get(reportId);
     }
 
-    @ApiOperation(value = "Get All Report")
-    @RequestMapping(value = "/reports/schema-versions/{schemaVersionId}", method = RequestMethod.GET) // todo : test if this works when schemaVersionId is null
-    public List<ReportData> getAll(@PathVariable Integer schemaVersionId, @RequestParam Optional<VisualizationType> visualization) throws ApiException {
-        return reportDto.selectAllBySchemaVersion(schemaVersionId, visualization.orElse(null));
+    @ApiOperation(value = "Get All Reports by app name and schema version")
+    @RequestMapping(value = "/reports", method = RequestMethod.GET)
+    public List<ReportData> getAll(@RequestParam AppName appName, @RequestParam Integer schemaVersionId) throws ApiException {
+        return reportDto.selectAllBySchemaVersion(schemaVersionId, appName);
     }
 
     @ApiOperation(value = "Copy Schema Reports")
