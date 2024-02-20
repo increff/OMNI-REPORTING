@@ -140,7 +140,7 @@ public class AdminController {
 
     @ApiOperation(value = "Get All Reports by app name and schema version")
     @RequestMapping(value = "/reports", method = RequestMethod.GET)
-    public List<ReportData> getAll(@RequestParam AppName appName, @RequestParam Integer schemaVersionId) throws ApiException {
+    public List<ReportData> getAll(@RequestParam AppName appName, @RequestParam(required = false) Integer schemaVersionId) throws ApiException {
         return reportDto.selectAllBySchemaVersion(schemaVersionId, appName);
     }
 
