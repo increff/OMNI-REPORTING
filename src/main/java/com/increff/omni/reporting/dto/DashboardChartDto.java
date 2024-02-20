@@ -12,6 +12,7 @@ import com.increff.omni.reporting.pojo.DefaultValuePojo;
 import com.increff.omni.reporting.pojo.ReportPojo;
 import com.increff.omni.reporting.util.ValidateUtil;
 import com.nextscm.commons.spring.common.ApiException;
+import com.nextscm.commons.spring.common.ApiStatus;
 import com.nextscm.commons.spring.common.ConvertUtil;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j;
@@ -43,6 +44,8 @@ public class DashboardChartDto extends AbstractDto {
     @Transactional(rollbackFor = ApiException.class)
     public List<DashboardChartData> addDashboardChart(List<DashboardChartForm> forms, Integer dashboardId) throws ApiException {
         ValidateUtil.validateDashboardChartForms(forms);
+        validateChartAliasesHaveSameAppName(forms.stream().map(DashboardChartForm::getChartAlias).collect(Collectors.toSet()));
+
         dashboardApi.getCheck(dashboardId, getOrgId());
         List<DashboardChartPojo> pojos = new ArrayList<>();
 
@@ -115,6 +118,16 @@ public class DashboardChartDto extends AbstractDto {
         return new ArrayList<>(inputControlIds);
     }
 
+
+    private void validateChartAliasesHaveSameAppName(Set<String> aliases) throws ApiException {
+        Set<String> appNames = new HashSet<>();
+        for(String alias : aliases){
+            ReportPojo report = reportApi.getCheckByAliasAndSchema(alias, getSchemaVersionId(), true);
+            appNames.add(report.getAppName().name());
+        }
+        if(appNames.size() > 1)
+            throw new ApiException(ApiStatus.BAD_DATA, "All charts in a dashboard should belong to same app.");
+    }
 
 
 }
