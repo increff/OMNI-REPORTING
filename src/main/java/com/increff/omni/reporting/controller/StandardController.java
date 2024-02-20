@@ -57,7 +57,7 @@ public class StandardController {
         return reportDto.selectByOrg(isChart, visualization.orElse(null));
     }
 
-    @ApiOperation(value = "Get Report by Alias") // todo : confirm from UI where this is used and remove if unused
+    @ApiOperation(value = "Get Report by Alias")
     @RequestMapping(value = "/reports/find", method = RequestMethod.GET)
     public ReportData selectByAlias(@RequestParam Boolean isChart, @RequestParam String alias) throws ApiException {
         return reportDto.selectByAlias(isChart, alias);

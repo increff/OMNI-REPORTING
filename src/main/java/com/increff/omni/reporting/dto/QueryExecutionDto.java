@@ -55,7 +55,7 @@ public class QueryExecutionDto extends AbstractDto {
         if (Objects.isNull(paramValue))
             return MONGO_ALWAYS_TRUE;
         if(!keepQuotes) // Unlike sql, error when using single quotes for numbers
-            paramValue = removeUnescapedSingleQuotes(paramValue);// do not remove escaped single quotes which comes as database value
+            paramValue = removeUnescapedSingleQuotes(paramValue);// do not remove escaped single quotes which comes from input
 
         filterJson = filterJson.replace("#" + paramKey, paramValue);
         return filterJson;

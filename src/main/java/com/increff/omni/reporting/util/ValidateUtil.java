@@ -18,7 +18,7 @@ import static com.nextscm.commons.spring.server.DtoHelper.checkValid;
 public class ValidateUtil {
     public static int MAX_DASHBOARD_CHARTS = 6;
     public static void validateReportForm(ReportForm form) throws ApiException {
-        // todo : add check that each query should have org access control filter for mongo. do the same for edit report also.
+        // todo : add access control string in query validation . check that each query should have org access control filter for mongo. do the same for edit report also.
         checkValid(form);
         if(form.getIsChart() && form.getCanSchedule())
             throw new ApiException(ApiStatus.BAD_DATA, "Dashboard Reports can't be scheduled");

@@ -63,6 +63,6 @@ public class AppAccessController {
         return reportDto.getValidationGroups(reportId);
     }
 
-    // todo : add alias APIs
+    // todo : add alias APIs if reqd
 
 }

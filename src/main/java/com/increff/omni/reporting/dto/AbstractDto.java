@@ -54,9 +54,14 @@ public class AbstractDto extends AbstractDtoApi {
     private ReportApi reportApi;
 
     public static boolean isCustomReportUser() {
-        if(getPrincipal().getRoles().contains(Roles.REPORT_ADMIN.getRole()) || getPrincipal().getRoles().contains(Roles.APP_ADMIN.getRole()))
+        if(getPrincipal().getRoles().contains(Roles.APP_ADMIN.getRole())
+            || getPrincipal().getRoles().contains(Roles.CIMS_REPORT_ADMIN.getRole())
+            || getPrincipal().getRoles().contains(Roles.OMS_REPORT_ADMIN.getRole())
+            || getPrincipal().getRoles().contains(Roles.UNIFY_REPORT_ADMIN.getRole()))
             return false;
-        return getPrincipal().getRoles().contains(Roles.REPORT_CUSTOM.getRole());
+        return getPrincipal().getRoles().contains(Roles.CIMS_REPORT_CUSTOM.getRole())
+                || getPrincipal().getRoles().contains(Roles.OMS_REPORT_CUSTOM.getRole())
+                || getPrincipal().getRoles().contains(Roles.UNIFY_REPORT_CUSTOM.getRole());
     }
 
     protected static int getOrgId() {

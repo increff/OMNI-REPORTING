@@ -102,8 +102,7 @@ public class UserPrincipalUtil {
         List<String> userRoles = getPrincipal().getRoles();
 
         if(userRoles.contains(Roles.APP_ADMIN.getRole())) {
-            return new HashSet<>( Arrays.asList(AppName.UNIFY, AppName.OMS)); // todo : change after testing
-            // return new HashSet<>(Arrays.asList(AppName.values()));
+            return new HashSet<>(Arrays.asList(AppName.values()));
         }
 
         for (String role : userRoles) {

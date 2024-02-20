@@ -31,12 +31,12 @@ public class AdminSecurityConfig extends WebSecurityConfigurerAdapter {
                 .requestMatchers()//
                 .antMatchers("/admin/**")
                 .and().authorizeRequests()//
-                .antMatchers(HttpMethod.GET,"/admin/orgs").hasAnyAuthority(Roles.APP_ADMIN.getRole(), Roles.REPORT_ADMIN.getRole())
+                .antMatchers(HttpMethod.GET,"/admin/orgs").hasAnyAuthority(Roles.APP_ADMIN.getRole(), Roles.CIMS_REPORT_ADMIN.getRole(), Roles.OMS_REPORT_ADMIN.getRole(), Roles.UNIFY_REPORT_ADMIN.getRole())
                 .antMatchers(HttpMethod.POST, "/admin/request-report/orgs/**").hasAnyAuthority(Roles.APP_ADMIN.getRole(),
-                                Roles.REPORT_ADMIN.getRole())
-                .antMatchers(HttpMethod.GET,"/admin/reports/orgs/**").hasAnyAuthority(Roles.APP_ADMIN.getRole(), Roles.REPORT_ADMIN.getRole())
-                .antMatchers(HttpMethod.GET,"/admin/orgs/*/reports/*/controls").hasAnyAuthority(Roles.APP_ADMIN.getRole(), Roles.REPORT_ADMIN.getRole())
-                .antMatchers(HttpMethod.GET,"/admin/orgs/*/reports/live").hasAnyAuthority(Roles.APP_ADMIN.getRole(), Roles.REPORT_ADMIN.getRole())
+                                Roles.CIMS_REPORT_ADMIN.getRole(), Roles.OMS_REPORT_ADMIN.getRole(), Roles.UNIFY_REPORT_ADMIN.getRole())
+                .antMatchers(HttpMethod.GET,"/admin/reports/orgs/**").hasAnyAuthority(Roles.APP_ADMIN.getRole(), Roles.CIMS_REPORT_ADMIN.getRole(), Roles.OMS_REPORT_ADMIN.getRole(), Roles.UNIFY_REPORT_ADMIN.getRole())
+                .antMatchers(HttpMethod.GET,"/admin/orgs/*/reports/*/controls").hasAnyAuthority(Roles.APP_ADMIN.getRole(), Roles.CIMS_REPORT_ADMIN.getRole(), Roles.OMS_REPORT_ADMIN.getRole(), Roles.UNIFY_REPORT_ADMIN.getRole())
+                .antMatchers(HttpMethod.GET,"/admin/orgs/*/reports/live").hasAnyAuthority(Roles.APP_ADMIN.getRole(), Roles.CIMS_REPORT_ADMIN.getRole(), Roles.OMS_REPORT_ADMIN.getRole(), Roles.UNIFY_REPORT_ADMIN.getRole())
                 .antMatchers("/admin/**").hasAnyAuthority(Roles.APP_ADMIN.getRole())//
                 .and().cors().and().csrf().disable()
                 .addFilterBefore(authTokenFilter, BasicAuthenticationFilter.class)

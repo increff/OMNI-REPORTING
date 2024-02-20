@@ -140,7 +140,7 @@ public class ScheduleReportTask extends AbstractTask {
                     dbConnectionApi.getStatement(connection, properties.getMaxExecutionTime(), fQuery,
                             properties.getResultSetFetchSize());
             resultSet = statement.executeQuery();
-            // TODO: ADD MONGO SUPPORT or move to query executor.
+            // TODO: ADD MONGO SUPPORT after PR review
             //  ques : query executor picks credentials from local machine, not from our api call. Thus it ownt uplaod to user bucket unless we send gcp config as well.
             // if we send configs, query executor can t create bean of file client as each request will have differnet file client constructor .
             Integer noOfRows = FileUtil.writeCsvFromResultSet(resultSet, file);

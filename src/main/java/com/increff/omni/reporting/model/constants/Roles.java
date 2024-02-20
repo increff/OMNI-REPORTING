@@ -10,9 +10,9 @@ public enum Roles {
 
     APP_ADMIN("app.admin"),
 
-    REPORT_ADMIN("report.admin"), // todo : delete normal roles and only keep app.admin for schedules/dashabords
-    REPORT_STANDARD("report.standard"),
-    REPORT_CUSTOM("report.custom"),
+    // REPORT_ADMIN("report.admin"), // todo : delete normal roles and only keep app.admin for schedules/dashabords
+    // REPORT_STANDARD("report.standard"),
+    // REPORT_CUSTOM("report.custom"),
 
     UNIFY_REPORT_ADMIN("unify.report.admin"),
     UNIFY_REPORT_STANDARD("unify.report.standard"),
@@ -27,7 +27,7 @@ public enum Roles {
     OMS_REPORT_CUSTOM("oms.report.custom");
 
     private final String role;
-    public static final List<String> USER_ACCESS_ADMIN_AUTHORITIES = Arrays.asList(Roles.APP_ADMIN.getRole(), Roles.REPORT_ADMIN.getRole(), Roles.CIMS_REPORT_ADMIN.getRole());
+    public static final List<String> USER_ACCESS_ADMIN_AUTHORITIES = Arrays.asList(Roles.APP_ADMIN.getRole(), Roles.CIMS_REPORT_ADMIN.getRole(), Roles.OMS_REPORT_ADMIN.getRole(), Roles.UNIFY_REPORT_ADMIN.getRole());
 
     Roles(String role) {
         this.role = role;
