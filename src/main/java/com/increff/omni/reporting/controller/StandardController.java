@@ -51,46 +51,22 @@ public class StandardController {
         return reportRequestDto.getAllAvailableTimeZones();
     }
 
-    @ApiOperation(value = "Select controls for a report")
-    @RequestMapping(value = "/reports/{reportId}/controls", method = RequestMethod.GET)
-    public List<InputControlData> selectByReportId(@PathVariable Integer reportId) throws ApiException {
-        return inputControlDto.selectForReport(reportId);
-    }
-
     @ApiOperation(value = "Get Reports")
     @RequestMapping(value = "/reports", method = RequestMethod.GET)
     public List<ReportData> selectByOrgId(@RequestParam Boolean isChart, @RequestParam Optional<VisualizationType> visualization) throws ApiException {
         return reportDto.selectByOrg(isChart, visualization.orElse(null));
     }
 
-    @ApiOperation(value = "Get Report by Alias")
+    @ApiOperation(value = "Get Report by Alias") // todo : confirm from UI where this is used and remove if unused
     @RequestMapping(value = "/reports/find", method = RequestMethod.GET)
     public ReportData selectByAlias(@RequestParam Boolean isChart, @RequestParam String alias) throws ApiException {
         return reportDto.selectByAlias(isChart, alias);
-    }
-
-    @ApiOperation(value = "Get Live Data")
-    @RequestMapping(value = "/reports/live", method = RequestMethod.POST)
-    public List<Map<String, String>> getLiveData(@RequestBody ReportRequestForm form) throws ApiException, IOException {
-        return reportDto.getLiveData(form);
-    }
-
-    @ApiOperation(value = "Get validation group")
-    @RequestMapping(value = "/reports/{reportId}/controls/validations", method = RequestMethod.GET)
-    public List<ValidationGroupData> getValidationGroups(@PathVariable Integer reportId) {
-        return reportDto.getValidationGroups(reportId);
     }
 
     @ApiOperation(value = "Get All Directories")
     @RequestMapping(value = "/directories", method = RequestMethod.GET)
     public List<DirectoryData> selectAllDirectories() throws ApiException {
         return directoryDto.getAllDirectories();
-    }
-
-    @ApiOperation(value = "Request Report")
-    @RequestMapping(value = "/request-report", method = RequestMethod.POST)
-    public void requestReport(@RequestBody ReportRequestForm form) throws ApiException {
-        reportRequestDto.requestReport(form);
     }
 
     @ApiOperation(value = "Get All Request data")

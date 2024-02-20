@@ -3,7 +3,7 @@ package com.increff.omni.reporting.security;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.increff.omni.reporting.api.ReportApi;
-import com.increff.omni.reporting.controller.StandardController;
+import com.increff.omni.reporting.controller.AppAccessController;
 import com.increff.omni.reporting.util.UserPrincipalUtil;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
@@ -39,11 +39,10 @@ public class ReportAppAccessFilter extends GenericFilterBean {
     private static final String REPORT_ID_STRING = "reportId";
 
     @Override
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
-            throws IOException, ServletException {
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) {
         try {
             Object controller = getControllerByURL((HttpServletRequest) request);
-            if(Objects.nonNull(controller) && !controller.getClass().equals(StandardController.class))
+            if(Objects.nonNull(controller) && !controller.getClass().equals(AppAccessController.class))
                 chain.doFilter(request, response);
 
 
