@@ -35,11 +35,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.security.KeyManagementException;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
+import java.security.GeneralSecurityException;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -81,7 +77,7 @@ public class BeanConfig {
     }
 
     @Bean
-    public AuthClient authClient(ApplicationProperties applicationProperties) throws NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
+    public AuthClient authClient() throws GeneralSecurityException {
         return new AuthClient(applicationProperties.getAuthBaseUrl(), applicationProperties.getAuthAppToken());
     }
 

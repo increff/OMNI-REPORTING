@@ -35,7 +35,7 @@ public class StandardSecurityConfig {
                 .authorizeHttpRequests(auth -> {
                     auth
                             .requestMatchers("/standard/schedules/**").hasAnyAuthority(APP_ADMIN)//
-                            .requestMatchers("/standard/**").hasAnyAuthority(APP_ADMIN_REPORT_ADMIN_REPORT_STANDARD);
+                            .requestMatchers("/standard/**").hasAnyAuthority(REPORT_STANDARD, APP_ADMIN);
                 })
                 .cors(AbstractHttpConfigurer::disable)
                 .csrf(AbstractHttpConfigurer::disable)
