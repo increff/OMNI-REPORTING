@@ -18,6 +18,8 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationFi
 public class StandardSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
+    private ReportAppAccessFilter reportAppAccessFilter;
+    @Autowired
     private AuthTokenFilter authTokenFilter;
     @Autowired
     private RateLimitingFilter rateLimitingFilter;
@@ -41,6 +43,7 @@ public class StandardSecurityConfig extends WebSecurityConfigurerAdapter {
                 .and().cors().and().csrf().disable()
                 .addFilterBefore(authTokenFilter, BasicAuthenticationFilter.class)
                 .addFilterAfter(rateLimitingFilter, AuthTokenFilter.class)
+                .addFilterAfter(reportAppAccessFilter, RateLimitingFilter.class)
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
         http.cors();
     }
