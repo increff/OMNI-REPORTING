@@ -23,7 +23,7 @@ public class AdminSecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private AdminFilter adminFilter;
 
-    private static final String APP_ADMIN = "app.admin";
+    private static final String APP_ADMIN = "app.admin"; // todo : change app.admin to appName.report.superadmin role
     private static final String REPORT_ADMIN = "report.admin";
 
 

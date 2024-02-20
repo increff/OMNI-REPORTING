@@ -57,7 +57,7 @@ public class QueryExecutionDto extends AbstractDto {
         if(!keepQuotes) // Unlike sql, error when using single quotes for numbers
             paramValue = removeUnescapedSingleQuotes(paramValue);// do not remove escaped single quotes which comes as database value
 
-        filterJson = filterJson.replace("#" + paramKey, paramValue); // todo:
+        filterJson = filterJson.replace("#" + paramKey, paramValue);
         return filterJson;
     }
 
