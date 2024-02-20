@@ -2,7 +2,7 @@ package com.increff.omni.reporting.dao;
 
 import com.increff.omni.reporting.model.constants.ReportType;
 import com.increff.omni.reporting.pojo.ReportPojo;
-import com.increff.commons.springboot.db.AbstractDao;
+import com.increff.commons.springboot.db.dao.AbstractDao;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 

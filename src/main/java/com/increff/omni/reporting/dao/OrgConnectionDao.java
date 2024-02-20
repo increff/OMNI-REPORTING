@@ -1,7 +1,7 @@
 package com.increff.omni.reporting.dao;
 
 import com.increff.omni.reporting.pojo.OrgConnectionPojo;
-import com.increff.commons.springboot.db.AbstractDao;
+import com.increff.commons.springboot.db.dao.AbstractDao;
 import org.springframework.stereotype.Repository;
 
 @Repository

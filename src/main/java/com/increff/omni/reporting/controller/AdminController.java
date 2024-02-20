@@ -253,9 +253,10 @@ public class AdminController {
 
     @Operation(description = "Change log level")
     @PutMapping(value = "/log")
-    public String changeLogLevel(@RequestParam Level level) {
-        Configurator.setLevel("com.increff.omni.reporting", level);
-        return String.format("Log level changed successfully to %s", level.toString());
+    public String changeLogLevel(@RequestParam String level) {
+        Level ll = Level.valueOf(level);
+        Configurator.setLevel("com.increff.omni.reporting", ll);
+        return String.format("Log level changed successfully to %s", ll.toString());
     }
 
     // Report admin APIs
