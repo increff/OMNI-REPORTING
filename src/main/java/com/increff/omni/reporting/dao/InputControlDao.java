@@ -11,6 +11,7 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import java.util.List;
+import java.util.Objects;
 
 @Repository
 @Transactional
@@ -36,7 +37,8 @@ public class InputControlDao extends AbstractDao<InputControlPojo> {
                 cb.and(
                         cb.equal(root.get("scope"), scope),
                         cb.equal(root.get("displayName"), displayName),
-                        cb.equal(root.get("schemaVersionId"), schemaVersionId)
+                        Objects.isNull(schemaVersionId) ? // todo : ques cb.equal(root.get) does not work for null values. ask if this way is correct and add in other places for input control dao and report dao
+                                cb.isNull(root.get("schemaVersionId")) : cb.equal(root.get("schemaVersionId"), schemaVersionId)
                 )
         );
         TypedQuery<InputControlPojo> tQuery = createQuery(query);

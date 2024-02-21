@@ -39,7 +39,7 @@ public class UserPrincipalUtil {
 
         // If user has admin authorities, then do not set any param as query will have default value as column name
         // Which will make sure all values are selected
-        if(!accessRoles.isEmpty())
+        if(!accessRoles.isEmpty()) // todo : if user is oms.admin, he will be considered as admin for all apps. Get report app name and validate user role based on that
             return getStringToStringParamMap(accessControlMap);
         Map<String, Map<String, List<String>>> resourceRoles = principal.getResourceRoles();
         accessControlMap.put(ResourceQueryParamKeys.fulfillmentLocationQueryParamKey

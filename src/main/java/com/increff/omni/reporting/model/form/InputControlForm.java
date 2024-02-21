@@ -26,7 +26,6 @@ public class InputControlForm {
     @NotNull
     private InputControlType type;
 
-    @NotNull
     private Integer schemaVersionId;
 
     private DateType dateType;

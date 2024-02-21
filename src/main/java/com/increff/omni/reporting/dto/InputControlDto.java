@@ -16,6 +16,7 @@ import lombok.Setter;
 import lombok.extern.log4j.Log4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.util.*;
@@ -23,6 +24,7 @@ import java.util.stream.Collectors;
 
 import static com.increff.omni.reporting.dto.CommonDtoHelper.sortBasedOnReportControlMappedTime;
 import static com.increff.omni.reporting.dto.CommonDtoHelper.updateValidationTypes;
+import static com.increff.omni.reporting.util.UserPrincipalUtil.NULL_SCHEMA_VERSION_APPS;
 
 @Service
 @Log4j
@@ -56,12 +58,15 @@ public class InputControlDto extends AbstractDto {
     @Autowired
     private ReportApi reportApi;
 
+    @Transactional(rollbackFor = ApiException.class)
     public InputControlData add(InputControlForm form) throws ApiException {
         validate(form);
         InputControlPojo pojo = ConvertUtil.convert(form, InputControlPojo.class);
         pojo = flowApi.add(pojo, form.getQuery(), form.getValues(), form.getReportId());
         return getInputControlDatas(Collections.singletonList(pojo), getOrgId()).get(0);
     }
+
+    @Transactional(rollbackFor = ApiException.class)
 
     public InputControlData update(Integer id, InputControlUpdateForm form) throws ApiException {
         validateForEdit(form);
@@ -130,19 +135,28 @@ public class InputControlDto extends AbstractDto {
                     .collect(Collectors.groupingBy(
                             InputControlValuesPojo::getControlId,
                             Collectors.mapping(InputControlValuesPojo::getValue, Collectors.toList())));
-        List<InputControlData> dataList = new ArrayList<>();
-        if(Objects.nonNull(reportId)) {
-            ReportPojo reportPojo = reportApi.getCheck(reportId);
-            for (InputControlPojo p : pojos) {
-                OrgConnectionPojo orgConnectionPojo = orgConnectionApi.getCheckByOrgIdAppName(orgId, reportPojo.getAppName());
-                ConnectionPojo connectionPojo = connectionApi.getCheck(orgConnectionPojo.getConnectionId());
-                String password = getDecryptedPassword(connectionPojo.getPassword());
 
-                SchemaVersionPojo schemaVersionPojo = schemaVersionApi.getCheck(p.getSchemaVersionId());
-                dataList.add(getDataFromPojo(p, controlToValuesMapping, controlToQueryMapping, connectionPojo,
-                        schemaVersionPojo, password));
-            }
+        List<InputControlData> dataList = new ArrayList<>();
+
+        ConnectionPojo connectionPojo = null;
+        String password = null;
+        SchemaVersionPojo schemaVersionPojo = null;
+
+        if(Objects.nonNull(reportId)) { // only get values for report if report id is present as we need to decide connection based on reports app name
+            ReportPojo reportPojo = reportApi.getCheck(reportId);
+            OrgConnectionPojo orgConnectionPojo = orgConnectionApi.getCheckByOrgIdAppName(orgId, reportPojo.getAppName());
+            connectionPojo = connectionApi.getCheck(orgConnectionPojo.getConnectionId());
+            password = getDecryptedPassword(connectionPojo.getPassword());
+
+            if( ! NULL_SCHEMA_VERSION_APPS.contains(reportPojo.getAppName()) )
+                schemaVersionPojo = schemaVersionApi.getCheck(reportPojo.getSchemaVersionId());
         }
+
+        for (InputControlPojo p : pojos) {
+            dataList.add(getDataFromPojo(p, controlToValuesMapping, controlToQueryMapping, connectionPojo,
+                    schemaVersionPojo, password));
+        }
+
         return dataList;
     }
 
@@ -150,10 +164,11 @@ public class InputControlDto extends AbstractDto {
             , Map<Integer, String> controlToQueryMapping, ConnectionPojo connectionPojo,
                                              SchemaVersionPojo schemaVersionPojo, String password) throws ApiException {
         InputControlData data = ConvertUtil.convert(p, InputControlData.class);
-        data.setSchemaVersionName(schemaVersionPojo.getName());
+        if(Objects.nonNull(schemaVersionPojo))
+            data.setSchemaVersionName(schemaVersionPojo.getName());
         data.setQuery(controlToQueryMapping.getOrDefault(p.getId(), null));
         data.setValues(controlToValuesMapping.getOrDefault(p.getId(), null));
-        if (!StringUtil.isEmpty(data.getQuery())) {
+        if (!StringUtil.isEmpty(data.getQuery()) && Objects.nonNull(connectionPojo)) {
             setInputControlOptions(data, flowApi.getValuesFromQuery(data.getQuery(), connectionPojo, password));
         } else {
             List<String> values = controlToValuesMapping.getOrDefault(p.getId(), null);
@@ -165,6 +180,8 @@ public class InputControlDto extends AbstractDto {
         }
         return data;
     }
+
+    @Transactional(rollbackFor = ApiException.class)
 
     private void setInputControlOptions(InputControlData data, Map<String, String> values) {
         values.keySet().forEach(k -> {

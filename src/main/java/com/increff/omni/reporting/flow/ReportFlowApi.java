@@ -324,9 +324,16 @@ public class ReportFlowApi extends AbstractFlowApi {
         InputControlPojo icPojo = inputControlApi.getCheck(pojo.getControlId());
         if (icPojo.getScope().equals(InputControlScope.LOCAL))
             throw new ApiException(ApiStatus.BAD_DATA, "Only Global Control can be mapped to a report");
-        if (!icPojo.getSchemaVersionId().equals(reportPojo.getSchemaVersionId()))
-            throw new ApiException(ApiStatus.BAD_DATA, "Report Schema version and input control schema version not " +
-                    "matching");
+
+        if(Objects.isNull(icPojo.getSchemaVersionId())){
+            if(Objects.nonNull(reportPojo.getSchemaVersionId()))
+                throw new ApiException(ApiStatus.BAD_DATA, "Report Schema version and input control schema version not " +
+                        "matching");
+        } else {
+            if (!icPojo.getSchemaVersionId().equals(reportPojo.getSchemaVersionId()))
+                throw new ApiException(ApiStatus.BAD_DATA, "Report Schema version and input control schema version not " +
+                        "matching");
+        }
     }
 
     private void validateForEdit(ReportPojo pojo, List<ReportSchedulePojo> reportSchedulePojos) throws ApiException {
