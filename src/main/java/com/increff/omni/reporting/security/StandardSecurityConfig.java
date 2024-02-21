@@ -31,6 +31,7 @@ public class StandardSecurityConfig extends WebSecurityConfigurerAdapter {
         http// Match only these URLs
                 .requestMatchers()//
                 .antMatchers("/standard/**").and().authorizeRequests()//
+                .antMatchers("/standard/pipelines/**").hasAnyAuthority(Roles.APP_ADMIN.getRole())//
                 .antMatchers("/standard/schedules/**").hasAnyAuthority(Roles.APP_ADMIN.getRole())//
                 .antMatchers(HttpMethod.POST, "/standard/dashboards/{dashboardId}/view").hasAnyAuthority(Roles.APP_ADMIN.getRole(), Roles.CIMS_REPORT_ADMIN.getRole(), Roles.OMS_REPORT_ADMIN.getRole(), Roles.UNIFY_REPORT_ADMIN.getRole(), Roles.CIMS_REPORT_STANDARD.getRole(), Roles.OMS_REPORT_STANDARD.getRole(), Roles.UNIFY_REPORT_STANDARD.getRole(), Roles.CIMS_REPORT_CUSTOM.getRole(), Roles.OMS_REPORT_CUSTOM.getRole(), Roles.UNIFY_REPORT_CUSTOM.getRole())//
                 .antMatchers(HttpMethod.GET, "/standard/dashboards/**").hasAnyAuthority(Roles.APP_ADMIN.getRole(), Roles.CIMS_REPORT_ADMIN.getRole(), Roles.OMS_REPORT_ADMIN.getRole(), Roles.UNIFY_REPORT_ADMIN.getRole(), Roles.CIMS_REPORT_STANDARD.getRole(), Roles.OMS_REPORT_STANDARD.getRole(), Roles.UNIFY_REPORT_STANDARD.getRole(), Roles.CIMS_REPORT_CUSTOM.getRole(), Roles.OMS_REPORT_CUSTOM.getRole(), Roles.UNIFY_REPORT_CUSTOM.getRole())//

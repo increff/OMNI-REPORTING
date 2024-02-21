@@ -6,6 +6,7 @@ import com.increff.omni.reporting.flow.ReportScheduleFlowApi;
 import com.increff.omni.reporting.model.constants.AuditActions;
 import com.increff.omni.reporting.model.constants.ReportRequestType;
 import com.increff.omni.reporting.model.data.InputControlFilterData;
+import com.increff.omni.reporting.model.data.PipelineFlowData;
 import com.increff.omni.reporting.model.data.ReportRequestData;
 import com.increff.omni.reporting.model.data.ReportScheduleData;
 import com.increff.omni.reporting.model.form.CronScheduleForm;
@@ -22,6 +23,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.increff.omni.reporting.dto.CommonDtoHelper.*;
+import static com.increff.omni.reporting.util.ValidateUtil.validateReportScheduleForm;
 
 @Component
 public class ReportScheduleDto extends AbstractDto {
@@ -52,23 +54,26 @@ public class ReportScheduleDto extends AbstractDto {
     private OrgConnectionApi orgConnectionApi;
     @Autowired
     private ConnectionApi connectionApi;
+    @Autowired
+    private SchedulePipelineApi schedulePipelineApi;
 
     public void scheduleReport(ReportScheduleForm form) throws ApiException {
-        checkValid(form);
+        validateReportScheduleForm(form);
         checkLimitForOrg();
         OrganizationPojo organizationPojo = organizationApi.getCheck(getOrgId());
         ReportPojo reportPojo = checkValidReport(form.getReportAlias());
         ReportSchedulePojo pojo = convertFormToReportSchedulePojo(form, getOrgId(), getUserId());
         List<ReportScheduleInputParamsPojo> reportScheduleInputParamsPojos =
                 validateAndPrepareInputParams(form, reportPojo);
-        flowApi.add(pojo, form.getSendTo(), reportScheduleInputParamsPojos, reportPojo);
+        flowApi.add(pojo, form.getSendTo(), reportScheduleInputParamsPojos, reportPojo,
+                ConvertUtil.convert(form.getPipelineDetails(), PipelineFlowData.class));
         flowApi.saveAudit(pojo.getId().toString(), AuditActions.CREATE_REPORT_SCHEDULE.toString(),
                 "Create Report Schedule",
                 "Report schedule created for organization : " + organizationPojo.getName(), getUserName());
     }
 
     public void editScheduleReport(Integer id, ReportScheduleForm form) throws ApiException {
-        checkValid(form);
+        validateReportScheduleForm(form);
         checkLimitForOrg();
         ReportSchedulePojo ex = api.getCheck(id);
         if (!ex.getOrgId().equals(getOrgId()))
@@ -80,7 +85,8 @@ public class ReportScheduleDto extends AbstractDto {
         pojo.setId(id);
         List<ReportScheduleInputParamsPojo> reportScheduleInputParamsPojos =
                 validateAndPrepareInputParams(form, reportPojo);
-        flowApi.edit(pojo, form.getSendTo(), reportScheduleInputParamsPojos, reportPojo);
+        flowApi.edit(pojo, form.getSendTo(), reportScheduleInputParamsPojos, reportPojo,
+                ConvertUtil.convert(form.getPipelineDetails(), PipelineFlowData.class));
         flowApi.saveAudit(pojo.getId().toString(), AuditActions.EDIT_REPORT_SCHEDULE.toString(), "Edit Report Schedule",
                 "Report schedule updated for organization : " + organizationPojo.getName() +
                         " with cron : " + pojo.getCron(), getUserName());
@@ -166,7 +172,7 @@ public class ReportScheduleDto extends AbstractDto {
         List<ReportScheduleData> dataList = new ArrayList<>();
         for (ReportSchedulePojo pojo : reportSchedulePojoList) {
             OrgSchemaVersionPojo orgSchemaVersionPojo = orgSchemaApi.getCheckByOrgId(pojo.getOrgId());
-            ReportPojo reportPojo = reportApi.getByAliasAndSchema(pojo.getReportAlias(),
+            ReportPojo reportPojo = reportApi.getCheckByAliasAndSchema(pojo.getReportAlias(),
                     orgSchemaVersionPojo.getSchemaVersionId(), false);
             List<ReportControlsPojo> reportControlsPojos = Objects.isNull(reportPojo) ?
                     new ArrayList<>() : reportControlsApi.getByReportId(reportPojo.getId());
@@ -193,6 +199,8 @@ public class ReportScheduleDto extends AbstractDto {
             data.setCronSchedule(cronData);
             data.setTimezone(getValueFromQuotes(timezone));
             data.setSendTo(emailsPojos.stream().map(ReportScheduleEmailsPojo::getSendTo).collect(Collectors.toList()));
+            data.setPipelineDetails(schedulePipelineApi.getByScheduleId(pojo.getId()).stream()
+                    .map(p -> new PipelineFlowData(p.getPipelineId(), p.getFolderName())).collect(Collectors.toList()));
             data.setMinFrequencyAllowedSeconds(reportPojo.getMinFrequencyAllowedSeconds());
             dataList.add(data);
         }

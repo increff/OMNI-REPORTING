@@ -1,6 +1,5 @@
 package com.increff.omni.reporting.util;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.increff.omni.reporting.api.FolderApi;
 import com.nextscm.commons.lang.StringUtil;
 import lombok.extern.log4j.Log4j;
@@ -14,6 +13,9 @@ import java.io.*;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Log4j
@@ -26,6 +28,7 @@ public class FileUtil {
     public static final String FILTER_QUERY_DISPLAY_NAME_COLUMN = "name";
     public static final String FILTER_QUERY_DISPLAY_VALUE_COLUMN = "id";
 
+    private final static String TIME_ZONE_PATTERN_WITHOUT_ZONE = "yyyy-MM-dd HH:mm:ss";
 
     public static void closeQuietly(Closeable c) {
         if (c == null) {
@@ -181,5 +184,22 @@ public class FileUtil {
 
     public static double roundOff(double value) {
         return Math.round(value * 10000.0) / 10000.0;
+    }
+
+    public static void writeDummyContentToFile(File file) throws IOException {
+        BufferedWriter writer = new BufferedWriter(new FileWriter(file));
+        writer.write("dummy"); // Write "dummy" to the file
+        writer.close();
+    }
+
+    public static String getCustomizedFileName(boolean isZip, String timezone, String name) {
+        return name + " - " + ZonedDateTime.now().withZoneSameInstant(
+                ZoneId.of(timezone)).format(DateTimeFormatter.ofPattern(TIME_ZONE_PATTERN_WITHOUT_ZONE))
+                + (isZip ? ".zip" :
+                ".csv");
+    }
+
+    public static String getPipelineFilename(Integer reportId, String name, String timezone) {
+        return "reportId_" + reportId + "_" + getCustomizedFileName(false, timezone, name);
     }
 }

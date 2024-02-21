@@ -64,7 +64,7 @@ public class AbstractDto extends AbstractDtoApi {
                 || getPrincipal().getRoles().contains(Roles.UNIFY_REPORT_CUSTOM.getRole());
     }
 
-    protected static int getOrgId() {
+    public static int getOrgId() {
         return getPrincipal().getDomainId();
     }
 
