@@ -207,7 +207,7 @@ public class StandardController {
     }
 
     @ApiOperation(value = "Get Null Schema Version App Names")
-    @RequestMapping(value = "/app-names", method = RequestMethod.GET)
+    @RequestMapping(value = "/app-names/null-schema-version", method = RequestMethod.GET)
     public List<AppName> getNullSchemaAppNames() {
         return new ArrayList<>(NULL_SCHEMA_VERSION_APPS);
     }
