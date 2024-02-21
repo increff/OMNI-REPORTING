@@ -15,10 +15,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+
+import static com.increff.omni.reporting.util.UserPrincipalUtil.NULL_SCHEMA_VERSION_APPS;
 
 @CrossOrigin
 @Api
@@ -205,5 +204,11 @@ public class StandardController {
     @RequestMapping(value = "/app-names", method = RequestMethod.GET)
     public List<AppName> getAppNames() {
         return Arrays.asList(AppName.values());
+    }
+
+    @ApiOperation(value = "Get Null Schema Version App Names")
+    @RequestMapping(value = "/app-names", method = RequestMethod.GET)
+    public List<AppName> getNullSchemaAppNames() {
+        return new ArrayList<>(NULL_SCHEMA_VERSION_APPS);
     }
 }
