@@ -118,9 +118,19 @@ public class ReportApi extends AbstractAuditApi {
         return pojo;
     }
 
-    public List<ReportPojo> getByAliasAndSchema(List<String> aliasList, Integer schemaVersionId, Boolean isChart) {
-        // todo : handle alias list for charts
-        return dao.getByAliasAndSchema(aliasList, schemaVersionId, isChart);
+    public List<ReportPojo> getByAliasAndSchema(List<String> aliasList, Integer schemaVersionId, Boolean isChart) throws ApiException {
+        List<String> nullSchemaAliases = new ArrayList<>();
+        for(String alias : aliasList){
+            if(NULL_SCHEMA_VERSION_APPS.contains(checkAliasAppName(alias)))
+                nullSchemaAliases.add(alias);
+        }
+        aliasList.removeAll(nullSchemaAliases);
+        List<ReportPojo> reports = new ArrayList<>();
+        if(!CollectionUtils.isEmpty(aliasList))
+            reports.addAll(dao.getByAliasAndSchema(aliasList, schemaVersionId, isChart));
+        if(!CollectionUtils.isEmpty(nullSchemaAliases))
+            reports.addAll(dao.getByAliasAndSchema(nullSchemaAliases, null, isChart));
+        return reports;
     }
 
     private AppName checkAliasAppName(String alias) throws ApiException {
