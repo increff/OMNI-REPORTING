@@ -39,6 +39,6 @@ public class InputControlPojo extends AbstractVersionedPojo{
     private DateType dateType;
 
     @Column
-    private Integer schemaVersionId; // todo make this non null
+    private Integer schemaVersionId;
 
 }
