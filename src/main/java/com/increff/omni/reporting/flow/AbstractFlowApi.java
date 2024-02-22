@@ -40,9 +40,6 @@ public class AbstractFlowApi extends AbstractAuditApi {
     protected static int getOrgId() {
         return getPrincipal().getDomainId();
     }
-    protected Integer getSchemaVersionId() throws ApiException{
-        return orgMappingApi.getCheckByOrgId(getOrgId()).getSchemaVersionId();
-    }
 
     protected void validate(ReportPojo reportPojo, List<ReportInputParamsPojo> reportInputParamsPojoList)
             throws ApiException {

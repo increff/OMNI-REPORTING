@@ -158,11 +158,14 @@ public class ReportFlowApi extends AbstractFlowApi {
     @Transactional(readOnly = true)
     public List<ReportPojo> getAll(Integer orgId, Boolean isChart, VisualizationType visualization) throws ApiException {
 
-        OrgMappingPojo orgMappingPojo = orgMappingApi.getCheckByOrgId(orgId);
+        List<OrgMappingPojo> orgMappingPojo = orgMappingApi.getCheckByOrgId(orgId);
+        List<Integer> orgSchemaVersionIds = orgMappingPojo.stream().map(OrgMappingPojo::getSchemaVersionId)
+                .collect(Collectors.toList());
+
         List<ReportPojo> reportPojoList = new ArrayList<>();
         //All standard
         List<ReportPojo> standard =
-                api.getByTypeAndSchema(ReportType.STANDARD, orgMappingPojo.getSchemaVersionId(), isChart, visualization);
+                api.getByTypeAndSchema(ReportType.STANDARD, orgSchemaVersionIds, isChart, visualization);
 
         //All custom
         List<CustomReportAccessPojo> customAccess = customReportAccessApi.getByOrgId(orgId);
@@ -170,7 +173,7 @@ public class ReportFlowApi extends AbstractFlowApi {
                 .collect(Collectors.toList());
 
         List<ReportPojo> custom =
-                api.getByIdsAndSchema(customIds, orgMappingPojo.getSchemaVersionId(), isChart);
+                api.getByIdsAndSchema(customIds, orgSchemaVersionIds, isChart);
 
         if(!isCustomReportUser()) // Add standard reports only if user in not custom report user
             reportPojoList.addAll(standard);
@@ -340,7 +343,7 @@ public class ReportFlowApi extends AbstractFlowApi {
         if (existing != null)
             throw new ApiException(ApiStatus.BAD_DATA, "Report already present with same name, schema version and " +
                     "report type (normal / dashboard)");
-        ReportPojo ex = api.getByAliasAndSchema(pojo.getAlias(), pojo.getSchemaVersionId(), pojo.getIsChart());
+        ReportPojo ex = api.getByAliasAndSchema(pojo.getAlias(), Collections.singletonList(pojo.getSchemaVersionId()), pojo.getIsChart());
         if (ex != null)
             throw new ApiException(ApiStatus.BAD_DATA, "Report already present with same alias, schema version and " +
                     "report type (normal / dashboard)");

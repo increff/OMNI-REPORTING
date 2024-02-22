@@ -21,6 +21,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.ZonedDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.increff.omni.reporting.dto.CommonDtoHelper.getValueFromQuotes;
 import static com.increff.omni.reporting.security.StandardSecurityConfig.*;
@@ -66,8 +67,8 @@ public class AbstractDto extends AbstractDtoApi {
         return getPrincipal().getUsername();
     }
 
-    protected Integer getSchemaVersionId() throws ApiException{
-        return orgMappingApi.getCheckByOrgId(getOrgId()).getSchemaVersionId();
+    protected List<Integer> getSchemaVersionIds() throws ApiException{
+        return orgMappingApi.getCheckByOrgId(getOrgId()).stream().map(OrgMappingPojo::getSchemaVersionId).collect(Collectors.toList());
     }
 
     protected void validateInputParamValues(Map<String, List<String>> inputParams,

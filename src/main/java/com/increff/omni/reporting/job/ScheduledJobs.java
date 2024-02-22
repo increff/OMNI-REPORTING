@@ -100,9 +100,11 @@ public class ScheduledJobs {
 
         log.debug("Eligible schedules : " + schedulePojos.size());
         for(ReportSchedulePojo s : schedulePojos) {
-            OrgMappingPojo orgMappingPojo = orgMappingApi.getCheckByOrgId(s.getOrgId());
+            List<OrgMappingPojo> orgMappingPojo = orgMappingApi.getCheckByOrgId(s.getOrgId());
+            List<Integer> orgSchemaVersionIds = orgMappingPojo.stream().map(OrgMappingPojo::getSchemaVersionId).collect(Collectors.toList());
             ReportPojo reportPojo = reportApi.getByAliasAndSchema(s.getReportAlias(),
-                    orgMappingPojo.getSchemaVersionId(), false);
+                    orgSchemaVersionIds, false);
+
             Integer reportId = Objects.isNull(reportPojo) ? null : reportPojo.getId();
             ReportRequestPojo reportRequestPojo = convertToReportRequestPojo(s, reportId);
             List<ReportInputParamsPojo> reportInputParamsPojoList = new ArrayList<>();

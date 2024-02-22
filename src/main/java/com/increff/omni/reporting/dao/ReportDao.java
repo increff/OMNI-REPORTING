@@ -19,14 +19,14 @@ import java.util.stream.Collectors;
 @Transactional
 public class ReportDao extends AbstractDao<ReportPojo> {
 
-    public List<ReportPojo> getByTypeAndSchema(ReportType type, Integer schemaVersionId, Boolean isChart, VisualizationType visualization) {
+    public List<ReportPojo> getByTypeAndSchema(ReportType type, List<Integer> schemaVersionIds, Boolean isChart, VisualizationType visualization) {
         CriteriaBuilder cb = this.em.getCriteriaBuilder();
         CriteriaQuery<ReportPojo> query = cb.createQuery(ReportPojo.class);
         Root<ReportPojo> root = query.from(ReportPojo.class);
         query.where(
                 cb.and(
                         cb.equal(root.get("type"), type),
-                        cb.equal(root.get("schemaVersionId"), schemaVersionId),
+                        cb.in(root.get("schemaVersionId")).value(schemaVersionIds),
                         cb.equal(root.get("isEnabled"), true),
                         cb.equal(root.get("isChart"), isChart),
                         root.get("chartType").in(parseVisualization(visualization))
@@ -51,14 +51,14 @@ public class ReportDao extends AbstractDao<ReportPojo> {
         return selectSingleOrNull(tQuery);
     }
 
-    public List<ReportPojo> getByIdsAndSchema(List<Integer> ids, Integer schemaVersionId, Boolean isChart) {
+    public List<ReportPojo> getByIdsAndSchema(List<Integer> ids, List<Integer> schemaVersionIds, Boolean isChart) {
         CriteriaBuilder cb = this.em.getCriteriaBuilder();
         CriteriaQuery<ReportPojo> query = cb.createQuery(ReportPojo.class);
         Root<ReportPojo> root = query.from(ReportPojo.class);
         query.where(
                 cb.and(
                         root.get("id").in(ids),
-                        cb.equal(root.get("schemaVersionId"), schemaVersionId),
+                        cb.in(root.get("schemaVersionId")).value(schemaVersionIds),
                         cb.equal(root.get("isEnabled"), true),
                         cb.equal(root.get("isChart"), isChart)
                 )
@@ -81,14 +81,16 @@ public class ReportDao extends AbstractDao<ReportPojo> {
         return selectMultiple(tQuery);
     }
 
-    public ReportPojo getByAliasAndSchema(String alias, Integer schemaVersionId, Boolean isChart) {
+    public ReportPojo getByAliasAndSchema(String alias, List<Integer> schemaVersionId, Boolean isChart) {
+        if(schemaVersionId.isEmpty())
+            return null;
         CriteriaBuilder cb = this.em.getCriteriaBuilder();
         CriteriaQuery<ReportPojo> query = cb.createQuery(ReportPojo.class);
         Root<ReportPojo> root = query.from(ReportPojo.class);
         query.where(
                 cb.and(
                         cb.equal(root.get("alias"), alias),
-                        cb.equal(root.get("schemaVersionId"), schemaVersionId),
+                        cb.in(root.get("schemaVersionId")).value(schemaVersionId),
                         cb.equal(root.get("isChart"), isChart)
                 )
         );
@@ -96,7 +98,7 @@ public class ReportDao extends AbstractDao<ReportPojo> {
         return selectSingleOrNull(tQuery);
     }
 
-    public List<ReportPojo> getByAliasAndSchema(List<String> aliasList, Integer schemaVersionId, Boolean isChart) {
+    public List<ReportPojo> getByAliasAndSchema(List<String> aliasList, List<Integer> schemaVersionIds, Boolean isChart) {
         if(aliasList.isEmpty())
             return new ArrayList<>();
         CriteriaBuilder cb = this.em.getCriteriaBuilder();
@@ -105,7 +107,7 @@ public class ReportDao extends AbstractDao<ReportPojo> {
         query.where(
                 cb.and(
                         root.get("alias").in(aliasList),
-                        cb.equal(root.get("schemaVersionId"), schemaVersionId),
+                        cb.in(root.get("schemaVersionId")).value(schemaVersionIds),
                         cb.equal(root.get("isChart"), isChart)
                 )
         );

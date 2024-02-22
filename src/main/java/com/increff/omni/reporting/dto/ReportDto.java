@@ -183,8 +183,10 @@ public class ReportDto extends AbstractDto {
     public ReportData selectByAlias(Boolean isChart, String alias) throws ApiException {
         Integer orgId = getOrgId();
         organizationApi.getCheck(orgId);
-        OrgMappingPojo schemaVersionPojo = orgMappingApi.getCheckByOrgId(orgId);
-        ReportPojo reportPojo = reportApi.getByAliasAndSchema(alias, schemaVersionPojo.getSchemaVersionId(),
+
+        List<OrgMappingPojo> orgMappingPojos = orgMappingApi.getCheckByOrgId(orgId);
+        List<Integer> orgSchemaVersionIds = orgMappingPojos.stream().map(OrgMappingPojo::getSchemaVersionId).collect(Collectors.toList());
+        ReportPojo reportPojo = reportApi.getByAliasAndSchema(alias, orgSchemaVersionIds,
                 isChart);
         if(Objects.isNull(reportPojo))
             throw new ApiException(ApiStatus.BAD_DATA,

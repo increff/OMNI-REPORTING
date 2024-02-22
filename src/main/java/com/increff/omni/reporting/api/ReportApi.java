@@ -36,8 +36,8 @@ public class ReportApi extends AbstractAuditApi {
         return dao.getByNameAndSchema(name, schemaVersionId, isChart);
     }
 
-    public List<ReportPojo> getByTypeAndSchema(ReportType type, Integer schemaVersionId, Boolean isChart, VisualizationType visualization){
-        return dao.getByTypeAndSchema(type, schemaVersionId, isChart, visualization);
+    public List<ReportPojo> getByTypeAndSchema(ReportType type, List<Integer> schemaVersionIds, Boolean isChart, VisualizationType visualization){
+        return dao.getByTypeAndSchema(type, schemaVersionIds, isChart, visualization);
     }
 
     public ReportPojo edit(ReportPojo pojo) throws ApiException {
@@ -53,10 +53,10 @@ public class ReportApi extends AbstractAuditApi {
         return existing;
     }
 
-    public List<ReportPojo> getByIdsAndSchema(List<Integer> ids, Integer schemaVersionId, Boolean isChart){
+    public List<ReportPojo> getByIdsAndSchema(List<Integer> ids, List<Integer> schemaVersionIds, Boolean isChart){
         if(CollectionUtils.isEmpty(ids))
             return new ArrayList<>();
-        return dao.getByIdsAndSchema(ids, schemaVersionId, isChart);
+        return dao.getByIdsAndSchema(ids, schemaVersionIds, isChart);
     }
 
     public List<ReportPojo> getByIds(List<Integer> ids, Boolean isChart){
@@ -69,17 +69,17 @@ public class ReportApi extends AbstractAuditApi {
         return dao.getBySchemaVersionAndTypes(schemaVersionId, visualization);
     }
 
-    public ReportPojo getByAliasAndSchema(String alias, Integer schemaVersionId, Boolean isChart) {
-        return dao.getByAliasAndSchema(alias, schemaVersionId, isChart);
+    public ReportPojo getByAliasAndSchema(String alias, List<Integer> schemaVersionIds, Boolean isChart) {
+        return dao.getByAliasAndSchema(alias, schemaVersionIds, isChart);
     }
 
-    public ReportPojo getCheckByAliasAndSchema(String alias, Integer schemaVersionId, Boolean isChart) throws ApiException {
+    public ReportPojo getCheckByAliasAndSchema(String alias, List<Integer> schemaVersionId, Boolean isChart) throws ApiException {
         ReportPojo pojo = dao.getByAliasAndSchema(alias, schemaVersionId, isChart);
         checkNotNull(pojo, "No report present with alias : " + alias + " schemaVersionId : " + schemaVersionId + " isChart : " + isChart);
         return pojo;
     }
 
-    public List<ReportPojo> getByAliasAndSchema(List<String> aliasList, Integer schemaVersionId, Boolean isChart) {
-        return dao.getByAliasAndSchema(aliasList, schemaVersionId, isChart);
+    public List<ReportPojo> getByAliasAndSchema(List<String> aliasList, List<Integer> schemaVersionIds, Boolean isChart) {
+        return dao.getByAliasAndSchema(aliasList, schemaVersionIds, isChart);
     }
 }

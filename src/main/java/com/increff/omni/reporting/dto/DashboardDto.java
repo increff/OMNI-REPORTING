@@ -127,7 +127,8 @@ public class DashboardDto extends AbstractDto {
         List<DashboardListData> data = ConvertUtil.convert(api.getByOrgId(orgId), DashboardListData.class);
 
         if (isCustomReportUser()) { // Filter out standard dashboards for custom users
-            List<Integer> customDashboardIds = getCustomDashboardIds(orgMappingApi.getCheckByOrgId(orgId).getSchemaVersionId(),
+            List<Integer> orgSchemaVersionIds = orgMappingApi.getCheckByOrgId(orgId).stream().map(OrgMappingPojo::getSchemaVersionId).collect(Collectors.toList());
+            List<Integer> customDashboardIds = getCustomDashboardIds(orgSchemaVersionIds,
                     data.stream().map(DashboardListData::getId).collect(Collectors.toList()));
             data = data.stream().filter(dashboard -> customDashboardIds.contains(dashboard.getId())).collect(Collectors.toList());
         }
@@ -141,7 +142,7 @@ public class DashboardDto extends AbstractDto {
         List<DashboardChartPojo> charts = dashboardChartApi.getCheckByDashboardId(id);
 
         return ChartUtil.getDashboardData(dashboard.getId(), ConvertUtil.convert(dashboard, DashboardForm.class),
-                getFilterDetails(dashboard, charts), getChartLayout(charts, getSchemaVersionId()));
+                getFilterDetails(dashboard, charts), getChartLayout(charts, getSchemaVersionIds()));
     }
 
     @Transactional(rollbackFor = ApiException.class)
@@ -156,7 +157,7 @@ public class DashboardDto extends AbstractDto {
     }
 
     private void setFilterDefaults(DashboardPojo dashboard, List<DashboardChartPojo> charts, Map<String, List<InputControlData>> filterDetails) throws ApiException {
-        Integer orgSchemaVersionId = orgMappingApi.getCheckByOrgId(dashboard.getOrgId()).getSchemaVersionId();
+        List<Integer> orgSchemaVersionIds = orgMappingApi.getCheckByOrgId(dashboard.getOrgId()).stream().map(OrgMappingPojo::getSchemaVersionId).collect(Collectors.toList());
         Map<String, Map<Integer, String>> chartDefaultValueMap = defaultValueApi.getByDashboardId(dashboard.getId())
                 .stream().collect(Collectors.groupingBy(DefaultValuePojo::getChartAlias,
                         Collectors.toMap(DefaultValuePojo::getControlId, DefaultValuePojo::getDefaultValue)));
@@ -165,7 +166,7 @@ public class DashboardDto extends AbstractDto {
             Map<Integer, String> controlDefaultValueMap = chartDefaultValueMap.getOrDefault(chart.getChartAlias(), new HashMap<>());
             controlDefaultValueMap.putAll(chartDefaultValueMap.getOrDefault(DEFAULT_VALUE_COMMON_KEY, new HashMap<>()));
 
-            ReportPojo report = reportApi.getCheckByAliasAndSchema(chart.getChartAlias(), orgSchemaVersionId, true);
+            ReportPojo report = reportApi.getCheckByAliasAndSchema(chart.getChartAlias(), orgSchemaVersionIds, true);
 
             filterDetails.put(report.getAlias(), new ArrayList<>());
             inputControlDto.selectForReport(report.getId()).forEach(inputControlData -> {
@@ -218,7 +219,7 @@ public class DashboardDto extends AbstractDto {
      * @param charts 1D list of charts
      * @return 2D list of charts. Each row is a list of charts for that row in sorted order of col
      */
-    private List<List<DashboardGridData>> getChartLayout(List<DashboardChartPojo> charts, Integer schemaVersionId) throws ApiException {
+    private List<List<DashboardGridData>> getChartLayout(List<DashboardChartPojo> charts, List<Integer> schemaVersionIds) throws ApiException {
         // sort charts based on row and col
         charts = charts.stream().sorted((o1, o2) -> {
             if (o1.getRow() == o2.getRow()) {
@@ -247,7 +248,7 @@ public class DashboardDto extends AbstractDto {
         for (List<DashboardChartPojo> chartRow : chartList){
             List<DashboardGridData> chartRowData = ConvertUtil.convert(chartRow, DashboardGridData.class);
             for (DashboardGridData chart : chartRowData) {
-                ReportPojo report = reportApi.getCheckByAliasAndSchema(chart.getChartAlias(), schemaVersionId, true);
+                ReportPojo report = reportApi.getCheckByAliasAndSchema(chart.getChartAlias(), schemaVersionIds, true);
                 chart.setName(report.getName());
                 chart.setChartType(report.getChartType());
                 chart.setChartId(report.getId());
@@ -373,13 +374,13 @@ public class DashboardDto extends AbstractDto {
     /**
      * Returns dashboardIds which have at least one chart of type CUSTOM
      */
-    private List<Integer> getCustomDashboardIds(Integer schemaVersionId, List<Integer> dashboardIds) throws ApiException {
+    private List<Integer> getCustomDashboardIds(List<Integer> schemaVersionIds, List<Integer> dashboardIds) throws ApiException {
         List<DashboardChartPojo> dashboardCharts = dashboardChartApi.getByDashboardIds(dashboardIds);
         Map<Integer, List<String>> dashboardChartAliasMap = dashboardCharts.stream().collect(Collectors.groupingBy(DashboardChartPojo::getDashboardId,
                 Collectors.mapping(DashboardChartPojo::getChartAlias, Collectors.toList())));
 
         List<ReportPojo> charts = reportApi.getByAliasAndSchema(dashboardCharts.stream().map(DashboardChartPojo::getChartAlias).collect(Collectors.toList()),
-                schemaVersionId, true);
+                schemaVersionIds, true);
         Map<String, ReportType> chartAliasReportTypeMap = charts.stream().collect(Collectors.toMap(ReportPojo::getAlias, ReportPojo::getType));
 
 
@@ -388,7 +389,7 @@ public class DashboardDto extends AbstractDto {
             boolean customChartExists = false;
             for(String chartAlias : dashboardChartAliasMap.getOrDefault(dashboardId, new ArrayList<>())){
                 if(!chartAliasReportTypeMap.containsKey(chartAlias))
-                    throw new ApiException(ApiStatus.BAD_DATA, "Chart alias not found: " + chartAlias + " for schema version: " + schemaVersionId + " isChart: true");
+                    throw new ApiException(ApiStatus.BAD_DATA, "Chart alias not found: " + chartAlias + " for schema version: " + schemaVersionIds + " isChart: true");
                 if(chartAliasReportTypeMap.get(chartAlias).equals(ReportType.CUSTOM)){
                     customChartExists = true;
                     break;

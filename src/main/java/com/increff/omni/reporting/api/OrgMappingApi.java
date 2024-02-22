@@ -4,13 +4,14 @@ import com.increff.omni.reporting.dao.OrgMappingDao;
 import com.increff.omni.reporting.pojo.OrgMappingPojo;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
+import lombok.extern.log4j.Log4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Objects;
 
+@Log4j
 @Service
 @Transactional(rollbackFor = ApiException.class)
 public class OrgMappingApi extends AbstractAuditApi {
@@ -43,21 +44,39 @@ public class OrgMappingApi extends AbstractAuditApi {
         return dao.selectAll();
     }
 
-    public OrgMappingPojo getCheckByOrgId(Integer orgId) throws ApiException {
-        OrgMappingPojo pojo = getByOrgId(orgId);
-        checkNotNull(pojo, "No schema mapped for org : " + orgId);
+    public List<OrgMappingPojo> getCheckByOrgId(Integer orgId) throws ApiException {
+        List<OrgMappingPojo> pojos = getByOrgId(orgId);
+        if(pojos.isEmpty()){
+            log.error("No mappings for org : " + orgId);
+            throw new ApiException(ApiStatus.BAD_DATA, "No mappings for org");
+        }
+        return pojos;
+    }
+
+    public OrgMappingPojo getCheckByOrgIdSchemaVersionId(Integer orgId, Integer schemaVersionId) throws ApiException {
+        OrgMappingPojo pojo = getByOrgIdSchemaVersionId(orgId, schemaVersionId);
+        if(pojo == null){
+            log.error("No mappings for org : " + orgId + " and schema version id : " + schemaVersionId);
+            throw new ApiException(ApiStatus.BAD_DATA, "No mappings for org and schema version id");
+        }
         return pojo;
     }
+
 
     public List<OrgMappingPojo> getBySchemaVersionId(Integer schemaVersionId)  {
         return dao.selectMultiple("schemaVersionId", schemaVersionId);
     }
 
-    private OrgMappingPojo getByOrgId(Integer orgId) {
-        return dao.select("orgId", orgId);
+    private List<OrgMappingPojo> getByOrgId(Integer orgId) {
+        return dao.selectMultiple("orgId", orgId);
+    }
+
+    private OrgMappingPojo getByOrgIdSchemaVersionId(Integer orgId, Integer schemaVersionId) {
+        return dao.selectByOrgIdSchemaVersionId(orgId, schemaVersionId);
     }
 
     public List<OrgMappingPojo> getCheckBySchemaVersionId(Integer schemaVersionId) throws ApiException {
+        // todo : multiple rows with same schema version id !
         List<OrgMappingPojo> pojos = dao.selectMultiple("schemaVersionId", schemaVersionId);
         if(pojos.isEmpty())
             throw new ApiException(ApiStatus.BAD_DATA, "No org mapped to schema version id : " + schemaVersionId);

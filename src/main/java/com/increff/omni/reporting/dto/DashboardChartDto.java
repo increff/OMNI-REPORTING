@@ -69,7 +69,7 @@ public class DashboardChartDto extends AbstractDto {
         Set<Integer> existingCommonControlIds = new HashSet<>();
 
         for(DashboardChartForm form : forms) {
-            ReportPojo report = reportApi.getCheckByAliasAndSchema(form.getChartAlias(), getSchemaVersionId(), true);
+            ReportPojo report = reportApi.getCheckByAliasAndSchema(form.getChartAlias(), getSchemaVersionIds(), true);
             List<InputControlData> inputControlDatas = inputControlDto.selectForReport(report.getId());
             chartAliasControlMap.put(report.getAlias(), inputControlDatas.stream().collect(Collectors.toMap(InputControlData::getId, x -> x)));
         }
