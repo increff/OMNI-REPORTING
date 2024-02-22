@@ -234,11 +234,11 @@ public class AdminController {
         return organizationDto.selectAllOrgSchema();
     }
 
-    @ApiOperation(value = "Get all org connection mapping")
-    @RequestMapping(value = "/orgs/connections/", method = RequestMethod.GET)
-    public List<OrgConnectionData> selectAllConnectionMapping() {
-        return organizationDto.selectAllOrgConnections();
-    }
+//    @ApiOperation(value = "Get all org connection mapping")
+//    @RequestMapping(value = "/orgs/connections/", method = RequestMethod.GET)
+//    public List<OrgConnectionData> selectAllConnectionMapping() {
+//        return organizationDto.selectAllOrgConnections();
+//    }
 
     @ApiOperation(value = "Add Directory")
     @RequestMapping(value = "/directories", method = RequestMethod.POST)
