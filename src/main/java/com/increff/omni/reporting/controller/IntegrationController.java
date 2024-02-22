@@ -44,17 +44,17 @@ public class IntegrationController {
         return organizationDto.add(form);
     }
 
-    @ApiOperation(value = "Map organization to a connection")
-    @RequestMapping(value = "/map-connection", method = RequestMethod.POST)
-    public OrgConnectionData addConnectionMapping(@RequestBody IntegrationOrgConnectionForm form) throws ApiException {
-        return organizationDto.mapToConnection(form);
-    }
-
-    @ApiOperation(value = "Map organization to a schema")
-    @RequestMapping(value = "/map-schema-version", method = RequestMethod.POST)
-    public OrgSchemaData addSchemaMapping(@RequestBody IntegrationOrgSchemaForm form) throws ApiException {
-        return organizationDto.mapToSchema(form);
-    }
+//    @ApiOperation(value = "Map organization to a connection")
+//    @RequestMapping(value = "/map-connection", method = RequestMethod.POST)
+//    public OrgConnectionData addConnectionMapping(@RequestBody IntegrationOrgConnectionForm form) throws ApiException {
+//        return organizationDto.mapToConnection(form);
+//    }
+//
+//    @ApiOperation(value = "Map organization to a schema")
+//    @RequestMapping(value = "/map-schema-version", method = RequestMethod.POST)
+//    public OrgSchemaData addSchemaMapping(@RequestBody IntegrationOrgSchemaForm form) throws ApiException {
+//        return organizationDto.mapToSchema(form);
+//    }
 
     @ApiOperation(value = "Get All Organizations")
     @RequestMapping(value = "/orgs", method = RequestMethod.GET)
