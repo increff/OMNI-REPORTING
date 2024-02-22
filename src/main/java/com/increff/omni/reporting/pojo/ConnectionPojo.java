@@ -1,5 +1,6 @@
 package com.increff.omni.reporting.pojo;
 
+import com.increff.omni.reporting.model.constants.DBType;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -23,4 +24,6 @@ public class ConnectionPojo extends AbstractVersionedPojo{
     private String username;
     @Column(nullable = false)
     private String password;
+    @Column(nullable = false)
+    private DBType dbType;
 }
