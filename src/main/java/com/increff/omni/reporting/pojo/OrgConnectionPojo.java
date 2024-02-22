@@ -19,4 +19,5 @@ public class OrgConnectionPojo extends AbstractVersionedPojo {
     private Integer orgId;
     @Column(nullable = false)
     private Integer connectionId;
+    //todo : add sv here
 }

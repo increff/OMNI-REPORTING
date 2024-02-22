@@ -9,4 +9,5 @@ import javax.validation.constraints.NotNull;
 @Getter
 @Setter
 public class OrgMappingsData extends OrgMappingsForm {
+    private Integer id;
 }

@@ -41,7 +41,7 @@ public class ReportDto extends AbstractDto {
     @Autowired
     private OrganizationApi organizationApi;
     @Autowired
-    private OrgSchemaApi orgSchemaApi;
+    private OrgMappingApi orgMappingApi;
     @Autowired
     private ReportValidationGroupApi reportValidationGroupApi;
     @Autowired
@@ -161,7 +161,7 @@ public class ReportDto extends AbstractDto {
     public List<ViewDashboardData> testQueryLive(ReportRequestForm form) throws IOException, ApiException {
         ReportPojo report = reportApi.getCheck(form.getReportId());
         Integer schemaVersionId = report.getSchemaVersionId();
-        Integer orgId = orgSchemaApi.getCheckBySchemaVersionId(schemaVersionId).get(0).getOrgId();
+        Integer orgId = orgMappingApi.getCheckBySchemaVersionId(schemaVersionId).get(0).getOrgId();
         log.debug("Testing query on orgId : " + orgId + " schemaVersionId : " + schemaVersionId + " reportName : " + report.getName() + " reportId : " + report.getId());
 
         List<Map<String, String>> data = getLiveDataForAnyOrganization(form, orgId);
@@ -183,7 +183,7 @@ public class ReportDto extends AbstractDto {
     public ReportData selectByAlias(Boolean isChart, String alias) throws ApiException {
         Integer orgId = getOrgId();
         organizationApi.getCheck(orgId);
-        OrgSchemaVersionPojo schemaVersionPojo = orgSchemaApi.getCheckByOrgId(orgId);
+        OrgMappingPojo schemaVersionPojo = orgMappingApi.getCheckByOrgId(orgId);
         ReportPojo reportPojo = reportApi.getByAliasAndSchema(alias, schemaVersionPojo.getSchemaVersionId(),
                 isChart);
         if(Objects.isNull(reportPojo))

@@ -41,7 +41,7 @@ public class ReportFlowApiTest extends AbstractTest {
     @Autowired
     private ApplicationProperties properties;
     @Autowired
-    private OrgSchemaApi orgSchemaApi;
+    private OrgMappingApi orgMappingApi;
     @Autowired
     private ReportApi reportApi;
     @Autowired
@@ -78,8 +78,8 @@ public class ReportFlowApiTest extends AbstractTest {
         schemaVersionApi.add(schemaVersionPojo);
         SchemaVersionPojo schemaVersionPojo1 = getSchemaPojo("9.0.2");
         schemaVersionApi.add(schemaVersionPojo1);
-        OrgSchemaVersionPojo pojo = getOrgSchemaPojo(100001, schemaVersionPojo1.getId());
-        orgSchemaApi.map(pojo);
+        OrgMappingPojo pojo = getOrgSchemaPojo(100001, schemaVersionPojo1.getId());
+        orgMappingApi.map(pojo);
         ReportPojo reportPojo = getReportPojo("Report 1", ReportType.STANDARD
                 , directoryPojo.getId(), schemaVersionPojo.getId());
         ReportPojo reportPojo1 = getReportPojo("Report 1", ReportType.STANDARD

@@ -44,7 +44,7 @@ public class ReportFlowApi extends AbstractFlowApi {
     @Autowired
     private DBConnectionApi dbConnectionApi;
     @Autowired
-    private OrgSchemaApi orgSchemaApi;
+    private OrgMappingApi orgMappingApi;
     @Autowired
     private DirectoryApi directoryApi;
     @Autowired
@@ -85,7 +85,7 @@ public class ReportFlowApi extends AbstractFlowApi {
     @Transactional(rollbackFor = ApiException.class)
     public ReportPojo editReport(ReportPojo pojo, Map<String, String> legends) throws ApiException {
         ReportPojo existing = api.getCheck(pojo.getId());
-        List<Integer> orgIds = orgSchemaApi.getBySchemaVersionId(pojo.getSchemaVersionId()).stream().map(OrgSchemaVersionPojo::getOrgId).collect(Collectors.toList());
+        List<Integer> orgIds = orgMappingApi.getBySchemaVersionId(pojo.getSchemaVersionId()).stream().map(OrgMappingPojo::getOrgId).collect(Collectors.toList());
         validateForEdit(pojo, reportScheduleApi.selectByOrgIdReportAlias(orgIds, pojo.getAlias()));
         if(existing.getChartType() != pojo.getChartType())
             throw new ApiException(ApiStatus.BAD_DATA, "Chart type can't be changed." +
@@ -158,11 +158,11 @@ public class ReportFlowApi extends AbstractFlowApi {
     @Transactional(readOnly = true)
     public List<ReportPojo> getAll(Integer orgId, Boolean isChart, VisualizationType visualization) throws ApiException {
 
-        OrgSchemaVersionPojo orgSchemaVersionPojo = orgSchemaApi.getCheckByOrgId(orgId);
+        OrgMappingPojo orgMappingPojo = orgMappingApi.getCheckByOrgId(orgId);
         List<ReportPojo> reportPojoList = new ArrayList<>();
         //All standard
         List<ReportPojo> standard =
-                api.getByTypeAndSchema(ReportType.STANDARD, orgSchemaVersionPojo.getSchemaVersionId(), isChart, visualization);
+                api.getByTypeAndSchema(ReportType.STANDARD, orgMappingPojo.getSchemaVersionId(), isChart, visualization);
 
         //All custom
         List<CustomReportAccessPojo> customAccess = customReportAccessApi.getByOrgId(orgId);
@@ -170,7 +170,7 @@ public class ReportFlowApi extends AbstractFlowApi {
                 .collect(Collectors.toList());
 
         List<ReportPojo> custom =
-                api.getByIdsAndSchema(customIds, orgSchemaVersionPojo.getSchemaVersionId(), isChart);
+                api.getByIdsAndSchema(customIds, orgMappingPojo.getSchemaVersionId(), isChart);
 
         if(!isCustomReportUser()) // Add standard reports only if user in not custom report user
             reportPojoList.addAll(standard);

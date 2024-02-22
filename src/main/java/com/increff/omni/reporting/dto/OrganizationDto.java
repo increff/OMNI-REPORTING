@@ -31,7 +31,7 @@ public class OrganizationDto extends AbstractDto {
     private SchemaVersionApi schemaVersionApi;
 
     @Autowired
-    private OrgSchemaApi orgSchemaApi;
+    private OrgMappingApi orgMappingApi;
 
     @Autowired
     private OrgConnectionApi orgConnectionApi;
@@ -70,22 +70,37 @@ public class OrganizationDto extends AbstractDto {
         //validation
         OrganizationPojo orgPojo = api.getCheck(id);
         SchemaVersionPojo schemaVersionPojo = schemaVersionApi.getCheck(schemaVersionId);
-        orgSchemaApi.saveAudit(id.toString(), AuditActions.ORGANIZATION_SCHEMA_VERSION_MAPPING.toString(),
+        orgMappingApi.saveAudit(id.toString(), AuditActions.ORGANIZATION_SCHEMA_VERSION_MAPPING.toString(),
                 "Map Org to Schema Version", "Mapping org : " + orgPojo.getName() + " to schema " +
                         "version : " + schemaVersionPojo.getName(),
                 getUserName());
-        OrgSchemaVersionPojo pojo = createPojo(orgPojo, schemaVersionPojo);
+        OrgMappingPojo pojo = createPojo(orgPojo, schemaVersionPojo);
         return CommonDtoHelper.getOrgSchemaData(pojo, schemaVersionPojo);
     }
 
     @Transactional(rollbackFor = ApiException.class)
-    public OrgMappingsData mapOrgDetails(OrgMappingsForm form) throws ApiException {
-        mapToConnection(form.getOrgId(), form.getConnectionId());
-        mapToSchema(form.getOrgId(), form.getSchemaVersionId());
-        return ConvertUtil.convert(form, OrgMappingsData.class);
+    public OrgMappingsData addOrgMapping(OrgMappingsForm form) throws ApiException {
+        checkValid(form);
+        OrgMappingPojo orgMappingPojo = ConvertUtil.convert(form, OrgMappingPojo.class);
+        orgMappingPojo = orgMappingApi.add(orgMappingPojo);
+        return ConvertUtil.convert(orgMappingPojo, OrgMappingsData.class);
+    }
+
+    @Transactional(rollbackFor = ApiException.class)
+    public OrgMappingsData editOrgMappings(Integer orgMappingId, OrgMappingsForm form) throws ApiException {
+        checkValid(form);
+        OrgMappingPojo orgMappingPojo = ConvertUtil.convert(form, OrgMappingPojo.class);
+        orgMappingPojo = orgMappingApi.update(orgMappingId, orgMappingPojo);
+        return ConvertUtil.convert(orgMappingPojo, OrgMappingsData.class);
+    }
+
+    public List<OrgMappingsData> selectOrgMappingDetails(){
+        List<OrgMappingPojo> pojos = orgMappingApi.selectAll();
+        return ConvertUtil.convert(pojos, OrgMappingsData.class);
     }
 
     public OrgSchemaData mapToSchema(IntegrationOrgSchemaForm form) throws ApiException {
+        // todo : change jenkins job apis
         OrganizationPojo organizationPojo = api.getByName(form.getOrgName());
         if(Objects.isNull(organizationPojo)) {
             throw new ApiException(ApiStatus.BAD_DATA,
@@ -96,17 +111,17 @@ public class OrganizationDto extends AbstractDto {
             throw new ApiException(ApiStatus.BAD_DATA,
                     "Schema is not available with name : " + form.getSchemaVersionName());
         }
-        orgSchemaApi.saveAudit(organizationPojo.getId().toString(),
+        orgMappingApi.saveAudit(organizationPojo.getId().toString(),
                 AuditActions.ORGANIZATION_SCHEMA_VERSION_MAPPING.toString(),
                 "Map Org to Schema Version", "Mapping org : " + organizationPojo.getName() + " to schema " +
                         "version : " + schemaVersionPojo.getName(),
                 getUserName());
-        OrgSchemaVersionPojo pojo = createPojo(organizationPojo, schemaVersionPojo);
+        OrgMappingPojo pojo = createPojo(organizationPojo, schemaVersionPojo);
         return CommonDtoHelper.getOrgSchemaData(pojo, schemaVersionPojo);
     }
 
     public List<OrgSchemaData> selectAllOrgSchema(){
-        List<OrgSchemaVersionPojo> pojos = orgSchemaApi.selectAll();
+        List<OrgMappingPojo> pojos = orgMappingApi.selectAll();
         List<SchemaVersionPojo> allPojos = schemaVersionApi.selectAll();
         return CommonDtoHelper.getOrgSchemaDataList(pojos, allPojos);
     }
@@ -149,13 +164,14 @@ public class OrganizationDto extends AbstractDto {
         return CommonDtoHelper.getOrgConnectionData(pojo, connectionPojo);
     }
 
-    private OrgSchemaVersionPojo createPojo(OrganizationPojo orgPojo, SchemaVersionPojo schemaVersionPojo) {
-        OrgSchemaVersionPojo pojo = new OrgSchemaVersionPojo();
+    private OrgMappingPojo createPojo(OrganizationPojo orgPojo, SchemaVersionPojo schemaVersionPojo) {
+        OrgMappingPojo pojo = new OrgMappingPojo();
         pojo.setOrgId(orgPojo.getId());
         pojo.setSchemaVersionId(schemaVersionPojo.getId());
-        return orgSchemaApi.map(pojo);
+        return orgMappingApi.map(pojo);
     }
 
+    @Transactional
     private OrgConnectionPojo createPojo(OrganizationPojo orgPojo, ConnectionPojo connectionPojo) {
         OrgConnectionPojo pojo = new OrgConnectionPojo();
         pojo.setOrgId(orgPojo.getId());

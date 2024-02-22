@@ -35,13 +35,13 @@ public class AbstractFlowApi extends AbstractAuditApi {
     @Autowired
     private ReportValidationGroupApi reportValidationGroupApi;
     @Autowired
-    private OrgSchemaApi orgSchemaApi;
+    private OrgMappingApi orgMappingApi;
 
     protected static int getOrgId() {
         return getPrincipal().getDomainId();
     }
     protected Integer getSchemaVersionId() throws ApiException{
-        return orgSchemaApi.getCheckByOrgId(getOrgId()).getSchemaVersionId();
+        return orgMappingApi.getCheckByOrgId(getOrgId()).getSchemaVersionId();
     }
 
     protected void validate(ReportPojo reportPojo, List<ReportInputParamsPojo> reportInputParamsPojoList)

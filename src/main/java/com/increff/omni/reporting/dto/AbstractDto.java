@@ -40,7 +40,7 @@ public class AbstractDto extends AbstractDtoApi {
     @Autowired
     private OrgConnectionApi orgConnectionApi;
     @Autowired
-    private OrgSchemaApi orgSchemaApi;
+    private OrgMappingApi orgMappingApi;
     @Autowired
     private ConnectionApi connectionApi;
     @Autowired
@@ -67,7 +67,7 @@ public class AbstractDto extends AbstractDtoApi {
     }
 
     protected Integer getSchemaVersionId() throws ApiException{
-        return orgSchemaApi.getCheckByOrgId(getOrgId()).getSchemaVersionId();
+        return orgMappingApi.getCheckByOrgId(getOrgId()).getSchemaVersionId();
     }
 
     protected void validateInputParamValues(Map<String, List<String>> inputParams,

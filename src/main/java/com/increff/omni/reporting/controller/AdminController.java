@@ -212,8 +212,21 @@ public class AdminController {
     @ApiOperation(value = "Map organization to a schema and connection")
     @RequestMapping(value = "/orgs/mappings", method = RequestMethod.POST)
     public OrgMappingsData addOrgMappings(@RequestBody OrgMappingsForm form) throws ApiException {
-        return organizationDto.mapOrgDetails(form);
+        return organizationDto.addOrgMapping(form);
     }
+
+    @ApiOperation(value = "Map organization to a schema and connection")
+    @RequestMapping(value = "/orgs/mappings/{id}", method = RequestMethod.PUT)
+    public OrgMappingsData editOrgMappings(@PathVariable Integer id, @RequestBody OrgMappingsForm form) throws ApiException {
+        return organizationDto.editOrgMappings(id, form);
+    }
+
+    @ApiOperation(value = "Get all org mappings")
+    @RequestMapping(value = "/orgs/mappings", method = RequestMethod.GET)
+    public List<OrgMappingsData> selectOrgMappingDetails() {
+        return organizationDto.selectOrgMappingDetails();
+    }
+
 
     @ApiOperation(value = "Get all org schema mapping")
     @RequestMapping(value = "/orgs/schema/", method = RequestMethod.GET)

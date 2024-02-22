@@ -39,7 +39,7 @@ public class ReportRequestFlowApiTest extends AbstractTest {
     @Autowired
     private SchemaVersionApi schemaVersionApi;
     @Autowired
-    private OrgSchemaApi orgSchemaApi;
+    private OrgMappingApi orgMappingApi;
     @Autowired
     private DirectoryDao directoryDao;
     @Autowired
@@ -62,8 +62,8 @@ public class ReportRequestFlowApiTest extends AbstractTest {
         orgConnectionApi.map(orgConnectionPojo);
         SchemaVersionPojo schemaPojo = getSchemaPojo("9.0.1");
         schemaVersionApi.add(schemaPojo);
-        OrgSchemaVersionPojo orgSchemaVersionPojo = getOrgSchemaPojo(orgPojo.getId(), schemaPojo.getId());
-        orgSchemaApi.map(orgSchemaVersionPojo);
+        OrgMappingPojo orgMappingPojo = getOrgSchemaPojo(orgPojo.getId(), schemaPojo.getId());
+        orgMappingApi.map(orgMappingPojo);
         DirectoryPojo rootPojo = directoryDao.select("directoryName", properties.getRootDirectory());
         DirectoryPojo pojo = getDirectoryPojo("Standard Reports", rootPojo.getId());
         directoryApi.add(pojo);

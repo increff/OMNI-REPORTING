@@ -207,7 +207,7 @@ public class CommonDtoHelper {
         return pojo;
     }
 
-    public static List<OrgSchemaData> getOrgSchemaDataList(List<OrgSchemaVersionPojo> pojos,
+    public static List<OrgSchemaData> getOrgSchemaDataList(List<OrgMappingPojo> pojos,
                                                            List<SchemaVersionPojo> allPojos) {
         Map<Integer, SchemaVersionPojo> idToPojoMap = new HashMap<>();
         allPojos.forEach(a -> idToPojoMap.put(a.getId(), a));
@@ -227,7 +227,7 @@ public class CommonDtoHelper {
         }).collect(Collectors.toList());
     }
 
-    public static OrgSchemaData getOrgSchemaData(OrgSchemaVersionPojo pojo, SchemaVersionPojo schemaVersionPojo) {
+    public static OrgSchemaData getOrgSchemaData(OrgMappingPojo pojo, SchemaVersionPojo schemaVersionPojo) {
         OrgSchemaData data = new OrgSchemaData();
         data.setOrgId(pojo.getOrgId());
         data.setSchemaVersionId(pojo.getSchemaVersionId());

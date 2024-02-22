@@ -51,7 +51,7 @@ public class DashboardDto extends AbstractDto {
     @Autowired
     private OrganizationApi organizationApi;
     @Autowired
-    private OrgSchemaApi orgSchemaApi;
+    private OrgMappingApi orgMappingApi;
     @Autowired
     private DefaultValueApi defaultValueApi;
     @Autowired
@@ -127,7 +127,7 @@ public class DashboardDto extends AbstractDto {
         List<DashboardListData> data = ConvertUtil.convert(api.getByOrgId(orgId), DashboardListData.class);
 
         if (isCustomReportUser()) { // Filter out standard dashboards for custom users
-            List<Integer> customDashboardIds = getCustomDashboardIds(orgSchemaApi.getCheckByOrgId(orgId).getSchemaVersionId(),
+            List<Integer> customDashboardIds = getCustomDashboardIds(orgMappingApi.getCheckByOrgId(orgId).getSchemaVersionId(),
                     data.stream().map(DashboardListData::getId).collect(Collectors.toList()));
             data = data.stream().filter(dashboard -> customDashboardIds.contains(dashboard.getId())).collect(Collectors.toList());
         }
@@ -156,7 +156,7 @@ public class DashboardDto extends AbstractDto {
     }
 
     private void setFilterDefaults(DashboardPojo dashboard, List<DashboardChartPojo> charts, Map<String, List<InputControlData>> filterDetails) throws ApiException {
-        Integer orgSchemaVersionId = orgSchemaApi.getCheckByOrgId(dashboard.getOrgId()).getSchemaVersionId();
+        Integer orgSchemaVersionId = orgMappingApi.getCheckByOrgId(dashboard.getOrgId()).getSchemaVersionId();
         Map<String, Map<Integer, String>> chartDefaultValueMap = defaultValueApi.getByDashboardId(dashboard.getId())
                 .stream().collect(Collectors.groupingBy(DefaultValuePojo::getChartAlias,
                         Collectors.toMap(DefaultValuePojo::getControlId, DefaultValuePojo::getDefaultValue)));

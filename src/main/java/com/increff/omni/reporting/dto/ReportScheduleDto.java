@@ -41,7 +41,7 @@ public class ReportScheduleDto extends AbstractDto {
     @Autowired
     private ReportRequestApi reportRequestApi;
     @Autowired
-    private OrgSchemaApi orgSchemaApi;
+    private OrgMappingApi orgMappingApi;
     @Autowired
     private ReportScheduleFlowApi flowApi;
     @Autowired
@@ -171,9 +171,9 @@ public class ReportScheduleDto extends AbstractDto {
             throws ApiException {
         List<ReportScheduleData> dataList = new ArrayList<>();
         for (ReportSchedulePojo pojo : reportSchedulePojoList) {
-            OrgSchemaVersionPojo orgSchemaVersionPojo = orgSchemaApi.getCheckByOrgId(pojo.getOrgId());
+            OrgMappingPojo orgMappingPojo = orgMappingApi.getCheckByOrgId(pojo.getOrgId());
             ReportPojo reportPojo = reportApi.getCheckByAliasAndSchema(pojo.getReportAlias(),
-                    orgSchemaVersionPojo.getSchemaVersionId(), false);
+                    orgMappingPojo.getSchemaVersionId(), false);
             List<ReportControlsPojo> reportControlsPojos = Objects.isNull(reportPojo) ?
                     new ArrayList<>() : reportControlsApi.getByReportId(reportPojo.getId());
             List<Integer> controlIds = reportControlsPojos.stream()
@@ -208,9 +208,9 @@ public class ReportScheduleDto extends AbstractDto {
     }
 
     private ReportPojo checkValidReport(String reportAlias) throws ApiException {
-        OrgSchemaVersionPojo orgSchemaVersionPojo = orgSchemaApi.getCheckByOrgId(getOrgId());
+        OrgMappingPojo orgMappingPojo = orgMappingApi.getCheckByOrgId(getOrgId());
         ReportPojo reportPojo =
-                reportApi.getByAliasAndSchema(reportAlias, orgSchemaVersionPojo.getSchemaVersionId(), false);
+                reportApi.getByAliasAndSchema(reportAlias, orgMappingPojo.getSchemaVersionId(), false);
         if (Objects.isNull(reportPojo) || !reportPojo.getCanSchedule())
             throw new ApiException(ApiStatus.BAD_DATA, "Report : " + reportAlias + " is not allowed to " +
                     "schedule");
