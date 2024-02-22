@@ -126,11 +126,11 @@ public class OrganizationDto extends AbstractDto {
         return CommonDtoHelper.getOrgSchemaDataList(pojos, allPojos);
     }
 
-    public List<OrgConnectionData> selectAllOrgConnections(){
-        List<OrgConnectionPojo> pojos = orgConnectionApi.selectAll();
-        List<ConnectionPojo> allPojos = connectionApi.selectAll();
-        return CommonDtoHelper.getOrgConnectionDataList(pojos, allPojos);
-    }
+//    public List<OrgConnectionData> selectAllOrgConnections(){
+//        List<OrgConnectionPojo> pojos = orgConnectionApi.selectAll();
+//        List<ConnectionPojo> allPojos = connectionApi.selectAll();
+//        return CommonDtoHelper.getOrgConnectionDataList(pojos, allPojos);
+//    }
 
     // todo : fix map connections to add/edit connections
 //    public OrgConnectionData mapToConnection(Integer id, Integer connectionId) throws ApiException {
