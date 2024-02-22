@@ -209,16 +209,10 @@ public class AdminController {
         return organizationDto.update(form);
     }
 
-    @ApiOperation(value = "Map organization to a schema")
-    @RequestMapping(value = "/orgs/{orgId}/schema/{schemaVersionId}", method = RequestMethod.POST)
-    public OrgSchemaData addSchemaMapping(@PathVariable Integer orgId, @PathVariable Integer schemaVersionId) throws ApiException {
-        return organizationDto.mapToSchema(orgId, schemaVersionId);
-    }
-
-    @ApiOperation(value = "Map organization to a connection")
-    @RequestMapping(value = "/orgs/{orgId}/connections/{connectionId}", method = RequestMethod.POST)
-    public OrgConnectionData addConnectionMapping(@PathVariable Integer orgId, @PathVariable Integer connectionId) throws ApiException {
-        return organizationDto.mapToConnection(orgId, connectionId);
+    @ApiOperation(value = "Map organization to a schema and connection")
+    @RequestMapping(value = "/orgs/mappings", method = RequestMethod.POST)
+    public OrgMappingsData addOrgMappings(@RequestBody OrgMappingsForm form) throws ApiException {
+        return organizationDto.mapOrgDetails(form);
     }
 
     @ApiOperation(value = "Get all org schema mapping")
