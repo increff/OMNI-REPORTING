@@ -66,17 +66,17 @@ public class OrganizationDto extends AbstractDto {
 
 
 
-    public OrgSchemaData mapToSchema(Integer id, Integer schemaVersionId) throws ApiException {
-        //validation
-        OrganizationPojo orgPojo = api.getCheck(id);
-        SchemaVersionPojo schemaVersionPojo = schemaVersionApi.getCheck(schemaVersionId);
-        orgMappingApi.saveAudit(id.toString(), AuditActions.ORGANIZATION_SCHEMA_VERSION_MAPPING.toString(),
-                "Map Org to Schema Version", "Mapping org : " + orgPojo.getName() + " to schema " +
-                        "version : " + schemaVersionPojo.getName(),
-                getUserName());
-        OrgMappingPojo pojo = createPojo(orgPojo, schemaVersionPojo);
-        return CommonDtoHelper.getOrgSchemaData(pojo, schemaVersionPojo);
-    }
+//    public OrgSchemaData mapToSchema(Integer id, Integer schemaVersionId) throws ApiException {
+//        //validation
+//        OrganizationPojo orgPojo = api.getCheck(id);
+//        SchemaVersionPojo schemaVersionPojo = schemaVersionApi.getCheck(schemaVersionId);
+//        orgMappingApi.saveAudit(id.toString(), AuditActions.ORGANIZATION_SCHEMA_VERSION_MAPPING.toString(),
+//                "Map Org to Schema Version", "Mapping org : " + orgPojo.getName() + " to schema " +
+//                        "version : " + schemaVersionPojo.getName(),
+//                getUserName());
+//        OrgMappingPojo pojo = createPojo(orgPojo, schemaVersionPojo);
+//        return CommonDtoHelper.getOrgSchemaData(pojo, schemaVersionPojo);
+//    }
 
     @Transactional(rollbackFor = ApiException.class)
     public OrgMappingsData addOrgMapping(OrgMappingsForm form) throws ApiException {
@@ -99,26 +99,26 @@ public class OrganizationDto extends AbstractDto {
         return ConvertUtil.convert(pojos, OrgMappingsData.class);
     }
 
-    public OrgSchemaData mapToSchema(IntegrationOrgSchemaForm form) throws ApiException {
-        // todo : change jenkins job apis
-        OrganizationPojo organizationPojo = api.getByName(form.getOrgName());
-        if(Objects.isNull(organizationPojo)) {
-            throw new ApiException(ApiStatus.BAD_DATA,
-                    "Organization is not available with name : " + form.getOrgName());
-        }
-        SchemaVersionPojo schemaVersionPojo = schemaVersionApi.getByName(form.getSchemaVersionName());
-        if(Objects.isNull(schemaVersionPojo)) {
-            throw new ApiException(ApiStatus.BAD_DATA,
-                    "Schema is not available with name : " + form.getSchemaVersionName());
-        }
-        orgMappingApi.saveAudit(organizationPojo.getId().toString(),
-                AuditActions.ORGANIZATION_SCHEMA_VERSION_MAPPING.toString(),
-                "Map Org to Schema Version", "Mapping org : " + organizationPojo.getName() + " to schema " +
-                        "version : " + schemaVersionPojo.getName(),
-                getUserName());
-        OrgMappingPojo pojo = createPojo(organizationPojo, schemaVersionPojo);
-        return CommonDtoHelper.getOrgSchemaData(pojo, schemaVersionPojo);
-    }
+//    public OrgSchemaData mapToSchema(IntegrationOrgSchemaForm form) throws ApiException {
+//        // todo : change jenkins job apis
+//        OrganizationPojo organizationPojo = api.getByName(form.getOrgName());
+//        if(Objects.isNull(organizationPojo)) {
+//            throw new ApiException(ApiStatus.BAD_DATA,
+//                    "Organization is not available with name : " + form.getOrgName());
+//        }
+//        SchemaVersionPojo schemaVersionPojo = schemaVersionApi.getByName(form.getSchemaVersionName());
+//        if(Objects.isNull(schemaVersionPojo)) {
+//            throw new ApiException(ApiStatus.BAD_DATA,
+//                    "Schema is not available with name : " + form.getSchemaVersionName());
+//        }
+//        orgMappingApi.saveAudit(organizationPojo.getId().toString(),
+//                AuditActions.ORGANIZATION_SCHEMA_VERSION_MAPPING.toString(),
+//                "Map Org to Schema Version", "Mapping org : " + organizationPojo.getName() + " to schema " +
+//                        "version : " + schemaVersionPojo.getName(),
+//                getUserName());
+//        OrgMappingPojo pojo = createPojo(organizationPojo, schemaVersionPojo);
+//        return CommonDtoHelper.getOrgSchemaData(pojo, schemaVersionPojo);
+//    }
 
     public List<OrgSchemaData> selectAllOrgSchema(){
         List<OrgMappingPojo> pojos = orgMappingApi.selectAll();
@@ -132,51 +132,37 @@ public class OrganizationDto extends AbstractDto {
         return CommonDtoHelper.getOrgConnectionDataList(pojos, allPojos);
     }
 
-    public OrgConnectionData mapToConnection(Integer id, Integer connectionId) throws ApiException {
-        //validation
-        OrganizationPojo orgPojo = api.getCheck(id);
-        ConnectionPojo connectionPojo = connectionApi.getCheck(connectionId);
-        orgConnectionApi.saveAudit(id.toString(), AuditActions.ORGANIZATION_CONNECTION_MAPPING.toString(),
-                "Map Org to Connection", "Mapping org : " + orgPojo.getName() +
-                        " to connection : " + connectionPojo.getName(),
-                getUserName());
-        OrgConnectionPojo pojo = createPojo(orgPojo, connectionPojo);
-        return CommonDtoHelper.getOrgConnectionData(pojo, connectionPojo);
-    }
-
-    public OrgConnectionData mapToConnection(IntegrationOrgConnectionForm form) throws ApiException {
-        OrganizationPojo organizationPojo = api.getByName(form.getOrgName());
-        if(Objects.isNull(organizationPojo)) {
-            throw new ApiException(ApiStatus.BAD_DATA,
-                    "Organization is not available with name : " + form.getOrgName());
-        }
-        ConnectionPojo connectionPojo = connectionApi.getByName(form.getConnectionName());
-        if(Objects.isNull(connectionPojo)) {
-            throw new ApiException(ApiStatus.BAD_DATA,
-                    "Connection is not available with name : " + form.getConnectionName());
-        }
-        orgConnectionApi.saveAudit(organizationPojo.getId().toString(),
-                AuditActions.ORGANIZATION_CONNECTION_MAPPING.toString(),
-                "Map Org to Connection", "Mapping org : " + organizationPojo.getName() +
-                        " to connection : " + connectionPojo.getName(),
-                getUserName());
-        OrgConnectionPojo pojo = createPojo(organizationPojo, connectionPojo);
-        return CommonDtoHelper.getOrgConnectionData(pojo, connectionPojo);
-    }
-
-    private OrgMappingPojo createPojo(OrganizationPojo orgPojo, SchemaVersionPojo schemaVersionPojo) {
-        OrgMappingPojo pojo = new OrgMappingPojo();
-        pojo.setOrgId(orgPojo.getId());
-        pojo.setSchemaVersionId(schemaVersionPojo.getId());
-        return orgMappingApi.map(pojo);
-    }
-
-    @Transactional
-    private OrgConnectionPojo createPojo(OrganizationPojo orgPojo, ConnectionPojo connectionPojo) {
-        OrgConnectionPojo pojo = new OrgConnectionPojo();
-        pojo.setOrgId(orgPojo.getId());
-        pojo.setConnectionId(connectionPojo.getId());
-        return orgConnectionApi.map(pojo);
-    }
+    // todo : fix map connections to add/edit connections
+//    public OrgConnectionData mapToConnection(Integer id, Integer connectionId) throws ApiException {
+//        //validation
+//        OrganizationPojo orgPojo = api.getCheck(id);
+//        ConnectionPojo connectionPojo = connectionApi.getCheck(connectionId);
+//        orgConnectionApi.saveAudit(id.toString(), AuditActions.ORGANIZATION_CONNECTION_MAPPING.toString(),
+//                "Map Org to Connection", "Mapping org : " + orgPojo.getName() +
+//                        " to connection : " + connectionPojo.getName(),
+//                getUserName());
+//        OrgConnectionPojo pojo = createPojo(orgPojo, connectionPojo);
+//        return CommonDtoHelper.getOrgConnectionData(pojo, connectionPojo);
+//    }
+//
+//    public OrgConnectionData mapToConnection(IntegrationOrgConnectionForm form) throws ApiException {
+//        OrganizationPojo organizationPojo = api.getByName(form.getOrgName());
+//        if(Objects.isNull(organizationPojo)) {
+//            throw new ApiException(ApiStatus.BAD_DATA,
+//                    "Organization is not available with name : " + form.getOrgName());
+//        }
+//        ConnectionPojo connectionPojo = connectionApi.getByName(form.getConnectionName());
+//        if(Objects.isNull(connectionPojo)) {
+//            throw new ApiException(ApiStatus.BAD_DATA,
+//                    "Connection is not available with name : " + form.getConnectionName());
+//        }
+//        orgConnectionApi.saveAudit(organizationPojo.getId().toString(),
+//                AuditActions.ORGANIZATION_CONNECTION_MAPPING.toString(),
+//                "Map Org to Connection", "Mapping org : " + organizationPojo.getName() +
+//                        " to connection : " + connectionPojo.getName(),
+//                getUserName());
+//        OrgConnectionPojo pojo = createPojo(organizationPojo, connectionPojo);
+//        return CommonDtoHelper.getOrgConnectionData(pojo, connectionPojo);
+//    }
 
 }
