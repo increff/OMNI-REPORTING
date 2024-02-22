@@ -1,5 +1,6 @@
 package com.increff.omni.reporting.pojo;
 
+import com.increff.omni.reporting.model.constants.AppName;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -17,5 +18,7 @@ public class SchemaVersionPojo extends AbstractVersionedPojo {
     private Integer id;
     @Column(nullable = false, unique = true)
     private String name;
+    @Column(nullable = false)
+    private AppName appName;
 
 }
