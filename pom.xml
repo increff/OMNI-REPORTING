@@ -45,6 +45,13 @@
 
     <dependencies>
 
+        <!-- https://mvnrepository.com/artifact/org.mongodb/mongodb-driver-sync -->
+        <dependency>
+            <groupId>org.mongodb</groupId>
+            <artifactId>mongodb-driver-sync</artifactId>
+            <version>5.0.0-beta0</version>
+        </dependency>
+
         <dependency>
             <groupId>com.increff.commons</groupId>
             <artifactId>increff-commons-fileclient</artifactId>
