@@ -31,6 +31,8 @@ import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.client.RestTemplate;
 
@@ -45,15 +47,16 @@ import java.util.concurrent.Executors;
 
 
 @Configuration
+@EnableScheduling
+@EnableAsync
 public class BeanConfig {
 
     @Autowired
     private ApplicationProperties applicationProperties;
 
     @Bean
-    public AuditApi auditApi() {
-        AuditApi auditApi = new AuditApi();
-        return auditApi;
+    public FileDownloadUtil getFileDownloadUtil() throws IOException {
+        return new FileDownloadUtil(applicationProperties.getGcpBucketName(), applicationProperties.getGcpFilePath());
     }
 
 
@@ -64,11 +67,6 @@ public class BeanConfig {
                 applicationProperties.getQueryExecutorAuthUsername(),
                 applicationProperties.getQueryExecutorAuthPassword(),
                 new RestTemplate(getRequestFactory(applicationProperties)));
-    }
-
-    @Bean
-    public FileDownloadUtil getFileDownloadUtil() throws IOException {
-        return new FileDownloadUtil(applicationProperties.getGcpBucketName(), applicationProperties.getGcpFilePath());
     }
 
     @Bean
@@ -119,12 +117,12 @@ public class BeanConfig {
                 .modules(javaTimeModule).build();
     }
 
-    @Bean
-    public MappingJackson2HttpMessageConverter customJackson2HttpMessageConverter() {
-        MappingJackson2HttpMessageConverter jsonConverter = new MappingJackson2HttpMessageConverter();
-        jsonConverter.setObjectMapper(getMapper());
-        return jsonConverter;
-    }
+//    @Bean
+//    public MappingJackson2HttpMessageConverter customJackson2HttpMessageConverter() {
+//        MappingJackson2HttpMessageConverter jsonConverter = new MappingJackson2HttpMessageConverter();
+//        jsonConverter.setObjectMapper(getMapper());
+//        return jsonConverter;
+//    }
 
     private ClientHttpRequestFactory getRequestFactory(ApplicationProperties applicationProperties) {
 

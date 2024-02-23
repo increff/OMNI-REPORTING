@@ -21,7 +21,7 @@ public class InputControlQueryPojo extends AbstractVersionedPojo{
     private Integer controlId;
 
     @Lob
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "LONGTEXT")
     private String query;
 
 }

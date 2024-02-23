@@ -1,9 +1,6 @@
 package com.increff.omni.reporting.flow;
 
-import com.increff.omni.reporting.api.AbstractAuditApi;
-import com.increff.omni.reporting.api.InputControlApi;
-import com.increff.omni.reporting.api.ReportControlsApi;
-import com.increff.omni.reporting.api.ReportValidationGroupApi;
+import com.increff.omni.reporting.api.*;
 import com.increff.omni.reporting.model.constants.ReportRequestType;
 import com.increff.omni.reporting.model.constants.ValidationType;
 import com.increff.omni.reporting.pojo.*;
@@ -20,6 +17,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static com.increff.account.client.SecurityUtil.getPrincipal;
+
 @Service
 public class AbstractFlowApi extends AbstractAuditApi {
 
@@ -35,6 +34,15 @@ public class AbstractFlowApi extends AbstractAuditApi {
     private InputControlApi controlApi;
     @Autowired
     private ReportValidationGroupApi reportValidationGroupApi;
+    @Autowired
+    private OrgSchemaApi orgSchemaApi;
+
+    protected static int getOrgId() {
+        return getPrincipal().getDomainId();
+    }
+    protected Integer getSchemaVersionId() throws ApiException{
+        return orgSchemaApi.getCheckByOrgId(getOrgId()).getSchemaVersionId();
+    }
 
     protected void validate(ReportPojo reportPojo, List<ReportInputParamsPojo> reportInputParamsPojoList)
             throws ApiException {

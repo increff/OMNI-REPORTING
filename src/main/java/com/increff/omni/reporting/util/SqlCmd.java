@@ -1,13 +1,13 @@
 package com.increff.omni.reporting.util;
 
+import com.increff.commons.springboot.common.JsonUtil;
 import com.increff.omni.reporting.dto.QueryExecutionDto;
-import com.increff.omni.reporting.model.form.SqlParams;
+import com.increff.commons.springboot.common.ApiException;
+import com.increff.commons.springboot.common.ApiStatus;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 @Log4j2
 public class SqlCmd {
@@ -30,7 +30,7 @@ public class SqlCmd {
         for (Map.Entry<String, String> e : functionValueMap.entrySet()) {
             query = query.replace(e.getKey(), e.getValue());
         }
-//        log.debug("Query formed : " + query);
+        log.debug("Query formed : " + query);
         return query;
     }
 
@@ -62,6 +62,19 @@ public class SqlCmd {
                 break;
         }
         return finalString;
+    }
+
+    public static Double getValueSum(List<Map<String, String>> result, String valueColumn) throws ApiException {
+        double sum = 0;
+        for (Map<String, String> map : result) {
+            try {
+                sum += Double.parseDouble(map.get(valueColumn));
+            } catch (NumberFormatException e) {
+                throw new ApiException(ApiStatus.BAD_DATA, "Failed to parse to Double. Value: " + map.get(valueColumn) + " Row: " + JsonUtil.serialize(map));
+            }
+        }
+        log.debug("getValueSum sum: " + sum);
+        return sum;
     }
 
 }

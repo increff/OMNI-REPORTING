@@ -168,7 +168,8 @@ public class CommonDtoHelper {
         return orgToPojo;
     }
 
-    public static void sortBasedOnReportControlMappedTime(List<InputControlData> inputControlDataList,
+    public static void
+    sortBasedOnReportControlMappedTime(List<InputControlData> inputControlDataList,
                                                           List<ReportControlsPojo> reportControlsPojos) {
         inputControlDataList.sort((o1, o2) -> {
             ReportControlsPojo p1 = reportControlsPojos.stream().filter(r -> r.getControlId().equals(o1.getId()))
@@ -361,8 +362,10 @@ public class CommonDtoHelper {
         reportPojo.setName(oldReport.getName());
         reportPojo.setType(oldReport.getType());
         reportPojo.setCanSchedule(oldReport.getCanSchedule());
-        reportPojo.setIsDashboard(oldReport.getIsDashboard());
+        reportPojo.setIsChart(oldReport.getIsChart());
         reportPojo.setAlias(oldReport.getAlias());
+        reportPojo.setChartType(oldReport.getChartType());
+        reportPojo.setMinFrequencyAllowedSeconds(oldReport.getMinFrequencyAllowedSeconds());
         return reportPojo;
     }
 
@@ -482,9 +485,10 @@ public class CommonDtoHelper {
             throw new ApiException(ApiStatus.BAD_DATA,"Please change existing schedules cron frequency before updating report min frequency.\n" + error.toString());
     }
 
-    public static long getCronFrequencyInSeconds(String cronExpression) throws ApiException {
+    public static long getCronFrequencyInSeconds(String cronExpression) {
         CronExpression generator = CronExpression.parse(cronExpression);
         long freqIntervalSecondsMin = 1000000000;
+
         Instant instant = Objects.requireNonNull(generator.next(ZonedDateTime.now())).toInstant();
         ZonedDateTime nextFireTime = ZonedDateTime.ofInstant(instant, ZoneId.of("UTC"));
 

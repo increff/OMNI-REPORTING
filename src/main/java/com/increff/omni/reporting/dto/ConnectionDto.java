@@ -37,8 +37,6 @@ public class ConnectionDto extends AbstractDto {
     @Autowired
     private ConnectionApi api;
     @Autowired
-    private FolderApi folderApi;
-    @Autowired
     private ApplicationProperties properties;
     @Autowired
     private DBConnectionApi dbConnectionApi;

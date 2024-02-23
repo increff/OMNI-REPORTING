@@ -7,6 +7,7 @@ import com.increff.omni.reporting.flow.ReportRequestFlowApi;
 import com.increff.omni.reporting.model.constants.ReportRequestType;
 import com.increff.omni.reporting.model.constants.ScheduleStatus;
 import com.increff.omni.reporting.pojo.*;
+import com.increff.omni.reporting.security.RateLimitingFilter;
 import com.increff.commons.springboot.common.ApiException;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,6 +53,9 @@ public class ScheduledJobs {
     @Autowired
     @Qualifier(value = "scheduleReportRequestExecutor")
     private Executor scheduleReportExecutor;
+
+    @Autowired
+    private RateLimitingFilter rateLimitingFilter;
 
     @Scheduled(fixedDelay = 1000)
     public void runUserReports() {
@@ -199,5 +203,10 @@ public class ScheduledJobs {
                 return 0;
             return o1.getCreatedAt().isAfter(o2.getCreatedAt()) ? 1 : -1;
         });
+    }
+
+    @Scheduled(cron = "0 0 6 * * *")
+    public void clearUserRateLimiterMap() {
+        rateLimitingFilter.clearUserRateLimiterMap();
     }
 }

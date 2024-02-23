@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -20,12 +21,13 @@ public class StandardSecurityConfig {
 
     @Autowired
     private AuthClient authClient;
+    @Autowired
+    private RateLimitingFilter rateLimitingFilter;
 
-    private static final String APP_ADMIN = "app.admin";
-    private static final String REPORT_ADMIN = "report.admin";
-    private static final String REPORT_STANDARD = "report.standard";
-
-    public static final String[] APP_ADMIN_REPORT_ADMIN_REPORT_STANDARD = {APP_ADMIN, REPORT_ADMIN, REPORT_STANDARD};
+    public static final String APP_ADMIN = "app.admin";
+    public static final String REPORT_ADMIN = "report.admin";
+    public static final String REPORT_STANDARD = "report.standard";
+    public static final String REPORT_CUSTOM = "report.custom";
 
     @Bean
     public SecurityFilterChain standardSecurityFilterChain(HttpSecurity http) throws Exception {
@@ -35,11 +37,16 @@ public class StandardSecurityConfig {
                 .authorizeHttpRequests(auth -> {
                     auth
                             .requestMatchers("/standard/schedules/**").hasAnyAuthority(APP_ADMIN)//
-                            .requestMatchers("/standard/**").hasAnyAuthority(REPORT_STANDARD, APP_ADMIN);
+                            .requestMatchers("/standard/pipelines/**").hasAnyAuthority(APP_ADMIN)//
+                            .requestMatchers(HttpMethod.POST, "/standard/dashboards/{dashboardId}/view").hasAnyAuthority(APP_ADMIN, REPORT_ADMIN, REPORT_STANDARD, REPORT_CUSTOM)
+                            .requestMatchers(HttpMethod.GET, "/standard/dashboards/**").hasAnyAuthority(APP_ADMIN, REPORT_ADMIN, REPORT_STANDARD, REPORT_CUSTOM)//
+                            .requestMatchers("/standard/dashboards/**").hasAnyAuthority(APP_ADMIN)//
+                            .requestMatchers("/standard/**").hasAnyAuthority(APP_ADMIN, REPORT_ADMIN, REPORT_STANDARD, REPORT_CUSTOM);
                 })
                 .cors(AbstractHttpConfigurer::disable)
                 .csrf(AbstractHttpConfigurer::disable)
                 .addFilterBefore(new AuthTokenFilter(authClient), BasicAuthenticationFilter.class)
+                .addFilterAfter(rateLimitingFilter, AuthTokenFilter.class)
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
         return http.build();
     }

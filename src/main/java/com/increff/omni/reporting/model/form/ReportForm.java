@@ -1,11 +1,14 @@
 package com.increff.omni.reporting.model.form;
 
+import com.increff.omni.reporting.model.constants.ChartType;
 import com.increff.omni.reporting.model.constants.ReportType;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import jakarta.validation.constraints.NotNull;
+import java.util.HashMap;
+import java.util.Map;
 
 @Setter
 @Getter
@@ -27,7 +30,10 @@ public class ReportForm {
     private Boolean canSchedule = false;
     private Integer minFrequencyAllowedSeconds;
     @NotNull
-    private Boolean isDashboard = false;
-
+    private Boolean isChart = false;
+    @NotNull
+    private ChartType chartType;
+    @NotNull
+    private Map<String, String> legends = new HashMap<>();
 
 }

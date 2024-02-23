@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.Setter;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 @Entity
 @Getter
@@ -24,6 +26,7 @@ public class ReportValidationGroupPojo extends AbstractVersionedPojo {
 
     @Column(nullable = false)
     @Enumerated(value = EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.VARCHAR)
     private ValidationType type;
 
     // for now, validation value is used for DATE range, in future it can be a key value pair

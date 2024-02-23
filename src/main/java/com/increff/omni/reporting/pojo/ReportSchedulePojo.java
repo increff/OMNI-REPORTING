@@ -5,6 +5,9 @@ import lombok.Getter;
 import lombok.Setter;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
 import java.time.ZonedDateTime;
 
 @Entity
@@ -50,6 +53,7 @@ public class ReportSchedulePojo extends AbstractVersionedPojo {
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.VARCHAR)
     private ScheduleStatus status = ScheduleStatus.NEW;
 
 }

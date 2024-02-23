@@ -1,6 +1,7 @@
 package com.increff.omni.reporting.controller;
 
 import com.increff.omni.reporting.dto.*;
+import com.increff.omni.reporting.model.constants.VisualizationType;
 import com.increff.omni.reporting.model.data.*;
 import com.increff.omni.reporting.model.form.*;
 import com.increff.commons.springboot.common.ApiException;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 // Todo internationalization
 @CrossOrigin
@@ -38,6 +40,8 @@ public class AdminController {
     private ReportRequestDto reportRequestDto;
     @Autowired
     private ReportScheduleDto reportScheduleDto;
+    @Autowired
+    private DashboardDto dashboardDto;
 
     // App admin APIs
 
@@ -73,7 +77,8 @@ public class AdminController {
 
     @Operation(summary = "Edit Input Control")
     @PutMapping(value = "/controls/{id}")
-    public InputControlData updateInputControl(@PathVariable Integer id, @RequestBody InputControlUpdateForm form) throws ApiException {
+    public InputControlData updateInputControl(@PathVariable Integer id, @RequestBody InputControlUpdateForm form)
+            throws ApiException {
         return inputControlDto.update(id, form);
     }
 
@@ -97,7 +102,8 @@ public class AdminController {
 
     @Operation(summary = "Update Schema")
     @PutMapping(value = "/schema/{schemaVersionId}")
-    public SchemaVersionData updateSchema(@PathVariable Integer schemaVersionId, @RequestBody SchemaVersionForm form) throws ApiException {
+    public SchemaVersionData updateSchema(@PathVariable Integer schemaVersionId, @RequestBody SchemaVersionForm form)
+            throws ApiException {
         return schemaDto.update(schemaVersionId, form);
     }
 
@@ -133,8 +139,9 @@ public class AdminController {
 
     @Operation(summary = "Get All Report")
     @GetMapping(value = "/reports/schema-versions/{schemaVersionId}")
-    public List<ReportData> getAll(@PathVariable Integer schemaVersionId) throws ApiException {
-        return reportDto.selectAllBySchemaVersion(schemaVersionId);
+    public List<ReportData> getAll(@PathVariable Integer schemaVersionId, @RequestParam Optional<VisualizationType>
+            visualization) throws ApiException {
+        return reportDto.selectAllBySchemaVersion(schemaVersionId, visualization.orElse(null));
     }
 
     @Operation(summary = "Copy Schema Reports")
@@ -145,7 +152,8 @@ public class AdminController {
 
     @Operation(summary = "Add/Edit Report Query")
     @PostMapping(value = "/reports/{reportId}/query")
-    public ReportQueryData addQuery(@PathVariable("reportId") Integer reportId, @RequestBody ReportQueryForm form) throws ApiException {
+    public ReportQueryData addQuery(@PathVariable("reportId") Integer reportId, @RequestBody ReportQueryForm form)
+            throws ApiException {
         return reportDto.upsertQuery(reportId, form);
     }
 
@@ -153,6 +161,12 @@ public class AdminController {
     @PostMapping(value = "/reports/query/try")
     public ReportQueryData getTransformedQuery(@RequestBody ReportQueryTestForm form) {
         return reportDto.getTransformedQuery(form);
+    }
+
+    @Operation(summary = "Test Query Live")
+    @PostMapping(value = "/reports/query/try-live")
+    public List<ViewDashboardData> testQueryLive(@RequestBody ReportRequestForm form) throws ApiException, IOException {
+        return reportDto.testQueryLive(form);
     }
 
     @Operation(summary = "Get Report Query")
@@ -175,13 +189,15 @@ public class AdminController {
 
     @Operation(summary = "Add validation group")
     @PostMapping(value = "/reports/{reportId}/controls/validations")
-    public void addValidationGroup(@PathVariable Integer reportId, @RequestBody ValidationGroupForm groupForm) throws ApiException {
+    public void addValidationGroup(@PathVariable Integer reportId, @RequestBody ValidationGroupForm groupForm)
+            throws ApiException {
         reportDto.addValidationGroup(reportId, groupForm);
     }
 
     @Operation(summary = "Delete validation group")
     @DeleteMapping(value = "/reports/{reportId}/controls/validations")
-    public void deleteValidationGroup(@PathVariable Integer reportId, @RequestParam String groupName) throws ApiException {
+    public void deleteValidationGroup(@PathVariable Integer reportId, @RequestParam String groupName)
+            throws ApiException {
         reportDto.deleteValidationGroup(reportId, groupName);
     }
 
@@ -199,13 +215,15 @@ public class AdminController {
 
     @Operation(summary = "Map organization to a schema")
     @PostMapping(value = "/orgs/{orgId}/schema/{schemaVersionId}")
-    public OrgSchemaData addSchemaMapping(@PathVariable Integer orgId, @PathVariable Integer schemaVersionId) throws ApiException {
+    public OrgSchemaData addSchemaMapping(@PathVariable Integer orgId, @PathVariable Integer schemaVersionId)
+            throws ApiException {
         return organizationDto.mapToSchema(orgId, schemaVersionId);
     }
 
     @Operation(summary = "Map organization to a connection")
     @PostMapping(value = "/orgs/{orgId}/connections/{connectionId}")
-    public OrgConnectionData addConnectionMapping(@PathVariable Integer orgId, @PathVariable Integer connectionId) throws ApiException {
+    public OrgConnectionData addConnectionMapping(@PathVariable Integer orgId, @PathVariable Integer connectionId)
+            throws ApiException {
         return organizationDto.mapToConnection(orgId, connectionId);
     }
 
@@ -275,8 +293,9 @@ public class AdminController {
 
     @Operation(summary = "Get Reports")
     @GetMapping(value = "/reports/orgs/{orgId}")
-    public List<ReportData> selectByOrgId(@PathVariable Integer orgId, @RequestParam Boolean isDashboard) throws ApiException {
-        return reportDto.selectByOrg(orgId, isDashboard);
+    public List<ReportData> selectByOrgId(@PathVariable Integer orgId, @RequestParam Boolean isChart,
+                                          @RequestParam Optional<VisualizationType> visualization) throws ApiException {
+        return reportDto.selectByOrg(orgId, isChart, visualization.orElse(null));
     }
 
     @Operation(summary = "Get Live Data For Any Organization")
@@ -288,14 +307,28 @@ public class AdminController {
 
     @Operation(summary = "Select controls for a report for given organization")
     @GetMapping(value = "/orgs/{orgId}/reports/{reportId}/controls")
-    public List<InputControlData> selectByReportId(@PathVariable Integer reportId, @PathVariable Integer orgId) throws ApiException {
+    public List<InputControlData> selectByReportId(@PathVariable Integer reportId, @PathVariable Integer orgId)
+            throws ApiException {
         return inputControlDto.selectForReport(reportId, orgId);
     }
 
     @Operation(summary = "Get Schedules for all organizations")
     @GetMapping(value = "/schedules")
-    public List<ReportScheduleData> getScheduleReports(@RequestParam Integer pageNo, @RequestParam Integer pageSize) throws ApiException {
+    public List<ReportScheduleData> getScheduleReports(@RequestParam Integer pageNo, @RequestParam Integer pageSize)
+            throws ApiException {
         return reportScheduleDto.getScheduleReportsForAllOrgs(pageNo, pageSize);
     }
 
+    @Operation(summary = "Copy Dashboard to all organizations. This copies charts only! NOT default values!")
+    @PostMapping(value = "/copy-dashboard-all-orgs")
+    public void copyDashboardToAllOrgs(@RequestParam Integer dashboardId, @RequestParam Integer orgId) throws ApiException {
+        dashboardDto.copyDashboardToAllOrgs(dashboardId, orgId);
+    }
+
+    @Operation(summary = "Copy Dashboard to some organizations. This copies charts only! NOT default values!")
+    @PostMapping(value = "/copy-dashboard-some-orgs")
+    public void copyDashboardToSomeOrgs(@RequestParam Integer dashboardId, @RequestParam Integer sourceOrgId,
+                                        @RequestParam List<Integer> destinationOrgIds) throws ApiException {
+        dashboardDto.copyDashboardToSomeOrgs(dashboardId, sourceOrgId, destinationOrgIds);
+    }
 }

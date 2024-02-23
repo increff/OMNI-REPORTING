@@ -31,8 +31,6 @@ public class ReportValidationGroupApi extends AbstractApi {
         if(pojoList.isEmpty())
             throw new ApiException(ApiStatus.BAD_DATA,
                     "Validation group does not exist with group name : " + groupName + " for report id : " + reportId);
-        if(pojoList.stream().anyMatch(ReportValidationGroupPojo::getIsSystemValidation))
-            throw new ApiException(ApiStatus.BAD_DATA, "System validation group can't be deleted");
         pojoList.forEach(p -> reportValidationGroupDao.remove(p));
     }
 

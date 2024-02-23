@@ -7,6 +7,9 @@ import lombok.Getter;
 import lombok.Setter;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
 import java.time.ZonedDateTime;
 
 @Entity
@@ -37,10 +40,12 @@ public class ReportRequestPojo extends AbstractVersionedPojo {
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.VARCHAR)
     private ReportRequestStatus status;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.VARCHAR)
     private ReportRequestType type;
 
     private Integer noOfRows;
@@ -49,6 +54,7 @@ public class ReportRequestPojo extends AbstractVersionedPojo {
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
+@JdbcTypeCode(SqlTypes.VARCHAR)
     private FileFormat fileFormat = FileFormat.CSV;
 
     private String url;

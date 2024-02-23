@@ -15,5 +15,6 @@ public class ReportRequestForm {
     private String timezone = "UTC";
     private FileFormat fileFormat = FileFormat.CSV;
     private Map<String, List<String>> paramMap;
+    private String query;
 
 }

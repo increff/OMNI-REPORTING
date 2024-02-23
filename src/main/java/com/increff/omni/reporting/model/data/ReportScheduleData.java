@@ -22,6 +22,8 @@ public class ReportScheduleData {
     private CronScheduleForm cronSchedule;
     private List<InputControlFilterData> filters;
     private List<String> sendTo;
+    private List<PipelineFlowData> pipelineDetails;
+
     private ZonedDateTime nextRuntime;
     private ZonedDateTime createdAt;
     private ZonedDateTime updatedAt;

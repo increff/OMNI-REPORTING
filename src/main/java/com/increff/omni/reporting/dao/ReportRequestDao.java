@@ -12,6 +12,7 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -96,6 +97,8 @@ public class ReportRequestDao extends AbstractDao<ReportRequestPojo> {
     }
 
     public List<ReportRequestPojo> selectByIds(List<Integer> reportRequestIds) {
+        if(reportRequestIds.isEmpty()) return new ArrayList<>();
+
         CriteriaBuilder cb = this.em.getCriteriaBuilder();
         CriteriaQuery<ReportRequestPojo> query = cb.createQuery(ReportRequestPojo.class);
         Root<ReportRequestPojo> root = query.from(ReportRequestPojo.class);

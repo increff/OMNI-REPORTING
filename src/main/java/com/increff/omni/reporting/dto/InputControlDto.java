@@ -33,9 +33,6 @@ public class InputControlDto extends AbstractDto {
     private InputControlApi api;
 
     @Autowired
-    private FolderApi folderApi;
-
-    @Autowired
     private InputControlFlowApi flowApi;
 
     @Autowired

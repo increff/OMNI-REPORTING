@@ -4,12 +4,9 @@ import com.increff.omni.reporting.api.*;
 import com.increff.omni.reporting.config.ApplicationProperties;
 import com.increff.omni.reporting.flow.ReportFlowApi;
 import com.increff.omni.reporting.flow.ReportRequestFlowApi;
-import com.increff.omni.reporting.model.constants.AuditActions;
-import com.increff.omni.reporting.model.constants.ReportRequestType;
-import com.increff.omni.reporting.model.constants.ValidationType;
-import com.increff.omni.reporting.model.data.ReportData;
-import com.increff.omni.reporting.model.data.ReportQueryData;
-import com.increff.omni.reporting.model.data.ValidationGroupData;
+import com.increff.omni.reporting.model.constants.*;
+import com.increff.omni.reporting.model.data.*;
+import com.increff.omni.reporting.model.data.Charts.ChartInterface;
 import com.increff.omni.reporting.model.form.*;
 import com.increff.omni.reporting.pojo.*;
 import com.increff.omni.reporting.util.SqlCmd;
@@ -18,6 +15,7 @@ import com.increff.commons.springboot.common.ApiException;
 import com.increff.commons.springboot.common.ApiStatus;
 import com.increff.commons.springboot.common.ConvertUtil;
 import lombok.Setter;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -29,10 +27,13 @@ import java.util.stream.Collectors;
 
 import static com.increff.omni.reporting.dto.CommonDtoHelper.getDirectoryPath;
 import static com.increff.omni.reporting.dto.CommonDtoHelper.getIdToPojoMap;
-import static com.increff.omni.reporting.util.ValidateUtil.validateForm;
+import static com.increff.omni.reporting.util.ChartUtil.getChartData;
+import static com.increff.omni.reporting.util.ConvertUtil.convertChartLegendsPojoToChartLegendsData;
+import static com.increff.omni.reporting.util.ValidateUtil.validateReportForm;
 
 @Service
 @Setter
+@Log4j2
 public class ReportDto extends AbstractDto {
 
     @Autowired
@@ -63,37 +64,47 @@ public class ReportDto extends AbstractDto {
     private OrgConnectionApi orgConnectionApi;
     @Autowired
     private ConnectionApi connectionApi;
+    @Autowired
+    private ChartLegendsApi chartLegendsApi;
 
     public ReportData add(ReportForm form) throws ApiException {
-        validateForm(form);
+        validateReportForm(form);
         ReportPojo pojo = ConvertUtil.convert(form, ReportPojo.class);
-        pojo = flowApi.addReport(pojo);
+        pojo = flowApi.addReport(pojo, form.getLegends());
         flowApi.saveAudit(pojo.getId().toString(), AuditActions.CREATE_REPORT.toString()
                 , "Create Report", "Report : " + pojo.getName() + " created", getUserName());
-        return convertToReportData(Collections.singletonList(pojo)).get(0);
+        ReportData reportData = convertToReportData(Collections.singletonList(pojo)).get(0);
+        reportData.setLegends(convertChartLegendsPojoToChartLegendsData(chartLegendsApi.getByChartId(pojo.getId())).getLegends());
+        return reportData;
     }
 
     public ReportData edit(Integer id, ReportForm form) throws ApiException {
-        validateForm(form);
+        validateReportForm(form);
         ReportPojo pojo = ConvertUtil.convert(form, ReportPojo.class);
         pojo.setId(id);
-        pojo = flowApi.editReport(pojo);
+        pojo = flowApi.editReport(pojo, form.getLegends());
         flowApi.saveAudit(pojo.getId().toString(), AuditActions.EDIT_REPORT.toString()
                 , "Update Report", "Report : " + pojo.getName() + " updated", getUserName());
-        return convertToReportData(Collections.singletonList(pojo)).get(0);
+        ReportData reportData = convertToReportData(Collections.singletonList(pojo)).get(0);
+        reportData.setLegends(convertChartLegendsPojoToChartLegendsData(chartLegendsApi.getByChartId(pojo.getId())).getLegends());
+        return reportData;
     }
 
     public List<Map<String, String>> getLiveDataForAnyOrganization(ReportRequestForm form, Integer orgId)
             throws ApiException, IOException {
         OrganizationPojo organizationPojo = organizationApi.getCheck(orgId);
-        ReportPojo reportPojo = validateReportForOrg(form, orgId);
-        OrgConnectionPojo orgConnectionPojo = orgConnectionApi.getCheckByOrgId(orgId);
-        ConnectionPojo connectionPojo = connectionApi.getCheck(orgConnectionPojo.getConnectionId());
+        ReportPojo reportPojo = reportApi.getCheck(form.getReportId());
+
+        validateReportForOrg(reportPojo, orgId);
+        validateQueryExists(reportPojo, form);
+
+        ConnectionPojo connectionPojo = connectionApi.getCheck(orgConnectionApi.getCheckByOrgId(orgId).getConnectionId());
         String password = getDecryptedPassword(connectionPojo.getPassword());
+
         ZonedDateTime startTime = ZonedDateTime.now();
         try {
             List<ReportInputParamsPojo> reportInputParamsPojoList = validateControls(form, orgId, reportPojo, password);
-            return flowApi.validateAndGetLiveData(reportPojo, reportInputParamsPojoList, connectionPojo, password);
+            return flowApi.validateAndGetLiveData(reportPojo, reportInputParamsPojoList, connectionPojo, password, form.getQuery());
         } finally {
             flowApi.saveAudit(reportPojo.getId().toString(), AuditActions.LIVE_REPORT.toString(),
                     "Live Report",
@@ -115,7 +126,9 @@ public class ReportDto extends AbstractDto {
 
     public ReportData get(Integer id) throws ApiException {
         ReportPojo pojo = reportApi.getCheck(id);
-        return convertToReportData(Collections.singletonList(pojo)).get(0);
+        ReportData reportData = convertToReportData(Collections.singletonList(pojo)).get(0);
+        reportData.setLegends(convertChartLegendsPojoToChartLegendsData(chartLegendsApi.getByChartId(pojo.getId())).getLegends());
+        return reportData;
     }
 
     public ReportQueryData upsertQuery(Integer reportId, ReportQueryForm form) throws ApiException {
@@ -145,31 +158,53 @@ public class ReportDto extends AbstractDto {
         return data;
     }
 
-    public ReportData selectByAlias(Boolean isDashboard, String alias) throws ApiException {
+    public List<ViewDashboardData> testQueryLive(ReportRequestForm form) throws IOException, ApiException {
+        ReportPojo report = reportApi.getCheck(form.getReportId());
+        Integer schemaVersionId = report.getSchemaVersionId();
+        Integer orgId = orgSchemaApi.getCheckBySchemaVersionId(schemaVersionId).get(0).getOrgId();
+        log.debug("Testing query on orgId : " + orgId + " schemaVersionId : " + schemaVersionId + " reportName : " + report.getName() + " reportId : " + report.getId());
+
+        List<Map<String, String>> data = getLiveDataForAnyOrganization(form, orgId);
+        ChartInterface chartInterface = getChartData(report.getChartType());
+        chartInterface.validateNormalize(data, report.getChartType());
+
+        return Collections.singletonList(getTestQueryLiveData(report, data, chartInterface));
+    }
+
+    private ViewDashboardData getTestQueryLiveData(ReportPojo report, List<Map<String, String>> data, ChartInterface chartInterface) throws ApiException {
+        ViewDashboardData viewData = new ViewDashboardData();
+        viewData.setChartData(chartInterface.transform(data));
+        viewData.setLegends(convertChartLegendsPojoToChartLegendsData(chartLegendsApi.getByChartId(report.getId())).getLegends());
+        viewData.setChartId(report.getId());
+        viewData.setType(report.getChartType());
+        return viewData;
+    }
+
+    public ReportData selectByAlias(Boolean isChart, String alias) throws ApiException {
         Integer orgId = getOrgId();
         organizationApi.getCheck(orgId);
         OrgSchemaVersionPojo schemaVersionPojo = orgSchemaApi.getCheckByOrgId(orgId);
         ReportPojo reportPojo = reportApi.getByAliasAndSchema(alias, schemaVersionPojo.getSchemaVersionId(),
-                isDashboard);
+                isChart);
         if(Objects.isNull(reportPojo))
             throw new ApiException(ApiStatus.BAD_DATA,
-                    (isDashboard ? "Dashboard" : "Report")  + " not available for alias : " + alias);
+                    (isChart ? "Dashboard" : "Report")  + " not available for alias : " + alias);
         validateCustomReportAccess(reportPojo, orgId);
         return convertToReportData(Collections.singletonList(reportPojo)).get(0);
     }
 
-    public List<ReportData> selectByOrg(Boolean isDashboard) throws ApiException {
-        return selectByOrg(getOrgId(), isDashboard);
+    public List<ReportData> selectByOrg(Boolean isChart, VisualizationType visualization) throws ApiException {
+        return selectByOrg(getOrgId(), isChart, visualization);
     }
 
-    public List<ReportData> selectByOrg(Integer orgId, Boolean isDashboard) throws ApiException {
+    public List<ReportData> selectByOrg(Integer orgId, Boolean isChart, VisualizationType visualization) throws ApiException {
         organizationApi.getCheck(orgId);
-        List<ReportPojo> pojos = flowApi.getAll(orgId, isDashboard);
+        List<ReportPojo> pojos = flowApi.getAll(orgId, isChart, visualization);
         return convertToReportData(pojos);
     }
 
-    public List<ReportData> selectAllBySchemaVersion(Integer schemaVersionId) throws ApiException {
-        List<ReportPojo> pojos = flowApi.getAllBySchemaVersionId(schemaVersionId);
+    public List<ReportData> selectAllBySchemaVersion(Integer schemaVersionId, VisualizationType visualization) throws ApiException {
+        List<ReportPojo> pojos = flowApi.getAllBySchemaVersionId(schemaVersionId, visualization);
         return convertToReportData(pojos);
     }
 
@@ -214,9 +249,14 @@ public class ReportDto extends AbstractDto {
             data.setGroupName(k);
             data.setValidationType(v.get(0).getType());
             data.setControls(pojos.stream().map(InputControlPojo::getDisplayName).collect(Collectors.toList()));
+            data.setCanDelete(!hasAccessControlledMultiSelect(pojos));
             validationGroupDataList.add(data);
         });
         return validationGroupDataList;
+    }
+
+    private boolean hasAccessControlledMultiSelect(List<InputControlPojo> pojos) {
+        return pojos.stream().anyMatch(pojo -> pojo.getType().equals(InputControlType.ACCESS_CONTROLLED_MULTI_SELECT));
     }
 
     private void validate(Integer reportId, ValidationGroupForm groupForm) throws ApiException {
@@ -261,14 +301,17 @@ public class ReportDto extends AbstractDto {
         return CommonDtoHelper.getReportInputParamsPojoList(inputParamsMap, form.getTimezone(), orgId, inputDisplayStringMap);
     }
 
-    private ReportPojo validateReportForOrg(ReportRequestForm form, Integer orgId) throws ApiException {
-        ReportPojo reportPojo = reportApi.getCheck(form.getReportId());
+    private ReportPojo validateReportForOrg(ReportPojo reportPojo, Integer orgId) throws ApiException {
         validateCustomReportAccess(reportPojo, orgId);
-        if(!reportPojo.getIsDashboard())
+        if(!reportPojo.getIsChart())
             throw new ApiException(ApiStatus.BAD_DATA, "Live data is only available for dashboards");
-        ReportQueryPojo reportQueryPojo = reportQueryApi.getByReportId(reportPojo.getId());
-        if (Objects.isNull(reportQueryPojo))
-            throw new ApiException(ApiStatus.BAD_DATA, "No query defined for report : " + reportPojo.getName());
         return reportPojo;
     }
+
+    private void validateQueryExists(ReportPojo reportPojo, ReportRequestForm form) throws ApiException {
+        ReportQueryPojo reportQueryPojo = reportQueryApi.getByReportId(reportPojo.getId());
+        if (Objects.isNull(reportQueryPojo) && Objects.isNull(form.getQuery()))
+            throw new ApiException(ApiStatus.BAD_DATA, "No query defined for report : " + reportPojo.getName());
+    }
+
 }

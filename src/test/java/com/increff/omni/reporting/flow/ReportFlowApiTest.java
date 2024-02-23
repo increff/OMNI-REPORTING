@@ -17,10 +17,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 import static com.increff.omni.reporting.helper.DirectoryTestHelper.getDirectoryPojo;
 import static com.increff.omni.reporting.helper.InputControlTestHelper.getInputControlPojo;
@@ -66,7 +63,7 @@ public class ReportFlowApiTest extends AbstractTest {
         schemaVersionApi.add(schemaVersionPojo);
         ReportPojo reportPojo = getReportPojo("Report 1", ReportType.STANDARD
                 , directoryPojo.getId(), schemaVersionPojo.getId());
-        ReportPojo pojo = flowApi.addReport(reportPojo);
+        ReportPojo pojo = flowApi.addReport(reportPojo, new HashMap<>());
         assertNotNull(pojo);
         assertEquals(ReportType.STANDARD, pojo.getType());
         assertEquals("Report 1", pojo.getName());
@@ -89,14 +86,14 @@ public class ReportFlowApiTest extends AbstractTest {
                 , directoryPojo.getId(), schemaVersionPojo1.getId());
         ReportPojo reportPojo2 = getReportPojo("Report 1", ReportType.STANDARD
                 , directoryPojo.getId(), schemaVersionPojo1.getId());
-        flowApi.addReport(reportPojo);
-        flowApi.addReport(reportPojo1);
+        flowApi.addReport(reportPojo, new HashMap<>());
+        flowApi.addReport(reportPojo1, new HashMap<>());
         try {
-            flowApi.addReport(reportPojo2);
+            flowApi.addReport(reportPojo2, new HashMap<>());
         } catch (ApiException e) {
             assertEquals(ApiStatus.BAD_DATA, e.getStatus());
             assertEquals("Report already present with same name, schema version and report type (normal / dashboard)", e.getMessage());
-            List<ReportPojo> reportPojos = flowApi.getAll(100001, false);
+            List<ReportPojo> reportPojos = flowApi.getAll(100001, false, null);
             assertEquals(1, reportPojos.size());
             assertEquals("Report 1", reportPojos.get(0).getName());
         }
@@ -111,11 +108,11 @@ public class ReportFlowApiTest extends AbstractTest {
         schemaVersionApi.add(schemaVersionPojo);
         ReportPojo reportPojo = getReportPojo("Report 1", ReportType.CUSTOM
                 , directoryPojo.getId(), schemaVersionPojo.getId());
-        flowApi.addReport(reportPojo);
+        flowApi.addReport(reportPojo, new HashMap<>());
         ReportPojo reportPojo2 = getReportPojo("Report 1 - 1", ReportType.STANDARD
                 , directoryPojo.getId(), schemaVersionPojo.getId());
         reportPojo2.setId(reportPojo.getId());
-        ReportPojo pojo = flowApi.editReport(reportPojo2);
+        ReportPojo pojo = flowApi.editReport(reportPojo2, new HashMap<>());
         assertNotNull(pojo);
         assertEquals(ReportType.STANDARD, pojo.getType());
         assertEquals("Report 1 - 1", pojo.getName());
@@ -130,19 +127,19 @@ public class ReportFlowApiTest extends AbstractTest {
         schemaVersionApi.add(schemaVersionPojo);
         ReportPojo reportPojo = getReportPojo("Report 1", ReportType.CUSTOM
                 , directoryPojo.getId(), schemaVersionPojo.getId());
-        flowApi.addReport(reportPojo);
+        flowApi.addReport(reportPojo, new HashMap<>());
         reportPojo = getReportPojo("Report 1", ReportType.CUSTOM
                 , directoryPojo.getId(), schemaVersionPojo.getId());
-        reportPojo.setIsDashboard(true);
-        flowApi.addReport(reportPojo);
+        reportPojo.setIsChart(true);
+        flowApi.addReport(reportPojo, new HashMap<>());
         ReportPojo reportPojo1 = getReportPojo("Report 1 - 1", ReportType.STANDARD
                 , directoryPojo.getId(), schemaVersionPojo.getId());
-        flowApi.addReport(reportPojo1);
+        flowApi.addReport(reportPojo1, new HashMap<>());
         ReportPojo reportPojo2 = getReportPojo("Report 1 - 1", ReportType.CUSTOM
                 , directoryPojo.getId(), schemaVersionPojo.getId());
         reportPojo2.setId(reportPojo.getId());
         try {
-            flowApi.editReport(reportPojo2);
+            flowApi.editReport(reportPojo2, new HashMap<>());
         } catch (ApiException e) {
             assertEquals(ApiStatus.BAD_DATA, e.getStatus());
             assertEquals("Report already present with same name, schema version and report type (normal / dashboard)", e.getMessage());
@@ -158,7 +155,7 @@ public class ReportFlowApiTest extends AbstractTest {
         schemaVersionApi.add(schemaVersionPojo);
         ReportPojo reportPojo = getReportPojo("Report 1", ReportType.STANDARD
                 , directoryPojo.getId(), schemaVersionPojo.getId());
-        ReportPojo pojo = flowApi.addReport(reportPojo);
+        ReportPojo pojo = flowApi.addReport(reportPojo, new HashMap<>());
         ReportQueryPojo queryPojo = getReportQueryPojo("select version();", pojo.getId());
         ReportQueryPojo queryPojo1 = flowApi.upsertQuery(queryPojo);
         assertEquals("select version();", queryPojo1.getQuery());

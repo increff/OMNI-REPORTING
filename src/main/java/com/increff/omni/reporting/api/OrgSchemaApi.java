@@ -3,6 +3,7 @@ package com.increff.omni.reporting.api;
 import com.increff.omni.reporting.dao.OrgSchemaDao;
 import com.increff.omni.reporting.pojo.OrgSchemaVersionPojo;
 import com.increff.commons.springboot.common.ApiException;
+import com.increff.commons.springboot.common.ApiStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,7 +12,7 @@ import java.util.List;
 import java.util.Objects;
 
 @Service
-@Transactional(rollbackFor = Exception.class)
+@Transactional(rollbackFor = ApiException.class)
 public class OrgSchemaApi extends AbstractAuditApi {
 
     @Autowired
@@ -47,5 +48,10 @@ public class OrgSchemaApi extends AbstractAuditApi {
         return dao.select("orgId", orgId);
     }
 
-
+    public List<OrgSchemaVersionPojo> getCheckBySchemaVersionId(Integer schemaVersionId) throws ApiException {
+        List<OrgSchemaVersionPojo> pojos = dao.selectMultiple("schemaVersionId", schemaVersionId);
+        if(pojos.isEmpty())
+            throw new ApiException(ApiStatus.BAD_DATA, "No org mapped to schema version id : " + schemaVersionId);
+        return pojos;
+    }
 }

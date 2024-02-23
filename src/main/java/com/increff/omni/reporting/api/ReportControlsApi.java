@@ -11,7 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 @Service
-@Transactional(rollbackFor = Exception.class)
+@Transactional(rollbackFor = ApiException.class)
 public class ReportControlsApi extends AbstractApi {
 
     @Autowired

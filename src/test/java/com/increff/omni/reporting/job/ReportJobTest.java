@@ -5,6 +5,7 @@ import com.increff.omni.reporting.config.AbstractTest;
 import com.increff.omni.reporting.config.ApplicationProperties;
 import com.increff.omni.reporting.dao.ReportScheduleDao;
 import com.increff.omni.reporting.dto.*;
+import com.increff.omni.reporting.model.constants.ChartType;
 import com.increff.omni.reporting.model.constants.InputControlScope;
 import com.increff.omni.reporting.model.constants.InputControlType;
 import com.increff.omni.reporting.model.constants.ReportType;
@@ -67,7 +68,7 @@ public class ReportJobTest extends AbstractTest {
         ConnectionData connectionData = connectionDto.add(connectionForm);
         organizationDto.mapToConnection(organizationData.getId(), connectionData.getId());
         organizationDto.mapToSchema(organizationData.getId(), schemaData.getId());
-        return getReportForm("Report 2", ReportType.STANDARD, directoryData.getId(), schemaData.getId(), false);
+        return getReportForm("Report 2", ReportType.STANDARD, directoryData.getId(), schemaData.getId(), false, ChartType.REPORT);
     }
 
     @Test
@@ -113,7 +114,7 @@ public class ReportJobTest extends AbstractTest {
         reportDto.upsertQuery(reportData.getId(), queryForm);
         List<ReportScheduleForm.InputParamMap> inputParamMaps = getInputParamList();
         ReportScheduleForm form = getReportScheduleForm("*/15", "*", "*", "?", "Report 2", "Asia/Kolkata",
-                true, Arrays.asList("a@gmail.com", "b@gmail.com"), inputParamMaps);
+                true, Arrays.asList("a@gmail.com", "b@gmail.com"), inputParamMaps, new ArrayList<>());
         scheduleDto.scheduleReport(form);
         List<ReportScheduleData> reportScheduleData = scheduleDto.getScheduleReports(1, 100);
 
@@ -135,7 +136,7 @@ public class ReportJobTest extends AbstractTest {
         reportDto.upsertQuery(reportData.getId(), queryForm);
         List<ReportScheduleForm.InputParamMap> inputParamMaps = getInputParamList();
         ReportScheduleForm form = getReportScheduleForm("*/15", "*", "*", "?", "Report 2", "Asia/Kolkata",
-                true, Arrays.asList("a@gmail.com", "b@gmail.com"), inputParamMaps);
+                true, Arrays.asList("a@gmail.com", "b@gmail.com"), inputParamMaps, new ArrayList<>());
         scheduleDto.scheduleReport(form);
         List<ReportScheduleData> reportScheduleData = scheduleDto.getScheduleReports(1, 100);
         assertEquals(1, reportScheduleData.size());
