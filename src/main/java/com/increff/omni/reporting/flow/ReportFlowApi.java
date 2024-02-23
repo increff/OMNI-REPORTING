@@ -343,6 +343,17 @@ public class ReportFlowApi extends AbstractFlowApi {
     private void validate(ReportPojo pojo) throws ApiException {
         directoryApi.getCheck(pojo.getDirectoryId());
         schemaVersionApi.getCheck(pojo.getSchemaVersionId());
+
+        List<SchemaVersionPojo> aliasSchemas = schemaVersionApi.getByIds(api.getByAlias(pojo.getAlias()).stream()
+                .map(ReportPojo::getSchemaVersionId).collect(Collectors.toList()));
+        List<AppName> existingAppNames = aliasSchemas.stream().map(SchemaVersionPojo::getAppName).collect(Collectors.toList());
+        AppName curentAppName = schemaVersionApi.getCheck(pojo.getSchemaVersionId()).getAppName();
+        if (existingAppNames.size() > 1)
+            throw new ApiException(ApiStatus.BAD_DATA, "Alias is not unique across schema versions");
+        if( (existingAppNames.size() == 1) && (existingAppNames.get(0) != curentAppName) )
+            throw new ApiException(ApiStatus.BAD_DATA, "Same alias " + pojo.getAlias() + " is already present in different app." +
+                    " CurrentAppName : " + curentAppName + " ExistingAppName : " + existingAppNames.get(0));
+
         if(StringUtil.isEmpty(pojo.getAlias()) || pojo.getAlias().contains(" "))
             throw new ApiException(ApiStatus.BAD_DATA, "Report alias can't have space, use underscore(_) instead");
         ReportPojo existing = api.getByNameAndSchema(pojo.getName(), pojo.getSchemaVersionId(), pojo.getIsChart());

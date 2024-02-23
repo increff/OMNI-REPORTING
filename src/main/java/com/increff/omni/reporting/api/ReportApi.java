@@ -12,6 +12,7 @@ import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional(rollbackFor = ApiException.class)
@@ -81,5 +82,9 @@ public class ReportApi extends AbstractAuditApi {
 
     public List<ReportPojo> getByAliasAndSchema(List<String> aliasList, List<Integer> schemaVersionIds, Boolean isChart) {
         return dao.getByAliasAndSchema(aliasList, schemaVersionIds, isChart);
+    }
+
+    public List<ReportPojo> getByAlias(String alias){
+        return dao.selectMultiple("alias", alias);
     }
 }

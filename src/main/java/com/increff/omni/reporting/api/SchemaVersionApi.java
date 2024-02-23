@@ -47,6 +47,10 @@ public class SchemaVersionApi extends AbstractApi {
         return dao.select("name", name);
     }
 
+    public List<SchemaVersionPojo> getByIds(List<Integer> ids) {
+        return dao.selectMultiple("id", ids);
+    }
+
     private void validateForEdit(SchemaVersionPojo pojo) throws ApiException {
         SchemaVersionPojo existing = getByName(pojo.getName());
         if(existing != null && !Objects.equals(existing.getId(), pojo.getId()))
