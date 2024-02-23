@@ -41,7 +41,4 @@ public class InputControlPojo extends AbstractVersionedPojo{
     @Column(nullable = false)
     private Integer schemaVersionId;
 
-    @Column(nullable = false)
-    private String alias;
-
 }

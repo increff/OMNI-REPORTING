@@ -18,6 +18,7 @@ public class SchemaVersionPojo extends AbstractVersionedPojo {
     private Integer id;
     @Column(nullable = false, unique = true)
     private String name;
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private AppName appName;
 
