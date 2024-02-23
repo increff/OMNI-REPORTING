@@ -6,6 +6,7 @@ import com.increff.omni.reporting.model.constants.*;
 import com.increff.omni.reporting.model.form.ValidationGroupForm;
 import com.increff.omni.reporting.pojo.*;
 import com.increff.omni.reporting.util.FileUtil;
+import com.increff.omni.reporting.util.MongoUtil;
 import com.increff.omni.reporting.util.SqlCmd;
 import com.increff.omni.reporting.validators.DateValidator;
 import com.increff.omni.reporting.validators.MandatoryValidator;
@@ -15,6 +16,7 @@ import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j;
+import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -107,13 +109,21 @@ public class ReportFlowApi extends AbstractFlowApi {
         try {
             Map<String, String> inputParamMap = getInputParamMapFromPojoList(reportInputParamsPojoList);
             String fQuery = SqlCmd.getFinalQuery(inputParamMap, query, true);
-            // Execute query and save results
-            connection = dbConnectionApi.getConnection(connectionPojo.getHost(), connectionPojo.getUsername(),
-                    password, properties.getMaxConnectionTime());
-            PreparedStatement statement = dbConnectionApi.getStatement(connection,
-                    properties.getLiveReportMaxExecutionTime(), fQuery, properties.getResultSetFetchSize());
-            ResultSet resultSet = statement.executeQuery();
-            int noOfRows = FileUtil.writeCsvFromResultSet(resultSet, file);
+            int noOfRows = 0;
+            if(connectionPojo.getDbType().equals(DBType.MYSQL)) {
+                connection = dbConnectionApi.getConnection(connectionPojo.getHost(), connectionPojo.getUsername(),
+                        password, properties.getMaxConnectionTime());
+                PreparedStatement statement = dbConnectionApi.getStatement(connection,
+                        properties.getLiveReportMaxExecutionTime(), fQuery, properties.getResultSetFetchSize());
+                ResultSet resultSet = statement.executeQuery();
+                noOfRows = FileUtil.writeCsvFromResultSet(resultSet, file);
+            } else if (connectionPojo.getDbType().equals(DBType.MONGO)) {
+                List<Document> docs = MongoUtil.executeMongoPipeline(connectionPojo.getHost(), connectionPojo.getUsername(),
+                        password, fQuery);
+                noOfRows = FileUtil.writeCsvFromMongoDocuments(docs, file);
+            }
+
+
             if (noOfRows > MAX_NUMBER_OF_ROWS) {
                 throw new ApiException(ApiStatus.BAD_DATA, "Data exceeded " + MAX_NUMBER_OF_ROWS + " Rows, select " +
                         "granular filters.");

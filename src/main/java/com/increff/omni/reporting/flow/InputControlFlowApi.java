@@ -2,15 +2,18 @@ package com.increff.omni.reporting.flow;
 
 import com.increff.omni.reporting.api.*;
 import com.increff.omni.reporting.config.ApplicationProperties;
+import com.increff.omni.reporting.model.constants.DBType;
 import com.increff.omni.reporting.model.constants.InputControlScope;
 import com.increff.omni.reporting.pojo.*;
 import com.increff.omni.reporting.util.FileUtil;
+import com.increff.omni.reporting.util.MongoUtil;
 import com.increff.omni.reporting.util.SqlCmd;
 import com.nextscm.commons.lang.StringUtil;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
 import com.nextscm.commons.spring.server.AbstractApi;
 import lombok.extern.log4j.Log4j;
+import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -85,13 +88,19 @@ public class InputControlFlowApi extends AbstractApi {
         Connection connection = null;
         try {
             String fQuery = SqlCmd.getFinalQuery(new HashMap<>(), query, true);
-            connection = dbConnectionApi.getConnection(connectionPojo.getHost(),
-                    connectionPojo.getUsername(), password,
-                    properties.getMaxConnectionTime());
-            PreparedStatement statement = dbConnectionApi.getStatement(connection,
-                    properties.getLiveReportMaxExecutionTime(), fQuery, properties.getResultSetFetchSize());
-            ResultSet resultSet = statement.executeQuery();
-            return FileUtil.getMapFromResultSet(resultSet);
+            if(connectionPojo.getDbType().equals(DBType.MYSQL)) {
+                connection = dbConnectionApi.getConnection(connectionPojo.getHost(), connectionPojo.getUsername(),
+                        password, properties.getMaxConnectionTime());
+                PreparedStatement statement = dbConnectionApi.getStatement(connection,
+                        properties.getLiveReportMaxExecutionTime(), fQuery, properties.getResultSetFetchSize());
+                ResultSet resultSet = statement.executeQuery();
+                return FileUtil.getMapFromResultSet(resultSet);
+            } else if (connectionPojo.getDbType().equals(DBType.MONGO)) {
+                List<Document> docs = MongoUtil.executeMongoPipeline(connectionPojo.getHost(), connectionPojo.getUsername(),
+                        password, fQuery);
+                return FileUtil.getMapFromMongoResultSet(docs);
+            }
+
         } catch (Exception e) {
             log.error("Error while getting input control values : ", e);
         } finally {
