@@ -6,6 +6,7 @@ import lombok.extern.log4j.Log4j;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.csv.CSVRecord;
+import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.*;
@@ -24,6 +25,9 @@ public class FileUtil {
     private FolderApi folderApi;
 
     private static final double MB = 1024 * 1024;
+    public static final String FILTER_QUERY_DISPLAY_NAME_COLUMN = "name";
+    public static final String FILTER_QUERY_DISPLAY_VALUE_COLUMN = "id";
+
     private final static String TIME_ZONE_PATTERN_WITHOUT_ZONE = "yyyy-MM-dd HH:mm:ss";
 
     public static void closeQuietly(Closeable c) {
@@ -81,6 +85,40 @@ public class FileUtil {
         return noOfRows;
     }
 
+    public static int writeCsvFromMongoDocuments(List<Document> documents, File file) throws IOException {
+        FileWriter fileWriter = new FileWriter(file);
+        BufferedWriter writer = new BufferedWriter(fileWriter);
+        CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT);
+        Set<String> headers = new HashSet<>();
+        for (Document document : documents) {
+            headers.addAll(document.keySet());
+        }
+        csvPrinter.printRecord(headers);
+        for (Document document : documents) {
+            List<String> data = new ArrayList<>();
+            for (String header : headers) {
+                String d = getValueInString(document, header);
+                if (!StringUtil.isEmpty(d))
+                    d = d.replace('\r', ' ').replace('\n', ' ');
+                data.add(d);
+            }
+            csvPrinter.printRecord(data);
+        }
+        csvPrinter.flush();
+        csvPrinter.close();
+        writer.close();
+        fileWriter.close();
+        return documents.size();
+    }
+
+    public static String getValueInString(Document document, String header) {
+        Object value = document.get(header);
+        if (value == null) {
+            return "";
+        }
+        return value.toString();
+    }
+
     public static Map<String, String> getMapFromResultSet(ResultSet resultSet) throws SQLException {
         Map<String, String> fMap = new HashMap<>();
         while (resultSet.next()) {
@@ -97,6 +135,16 @@ public class FileUtil {
             }
         }
         resultSet.close();
+        return fMap;
+    }
+
+    public static Map<String, String> getMapFromMongoResultSet(List<Document> documents) {
+        Map<String, String> fMap = new HashMap<>();
+        for (Document document : documents) {
+            String key = document.getString(FILTER_QUERY_DISPLAY_VALUE_COLUMN);
+            String value = document.getString(FILTER_QUERY_DISPLAY_NAME_COLUMN);
+            fMap.put(key, value);
+        }
         return fMap;
     }
 
