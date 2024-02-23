@@ -5,8 +5,9 @@ import com.increff.omni.reporting.model.constants.QueryOperator;
 import java.util.Objects;
 
 public class QueryExecutionDto extends AbstractDto {
-    
+
     private final static String ALWAYS_TRUE = "1=1";
+    private final static String MONGO_ALWAYS_TRUE = "{}";
 
     public static String filterAppend(String columnName, String operator, String paramValue, String condition) {
         String filter = filter(columnName, operator, paramValue);
@@ -48,5 +49,26 @@ public class QueryExecutionDto extends AbstractDto {
                 // Do nothing
         }
         return s.toString();
+    }
+
+    public static String mongoFilter(String filterJson, String paramKey, String paramValue, Boolean keepQuotes) {
+        if (Objects.isNull(paramValue))
+            return MONGO_ALWAYS_TRUE;
+        if(!keepQuotes) // Unlike sql, error when using single quotes for numbers
+            paramValue = removeUnescapedSingleQuotes(paramValue);// do not remove escaped single quotes which comes from input
+
+        filterJson = filterJson.replace("#" + paramKey, paramValue);
+        return filterJson;
+    }
+
+    /**
+     * Regex explained:
+     * (?<!\\\\)': This is a negative lookbehind assertion ((?<!...)). It ensures that the single quote (') is not preceded by a backslash (\). The \\\\ part represents a double backslash (\\) because in Java regex, backslashes need to be escaped twice within string literals. So, \\\\ matches a single backslash. Therefore, (?<!\\\\) ensures that the single quote is not preceded by a backslash.
+     *
+     * '': This is the replacement string, which is empty (""). It means that any matched single quotes will be replaced with nothing, effectively removing them from the string.
+     */
+    private static String removeUnescapedSingleQuotes(String paramValue) {
+        paramValue = paramValue.replaceAll("(?<!\\\\)'", "");
+        return paramValue;
     }
 }
