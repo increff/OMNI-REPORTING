@@ -2,18 +2,17 @@ package com.increff.omni.reporting.util;
 
 import com.increff.account.client.SecurityUtil;
 import com.increff.account.client.UserPrincipal;
-import com.increff.omni.reporting.model.constants.AppResourceKeys;
-import com.increff.omni.reporting.model.constants.InputControlType;
-import com.increff.omni.reporting.model.constants.ResourceQueryParamKeys;
+import com.increff.omni.reporting.model.constants.*;
 import com.increff.omni.reporting.model.form.ReportScheduleForm;
 
 import java.util.*;
 
+import static com.increff.omni.reporting.model.constants.Roles.USER_ACCESS_ADMIN_AUTHORITIES;
+
+
 public class UserPrincipalUtil {
 
-    private static final String APP_ADMIN = "app.admin";
-    private static final String REPORT_ADMIN = "report.admin";
-    private static final List<String> ADMIN_AUTHORITIES = Arrays.asList(APP_ADMIN, REPORT_ADMIN);
+    public static final Set<AppName> NULL_SCHEMA_VERSION_APPS = Collections.singleton(AppName.UNIFY); // todo : remove later if unused
 
     public static Map<String, String> getCompleteMapWithAccessControl(Map<String, List<String>> params) {
         Map<String, String> finalMap = new HashMap<>(getStringToStringParamMap(params));
@@ -33,12 +32,14 @@ public class UserPrincipalUtil {
     public static Map<String, String> getAccessControlMap() {
         Map<String, List<String>> accessControlMap = new HashMap<>();
         UserPrincipal principal = SecurityUtil.getPrincipal();
+        accessControlMap.put(ResourceQueryParamKeys.orgIdQueryParamKey,
+                new ArrayList<>(Collections.singletonList(String.valueOf(principal.getDomainId()))));
         List<String> accessRoles = principal.getRoles();
-        accessRoles.retainAll(ADMIN_AUTHORITIES);
+        accessRoles.retainAll(USER_ACCESS_ADMIN_AUTHORITIES);
 
         // If user has admin authorities, then do not set any param as query will have default value as column name
         // Which will make sure all values are selected
-        if(!accessRoles.isEmpty())
+        if(!accessRoles.isEmpty()) // todo : if user is oms.admin, he will be considered as admin for all apps. Get report app name and validate user role based on that
             return getStringToStringParamMap(accessControlMap);
         Map<String, Map<String, List<String>>> resourceRoles = principal.getResourceRoles();
         accessControlMap.put(ResourceQueryParamKeys.fulfillmentLocationQueryParamKey
@@ -88,5 +89,29 @@ public class UserPrincipalUtil {
             fList.add("'" + s + "'");
         }
         finalMap.put(key, String.join(",", fList));
+    }
+
+
+    public static boolean validateReportAppAccess(String appName) {
+        Set<AppName> accessibleApps = getAccessibleApps();
+        return accessibleApps.contains(AppName.valueOf(appName));
+    }
+
+    public static Set<AppName> getAccessibleApps() {
+        Set<AppName> accessibleApps = new HashSet<>();
+        List<String> userRoles = getPrincipal().getRoles();
+
+        if(userRoles.contains(Roles.APP_ADMIN.getRole())) {
+            return new HashSet<>(Arrays.asList(AppName.values()));
+        }
+
+        for (String role : userRoles) {
+            accessibleApps.add(AppName.valueOf(role.split("\\.")[0]));
+        }
+        return accessibleApps;
+    }
+
+    public static UserPrincipal getPrincipal() {
+        return SecurityUtil.getPrincipal();
     }
 }
