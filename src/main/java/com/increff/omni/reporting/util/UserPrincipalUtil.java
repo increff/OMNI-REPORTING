@@ -101,7 +101,7 @@ public class UserPrincipalUtil {
         Set<AppName> accessibleApps = new HashSet<>();
         List<String> userRoles = getPrincipal().getRoles();
 
-        if(userRoles.contains(Roles.APP_ADMIN.getRole())) {
+        if(userRoles.contains(Roles.APP_ADMIN.getRole())) { // todo : add report.admin here if required
             return new HashSet<>(Arrays.asList(AppName.values()));
         }
 
