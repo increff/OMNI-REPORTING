@@ -54,7 +54,7 @@ public class ReportRequestPojo extends AbstractVersionedPojo {
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-@JdbcTypeCode(SqlTypes.VARCHAR)
+    @JdbcTypeCode(SqlTypes.VARCHAR)
     private FileFormat fileFormat = FileFormat.CSV;
 
     private String url;
