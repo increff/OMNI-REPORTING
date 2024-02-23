@@ -60,8 +60,7 @@ public class ReportDto extends AbstractDto {
     private DirectoryApi directoryApi;
     @Autowired
     private ApplicationProperties properties;
-    @Autowired
-    private OrgConnectionApi orgConnectionApi;
+
     @Autowired
     private ConnectionApi connectionApi;
     @Autowired
@@ -98,7 +97,8 @@ public class ReportDto extends AbstractDto {
         validateReportForOrg(reportPojo, orgId);
         validateQueryExists(reportPojo, form);
 
-        ConnectionPojo connectionPojo = connectionApi.getCheck(orgConnectionApi.getCheckByOrgId(orgId).getConnectionId());
+        OrgMappingPojo orgMappingPojo = orgMappingApi.getCheckByOrgIdSchemaVersionId(orgId, reportPojo.getSchemaVersionId());
+        ConnectionPojo connectionPojo = connectionApi.getCheck(orgMappingPojo.getConnectionId());
         String password = getDecryptedPassword(connectionPojo.getPassword());
 
         ZonedDateTime startTime = ZonedDateTime.now();

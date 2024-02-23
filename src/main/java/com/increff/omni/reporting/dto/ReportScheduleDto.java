@@ -50,8 +50,7 @@ public class ReportScheduleDto extends AbstractDto {
     private ApplicationProperties properties;
     @Autowired
     private ReportInputParamsApi reportInputParamsApi;
-    @Autowired
-    private OrgConnectionApi orgConnectionApi;
+
     @Autowired
     private ConnectionApi connectionApi;
     @Autowired
@@ -238,8 +237,10 @@ public class ReportScheduleDto extends AbstractDto {
                                                                               ReportPojo reportPojo)
             throws ApiException {
         List<ReportControlsPojo> reportControlsPojoList = reportControlsApi.getByReportId(reportPojo.getId());
-        OrgConnectionPojo orgConnectionPojo = orgConnectionApi.getCheckByOrgId(getOrgId());
-        ConnectionPojo connectionPojo = connectionApi.getCheck(orgConnectionPojo.getConnectionId());
+        OrgMappingPojo orgMappingPojo = orgMappingApi.getCheckByOrgIdSchemaVersionId(getOrgId(),
+                reportPojo.getSchemaVersionId());
+
+        ConnectionPojo connectionPojo = connectionApi.getCheck(orgMappingPojo.getConnectionId());
         String password = getDecryptedPassword(connectionPojo.getPassword());
         List<InputControlPojo> inputControlPojoList = controlApi.selectByIds(reportControlsPojoList.stream()
                 .map(ReportControlsPojo::getControlId).collect(Collectors.toList()));

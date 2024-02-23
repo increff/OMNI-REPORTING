@@ -31,9 +31,8 @@ public class InputControlDto extends AbstractDto {
 
     @Autowired
     private InputControlApi api;
-
     @Autowired
-    private FolderApi folderApi;
+    private OrgMappingApi orgMappingApi;
 
     @Autowired
     private InputControlFlowApi flowApi;
@@ -43,9 +42,6 @@ public class InputControlDto extends AbstractDto {
 
     @Autowired
     private ReportValidationGroupApi reportValidationGroupApi;
-
-    @Autowired
-    private OrgConnectionApi orgConnectionApi;
 
     @Autowired
     private ConnectionApi connectionApi;
@@ -104,9 +100,6 @@ public class InputControlDto extends AbstractDto {
         List<Integer> controlIds = pojos.stream()
                 .map(InputControlPojo::getId).collect(Collectors.toList());
 
-        OrgConnectionPojo orgConnectionPojo = orgConnectionApi.getCheckByOrgId(orgId);
-        ConnectionPojo connectionPojo = connectionApi.getCheck(orgConnectionPojo.getConnectionId());
-        String password = getDecryptedPassword(connectionPojo.getPassword());
         //We need queries
         List<InputControlQueryPojo> queryPojos = api.selectControlQueries(controlIds);
         Map<Integer, String> controlToQueryMapping;
@@ -128,6 +121,10 @@ public class InputControlDto extends AbstractDto {
                             Collectors.mapping(InputControlValuesPojo::getValue, Collectors.toList())));
         List<InputControlData> dataList = new ArrayList<>();
         for(InputControlPojo p : pojos) {
+            OrgMappingPojo orgMappingPojo = orgMappingApi.getCheckByOrgIdSchemaVersionId(orgId, p.getSchemaVersionId());
+            ConnectionPojo connectionPojo = connectionApi.getCheck(orgMappingPojo.getConnectionId());
+            String password = getDecryptedPassword(connectionPojo.getPassword());
+
             SchemaVersionPojo schemaVersionPojo = schemaVersionApi.getCheck(p.getSchemaVersionId());
             dataList.add(getDataFromPojo(p, controlToValuesMapping, controlToQueryMapping, connectionPojo,
                     schemaVersionPojo, password));

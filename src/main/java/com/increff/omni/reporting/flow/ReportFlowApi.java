@@ -36,10 +36,6 @@ public class ReportFlowApi extends AbstractFlowApi {
     @Autowired
     private SchemaVersionApi schemaVersionApi;
     @Autowired
-    private OrgConnectionApi orgConnectionApi;
-    @Autowired
-    private ConnectionApi connectionApi;
-    @Autowired
     private FolderApi folderApi;
     @Autowired
     private DBConnectionApi dbConnectionApi;

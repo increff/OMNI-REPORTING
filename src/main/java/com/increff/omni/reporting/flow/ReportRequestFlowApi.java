@@ -33,8 +33,7 @@ public class ReportRequestFlowApi extends AbstractFlowApi {
     private ReportInputParamsApi reportInputParamsApi;
     @Autowired
     private ConnectionApi connectionApi;
-    @Autowired
-    private OrgConnectionApi orgConnectionApi;
+
     @Autowired
     private ReportValidationGroupApi reportValidationGroupApi;
     @Autowired

@@ -54,13 +54,13 @@ public class ScheduleReportTask extends AbstractTask {
     @Autowired
     private ReportRequestApi api;
     @Autowired
+    private OrgMappingApi orgMappingApi;
+    @Autowired
     private ReportApi reportApi;
     @Autowired
     private ReportQueryApi reportQueryApi;
     @Autowired
     private ReportInputParamsApi reportInputParamsApi;
-    @Autowired
-    private OrgConnectionApi orgConnectionApi;
     @Autowired
     private DBConnectionApi dbConnectionApi;
     @Autowired
@@ -101,8 +101,9 @@ public class ScheduleReportTask extends AbstractTask {
             List<ReportInputParamsPojo> reportInputParamsPojoList = reportInputParamsApi
                     .getInputParamsForReportRequest(reportRequestPojo.getId());
             ReportQueryPojo reportQueryPojo = reportQueryApi.getByReportId(reportPojo.getId());
-            OrgConnectionPojo orgConnectionPojo = orgConnectionApi.getCheckByOrgId(reportRequestPojo.getOrgId());
-            ConnectionPojo connectionPojo = connectionApi.getCheck(orgConnectionPojo.getConnectionId());
+            OrgMappingPojo orgMappingPojo = orgMappingApi.getCheckByOrgIdSchemaVersionId(reportRequestPojo.getOrgId(),
+                    reportPojo.getSchemaVersionId());
+            ConnectionPojo connectionPojo = connectionApi.getCheck(orgMappingPojo.getConnectionId());
 
             // Creation of file
             Map<String, String> inputParamMap = getInputParamMapFromPojoList(reportInputParamsPojoList);

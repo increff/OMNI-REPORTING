@@ -39,8 +39,6 @@ public class AbstractDto extends AbstractDtoApi {
     @Autowired
     private InputControlApi controlApi;
     @Autowired
-    private OrgConnectionApi orgConnectionApi;
-    @Autowired
     private OrgMappingApi orgMappingApi;
     @Autowired
     private ConnectionApi connectionApi;
@@ -194,8 +192,8 @@ public class AbstractDto extends AbstractDtoApi {
                 valuesMap.put(pojo.getValue(), pojo.getValue());
             }
         } else {
-            OrgConnectionPojo orgConnectionPojo = orgConnectionApi.getCheckByOrgId(orgId);
-            ConnectionPojo connectionPojo = connectionApi.getCheck(orgConnectionPojo.getConnectionId());
+            OrgMappingPojo orgMappingPojo = orgMappingApi.getCheckByOrgIdSchemaVersionId(orgId, p.getSchemaVersionId());
+            ConnectionPojo connectionPojo = connectionApi.getCheck(orgMappingPojo.getConnectionId());
             valuesMap = inputControlFlowApi.getValuesFromQuery(queryPojo.getQuery(), connectionPojo, password);
         }
         return valuesMap;

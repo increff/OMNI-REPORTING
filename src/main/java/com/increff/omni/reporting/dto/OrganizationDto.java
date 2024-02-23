@@ -33,8 +33,7 @@ public class OrganizationDto extends AbstractDto {
     @Autowired
     private OrgMappingApi orgMappingApi;
 
-    @Autowired
-    private OrgConnectionApi orgConnectionApi;
+
 
     @Autowired
     private ConnectionApi connectionApi;

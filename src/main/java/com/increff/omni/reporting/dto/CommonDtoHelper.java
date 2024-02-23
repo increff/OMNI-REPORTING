@@ -217,29 +217,12 @@ public class CommonDtoHelper {
         }).collect(Collectors.toList());
     }
 
-    public static List<OrgConnectionData> getOrgConnectionDataList(List<OrgConnectionPojo> pojos,
-                                                                   List<ConnectionPojo> allPojos) {
-        Map<Integer, ConnectionPojo> idToPojoMap = new HashMap<>();
-        allPojos.forEach(a -> idToPojoMap.put(a.getId(), a));
-        return pojos.stream().map(p -> {
-            ConnectionPojo pojo = idToPojoMap.get(p.getConnectionId());
-            return getOrgConnectionData(p, pojo);
-        }).collect(Collectors.toList());
-    }
 
     public static OrgSchemaData getOrgSchemaData(OrgMappingPojo pojo, SchemaVersionPojo schemaVersionPojo) {
         OrgSchemaData data = new OrgSchemaData();
         data.setOrgId(pojo.getOrgId());
         data.setSchemaVersionId(pojo.getSchemaVersionId());
         data.setSchemaName(schemaVersionPojo.getName());
-        return data;
-    }
-
-    public static OrgConnectionData getOrgConnectionData(OrgConnectionPojo pojo, ConnectionPojo connectionPojo) {
-        OrgConnectionData data = new OrgConnectionData();
-        data.setOrgId(pojo.getOrgId());
-        data.setConnectionId(pojo.getConnectionId());
-        data.setConnectionName(connectionPojo.getName());
         return data;
     }
 
