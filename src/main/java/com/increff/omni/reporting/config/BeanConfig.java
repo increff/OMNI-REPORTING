@@ -9,6 +9,8 @@ import com.fasterxml.jackson.datatype.jsr310.ser.ZonedDateTimeSerializer;
 import com.increff.account.client.AuthClient;
 import com.increff.commons.queryexecutor.QueryExecutorClient;
 import com.increff.commons.springboot.audit.api.AuditApi;
+import com.increff.commons.springboot.audit.dao.AuditDao;
+import com.increff.commons.springboot.audit.dao.DaoProvider;
 import com.increff.omni.reporting.dto.CommonDtoHelper;
 import com.increff.omni.reporting.util.FileDownloadUtil;
 import com.increff.service.encryption.EncryptionClient;
@@ -35,6 +37,7 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
@@ -49,6 +52,7 @@ import java.util.concurrent.Executors;
 @Configuration
 @EnableScheduling
 @EnableAsync
+@EnableWebMvc
 public class BeanConfig {
 
     @Autowired
@@ -78,6 +82,17 @@ public class BeanConfig {
     public AuthClient authClient() throws GeneralSecurityException {
         return new AuthClient(applicationProperties.getAuthBaseUrl(), applicationProperties.getAuthAppToken());
     }
+
+    @Bean
+    public AuditDao auditDao() {
+        return new AuditDao();
+    }
+
+    @Bean
+    public AuditApi getAuditApi() {
+        return new AuditApi();
+    }
+
 
     @Bean
     public Executor getScheduledThreadPool() {
@@ -143,21 +158,18 @@ public class BeanConfig {
                         .build()
         );
 
-        final ConnectionKeepAliveStrategy myStrategy = new ConnectionKeepAliveStrategy() {
-            @Override
-            public TimeValue getKeepAliveDuration(HttpResponse httpResponse, HttpContext httpContext) {
-                final Iterator<HeaderElement> it = MessageSupport.iterate(httpResponse, HeaderElements.KEEP_ALIVE);
-                final HeaderElement he = it.next();
-                final String param = he.getName();
-                final String value = he.getValue();
-                if (value != null && param.equalsIgnoreCase("timeout")) {
-                    try {
-                        return TimeValue.ofSeconds(Long.parseLong(value));
-                    } catch (final NumberFormatException ignore) {
-                    }
+        ConnectionKeepAliveStrategy myStrategy = (httpResponse, httpContext) -> {
+            Iterator<HeaderElement> it = MessageSupport.iterate(httpResponse, HeaderElements.KEEP_ALIVE);
+            while (it.hasNext()) {
+                HeaderElement he = it.next();
+                String param = he.getName();
+                String value = he.getValue();
+                if (value != null && param.equalsIgnoreCase
+                        ("timeout")) {
+                    return TimeValue.ofSeconds(Long.parseLong(value));
                 }
-                return TimeValue.ofSeconds(30);
             }
+            return TimeValue.ofSeconds(30);
         };
 
         HttpClient httpClient = HttpClients.custom().setConnectionManager(connManager).setKeepAliveStrategy(myStrategy).build();

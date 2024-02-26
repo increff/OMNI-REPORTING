@@ -2,6 +2,7 @@ package com.increff.omni.reporting.security;
 
 import com.increff.account.client.AuthClient;
 import com.increff.account.client.AuthTokenFilter;
+import com.increff.omni.reporting.config.ApplicationProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,7 +23,7 @@ public class StandardSecurityConfig {
     @Autowired
     private AuthClient authClient;
     @Autowired
-    private RateLimitingFilter rateLimitingFilter;
+    private ApplicationProperties applicationProperties;
 
     public static final String APP_ADMIN = "app.admin";
     public static final String REPORT_ADMIN = "report.admin";
@@ -46,7 +47,7 @@ public class StandardSecurityConfig {
                 .cors(AbstractHttpConfigurer::disable)
                 .csrf(AbstractHttpConfigurer::disable)
                 .addFilterBefore(new AuthTokenFilter(authClient), BasicAuthenticationFilter.class)
-                .addFilterAfter(rateLimitingFilter, AuthTokenFilter.class)
+                .addFilterAfter(new RateLimitingFilter(applicationProperties), AuthTokenFilter.class)
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
         return http.build();
     }

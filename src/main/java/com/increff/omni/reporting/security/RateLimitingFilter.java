@@ -5,7 +5,6 @@ import com.increff.omni.reporting.config.ApplicationProperties;
 import io.github.bucket4j.Bandwidth;
 import io.github.bucket4j.Bucket;
 import io.github.bucket4j.Refill;
-import lombok.extern.log4j.Log4j;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
@@ -25,12 +24,14 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Log4j2
-@Component
 @Order(0)
 public class RateLimitingFilter extends GenericFilterBean {
 
-    @Autowired
     private ApplicationProperties properties;
+
+    public RateLimitingFilter(ApplicationProperties properties) {
+        this.properties = properties;
+    }
 
     private ZonedDateTime nextLogTime = ZonedDateTime.now().minusMinutes(1);
     // Can cause heap space issues if the number of users is large!

@@ -16,7 +16,6 @@ import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-//@Component
 @Log4j2
 public class AdminFilter extends GenericFilterBean {
 
