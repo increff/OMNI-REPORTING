@@ -11,7 +11,7 @@ import javax.persistence.TypedQuery;
 @Transactional
 public class OrgMappingDao extends AbstractDao<OrgMappingPojo> {
 
-    private final String SELECT_BY_ORG_ID_SCHEMA_VERSION_ID = "select * from OrgMappingPojo where orgId=:orgId and schemaVersionId=:schemaVersionId";
+    private final String SELECT_BY_ORG_ID_SCHEMA_VERSION_ID = "select p from OrgMappingPojo p where orgId=:orgId and schemaVersionId=:schemaVersionId";
 
     public OrgMappingPojo selectByOrgIdSchemaVersionId(Integer orgId, Integer schemaVersionId) {
         TypedQuery<OrgMappingPojo> q = createJpqlQuery(SELECT_BY_ORG_ID_SCHEMA_VERSION_ID);
