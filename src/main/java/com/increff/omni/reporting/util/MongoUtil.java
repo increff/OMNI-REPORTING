@@ -60,7 +60,7 @@ public class MongoUtil {
             database = mongoClient.getDatabase(databaseName);
             MongoCollection<Document> collection = database.getCollection(collectionName);
 
-            AggregateIterable<Document> result = collection.aggregate(stages);
+            AggregateIterable<Document> result = collection.aggregate(stages).allowDiskUse(true);
             List<Document> results = new ArrayList<>();
             result.into(results); // TODO: Should write directly to file instead of collecting in list?
             return results;
