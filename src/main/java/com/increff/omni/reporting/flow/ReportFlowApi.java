@@ -8,6 +8,7 @@ import com.increff.omni.reporting.pojo.*;
 import com.increff.omni.reporting.util.FileUtil;
 import com.increff.omni.reporting.util.MongoUtil;
 import com.increff.omni.reporting.util.SqlCmd;
+import com.increff.omni.reporting.util.UserPrincipalUtil;
 import com.increff.omni.reporting.validators.DateValidator;
 import com.increff.omni.reporting.validators.MandatoryValidator;
 import com.increff.omni.reporting.validators.SingleMandatoryValidator;
@@ -167,6 +168,9 @@ public class ReportFlowApi extends AbstractFlowApi {
         List<OrgMappingPojo> orgMappingPojo = orgMappingApi.getCheckByOrgId(orgId);
         List<Integer> orgSchemaVersionIds = orgMappingPojo.stream().map(OrgMappingPojo::getSchemaVersionId)
                 .collect(Collectors.toList());
+        List<Integer> userAllowedSchemaVersionIds = schemaVersionApi.getByAppNames(UserPrincipalUtil.getAccessibleApps()).stream()
+                .map(SchemaVersionPojo::getId).collect(Collectors.toList());
+        orgSchemaVersionIds.retainAll(userAllowedSchemaVersionIds);
 
         List<ReportPojo> reportPojoList = new ArrayList<>();
         //All standard

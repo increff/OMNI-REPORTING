@@ -2,6 +2,7 @@ package com.increff.omni.reporting.dto;
 
 import com.increff.omni.reporting.api.*;
 import com.increff.omni.reporting.config.ApplicationProperties;
+import com.increff.omni.reporting.model.constants.AppName;
 import com.increff.omni.reporting.model.constants.ChartType;
 import com.increff.omni.reporting.model.constants.ReportType;
 import com.increff.omni.reporting.model.data.*;
@@ -12,6 +13,7 @@ import com.increff.omni.reporting.model.form.DefaultValueForm;
 import com.increff.omni.reporting.model.form.ReportRequestForm;
 import com.increff.omni.reporting.pojo.*;
 import com.increff.omni.reporting.util.ChartUtil;
+import com.increff.omni.reporting.util.UserPrincipalUtil;
 import com.increff.omni.reporting.util.ValidateUtil;
 import com.nextscm.commons.lang.StringUtil;
 import com.nextscm.commons.spring.common.ApiException;
@@ -28,7 +30,6 @@ import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.increff.omni.reporting.util.ChartUtil.DEFAULT_VALUE_COMMON_KEY;
 import static com.increff.omni.reporting.util.ChartUtil.getChartData;
 import static com.increff.omni.reporting.util.ConvertUtil.convertChartLegendsPojoToChartLegendsData;
 
@@ -60,6 +61,8 @@ public class DashboardDto extends AbstractDto {
     private DashboardChartDto dashboardChartDto;
     @Autowired
     private ApplicationProperties properties;
+    @Autowired
+    private SchemaVersionApi schemaVersionApi;
 
     @Transactional(rollbackFor = ApiException.class)
     public ApplicationPropertiesData getProperties() {
@@ -125,6 +128,13 @@ public class DashboardDto extends AbstractDto {
 
     public List<DashboardListData> getDashboardsByOrgId(Integer orgId) throws ApiException {
         List<DashboardListData> data = ConvertUtil.convert(api.getByOrgId(orgId), DashboardListData.class);
+
+        List<Integer> dashboardIds = data.stream().map(DashboardListData::getId).collect(Collectors.toList());
+
+        // Only keep dashboards containing at least 1 chart with SV in user accessible app schema versions
+        List<Integer> appDashboardIds = getDashboardsWithUserAppAccess(dashboardIds, getOrgId(), UserPrincipalUtil.getAccessibleApps());
+        data = data.stream().filter(dashboard -> appDashboardIds.contains(dashboard.getId())).collect(Collectors.toList());
+
 
         if (isCustomReportUser()) { // Filter out standard dashboards for custom users
             List<Integer> orgSchemaVersionIds = orgMappingApi.getCheckByOrgId(orgId).stream().map(OrgMappingPojo::getSchemaVersionId).collect(Collectors.toList());
@@ -389,5 +399,38 @@ public class DashboardDto extends AbstractDto {
         return customDashboardIds;
     }
 
+
+    /**
+     * Returns dashboardIds which have at least one chart with Schema Version in All Schema Versions for user accessible apps
+     */
+    private List<Integer> getDashboardsWithUserAppAccess(List<Integer> dashboardIds, Integer orgId, Set<AppName> appNames) throws ApiException {
+        List<Integer> userAllowedSchemaVersionIds = schemaVersionApi.getByAppNames(appNames).
+                stream().map(SchemaVersionPojo::getId).collect(Collectors.toList());
+        List<Integer> orgSchemaVersionIds = orgMappingApi.getCheckByOrgId(orgId).stream().map(OrgMappingPojo::getSchemaVersionId).collect(Collectors.toList());
+
+        List<DashboardChartPojo> dashboardCharts = dashboardChartApi.getByDashboardIds(dashboardIds);
+        Map<Integer, List<String>> dashboardChartAliasMap = dashboardCharts.stream().collect(Collectors.groupingBy(DashboardChartPojo::getDashboardId,
+                Collectors.mapping(DashboardChartPojo::getChartAlias, Collectors.toList())));
+
+        List<ReportPojo> charts = reportApi.getByAliasAndSchema(dashboardCharts.stream().map(DashboardChartPojo::getChartAlias).collect(Collectors.toList()),
+                orgSchemaVersionIds, true);
+        Map<String, ReportPojo> chartAliasChartMap = charts.stream().collect(Collectors.toMap(ReportPojo::getAlias, report -> report));
+
+
+        List<Integer> dashboardIdsWithUserAccessSchemaVersion = new ArrayList<>();
+        for(Integer dashboardId : dashboardIds){
+            boolean appChartExists = false;
+            for(String chartAlias : dashboardChartAliasMap.getOrDefault(dashboardId, new ArrayList<>())){
+                if(!chartAliasChartMap.containsKey(chartAlias))
+                    throw new ApiException(ApiStatus.BAD_DATA, "Chart alias not found: " + chartAlias + " for schema version: " + orgSchemaVersionIds + " isChart: true");
+                if(userAllowedSchemaVersionIds.contains(chartAliasChartMap.get(chartAlias).getSchemaVersionId())){
+                    appChartExists = true;
+                    break;
+                }
+            }
+            if(appChartExists) dashboardIdsWithUserAccessSchemaVersion.add(dashboardId);
+        }
+        return dashboardIdsWithUserAccessSchemaVersion;
+    }
 
 }
