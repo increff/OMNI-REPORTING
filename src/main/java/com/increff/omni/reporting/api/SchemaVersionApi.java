@@ -50,11 +50,11 @@ public class SchemaVersionApi extends AbstractApi {
     }
 
     public List<SchemaVersionPojo> getByIds(List<Integer> ids) {
-        return dao.selectMultiple("id", ids);
+        return dao.selectByIds(ids);
     }
 
     public List<SchemaVersionPojo> getByAppNames(Set<AppName> appNames) {
-        return dao.selectMultiple("appName", appNames);
+        return dao.selectByAppNames(appNames);
     }
 
     private void validateForEdit(SchemaVersionPojo pojo) throws ApiException {
