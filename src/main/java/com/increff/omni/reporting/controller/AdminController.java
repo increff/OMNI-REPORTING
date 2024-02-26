@@ -1,6 +1,7 @@
 package com.increff.omni.reporting.controller;
 
 import com.increff.omni.reporting.dto.*;
+import com.increff.omni.reporting.model.constants.InputControlScope;
 import com.increff.omni.reporting.model.constants.VisualizationType;
 import com.increff.omni.reporting.model.data.*;
 import com.increff.omni.reporting.model.form.*;
@@ -95,10 +96,10 @@ public class AdminController {
         return inputControlDto.selectAllGlobal(schemaVersionId);
     }
 
-    @ApiOperation(value = "Select all controls")
+    @ApiOperation(value = "Select controls by scope")
     @RequestMapping(value = "/controls", method = RequestMethod.GET)
-    public List<InputControlData> selectAllControls() throws ApiException {
-        return inputControlDto.selectAll();
+    public List<InputControlData> selectAllControls(@RequestParam InputControlScope scope) throws ApiException {
+        return inputControlDto.selectAll(scope);
     }
 
     @ApiOperation(value = "Add Schema")
