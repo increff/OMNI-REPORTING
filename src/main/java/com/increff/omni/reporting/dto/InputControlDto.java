@@ -66,7 +66,7 @@ public class InputControlDto extends AbstractDto {
 
     public List<InputControlData> selectAll(InputControlScope scope) throws ApiException {
         List<InputControlPojo> pojos = api.getByScope(scope);
-        return getInputControlDatas(pojos, getOrgId());
+        return getInputControlDatas(pojos, null); // Send orgId null as control can be for many schema versions but org is connected to only one schema version per application.
     }
 
     public InputControlData getById(Integer id) throws ApiException {
@@ -126,9 +126,13 @@ public class InputControlDto extends AbstractDto {
                             Collectors.mapping(InputControlValuesPojo::getValue, Collectors.toList())));
         List<InputControlData> dataList = new ArrayList<>();
         for(InputControlPojo p : pojos) {
-            OrgMappingPojo orgMappingPojo = orgMappingApi.getCheckByOrgIdSchemaVersionId(orgId, p.getSchemaVersionId());
-            ConnectionPojo connectionPojo = connectionApi.getCheck(orgMappingPojo.getConnectionId());
-            String password = getDecryptedPassword(connectionPojo.getPassword());
+            ConnectionPojo connectionPojo = null;
+            String password = null;
+            if(Objects.nonNull(orgId)) {
+                OrgMappingPojo orgMappingPojo = orgMappingApi.getCheckByOrgIdSchemaVersionId(orgId, p.getSchemaVersionId());
+                connectionPojo = connectionApi.getCheck(orgMappingPojo.getConnectionId());
+                password = getDecryptedPassword(connectionPojo.getPassword());
+            }
 
             SchemaVersionPojo schemaVersionPojo = schemaVersionApi.getCheck(p.getSchemaVersionId());
             dataList.add(getDataFromPojo(p, controlToValuesMapping, controlToQueryMapping, connectionPojo,
@@ -145,7 +149,8 @@ public class InputControlDto extends AbstractDto {
         data.setQuery(controlToQueryMapping.getOrDefault(p.getId(), null));
         data.setValues(controlToValuesMapping.getOrDefault(p.getId(), null));
         if (!StringUtil.isEmpty(data.getQuery())) {
-            setInputControlOptions(data, flowApi.getValuesFromQuery(data.getQuery(), connectionPojo, password));
+            if(Objects.nonNull(connectionPojo))
+                setInputControlOptions(data, flowApi.getValuesFromQuery(data.getQuery(), connectionPojo, password));
         } else {
             List<String> values = controlToValuesMapping.getOrDefault(p.getId(), null);
             if (!CollectionUtils.isEmpty(values)) {

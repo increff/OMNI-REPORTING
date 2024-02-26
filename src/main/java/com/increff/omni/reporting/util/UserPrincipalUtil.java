@@ -33,7 +33,7 @@ public class UserPrincipalUtil {
         Map<String, List<String>> accessControlMap = new HashMap<>();
         UserPrincipal principal = SecurityUtil.getPrincipal();
         accessControlMap.put(ResourceQueryParamKeys.orgIdQueryParamKey,
-                new ArrayList<>(Collections.singletonList(String.valueOf(principal.getDomainId()))));
+                new ArrayList<>(Collections.singletonList(String.valueOf(principal.getDomainId())))); // todo : increff admin will not be able to access other org with this
         List<String> accessRoles = principal.getRoles();
         accessRoles.retainAll(USER_ACCESS_ADMIN_AUTHORITIES);
 
