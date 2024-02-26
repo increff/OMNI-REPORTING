@@ -84,10 +84,12 @@ public class InputControlFlowApi extends AbstractApi {
     }
 
 
-    public Map<String, String> getValuesFromQuery(String query, ConnectionPojo connectionPojo, String password) {
+    public Map<String, String> getValuesFromQuery(String query, ConnectionPojo connectionPojo, String password, Integer orgId) {
         Connection connection = null;
         try {
-            String fQuery = SqlCmd.getFinalQuery(new HashMap<>(), query, true);
+            HashMap<String, String> map = new HashMap<>();
+            map.put("orgId", orgId.toString());
+            String fQuery = SqlCmd.getFinalQuery(map, query, true);
             if(connectionPojo.getDbType().equals(DBType.MYSQL)) {
                 connection = dbConnectionApi.getConnection(connectionPojo.getHost(), connectionPojo.getUsername(),
                         password, properties.getMaxConnectionTime());

@@ -136,21 +136,21 @@ public class InputControlDto extends AbstractDto {
 
             SchemaVersionPojo schemaVersionPojo = schemaVersionApi.getCheck(p.getSchemaVersionId());
             dataList.add(getDataFromPojo(p, controlToValuesMapping, controlToQueryMapping, connectionPojo,
-                    schemaVersionPojo, password));
+                    schemaVersionPojo, password, orgId));
         }
         return dataList;
     }
 
     private InputControlData getDataFromPojo(InputControlPojo p, Map<Integer, List<String>> controlToValuesMapping
             , Map<Integer, String> controlToQueryMapping, ConnectionPojo connectionPojo,
-                                             SchemaVersionPojo schemaVersionPojo, String password) throws ApiException {
+                                             SchemaVersionPojo schemaVersionPojo, String password, Integer orgId) throws ApiException {
         InputControlData data = ConvertUtil.convert(p, InputControlData.class);
         data.setSchemaVersionName(schemaVersionPojo.getName());
         data.setQuery(controlToQueryMapping.getOrDefault(p.getId(), null));
         data.setValues(controlToValuesMapping.getOrDefault(p.getId(), null));
         if (!StringUtil.isEmpty(data.getQuery())) {
             if(Objects.nonNull(connectionPojo))
-                setInputControlOptions(data, flowApi.getValuesFromQuery(data.getQuery(), connectionPojo, password));
+                setInputControlOptions(data, flowApi.getValuesFromQuery(data.getQuery(), connectionPojo, password, orgId));
         } else {
             List<String> values = controlToValuesMapping.getOrDefault(p.getId(), null);
             if (!CollectionUtils.isEmpty(values)) {

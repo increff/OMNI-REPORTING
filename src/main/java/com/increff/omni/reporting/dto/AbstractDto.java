@@ -194,7 +194,7 @@ public class AbstractDto extends AbstractDtoApi {
         } else {
             OrgMappingPojo orgMappingPojo = orgMappingApi.getCheckByOrgIdSchemaVersionId(orgId, p.getSchemaVersionId());
             ConnectionPojo connectionPojo = connectionApi.getCheck(orgMappingPojo.getConnectionId());
-            valuesMap = inputControlFlowApi.getValuesFromQuery(queryPojo.getQuery(), connectionPojo, password);
+            valuesMap = inputControlFlowApi.getValuesFromQuery(queryPojo.getQuery(), connectionPojo, password, orgId);
         }
         return valuesMap;
     }
