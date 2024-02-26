@@ -8,7 +8,8 @@ import javax.persistence.*;
 @Entity
 @Setter
 @Getter
-@Table(name = "orgMapping", indexes = {@Index(name = "idx_schemaVersionId", columnList = "schemaVersionId")})
+@Table(name = "orgMapping", indexes = {@Index(name = "idx_schemaVersionId", columnList = "schemaVersionId")},
+    uniqueConstraints = {@UniqueConstraint(columnNames = {"orgId", "schemaVersionId"})})
 public class OrgMappingPojo extends AbstractVersionedPojo {
 
     @Id

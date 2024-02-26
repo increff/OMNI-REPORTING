@@ -99,7 +99,7 @@ public class ReportDao extends AbstractDao<ReportPojo> {
     }
 
     public List<ReportPojo> getByAliasAndSchema(List<String> aliasList, List<Integer> schemaVersionIds, Boolean isChart) {
-        if(aliasList.isEmpty()) // todo : add schemaVersionIds empty check
+        if(aliasList.isEmpty() || schemaVersionIds.isEmpty())
             return new ArrayList<>();
         CriteriaBuilder cb = this.em.getCriteriaBuilder();
         CriteriaQuery<ReportPojo> query = cb.createQuery(ReportPojo.class);

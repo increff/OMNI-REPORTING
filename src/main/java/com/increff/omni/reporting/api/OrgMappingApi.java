@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 
 @Log4j
 @Service
@@ -19,8 +20,12 @@ public class OrgMappingApi extends AbstractAuditApi {
     @Autowired
     private OrgMappingDao dao;
 
-    public OrgMappingPojo add(OrgMappingPojo pojo) {
-        // todo : add validations
+    public OrgMappingPojo add(OrgMappingPojo pojo) throws ApiException {
+        OrgMappingPojo existing = getByOrgIdSchemaVersionId(pojo.getOrgId(), pojo.getSchemaVersionId());
+        if(Objects.nonNull(existing)){
+            log.error("OrgMapping already exists for org : " + pojo.getOrgId() + " and schema version id : " + pojo.getSchemaVersionId());
+            throw new ApiException(ApiStatus.BAD_DATA, "OrgMapping already exists for org and schema version id");
+        }
         dao.persist(pojo);
         return pojo;
     }
@@ -76,7 +81,6 @@ public class OrgMappingApi extends AbstractAuditApi {
     }
 
     public List<OrgMappingPojo> getCheckBySchemaVersionId(Integer schemaVersionId) throws ApiException {
-        // todo : multiple rows with same schema version id !
         List<OrgMappingPojo> pojos = dao.selectMultiple("schemaVersionId", schemaVersionId);
         if(pojos.isEmpty())
             throw new ApiException(ApiStatus.BAD_DATA, "No org mapped to schema version id : " + schemaVersionId);

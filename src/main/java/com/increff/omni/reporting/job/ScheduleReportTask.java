@@ -35,9 +35,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
@@ -110,7 +108,7 @@ public class ScheduleReportTask extends AbstractTask {
             timezone = getValueFromQuotes(inputParamMap.get("timezone"));
             String fQuery = SqlCmd.getFinalQuery(inputParamMap, reportQueryPojo.getQuery(), false);
             // Execute query and save results
-            prepareAndSendEmail(pojo, fQuery, connectionPojo, timezone, reportPojo);
+            prepareAndSendEmailOrPipelines(pojo, fQuery, connectionPojo, timezone, reportPojo);
             reportScheduleApi.addScheduleCount(pojo.getScheduleId(), 1, 0);
         } catch (Exception e) {
             log.error("Report Request ID : " + pojo.getId() + " failed", e);
@@ -134,9 +132,8 @@ public class ScheduleReportTask extends AbstractTask {
 
     }
 
-    // TODO  : Rename function
-    private void prepareAndSendEmail(ReportRequestPojo pojo, String fQuery, ConnectionPojo connectionPojo,
-                                     String timezone, ReportPojo reportPojo)
+    private void prepareAndSendEmailOrPipelines(ReportRequestPojo pojo, String fQuery, ConnectionPojo connectionPojo,
+                                                String timezone, ReportPojo reportPojo)
             throws IOException, ApiException {
         File file = folderApi.getFileForExtension(pojo.getId(), ".csv");
         Connection connection = null;
@@ -151,8 +148,6 @@ public class ScheduleReportTask extends AbstractTask {
                             properties.getResultSetFetchSize());
             resultSet = statement.executeQuery();
             // TODO: ADD MONGO SUPPORT after PR review
-            //  ques : query executor picks credentials from local machine, not from our api call. Thus it ownt uplaod to user bucket unless we send gcp config as well.
-            // if we send configs, query executor can t create bean of file client as each request will have differnet file client constructor .
             Integer noOfRows = FileUtil.writeCsvFromResultSet(resultSet, file);
             double fileSize = FileUtil.getSizeInMb(file.length());
             if (fileSize > properties.getMaxFileSize())

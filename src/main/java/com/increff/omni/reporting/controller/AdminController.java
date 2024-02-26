@@ -241,12 +241,6 @@ public class AdminController {
         return organizationDto.selectAllOrgSchema();
     }
 
-//    @ApiOperation(value = "Get all org connection mapping")
-//    @RequestMapping(value = "/orgs/connections/", method = RequestMethod.GET)
-//    public List<OrgConnectionData> selectAllConnectionMapping() {
-//        return organizationDto.selectAllOrgConnections();
-//    } todo rem
-
     @ApiOperation(value = "Add Directory")
     @RequestMapping(value = "/directories", method = RequestMethod.POST)
     public DirectoryData add(@RequestBody DirectoryForm form) throws ApiException {
@@ -311,7 +305,7 @@ public class AdminController {
         return reportDto.getLiveDataForAnyOrganization(form, orgId);
     }
 
-    @ApiOperation(value = "Select controls for a report for given organization") // todo : need to pass orgId where filter executes mongo query
+    @ApiOperation(value = "Select controls for a report for given organization")
     @RequestMapping(value = "/orgs/{orgId}/reports/{reportId}/controls", method = RequestMethod.GET)
     public List<InputControlData> selectByReportId(@PathVariable Integer reportId, @PathVariable Integer orgId) throws ApiException {
         return inputControlDto.selectForReport(reportId, orgId);

@@ -12,8 +12,6 @@ import static com.increff.omni.reporting.model.constants.Roles.USER_ACCESS_ADMIN
 
 public class UserPrincipalUtil {
 
-    public static final Set<AppName> NULL_SCHEMA_VERSION_APPS = Collections.singleton(AppName.UNIFY); // todo : remove later if unused
-
     public static Map<String, String> getCompleteMapWithAccessControl(Map<String, List<String>> params) {
         Map<String, String> finalMap = new HashMap<>(getStringToStringParamMap(params));
         finalMap.putAll(getAccessControlMap());
@@ -33,13 +31,13 @@ public class UserPrincipalUtil {
         Map<String, List<String>> accessControlMap = new HashMap<>();
         UserPrincipal principal = SecurityUtil.getPrincipal();
         accessControlMap.put(ResourceQueryParamKeys.orgIdQueryParamKey,
-                new ArrayList<>(Collections.singletonList(String.valueOf(principal.getDomainId())))); // todo : increff admin will not be able to access other org with this
+                new ArrayList<>(Collections.singletonList(String.valueOf(principal.getDomainId())))); // todo : remove later if unused
         List<String> accessRoles = principal.getRoles();
         accessRoles.retainAll(USER_ACCESS_ADMIN_AUTHORITIES);
 
         // If user has admin authorities, then do not set any param as query will have default value as column name
         // Which will make sure all values are selected
-        if(!accessRoles.isEmpty()) // todo : if user is oms.admin, he will be considered as admin for all apps. Get report app name and validate user role based on that
+        if(!accessRoles.isEmpty())
             return getStringToStringParamMap(accessControlMap);
         Map<String, Map<String, List<String>>> resourceRoles = principal.getResourceRoles();
         accessControlMap.put(ResourceQueryParamKeys.fulfillmentLocationQueryParamKey

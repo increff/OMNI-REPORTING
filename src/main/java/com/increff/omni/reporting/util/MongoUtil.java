@@ -46,8 +46,6 @@ public class MongoUtil {
 
 
     public static List<Document> executeMongoPipeline(String host, String username, String password, String databaseName, String collectionName, List<Document> stages) throws ApiException {
-        //try (MongoClient mongoClient = MongoClients.create("mongodb://" + username + ":" + password + "@" + host)) {
-        //mongodb://localhost:27017/
         String connectionString = "mongodb://";
         if(Objects.nonNull(username) && Objects.nonNull(password) && !username.isEmpty()) {
             connectionString += username + ":" + password + "@" + host;
@@ -62,31 +60,8 @@ public class MongoUtil {
 
             AggregateIterable<Document> result = collection.aggregate(stages).allowDiskUse(true);
             List<Document> results = new ArrayList<>();
-            result.into(results); // TODO: Should write directly to file instead of collecting in list?
+            result.into(results);
             return results;
-
-            // todo : remove comments
-//            JSONArray combinedArray = new JSONArray();
-//            for(Document r : results) {
-//                combinedArray.put(new JSONObject(r.toJson()));
-//
-//            // convertCombinedArrayToList(combinedArray);
-//
-//            // Print the combined JSONArray
-//            System.out.println(combinedArray.toString(4));
-//
-//            Map<String, Object> map = new HashMap<>();
-//
-//            // convert Document to JSON string
-//            //String json = results.toString();
-//            resultString += results.toString();
-//
-//
-//            mongoClient.close();
-//
-//            System.out.println(resultString);
-//            return resultString;
-//            return QueryExecutionDto.executeMongoQuery(collection, queryString);
         } catch (Exception e) {
             log.error("Error in executing mongo query : " + e.getMessage());
             throw new ApiException(ApiStatus.BAD_DATA, "Error in executing mongo query : " + e.getMessage());
