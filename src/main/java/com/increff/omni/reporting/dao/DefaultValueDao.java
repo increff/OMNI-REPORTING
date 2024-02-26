@@ -20,12 +20,19 @@ public class DefaultValueDao extends AbstractDao<DefaultValuePojo> {
                 .setParameter("chartAlias", chartAlias));
     }
 
-    private static final String DELETE_BY_DASHBOARD_CONTROL_NOT_IN = "delete from DefaultValuePojo p where p.dashboardId=:dashboardId and p.controlId not in (:controlId)";
-    public void deleteByDashboardIdAndControlIdNotIn(Integer dashboardId, List<Integer> controlIds) {
-        if (controlIds.isEmpty()) return;
-        createQuery(DELETE_BY_DASHBOARD_CONTROL_NOT_IN)
+    private static final String SELECT_BY_DASHBOARD_ID_AND_CONTROL_PARAM_NAME = "select p from DefaultValuePojo p where p.dashboardId=:dashboardId and p.paramName=:paramName";
+    public DefaultValuePojo getByDashboardIdAndControlParamName(Integer dashboardId, String paramName) {
+        return selectSingleOrNull(createJpqlQuery(SELECT_BY_DASHBOARD_ID_AND_CONTROL_PARAM_NAME)
                 .setParameter("dashboardId", dashboardId)
-                .setParameter("controlId", controlIds)
+                .setParameter("paramName", paramName));
+    }
+
+    private static final String DELETE_BY_DASHBOARD_ID_AND_CONTROL_PARAM_NAME_NOT_IN = "delete from DefaultValuePojo p where p.dashboardId=:dashboardId and p.paramName not in (:paramName)";
+    public void deleteByDashboardIdAndControlParamNameNotIn(Integer dashboardId, List<String> paramName) {
+        if (paramName.isEmpty()) return;
+        createQuery(DELETE_BY_DASHBOARD_ID_AND_CONTROL_PARAM_NAME_NOT_IN)
+                .setParameter("dashboardId", dashboardId)
+                .setParameter("paramName", paramName)
                 .executeUpdate();
     }
 

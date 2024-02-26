@@ -37,7 +37,4 @@ public class InputControlForm {
 
     private List<String> values = new ArrayList<>();
 
-    @NotNull
-    private String alias;
-
 }

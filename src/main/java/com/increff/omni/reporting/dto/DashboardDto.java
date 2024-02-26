@@ -79,7 +79,7 @@ public class DashboardDto extends AbstractDto {
         for(DefaultValueForm form : forms) {
             checkValid(form);
             api.getCheck(form.getDashboardId(), getOrgId());
-            validateControlIdExistsForDashboard(form.getDashboardId(), form.getControlId());
+            validateControlIdExistsForDashboard(form.getDashboardId(), form.getParamName());
 
             DefaultValuePojo pojo = ConvertUtil.convert(form, DefaultValuePojo.class);
             pojo.setDefaultValue(String.join(",", form.getDefaultValue()));
@@ -158,30 +158,27 @@ public class DashboardDto extends AbstractDto {
 
     private void setFilterDefaults(DashboardPojo dashboard, List<DashboardChartPojo> charts, Map<String, List<InputControlData>> filterDetails) throws ApiException {
         List<Integer> orgSchemaVersionIds = orgMappingApi.getCheckByOrgId(dashboard.getOrgId()).stream().map(OrgMappingPojo::getSchemaVersionId).collect(Collectors.toList());
-        Map<String, Map<Integer, String>> chartDefaultValueMap = defaultValueApi.getByDashboardId(dashboard.getId())
-                .stream().collect(Collectors.groupingBy(DefaultValuePojo::getChartAlias,
-                        Collectors.toMap(DefaultValuePojo::getControlId, DefaultValuePojo::getDefaultValue)));
+
+        Map<String, String> paramNameDefaultValueMap = defaultValueApi.getByDashboardId(dashboard.getId())
+                .stream().collect(Collectors.toMap(DefaultValuePojo::getParamName, DefaultValuePojo::getDefaultValue));
 
         for(DashboardChartPojo chart: charts){
-            Map<Integer, String> controlDefaultValueMap = chartDefaultValueMap.getOrDefault(chart.getChartAlias(), new HashMap<>());
-            controlDefaultValueMap.putAll(chartDefaultValueMap.getOrDefault(DEFAULT_VALUE_COMMON_KEY, new HashMap<>()));
-
             ReportPojo report = reportApi.getCheckByAliasAndSchema(chart.getChartAlias(), orgSchemaVersionIds, true);
 
             filterDetails.put(report.getAlias(), new ArrayList<>());
             inputControlDto.selectForReport(report.getId()).forEach(inputControlData -> {
-                inputControlData.setDefaultValue(controlDefaultValueMap.getOrDefault(inputControlData.getId(), null));
+                inputControlData.setDefaultValue(paramNameDefaultValueMap.getOrDefault(inputControlData.getParamName(), null));
                 if(Objects.nonNull(inputControlData.getDefaultValue()) && Objects.nonNull(inputControlData.getQuery()))
-                    inputControlData.setDefaultValue(String.join(",", getAllowedValuesInDefaults(controlDefaultValueMap, inputControlData)));
+                    inputControlData.setDefaultValue(String.join(",", getAllowedValuesInDefaults(paramNameDefaultValueMap, inputControlData)));
 
                 filterDetails.get(report.getAlias()).add(inputControlData);
             });
         }
     }
 
-    private List<String> getAllowedValuesInDefaults(Map<Integer, String> controlDefaultValueMap, InputControlData inputControlData) {
+    private List<String> getAllowedValuesInDefaults(Map<String, String> paramNameDefaultValueMap, InputControlData inputControlData) {
         List<String> allowedValues = inputControlData.getOptions().stream().map(InputControlData.InputControlDataValue::getLabelName).collect(Collectors.toList());
-        List<String> defaults = getValuesFromList(controlDefaultValueMap.get(inputControlData.getId()));
+        List<String> defaults = getValuesFromList(paramNameDefaultValueMap.get(inputControlData.getParamName()));
         defaults = defaults.stream().filter(allowedValues::contains).collect(Collectors.toList());
         return defaults;
     }
@@ -193,26 +190,19 @@ public class DashboardDto extends AbstractDto {
     }
 
     private void extractCommonFilters(List<DashboardChartPojo> charts, Map<String, List<InputControlData>> filterDetails) {
+        // combine all values of each chart into a single list
+        List<InputControlData> filters = charts.stream().map(DashboardChartPojo::getChartAlias).map(filterDetails::get).flatMap(List::stream).collect(Collectors.toList());
+        // remove duplicate param_names from the list
+        Set<String> paramNames = filters.stream().map(InputControlData::getParamName).collect(Collectors.toSet());
+        // keep first occurrence of each param_name
         List<InputControlData> commonFilters = new ArrayList<>();
-        for (InputControlData filter : filterDetails.get(charts.get(0).getChartAlias())) {
-            boolean isCommon = true;
-            for (DashboardChartPojo chart : charts) {
-                if (filterDetails.get(chart.getChartAlias()).stream().noneMatch(filter1 -> filter1.getId().equals(filter.getId()))) {
-                    isCommon = false; // if filter is not present in a chart, it is not common
-                    break;
-                }
-            }
-            if (isCommon) {
+        for (InputControlData filter : filters) {
+            if (paramNames.contains(filter.getParamName())) {
                 commonFilters.add(filter);
+                paramNames.remove(filter.getParamName());
             }
         }
-        filterDetails.put("common", commonFilters);
-
-        for (InputControlData filter : commonFilters){
-            for (DashboardChartPojo chart : charts) { // remove common filter from chart level filters
-                filterDetails.get(chart.getChartAlias()).removeIf(filter1 -> filter1.getId().equals(filter.getId()));
-            }
-        }
+        filterDetails.put("common", filters);
     }
 
     /**
@@ -304,12 +294,11 @@ public class DashboardDto extends AbstractDto {
             throw new ApiException(ApiStatus.BAD_DATA, "Max limit of dashboards reached: " + properties.getMaxDashboardsPerOrg());
     }
 
-
-    private void validateControlIdExistsForDashboard(Integer dashboardId, Integer controlId) throws ApiException {
+    private void validateControlIdExistsForDashboard(Integer dashboardId, String paramName) throws ApiException {
         Map<String,List<InputControlData>> filterDetails = getFilterDetails(api.getCheck(dashboardId, getOrgId()),
                 dashboardChartApi.getByDashboardId(dashboardId));
-        if(filterDetails.values().stream().flatMap(List::stream).noneMatch(inputControlData -> inputControlData.getId().equals(controlId))){
-            throw new ApiException(ApiStatus.BAD_DATA, "Control Id does not exist for dashboard id: " + dashboardId + " control id: " + controlId);
+        if(filterDetails.values().stream().flatMap(List::stream).noneMatch(inputControlData -> inputControlData.getParamName().equals(paramName))){
+            throw new ApiException(ApiStatus.BAD_DATA, "Param Name " + paramName + " does not exist for dashboard");
         }
     }
 
