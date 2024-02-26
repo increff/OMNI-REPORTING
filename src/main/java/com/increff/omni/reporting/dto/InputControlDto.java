@@ -64,6 +64,11 @@ public class InputControlDto extends AbstractDto {
         return getInputControlDatas(Collections.singletonList(pojo), getOrgId()).get(0);
     }
 
+    public List<InputControlData> selectAll() throws ApiException {
+        List<InputControlPojo> pojos = api.getAll();
+        return getInputControlDatas(pojos, getOrgId());
+    }
+
     public InputControlData getById(Integer id) throws ApiException {
         InputControlPojo pojo = api.getCheck(id);
         return getInputControlDatas(Collections.singletonList(pojo), getOrgId()).get(0);

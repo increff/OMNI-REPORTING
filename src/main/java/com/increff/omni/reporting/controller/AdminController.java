@@ -95,6 +95,12 @@ public class AdminController {
         return inputControlDto.selectAllGlobal(schemaVersionId);
     }
 
+    @ApiOperation(value = "Select all controls")
+    @RequestMapping(value = "/controls", method = RequestMethod.GET)
+    public List<InputControlData> selectAllControls() throws ApiException {
+        return inputControlDto.selectAll();
+    }
+
     @ApiOperation(value = "Add Schema")
     @RequestMapping(value = "/schema", method = RequestMethod.POST)
     public SchemaVersionData add(@RequestBody SchemaVersionForm form) throws ApiException {
