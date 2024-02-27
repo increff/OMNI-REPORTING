@@ -8,21 +8,20 @@ import com.increff.omni.reporting.api.*;
 import com.increff.omni.reporting.config.ApplicationProperties;
 import com.increff.omni.reporting.config.EmailProps;
 import com.increff.omni.reporting.dto.CommonDtoHelper;
+import com.increff.omni.reporting.model.constants.DBType;
 import com.increff.omni.reporting.model.constants.PipelineType;
 import com.increff.omni.reporting.model.constants.ReportRequestStatus;
 import com.increff.omni.reporting.model.form.FileProviderFolder.AwsPipelineConfigForm;
 import com.increff.omni.reporting.model.form.FileProviderFolder.GcpPipelineConfigForm;
 import com.increff.omni.reporting.pojo.*;
-import com.increff.omni.reporting.util.EmailUtil;
-import com.increff.omni.reporting.util.FileDownloadUtil;
-import com.increff.omni.reporting.util.FileUtil;
-import com.increff.omni.reporting.util.SqlCmd;
+import com.increff.omni.reporting.util.*;
 import com.increff.service.encryption.EncryptionClient;
 import com.increff.service.encryption.common.CryptoCommon;
 import com.nextscm.commons.spring.client.AppClientException;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
 import lombok.extern.log4j.Log4j;
+import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.scheduling.annotation.Async;
@@ -138,17 +137,23 @@ public class ScheduleReportTask extends AbstractTask {
         File file = folderApi.getFileForExtension(pojo.getId(), ".csv");
         Connection connection = null;
         ResultSet resultSet = null;
+        int noOfRows = 0;
         String password = getDecryptedPassword(connectionPojo.getPassword());
         try {
-            // Process data
-            connection = dbConnectionApi.getConnection(connectionPojo.getHost(), connectionPojo.getUsername(),
-                    password, properties.getMaxConnectionTime());
-            PreparedStatement statement =
-                    dbConnectionApi.getStatement(connection, properties.getMaxExecutionTime(), fQuery,
-                            properties.getResultSetFetchSize());
-            resultSet = statement.executeQuery();
-            // TODO: ADD MONGO SUPPORT after PR review
-            Integer noOfRows = FileUtil.writeCsvFromResultSet(resultSet, file);
+            if(connectionPojo.getDbType().equals(DBType.MYSQL)) {
+                connection = dbConnectionApi.getConnection(connectionPojo.getHost(), connectionPojo.getUsername(),
+                        password, properties.getMaxConnectionTime());
+                PreparedStatement statement =
+                        dbConnectionApi.getStatement(connection, properties.getMaxExecutionTime(), fQuery,
+                                properties.getResultSetFetchSize());
+                resultSet = statement.executeQuery();
+                noOfRows = FileUtil.writeCsvFromResultSet(resultSet, file);
+            } else if (connectionPojo.getDbType().equals(DBType.MONGO)) {
+                List<Document> docs = MongoUtil.executeMongoPipeline(connectionPojo.getHost(), connectionPojo.getUsername(),
+                        password, fQuery);
+                noOfRows = FileUtil.writeCsvFromMongoDocuments(docs, file);
+            }
+
             double fileSize = FileUtil.getSizeInMb(file.length());
             if (fileSize > properties.getMaxFileSize())
                 throw new ApiException(ApiStatus.BAD_DATA,
