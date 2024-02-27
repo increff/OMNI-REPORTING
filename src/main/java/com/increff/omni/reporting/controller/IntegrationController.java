@@ -3,14 +3,8 @@ package com.increff.omni.reporting.controller;
 import com.increff.omni.reporting.dto.ConnectionDto;
 import com.increff.omni.reporting.dto.DashboardDto;
 import com.increff.omni.reporting.dto.OrganizationDto;
-import com.increff.omni.reporting.model.data.ConnectionData;
-import com.increff.omni.reporting.model.data.OrgConnectionData;
-import com.increff.omni.reporting.model.data.OrgSchemaData;
-import com.increff.omni.reporting.model.data.OrganizationData;
-import com.increff.omni.reporting.model.form.ConnectionForm;
-import com.increff.omni.reporting.model.form.IntegrationOrgConnectionForm;
-import com.increff.omni.reporting.model.form.IntegrationOrgSchemaForm;
-import com.increff.omni.reporting.model.form.OrganizationForm;
+import com.increff.omni.reporting.model.data.*;
+import com.increff.omni.reporting.model.form.*;
 import com.nextscm.commons.spring.common.ApiException;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -44,17 +38,17 @@ public class IntegrationController {
         return organizationDto.add(form);
     }
 
-//    @ApiOperation(value = "Map organization to a connection")
-//    @RequestMapping(value = "/map-connection", method = RequestMethod.POST)
-//    public OrgConnectionData addConnectionMapping(@RequestBody IntegrationOrgConnectionForm form) throws ApiException {
-//        return organizationDto.mapToConnection(form);
-//    }
-//
-//    @ApiOperation(value = "Map organization to a schema")
-//    @RequestMapping(value = "/map-schema-version", method = RequestMethod.POST)
-//    public OrgSchemaData addSchemaMapping(@RequestBody IntegrationOrgSchemaForm form) throws ApiException {
-//        return organizationDto.mapToSchema(form);
-//    }
+    @ApiOperation(value = "Map organization to a schema and connection")
+    @RequestMapping(value = "/orgs/mappings", method = RequestMethod.POST)
+    public OrgMappingsData addOrgMappings(@RequestBody OrgMappingsForm form) throws ApiException {
+        return organizationDto.addOrgMapping(form);
+    }
+
+    @ApiOperation(value = "Edit Org Mapping")
+    @RequestMapping(value = "/orgs/mappings/{id}", method = RequestMethod.PUT)
+    public OrgMappingsData editOrgMappings(@PathVariable Integer id, @RequestBody OrgMappingsForm form) throws ApiException {
+        return organizationDto.editOrgMappings(id, form);
+    }
 
     @ApiOperation(value = "Get All Organizations")
     @RequestMapping(value = "/orgs", method = RequestMethod.GET)

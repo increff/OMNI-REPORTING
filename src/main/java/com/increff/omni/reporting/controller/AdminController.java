@@ -222,7 +222,7 @@ public class AdminController {
         return organizationDto.addOrgMapping(form);
     }
 
-    @ApiOperation(value = "Map organization to a schema and connection")
+    @ApiOperation(value = "Edit Org Mapping")
     @RequestMapping(value = "/orgs/mappings/{id}", method = RequestMethod.PUT)
     public OrgMappingsData editOrgMappings(@PathVariable Integer id, @RequestBody OrgMappingsForm form) throws ApiException {
         return organizationDto.editOrgMappings(id, form);

@@ -38,7 +38,7 @@ public class InputControlApi extends AbstractApi {
 
     public InputControlPojo add(InputControlPojo pojo, InputControlQueryPojo queryPojo,
                                 List<InputControlValuesPojo> valuesPojo) throws ApiException {
-        validateControlAddition(pojo); // todo : add alias unique cosntraint
+        validateControlAddition(pojo);
         setDateType(pojo);
         dao.persist(pojo);
         addQueryOrValues(queryPojo, pojo, valuesPojo);
