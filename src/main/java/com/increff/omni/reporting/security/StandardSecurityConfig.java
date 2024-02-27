@@ -1,6 +1,7 @@
 package com.increff.omni.reporting.security;
 
 import com.increff.account.client.AuthTokenFilter;
+import com.increff.omni.reporting.model.constants.Roles;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -21,24 +22,19 @@ public class StandardSecurityConfig extends WebSecurityConfigurerAdapter {
     private AuthTokenFilter authTokenFilter;
     @Autowired
     private RateLimitingFilter rateLimitingFilter;
-
-    public static final String APP_ADMIN = "app.admin";
-    public static final String REPORT_ADMIN = "report.admin";
-    public static final String REPORT_STANDARD = "report.standard";
-    public static final String REPORT_CUSTOM = "report.custom";
-
+    
     @Override
     protected void configure(HttpSecurity http) throws Exception {
 
         http// Match only these URLs
                 .requestMatchers()//
                 .antMatchers("/standard/**").and().authorizeRequests()//
-                .antMatchers("/standard/schedules/**").hasAnyAuthority(APP_ADMIN)//
-                .antMatchers("/standard/pipelines/**").hasAnyAuthority(APP_ADMIN)//
-                .antMatchers(HttpMethod.POST, "/standard/dashboards/{dashboardId}/view").hasAnyAuthority(APP_ADMIN, REPORT_ADMIN, REPORT_STANDARD, REPORT_CUSTOM)//
-                .antMatchers(HttpMethod.GET, "/standard/dashboards/**").hasAnyAuthority(APP_ADMIN, REPORT_ADMIN, REPORT_STANDARD, REPORT_CUSTOM)//
-                .antMatchers("/standard/dashboards/**").hasAnyAuthority(APP_ADMIN)//
-                .antMatchers("/standard/**").hasAnyAuthority(APP_ADMIN, REPORT_ADMIN, REPORT_STANDARD, REPORT_CUSTOM)//
+                .antMatchers("/standard/schedules/**").hasAnyAuthority(Roles.APP_ADMIN.getRole())//
+                .antMatchers("/standard/pipelines/**").hasAnyAuthority(Roles.APP_ADMIN.getRole())//
+                .antMatchers(HttpMethod.POST, "/standard/dashboards/{dashboardId}/view").hasAnyAuthority(Roles.APP_ADMIN.getRole(), Roles.REPORT_ADMIN.getRole(), Roles.OMNI_REPORT_STANDARD.getRole(), Roles.UNIFY_REPORT_STANDARD.getRole(), Roles.OMNI_REPORT_CUSTOM.getRole(), Roles.UNIFY_REPORT_CUSTOM.getRole())//
+                .antMatchers(HttpMethod.GET, "/standard/dashboards/**").hasAnyAuthority(Roles.APP_ADMIN.getRole(), Roles.REPORT_ADMIN.getRole(), Roles.OMNI_REPORT_STANDARD.getRole(), Roles.UNIFY_REPORT_STANDARD.getRole(), Roles.OMNI_REPORT_CUSTOM.getRole(), Roles.UNIFY_REPORT_CUSTOM.getRole())//
+                .antMatchers("/standard/dashboards/**").hasAnyAuthority(Roles.APP_ADMIN.getRole())//
+                .antMatchers("/standard/**").hasAnyAuthority(Roles.APP_ADMIN.getRole(), Roles.REPORT_ADMIN.getRole(), Roles.OMNI_REPORT_STANDARD.getRole(), Roles.UNIFY_REPORT_STANDARD.getRole(), Roles.OMNI_REPORT_CUSTOM.getRole(), Roles.UNIFY_REPORT_CUSTOM.getRole())//
                 .and().cors().and().csrf().disable()
                 .addFilterBefore(authTokenFilter, BasicAuthenticationFilter.class)
                 .addFilterAfter(rateLimitingFilter, AuthTokenFilter.class)
