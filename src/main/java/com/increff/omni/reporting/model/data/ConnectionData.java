@@ -1,5 +1,6 @@
 package com.increff.omni.reporting.model.data;
 
+import com.increff.omni.reporting.model.constants.DBType;
 import com.increff.omni.reporting.model.form.ConnectionForm;
 import lombok.Getter;
 import lombok.Setter;
@@ -15,4 +16,5 @@ public class ConnectionData {
     private String name;
     private String host;
     private String username;
+    private DBType dbType;
 }
