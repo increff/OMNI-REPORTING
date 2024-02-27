@@ -163,6 +163,7 @@ public class DashboardDto extends AbstractDto {
 
         extractCommonFilters(charts, filterDetails);
         // todo : merge validation groups for common filters and send to UI
+
         return filterDetails;
     }
 
@@ -202,7 +203,7 @@ public class DashboardDto extends AbstractDto {
     private void extractCommonFilters(List<DashboardChartPojo> charts, Map<String, List<InputControlData>> filterDetails) {
         // combine all values of each chart into a single list
         List<InputControlData> filters = charts.stream().map(DashboardChartPojo::getChartAlias).map(filterDetails::get).flatMap(List::stream).collect(Collectors.toList());
-        // remove duplicate param_names from the list
+        // get all param_names
         Set<String> paramNames = filters.stream().map(InputControlData::getParamName).collect(Collectors.toSet());
         // keep first occurrence of each param_name
         List<InputControlData> commonFilters = new ArrayList<>();
@@ -212,7 +213,7 @@ public class DashboardDto extends AbstractDto {
                 paramNames.remove(filter.getParamName());
             }
         }
-        filterDetails.put("common", filters);
+        filterDetails.put("common", commonFilters);
     }
 
     /**
