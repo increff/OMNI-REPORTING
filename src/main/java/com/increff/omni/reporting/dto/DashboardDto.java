@@ -76,7 +76,7 @@ public class DashboardDto extends AbstractDto {
     public List<DefaultValueData> upsertDefaultValues(List<DefaultValueForm> forms) throws ApiException {
         List<DefaultValuePojo> pojos = new ArrayList<>();
         if(forms.isEmpty()) return new ArrayList<>();
-
+        // todo : add validation for default values belong to same dashboard id
         defaultValueApi.deleteByDashboardId(forms.get(0).getDashboardId()); // Delete all existing default values for dashboard
         // todo : validate default values based on validation groups for dashboard charts. Also, will need to validate when charts are updated for dashboard.
         for(DefaultValueForm form : forms) {
@@ -162,7 +162,7 @@ public class DashboardDto extends AbstractDto {
         setFilterDefaults(dashboard, charts, filterDetails);
 
         extractCommonFilters(charts, filterDetails);
-
+        // todo : merge validation groups for common filters and send to UI
         return filterDetails;
     }
 
@@ -267,7 +267,10 @@ public class DashboardDto extends AbstractDto {
         DashboardChartPojo charts = dashboardChartApi.getCheckByDashboardAndChartAlias(dashboardId, report.getAlias());
         ChartType type = report.getChartType();
 
-        List<Map<String, String>> data = reportDto.getLiveData(form);
+        // Get all charts in dashboard. The following is used for merging validation groups. Thus, get all charts irrespective of user accessible charts
+        List<ReportPojo> allCharts = reportApi.getByAliasAndSchema(dashboardChartApi.getByDashboardId(dashboardId).stream().map(DashboardChartPojo::getChartAlias).collect(Collectors.toList()),
+                orgMappingApi.getCheckByOrgId(dashboard.getOrgId()).stream().map(OrgMappingPojo::getSchemaVersionId).collect(Collectors.toList()), true);
+        List<Map<String, String>> data = reportDto.getLiveData(form, allCharts.stream().map(ReportPojo::getId).collect(Collectors.toList()));
 
         ChartInterface chartInterface = getChartData(type);
         chartInterface.validateNormalize(data, type);
@@ -432,5 +435,6 @@ public class DashboardDto extends AbstractDto {
         }
         return dashboardIdsWithUserAccessSchemaVersion;
     }
+
 
 }

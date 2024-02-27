@@ -89,7 +89,7 @@ public class ReportDto extends AbstractDto {
         return reportData;
     }
 
-    public List<Map<String, String>> getLiveDataForAnyOrganization(ReportRequestForm form, Integer orgId)
+    public List<Map<String, String>> getLiveDataForAnyOrganization(ReportRequestForm form, Integer orgId, List<Integer> valGroupMergeReportIds)
             throws ApiException, IOException {
         OrganizationPojo organizationPojo = organizationApi.getCheck(orgId);
         ReportPojo reportPojo = reportApi.getCheck(form.getReportId());
@@ -104,7 +104,8 @@ public class ReportDto extends AbstractDto {
         ZonedDateTime startTime = ZonedDateTime.now();
         try {
             List<ReportInputParamsPojo> reportInputParamsPojoList = validateControls(form, orgId, reportPojo, password);
-            return flowApi.validateAndGetLiveData(reportPojo, reportInputParamsPojoList, connectionPojo, password, form.getQuery());
+            return flowApi.validateAndGetLiveData(reportPojo, reportInputParamsPojoList, connectionPojo, password, form.getQuery(),
+                    reportApi.getByIds(valGroupMergeReportIds));
         } finally {
             flowApi.saveAudit(reportPojo.getId().toString(), AuditActions.LIVE_REPORT.toString(),
                     "Live Report",
@@ -114,8 +115,8 @@ public class ReportDto extends AbstractDto {
         }
     }
 
-    public List<Map<String, String>> getLiveData(ReportRequestForm form) throws ApiException, IOException {
-        return getLiveDataForAnyOrganization(form, getOrgId());
+    public List<Map<String, String>> getLiveData(ReportRequestForm form, List<Integer> valGroupsMergeReportIds) throws ApiException, IOException {
+        return getLiveDataForAnyOrganization(form, getOrgId(), valGroupsMergeReportIds);
     }
 
     public void updateStatus(Integer reportId, Boolean isEnabled) throws ApiException {
@@ -163,7 +164,7 @@ public class ReportDto extends AbstractDto {
         Integer schemaVersionId = report.getSchemaVersionId();
         log.debug("Testing query on orgId : " + orgId + " schemaVersionId : " + schemaVersionId + " reportName : " + report.getName() + " reportId : " + report.getId());
 
-        List<Map<String, String>> data = getLiveDataForAnyOrganization(form, orgId);
+        List<Map<String, String>> data = getLiveDataForAnyOrganization(form, orgId, Collections.singletonList(form.getReportId()));
         ChartInterface chartInterface = getChartData(report.getChartType());
         chartInterface.validateNormalize(data, report.getChartType());
 

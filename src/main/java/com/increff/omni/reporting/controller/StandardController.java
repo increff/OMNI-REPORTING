@@ -71,11 +71,12 @@ public class StandardController {
         return reportDto.selectByAlias(isChart, alias);
     }
 
-    @ApiOperation(value = "Get Live Data")
-    @RequestMapping(value = "/reports/live", method = RequestMethod.POST)
-    public List<Map<String, String>> getLiveData(@RequestBody ReportRequestForm form) throws ApiException, IOException {
-        return reportDto.getLiveData(form);
-    }
+    // todo : remove if unused
+//    @ApiOperation(value = "Get Live Data")
+//    @RequestMapping(value = "/reports/live", method = RequestMethod.POST)
+//    public List<Map<String, String>> getLiveData(@RequestBody ReportRequestForm form) throws ApiException, IOException {
+//        return reportDto.getLiveData(form);
+//    }
 
     @ApiOperation(value = "Get validation group")
     @RequestMapping(value = "/reports/{reportId}/controls/validations", method = RequestMethod.GET)

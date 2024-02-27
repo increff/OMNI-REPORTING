@@ -37,4 +37,17 @@ public class ReportValidationGroupPojo extends AbstractVersionedPojo {
 
     @Column(nullable = false)
     private Integer reportControlId;
+
+    @Override
+    public String toString() {
+        return "ReportValidationGroupPojo{" +
+                "id=" + id +
+                ", groupName='" + groupName + '\'' +
+                ", type=" + type +
+                ", validationValue=" + validationValue +
+                ", reportId=" + reportId +
+                ", isSystemValidation=" + isSystemValidation +
+                ", reportControlId=" + reportControlId +
+                '}';
+    }
 }

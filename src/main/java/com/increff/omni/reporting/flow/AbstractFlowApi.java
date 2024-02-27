@@ -9,16 +9,16 @@ import com.increff.omni.reporting.validators.MandatoryValidator;
 import com.increff.omni.reporting.validators.SingleMandatoryValidator;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
+import lombok.extern.log4j.Log4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.increff.account.client.SecurityUtil.getPrincipal;
 
+@Log4j
 @Service
 public class AbstractFlowApi extends AbstractAuditApi {
 
@@ -41,10 +41,16 @@ public class AbstractFlowApi extends AbstractAuditApi {
         return getPrincipal().getDomainId();
     }
 
-    protected void validate(ReportPojo reportPojo, List<ReportInputParamsPojo> reportInputParamsPojoList)
-            throws ApiException {
-        List<ReportValidationGroupPojo> reportValidationGroupPojoList = reportValidationGroupApi
-                .getByReportId(reportPojo.getId());
+    protected void validate(ReportPojo reportPojo, List<ReportInputParamsPojo> reportInputParamsPojoList,
+                            List<ReportValidationGroupPojo> overridenReportValidationGroupPojoList) throws ApiException {
+
+        List<ReportValidationGroupPojo> reportValidationGroupPojoList = new ArrayList<>();
+        if(Objects.nonNull(overridenReportValidationGroupPojoList))
+            reportValidationGroupPojoList = overridenReportValidationGroupPojoList;
+        else {
+            reportValidationGroupPojoList =reportValidationGroupApi
+                    .getByReportId(reportPojo.getId());
+        }
         Map<String, List<ReportValidationGroupPojo>> groupedByName = reportValidationGroupPojoList.stream()
                 .collect(Collectors.groupingBy(ReportValidationGroupPojo::getGroupName));
 
@@ -89,5 +95,72 @@ public class AbstractFlowApi extends AbstractAuditApi {
             default:
                 throw new ApiException(ApiStatus.BAD_DATA, "Invalid Validation Type");
         }
+    }
+
+
+    public List<ReportValidationGroupPojo> mergeValidationGroups(Integer queryReportId, List<ReportPojo> reports) throws ApiException {
+        log.info("Merging validation groups for queryReportId: " + queryReportId + " and reports: " + reports); // todo : change log to debug
+        List<ReportValidationGroupPojo> finalGroups = new ArrayList<>();
+        List<ReportValidationGroupPojo> allReportValidationGroups = new ArrayList<>();
+        Map<Integer, Set<Integer>> reportIdToControlIdsMap = new HashMap<>();
+        Map<Integer, List<ReportControlsPojo>> controlIdToReportControlPojosListMap = new HashMap<>();
+
+        for(ReportPojo report : reports){
+            allReportValidationGroups.addAll(reportValidationGroupApi.getByReportId(report.getId()));
+
+            List<ReportControlsPojo> reportControlsPojos = reportControlsApi.getByReportId(report.getId());
+            for(ReportControlsPojo reportControlsPojo : reportControlsPojos){
+                List<ReportControlsPojo> reportControlPojos = controlIdToReportControlPojosListMap.getOrDefault(reportControlsPojo.getControlId(), new ArrayList<>());
+                reportControlPojos.add(reportControlsPojo);
+                controlIdToReportControlPojosListMap.put(reportControlsPojo.getControlId(), reportControlPojos);
+            }
+
+            List<Integer> controlIds = reportControlsPojos.stream()
+                    .map(ReportControlsPojo::getControlId).collect(Collectors.toList());
+
+            reportIdToControlIdsMap.put(report.getId(), new HashSet<>(controlIds));
+        }
+        log.info("All report validation groups: " + allReportValidationGroups);
+
+        // for every control id in reportIdToControlIdsMap(queryReportId), get all report
+        for(Integer queryReportControlId : reportIdToControlIdsMap.get(queryReportId)){
+
+            // generate validation groups for controls which only exist in queryReportId as we dont care about other validation groups.
+            List<Integer> reportControlMappingIds = controlIdToReportControlPojosListMap.get(queryReportControlId).stream()
+                    .map(ReportControlsPojo::getId).collect(Collectors.toList());
+            List<ReportValidationGroupPojo> controlValidationGroups = allReportValidationGroups.stream()
+                    .filter(r -> reportControlMappingIds.contains(r.getReportControlId())).collect(Collectors.toList());
+
+            // get mandatory groups for this control id
+            List<ReportValidationGroupPojo> mandatoryGroups = controlValidationGroups.stream()
+                    .filter(r -> r.getType().equals(ValidationType.MANDATORY)).collect(Collectors.toList());
+            if(!mandatoryGroups.isEmpty()){
+                ReportValidationGroupPojo group = mandatoryGroups.get(0);
+                group.setReportId(queryReportId);
+                group.setReportControlId(controlIdToReportControlPojosListMap.get(queryReportControlId).stream()
+                        .filter(r -> r.getReportId().equals(queryReportId)).collect(Collectors.toList()).get(0).getId());
+                finalGroups.add(group);
+            }
+
+            // get date range groups for this control id
+            List<ReportValidationGroupPojo> dateRangeGroups = controlValidationGroups.stream()
+                    .filter(r -> r.getType().equals(ValidationType.DATE_RANGE)).collect(Collectors.toList());
+            if(!dateRangeGroups.isEmpty()){
+                // get min value of all groups
+                dateRangeGroups.sort(Comparator.comparing(ReportValidationGroupPojo::getValidationValue));
+
+                ReportValidationGroupPojo group = dateRangeGroups.get(0);
+                group.setReportId(queryReportId);
+                group.setReportControlId(controlIdToReportControlPojosListMap.get(queryReportControlId).stream()
+                        .filter(r -> r.getReportId().equals(queryReportId)).collect(Collectors.toList()).get(0).getId());
+                group.setValidationValue(dateRangeGroups.get(0).getValidationValue());
+                finalGroups.add(group);
+            }
+
+            // ignore SINGLE_MANDATORY groups as they won't be used for charts/dashboards
+
+        }
+        log.info("Final groups: " + finalGroups);
+        return finalGroups;
     }
 }

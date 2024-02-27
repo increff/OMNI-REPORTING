@@ -298,12 +298,13 @@ public class AdminController {
         return reportDto.selectByOrg(orgId, isChart, visualization.orElse(null));
     }
 
-    @ApiOperation(value = "Get Live Data For Any Organization")
-    @RequestMapping(value = "/orgs/{orgId}/reports/live", method = RequestMethod.POST)
-    public List<Map<String, String>> requestReport(@PathVariable Integer orgId, @RequestBody ReportRequestForm form)
-            throws ApiException, IOException {
-        return reportDto.getLiveDataForAnyOrganization(form, orgId);
-    }
+//    // todo : remove if unused
+//    @ApiOperation(value = "Get Live Data For Any Organization")
+//    @RequestMapping(value = "/orgs/{orgId}/reports/live", method = RequestMethod.POST)
+//    public List<Map<String, String>> requestReport(@PathVariable Integer orgId, @RequestBody ReportRequestForm form)
+//            throws ApiException, IOException {
+//        return reportDto.getLiveDataForAnyOrganization(form, orgId);
+//    }
 
     @ApiOperation(value = "Select controls for a report for given organization")
     @RequestMapping(value = "/orgs/{orgId}/reports/{reportId}/controls", method = RequestMethod.GET)

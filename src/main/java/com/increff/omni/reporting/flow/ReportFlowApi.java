@@ -98,9 +98,10 @@ public class ReportFlowApi extends AbstractFlowApi {
 
     public List<Map<String, String>> validateAndGetLiveData(ReportPojo reportPojo,
                                                             List<ReportInputParamsPojo> reportInputParamsPojoList,
-                                                            ConnectionPojo connectionPojo, String password, String query)
+                                                            ConnectionPojo connectionPojo, String password, String query,
+                                                            List<ReportPojo> valGroupMergeReports)
             throws ApiException, IOException {
-        validate(reportPojo, reportInputParamsPojoList);
+        validate(reportPojo, reportInputParamsPojoList, mergeValidationGroups(reportPojo.getId(), valGroupMergeReports));
 
         if(Objects.isNull(query))
             query = queryApi.getByReportId(reportPojo.getId()).getQuery();

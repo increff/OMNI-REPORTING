@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -48,7 +49,7 @@ public class ReportRequestFlowApi extends AbstractFlowApi {
         if (!CollectionUtils.isEmpty(pendingReports) && pendingReports.size() >= MAX_OPEN_REPORT_REQUESTS)
             throw new ApiException(ApiStatus.BAD_DATA, "Wait for existing reports to get executed");
         ReportPojo reportPojo = reportApi.getCheck(pojo.getReportId());
-        validate(reportPojo, reportInputParamsPojoList);
+        validate(reportPojo, reportInputParamsPojoList, new ArrayList<>());
         requestReportWithoutValidation(pojo, reportInputParamsPojoList);
     }
 
