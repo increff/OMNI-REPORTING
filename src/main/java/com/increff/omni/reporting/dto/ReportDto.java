@@ -68,6 +68,7 @@ public class ReportDto extends AbstractDto {
 
     public ReportData add(ReportForm form) throws ApiException {
         validateReportForm(form);
+        form.setAlias(form.getAlias().trim().toLowerCase());
         ReportPojo pojo = ConvertUtil.convert(form, ReportPojo.class);
         pojo = flowApi.addReport(pojo, form.getLegends());
         flowApi.saveAudit(pojo.getId().toString(), AuditActions.CREATE_REPORT.toString()
