@@ -9,7 +9,9 @@ import javax.persistence.*;
 @Entity
 @Setter
 @Getter
-@Table(name = "connection")
+@Table(name = "connection", uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"name"})
+})
 public class ConnectionPojo extends AbstractVersionedPojo{
 
     @Id
