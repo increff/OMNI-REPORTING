@@ -128,11 +128,16 @@ public class InputControlDto extends AbstractDto {
         for(InputControlPojo p : pojos) {
             ConnectionPojo connectionPojo = null;
             String password = null;
-            if(Objects.nonNull(orgId)) {
-                OrgMappingPojo orgMappingPojo = orgMappingApi.getCheckByOrgIdSchemaVersionId(orgId, p.getSchemaVersionId());
-                connectionPojo = connectionApi.getCheck(orgMappingPojo.getConnectionId());
-                password = getDecryptedPassword(connectionPojo.getPassword());
-            }
+
+            if(Objects.nonNull(orgId)) { // If orgId is null, then we can't get connection details
+                OrgMappingPojo orgMappingPojo = orgMappingApi.getByOrgIdSchemaVersionId(orgId, p.getSchemaVersionId());
+                if(Objects.nonNull(orgMappingPojo)) { // If orgIdExists but org is mapped to different schema version, then we can't get connection details for input control of different schema version
+                    connectionPojo = connectionApi.getCheck(orgMappingPojo.getConnectionId());
+                    password = getDecryptedPassword(connectionPojo.getPassword());
+                } else
+                    log.debug("Cannot get filter options. OrgMapping does not exist. org : " + orgId + " schema version id : " + p.getSchemaVersionId());
+            } else
+                log.debug("Cannot get filter options. OrgId is null. control : " + p.getId() + " schema version id : " + p.getSchemaVersionId());
 
             SchemaVersionPojo schemaVersionPojo = schemaVersionApi.getCheck(p.getSchemaVersionId());
             dataList.add(getDataFromPojo(p, controlToValuesMapping, controlToQueryMapping, connectionPojo,

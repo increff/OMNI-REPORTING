@@ -67,6 +67,10 @@ public class OrgMappingApi extends AbstractAuditApi {
         return pojo;
     }
 
+    public OrgMappingPojo getByOrgIdSchemaVersionId(Integer orgId, Integer schemaVersionId) {
+        return dao.selectByOrgIdSchemaVersionId(orgId, schemaVersionId);
+    }
+
 
     public List<OrgMappingPojo> getBySchemaVersionId(Integer schemaVersionId)  {
         return dao.selectMultiple("schemaVersionId", schemaVersionId);
@@ -74,10 +78,6 @@ public class OrgMappingApi extends AbstractAuditApi {
 
     private List<OrgMappingPojo> getByOrgId(Integer orgId) {
         return dao.selectMultiple("orgId", orgId);
-    }
-
-    private OrgMappingPojo getByOrgIdSchemaVersionId(Integer orgId, Integer schemaVersionId) {
-        return dao.selectByOrgIdSchemaVersionId(orgId, schemaVersionId);
     }
 
     public List<OrgMappingPojo> getCheckBySchemaVersionId(Integer schemaVersionId) throws ApiException {
