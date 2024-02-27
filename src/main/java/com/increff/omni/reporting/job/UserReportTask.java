@@ -103,6 +103,8 @@ public class UserReportTask extends AbstractTask{
         queryDetailsForm.setUsername(connectionPojo.getUsername());
         queryDetailsForm.setReadTimeout(properties.getMaxExecutionTime());
         queryDetailsForm.setHost(connectionPojo.getHost());
+        queryDetailsForm.setDbType(
+                com.increff.commons.queryexecutor.constants.DBType.valueOf(connectionPojo.getDbType().toString()));
         form.setFileUploadDetails(uploadDetailsForm);
         form.setQueryDetails(queryDetailsForm);
         return form;

@@ -75,8 +75,6 @@ public class ScheduleReportTask extends AbstractTask {
     @Autowired
     private PipelineApi pipelineApi;
     @Autowired
-    private QueryExecutorClient executorClient;
-    @Autowired
     private EncryptionClient encryptionClient;
 
 
