@@ -170,8 +170,8 @@ public class AdminController {
 
     @ApiOperation(value = "Test Query Live")
     @RequestMapping(value = "/reports/query/try-live", method = RequestMethod.POST)
-    public List<ViewDashboardData> testQueryLive(@RequestBody ReportRequestForm form) throws ApiException, IOException {
-        return reportDto.testQueryLive(form);
+    public TestQueryLiveData testQueryLive(@RequestBody ReportRequestForm form, @RequestParam Integer orgId) throws ApiException, IOException {
+        return reportDto.testQueryLive(form, orgId);
     }
 
     @ApiOperation(value = "Get Report Query")

@@ -158,26 +158,34 @@ public class ReportDto extends AbstractDto {
         return data;
     }
 
-    public List<ViewDashboardData> testQueryLive(ReportRequestForm form) throws IOException, ApiException {
+    public TestQueryLiveData testQueryLive(ReportRequestForm form, Integer orgId) throws IOException, ApiException {
         ReportPojo report = reportApi.getCheck(form.getReportId());
         Integer schemaVersionId = report.getSchemaVersionId();
-        Integer orgId = orgMappingApi.getCheckBySchemaVersionId(schemaVersionId).get(0).getOrgId();
         log.debug("Testing query on orgId : " + orgId + " schemaVersionId : " + schemaVersionId + " reportName : " + report.getName() + " reportId : " + report.getId());
 
         List<Map<String, String>> data = getLiveDataForAnyOrganization(form, orgId);
         ChartInterface chartInterface = getChartData(report.getChartType());
         chartInterface.validateNormalize(data, report.getChartType());
 
-        return Collections.singletonList(getTestQueryLiveData(report, data, chartInterface));
+        return getTestQueryLiveData(report, data, chartInterface, orgId);
     }
 
-    private ViewDashboardData getTestQueryLiveData(ReportPojo report, List<Map<String, String>> data, ChartInterface chartInterface) throws ApiException {
+    private TestQueryLiveData getTestQueryLiveData(ReportPojo report, List<Map<String, String>> data, ChartInterface chartInterface,
+                                Integer orgId) throws ApiException {
         ViewDashboardData viewData = new ViewDashboardData();
         viewData.setChartData(chartInterface.transform(data));
         viewData.setLegends(convertChartLegendsPojoToChartLegendsData(chartLegendsApi.getByChartId(report.getId())).getLegends());
         viewData.setChartId(report.getId());
         viewData.setType(report.getChartType());
-        return viewData;
+
+        TestQueryLiveData testQueryLiveData = new TestQueryLiveData();
+        testQueryLiveData.setViewDashboardData(viewData);
+        testQueryLiveData.setTestedSchemaVersionId(report.getSchemaVersionId());
+        testQueryLiveData.setTestedOrgId(orgId);
+
+        OrgMappingPojo orgMappingPojo = orgMappingApi.getCheckByOrgIdSchemaVersionId(orgId, report.getSchemaVersionId());
+        testQueryLiveData.setTestedConnectionId(orgMappingPojo.getConnectionId());
+        return testQueryLiveData;
     }
 
     public ReportData selectByAlias(Boolean isChart, String alias) throws ApiException {
