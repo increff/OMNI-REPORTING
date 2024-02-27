@@ -78,7 +78,7 @@ public class DashboardDto extends AbstractDto {
         if(forms.isEmpty()) return new ArrayList<>();
 
         defaultValueApi.deleteByDashboardId(forms.get(0).getDashboardId()); // Delete all existing default values for dashboard
-
+        // todo : validate default values based on validation groups for dashboard charts. Also, will need to validate when charts are updated for dashboard.
         for(DefaultValueForm form : forms) {
             checkValid(form);
             api.getCheck(form.getDashboardId(), getOrgId());
