@@ -353,9 +353,9 @@ public class ReportFlowApi extends AbstractFlowApi {
         List<AppName> existingAppNames = aliasSchemas.stream().map(SchemaVersionPojo::getAppName).collect(Collectors.toList());
         AppName curentAppName = schemaVersionApi.getCheck(pojo.getSchemaVersionId()).getAppName();
         if (existingAppNames.size() > 1)
-            throw new ApiException(ApiStatus.BAD_DATA, "Alias is not unique across schema versions");
+            throw new ApiException(ApiStatus.BAD_DATA, "Alias " + pojo.getAlias() + " exists across app names!!"); // This should never occur. If this is hit, something disastrous has happened
         if( (existingAppNames.size() == 1) && (existingAppNames.get(0) != curentAppName) )
-            throw new ApiException(ApiStatus.BAD_DATA, "Same alias " + pojo.getAlias() + " is already present in different app." +
+            throw new ApiException(ApiStatus.BAD_DATA, "Alias " + pojo.getAlias() + " is already present in different app." +
                     " CurrentAppName : " + curentAppName + " ExistingAppName : " + existingAppNames.get(0));
 
         if(StringUtil.isEmpty(pojo.getAlias()) || pojo.getAlias().contains(" "))
