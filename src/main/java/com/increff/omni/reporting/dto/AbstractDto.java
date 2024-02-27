@@ -6,6 +6,7 @@ import com.increff.omni.reporting.api.*;
 import com.increff.omni.reporting.flow.InputControlFlowApi;
 import com.increff.omni.reporting.model.constants.ReportRequestType;
 import com.increff.omni.reporting.model.constants.ReportType;
+import com.increff.omni.reporting.model.constants.Roles;
 import com.increff.omni.reporting.pojo.*;
 import com.increff.service.encryption.EncryptionClient;
 import com.increff.service.encryption.common.CryptoCommon;
@@ -48,9 +49,10 @@ public class AbstractDto extends AbstractDtoApi {
     private CustomReportAccessApi customReportAccessApi;
 
     public static boolean isCustomReportUser() {
-        if(getPrincipal().getRoles().contains(REPORT_ADMIN) || getPrincipal().getRoles().contains(APP_ADMIN))
+        if(getPrincipal().getRoles().contains(Roles.APP_ADMIN.getRole()) || getPrincipal().getRoles().contains(Roles.REPORT_ADMIN.getRole()))
             return false;
-        return getPrincipal().getRoles().contains(REPORT_CUSTOM);
+        // todo : add check where this function is called to filter custom reports based on UNIFY / OMNI, currently all custom reports are returned
+        return getPrincipal().getRoles().contains(Roles.UNIFY_REPORT_CUSTOM.getRole()) || getPrincipal().getRoles().contains(Roles.OMNI_REPORT_CUSTOM.getRole());
     }
 
     public static int getOrgId() {
