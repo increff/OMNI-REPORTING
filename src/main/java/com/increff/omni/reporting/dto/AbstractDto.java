@@ -51,7 +51,6 @@ public class AbstractDto extends AbstractDtoApi {
     public static boolean isCustomReportUser() {
         if(getPrincipal().getRoles().contains(Roles.APP_ADMIN.getRole()) || getPrincipal().getRoles().contains(Roles.REPORT_ADMIN.getRole()))
             return false;
-        // todo : add check where this function is called to filter custom reports based on UNIFY / OMNI, currently all custom reports are returned
         return getPrincipal().getRoles().contains(Roles.UNIFY_REPORT_CUSTOM.getRole()) || getPrincipal().getRoles().contains(Roles.OMNI_REPORT_CUSTOM.getRole());
     }
 

@@ -165,17 +165,18 @@ public class ReportFlowApi extends AbstractFlowApi {
     @Transactional(readOnly = true)
     public List<ReportPojo> getAll(Integer orgId, Boolean isChart, VisualizationType visualization) throws ApiException {
 
+        // get intersection of schema version ids accessible to user and schema version ids mapped to org
         List<OrgMappingPojo> orgMappingPojo = orgMappingApi.getCheckByOrgId(orgId);
-        List<Integer> orgSchemaVersionIds = orgMappingPojo.stream().map(OrgMappingPojo::getSchemaVersionId)
+        List<Integer> orgUserSchemaVersionIds = orgMappingPojo.stream().map(OrgMappingPojo::getSchemaVersionId)
                 .collect(Collectors.toList());
         List<Integer> userAllowedSchemaVersionIds = schemaVersionApi.getByAppNames(UserPrincipalUtil.getAccessibleApps()).stream()
                 .map(SchemaVersionPojo::getId).collect(Collectors.toList());
-        orgSchemaVersionIds.retainAll(userAllowedSchemaVersionIds);
+        orgUserSchemaVersionIds.retainAll(userAllowedSchemaVersionIds);
 
         List<ReportPojo> reportPojoList = new ArrayList<>();
         //All standard
         List<ReportPojo> standard =
-                api.getByTypeAndSchema(ReportType.STANDARD, orgSchemaVersionIds, isChart, visualization);
+                api.getByTypeAndSchema(ReportType.STANDARD, orgUserSchemaVersionIds, isChart, visualization);
 
         //All custom
         List<CustomReportAccessPojo> customAccess = customReportAccessApi.getByOrgId(orgId);
@@ -183,7 +184,7 @@ public class ReportFlowApi extends AbstractFlowApi {
                 .collect(Collectors.toList());
 
         List<ReportPojo> custom =
-                api.getByIdsAndSchema(customIds, orgSchemaVersionIds, isChart);
+                api.getByIdsAndSchema(customIds, orgUserSchemaVersionIds, isChart);
 
         if(!isCustomReportUser()) // Add standard reports only if user in not custom report user
             reportPojoList.addAll(standard);
