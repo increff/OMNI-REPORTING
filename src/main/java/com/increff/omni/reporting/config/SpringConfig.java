@@ -169,4 +169,9 @@ public class SpringConfig extends WebMvcConfigurerAdapter {
         return factory;
     }
 
+    @Bean
+    public ObjectMapper getObjectMapper() {
+        return new ObjectMapper();
+    }
+
 }

@@ -93,7 +93,7 @@ public class MongoUtil {
             MongoDatabase database = mongoClient.getDatabase("admin");
             MongoIterable<String> collections = database.listCollectionNames();
             for (String collection : collections) {
-                log.info("Collection: " + collection);
+                log.debug("Collection: " + collection);
             }
         } catch (Exception e) {
             log.error("Error in testing mongo connection : " + e.getMessage());

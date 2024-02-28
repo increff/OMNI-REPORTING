@@ -25,6 +25,8 @@ import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
+import static com.increff.omni.reporting.util.SecurityFilterUtil.*;
+
 @Log4j
 @Component
 public class ReportAppAccessFilter extends GenericFilterBean {
@@ -35,13 +37,16 @@ public class ReportAppAccessFilter extends GenericFilterBean {
     @Autowired
     private ReportApi reportApi;
 
-    private static final String REPORT_ID_STRING = "reportId";
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) {
         try {
             Object controller = getControllerByURL((HttpServletRequest) request);
-            if(Objects.nonNull(controller) && !controller.getClass().equals(AppAccessController.class))
+            if(Objects.isNull(controller)) // Continue if controller not found
+                chain.doFilter(request, response);
+            if(!controller.getClass().equals(AppAccessController.class)) // Continue if controller is not AppAccessController
                 chain.doFilter(request, response);
 
 
@@ -80,46 +85,12 @@ public class ReportAppAccessFilter extends GenericFilterBean {
         reportId = getFromPathVariable(request); // Check if the report id is in the path variable
         if (reportId != null) return reportId;
 
-        reportId = getFromJsonPayload(request); // Check if the request contains a JSON body
+        reportId = getFromJsonPayload(request, objectMapper); // Check if the request contains a JSON body
         if (reportId != null) return reportId;
 
         return null;
     }
 
-    private static String getFromJsonPayload(HttpServletRequest request) throws ApiException {
-        String contentType = request.getContentType();
-        if (contentType != null && contentType.startsWith("application/json")) {
-            try {
-                ObjectMapper objectMapper = new ObjectMapper();
-                JsonNode jsonNode = objectMapper.readTree(request.getReader());
 
-                JsonNode reportIdNode = jsonNode.get("reportId");
-                if (reportIdNode != null) {
-                    return reportIdNode.asText();
-                }
-            } catch (IOException e) {
-                log.error("ReportAppAccessFilter Error reading JSON payload" + e.getMessage() + Arrays.asList(e.getStackTrace()));
-                throw new ApiException(ApiStatus.BAD_DATA, "ReportAppAccessFilter Error reading JSON payload " + e.getMessage());
-            }
-        }
-        return null;
-    }
-
-    private static String getFromPathVariable(HttpServletRequest request) {
-        String pathInfo = request.getPathInfo();
-        if (pathInfo != null) {
-            String[] pathSegments = pathInfo.split("/");
-            for (String segment : pathSegments) {
-                if (segment.startsWith(REPORT_ID_STRING + "=")) {
-                    return segment.substring(REPORT_ID_STRING.length()+1); // added 1 for equals sign
-                }
-            }
-        }
-        return null;
-    }
-
-    private static String getFromQueryParameter(HttpServletRequest request) {
-        return request.getParameter(REPORT_ID_STRING);
-    }
 
 }

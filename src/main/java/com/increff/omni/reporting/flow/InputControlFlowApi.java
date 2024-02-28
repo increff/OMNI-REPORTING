@@ -141,6 +141,11 @@ public class InputControlFlowApi extends AbstractApi {
         if(!pojo.getSchemaVersionId().equals(reportPojo.getSchemaVersionId()))
             throw new ApiException(ApiStatus.BAD_DATA, "Report Schema version and input control schema version not " +
                     "matching");
+
+        if(reportPojo.getIsChart())
+            throw new ApiException(ApiStatus.BAD_DATA, "Input control with scope LOCAL can't be added to charts");
+
+
         // Validating if any other control exists with same display or param name
         List<ReportControlsPojo> existingPojos = reportControlsApi.getByReportId(reportId);
         List<Integer> controlIds = existingPojos.stream().map(ReportControlsPojo::getControlId)
