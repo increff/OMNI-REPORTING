@@ -2,7 +2,7 @@ package com.increff.omni.reporting.dto;
 
 import com.increff.omni.reporting.api.*;
 import com.increff.omni.reporting.config.ApplicationProperties;
-import com.increff.omni.reporting.flow.AbstractFlowApi;
+import com.increff.omni.reporting.flow.FlowApi;
 import com.increff.omni.reporting.model.constants.AppName;
 import com.increff.omni.reporting.model.constants.ChartType;
 import com.increff.omni.reporting.model.constants.ReportType;
@@ -68,7 +68,7 @@ public class DashboardDto extends AbstractDto {
     private SchemaVersionApi schemaVersionApi;
 
     @Autowired
-    private AbstractFlowApi abstractFlowApi;
+    private FlowApi flowApi;
 
     @Transactional(rollbackFor = ApiException.class)
     public ApplicationPropertiesData getProperties() {
@@ -116,7 +116,7 @@ public class DashboardDto extends AbstractDto {
         for(ReportPojo report : reports) {
             // ques autowire this ? cannot make static as autoiwred services wont work inside .validate func. cannot extend as abstract dto is already extended in dashboardDto
             // AbstractFlowApi.validate(report, reportInputParamsPojoList, AbstractFlowApi.mergeValidationGroups(report.getId(), reports));
-            abstractFlowApi.validate(report, reportInputParamsPojoList, abstractFlowApi.mergeValidationGroups(report.getId(), reports));
+            flowApi.validate(report, reportInputParamsPojoList, flowApi.mergeValidationGroups(report.getId(), reports));
 
         }
     }

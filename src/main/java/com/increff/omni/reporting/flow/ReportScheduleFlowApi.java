@@ -5,7 +5,6 @@ import com.increff.omni.reporting.dto.CommonDtoHelper;
 import com.increff.omni.reporting.model.constants.ReportRequestType;
 import com.increff.omni.reporting.model.constants.ValidationType;
 import com.increff.omni.reporting.model.data.PipelineFlowData;
-import com.increff.omni.reporting.model.form.PipelineDetailsForm;
 import com.increff.omni.reporting.pojo.*;
 import com.nextscm.commons.lang.StringUtil;
 import com.nextscm.commons.spring.common.ApiException;
@@ -23,7 +22,7 @@ import java.util.stream.Collectors;
 
 @Service
 @Transactional(rollbackFor = ApiException.class)
-public class ReportScheduleFlowApi extends AbstractFlowApi {
+public class ReportScheduleFlowApi extends FlowApi {
 
     @Autowired
     private ReportScheduleApi reportScheduleApi;

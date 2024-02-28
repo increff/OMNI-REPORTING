@@ -20,7 +20,7 @@ import static com.increff.account.client.SecurityUtil.getPrincipal;
 
 @Log4j
 @Service
-public class AbstractFlowApi extends AbstractAuditApi {
+public class FlowApi extends AbstractAuditApi {
 
     @Autowired
     private SingleMandatoryValidator singleMandatoryValidator;

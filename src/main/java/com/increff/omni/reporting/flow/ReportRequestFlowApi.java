@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 import static com.increff.omni.reporting.dto.CommonDtoHelper.getStatusMapping;
 
 @Service
-public class ReportRequestFlowApi extends AbstractFlowApi {
+public class ReportRequestFlowApi extends FlowApi {
 
     @Autowired
     private ReportRequestApi api;

@@ -34,7 +34,7 @@ import static com.increff.omni.reporting.dto.CommonDtoHelper.*;
 @Service
 @Setter
 @Log4j
-public class ReportFlowApi extends AbstractFlowApi {
+public class ReportFlowApi extends FlowApi {
 
     @Autowired
     private SchemaVersionApi schemaVersionApi;
