@@ -30,8 +30,6 @@ public class UserPrincipalUtil {
     public static Map<String, String> getAccessControlMap() {
         Map<String, List<String>> accessControlMap = new HashMap<>();
         UserPrincipal principal = SecurityUtil.getPrincipal();
-        accessControlMap.put(ResourceQueryParamKeys.orgIdQueryParamKey,
-                new ArrayList<>(Collections.singletonList(String.valueOf(principal.getDomainId())))); // todo : remove later if unused
         List<String> accessRoles = principal.getRoles();
         accessRoles.retainAll(USER_ACCESS_ADMIN_AUTHORITIES);
 
