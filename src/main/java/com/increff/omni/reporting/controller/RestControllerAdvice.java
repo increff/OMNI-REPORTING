@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.web.servlet.NoHandlerFoundException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
@@ -28,6 +29,17 @@ public class RestControllerAdvice extends AbstractRestappControllerAdvice {
         data.setDescription(fromThrowable(t));
 //        log.error("Internal Server Error", t);
         return data;
+    }
+
+    @ResponseStatus(value = HttpStatus.NOT_FOUND)
+    @ExceptionHandler(NoHandlerFoundException.class)
+    @ResponseBody
+    public ErrorData handleNotFound(HttpServletRequest req, NoHandlerFoundException e) {
+        ErrorData ed = new ErrorData();
+        ed.setCode(ApiStatus.NOT_FOUND);
+        ed.setDescription("HTTP Status 404 – Not Found");
+        ed.setMessage("HTTP Status 404 – Not Found");
+        return ed;
     }
 
     // Moved from AbstractRestappControllerAdvice to here as it was removed in the next version
