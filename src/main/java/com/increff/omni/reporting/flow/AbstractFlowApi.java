@@ -41,7 +41,7 @@ public class AbstractFlowApi extends AbstractAuditApi {
         return getPrincipal().getDomainId();
     }
 
-    protected void validate(ReportPojo reportPojo, List<ReportInputParamsPojo> reportInputParamsPojoList,
+    public void validate(ReportPojo reportPojo, List<ReportInputParamsPojo> reportInputParamsPojoList,
                             List<ReportValidationGroupPojo> overridenReportValidationGroupPojoList) throws ApiException {
 
         List<ReportValidationGroupPojo> reportValidationGroupPojoList = new ArrayList<>();

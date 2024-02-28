@@ -1,10 +1,7 @@
 package com.increff.omni.reporting.util;
 
 import com.increff.omni.reporting.model.constants.ChartType;
-import com.increff.omni.reporting.model.form.DashboardAddForm;
-import com.increff.omni.reporting.model.form.DashboardChartForm;
-import com.increff.omni.reporting.model.form.ReportForm;
-import com.increff.omni.reporting.model.form.ReportScheduleForm;
+import com.increff.omni.reporting.model.form.*;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
 
@@ -62,5 +59,14 @@ public class ValidateUtil {
             throw new ApiException(ApiStatus.BAD_DATA, "Atleast one email or pipeline is required");
         if(form.getSendTo().size() > 0 && form.getPipelineDetails().size() > 0)
             throw new ApiException(ApiStatus.BAD_DATA, "Only one of email or pipeline should be given, not both");
+    }
+
+    public static void validateDefaultValueForm(List<DefaultValueForm> forms) throws ApiException {
+        for(DefaultValueForm form : forms)
+            checkValid(form);
+        Set<Integer> dashboardIds = forms.stream().map(DefaultValueForm::getDashboardId).collect(Collectors.toSet());
+        if(dashboardIds.size() > 1)
+            throw new ApiException(ApiStatus.BAD_DATA, "All dashboardIds should be same when updating default value");
+
     }
 }

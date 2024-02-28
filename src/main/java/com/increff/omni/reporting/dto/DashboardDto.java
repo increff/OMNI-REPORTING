@@ -2,9 +2,11 @@ package com.increff.omni.reporting.dto;
 
 import com.increff.omni.reporting.api.*;
 import com.increff.omni.reporting.config.ApplicationProperties;
+import com.increff.omni.reporting.flow.AbstractFlowApi;
 import com.increff.omni.reporting.model.constants.AppName;
 import com.increff.omni.reporting.model.constants.ChartType;
 import com.increff.omni.reporting.model.constants.ReportType;
+import com.increff.omni.reporting.model.constants.ValidationType;
 import com.increff.omni.reporting.model.data.*;
 import com.increff.omni.reporting.model.data.Charts.ChartInterface;
 import com.increff.omni.reporting.model.form.DashboardAddForm;
@@ -32,6 +34,7 @@ import java.util.stream.Collectors;
 
 import static com.increff.omni.reporting.util.ChartUtil.getChartData;
 import static com.increff.omni.reporting.util.ConvertUtil.convertChartLegendsPojoToChartLegendsData;
+import static com.increff.omni.reporting.util.ValidateUtil.validateDefaultValueForm;
 
 @Service
 @Log4j
@@ -64,6 +67,9 @@ public class DashboardDto extends AbstractDto {
     @Autowired
     private SchemaVersionApi schemaVersionApi;
 
+    @Autowired
+    private AbstractFlowApi abstractFlowApi;
+
     @Transactional(rollbackFor = ApiException.class)
     public ApplicationPropertiesData getProperties() {
         ApplicationPropertiesData data = new ApplicationPropertiesData();
@@ -76,11 +82,13 @@ public class DashboardDto extends AbstractDto {
     public List<DefaultValueData> upsertDefaultValues(List<DefaultValueForm> forms) throws ApiException {
         List<DefaultValuePojo> pojos = new ArrayList<>();
         if(forms.isEmpty()) return new ArrayList<>();
-        // todo : add validation for default values belong to same dashboard id
+        validateDefaultValueForm(forms);
+
         defaultValueApi.deleteByDashboardId(forms.get(0).getDashboardId()); // Delete all existing default values for dashboard
-        // todo : validate default values based on validation groups for dashboard charts. Also, will need to validate when charts are updated for dashboard.
+
+        runValidationGroupsForDefaultValues(forms);
+
         for(DefaultValueForm form : forms) {
-            checkValid(form);
             api.getCheck(form.getDashboardId(), getOrgId());
             validateControlIdExistsForDashboard(form.getDashboardId(), form.getParamName());
 
@@ -91,6 +99,27 @@ public class DashboardDto extends AbstractDto {
         return ConvertUtil.convert(pojos, DefaultValueData.class);
     }
 
+    private void runValidationGroupsForDefaultValues(List<DefaultValueForm> forms) throws ApiException {
+        List<ReportInputParamsPojo> reportInputParamsPojoList = new ArrayList<>();
+        forms.forEach(f-> {
+           ReportInputParamsPojo pojo = new ReportInputParamsPojo();
+           pojo.setParamKey(f.getParamName());
+           pojo.setParamValue(f.getDefaultValue().get(0));
+           reportInputParamsPojoList.add(pojo);
+        });
+
+        List<DashboardChartPojo> dashboardCharts = dashboardChartApi.getByDashboardId(forms.get(0).getDashboardId());
+        List<String> chartAliases = dashboardCharts.stream().map(DashboardChartPojo::getChartAlias).collect(Collectors.toList());
+        List<Integer> schemaVersionIds = orgMappingApi.getCheckByOrgId(getOrgId()).stream().map(OrgMappingPojo::getSchemaVersionId).collect(Collectors.toList());
+        List<ReportPojo> reports = reportApi.getByAliasAndSchema(chartAliases, schemaVersionIds, true);
+
+        for(ReportPojo report : reports) {
+            // ques autowire this ? cannot make static as autoiwred services wont work inside .validate func. cannot extend as abstract dto is already extended in dashboardDto
+            // AbstractFlowApi.validate(report, reportInputParamsPojoList, AbstractFlowApi.mergeValidationGroups(report.getId(), reports));
+            abstractFlowApi.validate(report, reportInputParamsPojoList, abstractFlowApi.mergeValidationGroups(report.getId(), reports));
+
+        }
+    }
 
 
     @Transactional(rollbackFor = ApiException.class)
@@ -162,7 +191,6 @@ public class DashboardDto extends AbstractDto {
         setFilterDefaults(dashboard, charts, filterDetails);
 
         extractCommonFilters(charts, filterDetails);
-        // todo : merge validation groups for common filters and send to UI
 
         return filterDetails;
     }
@@ -206,14 +234,24 @@ public class DashboardDto extends AbstractDto {
         // get all param_names
         Set<String> paramNames = filters.stream().map(InputControlData::getParamName).collect(Collectors.toSet());
         // keep first occurrence of each param_name
-        List<InputControlData> commonFilters = new ArrayList<>();
+        Map<String, InputControlData> commonFilters = new HashMap<>();
         for (InputControlData filter : filters) {
-            if (paramNames.contains(filter.getParamName())) {
-                commonFilters.add(filter);
-                paramNames.remove(filter.getParamName());
+            if (!commonFilters.containsKey(filter.getParamName())) {
+                commonFilters.put(filter.getParamName(), filter);
+            } else {
+                combineValidationGroupForFilter(commonFilters.get(filter.getParamName()), filter);
             }
         }
-        filterDetails.put("common", commonFilters);
+        filterDetails.put("common", new ArrayList<>(commonFilters.values()));
+    }
+
+    /**
+       Merges validation groups of controlB into controlA
+     */
+    private void combineValidationGroupForFilter(InputControlData controlA, InputControlData controlB) {
+        Set<ValidationType> validationTypes = new HashSet<>(controlA.getValidationTypes());
+        validationTypes.addAll(controlB.getValidationTypes());
+        controlA.setValidationTypes(new ArrayList<>(validationTypes));
     }
 
     /**

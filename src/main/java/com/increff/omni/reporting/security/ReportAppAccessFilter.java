@@ -64,16 +64,6 @@ public class ReportAppAccessFilter extends GenericFilterBean {
 
     }
 
-//      todo : remove comment
-//    private static Map<String, List<String>> getHeadersMap(HttpServletRequest httpRequest) {
-//        return Collections.list(httpRequest.getHeaderNames())
-//                .stream()
-//                .collect(Collectors.toMap(
-//                        Function.identity(),
-//                        h -> Collections.list(httpRequest.getHeaders(h))
-//                ));
-//    }
-
     public Object getControllerByURL(HttpServletRequest request) throws Exception {
         HandlerExecutionChain executionChain = requestMappingHandlerMapping.getHandler(request);
         if (executionChain != null && executionChain.getHandler() instanceof HandlerMethod) {
