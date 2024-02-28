@@ -132,6 +132,7 @@ public class ReportFlowApi extends FlowApi {
             }
             return FileUtil.getJsonDataFromFile(file, ',');
         } catch (Exception e) {
+            log.error("Failed to get the data for dashboard : " + e.getMessage() + "\n" + Arrays.asList(e.getStackTrace()));
             throw new ApiException(ApiStatus.BAD_DATA, "Failed to get the data for dashboard : " + e.getMessage());
         } finally {
             FileUtil.delete(file);

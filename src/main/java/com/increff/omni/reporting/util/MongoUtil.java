@@ -14,7 +14,8 @@ import java.util.concurrent.TimeUnit;
 @Log4j
 public class MongoUtil {
 
-    private static final String MONGO_PIPELINE_STAGE_SEPARATOR = "/\\* NEW STAGE \\*/";
+    private static final String MONGO_VAR_NAME_SEPARATOR = "##";
+    private static final String MONGO_PIPELINE_STAGE_SEPARATOR = "// NEW STAGE";
 
     public static Integer MONGO_READ_TIMEOUT_SEC; // loaded from application.properties post construct
     public static Integer MONGO_CONNECT_TIMEOUT_SEC;
@@ -34,19 +35,19 @@ public class MongoUtil {
         return Arrays.asList(query.split(delimiter));
     }
 
-    public static String getValueAfterEquals(String str) {
-        return str.split("\n")[0].split("=")[1];
+    public static String getValueAfterEquals(String str, String delimiter) {
+        return str.split(delimiter)[0].split("=")[1].trim();
     }
 
-    public static String deleteFirstLine(String str) {
-        return str.substring(str.indexOf("\n") + 1);
+    public static String deleteFirstLine(String str, String delimiter) {
+        return str.substring(str.indexOf(delimiter) + delimiter.length());
     }
 
     public static List<Document> executeMongoPipeline(String host, String username, String password, String query) throws ApiException {
-        String collectionName = getValueAfterEquals(query);
-        query = deleteFirstLine(query);
-        String databaseName = getValueAfterEquals(query);
-        query = deleteFirstLine(query);
+        String collectionName = getValueAfterEquals(query, MONGO_VAR_NAME_SEPARATOR);
+        query = deleteFirstLine(query, MONGO_VAR_NAME_SEPARATOR);
+        String databaseName = getValueAfterEquals(query, MONGO_VAR_NAME_SEPARATOR);
+        query = deleteFirstLine(query, MONGO_VAR_NAME_SEPARATOR);
         return executeMongoPipeline(host, username, password, databaseName, collectionName, parseMongoPipeline(query));
     }
 
