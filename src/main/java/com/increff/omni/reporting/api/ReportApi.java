@@ -1,10 +1,12 @@
 package com.increff.omni.reporting.api;
 
 import com.increff.omni.reporting.dao.ReportDao;
+import com.increff.omni.reporting.model.constants.AppName;
 import com.increff.omni.reporting.model.constants.ReportType;
 import com.increff.omni.reporting.model.constants.VisualizationType;
 import com.increff.omni.reporting.pojo.ReportPojo;
 import com.nextscm.commons.spring.common.ApiException;
+import lombok.extern.log4j.Log4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,8 +14,9 @@ import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Set;
 
+@Log4j
 @Service
 @Transactional(rollbackFor = ApiException.class)
 public class ReportApi extends AbstractAuditApi {
@@ -92,5 +95,9 @@ public class ReportApi extends AbstractAuditApi {
 
     public List<ReportPojo> getByAlias(String alias){
         return dao.selectMultiple("alias", alias);
+    }
+
+    public ReportPojo getByIdAndAppNameIn(Integer id, Set<AppName> appNames) {
+        return dao.getByIdAndAppNameIn(id, appNames);
     }
 }

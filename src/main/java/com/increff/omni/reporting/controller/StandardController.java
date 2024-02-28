@@ -71,13 +71,6 @@ public class StandardController {
         return reportDto.selectByAlias(isChart, alias);
     }
 
-    // todo : remove if unused
-//    @ApiOperation(value = "Get Live Data")
-//    @RequestMapping(value = "/reports/live", method = RequestMethod.POST)
-//    public List<Map<String, String>> getLiveData(@RequestBody ReportRequestForm form) throws ApiException, IOException {
-//        return reportDto.getLiveData(form);
-//    }
-
     @ApiOperation(value = "Get validation group")
     @RequestMapping(value = "/reports/{reportId}/controls/validations", method = RequestMethod.GET)
     public List<ValidationGroupData> getValidationGroups(@PathVariable Integer reportId) {
@@ -243,13 +236,6 @@ public class StandardController {
     @RequestMapping(value = "/dashboards", method = RequestMethod.GET)
     public List<DashboardListData> getDashboards() throws ApiException {
         return dashboardDto.getDashboardsByOrgId();
-    }
-
-    // Change rate limiter filter URL when changing endpoint URL
-    @ApiOperation(value = "View Dashboard")
-    @RequestMapping(value = "/dashboards/{dashboardId}/view", method = RequestMethod.POST)
-    public List<ViewDashboardData> viewDashboard(@PathVariable Integer dashboardId, @RequestBody ReportRequestForm form) throws ApiException, IOException {
-        return dashboardDto.viewDashboard(form, dashboardId);
     }
 
     @ApiOperation(value = "Get Properties")

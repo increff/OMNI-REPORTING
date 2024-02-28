@@ -138,6 +138,7 @@ public class ReportDto extends AbstractDto {
         ReportQueryPojo pojo = ConvertUtil.convert(form, ReportQueryPojo.class);
         pojo.setReportId(reportId);
         pojo = flowApi.upsertQuery(pojo);
+        // todo : add old query, new query in audit description and change description data type of audit pojo to long text
         flowApi.saveAudit(reportId.toString(), AuditActions.UPSERT_REPORT_QUERY.toString(), "Upsert Report Query"
                 , "Report query updated", getUserName());
         return ConvertUtil.convert(pojo, ReportQueryData.class);

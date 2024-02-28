@@ -22,7 +22,10 @@ public class StandardSecurityConfig extends WebSecurityConfigurerAdapter {
     private AuthTokenFilter authTokenFilter;
     @Autowired
     private RateLimitingFilter rateLimitingFilter;
-    
+
+    @Autowired
+    private ReportAppAccessFilter reportAppAccessFilter;
+
     @Override
     protected void configure(HttpSecurity http) throws Exception {
 
@@ -38,6 +41,7 @@ public class StandardSecurityConfig extends WebSecurityConfigurerAdapter {
                 .and().cors().and().csrf().disable()
                 .addFilterBefore(authTokenFilter, BasicAuthenticationFilter.class)
                 .addFilterAfter(rateLimitingFilter, AuthTokenFilter.class)
+                .addFilterAfter(reportAppAccessFilter, RateLimitingFilter.class)
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
         http.cors();
     }

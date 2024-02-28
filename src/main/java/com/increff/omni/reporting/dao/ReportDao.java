@@ -1,10 +1,12 @@
 package com.increff.omni.reporting.dao;
 
+import com.increff.omni.reporting.model.constants.AppName;
 import com.increff.omni.reporting.model.constants.ChartType;
 import com.increff.omni.reporting.model.constants.ReportType;
 import com.increff.omni.reporting.model.constants.VisualizationType;
 import com.increff.omni.reporting.pojo.ReportPojo;
 import com.nextscm.commons.spring.db.AbstractDao;
+import lombok.extern.log4j.Log4j;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,6 +17,7 @@ import javax.persistence.criteria.Root;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Log4j
 @Repository
 @Transactional
 public class ReportDao extends AbstractDao<ReportPojo> {
@@ -151,5 +154,16 @@ public class ReportDao extends AbstractDao<ReportPojo> {
                 .collect(Collectors.toList());
 
         return Collections.singletonList(ChartType.valueOf(visualization.name()));
+    }
+
+    private static final String SELECT_REPORT_BY_ID_AND_MULTIPLE_APP_NAMES = "select r from ReportPojo r join SchemaVersionPojo s on r.schemaVersionId = s.id where s.appName in :appNames and r.id = :reportId";
+    public ReportPojo getByIdAndAppNameIn(Integer reportId, Set<AppName> appNames) {
+        log.debug("Fetching report by id : " + reportId + " and appNames : " + appNames);
+        if(appNames.isEmpty()) return null;
+
+        TypedQuery<ReportPojo> query = em.createQuery(SELECT_REPORT_BY_ID_AND_MULTIPLE_APP_NAMES, ReportPojo.class);
+        query.setParameter("appNames", appNames);
+        query.setParameter("reportId", reportId);
+        return selectSingleOrNull(query);
     }
 }
