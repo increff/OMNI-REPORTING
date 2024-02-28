@@ -2,10 +2,7 @@ package com.increff.omni.reporting.dto;
 
 import com.increff.omni.reporting.api.*;
 import com.increff.omni.reporting.model.constants.AuditActions;
-import com.increff.omni.reporting.model.data.OrgConnectionData;
-import com.increff.omni.reporting.model.data.OrgMappingsData;
-import com.increff.omni.reporting.model.data.OrgSchemaData;
-import com.increff.omni.reporting.model.data.OrganizationData;
+import com.increff.omni.reporting.model.data.*;
 import com.increff.omni.reporting.model.form.IntegrationOrgConnectionForm;
 import com.increff.omni.reporting.model.form.IntegrationOrgSchemaForm;
 import com.increff.omni.reporting.model.form.OrgMappingsForm;
@@ -18,8 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @Service
 public class OrganizationDto extends AbstractDto {
@@ -96,6 +92,41 @@ public class OrganizationDto extends AbstractDto {
     public List<OrgMappingsData> selectOrgMappingDetails(){
         List<OrgMappingPojo> pojos = orgMappingApi.selectAll();
         return ConvertUtil.convert(pojos, OrgMappingsData.class);
+    }
+
+    public List<OrgMappingsGroupedData> selectOrgMappingGroupedDetails(){
+        List<OrgMappingsData> orgMappingsData = selectOrgMappingDetails();
+        Map<Integer, List<OrgMappingsData>> orgIdToOrgMappingsData = new HashMap<>();
+        for(OrgMappingsData data : orgMappingsData){
+            if(orgIdToOrgMappingsData.containsKey(data.getOrgId())){
+                orgIdToOrgMappingsData.get(data.getOrgId()).add(data);
+            }else{
+                orgIdToOrgMappingsData.put(data.getOrgId(), new ArrayList<>(Arrays.asList(data)) ); // do not change this to Collections.singletonList as elements are added in this list
+            }
+        }
+
+        List<OrgMappingsGroupedData> orgMappingsGroupedData = new ArrayList<>();
+        // iterate over orgIdToOrgMappingsData
+        for(Map.Entry<Integer, List<OrgMappingsData>> entry : orgIdToOrgMappingsData.entrySet()){
+            OrgMappingsGroupedData groupedData = new OrgMappingsGroupedData();
+            groupedData.setOrgId(entry.getKey());
+            groupedData.setOrgMappingsData(entry.getValue());
+            orgMappingsGroupedData.add(groupedData);
+        }
+
+        // add null for organizations which do not have any mappings
+        List<OrganizationData> organizationData = selectAll();
+        for(OrganizationData data : organizationData){
+            OrgMappingsGroupedData groupedData = new OrgMappingsGroupedData();
+            if(!orgIdToOrgMappingsData.containsKey(data.getId())) {
+                groupedData.setOrgId(data.getId());
+                OrgMappingsData emptyData = new OrgMappingsData();
+                emptyData.setOrgId(data.getId());
+                groupedData.setOrgMappingsData(Collections.singletonList(emptyData));
+                orgMappingsGroupedData.add(groupedData);
+            }
+        }
+        return orgMappingsGroupedData;
     }
 
     public List<OrgSchemaData> selectAllOrgSchema(){
