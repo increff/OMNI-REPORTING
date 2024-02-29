@@ -37,7 +37,7 @@ public class SqlCmd {
     private static String getValueFromMethod(Map<String, String> inputParamMap, String f, String methodName) {
         String paramKey, paramValue, columnName, operator, condition;
         Boolean keepQuotes;
-        String finalString = "{{" + f + "}}";
+        String finalString = "<<" + f + ">>";
         switch (methodName) {
             case "filter":
                 paramKey = f.split("\\(")[1].split(",")[0].trim();
