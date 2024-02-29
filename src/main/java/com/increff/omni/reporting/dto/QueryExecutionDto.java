@@ -9,6 +9,8 @@ public class QueryExecutionDto extends AbstractDto {
     private final static String ALWAYS_TRUE = "1=1";
     private final static String MONGO_ALWAYS_TRUE = "{}";
 
+    private final static String MONGO_FILTER_PARAM_VALUE_REPLACE_IDENTIFIER = "#";
+
     public static String filterAppend(String columnName, String operator, String paramValue, String condition) {
         String filter = filter(columnName, operator, paramValue);
         if(filter.equals(ALWAYS_TRUE))
@@ -57,14 +59,20 @@ public class QueryExecutionDto extends AbstractDto {
         if(!keepQuotes) // Unlike sql, error when using single quotes for numbers
             paramValue = removeUnescapedSingleQuotes(paramValue);// do not remove escaped single quotes which comes from input
 
-        filterJson = filterJson.replace("#" + paramKey, paramValue);
+        /*
+            For SQL, the value was just added at the end after col_name and operator (Eg. col_name = value)
+            For mongo, the value has to be replaced somewhere between the json.
+            Identifier is needed to know at which position the value has to be replaced.
+            So, we replace the #paramKey with the paramValue in the filterJson
+         */
+        filterJson = filterJson.replace(MONGO_FILTER_PARAM_VALUE_REPLACE_IDENTIFIER + paramKey, paramValue);
         return filterJson;
     }
 
     /**
      * Regex explained:
      * (?<!\\\\)': This is a negative lookbehind assertion ((?<!...)). It ensures that the single quote (') is not preceded by a backslash (\). The \\\\ part represents a double backslash (\\) because in Java regex, backslashes need to be escaped twice within string literals. So, \\\\ matches a single backslash. Therefore, (?<!\\\\) ensures that the single quote is not preceded by a backslash.
-     *
+     * <p>
      * '': This is the replacement string, which is empty (""). It means that any matched single quotes will be replaced with nothing, effectively removing them from the string.
      */
     private static String removeUnescapedSingleQuotes(String paramValue) {
