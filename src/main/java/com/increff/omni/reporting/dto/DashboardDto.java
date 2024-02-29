@@ -114,10 +114,7 @@ public class DashboardDto extends AbstractDto {
         List<ReportPojo> reports = reportApi.getByAliasAndSchema(chartAliases, schemaVersionIds, true);
 
         for(ReportPojo report : reports) {
-            // ques autowire this ? cannot make static as autoiwred services wont work inside .validate func. cannot extend as abstract dto is already extended in dashboardDto
-            // AbstractFlowApi.validate(report, reportInputParamsPojoList, AbstractFlowApi.mergeValidationGroups(report.getId(), reports));
             flowApi.validate(report, reportInputParamsPojoList, flowApi.mergeValidationGroups(report.getId(), reports));
-
         }
     }
 
