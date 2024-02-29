@@ -90,7 +90,7 @@ public class UserPrincipalUtil {
 
     public static boolean validateReportAppAccess(String appName) {
         Set<AppName> accessibleApps = getAccessibleApps();
-        return accessibleApps.contains(AppName.valueOf(appName));
+        return accessibleApps.contains(AppName.valueOf(appName.toUpperCase()));
     }
 
     public static Set<AppName> getAccessibleApps() {
@@ -102,7 +102,7 @@ public class UserPrincipalUtil {
         }
 
         for (String role : userRoles) {
-            accessibleApps.add(AppName.valueOf(role.split("\\.")[0]));
+            accessibleApps.add(AppName.valueOf(role.split("\\.")[0].toUpperCase()));
         }
         return accessibleApps;
     }

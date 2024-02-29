@@ -11,11 +11,11 @@ public enum Roles {
     APP_ADMIN("app.admin"),
     REPORT_ADMIN("report.admin"),
 
-    UNIFY_REPORT_STANDARD("unify.report.standard"),
-    UNIFY_REPORT_CUSTOM("unify.report.custom"),
+    UNIFY_REPORT_STANDARD("UNIFY.report.standard"),
+    UNIFY_REPORT_CUSTOM("UNIFY.report.custom"),
 
-    OMNI_REPORT_STANDARD("omni.report.standard"),
-    OMNI_REPORT_CUSTOM("omni.report.custom");
+    OMNI_REPORT_STANDARD("OMNI.report.standard"),
+    OMNI_REPORT_CUSTOM("OMNI.report.custom");
 
     private final String role;
     public static final List<String> USER_ACCESS_ADMIN_AUTHORITIES = Arrays.asList(
