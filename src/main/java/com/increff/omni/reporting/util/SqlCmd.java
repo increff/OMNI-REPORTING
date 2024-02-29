@@ -35,16 +35,16 @@ public class SqlCmd {
     }
 
     private static String getValueFromMethod(Map<String, String> inputParamMap, String f, String methodName) {
-        String paramKey, paramValue, columnName, operator, condition;
+        String paramKey, paramValue, filterJson, operator, condition;
         Boolean keepQuotes;
         String finalString = "<<" + f + ">>";
         switch (methodName) {
             case "filter":
                 paramKey = f.split("\\(")[1].split(",")[0].trim();
                 paramValue = inputParamMap.get(paramKey);
-                columnName = f.split("\\(")[1].split(",")[1].trim();
+                filterJson = f.split("\\(")[1].split(",")[1].trim();
                 operator = f.split("\\(")[1].split(",")[2].split("\\)")[0].trim();
-                finalString = QueryExecutionDto.filter(columnName, operator, paramValue);
+                finalString = QueryExecutionDto.filter(filterJson, operator, paramValue);
                 break;
             case "replace":
                 paramKey = StringUtils.substringBetween(f, "(", ")").trim();
@@ -56,17 +56,18 @@ public class SqlCmd {
             case "filterAppend":
                 paramKey = f.split("\\(")[1].split(",")[0].trim();
                 paramValue = inputParamMap.get(paramKey);
-                columnName = f.split("\\(")[1].split(",")[1].trim();
+                filterJson = f.split("\\(")[1].split(",")[1].trim();
                 operator = f.split("\\(")[1].split(",")[2].trim();
                 condition = f.split("\\(")[1].split(",")[3].split("\\)")[0].trim();
-                finalString = QueryExecutionDto.filterAppend(columnName, operator, paramValue, condition);
+                finalString = QueryExecutionDto.filterAppend(filterJson, operator, paramValue, condition);
                 break;
             case "mongoFilter":
                 paramKey = f.split("\\(")[1].split(",")[0].trim();
                 paramValue = inputParamMap.get(paramKey);
-                columnName = f.split("\\(")[1].split(",")[1].trim();
+                filterJson = f.split("\\(")[1].split(",")[1].trim();
+                // t is true
                 keepQuotes = f.split("\\(")[1].split(",")[2].split("\\)")[0].trim().equalsIgnoreCase("t");
-                finalString = QueryExecutionDto.mongoFilter(columnName, paramKey, paramValue, keepQuotes);
+                finalString = QueryExecutionDto.mongoFilter(filterJson, paramKey, paramValue, keepQuotes);
                 break;
         }
         return finalString;
