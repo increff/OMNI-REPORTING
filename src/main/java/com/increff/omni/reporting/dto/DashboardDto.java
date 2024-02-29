@@ -104,8 +104,10 @@ public class DashboardDto extends AbstractDto {
         forms.forEach(f-> {
            ReportInputParamsPojo pojo = new ReportInputParamsPojo();
            pojo.setParamKey(f.getParamName());
-           pojo.setParamValue(f.getDefaultValue().get(0));
-           reportInputParamsPojoList.add(pojo);
+           if(!f.getDefaultValue().isEmpty()) {
+               pojo.setParamValue(f.getDefaultValue().get(0));
+               reportInputParamsPojoList.add(pojo); // todo : check default value delete.
+           }
         });
 
         List<DashboardChartPojo> dashboardCharts = dashboardChartApi.getByDashboardId(forms.get(0).getDashboardId());
