@@ -1,6 +1,7 @@
 package com.increff.omni.reporting.dto;
 
 import com.increff.omni.reporting.api.*;
+import com.increff.omni.reporting.model.constants.AppName;
 import com.increff.omni.reporting.model.constants.AuditActions;
 import com.increff.omni.reporting.model.data.*;
 import com.increff.omni.reporting.model.form.IntegrationOrgConnectionForm;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class OrganizationDto extends AbstractDto {
@@ -59,23 +61,11 @@ public class OrganizationDto extends AbstractDto {
     }
 
 
-
-
-//    public OrgSchemaData mapToSchema(Integer id, Integer schemaVersionId) throws ApiException {
-//        //validation
-//        OrganizationPojo orgPojo = api.getCheck(id);
-//        SchemaVersionPojo schemaVersionPojo = schemaVersionApi.getCheck(schemaVersionId);
-//        orgMappingApi.saveAudit(id.toString(), AuditActions.ORGANIZATION_SCHEMA_VERSION_MAPPING.toString(),
-//                "Map Org to Schema Version", "Mapping org : " + orgPojo.getName() + " to schema " +
-//                        "version : " + schemaVersionPojo.getName(),
-//                getUserName());
-//        OrgMappingPojo pojo = createPojo(orgPojo, schemaVersionPojo);
-//        return CommonDtoHelper.getOrgSchemaData(pojo, schemaVersionPojo);
-//    }
-
     @Transactional(rollbackFor = ApiException.class)
     public OrgMappingsData addOrgMapping(OrgMappingsForm form) throws ApiException {
         checkValid(form);
+        validateOrgMappingForExistingAppName(form);
+
         OrgMappingPojo orgMappingPojo = ConvertUtil.convert(form, OrgMappingPojo.class);
         orgMappingPojo = orgMappingApi.add(orgMappingPojo);
         return ConvertUtil.convert(orgMappingPojo, OrgMappingsData.class);
@@ -84,10 +74,30 @@ public class OrganizationDto extends AbstractDto {
     @Transactional(rollbackFor = ApiException.class)
     public OrgMappingsData editOrgMappings(Integer orgMappingId, OrgMappingsForm form) throws ApiException {
         checkValid(form);
+        validateOrgMappingEditForExistingAppName(orgMappingId, form);
+
         OrgMappingPojo orgMappingPojo = ConvertUtil.convert(form, OrgMappingPojo.class);
         orgMappingPojo = orgMappingApi.update(orgMappingId, orgMappingPojo);
         return ConvertUtil.convert(orgMappingPojo, OrgMappingsData.class);
     }
+
+    private void validateOrgMappingForExistingAppName(OrgMappingsForm form) throws ApiException {
+        AppName newAppName = schemaVersionApi.getCheck(form.getSchemaVersionId()).getAppName();
+        List<Integer> existingSchemaVersionIds = orgMappingApi.getCheckByOrgId(form.getOrgId()).stream().map(OrgMappingPojo::getSchemaVersionId).collect(Collectors.toList());
+        List<AppName> existingAppNames = schemaVersionApi.getByIds(existingSchemaVersionIds).stream().map(SchemaVersionPojo::getAppName).collect(Collectors.toList());
+        if(existingAppNames.contains(newAppName)){
+            throw new ApiException(ApiStatus.BAD_DATA, "App name " + newAppName + " mapping already exists for this organization");
+        }
+    }
+
+    private void validateOrgMappingEditForExistingAppName(Integer orgMappingId, OrgMappingsForm form) throws ApiException {
+        AppName newAppName = schemaVersionApi.getCheck(form.getSchemaVersionId()).getAppName();
+        AppName oldAppName = schemaVersionApi.getCheck(orgMappingApi.getCheck(orgMappingId).getSchemaVersionId()).getAppName();
+        if(newAppName != oldAppName){ // do not allow to change app name when editing as this may lead to 2 schema versions mapping with same app name for same org
+            throw new ApiException(ApiStatus.BAD_DATA, "Schema Versions can only be edited for same app name. New app name: " + newAppName + " Old app name: " + oldAppName);
+        }
+    }
+
 
     public List<OrgMappingsData> selectOrgMappingDetails(){
         List<OrgMappingPojo> pojos = orgMappingApi.selectAll();
