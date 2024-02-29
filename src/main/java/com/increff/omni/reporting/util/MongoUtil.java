@@ -80,7 +80,7 @@ public class MongoUtil {
     }
 
     private static ConnectionString getConnectionString(String host, String username, String password) {
-        String connectionString = "mongodb://";
+        String connectionString = "mongodb+srv://";
         if(Objects.nonNull(username) && Objects.nonNull(password) && !username.isEmpty()) {
             connectionString += username + ":" + password + "@" + host;
         } else {
@@ -90,7 +90,7 @@ public class MongoUtil {
     }
 
     public static void testConnection(String host, String username, String password) throws ApiException {
-        try (MongoClient mongoClient = MongoClients.create("mongodb://" + username + ":" + password + "@" + host)) {
+        try (MongoClient mongoClient = MongoClients.create("mongodb+srv://" + username + ":" + password + "@" + host)) {
             MongoDatabase database = mongoClient.getDatabase("admin");
             MongoIterable<String> collections = database.listCollectionNames();
             for (String collection : collections) {
