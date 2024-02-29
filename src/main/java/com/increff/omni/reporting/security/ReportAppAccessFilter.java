@@ -14,9 +14,11 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.GenericFilterBean;
 
 import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -41,19 +43,24 @@ public class ReportAppAccessFilter extends GenericFilterBean {
     private ObjectMapper objectMapper;
 
     @Override
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) {
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException {
         try {
             Object controller = getControllerByURL((HttpServletRequest) request);
-            if(Objects.isNull(controller)) // Continue if controller not found
+            if(Objects.isNull(controller)) {// Continue if controller not found
                 chain.doFilter(request, response);
-            if(!controller.getClass().equals(AppAccessController.class)) // Continue if controller is not AppAccessController
+                return;
+            }
+            if(!controller.getClass().equals(AppAccessController.class)) {// Continue if controller is not AppAccessController
                 chain.doFilter(request, response);
+                return;
+            }
 
 
             String reportIdStr = extractReportId((HttpServletRequest) request);
             if(Objects.isNull(reportIdStr))
                 throw new ApiException(ApiStatus.BAD_DATA, "Report Id not found in request");
             Integer reportId = Integer.parseInt(reportIdStr);
+            log.debug("ReportAppAccessFilter.ReportId : " + reportId + " UserPrincipalUtil.getAccessibleApps() : " + UserPrincipalUtil.getAccessibleApps());
 
             ReportPojo report = reportApi.getByIdAndAppNameIn(reportId, UserPrincipalUtil.getAccessibleApps());
             if(Objects.isNull(report))
@@ -61,14 +68,20 @@ public class ReportAppAccessFilter extends GenericFilterBean {
 
             chain.doFilter(request, response);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            setResponse((HttpServletResponse) response, e);
             // ques : should i throw runtime exception here? error when increff throwing api exception
             //'doFilter(ServletRequest, ServletResponse, FilterChain)' in 'com.increff.omni.reporting.security.ReportAppAccessFilter' clashes with 'doFilter(ServletRequest, ServletResponse, FilterChain)' in 'javax.servlet.Filter'; overridden method does not throw 'com.nextscm.commons.spring.common.ApiException'
-
         }
-
     }
 
+    private void setResponse(HttpServletResponse response, Exception e) throws IOException {
+        int responseCode = 403;
+        HttpServletResponse httpResponse = response;
+        httpResponse.setContentType("application/json");
+        httpResponse.setCharacterEncoding("UTF-8");
+        httpResponse.getWriter().write("{\"status\":\"" + responseCode + "\",\"message\":\"" + e.getMessage() + "\"}");
+        httpResponse.setStatus(responseCode);
+    }
     public Object getControllerByURL(HttpServletRequest request) throws Exception {
         HandlerExecutionChain executionChain = requestMappingHandlerMapping.getHandler(request);
         if (executionChain != null && executionChain.getHandler() instanceof HandlerMethod) {
