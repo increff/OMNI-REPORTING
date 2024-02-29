@@ -76,7 +76,7 @@ public class OrgMappingApi extends AbstractAuditApi {
         return dao.selectMultiple("schemaVersionId", schemaVersionId);
     }
 
-    private List<OrgMappingPojo> getByOrgId(Integer orgId) {
+    public List<OrgMappingPojo> getByOrgId(Integer orgId) {
         return dao.selectMultiple("orgId", orgId);
     }
 

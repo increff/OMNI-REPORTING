@@ -83,7 +83,7 @@ public class OrganizationDto extends AbstractDto {
 
     private void validateOrgMappingForExistingAppName(OrgMappingsForm form) throws ApiException {
         AppName newAppName = schemaVersionApi.getCheck(form.getSchemaVersionId()).getAppName();
-        List<Integer> existingSchemaVersionIds = orgMappingApi.getCheckByOrgId(form.getOrgId()).stream().map(OrgMappingPojo::getSchemaVersionId).collect(Collectors.toList());
+        List<Integer> existingSchemaVersionIds = orgMappingApi.getByOrgId(form.getOrgId()).stream().map(OrgMappingPojo::getSchemaVersionId).collect(Collectors.toList());
         List<AppName> existingAppNames = schemaVersionApi.getByIds(existingSchemaVersionIds).stream().map(SchemaVersionPojo::getAppName).collect(Collectors.toList());
         if(existingAppNames.contains(newAppName)){
             throw new ApiException(ApiStatus.BAD_DATA, "App name " + newAppName + " mapping already exists for this organization");
