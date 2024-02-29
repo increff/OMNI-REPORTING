@@ -14,10 +14,6 @@ import java.util.List;
 @Transactional
 public class DashboardDao extends AbstractDao<DashboardPojo> {
 
-    public DashboardPojo getCheck(Integer id) {
-        return em().find(DashboardPojo.class, id);
-    }
-
     private static final String SELECT_BY_ORG_ID = "SELECT o FROM DashboardPojo o WHERE o.orgId=:orgId";
     public List<DashboardPojo> getByOrgId(Integer orgId) {
         TypedQuery<DashboardPojo> q = createJpqlQuery(SELECT_BY_ORG_ID);

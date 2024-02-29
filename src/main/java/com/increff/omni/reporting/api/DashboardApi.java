@@ -53,7 +53,7 @@ public class DashboardApi extends AbstractApi {
     }
 
     private DashboardPojo getCheck(Integer id) throws ApiException {
-        DashboardPojo pojo = dao.getCheck(id);
+        DashboardPojo pojo = dao.select(id);
         checkNotNull(pojo, "Dashboard does not exist id: " + id);
         return pojo;
     }
