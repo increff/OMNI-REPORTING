@@ -23,11 +23,12 @@ public class MongoUtil {
     public static List<Document> parseMongoPipeline(String pipeline) {
         List<Document> stages = new ArrayList<>();
         for (String stage : parseMongoQuery(pipeline, MONGO_PIPELINE_STAGE_SEPARATOR)) {
-            log.info("Stage:\n" + stage);
-            System.out.println("Stage:\n" + stage);
+            log.debug("parseMongoPipeline.Stage:\n" + stage);
+            System.out.println("Stage:\n" + stage); // todo : remove later
             stages.add(Document.parse(stage));
         }
-        log.debug("Parsed pipeline: " + stages);
+        log.debug("parseMongoPipeline.Parsed pipeline: " + stages);
+        log.debug("parseMongoPipeline.Stage size : " + stages.size());
         return stages;
     }
 
