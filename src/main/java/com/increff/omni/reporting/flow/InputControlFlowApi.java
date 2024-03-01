@@ -88,7 +88,7 @@ public class InputControlFlowApi extends AbstractApi {
         Connection connection = null;
         try {
             HashMap<String, String> map = new HashMap<>();
-            map.put("filter.orgId.param", orgId.toString());
+            map.put("filter.orgId.param", orgId.toString());  // Used in mongo filter query as we get client list based on orgId
 
             String fQuery = SqlCmd.getFinalQuery(map, query, true);
 
