@@ -54,6 +54,8 @@ public class MongoUtil {
 
 
     public static List<Document> executeMongoPipeline(String host, String username, String password, String databaseName, String collectionName, List<Document> stages) throws ApiException {
+        log.debug("executeMongoPipeline.host : " + host + " username : " + username + " databaseName : " + databaseName + " collectionName : " + collectionName + "\n"
+                + "stages.size : " + stages.size() + " stages : " + stages);
         ConnectionString connString = getConnectionString(host, username, password);
 
         MongoClientSettings settings = MongoClientSettings.builder()
