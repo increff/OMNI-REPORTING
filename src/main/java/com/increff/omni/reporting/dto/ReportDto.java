@@ -182,7 +182,7 @@ public class ReportDto extends AbstractDto {
         viewData.setType(report.getChartType());
 
         TestQueryLiveData testQueryLiveData = new TestQueryLiveData();
-        testQueryLiveData.setViewDashboardData(viewData);
+        testQueryLiveData.setViewDashboardData(Collections.singletonList(viewData)); // converting to list for UI
         testQueryLiveData.setTestedSchemaVersionId(report.getSchemaVersionId());
         testQueryLiveData.setTestedOrgId(orgId);
 
