@@ -6,6 +6,9 @@ import com.mongodb.client.*;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
 import lombok.extern.log4j.Log4j;
+import org.bson.BsonArray;
+import org.bson.BsonDocument;
+import org.bson.BsonValue;
 import org.bson.Document;
 
 import java.util.*;
@@ -20,16 +23,21 @@ public class MongoUtil {
     public static Integer MONGO_READ_TIMEOUT_SEC; // loaded from application.properties post construct
     public static Integer MONGO_CONNECT_TIMEOUT_SEC;
 
-    public static List<Document> parseMongoPipeline(String pipeline) {
-        List<Document> stages = new ArrayList<>();
-        for (String stage : parseMongoQuery(pipeline, MONGO_PIPELINE_STAGE_SEPARATOR)) {
-            log.debug("parseMongoPipeline.Stage:\n" + stage);
-            System.out.println("Stage:\n" + stage); // todo : remove later
-            stages.add(Document.parse(stage));
+    public static List<BsonDocument> parseMongoPipeline(String pipeline) {
+        System.out.println("parseMongoPipeline.pipeline : " + pipeline); // todo : remove before release
+        log.debug("parseMongoPipeline.pipeline : " + pipeline);
+        BsonArray bsonDocuments = BsonArray.parse(pipeline);
+        List<BsonDocument> documents = new ArrayList<>();
+        for (BsonValue bsonValue : bsonDocuments) {
+            if (bsonValue.isDocument()) {
+                log.debug("parseMongoPipeline.Stage:\n" + bsonValue.asDocument());
+                documents.add(bsonValue.asDocument());
+            }
         }
-        log.debug("parseMongoPipeline.Parsed pipeline: " + stages);
-        log.debug("parseMongoPipeline.Stage size : " + stages.size());
-        return stages;
+        log.debug("parseMongoPipeline.Parsed pipeline: " + documents);
+        log.debug("parseMongoPipeline.Stage size : " + documents.size());
+        System.out.println("parseMongoPipeline.Parsed pipeline: " + documents); // todo : remove before release
+        return documents;
     }
 
     public static List<String> parseMongoQuery(String query, String delimiter) {
@@ -53,7 +61,7 @@ public class MongoUtil {
     }
 
 
-    public static List<Document> executeMongoPipeline(String host, String username, String password, String databaseName, String collectionName, List<Document> stages) throws ApiException {
+    public static List<Document> executeMongoPipeline(String host, String username, String password, String databaseName, String collectionName, List<BsonDocument> stages) throws ApiException {
         log.debug("executeMongoPipeline.host : " + host + " username : " + username + " databaseName : " + databaseName + " collectionName : " + collectionName + "\n"
                 + "stages.size : " + stages.size() + " stages : " + stages);
         ConnectionString connString = getConnectionString(host, username, password);
@@ -71,7 +79,6 @@ public class MongoUtil {
             MongoDatabase database;
             database = mongoClient.getDatabase(databaseName);
             MongoCollection<Document> collection = database.getCollection(collectionName);
-
             AggregateIterable<Document> result = collection.aggregate(stages).allowDiskUse(true);
             List<Document> results = new ArrayList<>();
             result.into(results);
