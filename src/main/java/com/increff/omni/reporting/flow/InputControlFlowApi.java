@@ -104,7 +104,7 @@ public class InputControlFlowApi extends AbstractApi {
             }
 
         } catch (Exception e) {
-            log.error("Error while getting input control values : ", e);
+            log.error("Error while getting input control values : " + e.getMessage() + " " + Arrays.asList(e.getStackTrace()));
         } finally {
             try {
                 if (Objects.nonNull(connection)) {
