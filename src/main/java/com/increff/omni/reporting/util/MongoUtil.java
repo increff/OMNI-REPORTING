@@ -24,7 +24,7 @@ public class MongoUtil {
     public static Integer MONGO_CONNECT_TIMEOUT_SEC;
 
     public static List<BsonDocument> parseMongoPipeline(String pipeline) {
-        System.out.println("parseMongoPipeline.pipeline : " + pipeline); // todo : remove before release
+        System.out.println("parseMongoPipeline.pipeline : " + pipeline); // todo : remove before release form here and query-executor
         log.debug("parseMongoPipeline.pipeline : " + pipeline);
         BsonArray bsonDocuments = BsonArray.parse(pipeline);
         List<BsonDocument> documents = new ArrayList<>();
