@@ -9,6 +9,7 @@ import com.increff.omni.reporting.validators.MandatoryValidator;
 import com.increff.omni.reporting.validators.SingleMandatoryValidator;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
+import com.nextscm.commons.spring.common.ConvertUtil;
 import lombok.extern.log4j.Log4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -120,6 +121,10 @@ public class FlowApi extends AbstractAuditApi {
 
             reportIdToControlIdsMap.put(report.getId(), new HashSet<>(controlIds));
         }
+
+        // detach allReportValidationGroups from entity to prevent pojo updation on pojo.set
+        allReportValidationGroups = allReportValidationGroups.stream().map(g -> ConvertUtil.convert(g, ReportValidationGroupPojo.class))
+                .collect(Collectors.toList());
         log.info("All report validation groups: " + allReportValidationGroups);
 
         // for every control id in reportIdToControlIdsMap(queryReportId), get all report
