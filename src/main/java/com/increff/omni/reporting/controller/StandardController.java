@@ -80,12 +80,6 @@ public class StandardController {
         return directoryDto.getAllDirectories();
     }
 
-    @ApiOperation(value = "Request Report")
-    @RequestMapping(value = "/request-report", method = RequestMethod.POST)
-    public void requestReport(@RequestBody ReportRequestForm form) throws ApiException {
-        reportRequestDto.requestReport(form);
-    }
-
     @ApiOperation(value = "Get All Request data")
     @RequestMapping(value = "/request-report", method = RequestMethod.GET)
     public List<ReportRequestData> getAllRequests() throws ApiException, IOException {
