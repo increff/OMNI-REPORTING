@@ -140,7 +140,7 @@ public class FileUtil {
 
     public static Map<String, String> getMapFromMongoResultSet(List<Document> documents) {
         Map<String, String> fMap = new HashMap<>();
-        for (Document document : documents) {
+        for (Document document : documents) { // Need to hardcode column names as mongo result set can have columns in random order. So, we can't just get the first and second column
             String key = document.getInteger(FILTER_QUERY_DISPLAY_VALUE_COLUMN).toString();
             String value = document.getString(FILTER_QUERY_DISPLAY_NAME_COLUMN);
             fMap.put(key, value);
