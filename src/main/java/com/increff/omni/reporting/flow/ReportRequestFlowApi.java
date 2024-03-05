@@ -49,7 +49,7 @@ public class ReportRequestFlowApi extends FlowApi {
         if (!CollectionUtils.isEmpty(pendingReports) && pendingReports.size() >= MAX_OPEN_REPORT_REQUESTS)
             throw new ApiException(ApiStatus.BAD_DATA, "Wait for existing reports to get executed");
         ReportPojo reportPojo = reportApi.getCheck(pojo.getReportId());
-        validate(reportPojo, reportInputParamsPojoList, new ArrayList<>());
+        validate(reportPojo, reportInputParamsPojoList, null);
         requestReportWithoutValidation(pojo, reportInputParamsPojoList);
     }
 
