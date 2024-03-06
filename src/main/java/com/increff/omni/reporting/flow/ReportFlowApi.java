@@ -86,7 +86,7 @@ public class ReportFlowApi extends FlowApi {
         ReportPojo existing = api.getCheck(pojo.getId());
         List<Integer> orgIds = orgMappingApi.getBySchemaVersionId(pojo.getSchemaVersionId()).stream().map(OrgMappingPojo::getOrgId).collect(Collectors.toList());
         validateForEdit(pojo, reportScheduleApi.selectByOrgIdReportAlias(orgIds, pojo.getAlias()));
-        if(existing.getChartType() != pojo.getChartType())
+        if(existing.getChartType() != pojo.getChartType()) // todo : remove this check and inform arpnik
             throw new ApiException(ApiStatus.BAD_DATA, "Chart type can't be changed." +
                     " Current : " + existing.getChartType() + " New : " + pojo.getChartType());
         // Delete custom report access if transition is happening from CUSTOM to STANDARD
