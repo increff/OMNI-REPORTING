@@ -87,9 +87,7 @@ public class ReportFlowApi extends AbstractFlowApi {
         ReportPojo existing = api.getCheck(pojo.getId());
         List<Integer> orgIds = orgSchemaApi.getBySchemaVersionId(pojo.getSchemaVersionId()).stream().map(OrgSchemaVersionPojo::getOrgId).collect(Collectors.toList());
         validateForEdit(pojo, reportScheduleApi.selectByOrgIdReportAlias(orgIds, pojo.getAlias()));
-        if(existing.getChartType() != pojo.getChartType())
-            throw new ApiException(ApiStatus.BAD_DATA, "Chart type can't be changed." +
-                    " Current : " + existing.getChartType() + " New : " + pojo.getChartType());
+
         // Delete custom report access if transition is happening from CUSTOM to STANDARD
         if (existing.getType().equals(ReportType.CUSTOM) && pojo.getType().equals(ReportType.STANDARD))
             customReportAccessApi.deleteByReportId(pojo.getId());
