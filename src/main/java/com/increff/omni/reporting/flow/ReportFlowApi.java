@@ -28,7 +28,7 @@ import java.sql.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.increff.omni.reporting.dto.AbstractDto.isCustomReportUser;
+import static com.increff.omni.reporting.dto.AbstractDto.*;
 import static com.increff.omni.reporting.dto.CommonDtoHelper.*;
 
 @Service
@@ -188,8 +188,21 @@ public class ReportFlowApi extends FlowApi {
         List<ReportPojo> custom =
                 api.getByIdsAndSchema(customIds, orgUserSchemaVersionIds, isChart);
 
-        if(!isCustomReportUser()) // Add standard reports only if user in not custom report user
-            reportPojoList.addAll(standard);
+        List<SchemaVersionPojo> schemaVersionPojos = schemaVersionApi.getByAppNames(Arrays.stream(AppName.values()).collect(Collectors.toSet()));
+        List<Integer> omniSchemaVersionIds = schemaVersionPojos.stream().filter(s -> s.getAppName().equals(AppName.OMNI))
+                .map(SchemaVersionPojo::getId).collect(Collectors.toList());
+        List<Integer> unifySchemaVersionIds = schemaVersionPojos.stream().filter(s -> s.getAppName().equals(AppName.UNIFY))
+                .map(SchemaVersionPojo::getId).collect(Collectors.toList());
+
+        List<ReportPojo> omniStandard = standard.stream().filter(s -> omniSchemaVersionIds.contains(s.getSchemaVersionId()))
+                .collect(Collectors.toList());
+        List<ReportPojo> unifyStandard = standard.stream().filter(s -> unifySchemaVersionIds.contains(s.getSchemaVersionId()))
+                .collect(Collectors.toList());
+        if(!isOmniCustomReportUser()) // Add standard reports only if user in not custom report user
+            reportPojoList.addAll(omniStandard);
+        if(!isUnifyCustomReportUser())
+            reportPojoList.addAll(unifyStandard);
+
         reportPojoList.addAll(custom);
         return reportPojoList;
     }

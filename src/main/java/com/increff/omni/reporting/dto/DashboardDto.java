@@ -157,21 +157,22 @@ public class DashboardDto extends AbstractDto {
     public List<DashboardListData> getDashboardsByOrgId(Integer orgId) throws ApiException {
         List<DashboardListData> data = ConvertUtil.convert(api.getByOrgId(orgId), DashboardListData.class);
 
-        List<Integer> dashboardIds = data.stream().map(DashboardListData::getId).collect(Collectors.toList());
+        List<Integer> allDashboardIds = data.stream().map(DashboardListData::getId).collect(Collectors.toList());
 
-        // Only keep dashboards containing at least 1 chart with SV in user accessible app schema versions
-        List<Integer> appDashboardIds = getDashboardsWithUserAppAccess(dashboardIds, getOrgId(), UserPrincipalUtil.getAccessibleApps());
-        data = data.stream().filter(dashboard -> appDashboardIds.contains(dashboard.getId())).collect(Collectors.toList());
+        List<DashboardListData> dashboardListData = new ArrayList<>();
+        Set<AppName> appNames = UserPrincipalUtil.getAccessibleApps();
+        for (AppName appName : appNames) {
+            Set<ReportType> reportTypes = new HashSet<>();
+            reportTypes.add(ReportType.STANDARD);
+            reportTypes.add(ReportType.CUSTOM);
 
-
-        if (isCustomReportUser()) { // Filter out standard dashboards for custom users
-            List<Integer> orgSchemaVersionIds = orgMappingApi.getCheckByOrgId(orgId).stream().map(OrgMappingPojo::getSchemaVersionId).collect(Collectors.toList());
-            List<Integer> customDashboardIds = getCustomDashboardIds(orgSchemaVersionIds,
-                    data.stream().map(DashboardListData::getId).collect(Collectors.toList()));
-            data = data.stream().filter(dashboard -> customDashboardIds.contains(dashboard.getId())).collect(Collectors.toList());
+            if(isCustomReportUser(appName))
+                reportTypes.remove(ReportType.STANDARD);
+            List<Integer> allowedDashboardIds = getDashboardsWithChartParameters(allDashboardIds, orgId, appNames, reportTypes);
+            dashboardListData.addAll(data.stream().filter(dashboard -> allowedDashboardIds.contains(dashboard.getId())).collect(Collectors.toList()));
         }
-        data.sort(Comparator.comparing(DashboardListData::getName));
-        return data;
+        dashboardListData.sort(Comparator.comparing(DashboardListData::getName));
+        return dashboardListData;
     }
 
     @Transactional(rollbackFor = ApiException.class)
@@ -442,9 +443,9 @@ public class DashboardDto extends AbstractDto {
 
 
     /**
-     * Returns dashboardIds which have at least one chart with Schema Version in All Schema Versions for user accessible apps
+     * Returns dashboardIds containing at least 1 chart with given chart parameters
      */
-    private List<Integer> getDashboardsWithUserAppAccess(List<Integer> dashboardIds, Integer orgId, Set<AppName> appNames) throws ApiException {
+    private List<Integer> getDashboardsWithChartParameters(List<Integer> dashboardIds, Integer orgId, Set<AppName> appNames, Set<ReportType> reportTypes) throws ApiException {
         List<Integer> userAllowedSchemaVersionIds = schemaVersionApi.getByAppNames(appNames).
                 stream().map(SchemaVersionPojo::getId).collect(Collectors.toList());
         List<Integer> orgSchemaVersionIds = orgMappingApi.getCheckByOrgId(orgId).stream().map(OrgMappingPojo::getSchemaVersionId).collect(Collectors.toList());
@@ -464,7 +465,8 @@ public class DashboardDto extends AbstractDto {
             for(String chartAlias : dashboardChartAliasMap.getOrDefault(dashboardId, new ArrayList<>())){
                 if(!chartAliasChartMap.containsKey(chartAlias))
                     throw new ApiException(ApiStatus.BAD_DATA, "Chart alias not found: " + chartAlias + " for schema version: " + orgSchemaVersionIds + " isChart: true");
-                if(userAllowedSchemaVersionIds.contains(chartAliasChartMap.get(chartAlias).getSchemaVersionId())){
+                if(userAllowedSchemaVersionIds.contains(chartAliasChartMap.get(chartAlias).getSchemaVersionId())
+                && reportTypes.contains(chartAliasChartMap.get(chartAlias).getType())){
                     appChartExists = true;
                     break;
                 }
@@ -473,6 +475,8 @@ public class DashboardDto extends AbstractDto {
         }
         return dashboardIdsWithUserAccessSchemaVersion;
     }
+
+
 
 
 }

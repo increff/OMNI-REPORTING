@@ -4,6 +4,7 @@ import com.increff.account.client.SecurityUtil;
 import com.increff.account.client.UserPrincipal;
 import com.increff.omni.reporting.api.*;
 import com.increff.omni.reporting.flow.InputControlFlowApi;
+import com.increff.omni.reporting.model.constants.AppName;
 import com.increff.omni.reporting.model.constants.ReportRequestType;
 import com.increff.omni.reporting.model.constants.ReportType;
 import com.increff.omni.reporting.model.constants.Roles;
@@ -47,11 +48,24 @@ public class AbstractDto extends AbstractDtoApi {
     private InputControlFlowApi inputControlFlowApi;
     @Autowired
     private CustomReportAccessApi customReportAccessApi;
+    @Autowired
+    private SchemaVersionApi schemaVersionApi;
 
-    public static boolean isCustomReportUser() {
+    public static boolean isCustomReportUser(AppName appName) {
+        if(appName.equals(AppName.OMNI))
+            return isOmniCustomReportUser();
+        return isUnifyCustomReportUser();
+    }
+    public static boolean isOmniCustomReportUser() {
         if(getPrincipal().getRoles().contains(Roles.APP_ADMIN.getRole()) || getPrincipal().getRoles().contains(Roles.REPORT_ADMIN.getRole()))
             return false;
-        return getPrincipal().getRoles().contains(Roles.UNIFY_REPORT_CUSTOM.getRole()) || getPrincipal().getRoles().contains(Roles.OMNI_REPORT_CUSTOM.getRole());
+        return getPrincipal().getRoles().contains(Roles.OMNI_REPORT_CUSTOM.getRole());
+    }
+
+    public static boolean isUnifyCustomReportUser() {
+        if(getPrincipal().getRoles().contains(Roles.APP_ADMIN.getRole()) || getPrincipal().getRoles().contains(Roles.REPORT_ADMIN.getRole()))
+            return false;
+        return getPrincipal().getRoles().contains(Roles.UNIFY_REPORT_CUSTOM.getRole());
     }
 
     public static int getOrgId() {
@@ -160,7 +174,8 @@ public class AbstractDto extends AbstractDtoApi {
 
     protected void validateCustomReportAccess(ReportPojo reportPojo, Integer orgId) throws ApiException {
         if (reportPojo.getType().equals(ReportType.STANDARD)){
-            if(isCustomReportUser())
+            AppName appName = schemaVersionApi.getCheck(reportPojo.getSchemaVersionId()).getAppName();
+            if(isCustomReportUser(appName))
                 throw new ApiException(ApiStatus.BAD_DATA, "Custom Report User can't access standard report : "
                         + reportPojo.getName());
             return;
