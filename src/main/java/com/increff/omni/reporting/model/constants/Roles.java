@@ -14,8 +14,8 @@ public enum Roles {
     UNIFY_REPORT_STANDARD("unify.report.standard"),
     UNIFY_REPORT_CUSTOM("unify.report.custom"),
 
-    OMNI_REPORT_STANDARD("unify.report.standard"),
-    OMNI_REPORT_CUSTOM("unify.report.custom");
+    OMNI_REPORT_STANDARD("omni.report.standard"),
+    OMNI_REPORT_CUSTOM("omni.report.custom");
 
     private final String role;
     public static final List<String> USER_ACCESS_ADMIN_AUTHORITIES = Arrays.asList(
