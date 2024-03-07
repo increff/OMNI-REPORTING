@@ -6,6 +6,7 @@ import com.mongodb.client.*;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
 import lombok.extern.log4j.Log4j;
+import org.apache.commons.lang3.StringUtils;
 import org.bson.BsonArray;
 import org.bson.BsonDocument;
 import org.bson.BsonValue;
@@ -88,7 +89,7 @@ public class MongoUtil {
 
     private static ConnectionString getConnectionString(String host, String username, String password) {
         String connectionString = "mongodb+srv://";
-        if(Objects.nonNull(username) && Objects.nonNull(password) && !username.isEmpty()) {
+        if(StringUtils.isEmpty(username) && StringUtils.isEmpty(password)) {
             connectionString += username + ":" + password + "@" + host;
         } else {
             connectionString += host;
