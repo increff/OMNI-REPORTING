@@ -61,12 +61,14 @@ public class ValidateUtil {
             throw new ApiException(ApiStatus.BAD_DATA, "Only one of email or pipeline should be given, not both");
     }
 
-    public static void validateDefaultValueForm(List<DefaultValueForm> forms) throws ApiException {
+    public static void validateDefaultValueForm(List<DefaultValueForm> forms, Integer dashboardId) throws ApiException {
         for(DefaultValueForm form : forms)
             checkValid(form);
         Set<Integer> dashboardIds = forms.stream().map(DefaultValueForm::getDashboardId).collect(Collectors.toSet());
         if(dashboardIds.size() > 1)
             throw new ApiException(ApiStatus.BAD_DATA, "All dashboardIds should be same when updating default value");
+        if(dashboardIds.size() == 1 && !dashboardIds.contains(dashboardId))
+            throw new ApiException(ApiStatus.BAD_DATA, "DashboardId in all default value forms should be same as dashboardId in url");
 
     }
 }
