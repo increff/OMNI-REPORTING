@@ -9,10 +9,7 @@ import com.increff.omni.reporting.model.constants.ReportType;
 import com.increff.omni.reporting.model.constants.ValidationType;
 import com.increff.omni.reporting.model.data.*;
 import com.increff.omni.reporting.model.data.Charts.ChartInterface;
-import com.increff.omni.reporting.model.form.DashboardAddForm;
-import com.increff.omni.reporting.model.form.DashboardForm;
-import com.increff.omni.reporting.model.form.DefaultValueForm;
-import com.increff.omni.reporting.model.form.ReportRequestForm;
+import com.increff.omni.reporting.model.form.*;
 import com.increff.omni.reporting.pojo.*;
 import com.increff.omni.reporting.util.ChartUtil;
 import com.increff.omni.reporting.util.UserPrincipalUtil;
@@ -171,6 +168,8 @@ public class DashboardDto extends AbstractDto {
             List<Integer> allowedDashboardIds = getDashboardsWithChartParameters(allDashboardIds, orgId, appNames, reportTypes);
             dashboardListData.addAll(data.stream().filter(dashboard -> allowedDashboardIds.contains(dashboard.getId())).collect(Collectors.toList()));
         }
+        // remove duplicates
+        dashboardListData = dashboardListData.stream().distinct().collect(Collectors.toList());
         dashboardListData.sort(Comparator.comparing(DashboardListData::getName));
         return dashboardListData;
     }
@@ -446,6 +445,7 @@ public class DashboardDto extends AbstractDto {
      * Returns dashboardIds containing at least 1 chart with given chart parameters
      */
     private List<Integer> getDashboardsWithChartParameters(List<Integer> dashboardIds, Integer orgId, Set<AppName> appNames, Set<ReportType> reportTypes) throws ApiException {
+        log.debug("getDashboardsWithChartParameters.input orgId: " + orgId + " appNames: " + appNames + " reportTypes: " + reportTypes + " dashboardIds: " + dashboardIds);
         List<Integer> userAllowedSchemaVersionIds = schemaVersionApi.getByAppNames(appNames).
                 stream().map(SchemaVersionPojo::getId).collect(Collectors.toList());
         List<Integer> orgSchemaVersionIds = orgMappingApi.getCheckByOrgId(orgId).stream().map(OrgMappingPojo::getSchemaVersionId).collect(Collectors.toList());
@@ -468,11 +468,13 @@ public class DashboardDto extends AbstractDto {
                 if(userAllowedSchemaVersionIds.contains(chartAliasChartMap.get(chartAlias).getSchemaVersionId())
                 && reportTypes.contains(chartAliasChartMap.get(chartAlias).getType())){
                     appChartExists = true;
+                    log.debug("getDashboardsWithChartParameters.found dashboardId: " + dashboardId + " chartAlias: " + chartAlias);
                     break;
                 }
             }
             if(appChartExists) dashboardIdsWithUserAccessSchemaVersion.add(dashboardId);
         }
+        log.debug("getDashboardsWithChartParameters.return " + dashboardIdsWithUserAccessSchemaVersion);
         return dashboardIdsWithUserAccessSchemaVersion;
     }
 
