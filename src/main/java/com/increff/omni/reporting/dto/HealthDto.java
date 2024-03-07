@@ -21,16 +21,14 @@ public class HealthDto extends AbstractHealthDto {
     private ApplicationProperties applicationProperties;
 
     @Override
-    public HealthBulkData healthCheck(Boolean dependencies) {
+    public HealthBulkData checkDependenciesHealth() {
         HealthBulkData healthBulkData = new HealthBulkData();
-        if(Objects.nonNull(dependencies) && dependencies) {
-            healthBulkData.getHealthDataMap().put("crypto", serviceHealthCheck(applicationProperties.getCryptoHealthUrl()));
+        healthBulkData.getHealthDataMap().put("crypto", serviceHealthCheck(applicationProperties.getCryptoHealthUrl()));
             healthBulkData.getHealthDataMap().put("account", serviceHealthCheck(applicationProperties.getAccountHealthUrl()));
             healthBulkData.getHealthDataMap().put("queryExecutor", serviceHealthCheck(applicationProperties.getQueryExecutorHealthUrl()));
+            // TODO - Since we are not using any DbConfig, how to do to this?
 //            healthBulkData.getHealthDataMap().put("db", dbHealthCheck(applicationProperties.getJdbcUrl(),
 //                    applicationProperties.getJdbcUsername(), applicationProperties.getJdbcPassword()));
-            // TODO - add connection pojo health checks later if required
-        }
         return healthBulkData;
     }
 }

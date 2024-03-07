@@ -10,7 +10,6 @@ import com.increff.account.client.AuthClient;
 import com.increff.commons.queryexecutor.QueryExecutorClient;
 import com.increff.commons.springboot.audit.api.AuditApi;
 import com.increff.commons.springboot.audit.dao.AuditDao;
-import com.increff.commons.springboot.audit.dao.DaoProvider;
 import com.increff.omni.reporting.dto.CommonDtoHelper;
 import com.increff.omni.reporting.util.FileDownloadUtil;
 import com.increff.service.encryption.EncryptionClient;
@@ -20,10 +19,8 @@ import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
 import org.apache.hc.core5.http.HeaderElement;
 import org.apache.hc.core5.http.HeaderElements;
-import org.apache.hc.core5.http.HttpResponse;
 import org.apache.hc.core5.http.io.SocketConfig;
 import org.apache.hc.core5.http.message.MessageSupport;
-import org.apache.hc.core5.http.protocol.HttpContext;
 import org.apache.hc.core5.util.TimeValue;
 import org.apache.hc.core5.util.Timeout;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +29,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -40,7 +36,6 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 import java.io.IOException;
-import java.security.GeneralSecurityException;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -74,12 +69,12 @@ public class BeanConfig {
     }
 
     @Bean
-    public EncryptionClient getEncryptionClient(){
+    public EncryptionClient getEncryptionClient() {
         return new EncryptionClient(applicationProperties.getCryptoBaseUrl());
     }
 
     @Bean
-    public AuthClient authClient() throws GeneralSecurityException {
+    public AuthClient authClient() {
         return new AuthClient(applicationProperties.getAuthBaseUrl(), applicationProperties.getAuthAppToken());
     }
 
@@ -132,12 +127,6 @@ public class BeanConfig {
                 .modules(javaTimeModule).build();
     }
 
-//    @Bean
-//    public MappingJackson2HttpMessageConverter customJackson2HttpMessageConverter() {
-//        MappingJackson2HttpMessageConverter jsonConverter = new MappingJackson2HttpMessageConverter();
-//        jsonConverter.setObjectMapper(getMapper());
-//        return jsonConverter;
-//    }
 
     private ClientHttpRequestFactory getRequestFactory(ApplicationProperties applicationProperties) {
 

@@ -19,16 +19,12 @@ public class ConnectionApiTest extends AbstractTest {
     @Autowired
     private ConnectionApi api;
 
-    @Autowired
-    private ConfigurableEnvironment env;
-
     @Test
     public void testAddConnection() throws ApiException {
         ConnectionPojo pojo = getConnectionPojo("dev-db.increff.com", "Dev DB", "db.user"
                 , "db.password");
         pojo = api.add(pojo);
         assertNotNull(pojo);
-        env.getPropertySources();
         assertEquals("dev-db.increff.com", pojo.getHost());
         assertEquals("Dev DB", pojo.getName());
         assertEquals("db.user", pojo.getUsername());

@@ -207,6 +207,7 @@ public class ScheduledJobs {
 
 //    @Scheduled(cron = "0 0 6 * * *")
 //    public void clearUserRateLimiterMap() {
-//        rateLimitingFilter.clearUserRateLimiterMap();
+//        rateLimitingFilter.xclearUserRateLimiterMap();
 //    }
+    // Iternate and identify bean to clear map
 }

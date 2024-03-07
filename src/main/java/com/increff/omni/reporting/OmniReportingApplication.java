@@ -13,7 +13,8 @@ import javax.sql.DataSource;
 import java.sql.SQLException;
 
 @SpringBootApplication(exclude = { SecurityAutoConfiguration.class })
-@ComponentScan({"com.increff.omni.reporting", "com.increff.account.client", "com.increff.commons.queryexecutor"})
+@ComponentScan({"com.increff.omni.reporting", "com.increff.account.client",
+        "com.increff.commons.queryexecutor", "com.increff.commons.springboot.server"})
 @EntityScan({"com.increff.omni.reporting", "com.increff.commons.springboot.audit"})
 public class OmniReportingApplication {
 
