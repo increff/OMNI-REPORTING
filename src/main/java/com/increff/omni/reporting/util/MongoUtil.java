@@ -18,12 +18,11 @@ import java.util.concurrent.TimeUnit;
 public class MongoUtil {
 
     private static final String MONGO_VAR_NAME_SEPARATOR = "##";
-    private static final String MONGO_PIPELINE_STAGE_SEPARATOR = "// NEW STAGE";
 
     public static Integer MONGO_READ_TIMEOUT_SEC; // loaded from application.properties post construct
     public static Integer MONGO_CONNECT_TIMEOUT_SEC;
 
-    public static List<BsonDocument> parseMongoPipeline(String pipeline) {
+    public static List<BsonDocument> parseMongoPipeline(String pipeline) throws ApiException {
         System.out.println("parseMongoPipeline.pipeline : " + pipeline); // todo : remove before release form here and query-executor
         log.debug("parseMongoPipeline.pipeline : " + pipeline);
         BsonArray bsonDocuments = BsonArray.parse(pipeline);
@@ -32,16 +31,14 @@ public class MongoUtil {
             if (bsonValue.isDocument()) {
                 log.debug("parseMongoPipeline.Stage:\n" + bsonValue.asDocument());
                 documents.add(bsonValue.asDocument());
+            } else {
+                throw new ApiException(ApiStatus.BAD_DATA, "Bson Value is not a document\n" + bsonValue);
             }
         }
         log.debug("parseMongoPipeline.Parsed pipeline: " + documents);
         log.debug("parseMongoPipeline.Stage size : " + documents.size());
         System.out.println("parseMongoPipeline.Parsed pipeline: " + documents); // todo : remove before release
         return documents;
-    }
-
-    public static List<String> parseMongoQuery(String query, String delimiter) {
-        return Arrays.asList(query.split(delimiter));
     }
 
     public static String getValueAfterEquals(String str, String delimiter) {
@@ -100,7 +97,7 @@ public class MongoUtil {
     }
 
     public static void testConnection(String host, String username, String password) throws ApiException {
-        try (MongoClient mongoClient = MongoClients.create("mongodb+srv://" + username + ":" + password + "@" + host)) {
+        try (MongoClient mongoClient = MongoClients.create(getConnectionString(host, username, password))) {
             MongoDatabase database = mongoClient.getDatabase("admin");
             MongoIterable<String> collections = database.listCollectionNames();
             for (String collection : collections) {
