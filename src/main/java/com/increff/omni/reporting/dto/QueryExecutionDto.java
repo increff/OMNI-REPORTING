@@ -69,6 +69,12 @@ public class QueryExecutionDto extends AbstractDto {
         return filterJson;
     }
 
+    public static String mongoReplace(String paramValue, Boolean keepQuotes) {
+        if(!keepQuotes) // Unlike sql, error when using single quotes for numbers
+            paramValue = removeUnescapedSingleQuotes(paramValue);// do not remove escaped single quotes which comes from input
+        return paramValue;
+    }
+
     /**
      * Regex explained:
      * (?<!\\\\)': This is a negative lookbehind assertion ((?<!...)). It ensures that the single quote (') is not preceded by a backslash (\). The \\\\ part represents a double backslash (\\) because in Java regex, backslashes need to be escaped twice within string literals. So, \\\\ matches a single backslash. Therefore, (?<!\\\\) ensures that the single quote is not preceded by a backslash.

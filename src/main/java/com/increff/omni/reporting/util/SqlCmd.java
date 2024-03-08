@@ -69,6 +69,14 @@ public class SqlCmd {
                 keepQuotes = f.split("\\(")[1].split(",")[2].split("\\)")[0].trim().equalsIgnoreCase("t");
                 finalString = QueryExecutionDto.mongoFilter(filterJson, paramKey, paramValue, keepQuotes);
                 break;
+            case "mongoReplace":
+                paramKey = f.split("\\(")[1].split(",")[0].trim();
+                paramValue = inputParamMap.get(paramKey);
+                keepQuotes = f.split("\\(")[1].split(",")[1].split("\\)")[0].trim().equalsIgnoreCase("t");
+                if (Objects.nonNull(paramValue)) {
+                    finalString = QueryExecutionDto.mongoReplace(paramValue, keepQuotes);
+                }
+                break;
         }
         return finalString;
     }
