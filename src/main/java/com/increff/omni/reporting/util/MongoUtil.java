@@ -111,21 +111,5 @@ public class MongoUtil {
         }
     }
 
-    private static boolean isUserReadOnly(MongoClient mongoClient, String username) {
-        MongoDatabase adminDb = mongoClient.getDatabase("admin");
-        Document user = adminDb.getCollection("system.users").find(new Document("user", username)).first();
-        if (user != null) {
-            Object roles = user.get("roles");
-            if (roles instanceof Document) {
-                Document rolesDoc = (Document) roles;
-                for (String roleName : rolesDoc.keySet()) {
-                    if (roleName.equals("read") || roleName.equals("readAnyDatabase")) {
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
-    }
 
 }
