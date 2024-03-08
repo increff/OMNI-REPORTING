@@ -144,7 +144,7 @@ public class ReportDto extends AbstractDto {
         return ConvertUtil.convert(pojo, ReportQueryData.class);
     }
 
-    public ReportQueryData getTransformedQuery(ReportQueryTestForm form) {
+    public ReportQueryData getTransformedQuery(ReportQueryTestForm form) throws ApiException {
         Map<String, String> paramsMap = UserPrincipalUtil.getCompleteMapWithAccessControl(form.getParamMap());
         paramsMap.put("timezone", "'" + form.getTimezone() + "'");
         ReportQueryData data = new ReportQueryData();

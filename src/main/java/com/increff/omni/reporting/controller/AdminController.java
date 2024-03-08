@@ -163,7 +163,7 @@ public class AdminController {
 
     @ApiOperation(value = "Get transformed report query")
     @RequestMapping(value = "/reports/query/try", method = RequestMethod.POST)
-    public ReportQueryData getTransformedQuery(@RequestBody ReportQueryTestForm form) {
+    public ReportQueryData getTransformedQuery(@RequestBody ReportQueryTestForm form) throws ApiException {
         return reportDto.getTransformedQuery(form);
     }
 

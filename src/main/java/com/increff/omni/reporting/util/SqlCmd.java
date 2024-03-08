@@ -12,8 +12,11 @@ import java.util.*;
 @Log4j
 public class SqlCmd {
 
+    private static final String KEEP_QUOTES_TRUE = "keepQuotesTrue";
+    private static final String KEEP_QUOTES_FALSE = "keepQuotesFalse";
+
     public static String getFinalQuery(Map<String, String> inputParamMap, String query,
-                                       Boolean isUserPrincipalAvailable) {
+                                       Boolean isUserPrincipalAvailable) throws ApiException {
         if(isUserPrincipalAvailable)
             inputParamMap.putAll(UserPrincipalUtil.getAccessControlMap());
         String[] matchingFunctions = StringUtils.substringsBetween(query, "<<", ">>");
@@ -34,7 +37,7 @@ public class SqlCmd {
         return query;
     }
 
-    private static String getValueFromMethod(Map<String, String> inputParamMap, String f, String methodName) {
+    private static String getValueFromMethod(Map<String, String> inputParamMap, String f, String methodName) throws ApiException {
         String paramKey, paramValue, filterJson, operator, condition;
         Boolean keepQuotes;
         String finalString = "<<" + f + ">>";
@@ -66,19 +69,28 @@ public class SqlCmd {
                 paramValue = inputParamMap.get(paramKey);
                 filterJson = f.split("\\(")[1].split(",")[1].trim();
                 // t is true
-                keepQuotes = f.split("\\(")[1].split(",")[2].split("\\)")[0].trim().equalsIgnoreCase("t");
+                keepQuotes = isKeepQuotes(f.split("\\(")[1].split(",")[2].split("\\)")[0].trim());
                 finalString = QueryExecutionDto.mongoFilter(filterJson, paramKey, paramValue, keepQuotes);
                 break;
             case "mongoReplace":
                 paramKey = f.split("\\(")[1].split(",")[0].trim();
                 paramValue = inputParamMap.get(paramKey);
-                keepQuotes = f.split("\\(")[1].split(",")[1].split("\\)")[0].trim().equalsIgnoreCase("t");
+                keepQuotes = isKeepQuotes(f.split("\\(")[1].split(",")[1].split("\\)")[0].trim());
                 if (Objects.nonNull(paramValue)) {
                     finalString = QueryExecutionDto.mongoReplace(paramValue, keepQuotes);
                 }
                 break;
         }
         return finalString;
+    }
+
+    private static boolean isKeepQuotes(String f) throws ApiException {
+        if(f.equalsIgnoreCase(KEEP_QUOTES_TRUE))
+            return true;
+        else if(f.equalsIgnoreCase(KEEP_QUOTES_FALSE))
+            return false;
+        else
+            throw new ApiException(ApiStatus.BAD_DATA, "Invalid value for keepQuotes. Value: " + f);
     }
 
     public static Double getValueSum(List<Map<String, String>> result, String valueColumn) throws ApiException {
