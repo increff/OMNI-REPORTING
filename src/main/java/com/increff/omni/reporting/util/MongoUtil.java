@@ -94,7 +94,7 @@ public class MongoUtil {
         } else {
             connectionString += host;
         }
-        log.debug("getConnectionString : " + connectionString + " host : " + host + " username : " + username);
+        log.debug("getConnectionString host : " + host + " username : " + username);
         return new ConnectionString(connectionString);
     }
 
