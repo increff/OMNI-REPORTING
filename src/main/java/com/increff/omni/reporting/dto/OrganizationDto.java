@@ -2,10 +2,7 @@ package com.increff.omni.reporting.dto;
 
 import com.increff.omni.reporting.api.*;
 import com.increff.omni.reporting.model.constants.AppName;
-import com.increff.omni.reporting.model.constants.AuditActions;
 import com.increff.omni.reporting.model.data.*;
-import com.increff.omni.reporting.model.form.IntegrationOrgConnectionForm;
-import com.increff.omni.reporting.model.form.IntegrationOrgSchemaForm;
 import com.increff.omni.reporting.model.form.OrgMappingsForm;
 import com.increff.omni.reporting.model.form.OrganizationForm;
 import com.increff.omni.reporting.pojo.*;
@@ -99,13 +96,13 @@ public class OrganizationDto extends AbstractDto {
     }
 
 
-    public List<OrgMappingsData> selectOrgMappingDetails(){
+    public List<OrgMappingsData> getOrgMappingDetails(){
         List<OrgMappingPojo> pojos = orgMappingApi.selectAll();
         return ConvertUtil.convert(pojos, OrgMappingsData.class);
     }
 
-    public List<OrgMappingsGroupedData> selectOrgMappingGroupedDetails(){
-        List<OrgMappingsData> orgMappingsData = selectOrgMappingDetails();
+    public List<OrgMappingsGroupedData> getOrgMappingGroupedDetails(){
+        List<OrgMappingsData> orgMappingsData = getOrgMappingDetails();
         Map<Integer, List<OrgMappingsData>> orgIdToOrgMappingsData = new HashMap<>();
         for(OrgMappingsData data : orgMappingsData){
             if(orgIdToOrgMappingsData.containsKey(data.getOrgId())){
@@ -139,7 +136,7 @@ public class OrganizationDto extends AbstractDto {
         return orgMappingsGroupedData;
     }
 
-    public List<OrgSchemaData> selectAllOrgSchema(){
+    public List<OrgSchemaData> getAllOrgSchema(){
         List<OrgMappingPojo> pojos = orgMappingApi.selectAll();
         List<SchemaVersionPojo> allPojos = schemaVersionApi.selectAll();
         return CommonDtoHelper.getOrgSchemaDataList(pojos, allPojos);

@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 @CrossOrigin
@@ -230,19 +229,19 @@ public class AdminController {
     @ApiOperation(value = "Get all org mappings")
     @RequestMapping(value = "/orgs/mappings", method = RequestMethod.GET)
     public List<OrgMappingsData> selectOrgMappingDetails() {
-        return organizationDto.selectOrgMappingDetails();
+        return organizationDto.getOrgMappingDetails();
     }
 
     @ApiOperation(value = "Get all org mappings grouped by orgId")
     @RequestMapping(value = "/orgs/mappings/grouped", method = RequestMethod.GET)
     public List<OrgMappingsGroupedData> selectOrgMappingGroupedDetails() {
-        return organizationDto.selectOrgMappingGroupedDetails();
+        return organizationDto.getOrgMappingGroupedDetails();
     }
 
     @ApiOperation(value = "Get all org schema mapping")
     @RequestMapping(value = "/orgs/schema/", method = RequestMethod.GET)
     public List<OrgSchemaData> selectAllSchemaMapping() {
-        return organizationDto.selectAllOrgSchema();
+        return organizationDto.getAllOrgSchema();
     }
 
     @ApiOperation(value = "Add Directory")
