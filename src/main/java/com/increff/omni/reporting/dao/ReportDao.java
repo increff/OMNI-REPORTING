@@ -22,6 +22,8 @@ import java.util.stream.Collectors;
 @Transactional
 public class ReportDao extends AbstractDao<ReportPojo> {
 
+    private static final String SELECT_REPORT_BY_ID_AND_MULTIPLE_APP_NAMES = "select r from ReportPojo r join SchemaVersionPojo s on r.schemaVersionId = s.id where s.appName in :appNames and r.id = :reportId";
+
     public List<ReportPojo> getByTypeAndSchema(ReportType type, List<Integer> schemaVersionIds, Boolean isChart, VisualizationType visualization) {
         CriteriaBuilder cb = this.em.getCriteriaBuilder();
         CriteriaQuery<ReportPojo> query = cb.createQuery(ReportPojo.class);
@@ -156,7 +158,6 @@ public class ReportDao extends AbstractDao<ReportPojo> {
         return Collections.singletonList(ChartType.valueOf(visualization.name()));
     }
 
-    private static final String SELECT_REPORT_BY_ID_AND_MULTIPLE_APP_NAMES = "select r from ReportPojo r join SchemaVersionPojo s on r.schemaVersionId = s.id where s.appName in :appNames and r.id = :reportId";
     public ReportPojo getByIdAndAppNameIn(Integer reportId, Set<AppName> appNames) {
         log.debug("Fetching report by id : " + reportId + " and appNames : " + appNames);
         if(appNames.isEmpty()) return null;
