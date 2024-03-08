@@ -89,11 +89,12 @@ public class MongoUtil {
 
     private static ConnectionString getConnectionString(String host, String username, String password) {
         String connectionString = "mongodb+srv://";
-        if(StringUtils.isEmpty(username) && StringUtils.isEmpty(password)) {
+        if(!StringUtils.isEmpty(username) && !StringUtils.isEmpty(password)) { // todo : change in query-executor
             connectionString += username + ":" + password + "@" + host;
         } else {
             connectionString += host;
         }
+        log.debug("getConnectionString : " + connectionString + " host : " + host + " username : " + username);
         return new ConnectionString(connectionString);
     }
 
