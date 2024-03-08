@@ -1,5 +1,6 @@
 package com.increff.omni.reporting.pojo;
 
+import com.increff.commons.springboot.db.pojo.AbstractVersionedPojo;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -13,8 +14,8 @@ import jakarta.persistence.*;
 public class InputControlValuesPojo extends AbstractVersionedPojo {
 
     @Id
-    @TableGenerator(name = "organization_1", pkColumnValue = "organization_1", initialValue = 100000)
-    @GeneratedValue(strategy = GenerationType.TABLE, generator = "organization_1")
+    @TableGenerator(name = "organization", pkColumnValue = "organization", initialValue = 100000)
+    @GeneratedValue(strategy = GenerationType.TABLE, generator = "organization")
     private Integer id;
     @Column(nullable = false)
     private Integer controlId;
