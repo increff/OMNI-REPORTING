@@ -60,7 +60,7 @@ public class MongoUtil {
 
 
     public static List<Document> executeMongoPipeline(String host, String username, String password, String databaseName, String collectionName, List<BsonDocument> stages) throws ApiException {
-        log.debug("executeMongoPipeline.host : " + host + " username : " + username + " databaseName : " + databaseName + " collectionName : " + collectionName + "\n"
+        log.debug("executeMongoPipeline.username : " + username + " databaseName : " + databaseName + " collectionName : " + collectionName + "\n"
                 + "stages.size : " + stages.size() + " stages : " + stages);
         ConnectionString connString = getConnectionString(host, username, password);
 
@@ -94,7 +94,7 @@ public class MongoUtil {
         } else {
             connectionString += host;
         }
-        log.debug("getConnectionString host : " + host + " username : " + username);
+        log.debug("getConnectionString username : " + username);
         return new ConnectionString(connectionString);
     }
 
