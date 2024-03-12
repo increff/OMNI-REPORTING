@@ -138,7 +138,8 @@ public class ReportDto extends AbstractDto {
         ReportQueryPojo pojo = ConvertUtil.convert(form, ReportQueryPojo.class);
         pojo.setReportId(reportId);
 
-        String oldQuery = reportQueryApi.getByReportId(reportId).getQuery();
+        ReportQueryPojo oldPojo = reportQueryApi.getByReportId(reportId);
+        String oldQuery = Objects.isNull(oldPojo) ? "" : oldPojo.getQuery();
         pojo = flowApi.upsertQuery(pojo);
         String newQuery = pojo.getQuery();
         flowApi.saveAudit(reportId.toString(), AuditActions.UPSERT_REPORT_QUERY.toString(), "Upsert Report Query"
