@@ -46,4 +46,16 @@ public class IntegrationController {
         dashboardDto.copyDashboardToNewOrgs(orgIds);
     }
 
+    @ApiOperation(value = "Get All Schema")
+    @RequestMapping(value = "/schema", method = RequestMethod.GET)
+    public List<SchemaVersionData> selectAllSchema() {
+        return schemaDto.selectAll();
+    }
+
+    @ApiOperation(value = "Get all org mappings grouped by orgId")
+    @RequestMapping(value = "/orgs/mappings/grouped", method = RequestMethod.GET)
+    public List<OrgMappingsGroupedData> selectOrgMappingGroupedDetails() {
+        return organizationDto.getOrgMappingGroupedDetails();
+    }
+
 }
