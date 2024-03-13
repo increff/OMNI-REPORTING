@@ -1,6 +1,5 @@
 package com.increff.omni.reporting.security;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.increff.omni.reporting.api.ReportApi;
 import com.increff.omni.reporting.controller.AppAccessController;
@@ -14,18 +13,18 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.GenericFilterBean;
 
 import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
+import org.springframework.web.util.ContentCachingRequestWrapper;
 
 import static com.increff.omni.reporting.util.SecurityFilterUtil.*;
 
@@ -46,31 +45,30 @@ public class ReportAppAccessFilter extends GenericFilterBean {
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException {
         try {
             Object controller = getControllerByURL((HttpServletRequest) request);
-            if(Objects.isNull(controller)) {// Continue if controller not found
-                chain.doFilter(request, response);
-                return;
-            }
-            if(!controller.getClass().equals(AppAccessController.class)) {// Continue if controller is not AppAccessController
+            if( (Objects.isNull(controller)) || (!controller.getClass().equals(AppAccessController.class)) ) {// Continue if controller not found or controller is not AppAccessController
                 chain.doFilter(request, response);
                 return;
             }
 
+            ContentCachingRequestWrapper wrappedRequest = new ContentCachingRequestWrapper((HttpServletRequest) request);
+            // This line is necessary to cache InputStream (If request goes forward without this line, getContentAsByteArray() will return empty array)
+            // This gets further called in getJsonPayload() method. If this line is removed and getJsonPayload is later refactored, it will cause issues
+            wrappedRequest.getInputStream();
 
-            String reportIdStr = extractReportId((HttpServletRequest) request);
+            String reportIdStr = extractReportId(wrappedRequest);
             if(Objects.isNull(reportIdStr))
                 throw new ApiException(ApiStatus.BAD_DATA, "Report Id not found in request");
             Integer reportId = Integer.parseInt(reportIdStr);
-            log.debug("ReportAppAccessFilter.ReportId : " + reportId + " UserPrincipalUtil.getAccessibleApps() : " + UserPrincipalUtil.getAccessibleApps());
+            log.debug("ReportAppAccessFilter.ReportId : " + reportId + " userAccessibleApps : " + UserPrincipalUtil.getAccessibleApps() + " username : " + UserPrincipalUtil.getPrincipal().getUsername());
 
             ReportPojo report = reportApi.getByIdAndAppNameIn(reportId, UserPrincipalUtil.getAccessibleApps());
             if(Objects.isNull(report))
                 throw new ApiException(ApiStatus.BAD_DATA, "User does not have access to report");
 
-            chain.doFilter(request, response);
+            chain.doFilter(wrappedRequest, response);
+            log.error("ReportAppAccessFilter.doFilter end");
         } catch (Exception e) {
             setResponse((HttpServletResponse) response, e);
-            // ques : should i throw runtime exception here? error when increff throwing api exception
-            //'doFilter(ServletRequest, ServletResponse, FilterChain)' in 'com.increff.omni.reporting.security.ReportAppAccessFilter' clashes with 'doFilter(ServletRequest, ServletResponse, FilterChain)' in 'javax.servlet.Filter'; overridden method does not throw 'com.nextscm.commons.spring.common.ApiException'
         }
     }
 
@@ -82,6 +80,7 @@ public class ReportAppAccessFilter extends GenericFilterBean {
         httpResponse.getWriter().write("{\"status\":\"" + responseCode + "\",\"message\":\"" + e.getMessage() + "\"}");
         httpResponse.setStatus(responseCode);
     }
+
     public Object getControllerByURL(HttpServletRequest request) throws Exception {
         HandlerExecutionChain executionChain = requestMappingHandlerMapping.getHandler(request);
         if (executionChain != null && executionChain.getHandler() instanceof HandlerMethod) {
@@ -91,14 +90,16 @@ public class ReportAppAccessFilter extends GenericFilterBean {
         return null;
     }
 
-    private String extractReportId(HttpServletRequest request) throws ApiException{
-        String reportId = getFromQueryParameter(request); // Check if the report id is in the query parameter
+    private String extractReportId(ContentCachingRequestWrapper request) throws ApiException{
+        String reportId = null;
+
+        reportId = getFromJsonPayload(request, objectMapper); // Check if the request contains a JSON body
+        if (reportId != null) return reportId;
+
+        reportId = getFromQueryParameter(request); // Check if the report id is in the query parameter
         if (reportId != null) return reportId;
 
         reportId = getFromPathVariable(request); // Check if the report id is in the path variable
-        if (reportId != null) return reportId;
-
-        reportId = getFromJsonPayload(request, objectMapper); // Check if the request contains a JSON body
         if (reportId != null) return reportId;
 
         return null;

@@ -11,6 +11,7 @@ import com.nextscm.commons.spring.common.ApiStatus;
 import lombok.extern.log4j.Log4j;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Log4j
@@ -46,6 +47,16 @@ public class ConvertUtil {
             return obj.readValue(credentialsJson, fileProviderFormClass);
         } catch (Exception e) {
             throw new ApiException(ApiStatus.BAD_DATA, "Error while parsing credentials : " + e.getMessage());
+        }
+    }
+
+    public static <T> T getJavaObjectFromJson(String requestBody, Class<T> formClass, ObjectMapper objectMapper) throws ApiException {
+        try {
+            return objectMapper.readValue(requestBody, formClass);
+        } catch (Exception e) {
+            log.error("Error while parsing request body : " + requestBody + "\nError : " + e.getMessage() + "\n" + Arrays.toString(e.getStackTrace()));
+            throw new ApiException(ApiStatus.BAD_DATA, "Error while parsing request body : " + requestBody + "\nError : " + e.getMessage());
+
         }
     }
 

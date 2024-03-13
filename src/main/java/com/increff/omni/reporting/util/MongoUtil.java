@@ -24,7 +24,6 @@ public class MongoUtil {
     public static Integer MONGO_CONNECT_TIMEOUT_SEC;
 
     public static List<BsonDocument> parseMongoPipeline(String pipeline) throws ApiException {
-        System.out.println("parseMongoPipeline.pipeline : " + pipeline); // todo : remove before release form here and query-executor
         log.debug("parseMongoPipeline.pipeline : " + pipeline);
         BsonArray bsonDocuments = BsonArray.parse(pipeline);
         List<BsonDocument> documents = new ArrayList<>();
@@ -38,7 +37,6 @@ public class MongoUtil {
         }
         log.debug("parseMongoPipeline.Parsed pipeline: " + documents);
         log.debug("parseMongoPipeline.Stage size : " + documents.size());
-        System.out.println("parseMongoPipeline.Parsed pipeline: " + documents); // todo : remove before release
         return documents;
     }
 

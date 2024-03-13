@@ -41,7 +41,7 @@ public class StandardSecurityConfig extends WebSecurityConfigurerAdapter {
                 .and().cors().and().csrf().disable()
                 .addFilterBefore(authTokenFilter, BasicAuthenticationFilter.class)
                 .addFilterAfter(rateLimitingFilter, AuthTokenFilter.class)
-                // .addFilterAfter(reportAppAccessFilter, RateLimitingFilter.class) // todo : uncomment before release
+                .addFilterAfter(reportAppAccessFilter, RateLimitingFilter.class)
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
         http.cors();
     }

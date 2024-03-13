@@ -106,7 +106,7 @@ public class DashboardDto extends AbstractDto {
            pojo.setParamKey(f.getParamName());
            if(!f.getDefaultValue().isEmpty()) {
                pojo.setParamValue(f.getDefaultValue().get(0));
-               reportInputParamsPojoList.add(pojo); // todo : check default value delete.
+               reportInputParamsPojoList.add(pojo);
            }
         });
 
@@ -301,6 +301,7 @@ public class DashboardDto extends AbstractDto {
 
     @Transactional(rollbackFor = ApiException.class)
     public List<ViewDashboardData> viewDashboard(ReportRequestForm form, Integer dashboardId) throws ApiException, IOException {
+        checkValid(form);
         DashboardPojo dashboard = api.getCheck(dashboardId, getOrgId());
         ReportPojo report = reportApi.getCheck(form.getReportId());
         if(!report.getIsEnabled())

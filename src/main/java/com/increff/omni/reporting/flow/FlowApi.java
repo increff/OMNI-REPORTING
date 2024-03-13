@@ -100,7 +100,7 @@ public class FlowApi extends AbstractAuditApi {
 
 
     public List<ReportValidationGroupPojo> mergeValidationGroups(Integer queryReportId, List<ReportPojo> reports) throws ApiException {
-        log.info("Merging validation groups for queryReportId: " + queryReportId + " and reports: " + reports); // todo : change log to debug
+        log.info("Merging validation groups for queryReportId: " + queryReportId + " and reports: " + reports); // todo : change all logs in this func to debug
         List<ReportValidationGroupPojo> finalGroups = new ArrayList<>();
         List<ReportValidationGroupPojo> allReportValidationGroups = new ArrayList<>();
         Map<Integer, Set<Integer>> reportIdToControlIdsMap = new HashMap<>();
