@@ -59,7 +59,7 @@ public class AbstractDto extends AbstractDtoApi {
     public static boolean isOmniCustomReportUser() {
         if(getPrincipal().getRoles().contains(Roles.APP_ADMIN.getRole()) || getPrincipal().getRoles().contains(Roles.REPORT_ADMIN.getRole()))
             return false;
-        return getPrincipal().getRoles().contains(Roles.OMNI_REPORT_CUSTOM.getRole());
+        return getPrincipal().getRoles().contains(Roles.OMNI_REPORT_CUSTOM.getRole()); // todo : think about refactoring this
     }
 
     public static boolean isUnifyCustomReportUser() {
