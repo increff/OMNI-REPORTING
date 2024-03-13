@@ -3,10 +3,7 @@ package com.increff.omni.reporting.dto;
 import com.increff.omni.reporting.api.*;
 import com.increff.omni.reporting.config.ApplicationProperties;
 import com.increff.omni.reporting.flow.FlowApi;
-import com.increff.omni.reporting.model.constants.AppName;
-import com.increff.omni.reporting.model.constants.ChartType;
-import com.increff.omni.reporting.model.constants.ReportType;
-import com.increff.omni.reporting.model.constants.ValidationType;
+import com.increff.omni.reporting.model.constants.*;
 import com.increff.omni.reporting.model.data.*;
 import com.increff.omni.reporting.model.data.Charts.ChartInterface;
 import com.increff.omni.reporting.model.form.*;
@@ -194,6 +191,7 @@ public class DashboardDto extends AbstractDto {
 
         extractCommonFilters(charts, filterDetails);
 
+
         return filterDetails;
     }
 
@@ -245,6 +243,35 @@ public class DashboardDto extends AbstractDto {
             }
         }
         filterDetails.put("common", new ArrayList<>(commonFilters.values()));
+        sortFiltersForDashboards(filterDetails.get("common"));
+
+    }
+
+    private void sortFiltersForDashboards(List<InputControlData> filters) {
+        Map<InputControlType, Integer> INPUT_CONTROL_TYPE_SORT_ORDER = new HashMap<>();
+        //    ACCESS_CONTROLLED_MULTI_SELECT, DATE, DATE_TIME, MULTI_SELECT, SINGLE_SELECT, NUMBER, TEXT, MULTI_TEXT
+        INPUT_CONTROL_TYPE_SORT_ORDER.put(InputControlType.ACCESS_CONTROLLED_MULTI_SELECT, 1);
+        INPUT_CONTROL_TYPE_SORT_ORDER.put(InputControlType.DATE, 2);
+        INPUT_CONTROL_TYPE_SORT_ORDER.put(InputControlType.DATE_TIME, 3);
+        INPUT_CONTROL_TYPE_SORT_ORDER.put(InputControlType.MULTI_SELECT, 4);
+        INPUT_CONTROL_TYPE_SORT_ORDER.put(InputControlType.SINGLE_SELECT, 5);
+        INPUT_CONTROL_TYPE_SORT_ORDER.put(InputControlType.NUMBER, 6);
+        INPUT_CONTROL_TYPE_SORT_ORDER.put(InputControlType.TEXT, 7);
+        INPUT_CONTROL_TYPE_SORT_ORDER.put(InputControlType.MULTI_TEXT, 8);
+
+        filters.sort((o1, o2) -> {
+            if (o1.getType().equals(o2.getType())) {
+                if(o1.getType().equals(InputControlType.DATE_TIME)){
+                    // o1.dateType START DATE should come before END DATE
+                    if(o1.getDateType().equals(DateType.START_DATE) && o2.getDateType().equals(DateType.END_DATE))
+                        return -1;
+                    else
+                        return 1;
+                }
+                return o1.getDisplayName().compareTo(o2.getDisplayName()); // sort by display name alphabetical
+            }
+            return INPUT_CONTROL_TYPE_SORT_ORDER.get(o1.getType()) - INPUT_CONTROL_TYPE_SORT_ORDER.get(o2.getType());
+        });
     }
 
     /**
