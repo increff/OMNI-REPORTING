@@ -26,6 +26,9 @@ public class StandardSecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private ReportAppAccessFilter reportAppAccessFilter;
 
+    @Autowired
+    private RoleOverrideFilter roleOverrideFilter;
+
     @Override
     protected void configure(HttpSecurity http) throws Exception {
 
@@ -40,7 +43,8 @@ public class StandardSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/standard/**").hasAnyAuthority(Roles.APP_ADMIN.getRole(), Roles.REPORT_ADMIN.getRole(), Roles.OMNI_REPORT_STANDARD.getRole(), Roles.UNIFY_REPORT_STANDARD.getRole(), Roles.OMNI_REPORT_CUSTOM.getRole(), Roles.UNIFY_REPORT_CUSTOM.getRole())//
                 .and().cors().and().csrf().disable() // todo : add filter
                 .addFilterBefore(authTokenFilter, BasicAuthenticationFilter.class)
-                .addFilterAfter(rateLimitingFilter, AuthTokenFilter.class)
+                .addFilterBefore(roleOverrideFilter, BasicAuthenticationFilter.class)
+                .addFilterAfter(rateLimitingFilter, RoleOverrideFilter.class)
                 .addFilterAfter(reportAppAccessFilter, RateLimitingFilter.class)
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
         http.cors();

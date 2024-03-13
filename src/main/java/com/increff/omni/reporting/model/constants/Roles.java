@@ -8,6 +8,9 @@ import java.util.List;
 @Getter
 public enum Roles {
 
+    REPORT_STANDARD("report.standard"), // USED IN ROLE OVERRIDE FILTER
+    REPORT_CUSTOM("report.custom"),
+
     APP_ADMIN("app.admin"),
     REPORT_ADMIN("report.admin"),
 
