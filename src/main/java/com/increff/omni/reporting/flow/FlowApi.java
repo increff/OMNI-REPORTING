@@ -100,7 +100,7 @@ public class FlowApi extends AbstractAuditApi {
 
 
     public List<ReportValidationGroupPojo> mergeValidationGroups(Integer queryReportId, List<ReportPojo> reports) throws ApiException {
-        log.info("Merging validation groups for queryReportId: " + queryReportId + " and reports: " + reports); // todo : change all logs in this func to debug
+        log.debug("Merging validation groups for queryReportId: " + queryReportId + " and reports: " + reports);
         List<ReportValidationGroupPojo> finalGroups = new ArrayList<>();
         List<ReportValidationGroupPojo> allReportValidationGroups = new ArrayList<>();
         Map<Integer, Set<Integer>> reportIdToControlIdsMap = new HashMap<>();
@@ -125,7 +125,7 @@ public class FlowApi extends AbstractAuditApi {
         // detach allReportValidationGroups from entity to prevent pojo updation on pojo.set
         allReportValidationGroups = allReportValidationGroups.stream().map(g -> ConvertUtil.convert(g, ReportValidationGroupPojo.class))
                 .collect(Collectors.toList());
-        log.info("All report validation groups: " + allReportValidationGroups);
+        log.debug("All report validation groups: " + allReportValidationGroups);
 
         // for every control id in reportIdToControlIdsMap(queryReportId), get all report
         if(reportIdToControlIdsMap.containsKey(queryReportId)) {
@@ -167,7 +167,7 @@ public class FlowApi extends AbstractAuditApi {
 
             }
         }
-        log.info("Final groups: " + finalGroups);
+        log.debug("Final groups: " + finalGroups);
         return finalGroups;
     }
 }
