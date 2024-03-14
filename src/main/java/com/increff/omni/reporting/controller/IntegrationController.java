@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Objects;
 
 @CrossOrigin
 @Api
@@ -42,8 +43,8 @@ public class IntegrationController {
 
     @ApiOperation(value = "Copy Dashboard to new organizations. This copies charts only! NOT default values!")
     @RequestMapping(value = "/copy-dashboard-new-orgs", method = RequestMethod.POST)
-    public void copyDashboardToNewOrgs(@RequestParam List<Integer> orgIds) throws ApiException {
-        dashboardDto.copyDashboardToNewOrgs(orgIds);
+    public void copyDashboardToNewOrgs(@RequestParam List<Integer> orgIds, @RequestParam(required = false) Boolean copyTestDashboards) throws ApiException {
+        dashboardDto.copyDashboardToNewOrgs(orgIds, Objects.isNull(copyTestDashboards) ? false : copyTestDashboards);
     }
 
     @ApiOperation(value = "Get All Schema")

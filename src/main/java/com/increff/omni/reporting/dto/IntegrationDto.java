@@ -52,7 +52,7 @@ public class IntegrationDto extends AbstractDtoApi {
         OrgMappingsData orgMappingsData = organizationDto.addOrgMapping(orgMappingsForm);
 
         // copy increff dashboards to new org
-        dashboardDto.copyDashboardToNewOrgs(Collections.singletonList(form.getOrganizationForm().getId()));
+        dashboardDto.copyDashboardToNewOrgs(Collections.singletonList(form.getOrganizationForm().getId()), false);
 
         return orgMappingsData;
     }

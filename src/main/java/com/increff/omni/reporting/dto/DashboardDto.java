@@ -409,11 +409,15 @@ public class DashboardDto extends AbstractDto {
     }
 
     @Transactional(rollbackFor = ApiException.class)
-    public void copyDashboardToNewOrgs(List<Integer> orgIds) throws ApiException {
+    public void copyDashboardToNewOrgs(List<Integer> orgIds, Boolean copyTestDashboards) throws ApiException {
         // Copies all dashboards created in Increff org (Admin org set in properties file) to new orgs
         List<DashboardPojo> dashboards = api.getByOrgId(properties.getIncreffOrgId());
-        for(DashboardPojo dashboard : dashboards)
+        for(DashboardPojo dashboard : dashboards) {
+            if(dashboard.getName().toLowerCase().startsWith("test_"))
+                if(!copyTestDashboards) continue; // Skip if dashboard name starts with test
+
             copyDashboardToSomeOrgs(dashboard.getId(), dashboard.getOrgId(), orgIds);
+        }
     }
 
     @Transactional(rollbackFor = ApiException.class)
