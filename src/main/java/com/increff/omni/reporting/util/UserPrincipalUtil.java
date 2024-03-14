@@ -4,12 +4,13 @@ import com.increff.account.client.SecurityUtil;
 import com.increff.account.client.UserPrincipal;
 import com.increff.omni.reporting.model.constants.*;
 import com.increff.omni.reporting.model.form.ReportScheduleForm;
+import lombok.extern.log4j.Log4j;
 
 import java.util.*;
 
 import static com.increff.omni.reporting.model.constants.Roles.USER_ACCESS_ADMIN_AUTHORITIES;
 
-
+@Log4j
 public class UserPrincipalUtil {
 
     public static Map<String, String> getCompleteMapWithAccessControl(Map<String, List<String>> params) {
@@ -102,7 +103,12 @@ public class UserPrincipalUtil {
         }
 
         for (String role : userRoles) {
-            accessibleApps.add(AppName.valueOf(role.split("\\.")[0].toUpperCase()));
+            String app = role.split("\\.")[0].toUpperCase();
+            try {
+                accessibleApps.add(AppName.valueOf(app)); // todo : check this logic for getting app name as there might be another role called unify.admin
+            } catch (IllegalArgumentException e) {
+                log.trace("Role not found for app: " + app); // continue for other roles like abc.xyz as abc is not a valid app
+            }
         }
         return accessibleApps;
     }
