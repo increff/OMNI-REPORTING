@@ -40,7 +40,7 @@ public class AppAccessController {
 
     // Change rate limiter filter URL when changing endpoint URL
     @ApiOperation(value = "View Dashboard")
-    @RequestMapping(value = "/dashboards/{dashboardId}/view", method = RequestMethod.POST) // todo : check what @requestbody does and do load testing for this API
+    @RequestMapping(value = "/dashboards/{dashboardId}/view", method = RequestMethod.POST)
     public List<ViewDashboardData> viewDashboard(@PathVariable Integer dashboardId, ContentCachingRequestWrapper wrappedRequest) throws ApiException, IOException {
         String requestBody = new String(wrappedRequest.getContentAsByteArray());
         ReportRequestForm form = ConvertUtil.getJavaObjectFromJson(requestBody, ReportRequestForm.class, objectMapper);
