@@ -16,7 +16,7 @@ public class OrgMappingPojo extends AbstractVersionedPojo {
     @TableGenerator(name = "org_schema_version", pkColumnValue = "org_schema_version",initialValue = 100000)
     @GeneratedValue(strategy = GenerationType.TABLE, generator = "org_schema_version")
     private Integer id;
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private Integer orgId;
     @Column(nullable = false)
     private Integer schemaVersionId;
