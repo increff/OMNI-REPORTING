@@ -41,7 +41,7 @@ public class StandardSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers(HttpMethod.GET, "/standard/dashboards/**").hasAnyAuthority(Roles.APP_ADMIN.getRole(), Roles.REPORT_ADMIN.getRole(), Roles.OMNI_REPORT_STANDARD.getRole(), Roles.UNIFY_REPORT_STANDARD.getRole(), Roles.OMNI_REPORT_CUSTOM.getRole(), Roles.UNIFY_REPORT_CUSTOM.getRole())//
                 .antMatchers("/standard/dashboards/**").hasAnyAuthority(Roles.APP_ADMIN.getRole())//
                 .antMatchers("/standard/**").hasAnyAuthority(Roles.APP_ADMIN.getRole(), Roles.REPORT_ADMIN.getRole(), Roles.OMNI_REPORT_STANDARD.getRole(), Roles.UNIFY_REPORT_STANDARD.getRole(), Roles.OMNI_REPORT_CUSTOM.getRole(), Roles.UNIFY_REPORT_CUSTOM.getRole())//
-                .and().cors().and().csrf().disable() // todo : add filter
+                .and().cors().and().csrf().disable()
                 .addFilterBefore(authTokenFilter, BasicAuthenticationFilter.class)
                 .addFilterBefore(roleOverrideFilter, BasicAuthenticationFilter.class)
                 .addFilterAfter(rateLimitingFilter, RoleOverrideFilter.class)
