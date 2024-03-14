@@ -51,21 +51,12 @@ public class AbstractDto extends AbstractDtoApi {
     @Autowired
     private SchemaVersionApi schemaVersionApi;
 
-    public static boolean isCustomReportUser(AppName appName) {
-        if(appName.equals(AppName.OMNI))
-            return isOmniCustomReportUser();
-        return isUnifyCustomReportUser();
-    }
-    public static boolean isOmniCustomReportUser() {
+    public static boolean isCustomReportUser(AppName appName) throws ApiException {
         if(getPrincipal().getRoles().contains(Roles.APP_ADMIN.getRole()) || getPrincipal().getRoles().contains(Roles.REPORT_ADMIN.getRole()))
             return false;
-        return getPrincipal().getRoles().contains(Roles.OMNI_REPORT_CUSTOM.getRole()); // todo : think about refactoring this
-    }
 
-    public static boolean isUnifyCustomReportUser() {
-        if(getPrincipal().getRoles().contains(Roles.APP_ADMIN.getRole()) || getPrincipal().getRoles().contains(Roles.REPORT_ADMIN.getRole()))
-            return false;
-        return getPrincipal().getRoles().contains(Roles.UNIFY_REPORT_CUSTOM.getRole());
+        Roles customRole =  Roles.getRoleByString(appName.toString() + "." + Roles.REPORT_CUSTOM.getRole());
+        return getPrincipal().getRoles().contains(customRole.getRole());
     }
 
     public static int getOrgId() {
