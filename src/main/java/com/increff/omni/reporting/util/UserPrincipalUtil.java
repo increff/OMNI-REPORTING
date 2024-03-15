@@ -9,7 +9,6 @@ import lombok.extern.log4j.Log4j;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.increff.omni.reporting.model.constants.Roles.REPORT_STANDARD;
 import static com.increff.omni.reporting.model.constants.Roles.USER_ACCESS_ADMIN_AUTHORITIES;
 
 @Log4j
@@ -93,6 +92,7 @@ public class UserPrincipalUtil {
     public static Set<AppName> getAccessibleApps() {
         Set<AppName> accessibleApps = new HashSet<>();
         List<String> userRoles = getPrincipal().getRoles();
+        log.debug("User roles: " + userRoles);
 
         if(userRoles.contains(Roles.APP_ADMIN.getRole()) || userRoles.contains(Roles.REPORT_ADMIN.getRole())) {
             return new HashSet<>(Arrays.asList(AppName.values()));
@@ -106,6 +106,7 @@ public class UserPrincipalUtil {
 
             if(app.isEmpty() || role.equalsIgnoreCase(Roles.REPORT_STANDARD.getRole()) || role.equalsIgnoreCase(Roles.REPORT_CUSTOM.getRole()))
                 continue; // Skip standard role as it is not an app! User should always have role omni.report.standard/custom along with report.standard/custom!!
+            log.debug("Adding app: " + app);
             accessibleApps.add(AppName.valueOf(app));
         }
         return accessibleApps;
