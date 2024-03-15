@@ -40,7 +40,7 @@ public class ReportRequestFlowApi extends FlowApi {
     @Autowired
     private QueryExecutorClientApi executorClientApi;
 
-    private final static Integer MAX_OPEN_REPORT_REQUESTS = 5000; // TODO : Undo this change after load testing !!!!!!!!!
+    private final static Integer MAX_OPEN_REPORT_REQUESTS = 5;
 
     @Transactional(rollbackFor = ApiException.class)
     public void requestReport(ReportRequestPojo pojo, List<ReportInputParamsPojo> reportInputParamsPojoList)
