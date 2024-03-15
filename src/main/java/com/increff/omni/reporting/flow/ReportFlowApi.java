@@ -195,7 +195,7 @@ public class ReportFlowApi extends FlowApi {
                     reportPojoList.addAll(api.getByTypeAndSchema(ReportType.STANDARD, Collections.singletonList(schemaVersionId), isChart, visualization));
                 }
             }
-        } // todo : test this
+        }
         return reportPojoList;
     }
 
