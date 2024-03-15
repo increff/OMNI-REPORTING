@@ -7,7 +7,9 @@ import com.increff.omni.reporting.model.form.ReportScheduleForm;
 import lombok.extern.log4j.Log4j;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
+import static com.increff.omni.reporting.model.constants.Roles.REPORT_STANDARD;
 import static com.increff.omni.reporting.model.constants.Roles.USER_ACCESS_ADMIN_AUTHORITIES;
 
 @Log4j
@@ -88,12 +90,6 @@ public class UserPrincipalUtil {
         finalMap.put(key, String.join(",", fList));
     }
 
-
-    public static boolean validateReportAppAccess(String appName) {
-        Set<AppName> accessibleApps = getAccessibleApps();
-        return accessibleApps.contains(AppName.valueOf(appName.toUpperCase()));
-    }
-
     public static Set<AppName> getAccessibleApps() {
         Set<AppName> accessibleApps = new HashSet<>();
         List<String> userRoles = getPrincipal().getRoles();
@@ -102,13 +98,15 @@ public class UserPrincipalUtil {
             return new HashSet<>(Arrays.asList(AppName.values()));
         }
 
+        userRoles = userRoles.stream().filter(role -> role.contains(Roles.REPORT_STANDARD.getRole()) || role.contains(Roles.REPORT_CUSTOM.getRole())).collect(Collectors.toList());
         for (String role : userRoles) {
-            String app = role.split("\\.")[0].toUpperCase();
-            try {
-                accessibleApps.add(AppName.valueOf(app)); // todo : check this logic for getting app name as there might be another role called unify.admin
-            } catch (IllegalArgumentException e) {
-                log.trace("Role not found for app: " + app); // continue for other roles like abc.xyz as abc is not a valid app
-            }
+            String app =  "";
+            if(role.split("\\.").length > 0)
+                app = role.split("\\.")[0].toUpperCase();
+
+            if(app.isEmpty() || role.equalsIgnoreCase(Roles.REPORT_STANDARD.getRole()) || role.equalsIgnoreCase(Roles.REPORT_CUSTOM.getRole()))
+                continue; // Skip standard role as it is not an app! User should always have role omni.report.standard/custom along with report.standard/custom!!
+            accessibleApps.add(AppName.valueOf(app));
         }
         return accessibleApps;
     }
