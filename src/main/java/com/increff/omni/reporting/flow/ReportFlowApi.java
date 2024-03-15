@@ -174,34 +174,28 @@ public class ReportFlowApi extends FlowApi {
         orgUserSchemaVersionIds.retainAll(userAllowedSchemaVersionIds);
 
         List<ReportPojo> reportPojoList = new ArrayList<>();
-        //All standard
-        List<ReportPojo> standard =
-                api.getByTypeAndSchema(ReportType.STANDARD, orgUserSchemaVersionIds, isChart, visualization);
 
-        //All custom
+        // Get All custom Ids
         List<CustomReportAccessPojo> customAccess = customReportAccessApi.getByOrgId(orgId);
         List<Integer> customIds = customAccess.stream().map(CustomReportAccessPojo::getReportId)
                 .collect(Collectors.toList());
 
-        List<ReportPojo> custom =
-                api.getByIdsAndSchema(customIds, orgUserSchemaVersionIds, isChart);
+        // Get All Schema Versions
+        List<SchemaVersionPojo> schemaVersionPojos = schemaVersionApi.selectAll();
 
-        List<SchemaVersionPojo> schemaVersionPojos = schemaVersionApi.getByAppNames(Arrays.stream(AppName.values()).collect(Collectors.toSet()));
-        List<Integer> omniSchemaVersionIds = schemaVersionPojos.stream().filter(s -> s.getAppName().equals(AppName.OMNI))
-                .map(SchemaVersionPojo::getId).collect(Collectors.toList());
-        List<Integer> unifySchemaVersionIds = schemaVersionPojos.stream().filter(s -> s.getAppName().equals(AppName.UNIFY))
-                .map(SchemaVersionPojo::getId).collect(Collectors.toList());
+        for(AppName appName : AppName.values()){
+            List<Integer> appSchemaVersionIds = schemaVersionPojos.stream().filter(s -> s.getAppName().equals(appName))
+                    .map(SchemaVersionPojo::getId).collect(Collectors.toList());
+            Integer schemaVersionId = appSchemaVersionIds.stream().filter(orgUserSchemaVersionIds::contains).findFirst().orElse(null);
+            if(Objects.nonNull(schemaVersionId)) {
+                List<ReportPojo> custom = api.getByIdsAndSchema(customIds, Collections.singletonList(schemaVersionId), isChart);
+                reportPojoList.addAll(custom);
 
-        List<ReportPojo> omniStandard = standard.stream().filter(s -> omniSchemaVersionIds.contains(s.getSchemaVersionId()))
-                .collect(Collectors.toList());
-        List<ReportPojo> unifyStandard = standard.stream().filter(s -> unifySchemaVersionIds.contains(s.getSchemaVersionId()))
-                .collect(Collectors.toList());
-        if(!isOmniCustomReportUser()) // Add standard reports only if user in not custom report user
-            reportPojoList.addAll(omniStandard);
-        if(!isUnifyCustomReportUser())
-            reportPojoList.addAll(unifyStandard);
-
-        reportPojoList.addAll(custom);
+                if (!isCustomReportUser(appName)) { // Add standard reports only if user in not custom report user
+                    reportPojoList.addAll(api.getByTypeAndSchema(ReportType.STANDARD, Collections.singletonList(schemaVersionId), isChart, visualization));
+                }
+            }
+        } // todo : test this
         return reportPojoList;
     }
 
