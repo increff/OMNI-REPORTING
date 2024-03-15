@@ -45,7 +45,7 @@ public class DashboardDtoTestHelper {
     public static UpsertDefaultValueForm getUpsertDefaultValueForm(Integer dashboardId, String paramName, List<String> defaultValue) {
         UpsertDefaultValueForm form = new UpsertDefaultValueForm();
         form.setDefaultValueForms(Arrays.asList(getDefaultValueForm(dashboardId, paramName, defaultValue)));
-        form.setValidationGroupsValueForms(Collections.emptyList());
+        form.setValidationGroupsValueForms(form.getDefaultValueForms()); // For dates, exact date is needed in validation group values but dynamic date is needed for default value
         return form;
     }
 }
