@@ -42,19 +42,20 @@ public class SingleMandatoryValidatorTest extends AbstractTest {
         validator.validate(displayNames, params, "Report 1", 0, ReportRequestType.USER);
     }
 
-//    public void testValidateSuccess2() throws ApiException {
-//        List<String> params = Arrays.asList("'abc'", "'def'");
-//        List<String> displayNames = Arrays.asList("Client Id", "Item Id");
-//        try {
-//            validator.validate(displayNames, params, "Report 1", 0, ReportRequestType.USER);
-//        } catch (ApiException e) {
-//            assertEquals(ApiStatus.BAD_DATA, e.getStatus());
-//            assertEquals("Report 1 failed in validation for key / keys : " +
-//                            JsonUtil.serialize(displayNames) + " , validation type : " + ValidationType.SINGLE_MANDATORY,
-//                    e.getMessage());
-//            throw e;
-//        }
-//    } todo : uncomment
+    @Test
+    public void testValidateSuccess2() throws ApiException {
+        List<String> params = Arrays.asList("'abc'", "'def'");
+        List<String> displayNames = Arrays.asList("Client Id", "Item Id");
+        try {
+            validator.validate(displayNames, params, "Report 1", 0, ReportRequestType.USER);
+        } catch (ApiException e) {
+            assertEquals(ApiStatus.BAD_DATA, e.getStatus());
+            assertEquals("Report 1 failed in validation for key / keys : " +
+                            JsonUtil.serialize(displayNames) + " , validation type : " + ValidationType.SINGLE_MANDATORY,
+                    e.getMessage());
+            throw e;
+        }
+    }
 
     @Test
     public void testAdd() throws ApiException {
