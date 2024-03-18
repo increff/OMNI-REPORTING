@@ -27,16 +27,13 @@ public class IntegrationDto extends AbstractDtoApi {
     @Autowired
     private DashboardDto dashboardDto;
 
-    private static final String UNIFY_CONNECTION_NAME = "UNIFY";
-
     @Transactional
-    public OrgMappingsData integrateNewOrg(IntegrationOrgForm form) throws ApiException {
+    public OrgMappingsData integrateNewOrg(IntegrationOrgForm form, Boolean createNewConnection) throws ApiException {
         ConnectionData connectionData = null;
-        form.getConnectionForm().setName(form.getConnectionForm().getName().trim());
-        if(form.getConnectionForm().getName().trim().equalsIgnoreCase(UNIFY_CONNECTION_NAME)) // do not create UNIFY connection multiple times
-            connectionData = getConnectionData(form.getOrganizationForm().getName());
-        else // create connection
+        if(createNewConnection) // do not create UNIFY connection multiple times
             connectionData = connectionDto.add(form.getConnectionForm());
+        else
+            connectionData = getConnectionData(form.getOrganizationForm().getName());
 
         SchemaVersionData svData = getSchemaVersionData(form.getSchemaVersionName());
 
@@ -66,7 +63,7 @@ public class IntegrationDto extends AbstractDtoApi {
         OrgMappingsForm orgMappingsForm = new OrgMappingsForm();
         orgMappingsForm.setOrgId(form.getOrganizationForm().getId());
         orgMappingsForm.setSchemaVersionId(newSvData.getId());
-        orgMappingsForm.setConnectionId(oldOrgMappingData.getConnectionId());
+        orgMappingsForm.setConnectionId(oldOrgMappingData.getConnectionId()); // does not edit connection id
 
         return organizationDto.editOrgMappings(oldOrgMappingData.getId(), orgMappingsForm);
     }

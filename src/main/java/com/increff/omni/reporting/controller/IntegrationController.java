@@ -31,8 +31,8 @@ public class IntegrationController {
 
     @ApiOperation(value = "Integrate New Organization")
     @RequestMapping(value = "/integrate-new-org", method = RequestMethod.POST)
-    public OrgMappingsData add(@RequestBody IntegrationOrgForm form) throws ApiException {
-        return integrationDto.integrateNewOrg(form);
+    public OrgMappingsData add(@RequestBody IntegrationOrgForm form, @RequestParam Boolean createNewConnection) throws ApiException {
+        return integrationDto.integrateNewOrg(form, createNewConnection);
     }
 
     @ApiOperation(value = "Edit Existing Organization")
