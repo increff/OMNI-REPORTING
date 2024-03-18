@@ -131,6 +131,22 @@ public class ReportDtoTest extends AbstractTest {
     }
 
     @Test
+    public void testMongoFilterKeepQuotesFalse() throws ApiException {
+        ReportQueryTestForm testForm = getQueryTestForm();
+        testForm.setQuery("<<mongoFilter(id, { id_column : #id }, keepQuotesFalse)>>");
+        ReportQueryData queryData = dto.getTransformedQuery(testForm);
+        assertEquals("{ id_column : 1 }", queryData.getQuery());
+    }
+
+    @Test
+    public void testMongoFilterKeepQuotesTrue() throws ApiException {
+        ReportQueryTestForm testForm = getQueryTestForm();
+        testForm.setQuery("<<mongoFilter(id, { id_column : #id }, keepQuotesTrue)>>");
+        ReportQueryData queryData = dto.getTransformedQuery(testForm);
+        assertEquals("{ id_column : '1' }", queryData.getQuery());
+    }
+
+    @Test
     public void testMapToControlAndDelete() throws ApiException {
         ReportForm form = commonSetup("Report 2", ReportType.CUSTOM);
         ReportData data = dto.add(form);
