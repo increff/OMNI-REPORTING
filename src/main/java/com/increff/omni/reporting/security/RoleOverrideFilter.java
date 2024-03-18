@@ -43,6 +43,7 @@ public class RoleOverrideFilter extends GenericFilterBean {
                     SecurityUtil.addAuthority(authority);
                 }
             }
+
             userPrincipal.setRoles(roles);
             log.debug("Roles after override: " + userPrincipal.getRoles());
         }

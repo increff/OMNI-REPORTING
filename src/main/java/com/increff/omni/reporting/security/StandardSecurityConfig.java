@@ -34,13 +34,13 @@ public class StandardSecurityConfig extends WebSecurityConfigurerAdapter {
 
         http// Match only these URLs
                 .requestMatchers()//
-                .antMatchers("/standard/**").and().authorizeRequests()
+                .antMatchers("/standard/**").and().authorizeRequests()// todo : regex role matching
                 .antMatchers("/standard/schedules/**").hasAnyAuthority(Roles.APP_ADMIN.getRole())//
                 .antMatchers("/standard/pipelines/**").hasAnyAuthority(Roles.APP_ADMIN.getRole())//
-                .antMatchers(HttpMethod.POST, "/standard/dashboards/{dashboardId}/view").hasAnyAuthority(Roles.APP_ADMIN.getRole(), Roles.REPORT_ADMIN.getRole(), Roles.OMNI_REPORT_STANDARD.getRole(), Roles.UNIFY_REPORT_STANDARD.getRole(), Roles.OMNI_REPORT_CUSTOM.getRole(), Roles.UNIFY_REPORT_CUSTOM.getRole())//
-                .antMatchers(HttpMethod.GET, "/standard/dashboards/**").hasAnyAuthority(Roles.APP_ADMIN.getRole(), Roles.REPORT_ADMIN.getRole(), Roles.OMNI_REPORT_STANDARD.getRole(), Roles.UNIFY_REPORT_STANDARD.getRole(), Roles.OMNI_REPORT_CUSTOM.getRole(), Roles.UNIFY_REPORT_CUSTOM.getRole())//
+                .antMatchers(HttpMethod.POST, "/standard/dashboards/{dashboardId}/view").access("@roleUtil.hasAdminOrStandardOrCustom(authentication)")//
+                .antMatchers(HttpMethod.GET, "/standard/dashboards/**").access("@roleUtil.hasAdminOrStandardOrCustom(authentication)")//
                 .antMatchers("/standard/dashboards/**").hasAnyAuthority(Roles.APP_ADMIN.getRole())//
-                .antMatchers("/standard/**").hasAnyAuthority(Roles.APP_ADMIN.getRole(), Roles.REPORT_ADMIN.getRole(), Roles.OMNI_REPORT_STANDARD.getRole(), Roles.UNIFY_REPORT_STANDARD.getRole(), Roles.OMNI_REPORT_CUSTOM.getRole(), Roles.UNIFY_REPORT_CUSTOM.getRole())//
+                .antMatchers("/standard/**").access("@roleUtil.hasAdminOrStandardOrCustom(authentication)")//
                 .and().cors().and().csrf().disable()
                 .addFilterBefore(authTokenFilter, BasicAuthenticationFilter.class)
                 .addFilterBefore(roleOverrideFilter, BasicAuthenticationFilter.class)
