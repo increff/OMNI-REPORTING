@@ -35,12 +35,12 @@ public class ValidateUtil {
 
     public static void validateReportQueryForm(ReportQueryForm form, AppName appName) throws ApiException {
         checkValid(form);
-        if(appName.equals(AppName.UNIFY)) {
-            if(!form.getQuery().contains(UNIFY_QUERY_STRING)) {
-                throw new ApiException(ApiStatus.BAD_DATA, "Query should contain " + UNIFY_QUERY_STRING + " for App " + appName
-                        + " Query : " + form.getQuery());
-            }
-        }
+//        if(appName.equals(AppName.UNIFY)) { // todo : uncomment after real UNIFY DB is added
+//            if(!form.getQuery().contains(UNIFY_QUERY_STRING)) {
+//                throw new ApiException(ApiStatus.BAD_DATA, "Query should contain " + UNIFY_QUERY_STRING + " for App " + appName
+//                        + " Query : " + form.getQuery());
+//            }
+//        }
     }
 
     public static void validateDashboardChartForms(List<DashboardChartForm> forms) throws ApiException {
