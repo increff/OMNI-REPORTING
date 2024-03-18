@@ -1,5 +1,6 @@
 package com.increff.omni.reporting.util;
 
+import com.increff.omni.reporting.model.constants.AppName;
 import com.increff.omni.reporting.model.constants.ChartType;
 import com.increff.omni.reporting.model.form.*;
 import com.nextscm.commons.spring.common.ApiException;
@@ -14,9 +15,11 @@ import java.util.stream.Collectors;
 import static com.nextscm.commons.spring.server.DtoHelper.checkValid;
 
 public class ValidateUtil {
+
     public static int MAX_DASHBOARD_CHARTS = 6;
+    private static String UNIFY_QUERY_STRING = "unify";         // todo : change access control string in query validation after real UNIFY DB is added . check that each query should have org access control filter for mongo. do the same for edit report also.
+
     public static void validateReportForm(ReportForm form) throws ApiException {
-        // todo : add access control string in query validation . check that each query should have org access control filter for mongo. do the same for edit report also.
         checkValid(form);
         if(form.getIsChart() && form.getCanSchedule())
             throw new ApiException(ApiStatus.BAD_DATA, "Dashboard Reports can't be scheduled");
@@ -28,6 +31,16 @@ public class ValidateUtil {
         if(form.getChartType() != ChartType.REPORT && !form.getIsChart())
             throw new ApiException(ApiStatus.BAD_DATA, "isChart should be true for Chart Type: " + form.getChartType());
 
+    }
+
+    public static void validateReportQueryForm(ReportQueryForm form, AppName appName) throws ApiException {
+        checkValid(form);
+        if(appName.equals(AppName.UNIFY)) {
+            if(!form.getQuery().contains(UNIFY_QUERY_STRING)) {
+                throw new ApiException(ApiStatus.BAD_DATA, "Query should contain " + UNIFY_QUERY_STRING + " for App " + appName
+                        + " Query : " + form.getQuery());
+            }
+        }
     }
 
     public static void validateDashboardChartForms(List<DashboardChartForm> forms) throws ApiException {

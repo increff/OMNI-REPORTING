@@ -11,6 +11,7 @@ import com.increff.omni.reporting.model.form.*;
 import com.increff.omni.reporting.pojo.*;
 import com.increff.omni.reporting.util.SqlCmd;
 import com.increff.omni.reporting.util.UserPrincipalUtil;
+import com.increff.omni.reporting.util.ValidateUtil;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
 import com.nextscm.commons.spring.common.ConvertUtil;
@@ -137,6 +138,8 @@ public class ReportDto extends AbstractDto {
         checkValid(form);
         ReportQueryPojo pojo = ConvertUtil.convert(form, ReportQueryPojo.class);
         pojo.setReportId(reportId);
+
+        ValidateUtil.validateReportQueryForm(form, getReportSV(reportId).getAppName());
 
         ReportQueryPojo oldPojo = reportQueryApi.getByReportId(reportId);
         String oldQuery = Objects.isNull(oldPojo) ? "" : oldPojo.getQuery();
@@ -329,5 +332,11 @@ public class ReportDto extends AbstractDto {
         if (Objects.isNull(reportQueryPojo) && Objects.isNull(form.getQuery()))
             throw new ApiException(ApiStatus.BAD_DATA, "No query defined for report : " + reportPojo.getName());
     }
+
+    private SchemaVersionPojo getReportSV(Integer reportId) throws ApiException {
+        ReportPojo reportPojo = reportApi.getCheck(reportId);
+        return schemaVersionApi.getCheck(reportPojo.getSchemaVersionId());
+    }
+
 
 }
