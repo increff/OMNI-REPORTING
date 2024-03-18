@@ -34,7 +34,7 @@ public class StandardSecurityConfig extends WebSecurityConfigurerAdapter {
 
         http// Match only these URLs
                 .requestMatchers()//
-                .antMatchers("/standard/**").and().authorizeRequests()// todo : regex role matching
+                .antMatchers("/standard/**").and().authorizeRequests()//
                 .antMatchers("/standard/schedules/**").hasAnyAuthority(Roles.APP_ADMIN.getRole())//
                 .antMatchers("/standard/pipelines/**").hasAnyAuthority(Roles.APP_ADMIN.getRole())//
                 .antMatchers(HttpMethod.POST, "/standard/dashboards/{dashboardId}/view").access("@roleUtil.hasAdminOrStandardOrCustom(authentication)")//
