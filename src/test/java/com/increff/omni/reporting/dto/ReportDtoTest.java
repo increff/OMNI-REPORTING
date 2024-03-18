@@ -147,6 +147,23 @@ public class ReportDtoTest extends AbstractTest {
     }
 
     @Test
+    public void testMongoReplaceKeepQuotesFalse() throws ApiException {
+        ReportQueryTestForm testForm = getQueryTestForm();
+        testForm.setQuery("<<mongoReplace(id, keepQuotesFalse)>>");
+        ReportQueryData queryData = dto.getTransformedQuery(testForm);
+        assertEquals("1", queryData.getQuery());
+    }
+
+    @Test
+    public void testMongoReplaceKeepQuotesTrue() throws ApiException {
+        ReportQueryTestForm testForm = getQueryTestForm();
+        testForm.setQuery("<<mongoReplace(id, keepQuotesTrue)>>");
+        ReportQueryData queryData = dto.getTransformedQuery(testForm);
+        assertEquals("'1'", queryData.getQuery());
+    }
+
+
+    @Test
     public void testMapToControlAndDelete() throws ApiException {
         ReportForm form = commonSetup("Report 2", ReportType.CUSTOM);
         ReportData data = dto.add(form);
