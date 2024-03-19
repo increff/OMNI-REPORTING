@@ -352,72 +352,106 @@ public class DashboardDtoTest extends AbstractTest {
         List<DashboardListData> dashboardData = dashboardDto.getDashboardsByOrgId();
         assertEquals(0, dashboardData.size());
     }
-//
-//    @Test
-//    public void testValidationGroupMergeMandatory() throws ApiException {
-//        List<ReportData> chartDatas = commonSetup(ReportType.STANDARD);
-//
-//        // add input control to report
-//        InputControlForm form = getInputControlForm("Client Id", "clientId", InputControlScope.GLOBAL
-//                , InputControlType.TEXT, new ArrayList<>(), null, null, schemaVersionId);
-//        InputControlData inputControlData = inputControlDto.add(form);
-//
-//        reportDto.mapToControl(chartDatas.get(0).getId(), inputControlData.getId());
-//        reportDto.mapToControl(chartDatas.get(1).getId(), inputControlData.getId());
-//
-//        List<ReportControlsPojo> reportControlsPojos = reportControlsApi.getByReportId(chartDatas.get(0).getId());
-//        assertEquals(1, reportControlsPojos.size());
-//
-//        List<ReportControlsPojo> reportControlsPojos1 = reportControlsApi.getByReportId(chartDatas.get(1).getId());
-//        assertEquals(1, reportControlsPojos1.size());
-//
-//        ValidationGroupForm groupForm = getValidationGroupForm("group1", 90
-//                , ValidationType.MANDATORY, Arrays.asList(inputControlData.getId()));
-//        reportFlowApi.addValidationGroup(chartDatas.get(1).getId(), groupForm);
-//
-//
-//        DashboardData data = dashboardDto.addDashboard(getDashboardAddForm("Dashboard_1",
-//                Arrays.asList(getDashboardChartForm(chartDatas.get(0).getAlias(), 0, 0, 0, RowHeight.HALF),
-//                        getDashboardChartForm(chartDatas.get(1).getAlias(), 0, 1, 0, RowHeight.HALF))));
-//
-//        assertEquals(1, data.getFilterDetails().get("common").get(0).getValidationTypes().size());
-//        assertEquals(ValidationType.MANDATORY, data.getFilterDetails().get("common").get(0).getValidationTypes().get(0));
-//
-//    }
-//
-//    @Test
-//    public void testValidationGroupMergeDateRange() throws ApiException {
-//        List<ReportData> chartDatas = commonSetup(ReportType.STANDARD);
-//
-//        // add input control to report
-//        InputControlForm form = getInputControlForm("Start Date", "startDate", InputControlScope.GLOBAL
-//                , InputControlType.DATE, new ArrayList<>(), null, null, schemaVersionId);
-//        InputControlData inputControlData = inputControlDto.add(form);
-//
-//        InputControlForm form1 = getInputControlForm("End Date", "endDate", InputControlScope.GLOBAL
-//                , InputControlType.DATE, new ArrayList<>(), null, null, schemaVersionId);
-//        InputControlData inputControlData1 = inputControlDto.add(form1);
-//
-//        reportDto.mapToControl(chartDatas.get(0).getId(), inputControlData.getId());
-//        reportDto.mapToControl(chartDatas.get(0).getId(), inputControlData1.getId());
-//        reportDto.mapToControl(chartDatas.get(1).getId(), inputControlData.getId());
-//        reportDto.mapToControl(chartDatas.get(1).getId(), inputControlData1.getId());
-//
-//        List<ReportControlsPojo> reportControlsPojos = reportControlsApi.getByReportId(chartDatas.get(0).getId());
-//        assertEquals(2, reportControlsPojos.size());
-//
-//        List<ReportControlsPojo> reportControlsPojos1 = reportControlsApi.getByReportId(chartDatas.get(1).getId());
-//        assertEquals(2, reportControlsPojos1.size());
-//
-//        ValidationGroupForm groupForm = getValidationGroupForm("group1", 90
-//                , ValidationType.DATE_RANGE, Arrays.asList(inputControlData.getId(), inputControlData1.getId()));
-//        reportFlowApi.addValidationGroup(chartDatas.get(1).getId(), groupForm);  //
-//
-//        DashboardData data = dashboardDto.addDashboard(getDashboardAddForm("Dashboard_1",
-//                Arrays.asList(getDashboardChartForm(chartDatas.get(0).getAlias(), 0, 0, 0, RowHeight.HALF),
-//                        getDashboardChartForm(chartDatas.get(1).getAlias(), 0, 1, 0, RowHeight.HALF))));
-//
-//        assertEquals(1, data.getFilterDetails().get("common").get(0).getValidationTypes().size());
-//        assertEquals(ValidationType.DATE_RANGE, data.getFilterDetails().get("common").get(0).getValidationTypes().get(0));
-//    }
+
+    @Test
+    public void testValidationGroupMergeMandatory() throws ApiException {
+        List<ReportData> chartDatas = commonSetup(ReportType.STANDARD);
+
+        // add input control to report
+        InputControlForm form = getInputControlForm("Client Id", "clientId", InputControlScope.GLOBAL
+                , InputControlType.TEXT, new ArrayList<>(), null, null, schemaVersionId);
+        InputControlData inputControlData = inputControlDto.add(form);
+
+        reportDto.mapToControl(chartDatas.get(0).getId(), inputControlData.getId());
+        reportDto.mapToControl(chartDatas.get(1).getId(), inputControlData.getId());
+
+        List<ReportControlsPojo> reportControlsPojos = reportControlsApi.getByReportId(chartDatas.get(0).getId());
+        assertEquals(1, reportControlsPojos.size());
+
+        List<ReportControlsPojo> reportControlsPojos1 = reportControlsApi.getByReportId(chartDatas.get(1).getId());
+        assertEquals(1, reportControlsPojos1.size());
+
+        ValidationGroupForm groupForm = getValidationGroupForm("group1", 90
+                , ValidationType.MANDATORY, Arrays.asList(inputControlData.getId()));
+        reportFlowApi.addValidationGroup(chartDatas.get(1).getId(), groupForm);
+
+
+        DashboardData data = dashboardDto.addDashboard(getDashboardAddForm("Dashboard_1",
+                Arrays.asList(getDashboardChartForm(chartDatas.get(0).getAlias(), 0, 0, 0, RowHeight.HALF),
+                        getDashboardChartForm(chartDatas.get(1).getAlias(), 0, 1, 0, RowHeight.HALF))));
+
+        assertEquals(1, data.getFilterDetails().get("common").get(0).getValidationTypes().size());
+        assertEquals(ValidationType.MANDATORY, data.getFilterDetails().get("common").get(0).getValidationTypes().get(0));
+
+    }
+
+    @Test
+    public void testValidationGroupAddedLater() throws ApiException {
+        List<ReportData> chartDatas = commonSetup(ReportType.STANDARD);
+
+        // add input control to report
+        InputControlForm form = getInputControlForm("Client Id", "clientId", InputControlScope.GLOBAL
+                , InputControlType.TEXT, new ArrayList<>(), null, null, schemaVersionId);
+        InputControlData inputControlData = inputControlDto.add(form);
+
+        reportDto.mapToControl(chartDatas.get(0).getId(), inputControlData.getId());
+        reportDto.mapToControl(chartDatas.get(1).getId(), inputControlData.getId());
+
+        List<ReportControlsPojo> reportControlsPojos = reportControlsApi.getByReportId(chartDatas.get(0).getId());
+        assertEquals(1, reportControlsPojos.size());
+
+        List<ReportControlsPojo> reportControlsPojos1 = reportControlsApi.getByReportId(chartDatas.get(1).getId());
+        assertEquals(1, reportControlsPojos1.size());
+
+        DashboardData data = dashboardDto.addDashboard(getDashboardAddForm("Dashboard_1",
+                Arrays.asList(getDashboardChartForm(chartDatas.get(0).getAlias(), 0, 0, 0, RowHeight.HALF),
+                        getDashboardChartForm(chartDatas.get(1).getAlias(), 0, 1, 0, RowHeight.HALF))));
+
+        assertEquals(0, data.getFilterDetails().get("common").get(0).getValidationTypes().size());
+
+        ValidationGroupForm groupForm = getValidationGroupForm("group1", 90
+                , ValidationType.MANDATORY, Arrays.asList(inputControlData.getId()));
+        reportFlowApi.addValidationGroup(chartDatas.get(1).getId(), groupForm);
+
+        data = dashboardDto.getDashboard(data.getId());
+        assertEquals(1, data.getFilterDetails().get("common").get(0).getValidationTypes().size());
+        assertEquals(ValidationType.MANDATORY, data.getFilterDetails().get("common").get(0).getValidationTypes().get(0));
+    }
+
+    @Test
+    public void testValidationGroupMergeDateRange() throws ApiException {
+        List<ReportData> chartDatas = commonSetup(ReportType.STANDARD);
+
+        // add input control to report
+        InputControlForm form = getInputControlForm("Start Date", "startDate", InputControlScope.GLOBAL
+                , InputControlType.DATE, new ArrayList<>(), null, null, schemaVersionId);
+        InputControlData inputControlData = inputControlDto.add(form);
+
+        InputControlForm form1 = getInputControlForm("End Date", "endDate", InputControlScope.GLOBAL
+                , InputControlType.DATE, new ArrayList<>(), null, null, schemaVersionId);
+        InputControlData inputControlData1 = inputControlDto.add(form1);
+
+        reportDto.mapToControl(chartDatas.get(0).getId(), inputControlData.getId());
+        reportDto.mapToControl(chartDatas.get(0).getId(), inputControlData1.getId());
+        reportDto.mapToControl(chartDatas.get(1).getId(), inputControlData.getId());
+        reportDto.mapToControl(chartDatas.get(1).getId(), inputControlData1.getId());
+
+        List<ReportControlsPojo> reportControlsPojos = reportControlsApi.getByReportId(chartDatas.get(0).getId());
+        assertEquals(2, reportControlsPojos.size());
+
+        List<ReportControlsPojo> reportControlsPojos1 = reportControlsApi.getByReportId(chartDatas.get(1).getId());
+        assertEquals(2, reportControlsPojos1.size());
+
+        ValidationGroupForm groupForm = getValidationGroupForm("group1", 90
+                , ValidationType.DATE_RANGE, Arrays.asList(inputControlData.getId(), inputControlData1.getId()));
+        reportFlowApi.addValidationGroup(chartDatas.get(1).getId(), groupForm);  //
+
+        DashboardData data = dashboardDto.addDashboard(getDashboardAddForm("Dashboard_1",
+                Arrays.asList(getDashboardChartForm(chartDatas.get(0).getAlias(), 0, 0, 0, RowHeight.HALF),
+                        getDashboardChartForm(chartDatas.get(1).getAlias(), 0, 1, 0, RowHeight.HALF))));
+
+        assertEquals(1, data.getFilterDetails().get("common").get(0).getValidationTypes().size());
+        assertEquals(ValidationType.DATE_RANGE, data.getFilterDetails().get("common").get(0).getValidationTypes().get(0));
+    }
+
 }
