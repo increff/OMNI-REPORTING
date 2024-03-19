@@ -17,7 +17,7 @@ import static com.nextscm.commons.spring.server.DtoHelper.checkValid;
 public class ValidateUtil {
 
     public static int MAX_DASHBOARD_CHARTS = 6;
-    private static String UNIFY_QUERY_STRING = "unify";         // todo : change access control string in query validation after real UNIFY DB is added . check that each query should have org access control filter for mongo. do the same for edit report also.
+    private static String UNIFY_QUERY_STRING = "unify";
 
     public static void validateReportForm(ReportForm form) throws ApiException {
         checkValid(form);
