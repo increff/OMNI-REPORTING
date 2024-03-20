@@ -26,17 +26,7 @@ public class ReportRequestFlowApi extends AbstractFlowApi {
     @Autowired
     private ReportApi reportApi;
     @Autowired
-    private InputControlApi controlApi;
-    @Autowired
-    private ReportControlsApi reportControlsApi;
-    @Autowired
     private ReportInputParamsApi reportInputParamsApi;
-    @Autowired
-    private ConnectionApi connectionApi;
-    @Autowired
-    private OrgConnectionApi orgConnectionApi;
-    @Autowired
-    private ReportValidationGroupApi reportValidationGroupApi;
     @Autowired
     private QueryExecutorClientApi executorClientApi;
 

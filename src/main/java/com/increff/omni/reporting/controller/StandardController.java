@@ -99,7 +99,7 @@ public class StandardController {
     @GetMapping(value = "/request-report/{requestId}")
     public String getFile(@PathVariable Integer requestId) throws
             ApiException, IOException {
-        return reportRequestDto.getReportFile(requestId);
+        return "\"" + reportRequestDto.getReportFile(requestId) + "\"";
     }
 
     @Operation(summary = "View CSV of Request")
@@ -157,7 +157,7 @@ public class StandardController {
     @Operation(summary = "Get Application Version")
     @GetMapping(value = "/version")
     public String getVersion() {
-        return properties.getVersion();
+        return "\"" + properties.getVersion() + "\"";
     }
 
     @Operation(summary = "Add Pipeline")
