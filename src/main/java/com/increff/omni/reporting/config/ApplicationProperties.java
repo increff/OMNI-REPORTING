@@ -176,6 +176,7 @@ public class ApplicationProperties {
     public void init() {
         MongoUtil.MONGO_READ_TIMEOUT_SEC = mongoReadTimeoutSec;
         MongoUtil.MONGO_CONNECT_TIMEOUT_SEC = mongoConnectTimeoutSec;
+        MongoUtil.MONGO_SERVER_SELECT_TIMEOUT_SEC = mongoConnectTimeoutSec;
     }
 
 }

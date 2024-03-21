@@ -22,6 +22,8 @@ public class MongoUtil {
 
     public static Integer MONGO_READ_TIMEOUT_SEC; // loaded from application.properties post construct
     public static Integer MONGO_CONNECT_TIMEOUT_SEC;
+    public static Integer MONGO_SERVER_SELECT_TIMEOUT_SEC;
+
 
     public static List<BsonDocument> parseMongoPipeline(String pipeline) throws ApiException {
         log.debug("parseMongoPipeline.pipeline : " + pipeline);
@@ -60,6 +62,7 @@ public class MongoUtil {
     public static List<Document> executeMongoPipeline(String host, String username, String password, String databaseName, String collectionName, List<BsonDocument> stages) throws ApiException {
         log.debug("executeMongoPipeline.username : " + username + " databaseName : " + databaseName + " collectionName : " + collectionName + "\n"
                 + "stages.size : " + stages.size() + " stages : " + stages);
+
         ConnectionString connString = getConnectionString(host, username, password);
 
         MongoClientSettings settings = MongoClientSettings.builder()
@@ -68,10 +71,12 @@ public class MongoUtil {
                     builder.connectTimeout(MONGO_CONNECT_TIMEOUT_SEC, TimeUnit.SECONDS);
                     builder.readTimeout(MONGO_READ_TIMEOUT_SEC, TimeUnit.SECONDS);
                 })
+                .applyToClusterSettings(builder -> {
+                    builder.serverSelectionTimeout(MONGO_SERVER_SELECT_TIMEOUT_SEC, TimeUnit.SECONDS);
+                })
                 .build();
 
         try (MongoClient mongoClient = MongoClients.create(settings)) {
-
             MongoDatabase database;
             database = mongoClient.getDatabase(databaseName);
             MongoCollection<Document> collection = database.getCollection(collectionName);
