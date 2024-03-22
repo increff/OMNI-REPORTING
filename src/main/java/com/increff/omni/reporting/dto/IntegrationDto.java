@@ -8,6 +8,7 @@ import com.increff.omni.reporting.model.form.OrgMappingsForm;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
 import com.nextscm.commons.spring.server.AbstractDtoApi;
+import lombok.extern.log4j.Log4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Collections;
 import java.util.Objects;
 
+@Log4j
 @Service
 public class IntegrationDto extends AbstractDtoApi {
 
@@ -37,8 +39,13 @@ public class IntegrationDto extends AbstractDtoApi {
 
         SchemaVersionData svData = getSchemaVersionData(form.getSchemaVersionName());
 
-        // create org
-        organizationDto.add(form.getOrganizationForm());
+        // create org if not exists already
+        Integer orgId = form.getOrganizationForm().getId();
+        if(Objects.isNull(organizationDto.getById(orgId))) {
+            organizationDto.add(form.getOrganizationForm());
+            // copy increff dashboards to new org
+            dashboardDto.copyDashboardToNewOrgs(Collections.singletonList(form.getOrganizationForm().getId()), false);
+        } else log.info("Skipping new org creation as Organization with id " + orgId + " already exists");
 
         OrgMappingsForm orgMappingsForm = new OrgMappingsForm();
         orgMappingsForm.setOrgId(form.getOrganizationForm().getId());
@@ -47,10 +54,6 @@ public class IntegrationDto extends AbstractDtoApi {
 
         // create org mapping
         OrgMappingsData orgMappingsData = organizationDto.addOrgMapping(orgMappingsForm);
-
-        // copy increff dashboards to new org
-        dashboardDto.copyDashboardToNewOrgs(Collections.singletonList(form.getOrganizationForm().getId()), false);
-
         return orgMappingsData;
     }
 
@@ -69,6 +72,7 @@ public class IntegrationDto extends AbstractDtoApi {
     }
 
 
+    @Transactional(rollbackFor = ApiException.class)
     private SchemaVersionData getSchemaVersionData(String svName) throws ApiException {
         SchemaVersionData svData = schemaDto.selectAll().stream().filter(sv -> sv.getName().equals(svName)).findFirst().orElse(null);
         if(Objects.isNull(svData)){
@@ -77,6 +81,7 @@ public class IntegrationDto extends AbstractDtoApi {
         return svData;
     }
 
+    @Transactional(rollbackFor = ApiException.class)
     private OrgMappingsData getOrgMappingsData(Integer orgId, Integer svId) throws ApiException {
         OrgMappingsData oldOrgMappingData = organizationDto.getOrgMappingDetails().stream().filter(om ->
                 om.getOrgId().equals(orgId) && om.getSchemaVersionId().equals(svId))
@@ -86,6 +91,7 @@ public class IntegrationDto extends AbstractDtoApi {
         return oldOrgMappingData;
     }
 
+    @Transactional(rollbackFor = ApiException.class)
     private ConnectionData getConnectionData(String connectionName) throws ApiException {
         ConnectionData connectionData = connectionDto.selectAll().stream().filter(c -> c.getName().equals(connectionName)).findFirst().orElse(null);
         if(Objects.isNull(connectionData)){
