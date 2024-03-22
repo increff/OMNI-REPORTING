@@ -33,7 +33,7 @@ public class IntegrationDto extends AbstractDtoApi {
         if(createNewConnection) // do not create UNIFY connection multiple times
             connectionData = connectionDto.add(form.getConnectionForm());
         else
-            connectionData = getConnectionData(form.getOrganizationForm().getName());
+            connectionData = getConnectionData(form.getConnectionForm().getName());
 
         SchemaVersionData svData = getSchemaVersionData(form.getSchemaVersionName());
 
