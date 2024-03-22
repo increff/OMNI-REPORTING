@@ -27,7 +27,7 @@ public class IntegrationDto extends AbstractDtoApi {
     @Autowired
     private DashboardDto dashboardDto;
 
-    @Transactional
+    @Transactional(rollbackFor = ApiException.class)
     public OrgMappingsData integrateNewOrg(IntegrationOrgForm form, Boolean createNewConnection) throws ApiException {
         ConnectionData connectionData = null;
         if(createNewConnection) // do not create UNIFY connection multiple times
@@ -54,7 +54,7 @@ public class IntegrationDto extends AbstractDtoApi {
         return orgMappingsData;
     }
 
-    @Transactional
+    @Transactional(rollbackFor = ApiException.class)
     public OrgMappingsData editExistingOrg(IntegrationOrgForm form, String oldSvName) throws ApiException {
         SchemaVersionData oldSvData = getSchemaVersionData(oldSvName);
         OrgMappingsData oldOrgMappingData = getOrgMappingsData(form.getOrganizationForm().getId(), oldSvData.getId());
