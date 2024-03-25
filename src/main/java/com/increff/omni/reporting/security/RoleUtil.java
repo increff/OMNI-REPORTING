@@ -6,9 +6,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
 
 @Log4j
 @Service
@@ -18,13 +16,14 @@ public class RoleUtil {
 
     public boolean hasAdminOrStandardOrCustom(Authentication authentication) {
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
-        List<String> allowedRoles = Arrays.asList(
-                Roles.APP_ADMIN.getRole(), Roles.REPORT_ADMIN.getRole(), Roles.REPORT_STANDARD.getRole(), Roles.REPORT_CUSTOM.getRole());
         log.debug("user authorities : " + authorities);
         for (GrantedAuthority authority : authorities) {
-            if(allowedRoles.contains(authority.getAuthority().toLowerCase())){
+            if (authority.getAuthority().toLowerCase().equals(Roles.APP_ADMIN.getRole()) ||
+                    authority.getAuthority().toLowerCase().equals(Roles.REPORT_ADMIN.getRole()) ||
+                    authority.getAuthority().toLowerCase().contains(Roles.REPORT_STANDARD.getRole()) ||
+                    authority.getAuthority().toLowerCase().contains(Roles.REPORT_CUSTOM.getRole())) {
                 log.debug("user role contains check success : " + authority.getAuthority());
-                return true; // true if any allowed roles are substring of any authority in user authorities
+                return true;
             }
         }
         log.debug("user role contains check failure : " + authorities);
