@@ -66,7 +66,7 @@ public class ReportAppAccessFilter extends GenericFilterBean {
                 throw new ApiException(ApiStatus.BAD_DATA, "User does not have access to report");
 
             chain.doFilter(wrappedRequest, response);
-            log.error("ReportAppAccessFilter.doFilter end");
+            log.debug("ReportAppAccessFilter.doFilter end");
         } catch (Exception e) {
             setResponse((HttpServletResponse) response, e);
         }
