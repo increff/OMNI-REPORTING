@@ -26,7 +26,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.increff.omni.reporting.dto.CommonDtoHelper.getValueFromQuotes;
-import static com.increff.omni.reporting.security.StandardSecurityConfig.*;
 
 @Log4j
 @Component
@@ -55,8 +54,9 @@ public class AbstractDto extends AbstractDtoApi {
         if(getPrincipal().getRoles().contains(Roles.APP_ADMIN.getRole()) || getPrincipal().getRoles().contains(Roles.REPORT_ADMIN.getRole()))
             return false;
 
-        Roles customRole =  Roles.getRoleByString(appName.toString() + "." + Roles.REPORT_CUSTOM.getRole());
-        return getPrincipal().getRoles().contains(customRole.getRole());
+        String customRole = (appName.toString() + "." + Roles.REPORT_CUSTOM.getRole()).toLowerCase();
+        log.debug("Custom Role : " + customRole);
+        return getPrincipal().getRoles().contains(customRole);
     }
 
     public static int getOrgId() {
