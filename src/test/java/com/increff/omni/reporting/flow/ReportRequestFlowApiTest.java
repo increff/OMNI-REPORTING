@@ -4,6 +4,7 @@ import com.increff.omni.reporting.api.*;
 import com.increff.omni.reporting.config.AbstractTest;
 import com.increff.omni.reporting.config.ApplicationProperties;
 import com.increff.omni.reporting.dao.DirectoryDao;
+import com.increff.omni.reporting.helper.OrgMappingTestHelper;
 import com.increff.omni.reporting.model.constants.*;
 import com.increff.omni.reporting.model.form.ValidationGroupForm;
 import com.increff.omni.reporting.pojo.*;
@@ -33,13 +34,11 @@ public class ReportRequestFlowApiTest extends AbstractTest {
     @Autowired
     private ConnectionApi connectionApi;
     @Autowired
-    private OrgConnectionApi orgConnectionApi;
-    @Autowired
     private OrganizationApi organizationApi;
     @Autowired
     private SchemaVersionApi schemaVersionApi;
     @Autowired
-    private OrgSchemaApi orgSchemaApi;
+    private OrgMappingApi orgMappingApi;
     @Autowired
     private DirectoryDao directoryDao;
     @Autowired
@@ -58,12 +57,10 @@ public class ReportRequestFlowApiTest extends AbstractTest {
         organizationApi.add(orgPojo);
         ConnectionPojo connectionPojo = getConnectionPojo("127.0.0.1", "Dev DB", username, password);
         connectionApi.add(connectionPojo);
-        OrgConnectionPojo orgConnectionPojo = getOrgConnectionPojo(100001, connectionPojo.getId());
-        orgConnectionApi.map(orgConnectionPojo);
         SchemaVersionPojo schemaPojo = getSchemaPojo("9.0.1");
         schemaVersionApi.add(schemaPojo);
-        OrgSchemaVersionPojo orgSchemaVersionPojo = getOrgSchemaPojo(orgPojo.getId(), schemaPojo.getId());
-        orgSchemaApi.map(orgSchemaVersionPojo);
+        orgMappingApi.add(OrgMappingTestHelper.getOrgMappingPojo(orgPojo.getId(), schemaPojo.getId(), connectionPojo.getId()));
+
         DirectoryPojo rootPojo = directoryDao.select("directoryName", properties.getRootDirectory());
         DirectoryPojo pojo = getDirectoryPojo("Standard Reports", rootPojo.getId());
         directoryApi.add(pojo);

@@ -45,6 +45,13 @@
 
     <dependencies>
 
+        <!-- https://mvnrepository.com/artifact/org.mongodb/mongodb-driver-sync -->
+        <dependency>
+            <groupId>org.mongodb</groupId>
+            <artifactId>mongodb-driver-sync</artifactId>
+            <version>4.11.1</version>
+        </dependency>
+
         <dependency>
             <groupId>com.increff.commons</groupId>
             <artifactId>increff-commons-fileclient</artifactId>
@@ -86,7 +93,7 @@
         <dependency>
             <groupId>com.increff.commons</groupId>
             <artifactId>query-executor-client</artifactId>
-            <version>1.0.1</version>
+            <version>1.6.2-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.increff.commons</groupId>

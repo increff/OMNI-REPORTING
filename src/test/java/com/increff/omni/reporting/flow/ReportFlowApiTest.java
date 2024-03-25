@@ -4,6 +4,7 @@ import com.increff.omni.reporting.api.*;
 import com.increff.omni.reporting.config.AbstractTest;
 import com.increff.omni.reporting.config.ApplicationProperties;
 import com.increff.omni.reporting.dao.DirectoryDao;
+import com.increff.omni.reporting.helper.OrgMappingTestHelper;
 import com.increff.omni.reporting.helper.SchemaTestHelper;
 import com.increff.omni.reporting.model.constants.InputControlScope;
 import com.increff.omni.reporting.model.constants.InputControlType;
@@ -22,7 +23,6 @@ import java.util.*;
 import static com.increff.omni.reporting.helper.DirectoryTestHelper.getDirectoryPojo;
 import static com.increff.omni.reporting.helper.InputControlTestHelper.getInputControlPojo;
 import static com.increff.omni.reporting.helper.InputControlTestHelper.getInputControlQueryPojo;
-import static com.increff.omni.reporting.helper.OrgTestHelper.getOrgSchemaPojo;
 import static com.increff.omni.reporting.helper.ReportTestHelper.*;
 import static com.increff.omni.reporting.helper.SchemaTestHelper.getSchemaPojo;
 import static org.junit.Assert.assertEquals;
@@ -41,7 +41,7 @@ public class ReportFlowApiTest extends AbstractTest {
     @Autowired
     private ApplicationProperties properties;
     @Autowired
-    private OrgSchemaApi orgSchemaApi;
+    private OrgMappingApi orgMappingApi;
     @Autowired
     private ReportApi reportApi;
     @Autowired
@@ -78,8 +78,8 @@ public class ReportFlowApiTest extends AbstractTest {
         schemaVersionApi.add(schemaVersionPojo);
         SchemaVersionPojo schemaVersionPojo1 = getSchemaPojo("9.0.2");
         schemaVersionApi.add(schemaVersionPojo1);
-        OrgSchemaVersionPojo pojo = getOrgSchemaPojo(100001, schemaVersionPojo1.getId());
-        orgSchemaApi.map(pojo);
+
+        orgMappingApi.add(OrgMappingTestHelper.getOrgMappingPojo(100001, schemaVersionPojo1.getId(), 100001));
         ReportPojo reportPojo = getReportPojo("Report 1", ReportType.STANDARD
                 , directoryPojo.getId(), schemaVersionPojo.getId());
         ReportPojo reportPojo1 = getReportPojo("Report 1", ReportType.STANDARD

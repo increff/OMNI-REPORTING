@@ -9,5 +9,5 @@ import lombok.Setter;
 public class DefaultValueData {
     private String defaultValue;
     private Integer dashboardId;
-    private Integer controlId;
+    private String paramName;
 }

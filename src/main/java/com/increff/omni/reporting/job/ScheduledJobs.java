@@ -43,7 +43,7 @@ public class ScheduledJobs {
     @Autowired
     private ReportApi reportApi;
     @Autowired
-    private OrgSchemaApi orgSchemaApi;
+    private OrgMappingApi orgMappingApi;
     @Autowired
     private JobFactory jobFactory;
     @Autowired
@@ -100,9 +100,11 @@ public class ScheduledJobs {
 
         log.debug("Eligible schedules : " + schedulePojos.size());
         for(ReportSchedulePojo s : schedulePojos) {
-            OrgSchemaVersionPojo orgSchemaVersionPojo = orgSchemaApi.getCheckByOrgId(s.getOrgId());
+            List<OrgMappingPojo> orgMappingPojo = orgMappingApi.getCheckByOrgId(s.getOrgId());
+            List<Integer> orgSchemaVersionIds = orgMappingPojo.stream().map(OrgMappingPojo::getSchemaVersionId).collect(Collectors.toList());
             ReportPojo reportPojo = reportApi.getByAliasAndSchema(s.getReportAlias(),
-                    orgSchemaVersionPojo.getSchemaVersionId(), false);
+                    orgSchemaVersionIds, false);
+
             Integer reportId = Objects.isNull(reportPojo) ? null : reportPojo.getId();
             ReportRequestPojo reportRequestPojo = convertToReportRequestPojo(s, reportId);
             List<ReportInputParamsPojo> reportInputParamsPojoList = new ArrayList<>();

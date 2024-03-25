@@ -17,8 +17,6 @@ import javax.persistence.*;
         @Index(name = "idx_id_schemaVersionId", columnList = "id, schemaVersionId")
 }, uniqueConstraints = {@UniqueConstraint(name = "uk_schemaVersionId_alias_isChart", columnNames = {
         "schemaVersionId", "alias", "isChart"})})
-
-//todo change the name of this pojo later
 public class ReportPojo extends AbstractVersionedPojo{
 
     @Id
@@ -56,5 +54,22 @@ public class ReportPojo extends AbstractVersionedPojo{
     @Column(nullable = false)
     @Enumerated(value = EnumType.STRING)
     private ChartType chartType = ChartType.REPORT;
+
+    @Override
+    public String toString() {
+        return "ReportPojo{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", alias='" + alias + '\'' +
+                ", type=" + type +
+                ", directoryId=" + directoryId +
+                ", schemaVersionId=" + schemaVersionId +
+                ", isEnabled=" + isEnabled +
+                ", canSchedule=" + canSchedule +
+                ", minFrequencyAllowedSeconds=" + minFrequencyAllowedSeconds +
+                ", isChart=" + isChart +
+                ", chartType=" + chartType +
+                '}';
+    }
 
 }

@@ -1,6 +1,7 @@
 package com.increff.omni.reporting.controller;
 
 import com.increff.omni.reporting.dto.*;
+import com.increff.omni.reporting.model.constants.InputControlScope;
 import com.increff.omni.reporting.model.constants.VisualizationType;
 import com.increff.omni.reporting.model.data.*;
 import com.increff.omni.reporting.model.form.*;
@@ -14,10 +15,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
-// Todo internationalization
 @CrossOrigin
 @Api
 @RestController
@@ -95,6 +94,12 @@ public class AdminController {
         return inputControlDto.selectAllGlobal(schemaVersionId);
     }
 
+    @ApiOperation(value = "Select controls by scope")
+    @RequestMapping(value = "/controls", method = RequestMethod.GET)
+    public List<InputControlData> selectAllControls(@RequestParam InputControlScope scope) throws ApiException {
+        return inputControlDto.selectAll(scope);
+    }
+
     @ApiOperation(value = "Add Schema")
     @RequestMapping(value = "/schema", method = RequestMethod.POST)
     public SchemaVersionData add(@RequestBody SchemaVersionForm form) throws ApiException {
@@ -157,14 +162,14 @@ public class AdminController {
 
     @ApiOperation(value = "Get transformed report query")
     @RequestMapping(value = "/reports/query/try", method = RequestMethod.POST)
-    public ReportQueryData getTransformedQuery(@RequestBody ReportQueryTestForm form) {
+    public ReportQueryData getTransformedQuery(@RequestBody ReportQueryTestForm form) throws ApiException {
         return reportDto.getTransformedQuery(form);
     }
 
     @ApiOperation(value = "Test Query Live")
     @RequestMapping(value = "/reports/query/try-live", method = RequestMethod.POST)
-    public List<ViewDashboardData> testQueryLive(@RequestBody ReportRequestForm form) throws ApiException, IOException {
-        return reportDto.testQueryLive(form);
+    public TestQueryLiveData testQueryLive(@RequestBody ReportRequestForm form, @RequestParam Integer orgId) throws ApiException, IOException {
+        return reportDto.testQueryLive(form, orgId);
     }
 
     @ApiOperation(value = "Get Report Query")
@@ -209,28 +214,34 @@ public class AdminController {
         return organizationDto.update(form);
     }
 
-    @ApiOperation(value = "Map organization to a schema")
-    @RequestMapping(value = "/orgs/{orgId}/schema/{schemaVersionId}", method = RequestMethod.POST)
-    public OrgSchemaData addSchemaMapping(@PathVariable Integer orgId, @PathVariable Integer schemaVersionId) throws ApiException {
-        return organizationDto.mapToSchema(orgId, schemaVersionId);
+    @ApiOperation(value = "Map organization to a schema and connection")
+    @RequestMapping(value = "/orgs/mappings", method = RequestMethod.POST)
+    public OrgMappingsData addOrgMappings(@RequestBody OrgMappingsForm form) throws ApiException {
+        return organizationDto.addOrgMapping(form);
     }
 
-    @ApiOperation(value = "Map organization to a connection")
-    @RequestMapping(value = "/orgs/{orgId}/connections/{connectionId}", method = RequestMethod.POST)
-    public OrgConnectionData addConnectionMapping(@PathVariable Integer orgId, @PathVariable Integer connectionId) throws ApiException {
-        return organizationDto.mapToConnection(orgId, connectionId);
+    @ApiOperation(value = "Edit Org Mapping")
+    @RequestMapping(value = "/orgs/mappings/{id}", method = RequestMethod.PUT)
+    public OrgMappingsData editOrgMappings(@PathVariable Integer id, @RequestBody OrgMappingsForm form) throws ApiException {
+        return organizationDto.editOrgMappings(id, form);
+    }
+
+    @ApiOperation(value = "Get all org mappings")
+    @RequestMapping(value = "/orgs/mappings", method = RequestMethod.GET)
+    public List<OrgMappingsData> selectOrgMappingDetails() {
+        return organizationDto.getOrgMappingDetails();
+    }
+
+    @ApiOperation(value = "Get all org mappings grouped by orgId")
+    @RequestMapping(value = "/orgs/mappings/grouped", method = RequestMethod.GET)
+    public List<OrgMappingsGroupedData> selectOrgMappingGroupedDetails() {
+        return organizationDto.getOrgMappingGroupedDetails();
     }
 
     @ApiOperation(value = "Get all org schema mapping")
     @RequestMapping(value = "/orgs/schema/", method = RequestMethod.GET)
     public List<OrgSchemaData> selectAllSchemaMapping() {
-        return organizationDto.selectAllOrgSchema();
-    }
-
-    @ApiOperation(value = "Get all org connection mapping")
-    @RequestMapping(value = "/orgs/connections/", method = RequestMethod.GET)
-    public List<OrgConnectionData> selectAllConnectionMapping() {
-        return organizationDto.selectAllOrgConnections();
+        return organizationDto.getAllOrgSchema();
     }
 
     @ApiOperation(value = "Add Directory")
@@ -288,13 +299,6 @@ public class AdminController {
     @RequestMapping(value = "/reports/orgs/{orgId}", method = RequestMethod.GET)
     public List<ReportData> selectByOrgId(@PathVariable Integer orgId, @RequestParam Boolean isChart, @RequestParam Optional<VisualizationType> visualization) throws ApiException {
         return reportDto.selectByOrg(orgId, isChart, visualization.orElse(null));
-    }
-
-    @ApiOperation(value = "Get Live Data For Any Organization")
-    @RequestMapping(value = "/orgs/{orgId}/reports/live", method = RequestMethod.POST)
-    public List<Map<String, String>> requestReport(@PathVariable Integer orgId, @RequestBody ReportRequestForm form)
-            throws ApiException, IOException {
-        return reportDto.getLiveDataForAnyOrganization(form, orgId);
     }
 
     @ApiOperation(value = "Select controls for a report for given organization")

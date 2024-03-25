@@ -3,6 +3,9 @@ package com.increff.omni.reporting.helper;
 import com.increff.omni.reporting.model.constants.RowHeight;
 import com.increff.omni.reporting.model.form.*;
 
+import javax.validation.constraints.NotNull;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public class DashboardDtoTestHelper {
@@ -31,12 +34,18 @@ public class DashboardDtoTestHelper {
         return form;
     }
 
-    public static DefaultValueForm getDefaultValueForm(Integer dashboardId, Integer controlId, List<String> defaultValue, String chartAlias) {
+    public static DefaultValueForm getDefaultValueForm(Integer dashboardId, String paramName, List<String> defaultValue) {
         DefaultValueForm form = new DefaultValueForm();
         form.setDashboardId(dashboardId);
-        form.setControlId(controlId);
+        form.setParamName(paramName);
         form.setDefaultValue(defaultValue);
-        form.setChartAlias(chartAlias);
+        return form;
+    }
+
+    public static UpsertDefaultValueForm getUpsertDefaultValueForm(Integer dashboardId, String paramName, List<String> defaultValue) {
+        UpsertDefaultValueForm form = new UpsertDefaultValueForm();
+        form.setDefaultValueForms(Arrays.asList(getDefaultValueForm(dashboardId, paramName, defaultValue)));
+        form.setValidationGroupsValueForms(form.getDefaultValueForms()); // For dates, exact date is needed in validation group values but dynamic date is needed for default value
         return form;
     }
 }

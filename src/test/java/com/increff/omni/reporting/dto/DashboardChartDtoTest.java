@@ -3,6 +3,7 @@ package com.increff.omni.reporting.dto;
 import com.increff.account.client.SecurityUtil;
 import com.increff.account.client.UserPrincipal;
 import com.increff.omni.reporting.config.AbstractTest;
+import com.increff.omni.reporting.helper.OrgMappingTestHelper;
 import com.increff.omni.reporting.model.constants.ChartType;
 import com.increff.omni.reporting.model.constants.ReportType;
 import com.increff.omni.reporting.model.constants.RowHeight;
@@ -55,8 +56,8 @@ public class DashboardChartDtoTest extends AbstractTest {
         SchemaVersionData schemaData = schemaDto.add(schemaVersionForm);
         ConnectionForm connectionForm = getConnectionForm("127.0.0.1", "Test DB", username, password);
         ConnectionData connectionData = connectionDto.add(connectionForm);
-        organizationDto.mapToConnection(organizationData.getId(), connectionData.getId());
-        organizationDto.mapToSchema(organizationData.getId(), schemaData.getId());
+        organizationDto.addOrgMapping(OrgMappingTestHelper.getOrgMappingForm(organizationData.getId(), schemaData.getId(), connectionData.getId()));
+
         List<ReportForm> forms = new ArrayList<>();
         List<ReportData> datas = new ArrayList<>();
         HashMap<String, String> legends = new HashMap<>();

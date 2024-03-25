@@ -2,6 +2,7 @@ package com.increff.omni.reporting.dto;
 
 import com.increff.omni.reporting.api.ReportApi;
 import com.increff.omni.reporting.config.AbstractTest;
+import com.increff.omni.reporting.helper.OrgMappingTestHelper;
 import com.increff.omni.reporting.model.constants.DateType;
 import com.increff.omni.reporting.model.constants.InputControlScope;
 import com.increff.omni.reporting.model.constants.InputControlType;
@@ -57,7 +58,7 @@ public class InputControlDtoTest extends AbstractTest {
         ConnectionData connectionData = connectionDto.add(connectionForm);
         SchemaVersionForm form = getSchemaForm("9.0.1");
         schemaVersionId = schemaDto.add(form).getId();
-        organizationDto.mapToConnection(organizationData.getId(), connectionData.getId());
+        organizationDto.addOrgMapping(OrgMappingTestHelper.getOrgMappingForm(organizationData.getId(), schemaVersionId, connectionData.getId()));
     }
 
     @Test

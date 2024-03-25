@@ -6,6 +6,8 @@ import lombok.extern.log4j.Log4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
+
 @Log4j
 @Service
 public class AbstractAuditApi extends AbstractApi {
@@ -17,7 +19,7 @@ public class AbstractAuditApi extends AbstractApi {
         try {
             auditApi.save(objectId, objectType, action, description, actor);
         } catch (Exception e) {
-            log.error("Error in adding audit log with object ID : " + objectId + ", action : " + action +
+            log.error("Error in adding audit log. Error : " + e.getMessage() + "\n" + Arrays.asList(e.getStackTrace()) +"\n object ID : " + objectId + ", action : " + action +
                     ", description : " + description + ", actor : " + actor);
         }
     }

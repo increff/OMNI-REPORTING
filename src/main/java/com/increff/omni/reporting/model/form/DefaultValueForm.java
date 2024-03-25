@@ -12,9 +12,7 @@ public class DefaultValueForm {
     @NotNull
     private Integer dashboardId;
     @NotNull
-    private Integer controlId;
-    @NotNull
-    private String chartAlias;
+    private String paramName;
     @NotNull
     private List<String> defaultValue;
 }

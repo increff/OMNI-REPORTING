@@ -67,6 +67,10 @@ public class InputControlApi extends AbstractApi {
         return ex;
     }
 
+    public List<InputControlPojo> getByScope(InputControlScope scope) {
+        return dao.selectMultiple("scope", scope);
+    }
+
     public List<InputControlPojo> selectByIds(List<Integer> ids) {
         if (CollectionUtils.isEmpty(ids))
             return new ArrayList<>();

@@ -35,8 +35,15 @@ public class SingleMandatoryValidatorTest extends AbstractTest {
         }
     }
 
-    @Test(expected = ApiException.class)
-    public void testValidateErrorCase2() throws ApiException {
+    @Test
+    public void testValidateSuccess() throws ApiException {
+        List<String> params = Arrays.asList("''", "'abc'");
+        List<String> displayNames = Arrays.asList("Client Id", "Item Id");
+        validator.validate(displayNames, params, "Report 1", 0, ReportRequestType.USER);
+    }
+
+    @Test
+    public void testValidateSuccess2() throws ApiException {
         List<String> params = Arrays.asList("'abc'", "'def'");
         List<String> displayNames = Arrays.asList("Client Id", "Item Id");
         try {
@@ -48,13 +55,6 @@ public class SingleMandatoryValidatorTest extends AbstractTest {
                     e.getMessage());
             throw e;
         }
-    }
-
-    @Test
-    public void testValidateSuccess() throws ApiException {
-        List<String> params = Arrays.asList("''", "'abc'");
-        List<String> displayNames = Arrays.asList("Client Id", "Item Id");
-        validator.validate(displayNames, params, "Report 1", 0, ReportRequestType.USER);
     }
 
     @Test

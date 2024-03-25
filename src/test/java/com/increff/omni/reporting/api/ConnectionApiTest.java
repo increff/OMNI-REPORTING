@@ -12,7 +12,6 @@ import java.util.List;
 import static com.increff.omni.reporting.helper.ConnectionTestHelper.getConnectionPojo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-
 public class ConnectionApiTest extends AbstractTest {
 
     @Autowired

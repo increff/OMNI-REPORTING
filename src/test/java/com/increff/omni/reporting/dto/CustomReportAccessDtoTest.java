@@ -2,8 +2,10 @@ package com.increff.omni.reporting.dto;
 
 import com.increff.account.client.UserPrincipal;
 import com.increff.omni.reporting.config.AbstractTest;
+import com.increff.omni.reporting.helper.OrgMappingTestHelper;
 import com.increff.omni.reporting.model.constants.ChartType;
 import com.increff.omni.reporting.model.constants.ReportType;
+import com.increff.omni.reporting.model.constants.Roles;
 import com.increff.omni.reporting.model.data.*;
 import com.increff.omni.reporting.model.form.*;
 import com.nextscm.commons.spring.common.ApiException;
@@ -21,10 +23,11 @@ import java.util.List;
 import static com.increff.omni.reporting.helper.ConnectionTestHelper.getConnectionForm;
 import static com.increff.omni.reporting.helper.CustomReportAccessTestHelper.getCustomReportAccessForm;
 import static com.increff.omni.reporting.helper.DirectoryTestHelper.getDirectoryForm;
+import static com.increff.omni.reporting.helper.OrgMappingTestHelper.getOrgMappingForm;
 import static com.increff.omni.reporting.helper.OrgTestHelper.getOrganizationForm;
 import static com.increff.omni.reporting.helper.ReportTestHelper.getReportForm;
 import static com.increff.omni.reporting.helper.SchemaTestHelper.getSchemaForm;
-import static com.increff.omni.reporting.security.StandardSecurityConfig.REPORT_CUSTOM;
+
 import static org.junit.Assert.assertEquals;
 
 public class CustomReportAccessDtoTest extends AbstractTest {
@@ -59,8 +62,7 @@ public class CustomReportAccessDtoTest extends AbstractTest {
         SchemaVersionData schemaData = schemaDto.add(schemaVersionForm);
         ConnectionForm connectionForm = getConnectionForm("dev-db.increff.com", "Dev DB", "db.user", "db.password");
         ConnectionData connectionData = connectionDto.add(connectionForm);
-        organizationDto.mapToConnection(organizationData.getId(), connectionData.getId());
-        organizationDto.mapToSchema(organizationData.getId(), schemaData.getId());
+        organizationDto.addOrgMapping(OrgMappingTestHelper.getOrgMappingForm(organizationData.getId(), schemaData.getId(), connectionData.getId()));
         return getReportForm(name, type, directoryData.getId(), schemaData.getId(), false, ChartType.REPORT);
     }
 
@@ -112,7 +114,7 @@ public class CustomReportAccessDtoTest extends AbstractTest {
         Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
         UserPrincipal principal = new UserPrincipal();
         principal.setDomainId(orgId);
-        principal.setRoles(Collections.singletonList(REPORT_CUSTOM));
+        principal.setRoles(Collections.singletonList(Roles.OMNI_REPORT_CUSTOM.getRole()));
         Mockito.when(securityContext.getAuthentication().getPrincipal()).thenReturn(principal);
         SecurityContextHolder.setContext(securityContext);
 

@@ -29,7 +29,6 @@ public class HealthDto extends AbstractHealthDto {
             healthBulkData.getHealthDataMap().put("queryExecutor", serviceHealthCheck(applicationProperties.getQueryExecutorHealthUrl()));
             healthBulkData.getHealthDataMap().put("db", dbHealthCheck(applicationProperties.getJdbcUrl(),
                     applicationProperties.getJdbcUsername(), applicationProperties.getJdbcPassword()));
-            // TODO - add connection pojo health checks later if required
         }
         return healthBulkData;
     }

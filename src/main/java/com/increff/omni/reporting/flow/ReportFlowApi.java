@@ -6,7 +6,9 @@ import com.increff.omni.reporting.model.constants.*;
 import com.increff.omni.reporting.model.form.ValidationGroupForm;
 import com.increff.omni.reporting.pojo.*;
 import com.increff.omni.reporting.util.FileUtil;
+import com.increff.omni.reporting.util.MongoUtil;
 import com.increff.omni.reporting.util.SqlCmd;
+import com.increff.omni.reporting.util.UserPrincipalUtil;
 import com.increff.omni.reporting.validators.DateValidator;
 import com.increff.omni.reporting.validators.MandatoryValidator;
 import com.increff.omni.reporting.validators.SingleMandatoryValidator;
@@ -15,6 +17,7 @@ import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j;
+import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,26 +28,22 @@ import java.sql.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.increff.omni.reporting.dto.AbstractDto.isCustomReportUser;
+import static com.increff.omni.reporting.dto.AbstractDto.*;
 import static com.increff.omni.reporting.dto.CommonDtoHelper.*;
 
 @Service
 @Setter
 @Log4j
-public class ReportFlowApi extends AbstractFlowApi {
+public class ReportFlowApi extends FlowApi {
 
     @Autowired
     private SchemaVersionApi schemaVersionApi;
-    @Autowired
-    private OrgConnectionApi orgConnectionApi;
-    @Autowired
-    private ConnectionApi connectionApi;
     @Autowired
     private FolderApi folderApi;
     @Autowired
     private DBConnectionApi dbConnectionApi;
     @Autowired
-    private OrgSchemaApi orgSchemaApi;
+    private OrgMappingApi orgMappingApi;
     @Autowired
     private DirectoryApi directoryApi;
     @Autowired
@@ -85,11 +84,9 @@ public class ReportFlowApi extends AbstractFlowApi {
     @Transactional(rollbackFor = ApiException.class)
     public ReportPojo editReport(ReportPojo pojo, Map<String, String> legends) throws ApiException {
         ReportPojo existing = api.getCheck(pojo.getId());
-        List<Integer> orgIds = orgSchemaApi.getBySchemaVersionId(pojo.getSchemaVersionId()).stream().map(OrgSchemaVersionPojo::getOrgId).collect(Collectors.toList());
+        List<Integer> orgIds = orgMappingApi.getBySchemaVersionId(pojo.getSchemaVersionId()).stream().map(OrgMappingPojo::getOrgId).collect(Collectors.toList());
         validateForEdit(pojo, reportScheduleApi.selectByOrgIdReportAlias(orgIds, pojo.getAlias()));
-        if(existing.getChartType() != pojo.getChartType())
-            throw new ApiException(ApiStatus.BAD_DATA, "Chart type can't be changed." +
-                    " Current : " + existing.getChartType() + " New : " + pojo.getChartType());
+
         // Delete custom report access if transition is happening from CUSTOM to STANDARD
         if (existing.getType().equals(ReportType.CUSTOM) && pojo.getType().equals(ReportType.STANDARD))
             customReportAccessApi.deleteByReportId(pojo.getId());
@@ -99,9 +96,10 @@ public class ReportFlowApi extends AbstractFlowApi {
 
     public List<Map<String, String>> validateAndGetLiveData(ReportPojo reportPojo,
                                                             List<ReportInputParamsPojo> reportInputParamsPojoList,
-                                                            ConnectionPojo connectionPojo, String password, String query)
+                                                            ConnectionPojo connectionPojo, String password, String query,
+                                                            List<ReportPojo> valGroupMergeReports)
             throws ApiException, IOException {
-        validate(reportPojo, reportInputParamsPojoList);
+        validate(reportPojo, reportInputParamsPojoList, mergeValidationGroups(reportPojo.getId(), valGroupMergeReports));
 
         if(Objects.isNull(query))
             query = queryApi.getByReportId(reportPojo.getId()).getQuery();
@@ -111,19 +109,28 @@ public class ReportFlowApi extends AbstractFlowApi {
         try {
             Map<String, String> inputParamMap = getInputParamMapFromPojoList(reportInputParamsPojoList);
             String fQuery = SqlCmd.getFinalQuery(inputParamMap, query, true);
-            // Execute query and save results
-            connection = dbConnectionApi.getConnection(connectionPojo.getHost(), connectionPojo.getUsername(),
-                    password, properties.getMaxConnectionTime());
-            PreparedStatement statement = dbConnectionApi.getStatement(connection,
-                    properties.getLiveReportMaxExecutionTime(), fQuery, properties.getResultSetFetchSize());
-            ResultSet resultSet = statement.executeQuery();
-            int noOfRows = FileUtil.writeCsvFromResultSet(resultSet, file);
+            int noOfRows = 0;
+            if(connectionPojo.getDbType().equals(DBType.MYSQL)) {
+                connection = dbConnectionApi.getConnection(connectionPojo.getHost(), connectionPojo.getUsername(),
+                        password, properties.getMaxConnectionTime());
+                PreparedStatement statement = dbConnectionApi.getStatement(connection,
+                        properties.getLiveReportMaxExecutionTime(), fQuery, properties.getResultSetFetchSize());
+                ResultSet resultSet = statement.executeQuery();
+                noOfRows = FileUtil.writeCsvFromResultSet(resultSet, file);
+            } else if (connectionPojo.getDbType().equals(DBType.MONGO)) {
+                List<Document> docs = MongoUtil.executeMongoPipeline(connectionPojo.getHost(), connectionPojo.getUsername(),
+                        password, fQuery);
+                noOfRows = FileUtil.writeCsvFromMongoDocuments(docs, file);
+            }
+
+
             if (noOfRows > MAX_NUMBER_OF_ROWS) {
                 throw new ApiException(ApiStatus.BAD_DATA, "Data exceeded " + MAX_NUMBER_OF_ROWS + " Rows, select " +
                         "granular filters.");
             }
             return FileUtil.getJsonDataFromFile(file, ',');
         } catch (Exception e) {
+            log.error("Failed to get the data for dashboard : " + e.getMessage() + "\n" + Arrays.asList(e.getStackTrace()));
             throw new ApiException(ApiStatus.BAD_DATA, "Failed to get the data for dashboard : " + e.getMessage());
         } finally {
             FileUtil.delete(file);
@@ -158,23 +165,37 @@ public class ReportFlowApi extends AbstractFlowApi {
     @Transactional(readOnly = true)
     public List<ReportPojo> getAll(Integer orgId, Boolean isChart, VisualizationType visualization) throws ApiException {
 
-        OrgSchemaVersionPojo orgSchemaVersionPojo = orgSchemaApi.getCheckByOrgId(orgId);
-        List<ReportPojo> reportPojoList = new ArrayList<>();
-        //All standard
-        List<ReportPojo> standard =
-                api.getByTypeAndSchema(ReportType.STANDARD, orgSchemaVersionPojo.getSchemaVersionId(), isChart, visualization);
+        // get intersection of schema version ids accessible to user and schema version ids mapped to org
+        List<OrgMappingPojo> orgMappingPojo = orgMappingApi.getCheckByOrgId(orgId);
+        List<Integer> orgUserSchemaVersionIds = orgMappingPojo.stream().map(OrgMappingPojo::getSchemaVersionId)
+                .collect(Collectors.toList());
+        List<Integer> userAllowedSchemaVersionIds = schemaVersionApi.getByAppNames(UserPrincipalUtil.getAccessibleApps()).stream()
+                .map(SchemaVersionPojo::getId).collect(Collectors.toList());
+        orgUserSchemaVersionIds.retainAll(userAllowedSchemaVersionIds);
 
-        //All custom
+        List<ReportPojo> reportPojoList = new ArrayList<>();
+
+        // Get All custom Ids
         List<CustomReportAccessPojo> customAccess = customReportAccessApi.getByOrgId(orgId);
         List<Integer> customIds = customAccess.stream().map(CustomReportAccessPojo::getReportId)
                 .collect(Collectors.toList());
 
-        List<ReportPojo> custom =
-                api.getByIdsAndSchema(customIds, orgSchemaVersionPojo.getSchemaVersionId(), isChart);
+        // Get All Schema Versions
+        List<SchemaVersionPojo> schemaVersionPojos = schemaVersionApi.selectAll();
 
-        if(!isCustomReportUser()) // Add standard reports only if user in not custom report user
-            reportPojoList.addAll(standard);
-        reportPojoList.addAll(custom);
+        for(AppName appName : AppName.values()){
+            List<Integer> appSchemaVersionIds = schemaVersionPojos.stream().filter(s -> s.getAppName().equals(appName))
+                    .map(SchemaVersionPojo::getId).collect(Collectors.toList());
+            Integer schemaVersionId = appSchemaVersionIds.stream().filter(orgUserSchemaVersionIds::contains).findFirst().orElse(null);
+            if(Objects.nonNull(schemaVersionId)) {
+                List<ReportPojo> custom = api.getByIdsAndSchema(customIds, Collections.singletonList(schemaVersionId), isChart);
+                reportPojoList.addAll(custom);
+
+                if (!isCustomReportUser(appName)) { // Add standard reports only if user in not custom report user
+                    reportPojoList.addAll(api.getByTypeAndSchema(ReportType.STANDARD, Collections.singletonList(schemaVersionId), isChart, visualization));
+                }
+            }
+        }
         return reportPojoList;
     }
 
@@ -334,13 +355,24 @@ public class ReportFlowApi extends AbstractFlowApi {
     private void validate(ReportPojo pojo) throws ApiException {
         directoryApi.getCheck(pojo.getDirectoryId());
         schemaVersionApi.getCheck(pojo.getSchemaVersionId());
+
+        List<SchemaVersionPojo> aliasSchemas = schemaVersionApi.getByIds(api.getByAlias(pojo.getAlias()).stream()
+                .map(ReportPojo::getSchemaVersionId).collect(Collectors.toList()));
+        List<AppName> existingAppNames = aliasSchemas.stream().map(SchemaVersionPojo::getAppName).collect(Collectors.toList());
+        AppName curentAppName = schemaVersionApi.getCheck(pojo.getSchemaVersionId()).getAppName();
+        if (existingAppNames.size() > 1)
+            throw new ApiException(ApiStatus.BAD_DATA, "Alias " + pojo.getAlias() + " exists across app names!!"); // This should never occur. If this is hit, something disastrous has happened
+        if( (existingAppNames.size() == 1) && (existingAppNames.get(0) != curentAppName) )
+            throw new ApiException(ApiStatus.BAD_DATA, "Alias " + pojo.getAlias() + " is already present in different app." +
+                    " CurrentAppName : " + curentAppName + " ExistingAppName : " + existingAppNames.get(0));
+
         if(StringUtil.isEmpty(pojo.getAlias()) || pojo.getAlias().contains(" "))
             throw new ApiException(ApiStatus.BAD_DATA, "Report alias can't have space, use underscore(_) instead");
         ReportPojo existing = api.getByNameAndSchema(pojo.getName(), pojo.getSchemaVersionId(), pojo.getIsChart());
         if (existing != null)
             throw new ApiException(ApiStatus.BAD_DATA, "Report already present with same name, schema version and " +
                     "report type (normal / dashboard)");
-        ReportPojo ex = api.getByAliasAndSchema(pojo.getAlias(), pojo.getSchemaVersionId(), pojo.getIsChart());
+        ReportPojo ex = api.getByAliasAndSchema(pojo.getAlias(), Collections.singletonList(pojo.getSchemaVersionId()), pojo.getIsChart());
         if (ex != null)
             throw new ApiException(ApiStatus.BAD_DATA, "Report already present with same alias, schema version and " +
                     "report type (normal / dashboard)");

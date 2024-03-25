@@ -4,6 +4,7 @@ package com.increff.omni.reporting.controller;
 import com.increff.account.client.AuthClient;
 import com.increff.omni.reporting.config.ApplicationProperties;
 import com.increff.omni.reporting.dto.*;
+import com.increff.omni.reporting.model.constants.AppName;
 import com.increff.omni.reporting.model.constants.VisualizationType;
 import com.increff.omni.reporting.model.data.*;
 import com.increff.omni.reporting.model.form.*;
@@ -14,9 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @CrossOrigin
 @Api
@@ -69,12 +68,6 @@ public class StandardController {
         return reportDto.selectByAlias(isChart, alias);
     }
 
-    @ApiOperation(value = "Get Live Data")
-    @RequestMapping(value = "/reports/live", method = RequestMethod.POST)
-    public List<Map<String, String>> getLiveData(@RequestBody ReportRequestForm form) throws ApiException, IOException {
-        return reportDto.getLiveData(form);
-    }
-
     @ApiOperation(value = "Get validation group")
     @RequestMapping(value = "/reports/{reportId}/controls/validations", method = RequestMethod.GET)
     public List<ValidationGroupData> getValidationGroups(@PathVariable Integer reportId) {
@@ -85,12 +78,6 @@ public class StandardController {
     @RequestMapping(value = "/directories", method = RequestMethod.GET)
     public List<DirectoryData> selectAllDirectories() throws ApiException {
         return directoryDto.getAllDirectories();
-    }
-
-    @ApiOperation(value = "Request Report")
-    @RequestMapping(value = "/request-report", method = RequestMethod.POST)
-    public void requestReport(@RequestBody ReportRequestForm form) throws ApiException {
-        reportRequestDto.requestReport(form);
     }
 
     @ApiOperation(value = "Get All Request data")
@@ -226,8 +213,8 @@ public class StandardController {
 
     @ApiOperation(value = "Update Defaults in Dashboard. Also deletes all existing defaults for that dashboard")
     @RequestMapping(value = "/dashboards/defaults", method = RequestMethod.PUT)
-    public List<DefaultValueData> addDefaults(@RequestBody List<DefaultValueForm> forms) throws ApiException {
-        return dashboardDto.upsertDefaultValues(forms);
+    public List<DefaultValueData> addDefaults(@RequestBody UpsertDefaultValueForm form, @RequestParam Integer dashboardId) throws ApiException {
+        return dashboardDto.upsertDefaultValues(form, dashboardId);
     }
 
     @ApiOperation(value = "Get Dashboard")
@@ -236,23 +223,22 @@ public class StandardController {
         return dashboardDto.getDashboard(dashboardId);
     }
 
-    @ApiOperation(value = "Get Dashboards For Org")
+    @ApiOperation(value = "List Dashboards For Org")
     @RequestMapping(value = "/dashboards", method = RequestMethod.GET)
     public List<DashboardListData> getDashboards() throws ApiException {
         return dashboardDto.getDashboardsByOrgId();
-    }
-
-    // Change rate limiter filter URL when changing endpoint URL
-    @ApiOperation(value = "View Dashboard")
-    @RequestMapping(value = "/dashboards/{dashboardId}/view", method = RequestMethod.POST)
-    public List<ViewDashboardData> viewDashboard(@PathVariable Integer dashboardId, @RequestBody ReportRequestForm form) throws ApiException, IOException {
-        return dashboardDto.viewDashboard(form, dashboardId);
     }
 
     @ApiOperation(value = "Get Properties")
     @RequestMapping(value = "/properties", method = RequestMethod.GET)
     public ApplicationPropertiesData getProperties() {
         return dashboardDto.getProperties();
+    }
+
+    @ApiOperation(value = "Get App Names")
+    @RequestMapping(value = "/app-names", method = RequestMethod.GET)
+    public List<AppName> getAppNames() {
+        return Arrays.asList(AppName.values());
     }
 
 }

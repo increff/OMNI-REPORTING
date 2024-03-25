@@ -1,9 +1,12 @@
 package com.increff.omni.reporting.config;
 
+import com.increff.omni.reporting.util.MongoUtil;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+
+import javax.annotation.PostConstruct;
 
 @Getter
 @Setter
@@ -146,7 +149,7 @@ public class ApplicationProperties {
     @Value("${stuck.schedule.time.seconds:600}")
     private Integer stuckScheduleSeconds;
 
-    @Value("${max.dashboards.per.org:20}")
+    @Value("${max.dashboards.per.org:50}")
     private Integer maxDashboardsPerOrg;
 
     @Value("${rate.limit.tokens.refill.amount:20}")
@@ -162,5 +165,18 @@ public class ApplicationProperties {
 
     @Value("${query.executor.health.url}")
     private String queryExecutorHealthUrl;
+
+    @Value("${mongo.read.timeout.seconds:300}")
+    private Integer mongoReadTimeoutSec;
+
+    @Value("${mongo.connect.timeout.seconds:60}")
+    private Integer mongoConnectTimeoutSec;
+
+    @PostConstruct
+    public void init() {
+        MongoUtil.MONGO_READ_TIMEOUT_SEC = mongoReadTimeoutSec;
+        MongoUtil.MONGO_CONNECT_TIMEOUT_SEC = mongoConnectTimeoutSec;
+        MongoUtil.MONGO_SERVER_SELECT_TIMEOUT_SEC = mongoConnectTimeoutSec;
+    }
 
 }
