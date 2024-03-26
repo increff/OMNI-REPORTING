@@ -189,7 +189,7 @@ public class ReportAppAccessTest extends AbstractTest {
         Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
         UserPrincipal principal = new UserPrincipal();
         principal.setDomainId(orgId);
-        principal.setRoles(Arrays.asList(Roles.OMNI_REPORT_STANDARD.getRole(), "unify.report.standard"));
+        principal.setRoles(Arrays.asList(Roles.OMNI_REPORT_STANDARD.getRole(), "iip.report.standard"));
         Mockito.when(securityContext.getAuthentication().getPrincipal()).thenReturn(principal);
         SecurityContextHolder.setContext(securityContext);
 
@@ -213,7 +213,7 @@ public class ReportAppAccessTest extends AbstractTest {
         Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
         UserPrincipal principal = new UserPrincipal();
         principal.setDomainId(orgId);
-        principal.setRoles(Arrays.asList(Roles.OMNI_REPORT_STANDARD.getRole(), "unify.report.custom"));
+        principal.setRoles(Arrays.asList(Roles.OMNI_REPORT_STANDARD.getRole(), "iip.report.custom"));
         Mockito.when(securityContext.getAuthentication().getPrincipal()).thenReturn(principal);
         SecurityContextHolder.setContext(securityContext);
 
@@ -237,7 +237,7 @@ public class ReportAppAccessTest extends AbstractTest {
         Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
         UserPrincipal principal = new UserPrincipal();
         principal.setDomainId(orgId);
-        principal.setRoles(Arrays.asList(Roles.OMNI_REPORT_CUSTOM.getRole(), "unify.report.standard"));
+        principal.setRoles(Arrays.asList(Roles.OMNI_REPORT_CUSTOM.getRole(), "iip.report.standard"));
         Mockito.when(securityContext.getAuthentication().getPrincipal()).thenReturn(principal);
         SecurityContextHolder.setContext(securityContext);
 
@@ -262,7 +262,7 @@ public class ReportAppAccessTest extends AbstractTest {
         Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
         UserPrincipal principal = new UserPrincipal();
         principal.setDomainId(orgId);
-        principal.setRoles(Arrays.asList(Roles.OMNI_REPORT_STANDARD.getRole(), "unify.report.standard"));
+        principal.setRoles(Arrays.asList(Roles.OMNI_REPORT_STANDARD.getRole(), "iip.report.standard"));
         Mockito.when(securityContext.getAuthentication().getPrincipal()).thenReturn(principal);
         SecurityContextHolder.setContext(securityContext);
 
