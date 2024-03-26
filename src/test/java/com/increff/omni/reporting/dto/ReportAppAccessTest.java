@@ -109,7 +109,7 @@ public class ReportAppAccessTest extends AbstractTest {
         customReportAccessForm = getCustomReportAccessForm(reportData.getId(), orgId);
         dto.addCustomReportAccess(customReportAccessForm);
 
-        schemaVersionForm = getSchemaForm("U1", AppName.UNIFY);
+        schemaVersionForm = getSchemaForm("U1", AppName.IIP);
         schemaData = schemaDto.add(schemaVersionForm);
         u1SchemaId = schemaData.getId();
         reportForm = getReportForm("U1 Standard", ReportType.STANDARD, directoryData.getId(), schemaData.getId(), false, ChartType.REPORT);
@@ -122,7 +122,7 @@ public class ReportAppAccessTest extends AbstractTest {
         orgMappingsData = organizationDto.addOrgMapping(OrgMappingTestHelper.getOrgMappingForm(organizationData.getId(), schemaData.getId(), connectionId));
         unifyOrgMappingId = orgMappingsData.getId();
 
-        schemaVersionForm = getSchemaForm("U2", AppName.UNIFY);
+        schemaVersionForm = getSchemaForm("U2", AppName.IIP);
         schemaData = schemaDto.add(schemaVersionForm);
         u2SchemaId = schemaData.getId();
         reportForm = getReportForm("U2 Standard", ReportType.STANDARD, directoryData.getId(), schemaData.getId(), false, ChartType.REPORT);
