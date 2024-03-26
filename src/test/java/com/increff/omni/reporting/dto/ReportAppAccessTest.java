@@ -109,7 +109,7 @@ public class ReportAppAccessTest extends AbstractTest {
         customReportAccessForm = getCustomReportAccessForm(reportData.getId(), orgId);
         dto.addCustomReportAccess(customReportAccessForm);
 
-        schemaVersionForm = getSchemaForm("U1", AppName.UNIFY);
+        schemaVersionForm = getSchemaForm("U1", AppName.IIP);
         schemaData = schemaDto.add(schemaVersionForm);
         u1SchemaId = schemaData.getId();
         reportForm = getReportForm("U1 Standard", ReportType.STANDARD, directoryData.getId(), schemaData.getId(), false, ChartType.REPORT);
@@ -122,7 +122,7 @@ public class ReportAppAccessTest extends AbstractTest {
         orgMappingsData = organizationDto.addOrgMapping(OrgMappingTestHelper.getOrgMappingForm(organizationData.getId(), schemaData.getId(), connectionId));
         unifyOrgMappingId = orgMappingsData.getId();
 
-        schemaVersionForm = getSchemaForm("U2", AppName.UNIFY);
+        schemaVersionForm = getSchemaForm("U2", AppName.IIP);
         schemaData = schemaDto.add(schemaVersionForm);
         u2SchemaId = schemaData.getId();
         reportForm = getReportForm("U2 Standard", ReportType.STANDARD, directoryData.getId(), schemaData.getId(), false, ChartType.REPORT);
@@ -189,7 +189,7 @@ public class ReportAppAccessTest extends AbstractTest {
         Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
         UserPrincipal principal = new UserPrincipal();
         principal.setDomainId(orgId);
-        principal.setRoles(Arrays.asList(Roles.OMNI_REPORT_STANDARD.getRole(), "unify.report.standard"));
+        principal.setRoles(Arrays.asList(Roles.OMNI_REPORT_STANDARD.getRole(), "iip.report.standard"));
         Mockito.when(securityContext.getAuthentication().getPrincipal()).thenReturn(principal);
         SecurityContextHolder.setContext(securityContext);
 
@@ -213,7 +213,7 @@ public class ReportAppAccessTest extends AbstractTest {
         Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
         UserPrincipal principal = new UserPrincipal();
         principal.setDomainId(orgId);
-        principal.setRoles(Arrays.asList(Roles.OMNI_REPORT_STANDARD.getRole(), "unify.report.custom"));
+        principal.setRoles(Arrays.asList(Roles.OMNI_REPORT_STANDARD.getRole(), "iip.report.custom"));
         Mockito.when(securityContext.getAuthentication().getPrincipal()).thenReturn(principal);
         SecurityContextHolder.setContext(securityContext);
 
@@ -237,7 +237,7 @@ public class ReportAppAccessTest extends AbstractTest {
         Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
         UserPrincipal principal = new UserPrincipal();
         principal.setDomainId(orgId);
-        principal.setRoles(Arrays.asList(Roles.OMNI_REPORT_CUSTOM.getRole(), "unify.report.standard"));
+        principal.setRoles(Arrays.asList(Roles.OMNI_REPORT_CUSTOM.getRole(), "iip.report.standard"));
         Mockito.when(securityContext.getAuthentication().getPrincipal()).thenReturn(principal);
         SecurityContextHolder.setContext(securityContext);
 
@@ -262,7 +262,7 @@ public class ReportAppAccessTest extends AbstractTest {
         Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
         UserPrincipal principal = new UserPrincipal();
         principal.setDomainId(orgId);
-        principal.setRoles(Arrays.asList(Roles.OMNI_REPORT_STANDARD.getRole(), "unify.report.standard"));
+        principal.setRoles(Arrays.asList(Roles.OMNI_REPORT_STANDARD.getRole(), "iip.report.standard"));
         Mockito.when(securityContext.getAuthentication().getPrincipal()).thenReturn(principal);
         SecurityContextHolder.setContext(securityContext);
 
