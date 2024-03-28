@@ -7,7 +7,6 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Objects;
 
 import static com.increff.commons.springboot.server.HealthUtil.dbHealthCheck;
 import static com.increff.commons.springboot.server.HealthUtil.serviceHealthCheck;
@@ -24,11 +23,10 @@ public class HealthDto extends AbstractHealthDto {
     public HealthBulkData checkDependenciesHealth() {
         HealthBulkData healthBulkData = new HealthBulkData();
         healthBulkData.getHealthDataMap().put("crypto", serviceHealthCheck(applicationProperties.getCryptoHealthUrl()));
-            healthBulkData.getHealthDataMap().put("account", serviceHealthCheck(applicationProperties.getAccountHealthUrl()));
-            healthBulkData.getHealthDataMap().put("queryExecutor", serviceHealthCheck(applicationProperties.getQueryExecutorHealthUrl()));
-            // TODO - Since we are not using any DbConfig, how to do to this?
-//            healthBulkData.getHealthDataMap().put("db", dbHealthCheck(applicationProperties.getJdbcUrl(),
-//                    applicationProperties.getJdbcUsername(), applicationProperties.getJdbcPassword()));
+        healthBulkData.getHealthDataMap().put("account", serviceHealthCheck(applicationProperties.getAccountHealthUrl()));
+        healthBulkData.getHealthDataMap().put("queryExecutor", serviceHealthCheck(applicationProperties.getQueryExecutorHealthUrl()));
+        healthBulkData.getHealthDataMap().put("db", dbHealthCheck(applicationProperties.getDbUrl(),
+                    applicationProperties.getDbUsername(), applicationProperties.getDbPassword()));
         return healthBulkData;
     }
 }

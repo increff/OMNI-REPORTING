@@ -10,6 +10,15 @@ import org.springframework.stereotype.Component;
 @Component
 public class ApplicationProperties {
 
+    @Value("${spring.datasource.url}")
+    private String dbUrl;
+
+    @Value("${spring.datasource.username}")
+    private String dbUsername;
+
+    @Value("${spring.datasource.password}")
+    private String dbPassword;
+
     @Value("${user.report.request.corePoolSize:100}")
     private Integer userReportRequestCorePool;
 

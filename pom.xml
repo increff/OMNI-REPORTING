@@ -116,8 +116,8 @@
         </dependency>
 
         <dependency>
-            <groupId>com.increff.springboot.account</groupId>
-            <artifactId>account-client</artifactId>
+            <groupId>com.increff.account</groupId>
+            <artifactId>account-springboot-client</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
 

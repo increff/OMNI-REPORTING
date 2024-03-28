@@ -54,8 +54,7 @@ public class StandardSecurityConfig {
 
     @Bean
     public SecurityFilterChain getSecurityFilterChainForStaticResources(HttpSecurity http) throws Exception {
-        http.securityMatcher("/v3/api-docs/**", "/configuration/ui", "/swagger-resources", "/configuration/security",
-                        "/swagger-ui.html", "/webjars/**", "/ui/**", "swagger-ui/**","/swagger-ui")
+        http.securityMatcher("/v3/api-docs/**", "/swagger-ui.html", "swagger-ui/**")
                 .authorizeHttpRequests(auth -> {
                     auth.anyRequest().permitAll();
                 })
