@@ -16,8 +16,10 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -29,6 +31,9 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 @Transactional
 @SpringBootTest(properties = "spring.config.location=classpath:application-test.properties")
 @SpringBootApplication
+@ComponentScan({"com.increff.omni.reporting", "com.increff.account.client",
+        "com.increff.commons.queryexecutor", "com.increff.commons.springboot.server"})
+@EntityScan({"com.increff.omni.reporting", "com.increff.commons.springboot.audit"})
 public abstract class AbstractTest {
 
     public static void main(String[] args) {
