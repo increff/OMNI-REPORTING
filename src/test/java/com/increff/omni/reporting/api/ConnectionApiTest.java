@@ -6,6 +6,7 @@ import com.increff.omni.reporting.config.AbstractTest;
 import com.increff.omni.reporting.pojo.ConnectionPojo;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;

@@ -30,7 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
-@SpringBootTest(properties = "spring.config.location=classpath:application-test.properties")
+@SpringBootApplication
 @ComponentScan({"com.increff.omni.reporting", "com.increff.account.client",
         "com.increff.commons.queryexecutor", "com.increff.commons.springboot.server"})
 @EntityScan({"com.increff.omni.reporting", "com.increff.commons.springboot.audit"})
