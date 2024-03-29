@@ -24,6 +24,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
@@ -31,23 +32,19 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 @Transactional
 @SpringBootTest(properties = "spring.config.location=classpath:application-test.properties")
-@SpringBootApplication
+@ContextConfiguration(classes = AbstractTest.class)
 @ComponentScan({"com.increff.omni.reporting", "com.increff.account.client",
         "com.increff.commons.queryexecutor", "com.increff.commons.springboot.server"})
 @EntityScan({"com.increff.omni.reporting", "com.increff.commons.springboot.audit"})
 public class AbstractTest {
 
-    public static void main(String[] args) {
-        SpringApplication.run(AbstractTest.class, args);
-    }
-
     public Integer orgId = 100001;
 
-    @Value("${testdb.username}")
-    protected String username;
-
-    @Value("${testdb.password}")
-    protected String password;
+//    @Value("${testdb.username}")
+//    protected String username;
+//
+//    @Value("${testdb.password}")
+//    protected String password;
 
     @MockBean
     protected EncryptionClient encryptionClient;
