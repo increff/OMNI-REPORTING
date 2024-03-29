@@ -6,7 +6,7 @@ import com.increff.omni.reporting.config.AbstractTest;
 import com.increff.omni.reporting.pojo.ConnectionPojo;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.context.annotation.Import;
 
 import java.util.List;
 
@@ -14,6 +14,7 @@ import static com.increff.omni.reporting.helper.ConnectionTestHelper.getConnecti
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+@Import(AbstractTest.class)
 public class ConnectionApiTest extends AbstractTest {
 
     @Autowired
