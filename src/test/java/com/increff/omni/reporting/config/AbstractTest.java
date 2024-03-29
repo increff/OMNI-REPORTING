@@ -31,10 +31,10 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 @Transactional
 @SpringBootTest(properties = "spring.config.location=classpath:application-test.properties")
-//@SpringBootApplication
-//@ComponentScan({"com.increff.omni.reporting", "com.increff.account.client",
-//        "com.increff.commons.queryexecutor", "com.increff.commons.springboot.server"})
-//@EntityScan({"com.increff.omni.reporting", "com.increff.commons.springboot.audit"})
+@SpringBootApplication
+@ComponentScan({"com.increff.omni.reporting", "com.increff.account.client",
+        "com.increff.commons.queryexecutor", "com.increff.commons.springboot.server"})
+@EntityScan({"com.increff.omni.reporting", "com.increff.commons.springboot.audit"})
 public class AbstractTest {
 
     public static void main(String[] args) {

@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @Import(AbstractTest.class)
-public class ConnectionApiTest extends AbstractTest {
+public class ConnectionApiTest {
 
     @Autowired
     private ConnectionApi api;
