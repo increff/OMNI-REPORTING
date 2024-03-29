@@ -2,6 +2,7 @@ package com.increff.omni.reporting.config;
 
 import com.increff.account.client.UserPrincipal;
 import com.increff.commons.springboot.client.AppClientException;
+import com.increff.omni.reporting.OmniReportingApplication;
 import com.increff.omni.reporting.model.constants.AppResourceKeys;
 import com.increff.omni.reporting.model.constants.ChartType;
 import com.increff.omni.reporting.model.constants.PipelineType;
@@ -36,6 +37,10 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 public class AbstractTest {
 
     public Integer orgId = 100001;
+
+    public static void main(String[] args) {
+        SpringApplication.run(AbstractTest.class, args);
+    }
 
 //    @Value("${testdb.username}")
 //    protected String username;
