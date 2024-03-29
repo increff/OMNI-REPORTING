@@ -14,6 +14,8 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.core.Authentication;
@@ -26,7 +28,12 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 @Transactional
 @SpringBootTest(properties = "spring.config.location=classpath:application-test.properties")
+@SpringBootApplication
 public abstract class AbstractTest {
+
+    public static void main(String[] args) {
+        SpringApplication.run(AbstractTest.class, args);
+    }
 
     public Integer orgId = 100001;
 
