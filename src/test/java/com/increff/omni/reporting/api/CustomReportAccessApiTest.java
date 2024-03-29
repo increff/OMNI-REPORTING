@@ -12,7 +12,11 @@ import java.util.List;
 import static com.increff.omni.reporting.helper.CustomReportAccessTestHelper.getCustomReportAccessPojo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class CustomReportAccessApiTest extends AbstractTest {
+
+@Transactional
+@SpringBootTest(properties = "spring.config.location=classpath:application-test.properties")
+@ContextConfiguration(classes = AbstractTest.class)
+public class CustomReportAccessApiTest {
     @Autowired
     private CustomReportAccessApi api;
     @Test

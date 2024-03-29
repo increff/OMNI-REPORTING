@@ -17,8 +17,10 @@ import static com.increff.omni.reporting.helper.ConnectionTestHelper.getConnecti
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-
-public class ConnectionApiTest extends AbstractTest{
+@Transactional
+@SpringBootTest(properties = "spring.config.location=classpath:application-test.properties")
+@ContextConfiguration(classes = AbstractTest.class)
+public class ConnectionApiTest {
 
     @Autowired
     private ConnectionApi api;
