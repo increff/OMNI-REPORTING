@@ -1,6 +1,7 @@
 package com.increff.omni.reporting.api;
 
-import com.increff.omni.reporting.config.AbstractTest;
+import com.increff.omni.reporting.OmniReportingApplication;
+//import com.increff.omni.reporting.config.AbstractTest;
 import com.increff.omni.reporting.dao.CustomReportAccessDao;
 import com.increff.omni.reporting.pojo.CustomReportAccessPojo;
 import org.junit.jupiter.api.Test;
@@ -9,6 +10,8 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -16,9 +19,13 @@ import static com.increff.omni.reporting.helper.CustomReportAccessTestHelper.get
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
+//@RunWith(SpringRunner.class)
 @Transactional
-@SpringBootTest
-@Import(AbstractTest.class)
+@SpringBootTest(
+        webEnvironment = SpringBootTest.WebEnvironment.MOCK,
+        classes = OmniReportingApplication.class)
+@AutoConfigureMockMvc
+@TestPropertySource(locations = "classpath:application-test.properties")
 public class CustomReportAccessApiTest {
     @Autowired
     private CustomReportAccessApi api;
