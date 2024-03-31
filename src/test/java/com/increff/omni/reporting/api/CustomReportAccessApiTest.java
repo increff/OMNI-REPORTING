@@ -2,6 +2,7 @@ package com.increff.omni.reporting.api;
 
 import com.increff.omni.reporting.OmniReportingApplication;
 //import com.increff.omni.reporting.config.AbstractTest;
+import com.increff.omni.reporting.config.AbstractTest;
 import com.increff.omni.reporting.dao.CustomReportAccessDao;
 import com.increff.omni.reporting.pojo.CustomReportAccessPojo;
 import org.junit.jupiter.api.Test;
@@ -21,15 +22,7 @@ import static com.increff.omni.reporting.helper.CustomReportAccessTestHelper.get
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
-//@RunWith(SpringRunner.class)
-@Transactional
-@ExtendWith(SpringExtension.class)
-@SpringBootTest(
-        webEnvironment = SpringBootTest.WebEnvironment.MOCK,
-        classes = OmniReportingApplication.class)
-@AutoConfigureMockMvc
-@TestPropertySource(locations = "classpath:application-test.properties")
-public class CustomReportAccessApiTest {
+public class CustomReportAccessApiTest extends AbstractTest {
     @Autowired
     private CustomReportAccessApi api;
     @Test
