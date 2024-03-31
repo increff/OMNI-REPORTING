@@ -3,6 +3,8 @@ package com.increff.omni.reporting.config;
 import com.increff.account.client.UserPrincipal;
 import com.increff.commons.springboot.client.AppClientException;
 import com.increff.omni.reporting.OmniReportingApplication;
+import com.increff.omni.reporting.api.CustomReportAccessApi;
+import com.increff.omni.reporting.dao.CustomReportAccessDao;
 import com.increff.omni.reporting.model.constants.AppResourceKeys;
 import com.increff.omni.reporting.model.constants.ChartType;
 import com.increff.omni.reporting.model.constants.PipelineType;
@@ -19,6 +21,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -30,7 +33,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
-@SpringBootApplication
+@TestConfiguration
 @ComponentScan({"com.increff.omni.reporting", "com.increff.account.client",
         "com.increff.commons.queryexecutor", "com.increff.commons.springboot.server"})
 @EntityScan({"com.increff.omni.reporting", "com.increff.commons.springboot.audit"})
@@ -50,6 +53,16 @@ public class AbstractTest {
 
     @MockBean
     protected EncryptionClient encryptionClient;
+
+    @Bean
+    public CustomReportAccessDao customReportAccessDao() {
+        return new CustomReportAccessDao();
+    }
+
+    @Bean
+    public CustomReportAccessApi customReportAccessApi() {
+        return new CustomReportAccessApi();
+    }
 
 //    @Bean
 //    public EncryptionClient getEncryptionClient() {
