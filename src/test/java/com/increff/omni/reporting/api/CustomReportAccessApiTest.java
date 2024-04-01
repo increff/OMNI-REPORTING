@@ -4,6 +4,7 @@ import com.increff.omni.reporting.OmniReportingApplication;
 //import com.increff.omni.reporting.config.AbstractTest;
 import com.increff.omni.reporting.dao.CustomReportAccessDao;
 import com.increff.omni.reporting.pojo.CustomReportAccessPojo;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,8 +25,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @SpringBootTest
 @Transactional
 public class CustomReportAccessApiTest  {
-    @Autowired
+//    @Autowired
     private CustomReportAccessApi api;
+
+    @BeforeEach
+    public void setUp() {
+        api = new CustomReportAccessApi();
+    }
+
     @Test
     public void testAddCustomAccess() {
         CustomReportAccessPojo pojo = getCustomReportAccessPojo(100001, 100002);
