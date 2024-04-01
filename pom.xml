@@ -16,7 +16,7 @@
         <start-class>com.increff.omni.reporting.OmniReportingApplication</start-class>
 
         <!--    Versions    -->
-        <increff-commons-fileclient.version>1.1.6-SNAPSHOT</increff-commons-fileclient.version>
+        <increff-commons-fileclient.version>2.0.0-SNAPSHOT</increff-commons-fileclient.version>
         <bucket4j_jdk8-core.version>8.7.0</bucket4j_jdk8-core.version>
         <commons-springboot-server.version>0.0.1</commons-springboot-server.version>
         <commons-springboot-db-mysql.version>0.0.1</commons-springboot-db-mysql.version>
@@ -185,6 +185,17 @@
         <repository>
             <id>increff-snapshot</id>
             <url>https://one.increff.com/artifactory/libs-snapshot-local</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+        </repository>
+
+        <repository>
+            <id>sonatype-snapshot</id>
+            <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
             <snapshots>
                 <enabled>true</enabled>
             </snapshots>
