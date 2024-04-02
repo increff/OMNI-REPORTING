@@ -3,7 +3,6 @@ package com.increff.omni.reporting.job;
 import com.increff.commons.fileclient.AbstractFileProvider;
 import com.increff.commons.fileclient.AwsFileProvider;
 import com.increff.commons.fileclient.GcpFileProvider;
-import com.increff.commons.queryexecutor.QueryExecutorClient;
 import com.increff.omni.reporting.api.*;
 import com.increff.omni.reporting.config.ApplicationProperties;
 import com.increff.omni.reporting.config.EmailProps;
@@ -16,7 +15,7 @@ import com.increff.omni.reporting.model.form.FileProviderFolder.GcpPipelineConfi
 import com.increff.omni.reporting.pojo.*;
 import com.increff.omni.reporting.util.*;
 import com.increff.service.encryption.EncryptionClient;
-import com.increff.service.encryption.common.CryptoCommon;
+import com.increff.service.encryption.form.CryptoDecodeFormWithoutKey;
 import com.nextscm.commons.spring.client.AppClientException;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
@@ -28,14 +27,20 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import javax.persistence.OptimisticLockException;
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.ZonedDateTime;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -242,7 +247,7 @@ public class ScheduleReportTask extends AbstractTask {
 
     private String getDecryptedPassword(String password) throws ApiException {
         try {
-            CryptoCommon form = CommonDtoHelper.convertToCryptoForm(password);
+            CryptoDecodeFormWithoutKey form = CommonDtoHelper.convertToCryptoForm(password);
             String decryptedPassword = encryptionClient.decode(form).getValue();
             return Objects.isNull(decryptedPassword) ? password : decryptedPassword;
         } catch (AppClientException e) {
