@@ -58,4 +58,7 @@ public class ReportRequestPojo extends AbstractVersionedPojo {
 
     private ZonedDateTime requestCompletionTime;
 
+    @Column(nullable = false)
+    private Integer retryCount = 0;
+
 }

@@ -16,6 +16,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static com.increff.omni.reporting.util.ConstantsUtil.MAX_RETRY_COUNT;
+
 @Service
 @Transactional(rollbackFor = ApiException.class)
 public class ReportRequestApi extends AbstractApi {
@@ -82,6 +84,14 @@ public class ReportRequestApi extends AbstractApi {
     public void markFailed(Integer id, ReportRequestStatus status, String message, int noOfRows, double fileSize)
             throws ApiException {
         ReportRequestPojo reportRequestPojo = getCheck(id);
+
+        if (reportRequestPojo.getType().equals(ReportRequestType.EMAIL)) {
+            reportRequestPojo.setRetryCount(reportRequestPojo.getRetryCount() + 1);
+            if (reportRequestPojo.getRetryCount() < MAX_RETRY_COUNT) {
+                status = ReportRequestStatus.NEW;
+            }
+        }
+
         reportRequestPojo.setStatus(status);
         reportRequestPojo.setFailureReason(message);
         reportRequestPojo.setFileSize(fileSize);

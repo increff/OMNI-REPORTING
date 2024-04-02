@@ -1,5 +1,6 @@
 package com.increff.omni.reporting.config;
 
+import com.increff.omni.reporting.util.ConstantsUtil;
 import com.increff.omni.reporting.util.MongoUtil;
 import lombok.Getter;
 import lombok.Setter;
@@ -172,11 +173,16 @@ public class ApplicationProperties {
     @Value("${mongo.connect.timeout.seconds:60}")
     private Integer mongoConnectTimeoutSec;
 
+    @Value("${max.retry.count:3}")
+    private Integer maxRetryCount;
+
     @PostConstruct
     public void init() {
         MongoUtil.MONGO_READ_TIMEOUT_SEC = mongoReadTimeoutSec;
         MongoUtil.MONGO_CONNECT_TIMEOUT_SEC = mongoConnectTimeoutSec;
         MongoUtil.MONGO_SERVER_SELECT_TIMEOUT_SEC = mongoConnectTimeoutSec;
+
+        ConstantsUtil.MAX_RETRY_COUNT = maxRetryCount;
     }
 
 }

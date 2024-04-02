@@ -125,7 +125,7 @@ public class ScheduleReportTask extends AbstractTask {
                     EmailProps props = createEmailProps(null, false, toEmails, "Hi,<br>Please " +
                             "check failure reason in the latest scheduled requests. Re-submit the schedule in the " +
                                     "reporting application, which might solve the issue.", false, timezone, reportPojo.getName(),
-                            false, "FAILED");
+                            false, "Failed To Execute");
                     EmailUtil.sendMail(props);
                 }
             } catch (Exception ex) {
@@ -299,7 +299,7 @@ public class ScheduleReportTask extends AbstractTask {
     private EmailProps createEmailProps(File out, Boolean isAttachment,
                                         List<String> toEmails, String content,
                                         boolean isZip, String timezone, String name,
-                                        Boolean zeroData, String customSubject) {
+                                        Boolean zeroData, String customSubjectPostfix) {
         EmailProps props = new EmailProps();
         props.setFromEmail(properties.getFromEmail());
         props.setUsername(properties.getUsername());
@@ -311,8 +311,8 @@ public class ScheduleReportTask extends AbstractTask {
         String subject = "Increff Reporting : " + name;
         if (Objects.nonNull(zeroData) && zeroData) // Add (No Data) to subject if zero data
             subject += " (No Data) ";
-        if (Objects.nonNull(customSubject) && !customSubject.isEmpty())
-            subject = customSubject;
+        if (Objects.nonNull(customSubjectPostfix) && !customSubjectPostfix.isEmpty())
+            subject += " : " + customSubjectPostfix;
         props.setSubject(subject);
 
         props.setAttachment(out);
