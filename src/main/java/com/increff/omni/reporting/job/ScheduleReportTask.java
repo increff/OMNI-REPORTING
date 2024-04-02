@@ -3,7 +3,6 @@ package com.increff.omni.reporting.job;
 import com.increff.commons.fileclient.AbstractFileProvider;
 import com.increff.commons.fileclient.AwsFileProvider;
 import com.increff.commons.fileclient.GcpFileProvider;
-import com.increff.commons.queryexecutor.QueryExecutorClient;
 import com.increff.omni.reporting.api.*;
 import com.increff.omni.reporting.config.ApplicationProperties;
 import com.increff.omni.reporting.config.EmailProps;
@@ -28,14 +27,20 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import javax.persistence.OptimisticLockException;
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.ZonedDateTime;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -119,7 +124,8 @@ public class ScheduleReportTask extends AbstractTask {
                 if(!toEmails.isEmpty()) {
                     EmailProps props = createEmailProps(null, false, toEmails, "Hi,<br>Please " +
                             "check failure reason in the latest scheduled requests. Re-submit the schedule in the " +
-                            "reporting application, which might solve the issue.", false, timezone, reportPojo.getName());
+                                    "reporting application, which might solve the issue.", false, timezone, reportPojo.getName(),
+                            false, "FAILED");
                     EmailUtil.sendMail(props);
                 }
             } catch (Exception ex) {
@@ -159,9 +165,10 @@ public class ScheduleReportTask extends AbstractTask {
                                 " MB" + ". Please select granular filters");
             String filePath = "NA";
 
+            boolean zeroRows = (noOfRows == 0);
             List<SchedulePipelinePojo> schedulePipelinePojos = schedulePipelineApi.getByScheduleId(pojo.getScheduleId());
             if(schedulePipelinePojos.isEmpty())
-                sendEmail(fileSize, file, pojo, timezone, reportPojo.getName());
+                sendEmail(fileSize, file, pojo, timezone, reportPojo.getName(), zeroRows);
             else {
                 processPipelines(file, schedulePipelinePojos, FileUtil.getPipelineFilename(reportPojo.getId(), reportPojo.getName(), timezone));
             }
@@ -251,7 +258,7 @@ public class ScheduleReportTask extends AbstractTask {
     }
 
     private void sendEmail(double fileSize, File csvFile, ReportRequestPojo pojo, String timezone,
-                           String name)
+                           String name, Boolean zeroRows)
             throws IOException, ApiException, javax.mail.MessagingException {
         File out = csvFile;
         boolean isZip = false;
@@ -285,13 +292,14 @@ public class ScheduleReportTask extends AbstractTask {
                 .map(ReportScheduleEmailsPojo::getSendTo).collect(
                         Collectors.toList());
         EmailProps props = createEmailProps(out, true, toEmails, "", isZip, timezone,
-                name);
+                name, zeroRows, schedulePojo.getEmailSubject());
         EmailUtil.sendMail(props);
     }
 
     private EmailProps createEmailProps(File out, Boolean isAttachment,
                                         List<String> toEmails, String content,
-                                        boolean isZip, String timezone, String name) {
+                                        boolean isZip, String timezone, String name,
+                                        Boolean zeroData, String customSubject) {
         EmailProps props = new EmailProps();
         props.setFromEmail(properties.getFromEmail());
         props.setUsername(properties.getUsername());
@@ -299,7 +307,14 @@ public class ScheduleReportTask extends AbstractTask {
         props.setSmtpHost(properties.getSmtpHost());
         props.setSmtpPort(properties.getSmtpPort());
         props.setToEmails(toEmails);
-        props.setSubject("Increff Reporting : " + name);
+
+        String subject = "Increff Reporting : " + name;
+        if (Objects.nonNull(zeroData) && zeroData) // Add (No Data) to subject if zero data
+            subject += " (No Data) ";
+        if (Objects.nonNull(customSubject) && !customSubject.isEmpty())
+            subject = customSubject;
+        props.setSubject(subject);
+
         props.setAttachment(out);
         props.setCustomizedFileName(FileUtil.getCustomizedFileName(isZip, timezone, name));
         props.setIsAttachment(isAttachment);

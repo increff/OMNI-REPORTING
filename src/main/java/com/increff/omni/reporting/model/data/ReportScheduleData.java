@@ -1,6 +1,7 @@
 package com.increff.omni.reporting.model.data;
 
 import com.increff.omni.reporting.model.form.CronScheduleForm;
+import com.increff.omni.reporting.model.form.EmailParams;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -31,6 +32,8 @@ public class ReportScheduleData {
     private Integer failureCount;
 
     private Integer minFrequencyAllowedSeconds;
+
+    private EmailParams emailParams;
 
 
 }
