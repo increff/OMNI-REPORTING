@@ -12,7 +12,10 @@ import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.core.annotation.Order;
+import org.springframework.stereotype.Component;
 import org.springframework.web.filter.GenericFilterBean;
 
 import java.io.IOException;
@@ -23,6 +26,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Log4j2
 @Order(0)
+@Component
 public class RateLimitingFilter extends GenericFilterBean {
 
     private ApplicationProperties properties;
@@ -39,6 +43,13 @@ public class RateLimitingFilter extends GenericFilterBean {
         return Bucket.builder()
                 .addLimit(Bandwidth.classic(properties.getTokens(), Refill.intervally(properties.getTokens(), Duration.ofSeconds(properties.getTokensRefillRateSeconds()))))
                 .build();
+    }
+
+    @Bean
+    public FilterRegistrationBean<RateLimitingFilter> tenantFilterRegistration(RateLimitingFilter filter) {
+        FilterRegistrationBean<RateLimitingFilter> registration = new FilterRegistrationBean<>(filter);
+        registration.setEnabled(false);
+        return registration;
     }
 
     @Override
@@ -92,7 +103,8 @@ public class RateLimitingFilter extends GenericFilterBean {
     }
 
     public void clearUserRateLimiterMap() {
-        log.debug("RateLimitingFilter.clearUserRateLimiterMap: " + " userRateLimitersMap.size " + userRateLimiters.size() + " RateLimiting" + properties.getTokens() + " tokens per " + properties.getTokensRefillRateSeconds() + " seconds");
+        log.info("RateLimitingFilter.clearUserRateLimiterMap: " + " userRateLimitersMap.size " + userRateLimiters.size()
+                + " RateLimiting" + properties.getTokens() + " tokens per " + properties.getTokensRefillRateSeconds() + " seconds");
         userRateLimiters.entrySet().removeIf(entry -> entry.getValue().getAvailableTokens() == properties.getTokens());
     }
 

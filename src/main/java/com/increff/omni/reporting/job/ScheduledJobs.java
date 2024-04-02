@@ -54,8 +54,8 @@ public class ScheduledJobs {
     @Qualifier(value = "scheduleReportRequestExecutor")
     private Executor scheduleReportExecutor;
 
-//    @Autowired
-//    private RateLimitingFilter rateLimitingFilter;
+    @Autowired
+    private RateLimitingFilter rateLimitingFilter;
 
     @Scheduled(fixedDelay = 1000)
     public void runUserReports() {
@@ -205,9 +205,9 @@ public class ScheduledJobs {
         });
     }
 
-//    @Scheduled(cron = "0 0 6 * * *")
-//    public void clearUserRateLimiterMap() {
-//        rateLimitingFilter.xclearUserRateLimiterMap();
-//    }
-    // Iternate and identify bean to clear map
+    @Scheduled(cron = "0 0 6 * * *")
+    public void clearUserRateLimiterMap() {
+        rateLimitingFilter.clearUserRateLimiterMap();
+    }
+
 }
