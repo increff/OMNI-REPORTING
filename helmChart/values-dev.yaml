@@ -5,10 +5,10 @@
 replicaCount: 1
 
 image:
-  repository: "asia-south1-docker.pkg.dev/saas-dev-314407/integrations/omni-reporting"
+  repository: "asia-south1-docker.pkg.dev/saas-dev-314407/internal-services/omni-reporting"
   pullPolicy: Always
   # Overrides the image tag whose default is the chart appVersion.
-  tag: ""
+  tag: "0.0.1"
 
 imagePullSecrets: []
 nameOverride: ""
@@ -39,8 +39,8 @@ securityContext: {}
   # runAsUser: 1000
 
 probes:
-  enabled: true
-  path: /omni-reporting/health
+  enabled: false
+  path: /omni-reporting/api/test/health
 
 service:
   type: ClusterIP
