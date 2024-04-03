@@ -1,0 +1,30 @@
+# This is a template file for Dockerfile-dev. This file will be used for creating Dockerfile-dev file for any proxy that is to be onboarded onto K8s.
+
+# Base image
+FROM --platform=linux/amd64 asia-south1-docker.pkg.dev/saas-dev-314407/baseimage/base:ubuntu22.04-jdk8-tomcat9-elk.v2
+
+# USER tomcat
+
+# Set the working directory inside the container
+WORKDIR /home/tomcat/tomcat-internal/appdata
+
+# Touch the .properties file inside the container
+RUN sh -c 'touch /home/tomcat/tomcat-internal/appdata/omni-reporting.properties'
+
+# Set JAVA_OPTS environment variable
+ENV JAVA_OPTS="$JAVA_OPTS -Xms500m -Xmx500m -Dspring.profiles.active=dev  -Dvault.uri=https://vault.nextscm.com -Dvault.elasticsearch.port=9200 -Dvault.token={{ DEV_VAULT_TOKEN }} -Dvault.elasticsearch.host=elk-dev-internal.nextscm.com -Dvault.elasticsearch.password={{ DEV_VAULT_ELK_PASS }} -Dvault.elasticsearch.username=elastic"
+
+# Set ELK environment variables
+ENV SERVER_NAME="omni-reporting-pods"
+ENV APM_SERVER_URL="https://elk-apm-dev.nextscm.com"
+ENV APM_TOKEN="{{ DEV_APM_TOKEN }}"
+ENV APM_ENVIRONMENT="proxy"
+
+# Download the JFROG Artifactory URL
+RUN /home/tomcat/scripts/downwar.sh {{ JFROG_ARTIFACTORY_URL }} /home/tomcat/scripts/omni-reporting.war
+
+# Move the .war to webapps so that tomcat can run the application
+RUN mv /home/tomcat/scripts/*.war /home/tomcat/tomcat-internal/webapps/omni-reporting.war
+
+# Expose port 8080
+EXPOSE 8080
