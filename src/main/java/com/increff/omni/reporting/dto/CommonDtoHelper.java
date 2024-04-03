@@ -427,7 +427,8 @@ public class CommonDtoHelper {
         schedulePojo.setNextRuntime(getNextRunTime(cron, form.getTimezone()));
         // New / updated schedule is created with deleted flag false
         schedulePojo.setIsDeleted(false);
-        schedulePojo.setEmailSubject(form.getEmailParams().getSubject());
+        if (Objects.nonNull(form.getEmailParams()))
+            schedulePojo.setEmailSubject(form.getEmailParams().getSubject());
         return schedulePojo;
     }
 
