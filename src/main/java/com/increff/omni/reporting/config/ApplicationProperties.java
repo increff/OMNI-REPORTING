@@ -5,6 +5,8 @@ import lombok.Setter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.util.Map;
+
 @Getter
 @Setter
 @Component
@@ -83,8 +85,8 @@ public class ApplicationProperties {
     @Value("${gcp.bucketName}")
     private String gcpBucketName;
 
-    @Value("${gcp.filePath}")
-    private String gcpFilePath;
+    @Value("#{${gcp.credentials}}")
+    private Map<String, String> gcpCredentials;
 
     @Value("${root.directory:root}")
     private String rootDirectory;
@@ -95,7 +97,7 @@ public class ApplicationProperties {
     @Value("${query.outDir:omni-reporting-files}")
     private String outDir;
 
-    @Value("${reporting.version}")
+    @Value("${reporting.version:@project.version@}")
     private String version;
 
     @Value("${from.email}")

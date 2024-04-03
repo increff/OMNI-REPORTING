@@ -10,6 +10,7 @@ import com.increff.account.client.AuthClient;
 import com.increff.commons.queryexecutor.QueryExecutorClient;
 import com.increff.commons.springboot.audit.api.AuditApi;
 import com.increff.commons.springboot.audit.dao.AuditDao;
+import com.increff.commons.springboot.common.JsonUtil;
 import com.increff.omni.reporting.dto.CommonDtoHelper;
 import com.increff.omni.reporting.util.FileDownloadUtil;
 import com.increff.service.encryption.EncryptionClient;
@@ -35,11 +36,15 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.client.RestTemplate;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -59,8 +64,15 @@ public class BeanConfig {
 
     @Bean
     public FileDownloadUtil getFileDownloadUtil() throws IOException {
-        return new FileDownloadUtil(applicationProperties.getGcpBucketName(), applicationProperties.getGcpFilePath());
+        Map<String, String> credentials = applicationProperties.getGcpCredentials();
+        byte[] bytes = JsonUtil.serialize(credentials).getBytes(StandardCharsets.UTF_8);
+        InputStream inputStream = new ByteArrayInputStream(bytes);
+        return new FileDownloadUtil(applicationProperties.getGcpBucketName(), inputStream);
     }
+//    @Bean
+//    public FileDownloadUtil getFileDownloadUtil() throws IOException {
+//        return new FileDownloadUtil(applicationProperties.getGcpBucketName(), applicationProperties.getGcpFilePath());
+//    }
 
 
     @Bean
@@ -79,6 +91,8 @@ public class BeanConfig {
 
     @Bean
     public AuthClient authClient() {
+        System.out.println("Auth BaseUrl: " + applicationProperties.getAuthBaseUrl());
+        System.out.println("Auth AppToken: " + applicationProperties.getAuthAppToken());
         return new AuthClient(applicationProperties.getAuthBaseUrl(), applicationProperties.getAuthAppToken());
     }
 
