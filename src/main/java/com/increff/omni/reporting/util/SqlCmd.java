@@ -7,7 +7,10 @@ import com.nextscm.commons.spring.common.JsonUtil;
 import lombok.extern.log4j.Log4j;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 @Log4j
 public class SqlCmd {
@@ -17,8 +20,10 @@ public class SqlCmd {
 
     public static String getFinalQuery(Map<String, String> inputParamMap, String query,
                                        Boolean isUserPrincipalAvailable) throws ApiException {
-        if(isUserPrincipalAvailable)
-            inputParamMap.putAll(UserPrincipalUtil.getAccessControlMap());
+        if (isUserPrincipalAvailable) {
+            inputParamMap.putAll(UserPrincipalUtil.getAccessControlMapForUserAccessQueryParamKeys(query));
+        }
+
         String[] matchingFunctions = StringUtils.substringsBetween(query, "<<", ">>");
         if (Objects.isNull(matchingFunctions)) {
             log.debug("Query formed : " + query);
@@ -36,6 +41,21 @@ public class SqlCmd {
         log.debug("Query formed : " + query);
         return query;
     }
+
+//    private static Map<String, String> overrideUserAccess(String query, UserPrincipal userPrincipal) {
+//        // get all substrings between "user.access." and ","
+//
+//        if(Objects.isNull(userPrincipal))
+//            return new HashMap<>();
+//
+//        List<String> userAccessList = new ArrayList<>();
+//        String[] userAccess = StringUtils.substringsBetween(query, "user.access.", ",");
+//        if (Objects.nonNull(userAccess)) {
+//            userAccessList.addAll(Arrays.asList(userAccess));
+//        }
+//        return new HashMap<>();
+//
+//    }
 
     private static String getValueFromMethod(Map<String, String> inputParamMap, String f, String methodName) throws ApiException {
         String paramKey, paramValue, filterJson, operator, condition;

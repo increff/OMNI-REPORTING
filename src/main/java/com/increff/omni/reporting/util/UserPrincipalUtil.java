@@ -2,9 +2,12 @@ package com.increff.omni.reporting.util;
 
 import com.increff.account.client.SecurityUtil;
 import com.increff.account.client.UserPrincipal;
-import com.increff.omni.reporting.model.constants.*;
+import com.increff.omni.reporting.model.constants.AppName;
+import com.increff.omni.reporting.model.constants.InputControlType;
+import com.increff.omni.reporting.model.constants.Roles;
 import com.increff.omni.reporting.model.form.ReportScheduleForm;
 import lombok.extern.log4j.Log4j;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -14,9 +17,15 @@ import static com.increff.omni.reporting.model.constants.Roles.USER_ACCESS_ADMIN
 @Log4j
 public class UserPrincipalUtil {
 
+    private static final String USER_ACCESS_QUERY_PARAM_PREFIX = "user.access.";
+    // token till which the query param key is to be extracted
+    private static final String USER_ACCESS_QUERY_PARAM_SUBSTRING_CLOSE = ",";
+
+
     public static Map<String, String> getCompleteMapWithAccessControl(Map<String, List<String>> params) {
         Map<String, String> finalMap = new HashMap<>(getStringToStringParamMap(params));
-        finalMap.putAll(getAccessControlMap());
+        // todo : refactor func name
+        // finalMap.putAll(getAccessControlMap()); When validating values for access controlled param key, access control is checked since user.access string is in filter query and not in report query directly.
         return finalMap;
     }
 
@@ -24,12 +33,23 @@ public class UserPrincipalUtil {
         Map<String, String> finalMap = new HashMap<>();
         paramMap.forEach(p -> {
             processParamMap(finalMap, p.getKey(), p.getValue(), p.getType());
-        });
-        finalMap.putAll(getAccessControlMap());
+        }); // todo : refactor func name
+        // finalMap.putAll(getAccessControlMap()); Schedulers are run by app.admin who will have all access. Thus, no need to add user.access values to the map
         return finalMap;
     }
 
-    public static Map<String, String> getAccessControlMap() {
+    /**
+     * For Standard Users
+     * Returns a map containing all query param keys starting with 'user.access.'
+     * and values as empty string or actual value account server values set up for the user
+     * <p>
+     * For Admin Users
+     * Returns empty map. Values of 'user.access.' keys will be null
+     *
+     * @param query Report Query
+     * @return Map<String, String> containing values for all query param keys starting with 'user.access.'
+     */
+    public static Map<String, String> getAccessControlMapForUserAccessQueryParamKeys(String query) {
         Map<String, List<String>> accessControlMap = new HashMap<>();
         UserPrincipal principal = SecurityUtil.getPrincipal();
         List<String> accessRoles = principal.getRoles();
@@ -39,25 +59,35 @@ public class UserPrincipalUtil {
         // Which will make sure all values are selected
         if(!accessRoles.isEmpty())
             return getStringToStringParamMap(accessControlMap);
-        Map<String, Map<String, List<String>>> resourceRoles = principal.getResourceRoles();
-        accessControlMap.put(ResourceQueryParamKeys.fulfillmentLocationQueryParamKey
-                , new ArrayList<>(Collections.singletonList("")));
-        accessControlMap.put(ResourceQueryParamKeys.clientQueryParam, new ArrayList<>(Collections.singletonList("")));
-        accessControlMap.put(ResourceQueryParamKeys.restrictedResourceQueryParam, new ArrayList<>(Collections.singletonList("")));
-        if(resourceRoles.containsKey(AppResourceKeys.fulfillmentLocationKey)) {
-            List<String> resourceValues = new ArrayList<>(resourceRoles.get(AppResourceKeys.fulfillmentLocationKey)
-                    .keySet());
-            accessControlMap.put(ResourceQueryParamKeys.fulfillmentLocationQueryParamKey, resourceValues);
-        }
-        if(resourceRoles.containsKey(AppResourceKeys.clientKey)) {
-            List<String> resourceValues = new ArrayList<>(resourceRoles.get(AppResourceKeys.clientKey).keySet());
-            accessControlMap.put(ResourceQueryParamKeys.clientQueryParam, resourceValues);
-        }
-        if(resourceRoles.containsKey(AppResourceKeys.restrictedResourceKey)) {
-            List<String> resourceValues = new ArrayList<>(resourceRoles.get(AppResourceKeys.restrictedResourceKey).keySet());
-            accessControlMap.put(ResourceQueryParamKeys.restrictedResourceQueryParam, resourceValues);
-        }
+
+
+        accessControlMap = addResourceValuesForAccessQueryParamKeys(query, principal);
         return getStringToStringParamMap(accessControlMap);
+    }
+
+    private static Map<String, List<String>> addResourceValuesForAccessQueryParamKeys(String query, UserPrincipal principal) {
+        Map<String, List<String>> accessControlMap = new HashMap<>();
+
+        String[] queryParamKeys = StringUtils.substringsBetween(query, USER_ACCESS_QUERY_PARAM_PREFIX, USER_ACCESS_QUERY_PARAM_SUBSTRING_CLOSE);
+        log.debug("Query Param Keys: " + Arrays.toString(queryParamKeys));
+        cleanQueryParamKeys(queryParamKeys);
+        log.debug("Query Param Keys (Cleaned): " + Arrays.toString(queryParamKeys));
+
+        Map<String, Map<String, List<String>>> resourceRoles = principal.getResourceRoles();
+        for (String queryParamKey : queryParamKeys) {
+            // Set default value as empty string (No Access if values are not set for user)
+            accessControlMap.put(queryParamKey, new ArrayList<>(Collections.singletonList("")));
+
+            // If user has access to the resource, then set the values for the query param key
+            // Query Param Key and Resource Key In Account Server should be same
+            if (resourceRoles.containsKey(queryParamKey)) {
+                List<String> resourceValues = new ArrayList<>(resourceRoles.get(queryParamKey).keySet());
+                accessControlMap.put(queryParamKey, resourceValues);
+            }
+        }
+
+        log.debug("Access Control Map: " + accessControlMap);
+        return accessControlMap;
     }
 
     public static Map<String, String> getStringToStringParamMap(Map<String, List<String>> params) {
@@ -114,5 +144,12 @@ public class UserPrincipalUtil {
 
     public static UserPrincipal getPrincipal() {
         return SecurityUtil.getPrincipal();
+    }
+
+
+    private static void cleanQueryParamKeys(String[] queryParamKeys) {
+        for (int i = 0; i < queryParamKeys.length; i++) {
+            queryParamKeys[i] = queryParamKeys[i].split(",")[0].trim();
+        }
     }
 }

@@ -25,8 +25,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.increff.omni.reporting.dto.ReportRequestDto.accessControlledKeys;
-
 public class CommonDtoHelper {
 
     public final static String TIME_ZONE_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX";
@@ -121,8 +119,7 @@ public class CommonDtoHelper {
                                          List<InputControlPojo> controlPojos) {
         List<InputControlFilterData> filterData = new ArrayList<>();
         for (ReportInputParamsPojo reportInputParamsPojo : paramsPojoList) {
-            if (accessControlledKeys.contains(reportInputParamsPojo.getParamKey())
-                    || reportInputParamsPojo.getParamKey().equals("orgId"))
+            if (reportInputParamsPojo.getParamKey().equals("orgId"))
                 continue;
             if (reportInputParamsPojo.getParamKey().equals("timezone")) {
                 data.setTimezone(getValueFromQuotes(reportInputParamsPojo.getParamValue()));
@@ -282,14 +279,23 @@ public class CommonDtoHelper {
             reportInputParamsPojo.setDisplayValue(inputDisplayStringMap.getOrDefault(k, v));
             reportInputParamsPojoList.add(reportInputParamsPojo);
         });
+
         ReportInputParamsPojo timeZoneParam = new ReportInputParamsPojo();
         timeZoneParam.setParamKey("timezone");
         timeZoneParam.setParamValue("'" + timeZone + "'");
         reportInputParamsPojoList.add(timeZoneParam);
+
         ReportInputParamsPojo orgIdParam = new ReportInputParamsPojo();
         orgIdParam.setParamKey("orgId");
         orgIdParam.setParamValue("'" + orgId.toString() + "'");
         reportInputParamsPojoList.add(orgIdParam);
+
+        ReportInputParamsPojo userRoleParam = new ReportInputParamsPojo();
+        userRoleParam.setParamKey("hardcode.userRoles"); // todo : may not be reqd now.
+        userRoleParam.setParamValue("'" + "ROLE_REPORT_STANDARD" + "'"); // todo : get top role (app.admin if user has multiple roles)
+        reportInputParamsPojoList.add(userRoleParam);
+
+
         return reportInputParamsPojoList;
     }
 
