@@ -15,7 +15,7 @@ import com.increff.omni.reporting.model.form.FileProviderFolder.GcpPipelineConfi
 import com.increff.omni.reporting.pojo.*;
 import com.increff.omni.reporting.util.*;
 import com.increff.service.encryption.EncryptionClient;
-import com.increff.service.encryption.common.CryptoCommon;
+import com.increff.service.encryption.form.CryptoDecodeFormWithoutKey;
 import com.nextscm.commons.spring.client.AppClientException;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
@@ -249,7 +249,7 @@ public class ScheduleReportTask extends AbstractTask {
 
     private String getDecryptedPassword(String password) throws ApiException {
         try {
-            CryptoCommon form = CommonDtoHelper.convertToCryptoForm(password);
+            CryptoDecodeFormWithoutKey form = CommonDtoHelper.convertToCryptoForm(password);
             String decryptedPassword = encryptionClient.decode(form).getValue();
             return Objects.isNull(decryptedPassword) ? password : decryptedPassword;
         } catch (AppClientException e) {
