@@ -75,14 +75,16 @@ public class UserPrincipalUtil {
 
         Map<String, Map<String, List<String>>> resourceRoles = principal.getResourceRoles();
         for (String queryParamKey : queryParamKeys) {
+            String queryParamFullKey = USER_ACCESS_QUERY_PARAM_PREFIX + queryParamKey;
+
             // Set default value as empty string (No Access if values are not set for user)
-            accessControlMap.put(queryParamKey, new ArrayList<>(Collections.singletonList("")));
+            accessControlMap.put(queryParamFullKey, new ArrayList<>(Collections.singletonList("")));
 
             // If user has access to the resource, then set the values for the query param key
             // Query Param Key and Resource Key In Account Server should be same
             if (resourceRoles.containsKey(queryParamKey)) {
                 List<String> resourceValues = new ArrayList<>(resourceRoles.get(queryParamKey).keySet());
-                accessControlMap.put(queryParamKey, resourceValues);
+                accessControlMap.put(queryParamFullKey, resourceValues);
             }
         }
 
