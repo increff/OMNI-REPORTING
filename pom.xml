@@ -23,8 +23,7 @@
         <!-- Increff Dependencies -->
         <fileclient.version>1.1.4</fileclient.version>
         <nextscm-commons-spring.version>2.10</nextscm-commons-spring.version>
-        <crypto-client.version>2.14.2-SNAPSHOT
-        </crypto-client.version> <!-- todo : change snapshot to release version -->
+        <crypto-client.version>RELEASE</crypto-client.version>
         <increff-commons-logging.version>1.5</increff-commons-logging.version>
         <increff-account.version>3.27</increff-account.version>
         <lombok.version>1.18.22</lombok.version>
