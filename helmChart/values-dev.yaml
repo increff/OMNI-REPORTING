@@ -39,7 +39,7 @@ securityContext: {}
   # runAsUser: 1000
 
 probes:
-  enabled: false
+  enabled: true
   path: /omni-reporting/api/test/health
 
 service:
