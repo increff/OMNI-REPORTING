@@ -21,23 +21,23 @@ public abstract class AbstractValidator {
 
     public String getValidationMessage(String reportName, List<String> displayNames, ValidationType validationType
             , String extraMessage) {
-        StringBuilder errorMessage = new StringBuilder();
+        StringBuilder err = new StringBuilder();
 
-        if (!StringUtils.isEmpty(errorMessage)) errorMessage.append(extraMessage);
-        errorMessage.append(". ").append("Filter(s) : (");
+        if (!StringUtils.isEmpty(extraMessage)) err.append(extraMessage);
+        err.append(". ").append("Filter(s) : (");
 
         for (String displayName : displayNames) {
             if (StringUtil.isEmpty(displayName))
                 continue;
-            errorMessage.append(displayName).append(", ");
+            err.append(displayName).append(", ");
         }
         if (!displayNames.isEmpty()) // remove last comma
-            errorMessage.delete(errorMessage.length() - 2, errorMessage.length());
+            err.delete(err.length() - 2, err.length());
 
-        errorMessage.append("). Validation Type : ").append(validationType);
-        errorMessage.append(". Report : ").append(reportName);
+        err.append("). Validation Type : ").append(validationType);
+        err.append(". Report : ").append(reportName);
 
-        return errorMessage.toString();
+        return err.toString();
     }
 
     protected String getValueFromQuotes(String value) {
