@@ -20,7 +20,7 @@ public class SingleMandatoryValidatorTest extends AbstractTest {
     @Autowired
     private SingleMandatoryValidator validator;
 
-    @Test(expected = ApiException.class)
+    @Test(expected = ApiException.class) // todo : fix tc
     public void testValidateErrorCase1() throws ApiException {
         List<String> params = Arrays.asList("''", "''");
         List<String> displayNames = Arrays.asList("Client Id", "Item Id");
