@@ -26,6 +26,16 @@ public abstract class AbstractValidator {
         if (!StringUtils.isEmpty(extraMessage)) err.append(extraMessage);
         err.append("\n").append("Filter(s) : (");
 
+        err.append(getDisplayNamesErrorString(displayNames));
+
+        err.append(")\nValidation Type : ").append(validationType);
+        err.append("\nReport : ").append(reportName);
+
+        return err.toString();
+    }
+
+    protected static String getDisplayNamesErrorString(List<String> displayNames) {
+        StringBuilder err = new StringBuilder();
         for (String displayName : displayNames) {
             if (StringUtil.isEmpty(displayName))
                 continue;
@@ -33,10 +43,6 @@ public abstract class AbstractValidator {
         }
         if (!displayNames.isEmpty()) // remove last comma
             err.delete(err.length() - 2, err.length());
-
-        err.append(")\nValidation Type : ").append(validationType);
-        err.append("\nReport : ").append(reportName);
-
         return err.toString();
     }
 
