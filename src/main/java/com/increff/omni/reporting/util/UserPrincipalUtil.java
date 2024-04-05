@@ -6,6 +6,7 @@ import com.increff.omni.reporting.model.constants.AppName;
 import com.increff.omni.reporting.model.constants.InputControlType;
 import com.increff.omni.reporting.model.constants.Roles;
 import com.increff.omni.reporting.model.form.ReportScheduleForm;
+import com.nextscm.commons.spring.common.JsonUtil;
 import lombok.extern.log4j.Log4j;
 import org.apache.commons.lang3.StringUtils;
 
@@ -23,8 +24,9 @@ public class UserPrincipalUtil {
 
 
     public static Map<String, String> getMapWithoutAccessControl(Map<String, List<String>> params) {
-        Map<String, String> finalMap = new HashMap<>(getStringToStringParamMap(params));
-        // finalMap.putAll(getAccessControlMap()); When validating values for access controlled param key, access control is checked since user.access string is in filter query and not in report query directly.
+        Map<String, String> finalMap = new HashMap<>(getStringToStringParamMap(params)); // todo : cmt
+        // finalMap.putAll(getAccessControlMap());
+        // When validating values for access controlled param key, access control is checked since user.access string is in filter query and not in report query directly.
         return finalMap;
     }
 
@@ -68,9 +70,7 @@ public class UserPrincipalUtil {
         Map<String, List<String>> accessControlMap = new HashMap<>();
 
         String[] queryParamKeys = StringUtils.substringsBetween(query, USER_ACCESS_QUERY_PARAM_PREFIX, USER_ACCESS_QUERY_PARAM_SUBSTRING_CLOSE);
-        log.debug("Query Param Keys: " + Arrays.toString(queryParamKeys));
         cleanQueryParamKeys(queryParamKeys);
-        log.debug("Query Param Keys (Cleaned): " + Arrays.toString(queryParamKeys));
 
         Map<String, Map<String, List<String>>> resourceRoles = principal.getResourceRoles();
         for (String queryParamKey : queryParamKeys) {
@@ -87,7 +87,9 @@ public class UserPrincipalUtil {
             }
         }
 
-        log.debug("Access Control Map: " + accessControlMap);
+        log.debug("Access Control Map: " + JsonUtil.serialize(accessControlMap) +
+                " email: " + (((Objects.nonNull(principal.getEmail()))) ? principal.getEmail() : "null") +
+                " username: " + (((Objects.nonNull(principal.getUsername())) ? principal.getUsername() : "null")));
         return accessControlMap;
     }
 
@@ -149,8 +151,10 @@ public class UserPrincipalUtil {
 
 
     private static void cleanQueryParamKeys(String[] queryParamKeys) {
+        log.debug("Query Param Keys: " + Arrays.toString(queryParamKeys));
         for (int i = 0; i < queryParamKeys.length; i++) {
             queryParamKeys[i] = queryParamKeys[i].split(",")[0].trim();
         }
+        log.debug("Query Param Keys (Cleaned): " + Arrays.toString(queryParamKeys));
     }
 }
