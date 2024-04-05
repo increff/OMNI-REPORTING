@@ -373,7 +373,8 @@ public class DashboardDto extends AbstractDto {
         if(Objects.nonNull(api.getByOrgIdName(getOrgId(), form.getName())))
             throw new ApiException(ApiStatus.BAD_DATA, "Dashboard name already exists: " + form.getName() + " OrgId: " + getOrgId());
         if(api.getByOrgId(getOrgId()).size() >= properties.getMaxDashboardsPerOrg())
-            throw new ApiException(ApiStatus.BAD_DATA, "Max limit of dashboards reached: " + properties.getMaxDashboardsPerOrg());
+            throw new ApiException(ApiStatus.BAD_DATA, "Max limit of dashboards reached: " + properties.getMaxDashboardsPerOrg() +
+                    ". Please delete existing dashboards to add new ones");
     }
 
     private void validateControlIdExistsForDashboard(Integer dashboardId, String paramName) throws ApiException {
