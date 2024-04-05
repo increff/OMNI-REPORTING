@@ -73,6 +73,38 @@ public class DashboardDto extends AbstractDto {
     }
 
     @Transactional(rollbackFor = ApiException.class)
+    public FavData getFavoriteDashboard() {
+        FavData favData = new FavData();
+        FavouritePojo favPojo = api.getFavByOrgUser(getOrgId(), getUserId());
+        favData.setUserFav(Objects.nonNull(favPojo) ? favPojo.getFavId() : null);
+        favPojo = api.getFavByOrg(getOrgId());
+        favData.setOrgFav(Objects.nonNull(favPojo) ? favPojo.getFavId() : null);
+        return favData;
+    }
+
+    @Transactional(rollbackFor = ApiException.class)
+    public FavouriteData setUserFavoriteDashboard(FavouriteForm form) {
+        FavouritePojo favPojo = ConvertUtil.convert(form, FavouritePojo.class);
+        favPojo.setOrgId(getOrgId());
+        favPojo.setUserId(getUserId());
+        return ConvertUtil.convert(api.setFav(favPojo), FavouriteData.class);
+    }
+
+    @Transactional(rollbackFor = ApiException.class)
+    public FavouriteData setOrgFavoriteDashboard(FavouriteForm form) {
+        FavouritePojo favPojo = ConvertUtil.convert(form, FavouritePojo.class);
+        favPojo.setOrgId(getOrgId());
+        favPojo.setUserId(null);
+        return ConvertUtil.convert(api.setFav(favPojo), FavouriteData.class);
+    }
+
+    @Transactional(rollbackFor = ApiException.class)
+    public void deleteFavoriteDashboard(Integer favId) {
+        api.deleteFavById(favId);
+    }
+
+
+    @Transactional(rollbackFor = ApiException.class)
     public List<DefaultValueData> upsertDefaultValues(UpsertDefaultValueForm upsertDefaultValueform, Integer dashboardId) throws ApiException {
         List<DefaultValueForm> forms = upsertDefaultValueform.getDefaultValueForms();
         List<DefaultValuePojo> pojos = new ArrayList<>();
