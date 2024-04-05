@@ -4,7 +4,7 @@
 
     <groupId>com.increff.omni</groupId>
     <artifactId>omni-reporting</artifactId>
-    <version>2.0.3-SNAPSHOT</version>
+    <version>2.0.0-SNAPSHOT</version>
 
     <properties>
         <!-- Maven Properties -->
@@ -67,6 +67,12 @@
             <artifactId>commons-springboot-test</artifactId>
             <version>${commons-springboot-test.version}</version>
             <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <artifactId>android-json</artifactId>
+                    <groupId>com.vaadin.external.google</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
@@ -169,13 +175,81 @@
                 </executions>
             </plugin>
 
+<!--            <plugin>-->
+<!--                <groupId>com.google.cloud.tools</groupId>-->
+<!--                <artifactId>jib-maven-plugin</artifactId>-->
+<!--                <version>3.4.0</version>-->
+<!--                <configuration>-->
+<!--                    <from>-->
+<!--                        <image>rishavraj987654321/reporting-base-image:latest</image>-->
+<!--                        <platforms>-->
+<!--                            <platform>-->
+<!--                                <os>linux</os>-->
+<!--                                <architecture>amd64</architecture>-->
+<!--                            </platform>-->
+<!--                        </platforms>-->
+<!--                    </from>-->
+<!--                    <to>-->
+<!--                        <image>omni-reporting</image>-->
+<!--                        <tags>-->
+<!--                            <tag>${project.version}</tag>-->
+<!--                        </tags>-->
+<!--                    </to>-->
+<!--                    <extraDirectories>-->
+<!--                        <paths>-->
+<!--                            <path>-->
+<!--                                <from>target/</from>-->
+<!--                                <into>/usr/local/</into>-->
+<!--                                <includes>*.jar</includes>-->
+<!--                            </path>-->
+<!--                        </paths>-->
+<!--                    </extraDirectories>-->
+<!--                    <container>-->
+<!--                        <ports>-->
+<!--                            <port>9000</port>-->
+<!--                        </ports>-->
+<!--                        <entrypoint>INHERIT</entrypoint>-->
+<!--                    </container>-->
+<!--                </configuration>-->
+<!--            </plugin>-->
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>3.2.0</version>
+                <executions>
+                    <execution>
+                        <id>download-elastic-apm-agent</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>co.elastic.apm</groupId>
+                                    <artifactId>elastic-apm-agent</artifactId>
+                                    <version>1.38.0</version>
+                                    <type>jar</type>
+                                    <overWrite>true</overWrite>
+                                    <outputDirectory>${project.build.directory}/</outputDirectory>
+                                </artifactItem>
+                            </artifactItems>
+                            <outputDirectory>${project.build.directory}/</outputDirectory>
+                            <overWriteReleases>false</overWriteReleases>
+                            <overWriteSnapshots>true</overWriteSnapshots>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
             <plugin>
                 <groupId>com.google.cloud.tools</groupId>
                 <artifactId>jib-maven-plugin</artifactId>
                 <version>3.4.0</version>
                 <configuration>
                     <from>
-                        <image>dhruvincreff/rishav-base:3.0</image>
+                        <image>eclipse-temurin:21.0.2_13-jre-alpine</image>
                         <platforms>
                             <platform>
                                 <os>linux</os>
@@ -184,7 +258,7 @@
                         </platforms>
                     </from>
                     <to>
-                        <image>omni-reporting</image>
+                        <image>http://asia-south1-docker.pkg.dev/saas-dev-314407/internal-services/omni-reporting</image>
                         <tags>
                             <tag>${project.version}</tag>
                         </tags>
@@ -196,14 +270,27 @@
                                 <into>/usr/local/</into>
                                 <includes>*.jar</includes>
                             </path>
+                            <path>
+                                <from>src/main/resources/</from>
+                                <into>/usr/local/</into>
+                                <includes>*.xml</includes>
+                            </path>
+                            <path>
+                                <from>src/main/resources/</from>
+                                <into>/usr/local/</into>
+                                <includes>*.properties</includes>
+                            </path>
                         </paths>
                     </extraDirectories>
                     <container>
+                        <entrypoint>
+                            <arg>/bin/sh</arg>
+                            <arg>-c</arg>
+                            <arg>java -Xms1500m -Xmx1500m -javaagent:/usr/local/elastic-apm-agent-1.38.0.jar -Delastic.apm.service_name=omni-reporting-docker-test -Delastic.apm.application_packages=* -Delastic.apm.server_url=${ELK_DEV_URL} -Delastic.apm.secret_token=elkserver-dev -Delastic.apm.environment=elk -Dspring.cloud.vault.scheme=https -Dspring.cloud.vault.host=vault.nextscm.com -Dspring.cloud.vault.application-name=omniReporting -Dspring.cloud.vault.port=443 -Dspring.cloud.vault.token=hvs.Yt4JtVfjJJT0q71NdTxfZhDA -Dspring.config.import=vault:// -Dspring.profiles.active=dev -Dlogging.config=/usr/local/log4j2.xml -jar /usr/local/app.jar</arg>
+                        </entrypoint>
                         <ports>
                             <port>9000</port>
                         </ports>
-                        <entrypoint>INHERIT</entrypoint>
-<!--                        <entrypoint>java, -jar, /usr/local/app.jar</entrypoint>-->
                     </container>
                 </configuration>
             </plugin>

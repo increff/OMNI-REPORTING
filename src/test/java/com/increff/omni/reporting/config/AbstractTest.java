@@ -3,14 +3,11 @@ package com.increff.omni.reporting.config;
 import com.increff.account.client.UserPrincipal;
 import com.increff.commons.springboot.client.AppClientException;
 import com.increff.omni.reporting.model.constants.AppResourceKeys;
-import com.increff.omni.reporting.model.constants.ChartType;
-import com.increff.omni.reporting.model.constants.PipelineType;
-import com.increff.omni.reporting.model.form.PipelineForm;
+import com.increff.omni.reporting.util.FileDownloadUtil;
 import com.increff.service.encryption.EncryptionClient;
 import com.increff.service.encryption.data.CryptoData;
 import com.increff.service.encryption.form.CryptoForm;
 import org.junit.jupiter.api.BeforeEach;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Value;
@@ -39,10 +36,8 @@ public abstract class AbstractTest {
     @MockBean
     protected EncryptionClient encryptionClient;
 
-//    @Bean
-//    public EncryptionClient getEncryptionClient() {
-//        return Mockito.mock(EncryptionClient.class);
-//    }
+    @MockBean
+    protected FileDownloadUtil fileDownloadUtil;
 
     @BeforeEach
     public void setUp() throws AppClientException {
