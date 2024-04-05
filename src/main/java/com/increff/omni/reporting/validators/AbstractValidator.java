@@ -5,6 +5,7 @@ import com.increff.omni.reporting.model.constants.ReportRequestType;
 import com.increff.omni.reporting.model.constants.ValidationType;
 import com.nextscm.commons.lang.StringUtil;
 import com.nextscm.commons.spring.common.ApiException;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 
@@ -20,7 +21,11 @@ public abstract class AbstractValidator {
 
     public String getValidationMessage(String reportName, List<String> displayNames, ValidationType validationType
             , String extraMessage) {
-        StringBuilder errorMessage = new StringBuilder(reportName + " failed in validation for Filter(s) : (");
+        StringBuilder errorMessage = new StringBuilder();
+
+        if (!StringUtils.isEmpty(errorMessage)) errorMessage.append(extraMessage);
+        errorMessage.append(". ").append("Filter(s) : (");
+
         for (String displayName : displayNames) {
             if (StringUtil.isEmpty(displayName))
                 continue;
@@ -29,8 +34,9 @@ public abstract class AbstractValidator {
         if (!displayNames.isEmpty()) // remove last comma
             errorMessage.delete(errorMessage.length() - 2, errorMessage.length());
 
-        errorMessage.append("). Validation type : ").append(validationType).append(!StringUtil.isEmpty(extraMessage) ? ". Message : "
-                + extraMessage : extraMessage);
+        errorMessage.append("). Validation Type : ").append(validationType);
+        errorMessage.append(". Report : ").append(reportName);
+
         return errorMessage.toString();
     }
 
