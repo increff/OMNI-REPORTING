@@ -289,7 +289,7 @@
                             <arg>java -Xms1500m -Xmx1500m -javaagent:/usr/local/elastic-apm-agent-1.38.0.jar -Delastic.apm.service_name=omni-reporting-docker-test -Delastic.apm.application_packages=* -Delastic.apm.server_url=${ELK_DEV_URL} -Delastic.apm.secret_token=elkserver-dev -Delastic.apm.environment=elk -Dspring.cloud.vault.scheme=https -Dspring.cloud.vault.host=vault.nextscm.com -Dspring.cloud.vault.application-name=omniReporting -Dspring.cloud.vault.port=443 -Dspring.cloud.vault.token=hvs.Yt4JtVfjJJT0q71NdTxfZhDA -Dspring.config.import=vault:// -Dspring.profiles.active=dev -Dlogging.config=/usr/local/log4j2.xml -jar /usr/local/app.jar</arg>
                         </entrypoint>
                         <ports>
-                            <port>9000</port>
+                            <port>8080</port>
                         </ports>
                     </container>
                 </configuration>
