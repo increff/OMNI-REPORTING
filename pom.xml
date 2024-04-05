@@ -258,7 +258,7 @@
                         </platforms>
                     </from>
                     <to>
-                        <image>http://asia-south1-docker.pkg.dev/saas-dev-314407/internal-services/omni-reporting</image>
+                        <image>asia-south1-docker.pkg.dev/saas-dev-314407/internal-services/omni-reporting</image>
                         <tags>
                             <tag>${project.version}</tag>
                         </tags>
