@@ -22,18 +22,17 @@ public class UserPrincipalUtil {
     private static final String USER_ACCESS_QUERY_PARAM_SUBSTRING_CLOSE = ",";
 
 
-    public static Map<String, String> getCompleteMapWithAccessControl(Map<String, List<String>> params) {
+    public static Map<String, String> getMapWithoutAccessControl(Map<String, List<String>> params) {
         Map<String, String> finalMap = new HashMap<>(getStringToStringParamMap(params));
-        // todo : refactor func name
         // finalMap.putAll(getAccessControlMap()); When validating values for access controlled param key, access control is checked since user.access string is in filter query and not in report query directly.
         return finalMap;
     }
 
-    public static Map<String, String> getCompleteMapWithAccessControl(List<ReportScheduleForm.InputParamMap> paramMap) {
+    public static Map<String, String> getMapWithoutAccessControl(List<ReportScheduleForm.InputParamMap> paramMap) {
         Map<String, String> finalMap = new HashMap<>();
         paramMap.forEach(p -> {
             processParamMap(finalMap, p.getKey(), p.getValue(), p.getType());
-        }); // todo : refactor func name
+        });
         // finalMap.putAll(getAccessControlMap()); Schedulers are run by app.admin who will have all access. Thus, no need to add user.access values to the map
         return finalMap;
     }

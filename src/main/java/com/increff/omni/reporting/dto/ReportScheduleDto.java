@@ -251,7 +251,7 @@ public class ReportScheduleDto extends AbstractDto {
         List<InputControlPojo> inputControlPojoList = controlApi.selectByIds(reportControlsPojoList.stream()
                 .map(ReportControlsPojo::getControlId).collect(Collectors.toList()));
         Map<String, List<String>> userInputParams = getUserInputParams(form.getParamMap());
-        Map<String, String> inputParamsMap = UserPrincipalUtil.getCompleteMapWithAccessControl(form.getParamMap());
+        Map<String, String> inputParamsMap = UserPrincipalUtil.getMapWithoutAccessControl(form.getParamMap());
         Map<String, List<String>> inputDisplayMap = new HashMap<>();
         validateCustomReportAccess(reportPojo, getOrgId());
         validateInputParamValues(userInputParams, inputParamsMap, getOrgId(), inputDisplayMap, inputControlPojoList,

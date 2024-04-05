@@ -77,7 +77,7 @@ public class ReportRequestDto extends AbstractDto {
         ConnectionPojo connectionPojo = connectionApi.getCheck(orgMappingPojo.getConnectionId());
         String password = getDecryptedPassword(connectionPojo.getPassword());
 
-        Map<String, String> inputParamsMap = UserPrincipalUtil.getCompleteMapWithAccessControl(form.getParamMap());
+        Map<String, String> inputParamsMap = UserPrincipalUtil.getMapWithoutAccessControl(form.getParamMap());
         Map<String, List<String>> inputDisplayMap = new HashMap<>();
 
         if (reportPojo.getIsChart())
