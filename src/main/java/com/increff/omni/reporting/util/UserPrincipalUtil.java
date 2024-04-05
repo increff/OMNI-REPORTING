@@ -24,9 +24,8 @@ public class UserPrincipalUtil {
 
 
     public static Map<String, String> getMapWithoutAccessControl(Map<String, List<String>> params) {
-        Map<String, String> finalMap = new HashMap<>(getStringToStringParamMap(params)); // todo : cmt
-        // finalMap.putAll(getAccessControlMap());
-        // When validating values for access controlled param key, access control is checked since user.access string is in filter query and not in report query directly.
+        Map<String, String> finalMap = new HashMap<>(getStringToStringParamMap(params));
+        // finalMap.putAll(getAccessControlMap()); // Access Controlled Filters are validated internally when validating filter which has a query associated with it
         return finalMap;
     }
 
