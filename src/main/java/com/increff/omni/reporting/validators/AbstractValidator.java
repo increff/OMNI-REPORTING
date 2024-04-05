@@ -5,7 +5,6 @@ import com.increff.omni.reporting.model.constants.ReportRequestType;
 import com.increff.omni.reporting.model.constants.ValidationType;
 import com.nextscm.commons.lang.StringUtil;
 import com.nextscm.commons.spring.common.ApiException;
-import com.nextscm.commons.spring.common.JsonUtil;
 
 import java.util.List;
 
@@ -21,9 +20,16 @@ public abstract class AbstractValidator {
 
     public String getValidationMessage(String reportName, List<String> displayNames, ValidationType validationType
             , String extraMessage) {
-        return reportName + " failed in validation for key / keys : " + JsonUtil.serialize(displayNames)
-                + " , validation type : " + validationType + (!StringUtil.isEmpty(extraMessage) ? " message : "
+        StringBuilder errorMessage = new StringBuilder(reportName + " failed in validation for Filter(s) : (");
+        for (String displayName : displayNames) {
+            if (StringUtil.isEmpty(displayName))
+                continue;
+            errorMessage.append(displayName).append(", ");
+        }
+
+        errorMessage.append("). Validation type : ").append(validationType).append(!StringUtil.isEmpty(extraMessage) ? ". Message : "
                 + extraMessage : extraMessage);
+        return errorMessage.toString();
     }
 
     protected String getValueFromQuotes(String value) {
