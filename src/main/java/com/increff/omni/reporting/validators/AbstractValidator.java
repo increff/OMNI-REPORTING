@@ -26,6 +26,8 @@ public abstract class AbstractValidator {
                 continue;
             errorMessage.append(displayName).append(", ");
         }
+        if (!displayNames.isEmpty()) // remove last comma
+            errorMessage.delete(errorMessage.length() - 2, errorMessage.length());
 
         errorMessage.append("). Validation type : ").append(validationType).append(!StringUtil.isEmpty(extraMessage) ? ". Message : "
                 + extraMessage : extraMessage);
