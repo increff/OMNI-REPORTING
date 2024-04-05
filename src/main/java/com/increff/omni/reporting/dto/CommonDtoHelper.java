@@ -290,12 +290,6 @@ public class CommonDtoHelper {
         orgIdParam.setParamValue("'" + orgId.toString() + "'");
         reportInputParamsPojoList.add(orgIdParam);
 
-        ReportInputParamsPojo userRoleParam = new ReportInputParamsPojo();
-        userRoleParam.setParamKey("hardcode.userRoles"); // todo : may not be reqd now.
-        userRoleParam.setParamValue("'" + "ROLE_REPORT_STANDARD" + "'"); // todo : get top role (app.admin if user has multiple roles)
-        reportInputParamsPojoList.add(userRoleParam);
-
-
         return reportInputParamsPojoList;
     }
 
