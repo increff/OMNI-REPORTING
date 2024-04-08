@@ -24,6 +24,7 @@ public class ReportRequestData {
     private ZonedDateTime requestUpdatedTime;
     private List<InputControlFilterData> filters;
     private String failureReason;
+    private String displayFailureReason;
     private Double fileSize;
     private Integer noOfRows;
     private String timezone;

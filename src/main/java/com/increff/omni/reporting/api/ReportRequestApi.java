@@ -4,6 +4,7 @@ import com.increff.omni.reporting.dao.ReportRequestDao;
 import com.increff.omni.reporting.model.constants.ReportRequestStatus;
 import com.increff.omni.reporting.model.constants.ReportRequestType;
 import com.increff.omni.reporting.pojo.ReportRequestPojo;
+import com.increff.omni.reporting.util.ConvertUtil;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
 import com.nextscm.commons.spring.server.AbstractApi;
@@ -71,6 +72,7 @@ public class ReportRequestApi extends AbstractApi {
         reportRequestPojo.setFileSize(fileSize);
         reportRequestPojo.setNoOfRows(noOfRows);
         reportRequestPojo.setFailureReason(failureReason);
+        reportRequestPojo.setDisplayFailureReason(ConvertUtil.getDisplayFailureReason(failureReason));
         if (reportRequestPojo.getStatus().equals(ReportRequestStatus.COMPLETED) ||
                 reportRequestPojo.getStatus().equals(ReportRequestStatus.FAILED))
             reportRequestPojo.setRequestCompletionTime(completionTime);
@@ -94,6 +96,7 @@ public class ReportRequestApi extends AbstractApi {
 
         reportRequestPojo.setStatus(status);
         reportRequestPojo.setFailureReason(message);
+        reportRequestPojo.setDisplayFailureReason(ConvertUtil.getDisplayFailureReason(message));
         reportRequestPojo.setFileSize(fileSize);
         reportRequestPojo.setNoOfRows(noOfRows);
         reportRequestPojo.setRequestCompletionTime(ZonedDateTime.now());

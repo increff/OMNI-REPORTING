@@ -90,6 +90,7 @@ public class CommonDtoHelper {
         data.setNoOfRows(pojo.getNoOfRows());
         data.setSequenceNumber(sequenceNumber);
         data.setFailureReason(pojo.getFailureReason());
+        data.setDisplayFailureReason(pojo.getDisplayFailureReason());
         data.setFileFormat(pojo.getFileFormat());
         setFiltersApplied(paramsPojoList, data, controlPojos);
         return data;
