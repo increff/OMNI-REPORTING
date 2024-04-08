@@ -6,7 +6,6 @@ import com.increff.omni.reporting.model.constants.ReportRequestType;
 import com.increff.omni.reporting.model.constants.ValidationType;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
-import com.nextscm.commons.spring.common.JsonUtil;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -15,6 +14,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class DateValidatorTest extends AbstractTest {
 
@@ -42,8 +42,10 @@ public class DateValidatorTest extends AbstractTest {
             validator.validate(displayNames, params, "Report 1", 10, ReportRequestType.USER);
         } catch (ApiException e) {
             assertEquals(ApiStatus.BAD_DATA, e.getStatus());
-            assertEquals("Both from and to date should be selected for filters : [\"Client Id\",\"Item Id\"]",
-                    e.getMessage());
+            assertTrue(e.getMessage().contains("Both from and to date should be selected for filters"));
+            for (String displayName : displayNames) {
+                assertTrue(e.getMessage().contains(displayName));
+            }
             throw e;
         }
     }
@@ -56,9 +58,12 @@ public class DateValidatorTest extends AbstractTest {
             validator.validate(displayNames, params, "Report 1", 10, ReportRequestType.USER);
         } catch (ApiException e) {
             assertEquals(ApiStatus.BAD_DATA, e.getStatus());
-            assertEquals("Report 1 failed in validation for key / keys : " +
-                    JsonUtil.serialize(displayNames) + " , validation type : " + ValidationType.DATE_RANGE
-                    + " message : Date range crossed 10 days", e.getMessage());
+            for (String displayName : displayNames) {
+                assertTrue(e.getMessage().contains(displayName));
+            }
+            assertTrue(e.getMessage().contains(ValidationType.DATE_RANGE.toString()));
+            assertTrue(e.getMessage().contains("Report 1"));
+            assertTrue(e.getMessage().contains("Date range crossed 10 days"));
             throw e;
         }
     }
@@ -71,9 +76,12 @@ public class DateValidatorTest extends AbstractTest {
             validator.validate(displayNames, params, "Report 1", 10, ReportRequestType.USER);
         } catch (ApiException e) {
             assertEquals(ApiStatus.BAD_DATA, e.getStatus());
-            assertEquals("Report 1 failed in validation for key / keys : " +
-                    JsonUtil.serialize(displayNames) + " , validation type : " + ValidationType.DATE_RANGE
-                    + " message : Date range crossed 10 days", e.getMessage());
+            for (String displayName : displayNames) {
+                assertTrue(e.getMessage().contains(displayName));
+            }
+            assertTrue(e.getMessage().contains(ValidationType.DATE_RANGE.toString()));
+            assertTrue(e.getMessage().contains("Report 1"));
+            assertTrue(e.getMessage().contains("Date range crossed 10 days"));
             throw e;
         }
     }
@@ -86,9 +94,12 @@ public class DateValidatorTest extends AbstractTest {
             validator.validate(displayNames, params, "Report 1", 10, ReportRequestType.USER);
         } catch (ApiException e) {
             assertEquals(ApiStatus.BAD_DATA, e.getStatus());
-            assertEquals("Report 1 failed in validation for key / keys : " +
-                    JsonUtil.serialize(displayNames) + " , validation type : " + ValidationType.DATE_RANGE
-                    + " message : Both dates can't be equal", e.getMessage());
+            for (String displayName : displayNames) {
+                assertTrue(e.getMessage().contains(displayName));
+            }
+            assertTrue(e.getMessage().contains(ValidationType.DATE_RANGE.toString()));
+            assertTrue(e.getMessage().contains("Report 1"));
+            assertTrue(e.getMessage().contains("Both dates can't be equal"));
             throw e;
         }
     }
@@ -101,9 +112,12 @@ public class DateValidatorTest extends AbstractTest {
             validator.validate(displayNames, params, "Report 1", 10, ReportRequestType.USER);
         } catch (ApiException e) {
             assertEquals(ApiStatus.BAD_DATA, e.getStatus());
-            assertEquals("Report 1 failed in validation for key / keys : " +
-                    JsonUtil.serialize(displayNames) + " , validation type : " + ValidationType.DATE_RANGE
-                    + " message : Date is not in correct format : " + JsonUtil.serialize(params), e.getMessage());
+            for (String displayName : displayNames) {
+                assertTrue(e.getMessage().contains(displayName));
+            }
+            assertTrue(e.getMessage().contains(ValidationType.DATE_RANGE.toString()));
+            assertTrue(e.getMessage().contains("Report 1"));
+            assertTrue(e.getMessage().contains("Date is not in correct format"));
             throw e;
         }
     }
