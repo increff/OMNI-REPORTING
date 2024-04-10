@@ -22,6 +22,7 @@ import com.increff.omni.reporting.util.FileUtil;
 import com.increff.omni.reporting.util.SqlCmd;
 import com.increff.service.encryption.EncryptionClient;
 import com.increff.service.encryption.common.CryptoCommon;
+import jakarta.mail.MessagingException;
 import jakarta.persistence.OptimisticLockException;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -254,7 +255,7 @@ public class ScheduleReportTask extends AbstractTask {
 
     private void sendEmail(double fileSize, File csvFile, ReportRequestPojo pojo, String timezone,
                            String name)
-            throws IOException, ApiException, javax.mail.MessagingException {
+            throws IOException, ApiException, MessagingException {
         File out = csvFile;
         boolean isZip = false;
         if (fileSize > 50.0) {

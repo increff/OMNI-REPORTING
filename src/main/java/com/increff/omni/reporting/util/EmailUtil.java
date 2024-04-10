@@ -1,15 +1,14 @@
 package com.increff.omni.reporting.util;
 
 import com.increff.omni.reporting.config.EmailProps;
-
-import javax.activation.DataHandler;
-import javax.activation.DataSource;
-import javax.activation.FileDataSource;
-import javax.mail.*;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeBodyPart;
-import javax.mail.internet.MimeMessage;
-import javax.mail.internet.MimeMultipart;
+import jakarta.mail.*;
+import jakarta.mail.internet.InternetAddress;
+import jakarta.mail.internet.MimeBodyPart;
+import jakarta.mail.internet.MimeMessage;
+import jakarta.mail.internet.MimeMultipart;
+import jakarta.activation.DataHandler;
+import jakarta.activation.DataSource;
+import jakarta.activation.FileDataSource;
 import java.util.Properties;
 
 /**
@@ -17,7 +16,7 @@ import java.util.Properties;
  */
 public class EmailUtil {
 
-    public static void sendMail(EmailProps eprops) throws javax.mail.MessagingException {
+    public static void sendMail(EmailProps eprops) throws MessagingException {
         Properties props = new Properties();
         props.put("mail.smtp.auth", "true");
         props.put("mail.smtp.starttls.enable", "true");
@@ -55,7 +54,7 @@ public class EmailUtil {
 
     }
 
-    private static void setMessageContent(EmailProps eprops, Message message) throws javax.mail.MessagingException {
+    private static void setMessageContent(EmailProps eprops, Message message) throws MessagingException {
 
         if (eprops.getIsAttachment()) {
             BodyPart messageBodyPart = new MimeBodyPart();

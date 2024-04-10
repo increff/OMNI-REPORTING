@@ -22,8 +22,7 @@
         <commons-springboot-db-mysql.version>0.0.1</commons-springboot-db-mysql.version>
         <commons-springboot-audit-mysql.version>0.0.1</commons-springboot-audit-mysql.version>
         <commons-springboot-test.version>0.0.1</commons-springboot-test.version>
-        <javax.mail.version>1.4.7</javax.mail.version>
-        <h2.version>2.2.224</h2.version>
+        <agnus-mail.version>2.0.1</agnus-mail.version>
         <google-cloud-storage.version>2.20.0</google-cloud-storage.version>
         <commons-io.version>2.7</commons-io.version>
         <commons-csv.version>1.9.0</commons-csv.version>
@@ -76,9 +75,9 @@
         </dependency>
 
         <dependency>
-            <groupId>javax.mail</groupId>
-            <artifactId>mail</artifactId>
-            <version>${javax.mail.version}</version>
+            <groupId>org.eclipse.angus</groupId>
+            <artifactId>angus-mail</artifactId>
+            <version>${agnus-mail.version}</version>
         </dependency>
 
         <dependency>
