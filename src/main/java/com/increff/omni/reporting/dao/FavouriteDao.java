@@ -6,28 +6,40 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.TypedQuery;
-import java.util.Objects;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 
 @Repository
 @Transactional
 public class FavouriteDao extends AbstractDao<FavouritePojo> {
 
-    private static final String SELECT_BY_ORG_USER = "SELECT o FROM FavouritePojo o WHERE o.orgId=:orgId AND o.userId=:userId";
-    private static final String SELECT_BY_ORG_USER_NULL = "SELECT o FROM FavouritePojo o WHERE o.orgId=:orgId AND o.userId IS NULL";
-
     public FavouritePojo getByOrgUser(Integer orgId, Integer userId) {
-        if (Objects.isNull(userId))
-            return getByOrgUserNull(orgId);
-        TypedQuery<FavouritePojo> q = createJpqlQuery(SELECT_BY_ORG_USER);
-        q.setParameter("orgId", orgId);
-        q.setParameter("userId", userId);
-        return selectSingleOrNull(q);
+        CriteriaBuilder cb = this.em.getCriteriaBuilder();
+        CriteriaQuery<FavouritePojo> query = cb.createQuery(FavouritePojo.class);
+        Root<FavouritePojo> root = query.from(FavouritePojo.class);
+        query.where(
+                cb.and(
+                        cb.equal(root.get("orgId"), orgId),
+                        cb.equal(root.get("userId"), userId)
+                )
+        );
+        TypedQuery<FavouritePojo> tQuery = createQuery(query);
+        return selectSingleOrNull(tQuery);
     }
 
     public FavouritePojo getByOrgUserNull(Integer orgId) {
-        TypedQuery<FavouritePojo> q = createJpqlQuery(SELECT_BY_ORG_USER_NULL);
-        q.setParameter("orgId", orgId);
-        return selectSingleOrNull(q);
+        CriteriaBuilder cb = this.em.getCriteriaBuilder();
+        CriteriaQuery<FavouritePojo> query = cb.createQuery(FavouritePojo.class);
+        Root<FavouritePojo> root = query.from(FavouritePojo.class);
+        query.where(
+                cb.and(
+                        cb.equal(root.get("orgId"), orgId),
+                        cb.isNull(root.get("userId"))
+                )
+        );
+        TypedQuery<FavouritePojo> tQuery = createQuery(query);
+        return selectSingleOrNull(tQuery);
     }
 
 }
