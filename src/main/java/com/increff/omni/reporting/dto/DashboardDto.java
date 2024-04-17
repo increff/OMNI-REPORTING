@@ -76,9 +76,9 @@ public class DashboardDto extends AbstractDto {
     public FavData getFavoriteDashboard() {
         FavData favData = new FavData();
         FavouritePojo favPojo = api.getFavByOrgUser(getOrgId(), getUserId());
-        favData.setUserFav(Objects.nonNull(favPojo) ? favPojo.getFavId() : null);
+        favData.setUserFav(Objects.nonNull(favPojo) ? ConvertUtil.convert(favPojo, FavouriteData.class) : null);
         favPojo = api.getFavByOrg(getOrgId());
-        favData.setOrgFav(Objects.nonNull(favPojo) ? favPojo.getFavId() : null);
+        favData.setOrgFav(Objects.nonNull(favPojo) ? ConvertUtil.convert(favPojo, FavouriteData.class) : null);
         return favData;
     }
 

@@ -6,6 +6,6 @@ import lombok.Setter;
 @Setter
 @Getter
 public class FavData {
-    private Integer userFav;
-    private Integer orgFav;
+    private FavouriteData userFav;
+    private FavouriteData orgFav;
 }
