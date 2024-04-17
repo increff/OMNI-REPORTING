@@ -39,6 +39,7 @@ public class DashboardApi extends AbstractApi {
 
     public void delete(Integer id) throws ApiException {
         DashboardPojo pojo = getCheck(id);
+        deleteFavByFavId(pojo.getId());
         dao.remove(pojo);
     }
 
@@ -82,6 +83,12 @@ public class DashboardApi extends AbstractApi {
         FavouritePojo pojo = favouriteDao.select(id);
         if (Objects.nonNull(pojo))
             favouriteDao.remove(pojo);
+    }
+
+    public void deleteFavByFavId(Integer favId) {
+        List<FavouritePojo> pojos = favouriteDao.selectMultiple("favId", favId);
+        if (Objects.nonNull(pojos) && !pojos.isEmpty())
+            pojos.forEach(favouriteDao::remove);
     }
 
     private DashboardPojo getCheck(Integer id) throws ApiException {
