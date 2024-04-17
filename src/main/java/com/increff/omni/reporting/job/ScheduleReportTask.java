@@ -308,7 +308,7 @@ public class ScheduleReportTask extends AbstractTask {
         props.setSmtpPort(properties.getSmtpPort());
         props.setToEmails(toEmails);
 
-        String subject; // todo : override compeltely
+        String subject;
         if (Objects.nonNull(customSubject) && !customSubject.isEmpty())
             subject = customSubject;
         else
