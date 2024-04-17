@@ -29,8 +29,6 @@ public class AdminSecurityConfig {
     private static final String APP_ADMIN = "app.admin";
     private static final String REPORT_ADMIN = "report.admin";
 
-    public static final String[] APP_ADMIN_REPORT_ADMIN = {APP_ADMIN, REPORT_ADMIN};
-
     @Bean
     public SecurityFilterChain adminSecurityFilterChain(HttpSecurity http) throws Exception {
 
@@ -38,11 +36,11 @@ public class AdminSecurityConfig {
                 .securityMatcher("/admin/**")
                 .authorizeHttpRequests(auth -> {
                     auth
-                            .requestMatchers(HttpMethod.GET,"/admin/orgs").hasAnyAuthority(APP_ADMIN_REPORT_ADMIN)
-                            .requestMatchers(HttpMethod.POST, "/admin/request-report/orgs/**").hasAnyAuthority(APP_ADMIN_REPORT_ADMIN)
-                            .requestMatchers(HttpMethod.GET,"/admin/reports/orgs/**").hasAnyAuthority(APP_ADMIN_REPORT_ADMIN)
-                            .requestMatchers(HttpMethod.GET,"/admin/orgs/*/reports/*/controls").hasAnyAuthority(APP_ADMIN_REPORT_ADMIN)
-                            .requestMatchers(HttpMethod.GET,"/admin/orgs/*/reports/live").hasAnyAuthority(APP_ADMIN_REPORT_ADMIN)
+                            .requestMatchers(HttpMethod.GET,"/admin/orgs").hasAnyAuthority(APP_ADMIN, REPORT_ADMIN)
+                            .requestMatchers(HttpMethod.POST, "/admin/request-report/orgs/**").hasAnyAuthority(APP_ADMIN, REPORT_ADMIN)
+                            .requestMatchers(HttpMethod.GET,"/admin/reports/orgs/**").hasAnyAuthority(APP_ADMIN, REPORT_ADMIN)
+                            .requestMatchers(HttpMethod.GET,"/admin/orgs/*/reports/*/controls").hasAnyAuthority(APP_ADMIN, REPORT_ADMIN)
+                            .requestMatchers(HttpMethod.GET,"/admin/orgs/*/reports/live").hasAnyAuthority(APP_ADMIN, REPORT_ADMIN)
                             .requestMatchers("/admin/**").hasAnyAuthority(APP_ADMIN);
                 })
                 .cors(AbstractHttpConfigurer::disable)
