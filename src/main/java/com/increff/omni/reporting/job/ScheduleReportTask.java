@@ -299,7 +299,7 @@ public class ScheduleReportTask extends AbstractTask {
     private EmailProps createEmailProps(File out, Boolean isAttachment,
                                         List<String> toEmails, String content,
                                         boolean isZip, String timezone, String name,
-                                        Boolean zeroData, String customSubjectPostfix) {
+                                        Boolean zeroData, String customSubject) {
         EmailProps props = new EmailProps();
         props.setFromEmail(properties.getFromEmail());
         props.setUsername(properties.getUsername());
@@ -308,11 +308,14 @@ public class ScheduleReportTask extends AbstractTask {
         props.setSmtpPort(properties.getSmtpPort());
         props.setToEmails(toEmails);
 
-        String subject = "Increff Reporting : " + name;
+        String subject; // todo : override compeltely
+        if (Objects.nonNull(customSubject) && !customSubject.isEmpty())
+            subject = customSubject;
+        else
+            subject = "Increff Reporting : " + name;
+
         if (Objects.nonNull(zeroData) && zeroData) // Add (No Data) to subject if zero data
             subject += " (No Data) ";
-        if (Objects.nonNull(customSubjectPostfix) && !customSubjectPostfix.isEmpty())
-            subject += " : " + customSubjectPostfix;
         props.setSubject(subject);
 
         props.setAttachment(out);
