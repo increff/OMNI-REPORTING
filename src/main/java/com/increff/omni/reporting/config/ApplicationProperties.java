@@ -150,7 +150,7 @@ public class ApplicationProperties {
     @Value("${stuck.schedule.time.seconds:600}")
     private Integer stuckScheduleSeconds;
 
-    @Value("${max.dashboards.per.org:10000}")
+    @Value("${max.dashboards.per.org:100}")
     private Integer maxDashboardsPerOrg;
 
     @Value("${rate.limit.tokens.refill.amount:20}")
