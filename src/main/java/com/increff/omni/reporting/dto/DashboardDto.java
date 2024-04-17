@@ -64,7 +64,6 @@ public class DashboardDto extends AbstractDto {
     @Autowired
     private FlowApi flowApi;
 
-    @Transactional(rollbackFor = ApiException.class)
     public ApplicationPropertiesData getProperties() {
         ApplicationPropertiesData data = new ApplicationPropertiesData();
         data.setMaxDashboardsPerOrg(properties.getMaxDashboardsPerOrg());
@@ -72,7 +71,6 @@ public class DashboardDto extends AbstractDto {
         return data;
     }
 
-    @Transactional(rollbackFor = ApiException.class)
     public FavData getFavoriteDashboard() {
         FavData favData = new FavData();
         FavouritePojo favPojo = api.getFavByOrgUser(getOrgId(), getUserId());
@@ -82,7 +80,6 @@ public class DashboardDto extends AbstractDto {
         return favData;
     }
 
-    @Transactional(rollbackFor = ApiException.class)
     public FavouriteData setUserFavoriteDashboard(FavouriteForm form) {
         FavouritePojo favPojo = ConvertUtil.convert(form, FavouritePojo.class);
         favPojo.setOrgId(getOrgId());
@@ -90,7 +87,6 @@ public class DashboardDto extends AbstractDto {
         return ConvertUtil.convert(api.setFav(favPojo), FavouriteData.class);
     }
 
-    @Transactional(rollbackFor = ApiException.class)
     public FavouriteData setOrgFavoriteDashboard(FavouriteForm form) {
         FavouritePojo favPojo = ConvertUtil.convert(form, FavouritePojo.class);
         favPojo.setOrgId(getOrgId());
@@ -98,9 +94,8 @@ public class DashboardDto extends AbstractDto {
         return ConvertUtil.convert(api.setFav(favPojo), FavouriteData.class);
     }
 
-    @Transactional(rollbackFor = ApiException.class)
-    public void deleteFavoriteDashboard(Integer favId) {
-        api.deleteFavById(favId);
+    public void deleteFavoriteDashboard(Integer id) {
+        api.deleteFavById(id);
     }
 
 
