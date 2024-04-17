@@ -42,21 +42,6 @@ public class SqlCmd {
         return query;
     }
 
-//    private static Map<String, String> overrideUserAccess(String query, UserPrincipal userPrincipal) {
-//        // get all substrings between "user.access." and ","
-//
-//        if(Objects.isNull(userPrincipal))
-//            return new HashMap<>();
-//
-//        List<String> userAccessList = new ArrayList<>();
-//        String[] userAccess = StringUtils.substringsBetween(query, "user.access.", ",");
-//        if (Objects.nonNull(userAccess)) {
-//            userAccessList.addAll(Arrays.asList(userAccess));
-//        }
-//        return new HashMap<>();
-//
-//    }
-
     private static String getValueFromMethod(Map<String, String> inputParamMap, String f, String methodName) throws ApiException {
         String paramKey, paramValue, filterJson, operator, condition;
         Boolean keepQuotes;
