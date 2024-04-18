@@ -72,7 +72,7 @@ public class ConvertUtil {
         if (failureReason.contains("Statement cancelled due to timeout"))
             return "Report timeout exceeded";
 
-        return "Report execution failed";
+        return "Report execution failed. Please reach out to support team.";
     }
 
 
