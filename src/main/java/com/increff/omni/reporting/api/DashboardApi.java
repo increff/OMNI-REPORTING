@@ -6,7 +6,6 @@ import com.increff.omni.reporting.pojo.DashboardPojo;
 import com.increff.omni.reporting.pojo.FavouritePojo;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
-import com.nextscm.commons.spring.server.AbstractApi;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,7 +15,7 @@ import java.util.Objects;
 
 @Service
 @Transactional(rollbackFor = ApiException.class)
-public class DashboardApi extends AbstractApi {
+public class DashboardApi extends AbstractAuditApi {
 
     @Autowired
     private DashboardDao dao;
