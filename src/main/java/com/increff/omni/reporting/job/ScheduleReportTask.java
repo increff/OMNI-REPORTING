@@ -125,7 +125,7 @@ public class ScheduleReportTask extends AbstractTask {
                     EmailProps props = createEmailProps(null, false, toEmails, "Hi,<br>Please " +
                             "check failure reason in the latest scheduled requests. Re-submit the schedule in the " +
                                     "reporting application, which might solve the issue.", false, timezone, reportPojo.getName(),
-                            false, "Failed To Execute");
+                            false, schedulePojo.getEmailSubject() + " : Failed To Execute");
                     EmailUtil.sendMail(props);
                 }
             } catch (Exception ex) {
