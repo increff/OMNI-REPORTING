@@ -96,6 +96,8 @@ public class DashboardDto extends AbstractDto {
 
     public void deleteFavoriteDashboard(Integer id) {
         api.deleteFavById(id);
+        api.saveAudit(id.toString(), AuditActions.DELETE_FAVOURITE.toString(), "Delete Favourite"
+                , "Delete Favourite", getUserName());
     }
 
 
