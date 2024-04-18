@@ -9,12 +9,16 @@ import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
+import java.util.Objects;
 
 @Repository
 @Transactional
 public class FavouriteDao extends AbstractDao<FavouritePojo> {
 
     public FavouritePojo getByOrgUser(Integer orgId, Integer userId) {
+        if (Objects.isNull(userId))
+            return getByOrgUserNull(orgId);
+
         CriteriaBuilder cb = this.em.getCriteriaBuilder();
         CriteriaQuery<FavouritePojo> query = cb.createQuery(FavouritePojo.class);
         Root<FavouritePojo> root = query.from(FavouritePojo.class);
