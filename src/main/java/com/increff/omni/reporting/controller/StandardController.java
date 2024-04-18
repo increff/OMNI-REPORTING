@@ -263,7 +263,7 @@ public class StandardController {
         return dashboardDto.setOrgFavoriteDashboard(form);
     }
 
-    @ApiOperation(value = "Delete Favourite")
+    @ApiOperation(value = "Delete Favourite (If user wants to revert to org favourite)")
     @RequestMapping(value = "dashboard/favourite/{id}", method = RequestMethod.DELETE)
     public void deleteFavourite(@PathVariable Integer id) {
         dashboardDto.deleteFavoriteDashboard(id);
