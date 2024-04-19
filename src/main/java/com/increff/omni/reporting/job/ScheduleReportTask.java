@@ -139,16 +139,6 @@ public class ScheduleReportTask extends AbstractTask {
 
     }
 
-    private String getFailedEmailSubject(String reportName, String customSubject) {
-        String subject;
-        if (Objects.nonNull(customSubject) && !customSubject.isEmpty())
-            subject = customSubject;
-        else
-            subject = "Increff Reporting : " + reportName;
-
-        return subject + " (Failed)";
-    }
-
     private void prepareAndSendEmailOrPipelines(ReportRequestPojo pojo, String fQuery, ConnectionPojo connectionPojo,
                                                 String timezone, ReportPojo reportPojo)
             throws IOException, ApiException {
