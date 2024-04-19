@@ -118,6 +118,7 @@ public class ScheduleReportTask extends AbstractTask {
             api.markFailed(pojo.getId(), ReportRequestStatus.FAILED, e.getMessage(), 0, 0.0);
             reportScheduleApi.addScheduleCount(pojo.getScheduleId(), 0, 1);
             try {
+                reportRequestPojo = api.getCheck(pojo.getId());
                 if (reportRequestPojo.getRetryCount() >= MAX_RETRY_COUNT) {
                     ReportSchedulePojo schedulePojo = reportScheduleApi.getCheck(pojo.getScheduleId());
                     List<String> toEmails = reportScheduleApi.getByScheduleId(schedulePojo.getId()).stream()
