@@ -47,6 +47,7 @@ import java.util.zip.ZipOutputStream;
 
 import static com.increff.omni.reporting.dto.CommonDtoHelper.getInputParamMapFromPojoList;
 import static com.increff.omni.reporting.dto.CommonDtoHelper.getValueFromQuotes;
+import static com.increff.omni.reporting.util.ConstantsUtil.MAX_RETRY_COUNT;
 import static com.increff.omni.reporting.util.ConvertUtil.getJavaObjectFromJson;
 
 @Component
@@ -117,16 +118,18 @@ public class ScheduleReportTask extends AbstractTask {
             api.markFailed(pojo.getId(), ReportRequestStatus.FAILED, e.getMessage(), 0, 0.0);
             reportScheduleApi.addScheduleCount(pojo.getScheduleId(), 0, 1);
             try {
-                ReportSchedulePojo schedulePojo = reportScheduleApi.getCheck(pojo.getScheduleId());
-                List<String> toEmails = reportScheduleApi.getByScheduleId(schedulePojo.getId()).stream()
-                        .map(ReportScheduleEmailsPojo::getSendTo).collect(
-                                Collectors.toList());
-                if(!toEmails.isEmpty()) {
-                    EmailProps props = createEmailProps(null, false, toEmails, "Hi,<br>Please " +
-                            "check failure reason in the latest scheduled requests. Re-submit the schedule in the " +
-                                    "reporting application, which might solve the issue.", false, timezone, reportPojo.getName(),
-                            false, schedulePojo.getEmailSubject(), true);
-                    EmailUtil.sendMail(props);
+                if (reportRequestPojo.getRetryCount() >= MAX_RETRY_COUNT) {
+                    ReportSchedulePojo schedulePojo = reportScheduleApi.getCheck(pojo.getScheduleId());
+                    List<String> toEmails = reportScheduleApi.getByScheduleId(schedulePojo.getId()).stream()
+                            .map(ReportScheduleEmailsPojo::getSendTo).collect(
+                                    Collectors.toList());
+                    if (!toEmails.isEmpty()) {
+                        EmailProps props = createEmailProps(null, false, toEmails, "Hi,<br>Please " +
+                                        "check failure reason in the latest scheduled requests. Re-submit the schedule in the " +
+                                        "reporting application, which might solve the issue.", false, timezone, reportPojo.getName(),
+                                false, schedulePojo.getEmailSubject(), true);
+                        EmailUtil.sendMail(props);
+                    }
                 }
             } catch (Exception ex) {
                 log.error("Report Request ID : " + pojo.getId() + ". Failed to send email. ", ex);
