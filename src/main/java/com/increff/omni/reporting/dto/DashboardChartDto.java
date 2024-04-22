@@ -54,48 +54,15 @@ public class DashboardChartDto extends AbstractDto {
             pojos.add(dashboardChartApi.addDashboardChart(pojo));
         }
 
-        updateDefaultValues(dashboardId, forms);
+        updateDefaultValues(dashboardId, forms); // Delete default values for input controls not used in any of the updated charts
 
         return ConvertUtil.convert(pojos, DashboardChartData.class);
     }
 
-    /**
-     * Migrate common default values to chart default values as common filter might no longer be common on updating charts in dashboard
-     */
     @Transactional(rollbackFor = ApiException.class)
     private void updateDefaultValues(Integer dashboardId, List<DashboardChartForm> forms) throws ApiException {
-        Map<String, Map<Integer, InputControlData>> chartAliasControlMap = new HashMap<>();
-        Set<Integer> newCommonControlIds = new HashSet<>();
-        Set<Integer> existingCommonControlIds = new HashSet<>();
-
-        for(DashboardChartForm form : forms) {
-            ReportPojo report = reportApi.getCheckByAliasAndSchema(form.getChartAlias(), getSchemaVersionId(), true);
-            List<InputControlData> inputControlDatas = inputControlDto.selectForReport(report.getId());
-            chartAliasControlMap.put(report.getAlias(), inputControlDatas.stream().collect(Collectors.toMap(InputControlData::getId, x -> x)));
-        }
-
-        // Delete default values for all input controls not used in any of the updated charts
-        defaultValueApi.deleteByDashboardIdAndControlIdNotIn(dashboardId, chartAliasControlMap.values().stream().flatMap(x -> x.keySet().stream()).collect(Collectors.toList()));
-
-        chartAliasControlMap.values().stream().map(Map::keySet).collect(Collectors.toList()).forEach(newCommonControlIds::addAll);
-        for(Map<Integer, InputControlData> controlMap : chartAliasControlMap.values()) {
-            newCommonControlIds.retainAll(controlMap.keySet()); // Get common input control ids for all charts
-        }
-
-        List<DefaultValuePojo> commonDefaultPojos = defaultValueApi.getByDashboardId(dashboardId).stream().filter(x -> x.getChartAlias().equals(DEFAULT_VALUE_COMMON_KEY)).collect(Collectors.toList());
-        for(DefaultValuePojo commonDefaultPojo : commonDefaultPojos){ // Delete common default values for input controls not common anymore and migrate to chart level
-            if(!newCommonControlIds.contains(commonDefaultPojo.getControlId())) {
-                defaultValueApi.deleteByDashboardControlChartAlias(dashboardId, commonDefaultPojo.getControlId(), DEFAULT_VALUE_COMMON_KEY);
-                List<String> aliases = chartAliasControlMap.entrySet().stream().filter(x -> x.getValue().containsKey(commonDefaultPojo.getControlId())).map(Map.Entry::getKey).collect(Collectors.toList());
-                aliases.forEach(alias -> defaultValueApi.upsert(new DefaultValuePojo(dashboardId, commonDefaultPojo.getControlId(), alias, commonDefaultPojo.getDefaultValue())));
-            } else existingCommonControlIds.add(commonDefaultPojo.getControlId());
-        }
-
-        newCommonControlIds.removeAll(existingCommonControlIds); // Do nothing if common input control is still common
-        for(Integer commonControlId : newCommonControlIds) { // Delete chart level default values for newly created common input controls
-            defaultValueApi.deleteByDashboardControlChartAliasNotIn(dashboardId, commonControlId, Collections.singletonList(DEFAULT_VALUE_COMMON_KEY));
-            // Note :- Do not add default values for newly created common input controls as there may be separate default values on chart level (V1, V2, V3, etc.) and we won't know which one to use for common
-        }
+        defaultValueApi.deleteByDashboardIdAndControlParamNameNotIn(dashboardId,
+                getInputControlParamNamesUnion(forms.stream().map(DashboardChartForm::getChartAlias).collect(Collectors.toList())));
     }
 
     @Transactional(rollbackFor = ApiException.class)
@@ -105,12 +72,13 @@ public class DashboardChartDto extends AbstractDto {
     }
 
     @Transactional(rollbackFor = ApiException.class)
-    private List<Integer> getInputControlIdsUnion(List<Integer> reportIds) throws ApiException {
+    private List<String> getInputControlParamNamesUnion(List<String> chartAliases) throws ApiException {
         Map<String, Map<Integer, InputControlData>> chartAliasControlMap = new HashMap<>();
-        Set<Integer> inputControlIds = new HashSet<>();
-        for(Integer reportId : reportIds){
-            List<InputControlData> inputControlDatas = inputControlDto.selectForReport(reportId);
-            inputControlIds.addAll(inputControlDatas.stream().map(InputControlData::getId).collect(Collectors.toList()));
+        Set<String> inputControlIds = new HashSet<>();
+        for(String alias : chartAliases){
+            ReportPojo report = reportApi.getCheckByAliasAndSchema(alias, getSchemaVersionIds(), true);
+            List<InputControlData> inputControlDatas = inputControlDto.selectForReport(report.getId());
+            inputControlIds.addAll(inputControlDatas.stream().map(InputControlData::getParamName).collect(Collectors.toList()));
         }
         return new ArrayList<>(inputControlIds);
     }

@@ -238,6 +238,6 @@ public class InputControlFlowApiTest extends AbstractTest {
     public void testGetValuesFromQuery() throws ApiException {
         ConnectionPojo pojo = getConnectionPojo("127.0.0.1", "Dev DB", username, password);
         connectionApi.add(pojo);
-        flowApi.getValuesFromQuery("select version(),version();", pojo, password);
+        flowApi.getValuesFromQuery("select version(),version();", pojo, password, 1);
     }
 }

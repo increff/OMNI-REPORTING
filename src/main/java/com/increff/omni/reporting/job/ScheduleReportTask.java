@@ -11,20 +11,19 @@ import com.increff.omni.reporting.api.*;
 import com.increff.omni.reporting.config.ApplicationProperties;
 import com.increff.omni.reporting.config.EmailProps;
 import com.increff.omni.reporting.dto.CommonDtoHelper;
+import com.increff.omni.reporting.model.constants.DBType;
 import com.increff.omni.reporting.model.constants.PipelineType;
 import com.increff.omni.reporting.model.constants.ReportRequestStatus;
 import com.increff.omni.reporting.model.form.FileProviderFolder.AwsPipelineConfigForm;
 import com.increff.omni.reporting.model.form.FileProviderFolder.GcpPipelineConfigForm;
 import com.increff.omni.reporting.pojo.*;
-import com.increff.omni.reporting.util.EmailUtil;
-import com.increff.omni.reporting.util.FileDownloadUtil;
-import com.increff.omni.reporting.util.FileUtil;
-import com.increff.omni.reporting.util.SqlCmd;
+import com.increff.omni.reporting.util.*;
 import com.increff.service.encryption.EncryptionClient;
 import com.increff.service.encryption.common.CryptoCommon;
 import jakarta.mail.MessagingException;
 import jakarta.persistence.OptimisticLockException;
 import lombok.extern.log4j.Log4j2;
+import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.scheduling.annotation.Async;
@@ -59,13 +58,13 @@ public class ScheduleReportTask extends AbstractTask {
     @Autowired
     private ReportRequestApi api;
     @Autowired
+    private OrgMappingApi orgMappingApi;
+    @Autowired
     private ReportApi reportApi;
     @Autowired
     private ReportQueryApi reportQueryApi;
     @Autowired
     private ReportInputParamsApi reportInputParamsApi;
-    @Autowired
-    private OrgConnectionApi orgConnectionApi;
     @Autowired
     private DBConnectionApi dbConnectionApi;
     @Autowired
@@ -82,8 +81,6 @@ public class ScheduleReportTask extends AbstractTask {
     private SchedulePipelineApi schedulePipelineApi;
     @Autowired
     private PipelineApi pipelineApi;
-    @Autowired
-    private QueryExecutorClient executorClient;
     @Autowired
     private EncryptionClient encryptionClient;
 
@@ -106,15 +103,16 @@ public class ScheduleReportTask extends AbstractTask {
             List<ReportInputParamsPojo> reportInputParamsPojoList = reportInputParamsApi
                     .getInputParamsForReportRequest(reportRequestPojo.getId());
             ReportQueryPojo reportQueryPojo = reportQueryApi.getByReportId(reportPojo.getId());
-            OrgConnectionPojo orgConnectionPojo = orgConnectionApi.getCheckByOrgId(reportRequestPojo.getOrgId());
-            ConnectionPojo connectionPojo = connectionApi.getCheck(orgConnectionPojo.getConnectionId());
+            OrgMappingPojo orgMappingPojo = orgMappingApi.getCheckByOrgIdSchemaVersionId(reportRequestPojo.getOrgId(),
+                    reportPojo.getSchemaVersionId());
+            ConnectionPojo connectionPojo = connectionApi.getCheck(orgMappingPojo.getConnectionId());
 
             // Creation of file
             Map<String, String> inputParamMap = getInputParamMapFromPojoList(reportInputParamsPojoList);
             timezone = getValueFromQuotes(inputParamMap.get("timezone"));
             String fQuery = SqlCmd.getFinalQuery(inputParamMap, reportQueryPojo.getQuery(), false);
             // Execute query and save results
-            prepareAndSendEmail(pojo, fQuery, connectionPojo, timezone, reportPojo);
+            prepareAndSendEmailOrPipelines(pojo, fQuery, connectionPojo, timezone, reportPojo);
             reportScheduleApi.addScheduleCount(pojo.getScheduleId(), 1, 0);
         } catch (Exception e) {
             log.error("Report Request ID : " + pojo.getId() + " failed", e);
@@ -138,23 +136,29 @@ public class ScheduleReportTask extends AbstractTask {
 
     }
 
-    // TODO  : Rename function
-    private void prepareAndSendEmail(ReportRequestPojo pojo, String fQuery, ConnectionPojo connectionPojo,
-                                     String timezone, ReportPojo reportPojo)
+    private void prepareAndSendEmailOrPipelines(ReportRequestPojo pojo, String fQuery, ConnectionPojo connectionPojo,
+                                                String timezone, ReportPojo reportPojo)
             throws IOException, ApiException {
         File file = folderApi.getFileForExtension(pojo.getId(), ".csv");
         Connection connection = null;
         ResultSet resultSet = null;
+        int noOfRows = 0;
         String password = getDecryptedPassword(connectionPojo.getPassword());
         try {
-            // Process data
-            connection = dbConnectionApi.getConnection(connectionPojo.getHost(), connectionPojo.getUsername(),
-                    password, properties.getMaxConnectionTime());
-            PreparedStatement statement =
-                    dbConnectionApi.getStatement(connection, properties.getMaxExecutionTime(), fQuery,
-                            properties.getResultSetFetchSize());
-            resultSet = statement.executeQuery();
-            Integer noOfRows = FileUtil.writeCsvFromResultSet(resultSet, file);
+            if(connectionPojo.getDbType().equals(DBType.MYSQL)) {
+                connection = dbConnectionApi.getConnection(connectionPojo.getHost(), connectionPojo.getUsername(),
+                        password, properties.getMaxConnectionTime());
+                PreparedStatement statement =
+                        dbConnectionApi.getStatement(connection, properties.getMaxExecutionTime(), fQuery,
+                                properties.getResultSetFetchSize());
+                resultSet = statement.executeQuery();
+                noOfRows = FileUtil.writeCsvFromResultSet(resultSet, file);
+            } else if (connectionPojo.getDbType().equals(DBType.MONGO)) {
+                List<Document> docs = MongoUtil.executeMongoPipeline(connectionPojo.getHost(), connectionPojo.getUsername(),
+                        password, fQuery);
+                noOfRows = FileUtil.writeCsvFromMongoDocuments(docs, file);
+            }
+
             double fileSize = FileUtil.getSizeInMb(file.length());
             if (fileSize > properties.getMaxFileSize())
                 throw new ApiException(ApiStatus.BAD_DATA,

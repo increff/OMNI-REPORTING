@@ -4,8 +4,10 @@ import com.increff.account.client.SecurityUtil;
 import com.increff.account.client.UserPrincipal;
 import com.increff.omni.reporting.api.*;
 import com.increff.omni.reporting.flow.InputControlFlowApi;
+import com.increff.omni.reporting.model.constants.AppName;
 import com.increff.omni.reporting.model.constants.ReportRequestType;
 import com.increff.omni.reporting.model.constants.ReportType;
+import com.increff.omni.reporting.model.constants.Roles;
 import com.increff.omni.reporting.pojo.*;
 import com.increff.service.encryption.EncryptionClient;
 import com.increff.service.encryption.common.CryptoCommon;
@@ -21,9 +23,9 @@ import org.springframework.stereotype.Component;
 
 import java.time.ZonedDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.increff.omni.reporting.dto.CommonDtoHelper.getValueFromQuotes;
-import static com.increff.omni.reporting.security.StandardSecurityConfig.*;
 
 @Log4j2
 @Component
@@ -38,20 +40,23 @@ public class AbstractDto extends AbstractDtoApi {
     @Autowired
     private InputControlApi controlApi;
     @Autowired
-    private OrgConnectionApi orgConnectionApi;
-    @Autowired
-    private OrgSchemaApi orgSchemaApi;
+    private OrgMappingApi orgMappingApi;
     @Autowired
     private ConnectionApi connectionApi;
     @Autowired
     private InputControlFlowApi inputControlFlowApi;
     @Autowired
     private CustomReportAccessApi customReportAccessApi;
+    @Autowired
+    private SchemaVersionApi schemaVersionApi;
 
-    public static boolean isCustomReportUser() {
-        if(getPrincipal().getRoles().contains(REPORT_ADMIN) || getPrincipal().getRoles().contains(APP_ADMIN))
+    public static boolean isCustomReportUser(AppName appName) throws ApiException {
+        if(getPrincipal().getRoles().contains(Roles.APP_ADMIN.getRole()) || getPrincipal().getRoles().contains(Roles.REPORT_ADMIN.getRole()))
             return false;
-        return getPrincipal().getRoles().contains(REPORT_CUSTOM);
+
+        String customRole = (appName.toString() + "." + Roles.REPORT_CUSTOM.getRole()).toLowerCase();
+        log.debug("Custom Role : " + customRole);
+        return getPrincipal().getRoles().contains(customRole);
     }
 
     public static int getOrgId() {
@@ -66,8 +71,8 @@ public class AbstractDto extends AbstractDtoApi {
         return getPrincipal().getUsername();
     }
 
-    protected Integer getSchemaVersionId() throws ApiException{
-        return orgSchemaApi.getCheckByOrgId(getOrgId()).getSchemaVersionId();
+    protected List<Integer> getSchemaVersionIds() throws ApiException{
+        return orgMappingApi.getCheckByOrgId(getOrgId()).stream().map(OrgMappingPojo::getSchemaVersionId).collect(Collectors.toList());
     }
 
     protected void validateInputParamValues(Map<String, List<String>> inputParams,
@@ -160,7 +165,8 @@ public class AbstractDto extends AbstractDtoApi {
 
     protected void validateCustomReportAccess(ReportPojo reportPojo, Integer orgId) throws ApiException {
         if (reportPojo.getType().equals(ReportType.STANDARD)){
-            if(isCustomReportUser())
+            AppName appName = schemaVersionApi.getCheck(reportPojo.getSchemaVersionId()).getAppName();
+            if(isCustomReportUser(appName))
                 throw new ApiException(ApiStatus.BAD_DATA, "Custom Report User can't access standard report : "
                         + reportPojo.getName());
             return;
@@ -193,9 +199,9 @@ public class AbstractDto extends AbstractDtoApi {
                 valuesMap.put(pojo.getValue(), pojo.getValue());
             }
         } else {
-            OrgConnectionPojo orgConnectionPojo = orgConnectionApi.getCheckByOrgId(orgId);
-            ConnectionPojo connectionPojo = connectionApi.getCheck(orgConnectionPojo.getConnectionId());
-            valuesMap = inputControlFlowApi.getValuesFromQuery(queryPojo.getQuery(), connectionPojo, password);
+            OrgMappingPojo orgMappingPojo = orgMappingApi.getCheckByOrgIdSchemaVersionId(orgId, p.getSchemaVersionId());
+            ConnectionPojo connectionPojo = connectionApi.getCheck(orgMappingPojo.getConnectionId());
+            valuesMap = inputControlFlowApi.getValuesFromQuery(queryPojo.getQuery(), connectionPojo, password, orgId);
         }
         return valuesMap;
     }

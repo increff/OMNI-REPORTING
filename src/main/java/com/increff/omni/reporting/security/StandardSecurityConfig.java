@@ -3,6 +3,7 @@ package com.increff.omni.reporting.security;
 import com.increff.account.client.AuthClient;
 import com.increff.account.client.AuthTokenFilter;
 import com.increff.omni.reporting.config.ApplicationProperties;
+import com.increff.omni.reporting.model.constants.Roles;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -25,10 +26,11 @@ public class StandardSecurityConfig {
     @Autowired
     private ApplicationProperties applicationProperties;
 
-    public static final String APP_ADMIN = "app.admin";
-    public static final String REPORT_ADMIN = "report.admin";
-    public static final String REPORT_STANDARD = "report.standard";
-    public static final String REPORT_CUSTOM = "report.custom";
+    @Autowired
+    private ReportAppAccessFilter reportAppAccessFilter;
+
+    @Autowired
+    private RoleOverrideFilter roleOverrideFilter;
 
     @Bean
     public SecurityFilterChain standardSecurityFilterChain(HttpSecurity http) throws Exception {
@@ -37,17 +39,19 @@ public class StandardSecurityConfig {
                 .securityMatcher("/standard/**")
                 .authorizeHttpRequests(auth -> {
                     auth
-                            .requestMatchers("/standard/schedules/**").hasAnyAuthority(APP_ADMIN)//
-                            .requestMatchers("/standard/pipelines/**").hasAnyAuthority(APP_ADMIN)//
-                            .requestMatchers(HttpMethod.POST, "/standard/dashboards/{dashboardId}/view").hasAnyAuthority(APP_ADMIN, REPORT_ADMIN, REPORT_STANDARD, REPORT_CUSTOM)
-                            .requestMatchers(HttpMethod.GET, "/standard/dashboards/**").hasAnyAuthority(APP_ADMIN, REPORT_ADMIN, REPORT_STANDARD, REPORT_CUSTOM)//
-                            .requestMatchers("/standard/dashboards/**").hasAnyAuthority(APP_ADMIN)//
-                            .requestMatchers("/standard/**").hasAnyAuthority(APP_ADMIN, REPORT_ADMIN, REPORT_STANDARD, REPORT_CUSTOM);
+                            .requestMatchers("/standard/schedules/**").hasAnyAuthority(Roles.APP_ADMIN.getRole())//
+                            .requestMatchers("/standard/pipelines/**").hasAnyAuthority(Roles.APP_ADMIN.getRole())//
+                            .requestMatchers(HttpMethod.POST, "/standard/dashboards/{dashboardId}/view").hasAnyAuthority("@roleUtil.hasAdminOrStandardOrCustom(authentication)")
+                            .requestMatchers(HttpMethod.GET, "/standard/dashboards/**").hasAnyAuthority("@roleUtil.hasAdminOrStandardOrCustom(authentication)")//
+                            .requestMatchers("/standard/dashboards/**").hasAnyAuthority(Roles.APP_ADMIN.getRole())//
+                            .requestMatchers("/standard/**").hasAnyAuthority("@roleUtil.hasAdminOrStandardOrCustom(authentication)");
                 })
                 .cors(AbstractHttpConfigurer::disable)
                 .csrf(AbstractHttpConfigurer::disable)
                 .addFilterBefore(new AuthTokenFilter(authClient), BasicAuthenticationFilter.class)
+                .addFilterBefore(roleOverrideFilter, BasicAuthenticationFilter.class)
                 .addFilterAfter(new RateLimitingFilter(applicationProperties), AuthTokenFilter.class)
+                .addFilterAfter(reportAppAccessFilter, RateLimitingFilter.class)
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
         return http.build();
     }

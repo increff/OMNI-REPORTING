@@ -3,6 +3,7 @@ package com.increff.omni.reporting.controller;
 
 import com.increff.omni.reporting.config.ApplicationProperties;
 import com.increff.omni.reporting.dto.*;
+import com.increff.omni.reporting.model.constants.AppName;
 import com.increff.omni.reporting.model.constants.VisualizationType;
 import com.increff.omni.reporting.model.data.*;
 import com.increff.omni.reporting.model.form.*;
@@ -12,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -65,12 +67,6 @@ public class StandardController {
         return reportDto.selectByAlias(isChart, alias);
     }
 
-    @Operation(summary = "Get Live Data")
-    @PostMapping(value = "/reports/live")
-    public List<Map<String, String>> getLiveData(@RequestBody ReportRequestForm form) throws ApiException, IOException {
-        return reportDto.getLiveData(form);
-    }
-
     @Operation(summary = "Get validation group")
     @GetMapping(value = "/reports/{reportId}/controls/validations")
     public List<ValidationGroupData> getValidationGroups(@PathVariable Integer reportId) {
@@ -81,12 +77,6 @@ public class StandardController {
     @GetMapping(value = "/directories")
     public List<DirectoryData> selectAllDirectories() throws ApiException {
         return directoryDto.getAllDirectories();
-    }
-
-    @Operation(summary = "Request Report")
-    @PostMapping(value = "/request-report")
-    public void requestReport(@RequestBody ReportRequestForm form) throws ApiException {
-        reportRequestDto.requestReport(form);
     }
 
     @Operation(summary = "Get All Request data")
@@ -154,103 +144,101 @@ public class StandardController {
         reportScheduleDto.updateStatus(id, isEnabled);
     }
 
+    @Operation(summary = "Add Pipeline")
+    @PostMapping(value = "/pipelines")
+    public PipelineData addPipeline(@RequestBody PipelineForm form) throws ApiException {
+        return pipelineDto.add(form);
+    }
+
+    @Operation(summary = "Edit Pipeline")
+    @PutMapping(value = "/pipelines/{id}")
+    public PipelineData editPipeline(@RequestBody PipelineForm form, @PathVariable Integer id) throws ApiException {
+        return pipelineDto.update(id, form);
+    }
+
+    @Operation(summary = "Get Pipelines By User Org")
+    @GetMapping(value = "/pipelines")
+    public List<PipelineData> getPipelinesByUserOrg() throws ApiException{
+        return pipelineDto.getPipelinesByUserOrg();
+    }
+
+    @Operation(summary = "Get Pipeline by ID")
+    @GetMapping(value = "/pipelines/{id}")
+    public PipelineData getPipelineById(@PathVariable Integer id) throws ApiException {
+        return pipelineDto.getPipelineById(id);
+    }
+
+    @Operation(summary = "Test Pipeline")
+    @PostMapping(value = "/pipelines/test")
+    public void testPipeline(@RequestBody PipelineForm form) throws ApiException {
+        pipelineDto.testConnection(form);
+    }
+
     @Operation(summary = "Get Application Version")
     @GetMapping(value = "/version")
     public String getVersion() {
         return "\"" + properties.getVersion() + "\"";
     }
 
-    @Operation(summary = "Add Pipeline")
-    @RequestMapping(value = "/pipelines", method = RequestMethod.POST)
-    public PipelineData addPipeline(@RequestBody PipelineForm form) throws ApiException {
-        return pipelineDto.add(form);
-    }
-
-    @Operation(summary = "Edit Pipeline")
-    @RequestMapping(value = "/pipelines/{id}", method = RequestMethod.PUT)
-    public PipelineData editPipeline(@RequestBody PipelineForm form, @PathVariable Integer id) throws ApiException {
-        return pipelineDto.update(id, form);
-    }
-
-    @Operation(summary = "Get Pipelines By User Org")
-    @RequestMapping(value = "/pipelines", method = RequestMethod.GET)
-    public List<PipelineData> getPipelinesByUserOrg() throws ApiException{
-        return pipelineDto.getPipelinesByUserOrg();
-    }
-
-    @Operation(summary = "Get Pipeline by ID")
-    @RequestMapping(value = "/pipelines/{id}", method = RequestMethod.GET)
-    public PipelineData getPipelineById(@PathVariable Integer id) throws ApiException {
-        return pipelineDto.getPipelineById(id);
-    }
-
-    @Operation(summary = "Test Pipeline")
-    @RequestMapping(value = "/pipelines/test", method = RequestMethod.POST)
-    public void testPipeline(@RequestBody PipelineForm form) throws ApiException {
-        pipelineDto.testConnection(form);
-    }
-
     @Operation(summary = "Add Dashboard")
-    @RequestMapping(value = "/dashboards", method = RequestMethod.POST)
+    @PostMapping(value = "/dashboards")
     public DashboardData addDashboard(@RequestBody DashboardAddForm form) throws ApiException {
         return dashboardDto.addDashboard(form);
     }
 
     @Operation(summary = "Delete Dashboard")
-    @RequestMapping(value = "/dashboards/{dashboardId}", method = RequestMethod.DELETE)
+    @DeleteMapping(value = "/dashboards/{dashboardId}")
     public void deleteDashboard(@PathVariable Integer dashboardId) throws ApiException {
         dashboardDto.deleteDashboard(dashboardId);
     }
 
     @Operation(summary = "Edit Dashboard")
-    @RequestMapping(value = "/dashboards/{dashboardId}", method = RequestMethod.PUT)
+    @PutMapping(value = "/dashboards/{dashboardId}")
     public DashboardData editDashboard(@RequestBody DashboardForm form, @PathVariable Integer dashboardId) throws ApiException {
         return dashboardDto.updateDashboard(form, dashboardId);
     }
 
     @Operation(summary = "Add/Edit Charts in Dashboard")
-    @RequestMapping(value = "/dashboards/{dashboardId}/charts", method = RequestMethod.PUT)
-    public List<DashboardChartData> addChart(@RequestBody List<DashboardChartForm> forms,
-                                             @PathVariable Integer dashboardId) throws ApiException {
+    @PutMapping(value = "/dashboards/{dashboardId}/charts")
+    public List<DashboardChartData> addChart(@RequestBody List<DashboardChartForm> forms, @PathVariable Integer dashboardId) throws ApiException {
         return dashboardChartDto.addDashboardChart(forms, dashboardId);
     }
 
     @Operation(summary = "Get Charts in Dashboard")
-    @RequestMapping(value = "/dashboards/{dashboardId}/charts", method = RequestMethod.GET)
+    @GetMapping(value = "/dashboards/{dashboardId}/charts")
     public List<DashboardChartData> getCharts(@PathVariable Integer dashboardId) throws ApiException {
         return dashboardChartDto.getDashboardCharts(dashboardId);
     }
 
     @Operation(summary = "Update Defaults in Dashboard. Also deletes all existing defaults for that dashboard")
-    @RequestMapping(value = "/dashboards/defaults", method = RequestMethod.PUT)
-    public List<DefaultValueData> addDefaults(@RequestBody List<DefaultValueForm> forms) throws ApiException {
-        return dashboardDto.upsertDefaultValues(forms);
+    @PutMapping(value = "/dashboards/defaults")
+    public List<DefaultValueData> addDefaults(@RequestBody UpsertDefaultValueForm form,
+                                              @RequestParam Integer dashboardId) throws ApiException {
+        return dashboardDto.upsertDefaultValues(form, dashboardId);
     }
 
     @Operation(summary = "Get Dashboard")
-    @RequestMapping(value = "/dashboards/{dashboardId}", method = RequestMethod.GET)
+    @GetMapping(value = "/dashboards/{dashboardId}")
     public DashboardData getDashboard(@PathVariable Integer dashboardId) throws ApiException {
         return dashboardDto.getDashboard(dashboardId);
     }
 
-    @Operation(summary = "Get Dashboards For Org")
-    @RequestMapping(value = "/dashboards", method = RequestMethod.GET)
+    @Operation(summary = "List Dashboards For Org")
+    @GetMapping(value = "/dashboards")
     public List<DashboardListData> getDashboards() throws ApiException {
         return dashboardDto.getDashboardsByOrgId();
     }
 
-    // Change rate limiter filter URL when changing endpoint URL
-    @Operation(summary = "View Dashboard")
-    @RequestMapping(value = "/dashboards/{dashboardId}/view", method = RequestMethod.POST)
-    public List<ViewDashboardData> viewDashboard(@PathVariable Integer dashboardId,
-                                                 @RequestBody ReportRequestForm form) throws ApiException, IOException {
-        return dashboardDto.viewDashboard(form, dashboardId);
-    }
-
     @Operation(summary = "Get Properties")
-    @RequestMapping(value = "/properties", method = RequestMethod.GET)
+    @GetMapping(value = "/properties")
     public ApplicationPropertiesData getProperties() {
         return dashboardDto.getProperties();
+    }
+
+    @Operation(summary = "Get App Names")
+    @GetMapping(value = "/app-names")
+    public List<AppName> getAppNames() {
+        return Arrays.asList(AppName.values());
     }
 
 }

@@ -2,18 +2,17 @@ package com.increff.omni.reporting.util;
 
 import com.increff.account.client.SecurityUtil;
 import com.increff.account.client.UserPrincipal;
-import com.increff.omni.reporting.model.constants.AppResourceKeys;
-import com.increff.omni.reporting.model.constants.InputControlType;
-import com.increff.omni.reporting.model.constants.ResourceQueryParamKeys;
+import com.increff.omni.reporting.model.constants.*;
 import com.increff.omni.reporting.model.form.ReportScheduleForm;
+import lombok.extern.log4j.Log4j2;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
+import static com.increff.omni.reporting.model.constants.Roles.USER_ACCESS_ADMIN_AUTHORITIES;
+
+@Log4j2
 public class UserPrincipalUtil {
-
-    private static final String APP_ADMIN = "app.admin";
-    private static final String REPORT_ADMIN = "report.admin";
-    private static final List<String> ADMIN_AUTHORITIES = Arrays.asList(APP_ADMIN, REPORT_ADMIN);
 
     public static Map<String, String> getCompleteMapWithAccessControl(Map<String, List<String>> params) {
         Map<String, String> finalMap = new HashMap<>(getStringToStringParamMap(params));
@@ -34,7 +33,7 @@ public class UserPrincipalUtil {
         Map<String, List<String>> accessControlMap = new HashMap<>();
         UserPrincipal principal = SecurityUtil.getPrincipal();
         List<String> accessRoles = principal.getRoles();
-        accessRoles.retainAll(ADMIN_AUTHORITIES);
+        accessRoles.retainAll(USER_ACCESS_ADMIN_AUTHORITIES);
 
         // If user has admin authorities, then do not set any param as query will have default value as column name
         // Which will make sure all values are selected
@@ -88,5 +87,32 @@ public class UserPrincipalUtil {
             fList.add("'" + s + "'");
         }
         finalMap.put(key, String.join(",", fList));
+    }
+
+    public static Set<AppName> getAccessibleApps() {
+        Set<AppName> accessibleApps = new HashSet<>();
+        List<String> userRoles = getPrincipal().getRoles();
+        log.debug("User roles: " + userRoles);
+
+        if(userRoles.contains(Roles.APP_ADMIN.getRole()) || userRoles.contains(Roles.REPORT_ADMIN.getRole())) {
+            return new HashSet<>(Arrays.asList(AppName.values()));
+        }
+
+        userRoles = userRoles.stream().filter(role -> role.contains(Roles.REPORT_STANDARD.getRole()) || role.contains(Roles.REPORT_CUSTOM.getRole())).collect(Collectors.toList());
+        for (String role : userRoles) {
+            String app =  "";
+            if(role.split("\\.").length > 0)
+                app = role.split("\\.")[0].toUpperCase();
+
+            if(app.isEmpty() || role.equalsIgnoreCase(Roles.REPORT_STANDARD.getRole()) || role.equalsIgnoreCase(Roles.REPORT_CUSTOM.getRole()))
+                continue; // Skip standard role as it is not an app! User should always have role omni.report.standard/custom along with report.standard/custom!!
+            log.debug("Adding app: " + app);
+            accessibleApps.add(AppName.valueOf(app));
+        }
+        return accessibleApps;
+    }
+
+    public static UserPrincipal getPrincipal() {
+        return SecurityUtil.getPrincipal();
     }
 }

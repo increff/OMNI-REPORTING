@@ -26,6 +26,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 public abstract class AbstractTest {
 
     public Integer orgId = 100001;
+    public String orgName = "increff";
 
     @Value("${testdb.username}")
     protected String username;
@@ -64,7 +65,7 @@ public abstract class AbstractTest {
         Authentication authentication = Mockito.mock(Authentication.class);
         UserPrincipal principal = new UserPrincipal();
         principal.setDomainId(orgId);
-        principal.setDomainName("increff");
+        principal.setDomainName(orgName);
         principal.setId(100001);
         principal.setUsername("test_user");
         principal.setAppName("saas");

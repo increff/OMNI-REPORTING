@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -19,7 +20,7 @@ import java.util.stream.Collectors;
 import static com.increff.omni.reporting.dto.CommonDtoHelper.getStatusMapping;
 
 @Service
-public class ReportRequestFlowApi extends AbstractFlowApi {
+public class ReportRequestFlowApi extends FlowApi {
 
     @Autowired
     private ReportRequestApi api;
@@ -27,6 +28,11 @@ public class ReportRequestFlowApi extends AbstractFlowApi {
     private ReportApi reportApi;
     @Autowired
     private ReportInputParamsApi reportInputParamsApi;
+    @Autowired
+    private ConnectionApi connectionApi;
+
+    @Autowired
+    private ReportValidationGroupApi reportValidationGroupApi;
     @Autowired
     private QueryExecutorClientApi executorClientApi;
 
@@ -39,7 +45,7 @@ public class ReportRequestFlowApi extends AbstractFlowApi {
         if (!CollectionUtils.isEmpty(pendingReports) && pendingReports.size() >= MAX_OPEN_REPORT_REQUESTS)
             throw new ApiException(ApiStatus.BAD_DATA, "Wait for existing reports to get executed");
         ReportPojo reportPojo = reportApi.getCheck(pojo.getReportId());
-        validate(reportPojo, reportInputParamsPojoList);
+        validate(reportPojo, reportInputParamsPojoList, null);
         requestReportWithoutValidation(pojo, reportInputParamsPojoList);
     }
 

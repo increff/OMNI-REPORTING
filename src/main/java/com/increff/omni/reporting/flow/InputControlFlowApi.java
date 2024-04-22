@@ -2,15 +2,18 @@ package com.increff.omni.reporting.flow;
 
 import com.increff.omni.reporting.api.*;
 import com.increff.omni.reporting.config.ApplicationProperties;
+import com.increff.omni.reporting.model.constants.DBType;
 import com.increff.omni.reporting.model.constants.InputControlScope;
 import com.increff.omni.reporting.pojo.*;
 import com.increff.omni.reporting.util.FileUtil;
+import com.increff.omni.reporting.util.MongoUtil;
 import com.increff.omni.reporting.util.SqlCmd;
 import com.nextscm.commons.lang.StringUtil;
 import com.increff.commons.springboot.common.ApiException;
 import com.increff.commons.springboot.common.ApiStatus;
 import com.increff.commons.springboot.server.AbstractApi;
 import lombok.extern.log4j.Log4j2;
+import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -81,19 +84,29 @@ public class InputControlFlowApi extends AbstractApi {
     }
 
 
-    public Map<String, String> getValuesFromQuery(String query, ConnectionPojo connectionPojo, String password) {
+    public Map<String, String> getValuesFromQuery(String query, ConnectionPojo connectionPojo, String password, Integer orgId) {
         Connection connection = null;
         try {
-            String fQuery = SqlCmd.getFinalQuery(new HashMap<>(), query, true);
-            connection = dbConnectionApi.getConnection(connectionPojo.getHost(),
-                    connectionPojo.getUsername(), password,
-                    properties.getMaxConnectionTime());
-            PreparedStatement statement = dbConnectionApi.getStatement(connection,
-                    properties.getLiveReportMaxExecutionTime(), fQuery, properties.getResultSetFetchSize());
-            ResultSet resultSet = statement.executeQuery();
-            return FileUtil.getMapFromResultSet(resultSet);
+            HashMap<String, String> map = new HashMap<>();
+            map.put("filter.orgId.param", orgId.toString());  // Used in mongo filter query as we get client list based on orgId
+
+            String fQuery = SqlCmd.getFinalQuery(map, query, true);
+
+            if(connectionPojo.getDbType().equals(DBType.MYSQL)) {
+                connection = dbConnectionApi.getConnection(connectionPojo.getHost(), connectionPojo.getUsername(),
+                        password, properties.getMaxConnectionTime());
+                PreparedStatement statement = dbConnectionApi.getStatement(connection,
+                        properties.getLiveReportMaxExecutionTime(), fQuery, properties.getResultSetFetchSize());
+                ResultSet resultSet = statement.executeQuery();
+                return FileUtil.getMapFromResultSet(resultSet);
+            } else if (connectionPojo.getDbType().equals(DBType.MONGO)) {
+                List<Document> docs = MongoUtil.executeMongoPipeline(connectionPojo.getHost(), connectionPojo.getUsername(),
+                        password, fQuery);
+                return FileUtil.getMapFromMongoResultSet(docs);
+            }
+
         } catch (Exception e) {
-//            log.error("Error while getting input control values : ", e);
+            log.error("Error while getting input control values : " + e.getMessage() + " " + Arrays.asList(e.getStackTrace()));
         } finally {
             try {
                 if (Objects.nonNull(connection)) {
@@ -130,6 +143,11 @@ public class InputControlFlowApi extends AbstractApi {
         if(!pojo.getSchemaVersionId().equals(reportPojo.getSchemaVersionId()))
             throw new ApiException(ApiStatus.BAD_DATA, "Report Schema version and input control schema version not " +
                     "matching");
+
+        if(reportPojo.getIsChart())
+            throw new ApiException(ApiStatus.BAD_DATA, "Input control with scope LOCAL can't be added to charts");
+
+
         // Validating if any other control exists with same display or param name
         List<ReportControlsPojo> existingPojos = reportControlsApi.getByReportId(reportId);
         List<Integer> controlIds = existingPojos.stream().map(ReportControlsPojo::getControlId)

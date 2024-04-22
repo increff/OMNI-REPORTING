@@ -11,6 +11,7 @@ import com.increff.omni.reporting.model.form.*;
 import com.increff.omni.reporting.pojo.*;
 import com.increff.omni.reporting.util.SqlCmd;
 import com.increff.omni.reporting.util.UserPrincipalUtil;
+import com.increff.omni.reporting.util.ValidateUtil;
 import com.increff.commons.springboot.common.ApiException;
 import com.increff.commons.springboot.common.ApiStatus;
 import com.increff.commons.springboot.common.ConvertUtil;
@@ -41,7 +42,7 @@ public class ReportDto extends AbstractDto {
     @Autowired
     private OrganizationApi organizationApi;
     @Autowired
-    private OrgSchemaApi orgSchemaApi;
+    private OrgMappingApi orgMappingApi;
     @Autowired
     private ReportValidationGroupApi reportValidationGroupApi;
     @Autowired
@@ -60,8 +61,7 @@ public class ReportDto extends AbstractDto {
     private DirectoryApi directoryApi;
     @Autowired
     private ApplicationProperties properties;
-    @Autowired
-    private OrgConnectionApi orgConnectionApi;
+
     @Autowired
     private ConnectionApi connectionApi;
     @Autowired
@@ -69,6 +69,7 @@ public class ReportDto extends AbstractDto {
 
     public ReportData add(ReportForm form) throws ApiException {
         validateReportForm(form);
+        form.setAlias(form.getAlias().trim().toLowerCase());
         ReportPojo pojo = ConvertUtil.convert(form, ReportPojo.class);
         pojo = flowApi.addReport(pojo, form.getLegends());
         flowApi.saveAudit(pojo.getId().toString(), AuditActions.CREATE_REPORT.toString()
@@ -90,7 +91,7 @@ public class ReportDto extends AbstractDto {
         return reportData;
     }
 
-    public List<Map<String, String>> getLiveDataForAnyOrganization(ReportRequestForm form, Integer orgId)
+    public List<Map<String, String>> getLiveDataForAnyOrganization(ReportRequestForm form, Integer orgId, List<Integer> valGroupMergeReportIds)
             throws ApiException, IOException {
         OrganizationPojo organizationPojo = organizationApi.getCheck(orgId);
         ReportPojo reportPojo = reportApi.getCheck(form.getReportId());
@@ -98,13 +99,15 @@ public class ReportDto extends AbstractDto {
         validateReportForOrg(reportPojo, orgId);
         validateQueryExists(reportPojo, form);
 
-        ConnectionPojo connectionPojo = connectionApi.getCheck(orgConnectionApi.getCheckByOrgId(orgId).getConnectionId());
+        OrgMappingPojo orgMappingPojo = orgMappingApi.getCheckByOrgIdSchemaVersionId(orgId, reportPojo.getSchemaVersionId());
+        ConnectionPojo connectionPojo = connectionApi.getCheck(orgMappingPojo.getConnectionId());
         String password = getDecryptedPassword(connectionPojo.getPassword());
 
         ZonedDateTime startTime = ZonedDateTime.now();
         try {
             List<ReportInputParamsPojo> reportInputParamsPojoList = validateControls(form, orgId, reportPojo, password);
-            return flowApi.validateAndGetLiveData(reportPojo, reportInputParamsPojoList, connectionPojo, password, form.getQuery());
+            return flowApi.validateAndGetLiveData(reportPojo, reportInputParamsPojoList, connectionPojo, password, form.getQuery(),
+                    reportApi.getByIds(valGroupMergeReportIds));
         } finally {
             flowApi.saveAudit(reportPojo.getId().toString(), AuditActions.LIVE_REPORT.toString(),
                     "Live Report",
@@ -114,8 +117,8 @@ public class ReportDto extends AbstractDto {
         }
     }
 
-    public List<Map<String, String>> getLiveData(ReportRequestForm form) throws ApiException, IOException {
-        return getLiveDataForAnyOrganization(form, getOrgId());
+    public List<Map<String, String>> getLiveData(ReportRequestForm form, List<Integer> valGroupsMergeReportIds) throws ApiException, IOException {
+        return getLiveDataForAnyOrganization(form, getOrgId(), valGroupsMergeReportIds);
     }
 
     public void updateStatus(Integer reportId, Boolean isEnabled) throws ApiException {
@@ -135,13 +138,19 @@ public class ReportDto extends AbstractDto {
         checkValid(form);
         ReportQueryPojo pojo = ConvertUtil.convert(form, ReportQueryPojo.class);
         pojo.setReportId(reportId);
+
+        ValidateUtil.validateReportQueryForm(form, getReportSV(reportId).getAppName());
+
+        ReportQueryPojo oldPojo = reportQueryApi.getByReportId(reportId);
+        String oldQuery = Objects.isNull(oldPojo) ? "" : oldPojo.getQuery();
         pojo = flowApi.upsertQuery(pojo);
+        String newQuery = pojo.getQuery();
         flowApi.saveAudit(reportId.toString(), AuditActions.UPSERT_REPORT_QUERY.toString(), "Upsert Report Query"
-                , "Report query updated", getUserName());
+                , "Report query updated. Old query\n" + oldQuery + "\nNew Query\n" + newQuery, getUserName());
         return ConvertUtil.convert(pojo, ReportQueryData.class);
     }
 
-    public ReportQueryData getTransformedQuery(ReportQueryTestForm form) {
+    public ReportQueryData getTransformedQuery(ReportQueryTestForm form) throws ApiException {
         Map<String, String> paramsMap = UserPrincipalUtil.getCompleteMapWithAccessControl(form.getParamMap());
         paramsMap.put("timezone", "'" + form.getTimezone() + "'");
         ReportQueryData data = new ReportQueryData();
@@ -158,33 +167,43 @@ public class ReportDto extends AbstractDto {
         return data;
     }
 
-    public List<ViewDashboardData> testQueryLive(ReportRequestForm form) throws IOException, ApiException {
+    public TestQueryLiveData testQueryLive(ReportRequestForm form, Integer orgId) throws IOException, ApiException {
         ReportPojo report = reportApi.getCheck(form.getReportId());
         Integer schemaVersionId = report.getSchemaVersionId();
-        Integer orgId = orgSchemaApi.getCheckBySchemaVersionId(schemaVersionId).get(0).getOrgId();
         log.debug("Testing query on orgId : " + orgId + " schemaVersionId : " + schemaVersionId + " reportName : " + report.getName() + " reportId : " + report.getId());
 
-        List<Map<String, String>> data = getLiveDataForAnyOrganization(form, orgId);
+        List<Map<String, String>> data = getLiveDataForAnyOrganization(form, orgId, Collections.singletonList(form.getReportId()));
         ChartInterface chartInterface = getChartData(report.getChartType());
         chartInterface.validateNormalize(data, report.getChartType());
 
-        return Collections.singletonList(getTestQueryLiveData(report, data, chartInterface));
+        return getTestQueryLiveData(report, data, chartInterface, orgId);
     }
 
-    private ViewDashboardData getTestQueryLiveData(ReportPojo report, List<Map<String, String>> data, ChartInterface chartInterface) throws ApiException {
+    private TestQueryLiveData getTestQueryLiveData(ReportPojo report, List<Map<String, String>> data, ChartInterface chartInterface,
+                                Integer orgId) throws ApiException {
         ViewDashboardData viewData = new ViewDashboardData();
         viewData.setChartData(chartInterface.transform(data));
         viewData.setLegends(convertChartLegendsPojoToChartLegendsData(chartLegendsApi.getByChartId(report.getId())).getLegends());
         viewData.setChartId(report.getId());
         viewData.setType(report.getChartType());
-        return viewData;
+
+        TestQueryLiveData testQueryLiveData = new TestQueryLiveData();
+        testQueryLiveData.setViewDashboardData(Collections.singletonList(viewData)); // converting to list for UI
+        testQueryLiveData.setTestedSchemaVersionId(report.getSchemaVersionId());
+        testQueryLiveData.setTestedOrgId(orgId);
+
+        OrgMappingPojo orgMappingPojo = orgMappingApi.getCheckByOrgIdSchemaVersionId(orgId, report.getSchemaVersionId());
+        testQueryLiveData.setTestedConnectionId(orgMappingPojo.getConnectionId());
+        return testQueryLiveData;
     }
 
     public ReportData selectByAlias(Boolean isChart, String alias) throws ApiException {
         Integer orgId = getOrgId();
         organizationApi.getCheck(orgId);
-        OrgSchemaVersionPojo schemaVersionPojo = orgSchemaApi.getCheckByOrgId(orgId);
-        ReportPojo reportPojo = reportApi.getByAliasAndSchema(alias, schemaVersionPojo.getSchemaVersionId(),
+
+        List<OrgMappingPojo> orgMappingPojos = orgMappingApi.getCheckByOrgId(orgId);
+        List<Integer> orgSchemaVersionIds = orgMappingPojos.stream().map(OrgMappingPojo::getSchemaVersionId).collect(Collectors.toList());
+        ReportPojo reportPojo = reportApi.getByAliasAndSchema(alias, orgSchemaVersionIds,
                 isChart);
         if(Objects.isNull(reportPojo))
             throw new ApiException(ApiStatus.BAD_DATA,
@@ -313,5 +332,11 @@ public class ReportDto extends AbstractDto {
         if (Objects.isNull(reportQueryPojo) && Objects.isNull(form.getQuery()))
             throw new ApiException(ApiStatus.BAD_DATA, "No query defined for report : " + reportPojo.getName());
     }
+
+    private SchemaVersionPojo getReportSV(Integer reportId) throws ApiException {
+        ReportPojo reportPojo = reportApi.getCheck(reportId);
+        return schemaVersionApi.getCheck(reportPojo.getSchemaVersionId());
+    }
+
 
 }

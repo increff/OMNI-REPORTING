@@ -1,6 +1,7 @@
 package com.increff.omni.reporting.api;
 
 import com.increff.omni.reporting.dao.SchemaVersionDao;
+import com.increff.omni.reporting.model.constants.AppName;
 import com.increff.omni.reporting.pojo.SchemaVersionPojo;
 import com.increff.commons.springboot.common.ApiException;
 import com.increff.commons.springboot.common.ApiStatus;
@@ -11,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 @Service
 @Transactional(rollbackFor = ApiException.class)
@@ -45,6 +47,14 @@ public class SchemaVersionApi extends AbstractApi {
 
     public SchemaVersionPojo getByName(String name) {
         return dao.select("name", name);
+    }
+
+    public List<SchemaVersionPojo> getByIds(List<Integer> ids) {
+        return dao.selectByIds(ids);
+    }
+
+    public List<SchemaVersionPojo> getByAppNames(Set<AppName> appNames) {
+        return dao.selectByAppNames(appNames);
     }
 
     private void validateForEdit(SchemaVersionPojo pojo) throws ApiException {

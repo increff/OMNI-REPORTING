@@ -37,9 +37,10 @@ public class ReportRequestDto extends AbstractDto {
     @Autowired
     private ReportRequestFlowApi flow;
     @Autowired
-    private ReportApi reportApi;
+    private OrgMappingApi orgMappingApi;
     @Autowired
-    private OrgConnectionApi orgConnectionApi;
+    private ReportApi reportApi;
+
     @Autowired
     private ConnectionApi connectionApi;
     @Autowired
@@ -49,13 +50,9 @@ public class ReportRequestDto extends AbstractDto {
     @Autowired
     private ReportRequestApi reportRequestApi;
     @Autowired
-    private CustomReportAccessApi customReportAccessApi;
-    @Autowired
     private FolderApi folderApi;
     @Autowired
     private ReportQueryApi queryApi;
-    @Autowired
-    private InputControlFlowApi inputControlFlowApi;
     @Autowired
     private OrganizationApi organizationApi;
     @Autowired
@@ -63,8 +60,6 @@ public class ReportRequestDto extends AbstractDto {
 
     @Autowired
     private ReportInputParamsApi reportInputParamsApi;
-    @Autowired
-    private QueryExecutorClientApi executorClientApi;
 
     private static final Integer MAX_NUMBER_OF_ROWS = 200;
     private static final Integer MAX_LIMIT = 25;
@@ -77,16 +72,18 @@ public class ReportRequestDto extends AbstractDto {
 
     public void requestReportForAnyOrg(ReportRequestForm form, Integer orgId) throws ApiException {
         checkValid(form);
+        ReportRequestPojo pojo = CommonDtoHelper.getReportRequestPojo(form, orgId, getUserId());
+        ReportPojo reportPojo = reportApi.getCheck(pojo.getReportId());
+
         OrganizationPojo organizationPojo = organizationApi.getCheck(orgId);
-        OrgConnectionPojo orgConnectionPojo = orgConnectionApi.getCheckByOrgId(orgId);
-        ConnectionPojo connectionPojo = connectionApi.getCheck(orgConnectionPojo.getConnectionId());
+        OrgMappingPojo orgMappingPojo = orgMappingApi.getCheckByOrgIdSchemaVersionId(orgId, reportPojo.getSchemaVersionId());
+
+        ConnectionPojo connectionPojo = connectionApi.getCheck(orgMappingPojo.getConnectionId());
         String password = getDecryptedPassword(connectionPojo.getPassword());
 
         Map<String, String> inputParamsMap = UserPrincipalUtil.getCompleteMapWithAccessControl(form.getParamMap());
         Map<String, List<String>> inputDisplayMap = new HashMap<>();
 
-        ReportRequestPojo pojo = CommonDtoHelper.getReportRequestPojo(form, orgId, getUserId());
-        ReportPojo reportPojo = reportApi.getCheck(pojo.getReportId());
         if (reportPojo.getIsChart())
             throw new ApiException(ApiStatus.BAD_DATA, "Dashboard can't be requested here");
 

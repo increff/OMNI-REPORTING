@@ -1,5 +1,6 @@
 package com.increff.omni.reporting.pojo;
 
+import com.increff.omni.reporting.model.constants.DBType;
 import com.increff.commons.springboot.db.pojo.AbstractVersionedPojo;
 import lombok.Getter;
 import lombok.Setter;
@@ -9,7 +10,9 @@ import jakarta.persistence.*;
 @Entity
 @Setter
 @Getter
-@Table(name = "connection")
+@Table(name = "connection", uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"name"})
+})
 public class ConnectionPojo extends AbstractVersionedPojo{
 
     @Id
@@ -24,4 +27,7 @@ public class ConnectionPojo extends AbstractVersionedPojo{
     private String username;
     @Column(nullable = false)
     private String password;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private DBType dbType;
 }

@@ -1,10 +1,8 @@
 package com.increff.omni.reporting.util;
 
+import com.increff.omni.reporting.model.constants.AppName;
 import com.increff.omni.reporting.model.constants.ChartType;
-import com.increff.omni.reporting.model.form.DashboardAddForm;
-import com.increff.omni.reporting.model.form.DashboardChartForm;
-import com.increff.omni.reporting.model.form.ReportForm;
-import com.increff.omni.reporting.model.form.ReportScheduleForm;
+import com.increff.omni.reporting.model.form.*;
 import com.increff.commons.springboot.common.ApiException;
 import com.increff.commons.springboot.common.ApiStatus;
 
@@ -17,7 +15,10 @@ import java.util.stream.Collectors;
 import static com.increff.commons.springboot.server.DtoHelper.checkValid;
 
 public class ValidateUtil {
+
     public static int MAX_DASHBOARD_CHARTS = 6;
+    private static String UNIFY_QUERY_STRING = "unify";
+
     public static void validateReportForm(ReportForm form) throws ApiException {
         checkValid(form);
         if(form.getIsChart() && form.getCanSchedule())
@@ -29,6 +30,16 @@ public class ValidateUtil {
         if(form.getChartType() != ChartType.REPORT && !form.getIsChart())
             throw new ApiException(ApiStatus.BAD_DATA, "isChart should be true for Chart Type: " + form.getChartType());
 
+    }
+
+    public static void validateReportQueryForm(ReportQueryForm form, AppName appName) throws ApiException {
+        checkValid(form);
+//        if(appName.equals(AppName.UNIFY)) { // todo : uncomment after real UNIFY DB is added
+//            if(!form.getQuery().contains(UNIFY_QUERY_STRING)) {
+//                throw new ApiException(ApiStatus.BAD_DATA, "Query should contain " + UNIFY_QUERY_STRING + " for App " + appName
+//                        + " Query : " + form.getQuery());
+//            }
+//        }
     }
 
     public static void validateDashboardChartForms(List<DashboardChartForm> forms) throws ApiException {
@@ -60,5 +71,16 @@ public class ValidateUtil {
             throw new ApiException(ApiStatus.BAD_DATA, "Atleast one email or pipeline is required");
         if(form.getSendTo().size() > 0 && form.getPipelineDetails().size() > 0)
             throw new ApiException(ApiStatus.BAD_DATA, "Only one of email or pipeline should be given, not both");
+    }
+
+    public static void validateDefaultValueForm(List<DefaultValueForm> forms, Integer dashboardId) throws ApiException {
+        for(DefaultValueForm form : forms)
+            checkValid(form);
+        Set<Integer> dashboardIds = forms.stream().map(DefaultValueForm::getDashboardId).collect(Collectors.toSet());
+        if(dashboardIds.size() > 1)
+            throw new ApiException(ApiStatus.BAD_DATA, "All dashboardIds should be same when updating default value");
+        if(dashboardIds.size() == 1 && !dashboardIds.contains(dashboardId))
+            throw new ApiException(ApiStatus.BAD_DATA, "DashboardId in all default value forms should be same as dashboardId in url");
+
     }
 }

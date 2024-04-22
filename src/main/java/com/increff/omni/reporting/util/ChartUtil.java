@@ -53,7 +53,7 @@ public class ChartUtil {
             log.debug("difference: " + difference);
             if (difference != 0) { // As the final sum can be between(99.xx to 100.xx) due to precision, add the offset to first value
                 columnNameRowRemoved.get(0).put(PCT_VAL_COL, String.format("%.2f", Double.parseDouble(columnNameRowRemoved.get(0).get(PCT_VAL_COL)) + difference));
-            } // TODO: Make pct sum 100 by calculating final row pct after  from sum of the rest instead of doing above BS
+            }
         }
     }
 

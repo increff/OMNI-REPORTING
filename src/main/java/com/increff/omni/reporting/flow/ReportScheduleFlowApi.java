@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 
 @Service
 @Transactional(rollbackFor = ApiException.class)
-public class ReportScheduleFlowApi extends AbstractFlowApi {
+public class ReportScheduleFlowApi extends FlowApi {
 
     @Autowired
     private ReportScheduleApi reportScheduleApi;

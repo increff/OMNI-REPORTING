@@ -6,6 +6,13 @@
     <artifactId>omni-reporting</artifactId>
     <version>2.0.0-SNAPSHOT</version>
 
+    <parent>
+        <!-- version for all the spring boot starters -->
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.2.0</version>
+    </parent>
+
     <properties>
         <!-- Maven Properties -->
         <java.version>21</java.version>
@@ -30,6 +37,12 @@
 
 
     <dependencies>
+
+        <dependency>
+            <groupId>org.mongodb</groupId>
+            <artifactId>mongodb-driver-sync</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>com.increff.commons</groupId>
             <artifactId>increff-commons-fileclient</artifactId>
@@ -129,7 +142,7 @@
         <dependency>
             <groupId>com.increff.commons</groupId>
             <artifactId>query-executor-client</artifactId>
-            <version>2.0-SNAPSHOT</version>
+            <version>1.6.2</version>
         </dependency>
 
     </dependencies>
