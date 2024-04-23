@@ -10,8 +10,8 @@ import com.increff.omni.reporting.model.data.*;
 import com.increff.omni.reporting.model.form.ReportRequestForm;
 import com.increff.omni.reporting.model.form.ReportScheduleForm;
 import com.increff.omni.reporting.pojo.*;
-import com.increff.service.encryption.common.CryptoCommon;
-import com.increff.service.encryption.form.CryptoForm;
+import com.increff.service.encryption.form.CryptoDecodeFormWithoutKey;
+import com.increff.service.encryption.form.CryptoFormWithoutKey;
 import com.nextscm.commons.lang.StringUtil;
 import com.increff.commons.springboot.common.ApiException;
 import com.increff.commons.springboot.common.ApiStatus;
@@ -352,18 +352,16 @@ public class CommonDtoHelper {
         return reportPojo;
     }
 
-    public static CryptoForm getCryptoForm(String password, Integer userId) {
-        CryptoForm cryptoForm = new CryptoForm();
-        cryptoForm.setKey("key");
+    public static CryptoFormWithoutKey getCryptoForm(String password, Integer userId) {
+        CryptoFormWithoutKey cryptoForm = new CryptoFormWithoutKey();
         cryptoForm.setValue(password);
         cryptoForm.setAppName("omni-reporting");
         cryptoForm.setOrgId(userId.toString());
         return cryptoForm;
     }
 
-    public static CryptoCommon convertToCryptoForm(String value) {
-        CryptoCommon form = new CryptoCommon();
-        form.setKey("key");
+    public static CryptoDecodeFormWithoutKey convertToCryptoForm(String value) {
+        CryptoDecodeFormWithoutKey form = new CryptoDecodeFormWithoutKey();
         form.setValue(value);
         return form;
     }

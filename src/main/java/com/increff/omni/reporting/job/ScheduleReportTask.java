@@ -3,7 +3,6 @@ package com.increff.omni.reporting.job;
 import com.increff.commons.fileclient.AbstractFileProvider;
 import com.increff.commons.fileclient.AwsFileProvider;
 import com.increff.commons.fileclient.GcpFileProvider;
-import com.increff.commons.queryexecutor.QueryExecutorClient;
 import com.increff.commons.springboot.client.AppClientException;
 import com.increff.commons.springboot.common.ApiException;
 import com.increff.commons.springboot.common.ApiStatus;
@@ -19,7 +18,7 @@ import com.increff.omni.reporting.model.form.FileProviderFolder.GcpPipelineConfi
 import com.increff.omni.reporting.pojo.*;
 import com.increff.omni.reporting.util.*;
 import com.increff.service.encryption.EncryptionClient;
-import com.increff.service.encryption.common.CryptoCommon;
+import com.increff.service.encryption.form.CryptoDecodeFormWithoutKey;
 import jakarta.mail.MessagingException;
 import jakarta.persistence.OptimisticLockException;
 import lombok.extern.log4j.Log4j2;
@@ -249,7 +248,7 @@ public class ScheduleReportTask extends AbstractTask {
 
     private String getDecryptedPassword(String password) throws ApiException {
         try {
-            CryptoCommon form = CommonDtoHelper.convertToCryptoForm(password);
+            CryptoDecodeFormWithoutKey form = CommonDtoHelper.convertToCryptoForm(password);
             String decryptedPassword = encryptionClient.decode(form).getValue();
             return Objects.isNull(decryptedPassword) ? password : decryptedPassword;
         } catch (AppClientException e) {

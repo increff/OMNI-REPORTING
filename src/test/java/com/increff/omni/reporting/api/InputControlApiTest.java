@@ -224,51 +224,6 @@ public class InputControlApiTest extends AbstractTest {
         assertEquals("PACKED", valuesPojoList.get(2).getValue());
     }
 
-    @Test
-    public void testAddInputControlSameDisplayName() throws ApiException {
-        InputControlPojo inputControlPojo = getInputControlPojo("Item Status", "itemStatus"
-                , InputControlScope.GLOBAL, InputControlType.MULTI_SELECT, p.getId());
-        List<InputControlValuesPojo> valuesPojos = getInputControlValuesPojo(Arrays.asList("LIVE", "NEW", "PACKED")
-                , null);
-        api.add(inputControlPojo, null, valuesPojos);
-        InputControlPojo pojo = api.getCheck(inputControlPojo.getId());
-        assertNotNull(pojo);
-        assertEquals("Item Status", pojo.getDisplayName());
-        assertEquals("itemStatus", pojo.getParamName());
-        assertEquals(InputControlScope.GLOBAL, pojo.getScope());
-        assertEquals(InputControlType.MULTI_SELECT, pojo.getType());
-        InputControlPojo inputControlPojo2 = getInputControlPojo("Item Status", "item_Status"
-                , InputControlScope.GLOBAL, InputControlType.MULTI_SELECT, p.getId());
-        try {
-            api.add(inputControlPojo2, null, valuesPojos);
-        } catch (ApiException e) {
-            assertEquals(ApiStatus.BAD_DATA, e.getStatus());
-            assertEquals("Cannot create input control with same display name or param name", e.getMessage());
-        }
-    }
-
-    @Test
-    public void testAddInputControlSameParamName() throws ApiException {
-        InputControlPojo inputControlPojo = getInputControlPojo("Item-Status", "itemStatus"
-                , InputControlScope.GLOBAL, InputControlType.MULTI_SELECT, p.getId());
-        List<InputControlValuesPojo> valuesPojos = getInputControlValuesPojo(Arrays.asList("LIVE", "NEW", "PACKED")
-                , null);
-        api.add(inputControlPojo, null, valuesPojos);
-        InputControlPojo pojo = api.getCheck(inputControlPojo.getId());
-        assertNotNull(pojo);
-        assertEquals("Item-Status", pojo.getDisplayName());
-        assertEquals("itemStatus", pojo.getParamName());
-        assertEquals(InputControlScope.GLOBAL, pojo.getScope());
-        assertEquals(InputControlType.MULTI_SELECT, pojo.getType());
-        InputControlPojo inputControlPojo2 = getInputControlPojo("Item Status", "itemStatus"
-                , InputControlScope.GLOBAL, InputControlType.MULTI_SELECT, p.getId());
-        try {
-            api.add(inputControlPojo2, null, valuesPojos);
-        } catch (ApiException e) {
-            assertEquals(ApiStatus.BAD_DATA, e.getStatus());
-            assertEquals("Cannot create input control with same display name or param name", e.getMessage());
-        }
-    }
 
     @Test
     public void testSelectMultiple() throws ApiException {

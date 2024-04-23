@@ -10,7 +10,7 @@ import com.increff.omni.reporting.model.constants.ReportType;
 import com.increff.omni.reporting.model.constants.Roles;
 import com.increff.omni.reporting.pojo.*;
 import com.increff.service.encryption.EncryptionClient;
-import com.increff.service.encryption.common.CryptoCommon;
+import com.increff.service.encryption.form.CryptoDecodeFormWithoutKey;
 import com.nextscm.commons.lang.StringUtil;
 import com.increff.commons.springboot.client.AppClientException;
 import com.increff.commons.springboot.common.ApiException;
@@ -181,7 +181,7 @@ public class AbstractDto extends AbstractDtoApi {
 
     protected String getDecryptedPassword(String password) throws ApiException {
         try {
-            CryptoCommon form = CommonDtoHelper.convertToCryptoForm(password);
+            CryptoDecodeFormWithoutKey form = CommonDtoHelper.convertToCryptoForm(password);
             String decryptedPassword = encryptionClient.decode(form).getValue();
             return Objects.isNull(decryptedPassword) ? password : decryptedPassword;
         } catch (AppClientException e) {

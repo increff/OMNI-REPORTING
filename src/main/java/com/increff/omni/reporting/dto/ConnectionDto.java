@@ -9,10 +9,9 @@ import com.increff.omni.reporting.model.constants.DBType;
 import com.increff.omni.reporting.model.data.ConnectionData;
 import com.increff.omni.reporting.model.form.ConnectionForm;
 import com.increff.omni.reporting.pojo.ConnectionPojo;
-import com.increff.omni.reporting.util.FileUtil;
 import com.increff.omni.reporting.util.MongoUtil;
 import com.increff.service.encryption.EncryptionClient;
-import com.increff.service.encryption.form.CryptoForm;
+import com.increff.service.encryption.form.CryptoFormWithoutKey;
 import com.nextscm.commons.lang.StringUtil;
 import com.increff.commons.springboot.client.AppClientException;
 import com.increff.commons.springboot.common.ApiException;
@@ -103,7 +102,7 @@ public class ConnectionDto extends AbstractDto {
 
     private String encryptPassword(ConnectionForm connectionForm, Integer userId) throws ApiException {
         try {
-            CryptoForm form = getCryptoForm(connectionForm.getPassword(), userId);
+            CryptoFormWithoutKey form = getCryptoForm(connectionForm.getPassword(), userId);
             return encryptionClient.encode(form).getValue();
         } catch (AppClientException e) {
             throw new ApiException(ApiStatus.BAD_DATA, "Failed to encrypt password : " + e.getMessage());

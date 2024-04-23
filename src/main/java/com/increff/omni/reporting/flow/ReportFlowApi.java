@@ -24,11 +24,14 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
 import java.io.IOException;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.increff.omni.reporting.dto.AbstractDto.*;
+import static com.increff.omni.reporting.dto.AbstractDto.isCustomReportUser;
 import static com.increff.omni.reporting.dto.CommonDtoHelper.*;
 
 @Service
@@ -230,6 +233,13 @@ public class ReportFlowApi extends FlowApi {
         checkNotNull(pojo, "No report control exist with control id : " + controlId);
         reportValidationGroupApi.deleteByReportIdAndReportControlId(reportId, pojo.getId());
         reportControlsApi.delete(pojo.getId());
+        InputControlPojo inputControlPojo = inputControlApi.getCheck(controlId);
+
+        // Delete everything if it is a local control
+        // DO NOT DELETE global as it might be used in other reports
+        if (inputControlPojo.getScope().equals(InputControlScope.LOCAL))
+            inputControlApi.delete(controlId);
+
     }
 
     @Transactional(rollbackFor = ApiException.class)
@@ -241,6 +251,7 @@ public class ReportFlowApi extends FlowApi {
         // Migrate Reports
         List<ReportPojo> oldSchemaReports = api.getBySchemaVersion(oldSchemaVersionId, null);
         for (ReportPojo oldReport : oldSchemaReports) {
+            log.info("Migrating report id : " + oldReport.getId());
             ReportPojo ex = api.getByNameAndSchema(oldReport.getName(), newSchemaVersionId, oldReport.getIsChart());
             if (Objects.nonNull(ex))
                 continue;
@@ -399,6 +410,7 @@ public class ReportFlowApi extends FlowApi {
         Map<Integer, Integer> oldToNewControls = new HashMap<>();
         List<InputControlPojo> oldControls = inputControlApi.getBySchemaVersion(oldSchemaVersionId);
         for (InputControlPojo o : oldControls) {
+            log.info("Migrating control id : " + o.getId());
             InputControlPojo p = getInputControlPojoFromOldControl(newSchemaVersionId, o);
             InputControlQueryPojo q = null;
             List<InputControlValuesPojo> v = new ArrayList<>();
