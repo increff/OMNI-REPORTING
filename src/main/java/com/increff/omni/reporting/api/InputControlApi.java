@@ -70,6 +70,16 @@ public class InputControlApi extends AbstractApi {
         return ex;
     }
 
+    public void delete(Integer id) throws ApiException {
+        InputControlPojo pojo = getCheck(id);
+        dao.remove(pojo);
+        InputControlQueryPojo queryPojo = selectControlQuery(id);
+        if (Objects.nonNull(queryPojo))
+            queryDao.remove(queryPojo.getId());
+        List<InputControlValuesPojo> valuesPojoList = valuesDao.selectMultiple("controlId", id);
+        valuesPojoList.forEach(v -> valuesDao.remove(v.getId()));
+    }
+
     public List<InputControlPojo> getByScope(InputControlScope scope) {
         return dao.selectMultiple("scope", scope);
     }

@@ -233,6 +233,13 @@ public class ReportFlowApi extends FlowApi {
         checkNotNull(pojo, "No report control exist with control id : " + controlId);
         reportValidationGroupApi.deleteByReportIdAndReportControlId(reportId, pojo.getId());
         reportControlsApi.delete(pojo.getId());
+        InputControlPojo inputControlPojo = inputControlApi.getCheck(controlId);
+
+        // Delete everything if it is a local control
+        // DO NOT DELETE global as it might be used in other reports
+        if (inputControlPojo.getScope().equals(InputControlScope.LOCAL))
+            inputControlApi.delete(controlId);
+
     }
 
     @Transactional(rollbackFor = ApiException.class)
