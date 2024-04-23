@@ -2,12 +2,9 @@ package com.increff.omni.reporting.config;
 
 import com.increff.account.client.UserPrincipal;
 import com.increff.omni.reporting.model.constants.AppResourceKeys;
-import com.increff.omni.reporting.model.constants.ChartType;
-import com.increff.omni.reporting.model.constants.PipelineType;
-import com.increff.omni.reporting.model.form.PipelineForm;
 import com.increff.service.encryption.EncryptionClient;
-import com.increff.service.encryption.data.CryptoData;
-import com.increff.service.encryption.form.CryptoForm;
+import com.increff.service.encryption.data.CryptoDataWithoutKey;
+import com.increff.service.encryption.form.CryptoFormWithoutKey;
 import com.nextscm.commons.spring.client.AppClientException;
 import org.junit.Before;
 import org.junit.runner.RunWith;
@@ -47,18 +44,18 @@ public abstract class AbstractTest {
     public void setUp() throws AppClientException {
         MockitoAnnotations.initMocks(this);
         setSecurityContext();
-        Mockito.when(encryptionClient.encode(Mockito.any(CryptoForm.class))).thenReturn(getCryptoData());
+        Mockito.when(encryptionClient.encode(Mockito.any(CryptoFormWithoutKey.class))).thenReturn(getCryptoData());
         Mockito.when(encryptionClient.decode(Mockito.any())).thenReturn(getDecryptedCryptoData());
     }
 
-    private CryptoData getCryptoData() {
-        CryptoData cryptoData = new CryptoData();
+    private CryptoDataWithoutKey getCryptoData() {
+        CryptoDataWithoutKey cryptoData = new CryptoDataWithoutKey();
         cryptoData.setValue("UUID");
         return cryptoData;
     }
 
-    private CryptoData getDecryptedCryptoData() {
-        CryptoData cryptoData = new CryptoData();
+    private CryptoDataWithoutKey getDecryptedCryptoData() {
+        CryptoDataWithoutKey cryptoData = new CryptoDataWithoutKey();
         cryptoData.setValue("nextscm@fashion");
         return cryptoData;
     }
