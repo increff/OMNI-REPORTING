@@ -120,6 +120,11 @@ public class InputControlApi extends AbstractApi {
     }
 
     private void validateControlAddition(InputControlPojo pojo) throws ApiException {
+        if (pojo.getScope().equals(InputControlScope.LOCAL)) {
+            return; // Skip checking existing controls for same param name as it does not matter if local and global filters have same param name
+        }
+
+        // 2 global filters with same param name not allowed
         InputControlPojo existingByName = getByScopeAndDisplayName(InputControlScope.GLOBAL, pojo.getDisplayName(),
                 pojo.getSchemaVersionId());
 
