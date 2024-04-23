@@ -46,7 +46,7 @@ public class RateLimitingFilter extends GenericFilterBean {
     }
 
     @Bean
-    public FilterRegistrationBean<RateLimitingFilter> tenantFilterRegistration(RateLimitingFilter filter) {
+    public FilterRegistrationBean<RateLimitingFilter> rateLimitingFilterRegistrationBean(RateLimitingFilter filter) {
         FilterRegistrationBean<RateLimitingFilter> registration = new FilterRegistrationBean<>(filter);
         registration.setEnabled(false);
         return registration;

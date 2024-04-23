@@ -48,7 +48,7 @@ public class ReportAppAccessFilter extends GenericFilterBean {
     private ObjectMapper objectMapper;
 
     @Bean
-    public FilterRegistrationBean<ReportAppAccessFilter> tenantFilterRegistration(ReportAppAccessFilter filter) {
+    public FilterRegistrationBean<ReportAppAccessFilter> reportAppAccessFilterRegistrationBean(ReportAppAccessFilter filter) {
         FilterRegistrationBean<ReportAppAccessFilter> registration = new FilterRegistrationBean<>(filter);
         registration.setEnabled(false);
         return registration;

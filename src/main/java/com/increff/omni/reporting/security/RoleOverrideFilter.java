@@ -23,7 +23,7 @@ import java.util.Objects;
 public class RoleOverrideFilter extends GenericFilterBean {
 
     @Bean
-    public FilterRegistrationBean<RoleOverrideFilter> tenantFilterRegistration(RoleOverrideFilter filter) {
+    public FilterRegistrationBean<RoleOverrideFilter> roleOverrideFilterRegistrationBean(RoleOverrideFilter filter) {
         FilterRegistrationBean<RoleOverrideFilter> registration = new FilterRegistrationBean<>(filter);
         registration.setEnabled(false);
         return registration;
