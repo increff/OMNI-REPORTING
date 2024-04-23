@@ -136,7 +136,7 @@
         <dependency>
             <groupId>com.increff.account</groupId>
             <artifactId>account-springboot-client</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <version>0.0.1</version>
         </dependency>
 
         <dependency>
@@ -187,43 +187,6 @@
                 </executions>
             </plugin>
 
-<!--            <plugin>-->
-<!--                <groupId>com.google.cloud.tools</groupId>-->
-<!--                <artifactId>jib-maven-plugin</artifactId>-->
-<!--                <version>3.4.0</version>-->
-<!--                <configuration>-->
-<!--                    <from>-->
-<!--                        <image>rishavraj987654321/reporting-base-image:latest</image>-->
-<!--                        <platforms>-->
-<!--                            <platform>-->
-<!--                                <os>linux</os>-->
-<!--                                <architecture>amd64</architecture>-->
-<!--                            </platform>-->
-<!--                        </platforms>-->
-<!--                    </from>-->
-<!--                    <to>-->
-<!--                        <image>omni-reporting</image>-->
-<!--                        <tags>-->
-<!--                            <tag>${project.version}</tag>-->
-<!--                        </tags>-->
-<!--                    </to>-->
-<!--                    <extraDirectories>-->
-<!--                        <paths>-->
-<!--                            <path>-->
-<!--                                <from>target/</from>-->
-<!--                                <into>/usr/local/</into>-->
-<!--                                <includes>*.jar</includes>-->
-<!--                            </path>-->
-<!--                        </paths>-->
-<!--                    </extraDirectories>-->
-<!--                    <container>-->
-<!--                        <ports>-->
-<!--                            <port>9000</port>-->
-<!--                        </ports>-->
-<!--                        <entrypoint>INHERIT</entrypoint>-->
-<!--                    </container>-->
-<!--                </configuration>-->
-<!--            </plugin>-->
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

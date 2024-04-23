@@ -24,13 +24,13 @@ public class StandardSecurityConfig {
     @Autowired
     private AuthClient authClient;
     @Autowired
-    private ApplicationProperties applicationProperties;
+    private RateLimitingFilter rateLimitingFilter;
 
-//    @Autowired
-//    private ReportAppAccessFilter reportAppAccessFilter;
+    @Autowired
+    private ReportAppAccessFilter reportAppAccessFilter;
 
-//    @Autowired
-//    private RoleOverrideFilter roleOverrideFilter;
+    @Autowired
+    private RoleOverrideFilter roleOverrideFilter;
 
     @Bean
     public SecurityFilterChain standardSecurityFilterChain(HttpSecurity http) throws Exception {
@@ -41,17 +41,17 @@ public class StandardSecurityConfig {
                     auth
                             .requestMatchers("/standard/schedules/**").hasAnyAuthority(Roles.APP_ADMIN.getRole())//
                             .requestMatchers("/standard/pipelines/**").hasAnyAuthority(Roles.APP_ADMIN.getRole())//
-                            .requestMatchers(HttpMethod.POST, "/standard/dashboards/{dashboardId}/view").hasAnyAuthority("@roleUtil.hasAdminOrStandardOrCustom(authentication)")
-                            .requestMatchers(HttpMethod.GET, "/standard/dashboards/**").hasAnyAuthority("@roleUtil.hasAdminOrStandardOrCustom(authentication)")//
+                            .requestMatchers(HttpMethod.POST, "/standard/dashboards/{dashboardId}/view").hasAnyAuthority(Roles.APP_ADMIN.getRole(), Roles.OMNI_REPORT_STANDARD.getRole(), Roles.OMNI_REPORT_CUSTOM.getRole(), "icc.report.standard", "icc.report.custom"  )
+                            .requestMatchers(HttpMethod.GET, "/standard/dashboards/**").hasAnyAuthority(Roles.APP_ADMIN.getRole(), Roles.OMNI_REPORT_STANDARD.getRole(), Roles.OMNI_REPORT_CUSTOM.getRole(), "icc.report.standard", "icc.report.custom"  )//
                             .requestMatchers("/standard/dashboards/**").hasAnyAuthority(Roles.APP_ADMIN.getRole())//
-                            .requestMatchers("/standard/**").hasAnyAuthority("@roleUtil.hasAdminOrStandardOrCustom(authentication)");
+                            .requestMatchers("/standard/**").hasAnyAuthority(Roles.APP_ADMIN.getRole(), Roles.OMNI_REPORT_STANDARD.getRole(), Roles.OMNI_REPORT_CUSTOM.getRole(), "icc.report.standard", "icc.report.custom"  );
                 })
                 .cors(AbstractHttpConfigurer::disable)
                 .csrf(AbstractHttpConfigurer::disable)
                 .addFilterBefore(new AuthTokenFilter(authClient), BasicAuthenticationFilter.class)
-//                .addFilterBefore(roleOverrideFilter, BasicAuthenticationFilter.class)
-                .addFilterAfter(new RateLimitingFilter(applicationProperties), AuthTokenFilter.class)
-//                .addFilterAfter(reportAppAccessFilter, RateLimitingFilter.class)
+                .addFilterBefore(roleOverrideFilter, BasicAuthenticationFilter.class)
+                .addFilterAfter(rateLimitingFilter, AuthTokenFilter.class)
+                .addFilterAfter(reportAppAccessFilter, RateLimitingFilter.class)
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
         return http.build();
     }
