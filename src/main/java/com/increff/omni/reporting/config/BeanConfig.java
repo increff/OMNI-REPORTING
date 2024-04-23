@@ -69,10 +69,6 @@ public class BeanConfig {
         InputStream inputStream = new ByteArrayInputStream(bytes);
         return new FileDownloadUtil(applicationProperties.getGcpBucketName(), inputStream);
     }
-//    @Bean
-//    public FileDownloadUtil getFileDownloadUtil() throws IOException {
-//        return new FileDownloadUtil(applicationProperties.getGcpBucketName(), applicationProperties.getGcpFilePath());
-//    }
 
 
     @Bean
