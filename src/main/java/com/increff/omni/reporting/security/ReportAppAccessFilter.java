@@ -9,6 +9,12 @@ import com.increff.commons.springboot.common.ApiException;
 import com.increff.commons.springboot.common.ApiStatus;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.GenericFilterBean;
 
@@ -40,6 +46,13 @@ public class ReportAppAccessFilter extends GenericFilterBean {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @Bean
+    public FilterRegistrationBean<ReportAppAccessFilter> tenantFilterRegistration(ReportAppAccessFilter filter) {
+        FilterRegistrationBean<ReportAppAccessFilter> registration = new FilterRegistrationBean<>(filter);
+        registration.setEnabled(false);
+        return registration;
+    }
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException {

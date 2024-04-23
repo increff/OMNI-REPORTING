@@ -103,7 +103,7 @@ public class RateLimitingFilter extends GenericFilterBean {
     }
 
     public void clearUserRateLimiterMap() {
-        log.info("RateLimitingFilter.clearUserRateLimiterMap: " + " userRateLimitersMap.size " + userRateLimiters.size()
+        log.debug("RateLimitingFilter.clearUserRateLimiterMap: " + " userRateLimitersMap.size " + userRateLimiters.size()
                 + " RateLimiting" + properties.getTokens() + " tokens per " + properties.getTokensRefillRateSeconds() + " seconds");
         userRateLimiters.entrySet().removeIf(entry -> entry.getValue().getAvailableTokens() == properties.getTokens());
     }

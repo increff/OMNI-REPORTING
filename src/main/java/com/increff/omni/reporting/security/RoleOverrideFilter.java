@@ -4,6 +4,8 @@ import com.increff.account.client.SecurityUtil;
 import com.increff.account.client.UserPrincipal;
 import com.increff.omni.reporting.model.constants.Roles;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.GenericFilterBean;
@@ -19,6 +21,13 @@ import java.util.Objects;
 @Component
 @Log4j2
 public class RoleOverrideFilter extends GenericFilterBean {
+
+    @Bean
+    public FilterRegistrationBean<RoleOverrideFilter> tenantFilterRegistration(RoleOverrideFilter filter) {
+        FilterRegistrationBean<RoleOverrideFilter> registration = new FilterRegistrationBean<>(filter);
+        registration.setEnabled(false);
+        return registration;
+    }
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)

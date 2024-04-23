@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.Setter;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 @Entity
 @Setter
@@ -23,6 +25,7 @@ public class SchemaVersionPojo extends AbstractVersionedPojo {
     private String name;
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
+    @JdbcTypeCode(SqlTypes.VARCHAR)
     private AppName appName;
 
 }

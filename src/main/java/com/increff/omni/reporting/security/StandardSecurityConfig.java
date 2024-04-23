@@ -26,11 +26,11 @@ public class StandardSecurityConfig {
     @Autowired
     private ApplicationProperties applicationProperties;
 
-    @Autowired
-    private ReportAppAccessFilter reportAppAccessFilter;
+//    @Autowired
+//    private ReportAppAccessFilter reportAppAccessFilter;
 
-    @Autowired
-    private RoleOverrideFilter roleOverrideFilter;
+//    @Autowired
+//    private RoleOverrideFilter roleOverrideFilter;
 
     @Bean
     public SecurityFilterChain standardSecurityFilterChain(HttpSecurity http) throws Exception {
@@ -49,9 +49,9 @@ public class StandardSecurityConfig {
                 .cors(AbstractHttpConfigurer::disable)
                 .csrf(AbstractHttpConfigurer::disable)
                 .addFilterBefore(new AuthTokenFilter(authClient), BasicAuthenticationFilter.class)
-                .addFilterBefore(roleOverrideFilter, BasicAuthenticationFilter.class)
+//                .addFilterBefore(roleOverrideFilter, BasicAuthenticationFilter.class)
                 .addFilterAfter(new RateLimitingFilter(applicationProperties), AuthTokenFilter.class)
-                .addFilterAfter(reportAppAccessFilter, RateLimitingFilter.class)
+//                .addFilterAfter(reportAppAccessFilter, RateLimitingFilter.class)
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
         return http.build();
     }

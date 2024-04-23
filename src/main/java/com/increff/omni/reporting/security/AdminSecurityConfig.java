@@ -27,9 +27,6 @@ public class AdminSecurityConfig {
     @Autowired
     private ApplicationProperties applicationProperties;
 
-    private static final String APP_ADMIN = "app.admin";
-    private static final String REPORT_ADMIN = "report.admin";
-
     @Bean
     public SecurityFilterChain adminSecurityFilterChain(HttpSecurity http) throws Exception {
 

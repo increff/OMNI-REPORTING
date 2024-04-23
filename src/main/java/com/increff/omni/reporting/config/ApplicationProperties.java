@@ -99,7 +99,7 @@ public class ApplicationProperties {
     @Value("${query.outDir:omni-reporting-files}")
     private String outDir;
 
-    @Value("${app.version:UNKNOWN}")
+    @Value("${project.version:UNKNOWN}")
     private String version;
 
     @Value("${from.email}")
