@@ -24,12 +24,11 @@
 
         <!--    Versions    -->
         <increff-commons-fileclient.version>2.0.0-SNAPSHOT</increff-commons-fileclient.version>
-        <bucket4j_jdk8-core.version>8.7.0</bucket4j_jdk8-core.version>
+        <bucket4j-core.version>8.7.0</bucket4j-core.version>
         <commons-springboot-server.version>0.0.1</commons-springboot-server.version>
         <commons-springboot-db-mysql.version>0.0.1</commons-springboot-db-mysql.version>
         <commons-springboot-audit-mysql.version>0.0.1</commons-springboot-audit-mysql.version>
         <commons-springboot-test.version>0.0.1</commons-springboot-test.version>
-        <agnus-mail.version>2.0.1</agnus-mail.version>
         <google-cloud-storage.version>2.20.0</google-cloud-storage.version>
         <commons-io.version>2.7</commons-io.version>
         <commons-csv.version>1.9.0</commons-csv.version>
@@ -52,8 +51,8 @@
         <!-- https://mvnrepository.com/artifact/com.github.vladimir-bukhtoyarov/bucket4j-core -->
         <dependency>
             <groupId>com.bucket4j</groupId>
-            <artifactId>bucket4j_jdk8-core</artifactId>
-            <version>${bucket4j_jdk8-core.version}</version>
+            <artifactId>bucket4j-core</artifactId>
+            <version>${bucket4j-core.version}</version>
         </dependency>
 
         <dependency>
@@ -90,7 +89,6 @@
         <dependency>
             <groupId>org.eclipse.angus</groupId>
             <artifactId>angus-mail</artifactId>
-            <version>${agnus-mail.version}</version>
         </dependency>
 
         <dependency>
