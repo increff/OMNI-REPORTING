@@ -369,13 +369,13 @@ public class ReportFlowApi extends FlowApi {
 
         List<SchemaVersionPojo> aliasSchemas = schemaVersionApi.getByIds(api.getByAlias(pojo.getAlias()).stream()
                 .map(ReportPojo::getSchemaVersionId).collect(Collectors.toList()));
-        List<AppName> existingAppNames = aliasSchemas.stream().map(SchemaVersionPojo::getAppName).collect(Collectors.toList());
+        Set<AppName> existingAppNames = aliasSchemas.stream().map(SchemaVersionPojo::getAppName).collect(Collectors.toSet());
         AppName curentAppName = schemaVersionApi.getCheck(pojo.getSchemaVersionId()).getAppName();
         if (existingAppNames.size() > 1)
             throw new ApiException(ApiStatus.BAD_DATA, "Alias " + pojo.getAlias() + " exists across app names!!"); // This should never occur. If this is hit, something disastrous has happened
-        if( (existingAppNames.size() == 1) && (existingAppNames.get(0) != curentAppName) )
+        if ((existingAppNames.size() == 1) && (existingAppNames.stream().findFirst().get() != curentAppName))
             throw new ApiException(ApiStatus.BAD_DATA, "Alias " + pojo.getAlias() + " is already present in different app." +
-                    " CurrentAppName : " + curentAppName + " ExistingAppName : " + existingAppNames.get(0));
+                    " CurrentAppName : " + curentAppName + " ExistingAppName : " + existingAppNames.stream().findFirst().get());
 
         if(StringUtil.isEmpty(pojo.getAlias()) || pojo.getAlias().contains(" "))
             throw new ApiException(ApiStatus.BAD_DATA, "Report alias can't have space, use underscore(_) instead");

@@ -144,7 +144,7 @@ public class InputControlApi extends AbstractApi {
         if (existingByName != null || existingByParam != null) {
             log.error("InputControlPojo\n" + JsonUtil.serialize(pojo));
             throw new ApiException(ApiStatus.BAD_DATA,
-                    "Cannot create input control with same display name " + pojo.getDisplayName() + " or param name" + pojo.getParamName());
+                    "Cannot create input control with same display name " + pojo.getDisplayName() + " or param name " + pojo.getParamName());
         }
     }
 
