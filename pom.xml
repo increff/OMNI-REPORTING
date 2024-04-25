@@ -263,7 +263,7 @@
                         <entrypoint>
                             <arg>/bin/sh</arg>
                             <arg>-c</arg>
-                            <arg>java -Xms1500m -Xmx1500m -javaagent:/usr/local/elastic-apm-agent-1.38.0.jar -Dlogging.config=/usr/local/log4j2.xml -Delastic.apm.service_name=omni-reporting-docker-test -Delastic.apm.application_packages=* -Delastic.apm.server_url=http://10.180.0.51:8200 -Delastic.apm.secret_token=elkserver-dev -Delastic.apm.environment=elk -Dspring.cloud.vault.scheme=${VAULT_SCHEME} -Dspring.cloud.vault.host=${VAULT_HOST} -Dspring.cloud.vault.application-name=omniReporting -Dspring.cloud.vault.port=${VAULT_PORT} -Dspring.cloud.vault.token=${VAULT_TOKEN} -Dspring.config.import=vault:// -Dspring.profiles.active=${ACTIVE_PROFILE} -jar /usr/local/app.jar</arg>
+                            <arg>java -Xms1500m -Xmx1500m -javaagent:/usr/local/elastic-apm-agent-1.38.0.jar -Dlogging.config=/usr/local/log4j2.xml -Delastic.apm.service_name=${ELK_SERVICE_NAME} -Delastic.apm.application_packages=* -Delastic.apm.server_url=${ELK_SERVER_URL} -Delastic.apm.secret_token=${ELK_SERVER_TOKEN} -Delastic.apm.environment=elk -Dspring.cloud.vault.scheme=${VAULT_SCHEME} -Dspring.cloud.vault.host=${VAULT_HOST} -Dspring.cloud.vault.application-name=omniReporting -Dspring.cloud.vault.port=${VAULT_PORT} -Dspring.cloud.vault.token=${VAULT_TOKEN} -Dspring.config.import=vault:// -Dspring.profiles.active=${ACTIVE_PROFILE} -jar /usr/local/app.jar</arg>
                         </entrypoint>
                         <ports>
                             <port>8080</port>
