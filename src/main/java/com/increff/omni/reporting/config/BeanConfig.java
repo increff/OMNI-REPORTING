@@ -88,7 +88,6 @@ public class BeanConfig {
     @Bean
     public AuthClient authClient() {
         System.out.println("Auth BaseUrl: " + applicationProperties.getAuthBaseUrl());
-        System.out.println("Auth AppToken: " + applicationProperties.getAuthAppToken());
         return new AuthClient(applicationProperties.getAuthBaseUrl(), applicationProperties.getAuthAppToken());
     }
 
