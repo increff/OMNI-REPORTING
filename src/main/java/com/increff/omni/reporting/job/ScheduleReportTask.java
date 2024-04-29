@@ -3,6 +3,7 @@ package com.increff.omni.reporting.job;
 import com.increff.commons.fileclient.AbstractFileProvider;
 import com.increff.commons.fileclient.AwsFileProvider;
 import com.increff.commons.fileclient.GcpFileProvider;
+import com.increff.commons.fileclient.SftpFileProvider;
 import com.increff.omni.reporting.api.*;
 import com.increff.omni.reporting.config.ApplicationProperties;
 import com.increff.omni.reporting.config.EmailProps;
@@ -12,10 +13,12 @@ import com.increff.omni.reporting.model.constants.PipelineType;
 import com.increff.omni.reporting.model.constants.ReportRequestStatus;
 import com.increff.omni.reporting.model.form.FileProviderFolder.AwsPipelineConfigForm;
 import com.increff.omni.reporting.model.form.FileProviderFolder.GcpPipelineConfigForm;
+import com.increff.omni.reporting.model.form.FileProviderFolder.SftpPipelineConfigForm;
 import com.increff.omni.reporting.pojo.*;
 import com.increff.omni.reporting.util.*;
 import com.increff.service.encryption.EncryptionClient;
 import com.increff.service.encryption.form.CryptoDecodeFormWithoutKey;
+import com.jcraft.jsch.*;
 import com.nextscm.commons.spring.client.AppClientException;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
@@ -217,8 +220,12 @@ public class ScheduleReportTask extends AbstractTask {
     public void uploadScheduleFiles(PipelineType type, String configs, File file, String folderName, String filename) throws ApiException {
         try {
             AbstractFileProvider fileProvider = getFileProvider(type, configs);
-            fileProvider.create(getFilepathWithFolder(filename, folderName), Files.newInputStream(file.toPath()));
+            if (fileProvider instanceof SftpFileProvider)
+                fileProvider.create(file.toPath().toString(), getFilepathWithFolder(filename, folderName));
+            else
+                fileProvider.create(getFilepathWithFolder(filename, folderName), Files.newInputStream(file.toPath()));
         } catch (Exception e) {
+            log.error("Error while uploadScheduleFiles : " + e + " " + Arrays.toString(e.getStackTrace()));
             throw new ApiException(ApiStatus.BAD_DATA, "Error while uploadScheduleFiles : " + e.getMessage());
         }
     }
@@ -231,7 +238,7 @@ public class ScheduleReportTask extends AbstractTask {
         return filePath;
     }
 
-    private AbstractFileProvider getFileProvider(PipelineType type, String configs) throws ApiException {
+    public static AbstractFileProvider getFileProvider(PipelineType type, String configs) throws ApiException {
         try {
             switch (type) {
                 case AWS:
@@ -240,6 +247,9 @@ public class ScheduleReportTask extends AbstractTask {
                 case GCP:
                     GcpPipelineConfigForm gcpForm = getJavaObjectFromJson(configs, GcpPipelineConfigForm.class);
                     return new GcpFileProvider(gcpForm.getBucketUrl(), gcpForm.getBucketName(), new ByteArrayInputStream(gcpForm.getCredentialsJson().toString().getBytes()));
+                case SFTP:
+                    SftpPipelineConfigForm sftpForm = getJavaObjectFromJson(configs, SftpPipelineConfigForm.class);
+                    return new SftpFileProvider(sftpForm.getHost(), sftpForm.getUsername(), sftpForm.getPassword());
                 default:
                     throw new ApiException(ApiStatus.BAD_DATA, "Unsupported File Provider Type " + type);
             }
@@ -247,6 +257,31 @@ public class ScheduleReportTask extends AbstractTask {
             log.error("Error while getting file provider : " + e + " " + Arrays.toString(e.getStackTrace()));
             throw new ApiException(ApiStatus.BAD_DATA, "Error while getting file provider : " + e);
         }
+    }
+
+    public ChannelSftp setupJsch(String remoteHost, String username, String password) throws JSchException {
+        JSch jsch = new JSch();
+
+        // input stream for remoteHost ftp.increff.com
+        JSch.setConfig("StrictHostKeyChecking", "no");
+
+
+        Session jschSession = jsch.getSession(username, remoteHost);
+        jschSession.setPassword(password);
+        jschSession.connect();
+        return (ChannelSftp) jschSession.openChannel("sftp");
+    }
+
+    public void put(ChannelSftp channelSftp, String localFile, String remoteDir) throws JSchException, SftpException {
+        //ChannelSftp channelSftp = setupJsch();
+        channelSftp.connect();
+
+//        String localFile = "src/main/resources/sample.txt";
+//        String remoteDir = "remote_sftp_test/";
+
+        channelSftp.put(localFile, remoteDir);
+
+        channelSftp.exit();
     }
 
 
