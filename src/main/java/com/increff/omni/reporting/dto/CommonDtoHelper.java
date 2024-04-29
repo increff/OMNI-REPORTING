@@ -25,8 +25,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.increff.omni.reporting.dto.ReportRequestDto.accessControlledKeys;
-
 public class CommonDtoHelper {
 
     public final static String TIME_ZONE_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX";
@@ -92,6 +90,7 @@ public class CommonDtoHelper {
         data.setNoOfRows(pojo.getNoOfRows());
         data.setSequenceNumber(sequenceNumber);
         data.setFailureReason(pojo.getFailureReason());
+        data.setDisplayFailureReason(pojo.getDisplayFailureReason());
         data.setFileFormat(pojo.getFileFormat());
         setFiltersApplied(paramsPojoList, data, controlPojos);
         return data;
@@ -121,8 +120,7 @@ public class CommonDtoHelper {
                                          List<InputControlPojo> controlPojos) {
         List<InputControlFilterData> filterData = new ArrayList<>();
         for (ReportInputParamsPojo reportInputParamsPojo : paramsPojoList) {
-            if (accessControlledKeys.contains(reportInputParamsPojo.getParamKey())
-                    || reportInputParamsPojo.getParamKey().equals("orgId"))
+            if (reportInputParamsPojo.getParamKey().equals("orgId"))
                 continue;
             if (reportInputParamsPojo.getParamKey().equals("timezone")) {
                 data.setTimezone(getValueFromQuotes(reportInputParamsPojo.getParamValue()));
@@ -282,14 +280,17 @@ public class CommonDtoHelper {
             reportInputParamsPojo.setDisplayValue(inputDisplayStringMap.getOrDefault(k, v));
             reportInputParamsPojoList.add(reportInputParamsPojo);
         });
+
         ReportInputParamsPojo timeZoneParam = new ReportInputParamsPojo();
         timeZoneParam.setParamKey("timezone");
         timeZoneParam.setParamValue("'" + timeZone + "'");
         reportInputParamsPojoList.add(timeZoneParam);
+
         ReportInputParamsPojo orgIdParam = new ReportInputParamsPojo();
         orgIdParam.setParamKey("orgId");
         orgIdParam.setParamValue("'" + orgId.toString() + "'");
         reportInputParamsPojoList.add(orgIdParam);
+
         return reportInputParamsPojoList;
     }
 
@@ -419,6 +420,8 @@ public class CommonDtoHelper {
         schedulePojo.setNextRuntime(getNextRunTime(cron, form.getTimezone()));
         // New / updated schedule is created with deleted flag false
         schedulePojo.setIsDeleted(false);
+        if (Objects.nonNull(form.getEmailParams()))
+            schedulePojo.setEmailSubject(form.getEmailParams().getSubject());
         return schedulePojo;
     }
 

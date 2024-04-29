@@ -124,6 +124,7 @@ public class ReportScheduleApi extends AbstractAuditApi {
         ex.setNextRuntime(pojo.getNextRuntime());
         ex.setIsDeleted(pojo.getIsDeleted());
         ex.setStatus(pojo.getStatus());
+        ex.setEmailSubject(pojo.getEmailSubject());
         dao.update(ex);
     }
 

@@ -130,4 +130,10 @@ public class ReportTestHelper {
         queryForm.setQuery(query);
         return queryForm;
     }
+
+    public static FavouriteForm getFavoriteForm(Integer favId) {
+        FavouriteForm form = new FavouriteForm();
+        form.setFavId(favId);
+        return form;
+    }
 }

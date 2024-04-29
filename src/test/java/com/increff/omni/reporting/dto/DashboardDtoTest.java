@@ -33,8 +33,8 @@ import static com.increff.omni.reporting.helper.InputControlTestHelper.getInputC
 import static com.increff.omni.reporting.helper.OrgTestHelper.getOrganizationForm;
 import static com.increff.omni.reporting.helper.ReportTestHelper.*;
 import static com.increff.omni.reporting.helper.SchemaTestHelper.getSchemaForm;
-
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 public class DashboardDtoTest extends AbstractTest {
 
@@ -453,5 +453,65 @@ public class DashboardDtoTest extends AbstractTest {
         assertEquals(1, data.getFilterDetails().get("common").get(0).getValidationTypes().size());
         assertEquals(ValidationType.DATE_RANGE, data.getFilterDetails().get("common").get(0).getValidationTypes().get(0));
     }
+
+
+    @Test
+    public void testSetUserFavoriteDashboard() throws ApiException {
+        FavouriteForm favouriteForm = getFavoriteForm(9);
+        dashboardDto.setUserFavoriteDashboard(favouriteForm);
+        assertEquals(favouriteForm.getFavId(), dashboardDto.getFavoriteDashboard().getUserFav().getFavId());
+    }
+
+    @Test
+    public void testSetOrgFavoriteDashboard() throws ApiException {
+        FavouriteForm favouriteForm = getFavoriteForm(9);
+        dashboardDto.setOrgFavoriteDashboard(favouriteForm);
+        assertEquals(favouriteForm.getFavId(), dashboardDto.getFavoriteDashboard().getOrgFav().getFavId());
+    }
+
+    @Test
+    public void testUpdateUserFavoriteDashboard() throws ApiException {
+        FavouriteForm favouriteForm = getFavoriteForm(9);
+        dashboardDto.setUserFavoriteDashboard(favouriteForm);
+        assertEquals(favouriteForm.getFavId(), dashboardDto.getFavoriteDashboard().getUserFav().getFavId());
+        favouriteForm = getFavoriteForm(10);
+        dashboardDto.setUserFavoriteDashboard(favouriteForm);
+        assertEquals(favouriteForm.getFavId(), dashboardDto.getFavoriteDashboard().getUserFav().getFavId());
+    }
+
+    @Test
+    public void testUpdateOrgFavoriteDashboard() throws ApiException {
+        FavouriteForm favouriteForm = getFavoriteForm(9);
+        dashboardDto.setOrgFavoriteDashboard(favouriteForm);
+        assertEquals(favouriteForm.getFavId(), dashboardDto.getFavoriteDashboard().getOrgFav().getFavId());
+        favouriteForm = getFavoriteForm(10);
+        dashboardDto.setOrgFavoriteDashboard(favouriteForm);
+        assertEquals(favouriteForm.getFavId(), dashboardDto.getFavoriteDashboard().getOrgFav().getFavId());
+    }
+
+    //testBothFavoriteDashboard
+    @Test
+    public void testBothFavoriteDashboard() throws ApiException {
+        FavouriteForm userFavouriteForm = getFavoriteForm(9);
+        FavouriteForm orgFavouriteForm = getFavoriteForm(10);
+        dashboardDto.setUserFavoriteDashboard(userFavouriteForm);
+        dashboardDto.setOrgFavoriteDashboard(orgFavouriteForm);
+        assertEquals(userFavouriteForm.getFavId(), dashboardDto.getFavoriteDashboard().getUserFav().getFavId());
+        assertEquals(orgFavouriteForm.getFavId(), dashboardDto.getFavoriteDashboard().getOrgFav().getFavId());
+
+        //update user favorite dashboard
+        userFavouriteForm = getFavoriteForm(11);
+        dashboardDto.setUserFavoriteDashboard(userFavouriteForm);
+        assertEquals(userFavouriteForm.getFavId(), dashboardDto.getFavoriteDashboard().getUserFav().getFavId());
+        assertEquals(orgFavouriteForm.getFavId(), dashboardDto.getFavoriteDashboard().getOrgFav().getFavId());
+
+        //update org favorite dashboard
+        orgFavouriteForm = getFavoriteForm(12);
+        dashboardDto.setOrgFavoriteDashboard(orgFavouriteForm);
+        assertEquals(userFavouriteForm.getFavId(), dashboardDto.getFavoriteDashboard().getUserFav().getFavId());
+        assertEquals(orgFavouriteForm.getFavId(), dashboardDto.getFavoriteDashboard().getOrgFav().getFavId());
+
+    }
+
 
 }

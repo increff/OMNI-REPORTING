@@ -15,7 +15,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @CrossOrigin
 @Api
@@ -239,6 +242,31 @@ public class StandardController {
     @RequestMapping(value = "/app-names", method = RequestMethod.GET)
     public List<AppName> getAppNames() {
         return Arrays.asList(AppName.values());
+    }
+
+
+    @ApiOperation(value = "Get Favourite")
+    @RequestMapping(value = "dashboard/favourite", method = RequestMethod.GET)
+    public FavData getFavourite() {
+        return dashboardDto.getFavoriteDashboard();
+    }
+
+    @ApiOperation(value = "Set User Favourite")
+    @RequestMapping(value = "dashboard/favourite/user", method = RequestMethod.POST)
+    public FavouriteData setUserFavourite(@RequestBody FavouriteForm form) {
+        return dashboardDto.setUserFavoriteDashboard(form);
+    }
+
+    @ApiOperation(value = "Set Org Favourite")
+    @RequestMapping(value = "dashboard/favourite/org", method = RequestMethod.POST)
+    public FavouriteData setOrgFavourite(@RequestBody FavouriteForm form) {
+        return dashboardDto.setOrgFavoriteDashboard(form);
+    }
+
+    @ApiOperation(value = "Delete Favourite (If user wants to revert to org favourite)")
+    @RequestMapping(value = "dashboard/favourite/{id}", method = RequestMethod.DELETE)
+    public void deleteFavourite(@PathVariable Integer id) {
+        dashboardDto.deleteFavoriteDashboard(id);
     }
 
 }

@@ -1,10 +1,11 @@
 package com.increff.omni.reporting.api;
 
 import com.increff.omni.reporting.dao.DashboardDao;
+import com.increff.omni.reporting.dao.FavouriteDao;
 import com.increff.omni.reporting.pojo.DashboardPojo;
+import com.increff.omni.reporting.pojo.FavouritePojo;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
-import com.nextscm.commons.spring.server.AbstractApi;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,10 +15,12 @@ import java.util.Objects;
 
 @Service
 @Transactional(rollbackFor = ApiException.class)
-public class DashboardApi extends AbstractApi {
+public class DashboardApi extends AbstractAuditApi {
 
     @Autowired
     private DashboardDao dao;
+    @Autowired
+    private FavouriteDao favouriteDao;
 
     public DashboardPojo add(DashboardPojo pojo) throws ApiException {
         DashboardPojo existing = getByOrgIdName(pojo.getOrgId(), pojo.getName());
@@ -35,6 +38,7 @@ public class DashboardApi extends AbstractApi {
 
     public void delete(Integer id) throws ApiException {
         DashboardPojo pojo = getCheck(id);
+        deleteFavByFavId(pojo.getId());
         dao.remove(pojo);
     }
 
@@ -50,6 +54,40 @@ public class DashboardApi extends AbstractApi {
     }
     public DashboardPojo getByOrgIdName(Integer orgId, String name) {
         return dao.getByOrgIdName(orgId, name);
+    }
+
+    public FavouritePojo getFavByOrgUser(Integer orgId, Integer userId) {
+        return favouriteDao.getByOrgUser(orgId, userId);
+    }
+
+    public FavouritePojo getFavByOrg(Integer orgId) {
+        return favouriteDao.getByOrgUser(orgId, null);
+    }
+
+
+    public FavouritePojo setFav(FavouritePojo pojo) {
+        FavouritePojo existing = favouriteDao.getByOrgUser(pojo.getOrgId(), pojo.getUserId());
+        if (Objects.isNull(existing)) {
+            favouriteDao.persist(pojo);
+            return pojo;
+        } else {
+            existing.setFavId(pojo.getFavId());
+            existing.setOrgId(pojo.getOrgId());
+            favouriteDao.update(existing);
+            return existing;
+        }
+    }
+
+    public void deleteFavById(Integer id) {
+        FavouritePojo pojo = favouriteDao.select(id);
+        if (Objects.nonNull(pojo))
+            favouriteDao.remove(pojo);
+    }
+
+    public void deleteFavByFavId(Integer favId) {
+        List<FavouritePojo> pojos = favouriteDao.selectMultiple("favId", favId);
+        if (Objects.nonNull(pojos) && !pojos.isEmpty())
+            pojos.forEach(favouriteDao::remove);
     }
 
     private DashboardPojo getCheck(Integer id) throws ApiException {

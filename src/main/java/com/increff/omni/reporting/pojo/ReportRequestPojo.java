@@ -55,7 +55,12 @@ public class ReportRequestPojo extends AbstractVersionedPojo {
 
     @Column(columnDefinition = "TEXT")
     private String failureReason;
+    @Column(columnDefinition = "TEXT")
+    private String displayFailureReason = "";
 
     private ZonedDateTime requestCompletionTime;
+
+    @Column(nullable = false)
+    private Integer retryCount = 0;
 
 }

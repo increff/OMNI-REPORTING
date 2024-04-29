@@ -1,11 +1,19 @@
 package com.increff.omni.reporting.dto;
 
-import com.increff.omni.reporting.api.*;
+import com.increff.omni.reporting.api.ConnectionApi;
+import com.increff.omni.reporting.api.OrgMappingApi;
+import com.increff.omni.reporting.api.OrganizationApi;
+import com.increff.omni.reporting.api.SchemaVersionApi;
 import com.increff.omni.reporting.model.constants.AppName;
-import com.increff.omni.reporting.model.data.*;
+import com.increff.omni.reporting.model.data.OrgMappingsData;
+import com.increff.omni.reporting.model.data.OrgMappingsGroupedData;
+import com.increff.omni.reporting.model.data.OrgSchemaData;
+import com.increff.omni.reporting.model.data.OrganizationData;
 import com.increff.omni.reporting.model.form.OrgMappingsForm;
 import com.increff.omni.reporting.model.form.OrganizationForm;
-import com.increff.omni.reporting.pojo.*;
+import com.increff.omni.reporting.pojo.OrgMappingPojo;
+import com.increff.omni.reporting.pojo.OrganizationPojo;
+import com.increff.omni.reporting.pojo.SchemaVersionPojo;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
 import com.nextscm.commons.spring.common.ConvertUtil;
@@ -48,8 +56,8 @@ public class OrganizationDto extends AbstractDto {
     }
 
     public OrganizationData getById(Integer id) throws ApiException {
-        OrganizationPojo pojo = api.getCheck(id);
-        return ConvertUtil.convert(pojo, OrganizationData.class);
+        OrganizationPojo pojo = api.get(id);
+        return Objects.isNull(pojo) ? null : ConvertUtil.convert(pojo, OrganizationData.class);
     }
 
     public List<OrganizationData> selectAll(){

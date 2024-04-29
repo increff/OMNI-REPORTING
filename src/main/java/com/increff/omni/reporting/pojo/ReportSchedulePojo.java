@@ -52,4 +52,6 @@ public class ReportSchedulePojo extends AbstractVersionedPojo {
     @Enumerated(EnumType.STRING)
     private ScheduleStatus status = ScheduleStatus.NEW;
 
+    private String emailSubject;
+
 }
