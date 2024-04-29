@@ -46,21 +46,6 @@
 
     <dependencies>
 
-        <!--        &lt;!&ndash; SFTP https://mvnrepository.com/artifact/com.jcraft/jsch &ndash;&gt;-->
-        <!--        <dependency>-->
-        <!--            <groupId>com.jcraft</groupId>-->
-        <!--            <artifactId>jsch</artifactId>-->
-        <!--            <version>0.1.55</version>-->
-        <!--        </dependency>-->
-
-        <!--        &lt;!&ndash; https://mvnrepository.com/artifact/com.hierynomus/sshj &ndash;&gt;-->
-        <!--        <dependency>-->
-        <!--            <groupId>com.hierynomus</groupId>-->
-        <!--            <artifactId>sshj</artifactId>-->
-        <!--            <version>0.38.0</version>-->
-        <!--        </dependency>-->
-
-
         <!-- https://mvnrepository.com/artifact/org.mongodb/mongodb-driver-sync -->
         <dependency>
             <groupId>org.mongodb</groupId>
