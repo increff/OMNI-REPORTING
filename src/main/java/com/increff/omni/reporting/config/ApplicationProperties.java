@@ -178,7 +178,6 @@ public class ApplicationProperties {
     @Value("${max.retry.count:3}")
     private Integer maxRetryCount;
 
-    //UNIFY_QUERY_STRING
     @Value("${unify.query.string:mongoFilter(param}")
     private String unifyQueryString;
 
