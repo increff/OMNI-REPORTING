@@ -9,6 +9,8 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 
+import static com.increff.omni.reporting.util.ValidateUtil.UNIFY_QUERY_STRING;
+
 @Getter
 @Setter
 @Component
@@ -176,13 +178,19 @@ public class ApplicationProperties {
     @Value("${max.retry.count:3}")
     private Integer maxRetryCount;
 
+    @Value("${unify.query.string:mongoFilter(param}")
+    private String unifyQueryString;
+
     @PostConstruct
     public void init() {
+        UNIFY_QUERY_STRING = unifyQueryString;
+
         MongoUtil.MONGO_READ_TIMEOUT_SEC = mongoReadTimeoutSec;
         MongoUtil.MONGO_CONNECT_TIMEOUT_SEC = mongoConnectTimeoutSec;
         MongoUtil.MONGO_SERVER_SELECT_TIMEOUT_SEC = mongoConnectTimeoutSec;
 
         ConstantsUtil.MAX_RETRY_COUNT = maxRetryCount;
+
     }
 
 }
