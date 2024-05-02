@@ -111,7 +111,7 @@ public class ReportDtoTest extends AbstractTest {
         ReportQueryTestForm testForm = getQueryTestForm();
         testForm.setParamMap(new HashMap<>());
         ReportQueryData queryData = dto.getTransformedQuery(testForm);
-        assertEquals("select * from table where id = <<replace(id)>>;", queryData.getQuery());
+        assertEquals("select * from table where id = <<replace(<id>)>>;", queryData.getQuery());
     }
 
     @Test
@@ -119,13 +119,13 @@ public class ReportDtoTest extends AbstractTest {
         ReportQueryTestForm testForm = getQueryTestForm();
         testForm.setParamMap(new HashMap<>());
         ReportQueryData queryData = dto.getTransformedQuery(testForm);
-        assertEquals("select * from table where id = <<replace(id)>>;", queryData.getQuery());
+        assertEquals("select * from table where id = <<replace(<id>)>>;", queryData.getQuery());
     }
 
     @Test
     public void testTransformedQueryCase2() throws ApiException {
         ReportQueryTestForm testForm = getQueryTestForm();
-        testForm.setQuery("select * from table where <<filter(id,id,<=)>>;");
+        testForm.setQuery("select * from table where <<filter(<id,id,<= >)>>;");
         ReportQueryData queryData = dto.getTransformedQuery(testForm);
         assertEquals("select * from table where id <= '1';", queryData.getQuery());
     }
@@ -133,7 +133,7 @@ public class ReportDtoTest extends AbstractTest {
     @Test
     public void testMongoFilterKeepQuotesFalse() throws ApiException {
         ReportQueryTestForm testForm = getQueryTestForm();
-        testForm.setQuery("<<mongoFilter(id, { id_column : #id }, keepQuotesFalse)>>");
+        testForm.setQuery("<<mongoFilter(<id, { id_column : #id }, keepQuotesFalse>)>>");
         ReportQueryData queryData = dto.getTransformedQuery(testForm);
         assertEquals("{ id_column : 1 }", queryData.getQuery());
     }
@@ -141,7 +141,7 @@ public class ReportDtoTest extends AbstractTest {
     @Test
     public void testMongoFilterKeepQuotesTrue() throws ApiException {
         ReportQueryTestForm testForm = getQueryTestForm();
-        testForm.setQuery("<<mongoFilter(id, { id_column : #id }, keepQuotesTrue)>>");
+        testForm.setQuery("<<mongoFilter(<id, { id_column : #id }, keepQuotesTrue>)>>");
         ReportQueryData queryData = dto.getTransformedQuery(testForm);
         assertEquals("{ id_column : '1' }", queryData.getQuery());
     }
@@ -149,7 +149,7 @@ public class ReportDtoTest extends AbstractTest {
     @Test
     public void testMongoFilterNoValue() throws ApiException {
         ReportQueryTestForm testForm = getQueryTestForm();
-        testForm.setQuery("<<mongoFilter(key_wout_val, { id_column : #key_wout_val }, keepQuotesTrue)>>");
+        testForm.setQuery("<<mongoFilter(<key_wout_val, { id_column : #key_wout_val }, keepQuotesTrue>)>>");
         ReportQueryData queryData = dto.getTransformedQuery(testForm);
         assertEquals("{}", queryData.getQuery());
     }
@@ -157,7 +157,7 @@ public class ReportDtoTest extends AbstractTest {
     @Test
     public void testMongoReplaceKeepQuotesFalse() throws ApiException {
         ReportQueryTestForm testForm = getQueryTestForm();
-        testForm.setQuery("<<mongoReplace(id, keepQuotesFalse)>>");
+        testForm.setQuery("<<mongoReplace(<id, keepQuotesFalse>)>>");
         ReportQueryData queryData = dto.getTransformedQuery(testForm);
         assertEquals("1", queryData.getQuery());
     }
@@ -165,7 +165,7 @@ public class ReportDtoTest extends AbstractTest {
     @Test
     public void testMongoReplaceKeepQuotesTrue() throws ApiException {
         ReportQueryTestForm testForm = getQueryTestForm();
-        testForm.setQuery("<<mongoReplace(id, keepQuotesTrue)>>");
+        testForm.setQuery("<<mongoReplace(<id, keepQuotesTrue>)>>");
         ReportQueryData queryData = dto.getTransformedQuery(testForm);
         assertEquals("'1'", queryData.getQuery());
     }
@@ -173,7 +173,7 @@ public class ReportDtoTest extends AbstractTest {
     @Test
     public void testMongoReplaceNoValue() throws ApiException {
         ReportQueryTestForm testForm = getQueryTestForm();
-        testForm.setQuery("<<mongoReplace(id, keepQuotesTrue)>>");
+        testForm.setQuery("<<mongoReplace(<id, keepQuotesTrue>)>>");
         ReportQueryData queryData = dto.getTransformedQuery(testForm);
         assertEquals("'1'", queryData.getQuery());
     }
