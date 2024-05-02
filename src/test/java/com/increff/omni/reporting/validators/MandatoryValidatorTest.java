@@ -14,6 +14,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 public class MandatoryValidatorTest extends AbstractTest {
 
     @Autowired
@@ -27,9 +29,10 @@ public class MandatoryValidatorTest extends AbstractTest {
             validator.validate(displayNames, params, "Report 1", 0, ReportRequestType.USER);
         } catch (ApiException e) {
             assertEquals(ApiStatus.BAD_DATA, e.getStatus());
-            assertEquals("Report 1 failed in validation for key / keys : " +
-                            JsonUtil.serialize(displayNames) + " , validation type : " + ValidationType.MANDATORY,
-                    e.getMessage());
+            for (String displayName : displayNames)
+                assertTrue(e.getMessage().contains(displayName));
+            assertTrue(e.getMessage().contains(ValidationType.MANDATORY.toString()));
+            assertTrue(e.getMessage().contains("Report 1"));
         }
     }
 

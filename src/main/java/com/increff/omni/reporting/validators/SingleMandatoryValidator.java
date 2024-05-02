@@ -21,6 +21,6 @@ public class SingleMandatoryValidator extends AbstractValidator {
                 .collect(Collectors.toList());
         if (nonEmptyValues.isEmpty()) // If no value exists for any of the fields
             throw new ApiException(ApiStatus.BAD_DATA, getValidationMessage(reportName, displayName
-                    , ValidationType.SINGLE_MANDATORY, ""));
+                    , ValidationType.SINGLE_MANDATORY, "At least one of these filters values should be present"));
     }
 }

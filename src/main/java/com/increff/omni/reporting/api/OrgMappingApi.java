@@ -35,8 +35,8 @@ public class OrgMappingApi extends AbstractAuditApi {
         existing.setOrgId(pojo.getOrgId());
         existing.setSchemaVersionId(pojo.getSchemaVersionId());
         existing.setConnectionId(pojo.getConnectionId());
-        dao.update(pojo);
-        return pojo;
+        dao.update(existing);
+        return existing;
     }
 
     public OrgMappingPojo getCheck(Integer id) throws ApiException {

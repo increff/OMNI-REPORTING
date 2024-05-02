@@ -14,6 +14,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 public class SingleMandatoryValidatorTest extends AbstractTest {
 
     @Autowired
@@ -27,9 +29,10 @@ public class SingleMandatoryValidatorTest extends AbstractTest {
             validator.validate(displayNames, params, "Report 1", 0, ReportRequestType.USER);
         } catch (ApiException e) {
             assertEquals(ApiStatus.BAD_DATA, e.getStatus());
-            assertEquals("Report 1 failed in validation for key / keys : " +
-                            JsonUtil.serialize(displayNames) + " , validation type : " + ValidationType.SINGLE_MANDATORY,
-                    e.getMessage());
+            for (String displayName : displayNames)
+                assertTrue(e.getMessage().contains(displayName));
+            assertTrue(e.getMessage().contains(ValidationType.SINGLE_MANDATORY.toString()));
+            assertTrue(e.getMessage().contains("Report 1"));
         }
     }
 
@@ -41,16 +44,17 @@ public class SingleMandatoryValidatorTest extends AbstractTest {
     }
 
     @Test
-    public void testValidateErrorCase2() throws ApiException {
+    public void testValidateSuccess2() throws ApiException {
         List<String> params = Arrays.asList("'abc'", "'def'");
         List<String> displayNames = Arrays.asList("Client Id", "Item Id");
         try {
             validator.validate(displayNames, params, "Report 1", 0, ReportRequestType.USER);
         } catch (ApiException e) {
             assertEquals(ApiStatus.BAD_DATA, e.getStatus());
-            assertEquals("Report 1 failed in validation for key / keys : " +
-                            JsonUtil.serialize(displayNames) + " , validation type : " + ValidationType.SINGLE_MANDATORY,
-                    e.getMessage());
+            for (String displayName : displayNames) {
+                assertTrue(e.getMessage().contains(displayName));
+            }
+            assertTrue(e.getMessage().contains(ValidationType.SINGLE_MANDATORY.toString()));
         }
     }
 

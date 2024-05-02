@@ -48,6 +48,7 @@ import java.util.zip.ZipOutputStream;
 
 import static com.increff.omni.reporting.dto.CommonDtoHelper.getInputParamMapFromPojoList;
 import static com.increff.omni.reporting.dto.CommonDtoHelper.getValueFromQuotes;
+import static com.increff.omni.reporting.util.ConstantsUtil.MAX_RETRY_COUNT;
 import static com.increff.omni.reporting.util.ConvertUtil.getJavaObjectFromJson;
 
 @Component
@@ -118,15 +119,19 @@ public class ScheduleReportTask extends AbstractTask {
             api.markFailed(pojo.getId(), ReportRequestStatus.FAILED, e.getMessage(), 0, 0.0);
             reportScheduleApi.addScheduleCount(pojo.getScheduleId(), 0, 1);
             try {
-                ReportSchedulePojo schedulePojo = reportScheduleApi.getCheck(pojo.getScheduleId());
-                List<String> toEmails = reportScheduleApi.getByScheduleId(schedulePojo.getId()).stream()
-                        .map(ReportScheduleEmailsPojo::getSendTo).collect(
-                                Collectors.toList());
-                if(!toEmails.isEmpty()) {
-                    EmailProps props = createEmailProps(null, false, toEmails, "Hi,<br>Please " +
-                            "check failure reason in the latest scheduled requests. Re-submit the schedule in the " +
-                            "reporting application, which might solve the issue.", false, timezone, reportPojo.getName());
-                    EmailUtil.sendMail(props);
+                reportRequestPojo = api.getCheck(pojo.getId());
+                if (reportRequestPojo.getRetryCount() >= MAX_RETRY_COUNT) {
+                    ReportSchedulePojo schedulePojo = reportScheduleApi.getCheck(pojo.getScheduleId());
+                    List<String> toEmails = reportScheduleApi.getByScheduleId(schedulePojo.getId()).stream()
+                            .map(ReportScheduleEmailsPojo::getSendTo).collect(
+                                    Collectors.toList());
+                    if (!toEmails.isEmpty()) {
+                        EmailProps props = createEmailProps(null, false, toEmails, "Hi,<br>Please " +
+                                        "check failure reason in the latest scheduled requests. Re-submit the schedule in the " +
+                                        "reporting application, which might solve the issue.", false, timezone, reportPojo.getName(),
+                                false, schedulePojo.getEmailSubject(), true);
+                        EmailUtil.sendMail(props);
+                    }
                 }
             } catch (Exception ex) {
                 log.error("Report Request ID : " + pojo.getId() + ". Failed to send email. ", ex);
@@ -165,9 +170,10 @@ public class ScheduleReportTask extends AbstractTask {
                                 " MB" + ". Please select granular filters");
             String filePath = "NA";
 
+            boolean zeroRows = (noOfRows == 0);
             List<SchedulePipelinePojo> schedulePipelinePojos = schedulePipelineApi.getByScheduleId(pojo.getScheduleId());
             if(schedulePipelinePojos.isEmpty())
-                sendEmail(fileSize, file, pojo, timezone, reportPojo.getName());
+                sendEmail(fileSize, file, pojo, timezone, reportPojo.getName(), zeroRows);
             else {
                 processPipelines(file, schedulePipelinePojos, FileUtil.getPipelineFilename(reportPojo.getId(), reportPojo.getName(), timezone));
             }
@@ -257,7 +263,7 @@ public class ScheduleReportTask extends AbstractTask {
     }
 
     private void sendEmail(double fileSize, File csvFile, ReportRequestPojo pojo, String timezone,
-                           String name)
+                           String name, Boolean zeroRows)
             throws IOException, ApiException, MessagingException {
         File out = csvFile;
         boolean isZip = false;
@@ -291,13 +297,14 @@ public class ScheduleReportTask extends AbstractTask {
                 .map(ReportScheduleEmailsPojo::getSendTo).collect(
                         Collectors.toList());
         EmailProps props = createEmailProps(out, true, toEmails, "", isZip, timezone,
-                name);
+                name, zeroRows, schedulePojo.getEmailSubject(), false);
         EmailUtil.sendMail(props);
     }
 
     private EmailProps createEmailProps(File out, Boolean isAttachment,
                                         List<String> toEmails, String content,
-                                        boolean isZip, String timezone, String name) {
+                                        boolean isZip, String timezone, String name,
+                                        Boolean zeroData, String customSubject, Boolean failed) {
         EmailProps props = new EmailProps();
         props.setFromEmail(properties.getFromEmail());
         props.setUsername(properties.getUsername());
@@ -305,7 +312,19 @@ public class ScheduleReportTask extends AbstractTask {
         props.setSmtpHost(properties.getSmtpHost());
         props.setSmtpPort(properties.getSmtpPort());
         props.setToEmails(toEmails);
-        props.setSubject("Increff Reporting : " + name);
+
+        String subject;
+        if (Objects.nonNull(customSubject) && !customSubject.isEmpty())
+            subject = customSubject;
+        else
+            subject = "Increff Reporting : " + name;
+
+        if (Objects.nonNull(failed) && failed) // Add (Failed) to subject if failed
+            subject += " (Failed) ";
+        if (Objects.nonNull(zeroData) && zeroData) // Add (No Data) to subject if zero data
+            subject += " (No Data) ";
+        props.setSubject(subject);
+
         props.setAttachment(out);
         props.setCustomizedFileName(FileUtil.getCustomizedFileName(isZip, timezone, name));
         props.setIsAttachment(isAttachment);

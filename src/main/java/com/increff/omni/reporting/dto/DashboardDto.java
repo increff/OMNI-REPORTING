@@ -62,13 +62,42 @@ public class DashboardDto extends AbstractDto {
     @Autowired
     private FlowApi flowApi;
 
-    @Transactional(rollbackFor = ApiException.class)
     public ApplicationPropertiesData getProperties() {
         ApplicationPropertiesData data = new ApplicationPropertiesData();
         data.setMaxDashboardsPerOrg(properties.getMaxDashboardsPerOrg());
         data.setMaxChartsPerDashboard(ValidateUtil.MAX_DASHBOARD_CHARTS);
         return data;
     }
+
+    public FavData getFavoriteDashboard() {
+        FavData favData = new FavData();
+        FavouritePojo favPojo = api.getFavByOrgUser(getOrgId(), getUserId());
+        favData.setUserFav(Objects.nonNull(favPojo) ? ConvertUtil.convert(favPojo, FavouriteData.class) : null);
+        favPojo = api.getFavByOrg(getOrgId());
+        favData.setOrgFav(Objects.nonNull(favPojo) ? ConvertUtil.convert(favPojo, FavouriteData.class) : null);
+        return favData;
+    }
+
+    public FavouriteData setUserFavoriteDashboard(FavouriteForm form) {
+        FavouritePojo favPojo = ConvertUtil.convert(form, FavouritePojo.class);
+        favPojo.setOrgId(getOrgId());
+        favPojo.setUserId(getUserId());
+        return ConvertUtil.convert(api.setFav(favPojo), FavouriteData.class);
+    }
+
+    public FavouriteData setOrgFavoriteDashboard(FavouriteForm form) {
+        FavouritePojo favPojo = ConvertUtil.convert(form, FavouritePojo.class);
+        favPojo.setOrgId(getOrgId());
+        favPojo.setUserId(null);
+        return ConvertUtil.convert(api.setFav(favPojo), FavouriteData.class);
+    }
+
+    public void deleteFavoriteDashboard(Integer id) {
+        api.deleteFavById(id);
+        api.saveAudit(id.toString(), AuditActions.DELETE_FAVOURITE.toString(), "Delete Favourite"
+                , "Delete Favourite", getUserName());
+    }
+
 
     @Transactional(rollbackFor = ApiException.class)
     public List<DefaultValueData> upsertDefaultValues(UpsertDefaultValueForm upsertDefaultValueform, Integer dashboardId) throws ApiException {
@@ -371,7 +400,8 @@ public class DashboardDto extends AbstractDto {
         if(Objects.nonNull(api.getByOrgIdName(getOrgId(), form.getName())))
             throw new ApiException(ApiStatus.BAD_DATA, "Dashboard name already exists: " + form.getName() + " OrgId: " + getOrgId());
         if(api.getByOrgId(getOrgId()).size() >= properties.getMaxDashboardsPerOrg())
-            throw new ApiException(ApiStatus.BAD_DATA, "Max limit of dashboards reached: " + properties.getMaxDashboardsPerOrg());
+            throw new ApiException(ApiStatus.BAD_DATA, "Max limit of dashboards reached: " + properties.getMaxDashboardsPerOrg() +
+                    ". Please delete existing dashboards to add new ones");
     }
 
     private void validateControlIdExistsForDashboard(Integer dashboardId, String paramName) throws ApiException {
@@ -411,7 +441,7 @@ public class DashboardDto extends AbstractDto {
         // Copies all dashboards created in Increff org (Admin org set in properties file) to new orgs
         List<DashboardPojo> dashboards = api.getByOrgId(properties.getIncreffOrgId());
         for(DashboardPojo dashboard : dashboards) {
-            if(dashboard.getName().toLowerCase().startsWith("test_"))
+            if (dashboard.getName().toLowerCase().startsWith("test"))
                 if(!copyTestDashboards) continue; // Skip if dashboard name starts with test
 
             copyDashboardToSomeOrgs(dashboard.getId(), dashboard.getOrgId(), orgIds);

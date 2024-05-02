@@ -82,6 +82,9 @@ public class FileUtil {
         writer.close();
         fileWriter.close();
         resultSet.close();
+
+        if (noOfRows == 1) // Set noOfRows to 0 if there is only header row (which contains column names only and 0 data rows)
+            noOfRows = 0; // This is done to send No Data in email subject for schedule reports
         return noOfRows;
     }
 

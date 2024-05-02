@@ -10,6 +10,7 @@ import com.increff.omni.reporting.model.data.PipelineFlowData;
 import com.increff.omni.reporting.model.data.ReportRequestData;
 import com.increff.omni.reporting.model.data.ReportScheduleData;
 import com.increff.omni.reporting.model.form.CronScheduleForm;
+import com.increff.omni.reporting.model.form.EmailParams;
 import com.increff.omni.reporting.model.form.ReportScheduleForm;
 import com.increff.omni.reporting.pojo.*;
 import com.increff.omni.reporting.util.UserPrincipalUtil;
@@ -188,6 +189,11 @@ public class ReportScheduleDto extends AbstractDto {
                     Collectors.toList()).get(0).getParamValue();
             List<InputControlFilterData> filterData = prepareFilters(paramsPojos, controlPojos);
             ReportScheduleData data = ConvertUtil.convert(pojo, ReportScheduleData.class);
+
+            EmailParams emailParams = new EmailParams();
+            emailParams.setSubject(pojo.getEmailSubject());
+            data.setEmailParams(emailParams);
+
             data.setReportName(reportPojo.getName());
             data.setReportId(reportPojo.getId());
             data.setFilters(filterData);
@@ -245,7 +251,7 @@ public class ReportScheduleDto extends AbstractDto {
         List<InputControlPojo> inputControlPojoList = controlApi.selectByIds(reportControlsPojoList.stream()
                 .map(ReportControlsPojo::getControlId).collect(Collectors.toList()));
         Map<String, List<String>> userInputParams = getUserInputParams(form.getParamMap());
-        Map<String, String> inputParamsMap = UserPrincipalUtil.getCompleteMapWithAccessControl(form.getParamMap());
+        Map<String, String> inputParamsMap = UserPrincipalUtil.getMapWithoutAccessControl(form.getParamMap());
         Map<String, List<String>> inputDisplayMap = new HashMap<>();
         validateCustomReportAccess(reportPojo, getOrgId());
         validateInputParamValues(userInputParams, inputParamsMap, getOrgId(), inputDisplayMap, inputControlPojoList,

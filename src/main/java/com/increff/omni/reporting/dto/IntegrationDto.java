@@ -39,7 +39,7 @@ public class IntegrationDto extends AbstractDtoApi {
 
         SchemaVersionData svData = getSchemaVersionData(form.getSchemaVersionName());
 
-        // create org if not exists already
+        // create org if not exists already (Might exist already if one OMNI mapping is already present for this org and we try to add UNIFY mapping)
         Integer orgId = form.getOrganizationForm().getId();
         if(Objects.isNull(organizationDto.getById(orgId))) {
             organizationDto.add(form.getOrganizationForm());

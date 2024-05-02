@@ -5,8 +5,8 @@ import com.increff.omni.reporting.config.ApplicationProperties;
 import com.increff.omni.reporting.flow.ReportFlowApi;
 import com.increff.omni.reporting.flow.ReportRequestFlowApi;
 import com.increff.omni.reporting.model.constants.*;
-import com.increff.omni.reporting.model.data.*;
 import com.increff.omni.reporting.model.data.Charts.ChartInterface;
+import com.increff.omni.reporting.model.data.*;
 import com.increff.omni.reporting.model.form.*;
 import com.increff.omni.reporting.pojo.*;
 import com.increff.omni.reporting.util.SqlCmd;
@@ -151,7 +151,7 @@ public class ReportDto extends AbstractDto {
     }
 
     public ReportQueryData getTransformedQuery(ReportQueryTestForm form) throws ApiException {
-        Map<String, String> paramsMap = UserPrincipalUtil.getCompleteMapWithAccessControl(form.getParamMap());
+        Map<String, String> paramsMap = UserPrincipalUtil.getMapWithoutAccessControl(form.getParamMap());
         paramsMap.put("timezone", "'" + form.getTimezone() + "'");
         ReportQueryData data = new ReportQueryData();
         data.setQuery(SqlCmd.getFinalQuery(paramsMap, form.getQuery(), true));
@@ -309,7 +309,7 @@ public class ReportDto extends AbstractDto {
 
     private List<ReportInputParamsPojo> validateControls(ReportRequestForm form, Integer orgId,
                                                          ReportPojo reportPojo, String password) throws ApiException {
-        Map<String, String> inputParamsMap = UserPrincipalUtil.getCompleteMapWithAccessControl(form.getParamMap());
+        Map<String, String> inputParamsMap = UserPrincipalUtil.getMapWithoutAccessControl(form.getParamMap());
         Map<String, List<String>> inputDisplayMap = new HashMap<>();
         List<ReportControlsPojo> reportControlsPojoList = reportControlsApi.getByReportId(reportPojo.getId());
         List<InputControlPojo> inputControlPojoList = inputControlApi.selectByIds(reportControlsPojoList.stream()

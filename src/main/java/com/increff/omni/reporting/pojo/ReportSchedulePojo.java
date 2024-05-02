@@ -57,4 +57,6 @@ public class ReportSchedulePojo extends AbstractVersionedPojo {
     @JdbcTypeCode(SqlTypes.VARCHAR)
     private ScheduleStatus status = ScheduleStatus.NEW;
 
+    private String emailSubject;
+
 }

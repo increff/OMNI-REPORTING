@@ -9,6 +9,8 @@ import com.increff.omni.reporting.pojo.PipelinePojo;
 import com.increff.commons.springboot.common.ApiException;
 import com.increff.commons.springboot.common.ApiStatus;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.StringUtils;
+
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -58,6 +60,20 @@ public class ConvertUtil {
             throw new ApiException(ApiStatus.BAD_DATA, "Error while parsing request body : " + requestBody + "\nError : " + e.getMessage());
 
         }
+    }
+
+    public static String getDisplayFailureReason(String failureReason) {
+        if (StringUtils.isEmpty(failureReason))
+            return "";
+
+        if (failureReason.contains("File size")
+                || failureReason.contains("Error connecting to the database"))
+            return failureReason;
+
+        if (failureReason.contains("Statement cancelled due to timeout"))
+            return "Report timeout exceeded";
+
+        return "Report execution failed. Please reach out to support team.";
     }
 
 

@@ -241,4 +241,29 @@ public class StandardController {
         return Arrays.asList(AppName.values());
     }
 
+
+    @Operation(summary = "Get Favourite")
+    @GetMapping(value = "dashboard/favourite")
+    public FavData getFavourite() {
+        return dashboardDto.getFavoriteDashboard();
+    }
+
+    @Operation(summary = "Set User Favourite")
+    @PostMapping(value = "dashboard/favourite/user")
+    public FavouriteData setUserFavourite(@RequestBody FavouriteForm form) {
+        return dashboardDto.setUserFavoriteDashboard(form);
+    }
+
+    @Operation(summary = "Set Org Favourite")
+    @PostMapping(value = "dashboard/favourite/org")
+    public FavouriteData setOrgFavourite(@RequestBody FavouriteForm form) {
+        return dashboardDto.setOrgFavoriteDashboard(form);
+    }
+
+    @Operation(summary = "Delete Favourite (If user wants to revert to org favourite)")
+    @DeleteMapping(value = "dashboard/favourite/{id}")
+    public void deleteFavourite(@PathVariable Integer id) {
+        dashboardDto.deleteFavoriteDashboard(id);
+    }
+
 }

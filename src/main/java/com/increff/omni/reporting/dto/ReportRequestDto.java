@@ -1,12 +1,10 @@
 package com.increff.omni.reporting.dto;
 
 import com.increff.omni.reporting.api.*;
-import com.increff.omni.reporting.flow.InputControlFlowApi;
 import com.increff.omni.reporting.flow.ReportRequestFlowApi;
 import com.increff.omni.reporting.model.constants.AuditActions;
 import com.increff.omni.reporting.model.constants.ReportRequestStatus;
 import com.increff.omni.reporting.model.constants.ReportRequestType;
-import com.increff.omni.reporting.model.constants.ResourceQueryParamKeys;
 import com.increff.omni.reporting.model.data.ReportRequestData;
 import com.increff.omni.reporting.model.data.TimeZoneData;
 import com.increff.omni.reporting.model.form.ReportRequestForm;
@@ -63,8 +61,6 @@ public class ReportRequestDto extends AbstractDto {
 
     private static final Integer MAX_NUMBER_OF_ROWS = 200;
     private static final Integer MAX_LIMIT = 25;
-    public static final List<String> accessControlledKeys = Arrays.asList(ResourceQueryParamKeys.clientQueryParam,
-            ResourceQueryParamKeys.fulfillmentLocationQueryParamKey, ResourceQueryParamKeys.restrictedResourceQueryParam);
 
     public void requestReport(ReportRequestForm form) throws ApiException {
         requestReportForAnyOrg(form, getOrgId());
@@ -81,7 +77,7 @@ public class ReportRequestDto extends AbstractDto {
         ConnectionPojo connectionPojo = connectionApi.getCheck(orgMappingPojo.getConnectionId());
         String password = getDecryptedPassword(connectionPojo.getPassword());
 
-        Map<String, String> inputParamsMap = UserPrincipalUtil.getCompleteMapWithAccessControl(form.getParamMap());
+        Map<String, String> inputParamsMap = UserPrincipalUtil.getMapWithoutAccessControl(form.getParamMap());
         Map<String, List<String>> inputDisplayMap = new HashMap<>();
 
         if (reportPojo.getIsChart())

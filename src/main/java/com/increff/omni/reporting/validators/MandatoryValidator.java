@@ -19,7 +19,7 @@ public class MandatoryValidator extends AbstractValidator {
         for(String p : paramValues){
             if(StringUtil.isEmpty(getValueFromQuotes(p)))
                 throw new ApiException(ApiStatus.BAD_DATA, getValidationMessage(reportName, displayNames
-                        , ValidationType.MANDATORY, ""));
+                        , ValidationType.MANDATORY, "Value should be present for this filter"));
         }
     }
 }

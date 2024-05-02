@@ -7,7 +7,10 @@ import com.increff.commons.springboot.common.ApiStatus;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 @Log4j2
 public class SqlCmd {
@@ -17,8 +20,10 @@ public class SqlCmd {
 
     public static String getFinalQuery(Map<String, String> inputParamMap, String query,
                                        Boolean isUserPrincipalAvailable) throws ApiException {
-        if(isUserPrincipalAvailable)
-            inputParamMap.putAll(UserPrincipalUtil.getAccessControlMap());
+        if (isUserPrincipalAvailable) {
+            inputParamMap.putAll(UserPrincipalUtil.getAccessControlMapForUserAccessQueryParamKeys(query));
+        }
+
         String[] matchingFunctions = StringUtils.substringsBetween(query, "<<", ">>");
         if (Objects.isNull(matchingFunctions)) {
             log.debug("Query formed : " + query);

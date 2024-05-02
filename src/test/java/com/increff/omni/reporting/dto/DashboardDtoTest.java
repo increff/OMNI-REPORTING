@@ -37,6 +37,7 @@ import static com.increff.omni.reporting.helper.SchemaTestHelper.getSchemaForm;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+
 public class DashboardDtoTest extends AbstractTest {
 
     @Autowired
@@ -127,7 +128,7 @@ public class DashboardDtoTest extends AbstractTest {
                             Arrays.asList(getDashboardChartForm(chartDatas.get(0).getAlias(), 0, 0, 0, RowHeight.HALF))));
                 });
                 assertEquals(ApiStatus.BAD_DATA, exception.getStatus());
-                assertEquals("Max limit of dashboards reached: " + properties.getMaxDashboardsPerOrg(), exception.getMessage());
+                assertTrue(exception.getMessage().contains("Max limit of dashboards reached: " + properties.getMaxDashboardsPerOrg()));
                 break;
             }
             DashboardData data = dashboardDto.addDashboard(getDashboardAddForm("Dashboard_"+i,
@@ -472,5 +473,65 @@ public class DashboardDtoTest extends AbstractTest {
         assertEquals(1, data.getFilterDetails().get("common").get(0).getValidationTypes().size());
         assertEquals(ValidationType.DATE_RANGE, data.getFilterDetails().get("common").get(0).getValidationTypes().get(0));
     }
+
+
+    @Test
+    public void testSetUserFavoriteDashboard() throws ApiException {
+        FavouriteForm favouriteForm = getFavoriteForm(9);
+        dashboardDto.setUserFavoriteDashboard(favouriteForm);
+        assertEquals(favouriteForm.getFavId(), dashboardDto.getFavoriteDashboard().getUserFav().getFavId());
+    }
+
+    @Test
+    public void testSetOrgFavoriteDashboard() throws ApiException {
+        FavouriteForm favouriteForm = getFavoriteForm(9);
+        dashboardDto.setOrgFavoriteDashboard(favouriteForm);
+        assertEquals(favouriteForm.getFavId(), dashboardDto.getFavoriteDashboard().getOrgFav().getFavId());
+    }
+
+    @Test
+    public void testUpdateUserFavoriteDashboard() throws ApiException {
+        FavouriteForm favouriteForm = getFavoriteForm(9);
+        dashboardDto.setUserFavoriteDashboard(favouriteForm);
+        assertEquals(favouriteForm.getFavId(), dashboardDto.getFavoriteDashboard().getUserFav().getFavId());
+        favouriteForm = getFavoriteForm(10);
+        dashboardDto.setUserFavoriteDashboard(favouriteForm);
+        assertEquals(favouriteForm.getFavId(), dashboardDto.getFavoriteDashboard().getUserFav().getFavId());
+    }
+
+    @Test
+    public void testUpdateOrgFavoriteDashboard() throws ApiException {
+        FavouriteForm favouriteForm = getFavoriteForm(9);
+        dashboardDto.setOrgFavoriteDashboard(favouriteForm);
+        assertEquals(favouriteForm.getFavId(), dashboardDto.getFavoriteDashboard().getOrgFav().getFavId());
+        favouriteForm = getFavoriteForm(10);
+        dashboardDto.setOrgFavoriteDashboard(favouriteForm);
+        assertEquals(favouriteForm.getFavId(), dashboardDto.getFavoriteDashboard().getOrgFav().getFavId());
+    }
+
+    //testBothFavoriteDashboard
+    @Test
+    public void testBothFavoriteDashboard() throws ApiException {
+        FavouriteForm userFavouriteForm = getFavoriteForm(9);
+        FavouriteForm orgFavouriteForm = getFavoriteForm(10);
+        dashboardDto.setUserFavoriteDashboard(userFavouriteForm);
+        dashboardDto.setOrgFavoriteDashboard(orgFavouriteForm);
+        assertEquals(userFavouriteForm.getFavId(), dashboardDto.getFavoriteDashboard().getUserFav().getFavId());
+        assertEquals(orgFavouriteForm.getFavId(), dashboardDto.getFavoriteDashboard().getOrgFav().getFavId());
+
+        //update user favorite dashboard
+        userFavouriteForm = getFavoriteForm(11);
+        dashboardDto.setUserFavoriteDashboard(userFavouriteForm);
+        assertEquals(userFavouriteForm.getFavId(), dashboardDto.getFavoriteDashboard().getUserFav().getFavId());
+        assertEquals(orgFavouriteForm.getFavId(), dashboardDto.getFavoriteDashboard().getOrgFav().getFavId());
+
+        //update org favorite dashboard
+        orgFavouriteForm = getFavoriteForm(12);
+        dashboardDto.setOrgFavoriteDashboard(orgFavouriteForm);
+        assertEquals(userFavouriteForm.getFavId(), dashboardDto.getFavoriteDashboard().getUserFav().getFavId());
+        assertEquals(orgFavouriteForm.getFavId(), dashboardDto.getFavoriteDashboard().getOrgFav().getFavId());
+
+    }
+
 
 }

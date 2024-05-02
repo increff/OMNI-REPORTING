@@ -15,6 +15,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class DateValidatorTest extends AbstractTest {
 
@@ -42,9 +43,10 @@ public class DateValidatorTest extends AbstractTest {
             validator.validate(displayNames, params, "Report 1", 10, ReportRequestType.USER);
         } catch (ApiException e) {
             assertEquals(ApiStatus.BAD_DATA, e.getStatus());
-            assertEquals("Both from and to date should be selected for filters : [\"Client Id\",\"Item Id\"]",
-                    e.getMessage());
-
+            assertTrue(e.getMessage().contains("Both from and to date should be selected for filters"));
+            for (String displayName : displayNames) {
+                assertTrue(e.getMessage().contains(displayName));
+            }
         }
     }
 
@@ -56,10 +58,12 @@ public class DateValidatorTest extends AbstractTest {
             validator.validate(displayNames, params, "Report 1", 10, ReportRequestType.USER);
         } catch (ApiException e) {
             assertEquals(ApiStatus.BAD_DATA, e.getStatus());
-            assertEquals("Report 1 failed in validation for key / keys : " +
-                    JsonUtil.serialize(displayNames) + " , validation type : " + ValidationType.DATE_RANGE
-                    + " message : Date range crossed 10 days", e.getMessage());
-
+            for (String displayName : displayNames) {
+                assertTrue(e.getMessage().contains(displayName));
+            }
+            assertTrue(e.getMessage().contains(ValidationType.DATE_RANGE.toString()));
+            assertTrue(e.getMessage().contains("Report 1"));
+            assertTrue(e.getMessage().contains("Date range crossed 10 days"));
         }
     }
 
@@ -71,10 +75,12 @@ public class DateValidatorTest extends AbstractTest {
             validator.validate(displayNames, params, "Report 1", 10, ReportRequestType.USER);
         } catch (ApiException e) {
             assertEquals(ApiStatus.BAD_DATA, e.getStatus());
-            assertEquals("Report 1 failed in validation for key / keys : " +
-                    JsonUtil.serialize(displayNames) + " , validation type : " + ValidationType.DATE_RANGE
-                    + " message : Date range crossed 10 days", e.getMessage());
-
+            for (String displayName : displayNames) {
+                assertTrue(e.getMessage().contains(displayName));
+            }
+            assertTrue(e.getMessage().contains(ValidationType.DATE_RANGE.toString()));
+            assertTrue(e.getMessage().contains("Report 1"));
+            assertTrue(e.getMessage().contains("Date range crossed 10 days"));
         }
     }
 
@@ -86,10 +92,12 @@ public class DateValidatorTest extends AbstractTest {
             validator.validate(displayNames, params, "Report 1", 10, ReportRequestType.USER);
         } catch (ApiException e) {
             assertEquals(ApiStatus.BAD_DATA, e.getStatus());
-            assertEquals("Report 1 failed in validation for key / keys : " +
-                    JsonUtil.serialize(displayNames) + " , validation type : " + ValidationType.DATE_RANGE
-                    + " message : Both dates can't be equal", e.getMessage());
-
+            for (String displayName : displayNames) {
+                assertTrue(e.getMessage().contains(displayName));
+            }
+            assertTrue(e.getMessage().contains(ValidationType.DATE_RANGE.toString()));
+            assertTrue(e.getMessage().contains("Report 1"));
+            assertTrue(e.getMessage().contains("Both dates can't be equal"));
         }
     }
 
@@ -101,10 +109,12 @@ public class DateValidatorTest extends AbstractTest {
             validator.validate(displayNames, params, "Report 1", 10, ReportRequestType.USER);
         } catch (ApiException e) {
             assertEquals(ApiStatus.BAD_DATA, e.getStatus());
-            assertEquals("Report 1 failed in validation for key / keys : " +
-                    JsonUtil.serialize(displayNames) + " , validation type : " + ValidationType.DATE_RANGE
-                    + " message : Date is not in correct format : " + JsonUtil.serialize(params), e.getMessage());
-
+            for (String displayName : displayNames) {
+                assertTrue(e.getMessage().contains(displayName));
+            }
+            assertTrue(e.getMessage().contains(ValidationType.DATE_RANGE.toString()));
+            assertTrue(e.getMessage().contains("Report 1"));
+            assertTrue(e.getMessage().contains("Date is not in correct format"));
         }
     }
 

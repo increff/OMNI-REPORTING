@@ -18,6 +18,9 @@ public class ReportScheduleForm {
     private String reportAlias;
     private List<InputParamMap> paramMap;
     private CronScheduleForm cronSchedule;
+
+    private EmailParams emailParams;
+
     private List<String> sendTo = new ArrayList<>();
     private List<PipelineDetailsForm> pipelineDetails = new ArrayList<>();
 
