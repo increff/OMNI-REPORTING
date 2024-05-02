@@ -106,7 +106,7 @@ public class ReportTestHelper {
 
     public static ReportQueryTestForm getQueryTestForm() {
         ReportQueryTestForm queryTestForm = new ReportQueryTestForm();
-        queryTestForm.setQuery("select * from table where id = <<replace(id)>>;");
+        queryTestForm.setQuery("select * from table where id = <<replace(<id>)>>;");
         Map<String, List<String>> paramMap = new HashMap<>();
         paramMap.put("id", Arrays.asList("1"));
         queryTestForm.setParamMap(paramMap);
