@@ -17,6 +17,8 @@ public class SqlCmd {
 
     private static final String KEEP_QUOTES_TRUE = "keepQuotesTrue";
     private static final String KEEP_QUOTES_FALSE = "keepQuotesFalse";
+    private static final String OPEN_SEP = "\\(<";
+    private static final String CLOSE_SEP = ">\\)";
 
     public static String getFinalQuery(Map<String, String> inputParamMap, String query,
                                        Boolean isUserPrincipalAvailable) throws ApiException {
@@ -31,7 +33,7 @@ public class SqlCmd {
         }
         Map<String, String> functionValueMap = new HashMap<>();
         for (String f : matchingFunctions) {
-            String methodName = f.split("\\(")[0].trim();
+            String methodName = f.split(OPEN_SEP)[0].trim();
             String finalString = getValueFromMethod(inputParamMap, f, methodName);
             functionValueMap.put("<<" + f + ">>", finalString);
         }
@@ -46,41 +48,42 @@ public class SqlCmd {
         String paramKey, paramValue, filterJson, operator, condition;
         Boolean keepQuotes;
         String finalString = "<<" + f + ">>";
+
         switch (methodName) {
-            case "filter":
-                paramKey = f.split("\\(")[1].split(",")[0].trim();
+            case "filter": // filter(  )>>  ) >>
+                paramKey = f.split(OPEN_SEP)[1].split(",")[0].trim();
                 paramValue = inputParamMap.get(paramKey);
-                filterJson = f.split("\\(")[1].split(",")[1].trim();
-                operator = f.split("\\(")[1].split(",")[2].split("\\)")[0].trim();
+                filterJson = f.split(OPEN_SEP)[1].split(",")[1].trim();
+                operator = f.split(OPEN_SEP)[1].split(",")[2].split(CLOSE_SEP)[0].trim();
                 finalString = QueryExecutionDto.filter(filterJson, operator, paramValue);
                 break;
             case "replace":
-                paramKey = StringUtils.substringBetween(f, "(", ")").trim();
+                paramKey = StringUtils.substringBetween(f, OPEN_SEP, CLOSE_SEP).trim();
                 paramValue = inputParamMap.get(paramKey);
                 if (Objects.nonNull(paramValue)) {
                     finalString = paramValue;
                 }
                 break;
             case "filterAppend":
-                paramKey = f.split("\\(")[1].split(",")[0].trim();
+                paramKey = f.split(OPEN_SEP)[1].split(",")[0].trim();
                 paramValue = inputParamMap.get(paramKey);
-                filterJson = f.split("\\(")[1].split(",")[1].trim();
-                operator = f.split("\\(")[1].split(",")[2].trim();
-                condition = f.split("\\(")[1].split(",")[3].split("\\)")[0].trim();
+                filterJson = f.split(OPEN_SEP)[1].split(",")[1].trim();
+                operator = f.split(OPEN_SEP)[1].split(",")[2].trim();
+                condition = f.split(OPEN_SEP)[1].split(",")[3].split(CLOSE_SEP)[0].trim();
                 finalString = QueryExecutionDto.filterAppend(filterJson, operator, paramValue, condition);
                 break;
             case "mongoFilter":
-                paramKey = f.split("\\(")[1].split(",")[0].trim();
+                paramKey = f.split(OPEN_SEP)[1].split(",")[0].trim();
                 paramValue = inputParamMap.get(paramKey);
-                filterJson = f.split("\\(")[1].split(",")[1].trim();
+                filterJson = f.split(OPEN_SEP)[1].split(",")[1].trim();
                 // t is true
-                keepQuotes = isKeepQuotes(f.split("\\(")[1].split(",")[2].split("\\)")[0].trim());
+                keepQuotes = isKeepQuotes(f.split(OPEN_SEP)[1].split(",")[2].split(CLOSE_SEP)[0].trim());
                 finalString = QueryExecutionDto.mongoFilter(filterJson, paramKey, paramValue, keepQuotes);
                 break;
             case "mongoReplace":
-                paramKey = f.split("\\(")[1].split(",")[0].trim();
+                paramKey = f.split(OPEN_SEP)[1].split(",")[0].trim();
                 paramValue = inputParamMap.get(paramKey);
-                keepQuotes = isKeepQuotes(f.split("\\(")[1].split(",")[1].split("\\)")[0].trim());
+                keepQuotes = isKeepQuotes(f.split(OPEN_SEP)[1].split(",")[1].split(CLOSE_SEP)[0].trim());
                 if (Objects.nonNull(paramValue)) {
                     finalString = QueryExecutionDto.mongoReplace(paramValue, keepQuotes);
                 }
