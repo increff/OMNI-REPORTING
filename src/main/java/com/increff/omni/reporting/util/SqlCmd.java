@@ -58,7 +58,7 @@ public class SqlCmd {
                 finalString = QueryExecutionDto.filter(filterJson, operator, paramValue);
                 break;
             case "replace":
-                paramKey = StringUtils.substringBetween(f, OPEN_SEP, CLOSE_SEP).trim();
+                paramKey = f.split(OPEN_SEP)[1].split(CLOSE_SEP)[0].trim();
                 paramValue = inputParamMap.get(paramKey);
                 if (Objects.nonNull(paramValue)) {
                     finalString = paramValue;
