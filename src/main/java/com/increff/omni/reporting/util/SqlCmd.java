@@ -17,8 +17,8 @@ public class SqlCmd {
 
     private static final String KEEP_QUOTES_TRUE = "keepQuotesTrue";
     private static final String KEEP_QUOTES_FALSE = "keepQuotesFalse";
-    private static final String OPEN_SEP = "\\(<";
-    private static final String CLOSE_SEP = ">\\)";
+    private static final String OPEN_SEP = "\\(\\^";
+    private static final String CLOSE_SEP = "\\^\\)";
 
     public static String getFinalQuery(Map<String, String> inputParamMap, String query,
                                        Boolean isUserPrincipalAvailable) throws ApiException {
