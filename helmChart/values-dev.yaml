@@ -49,14 +49,14 @@ service:
     cloud.google.com/neg: '{"exposed_ports": {"8080":{"name": "omni-reporting-neg"}}}'
 
 envs:
-  VAULT_SCHEME: https
-  VAULT_HOST: vault.nextscm.com
-  VAULT_PORT: 443
-  VAULT_TOKEN: hvs.Yt4JtVfjJJT0q71NdTxfZhDA
-  ACTIVE_PROFILE: dev
-  ELK_SERVICE_NAME=omni-reporting-docker-test
-  ELK_SERVER_URL=http://10.180.0.51:8200
-  ELK_SERVER_TOKEN=elkserver-dev
+  VAULT_SCHEME: "https"
+  VAULT_HOST: "vault.nextscm.com"
+  VAULT_PORT: "443"
+  VAULT_TOKEN: "hvs.Yt4JtVfjJJT0q71NdTxfZhDA"
+  ACTIVE_PROFILE: "dev"
+  ELK_SERVICE_NAME: "omni-reporting-docker-test"
+  ELK_SERVER_URL: "http://10.180.0.51:8200"
+  ELK_SERVER_TOKEN: "elkserver-dev"
 
 ingress:
   enabled: false
