@@ -68,6 +68,10 @@ public class UserPrincipalUtil {
         Map<String, List<String>> accessControlMap = new HashMap<>();
 
         String[] queryParamKeys = StringUtils.substringsBetween(query, USER_ACCESS_QUERY_PARAM_PREFIX, USER_ACCESS_QUERY_PARAM_SUBSTRING_CLOSE);
+        if (Objects.isNull(queryParamKeys)) {
+            log.debug("No user.access. query param keys found in the query: " + query);
+            return accessControlMap;
+        }
         cleanQueryParamKeys(queryParamKeys);
 
         Map<String, Map<String, List<String>>> resourceRoles = principal.getResourceRoles();
