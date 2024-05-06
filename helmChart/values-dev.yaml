@@ -54,7 +54,9 @@ envs:
   VAULT_PORT: 443
   VAULT_TOKEN: hvs.Yt4JtVfjJJT0q71NdTxfZhDA
   ACTIVE_PROFILE: dev
-  ELK_DEV_URL: http://10.180.0.51:8200
+  ELK_SERVICE_NAME=omni-reporting-docker-test
+  ELK_SERVER_URL=http://10.180.0.51:8200
+  ELK_SERVER_TOKEN=elkserver-dev
 
 ingress:
   enabled: false
