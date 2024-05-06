@@ -77,7 +77,7 @@ public class PipelineDto extends AbstractDto {
         } catch (Exception e) {
             if (file.exists()) // If an exception occurs, delete the file if it exists
                 FileUtil.delete(file);
-            throw new ApiException(ApiStatus.BAD_DATA, "Error while testing connection: " + e.getMessage());
+            throw new ApiException(ApiStatus.BAD_DATA, "Error while testing connection: " + e.getMessage(), e);
         } finally {
             FileUtil.delete(file);
         }

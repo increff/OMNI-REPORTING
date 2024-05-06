@@ -255,7 +255,7 @@ public class ScheduleReportTask extends AbstractTask {
             }
         } catch (Exception e) {
             log.error("Error while getting file provider : " + e + " " + Arrays.toString(e.getStackTrace()));
-            throw new ApiException(ApiStatus.BAD_DATA, "Error while getting file provider : " + e);
+            throw new ApiException(ApiStatus.BAD_DATA, "Error while getting file provider : " + e.getMessage(), e);
         }
     }
 
