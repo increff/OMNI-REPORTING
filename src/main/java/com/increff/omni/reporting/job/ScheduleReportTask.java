@@ -225,8 +225,8 @@ public class ScheduleReportTask extends AbstractTask {
             else
                 fileProvider.create(getFilepathWithFolder(filename, folderName), Files.newInputStream(file.toPath()));
         } catch (Exception e) {
-            log.error("Error while uploadScheduleFiles : " + e + " " + Arrays.toString(e.getStackTrace()));
-            throw new ApiException(ApiStatus.BAD_DATA, "Error while uploadScheduleFiles : " + e.getMessage());
+            log.error("Error while uploading file : " + e + " " + Arrays.toString(e.getStackTrace()));
+            throw new ApiException(ApiStatus.BAD_DATA, "Error while uploading file : " + e.getMessage());
         }
     }
 
