@@ -16,7 +16,10 @@ import java.sql.SQLException;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Log4j
 public class FileUtil {
@@ -92,7 +95,7 @@ public class FileUtil {
         FileWriter fileWriter = new FileWriter(file);
         BufferedWriter writer = new BufferedWriter(fileWriter);
         CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT);
-        Set<String> headers = new HashSet<>();
+        List<String> headers = new ArrayList<>();
         for (Document document : documents) {
             headers.addAll(document.keySet());
         }
