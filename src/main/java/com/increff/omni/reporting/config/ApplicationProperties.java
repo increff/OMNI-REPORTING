@@ -181,8 +181,7 @@ public class ApplicationProperties {
     @Value("${unify.query.string:mongoFilter(param}")
     private String unifyQueryString;
 
-    // syntax for using $,{,} in default value - @Value("${my.property:${fallbackValue}}")
-    @Value("${mongo.client.filter:${ {\"$match\":<<mongoFilter(<clients,{clientId:{$in:[#clients]}},keepQuotesTrue>)>>}, }}")
+    @Value("${mongo.client.filter}")
     private String mongoClientFilter;
 
     @PostConstruct

@@ -25,7 +25,7 @@ public class SqlCmd {
 
     public static String getFinalQuery(Map<String, String> inputParamMap, String query,
                                        Boolean isUserPrincipalAvailable, DBType dbType) throws ApiException {
-        log.debug("getFinalQuery input : " + query);
+        log.debug("getFinalQuery input\n" + query);
 
         if (isUserPrincipalAvailable) {
             inputParamMap.putAll(UserPrincipalUtil.getAccessControlMapForUserAccessQueryParamKeys(query));
