@@ -181,6 +181,10 @@ public class ApplicationProperties {
     @Value("${unify.query.string:mongoFilter(param}")
     private String unifyQueryString;
 
+    // syntax for using $,{,} in default value - @Value("${my.property:${fallbackValue}}")
+    @Value("${mongo.client.filter:${ {\"$match\":<<mongoFilter(<clients,{clientId:{$in:[#clients]}},keepQuotesTrue>)>>}, }}")
+    private String mongoClientFilter;
+
     @PostConstruct
     public void init() {
         UNIFY_QUERY_STRING = unifyQueryString;
@@ -188,6 +192,8 @@ public class ApplicationProperties {
         MongoUtil.MONGO_READ_TIMEOUT_SEC = mongoReadTimeoutSec;
         MongoUtil.MONGO_CONNECT_TIMEOUT_SEC = mongoConnectTimeoutSec;
         MongoUtil.MONGO_SERVER_SELECT_TIMEOUT_SEC = mongoConnectTimeoutSec;
+
+        MongoUtil.MONGO_CLIENT_FILTER = mongoClientFilter;
 
         ConstantsUtil.MAX_RETRY_COUNT = maxRetryCount;
 

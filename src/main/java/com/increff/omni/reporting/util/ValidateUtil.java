@@ -17,7 +17,7 @@ import static com.nextscm.commons.spring.server.DtoHelper.checkValid;
 public class ValidateUtil {
 
     public static int MAX_DASHBOARD_CHARTS = 6;
-    public static String UNIFY_QUERY_STRING = "";
+    public static String UNIFY_QUERY_STRING;
 
     public static void validateReportForm(ReportForm form) throws ApiException {
         checkValid(form);
@@ -35,8 +35,9 @@ public class ValidateUtil {
 
     public static void validateReportQueryForm(ReportQueryForm form, AppName appName) throws ApiException {
         checkValid(form);
-        if (appName.equals(AppName.ICC)) { // todo : uncomment after real UNIFY DB is added
-            String cleanedQuery = form.getQuery().replaceAll("\\s", ""); // remove white spaces and check if query contains UNIFY_QUERY_STRING
+        if (appName.equals(AppName.ICC)) {
+            // remove white spaces and check if query contains UNIFY_QUERY_STRING
+            String cleanedQuery = form.getQuery().replaceAll("\\s", "");
             String cleanedUnifyQueryString = UNIFY_QUERY_STRING.replaceAll("\\s", "");
             if (!cleanedQuery.contains(cleanedUnifyQueryString)) {
                 throw new ApiException(ApiStatus.BAD_DATA, "Query should contain " + UNIFY_QUERY_STRING + " for App " + appName

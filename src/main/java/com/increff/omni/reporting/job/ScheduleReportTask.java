@@ -112,7 +112,7 @@ public class ScheduleReportTask extends AbstractTask {
             // Creation of file
             Map<String, String> inputParamMap = getInputParamMapFromPojoList(reportInputParamsPojoList);
             timezone = getValueFromQuotes(inputParamMap.get("timezone"));
-            String fQuery = SqlCmd.getFinalQuery(inputParamMap, reportQueryPojo.getQuery(), false);
+            String fQuery = SqlCmd.getFinalQuery(inputParamMap, reportQueryPojo.getQuery(), false, connectionPojo.getDbType());
             // Execute query and save results
             prepareAndSendEmailOrPipelines(pojo, fQuery, connectionPojo, timezone, reportPojo);
             reportScheduleApi.addScheduleCount(pojo.getScheduleId(), 1, 0);

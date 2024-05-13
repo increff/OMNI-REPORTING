@@ -12,20 +12,25 @@ import org.bson.BsonDocument;
 import org.bson.BsonValue;
 import org.bson.Document;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @Log4j
 public class MongoUtil {
 
-    private static final String MONGO_VAR_NAME_SEPARATOR = "##";
+    public static final String MONGO_VAR_NAME_SEPARATOR = "##";
+    public static final String MONGO_IGNORE_CLIENT_FILTER = "IGNORE_CLIENT_FILTER";
+    public static final String COLLECTION_NAME = "collectionName";
+
+    public static String MONGO_CLIENT_FILTER;
 
     public static Integer MONGO_READ_TIMEOUT_SEC; // loaded from application.properties post construct
     public static Integer MONGO_CONNECT_TIMEOUT_SEC;
     public static Integer MONGO_SERVER_SELECT_TIMEOUT_SEC;
 
 
-    public static List<BsonDocument> parseMongoPipeline(String pipeline) throws ApiException {
+    public static List<BsonDocument> parseMongoPipeline(String pipeline, Boolean addAccessFilter) throws ApiException {
         log.debug("parseMongoPipeline.pipeline : " + pipeline);
         BsonArray bsonDocuments = BsonArray.parse(pipeline);
         List<BsonDocument> documents = new ArrayList<>();
@@ -37,6 +42,10 @@ public class MongoUtil {
                 throw new ApiException(ApiStatus.BAD_DATA, "Bson Value is not a document\n" + bsonValue);
             }
         }
+        if (addAccessFilter) {
+            documents.add(BsonDocument.parse("{ $match: { $or: [ { client: { $exists: false } }, { client: { $eq: \"##client##\" } } ] } }"));
+        }
+
         log.debug("parseMongoPipeline.Parsed pipeline: " + documents);
         log.debug("parseMongoPipeline.Stage size : " + documents.size());
         return documents;
@@ -55,7 +64,13 @@ public class MongoUtil {
         query = deleteFirstLine(query, MONGO_VAR_NAME_SEPARATOR);
         String databaseName = getValueAfterEquals(query, MONGO_VAR_NAME_SEPARATOR);
         query = deleteFirstLine(query, MONGO_VAR_NAME_SEPARATOR);
-        return executeMongoPipeline(host, username, password, databaseName, collectionName, parseMongoPipeline(query));
+
+        boolean addAccessFilter = true;
+        if (query.startsWith(MONGO_IGNORE_CLIENT_FILTER)) {
+            query = query.replace(MONGO_IGNORE_CLIENT_FILTER, "");
+            addAccessFilter = false;
+        }
+        return executeMongoPipeline(host, username, password, databaseName, collectionName, parseMongoPipeline(query, addAccessFilter));
     }
 
 

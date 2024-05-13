@@ -111,7 +111,7 @@ public class ReportFlowApi extends FlowApi {
         Connection connection = null;
         try {
             Map<String, String> inputParamMap = getInputParamMapFromPojoList(reportInputParamsPojoList);
-            String fQuery = SqlCmd.getFinalQuery(inputParamMap, query, true);
+            String fQuery = SqlCmd.getFinalQuery(inputParamMap, query, true, connectionPojo.getDbType());
             int noOfRows = 0;
             if(connectionPojo.getDbType().equals(DBType.MYSQL)) {
                 connection = dbConnectionApi.getConnection(connectionPojo.getHost(), connectionPojo.getUsername(),

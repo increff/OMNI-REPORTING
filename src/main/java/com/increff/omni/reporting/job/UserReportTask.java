@@ -71,7 +71,7 @@ public class UserReportTask extends AbstractTask{
             Map<String, String> inputParamMap = getInputParamMapFromPojoList(reportInputParamsPojoList);
             String timezone = getValueFromQuotes(inputParamMap.get("timezone"));
             String fQuery = SqlCmd.getFinalQuery(inputParamMap, reportQueryPojo.getQuery(),
-                    false);
+                    false, connectionPojo.getDbType());
             QueryExecutorForm queryExecutorForm = getQueryExecutorForm(fQuery, timezone, connectionPojo,
                     reportRequestPojo, reportPojo);
             executorClient.postRequest(queryExecutorForm);
