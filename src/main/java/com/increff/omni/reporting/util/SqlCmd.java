@@ -57,8 +57,10 @@ public class SqlCmd {
 
         String inpQuery = query;
 
-        if (query.startsWith(MONGO_IGNORE_CLIENT_FILTER)) // todo : ques : change this to contains ?
+        if (query.startsWith(MONGO_IGNORE_CLIENT_FILTER)) {
+            query = deleteFirstLine(query, MONGO_VAR_NAME_SEPARATOR);
             return query;
+        }
 
         // extract index of last $project string
         int lastProjectIndex = query.lastIndexOf("$project");
@@ -76,7 +78,6 @@ public class SqlCmd {
         // inject string MONGO_CLIENT_ACCESS_FILTER in input query at lastCommaIndex
         query = inpQuery.substring(0, lastCommaIndex) + MONGO_CLIENT_FILTER + inpQuery.substring(lastCommaIndex);
 
-        query = deleteFirstLine(query, MONGO_VAR_NAME_SEPARATOR);
         return query;
     }
 
