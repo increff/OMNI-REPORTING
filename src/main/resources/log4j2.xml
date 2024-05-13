@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Configuration status="debug" name="omniReporting">
+<Configuration status="info" name="omniReporting">
     <Properties>
         <Property name="baseDir">logs</Property>
         <Property name="catalinaBaseDir">tomcat/logs/catalina</Property>
