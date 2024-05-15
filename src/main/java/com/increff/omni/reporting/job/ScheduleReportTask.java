@@ -18,7 +18,6 @@ import com.increff.omni.reporting.pojo.*;
 import com.increff.omni.reporting.util.*;
 import com.increff.service.encryption.EncryptionClient;
 import com.increff.service.encryption.form.CryptoDecodeFormWithoutKey;
-import com.jcraft.jsch.*;
 import com.nextscm.commons.spring.client.AppClientException;
 import com.nextscm.commons.spring.common.ApiException;
 import com.nextscm.commons.spring.common.ApiStatus;
@@ -258,33 +257,6 @@ public class ScheduleReportTask extends AbstractTask {
             throw new ApiException(ApiStatus.BAD_DATA, "Error while getting file provider : " + e.getMessage(), e);
         }
     }
-
-    public ChannelSftp setupJsch(String remoteHost, String username, String password) throws JSchException {
-        JSch jsch = new JSch();
-
-        // input stream for remoteHost ftp.increff.com
-        JSch.setConfig("StrictHostKeyChecking", "no");
-
-
-        Session jschSession = jsch.getSession(username, remoteHost);
-        jschSession.setPassword(password);
-        jschSession.connect();
-        return (ChannelSftp) jschSession.openChannel("sftp");
-    }
-
-    public void put(ChannelSftp channelSftp, String localFile, String remoteDir) throws JSchException, SftpException {
-        //ChannelSftp channelSftp = setupJsch();
-        channelSftp.connect();
-
-//        String localFile = "src/main/resources/sample.txt";
-//        String remoteDir = "remote_sftp_test/";
-
-        channelSftp.put(localFile, remoteDir);
-
-        channelSftp.exit();
-    }
-
-
 
     private String getDecryptedPassword(String password) throws ApiException {
         try {
