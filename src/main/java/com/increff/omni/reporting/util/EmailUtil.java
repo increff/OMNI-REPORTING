@@ -1,6 +1,7 @@
 package com.increff.omni.reporting.util;
 
 import com.increff.omni.reporting.config.EmailProps;
+import lombok.extern.log4j.Log4j;
 
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
@@ -15,6 +16,7 @@ import java.util.Properties;
 /**
  * Utility to send emails
  */
+@Log4j
 public class EmailUtil {
 
     public static void sendMail(EmailProps eprops) throws javax.mail.MessagingException {
@@ -43,6 +45,7 @@ public class EmailUtil {
         // Set To: header field of the header.
         for (String email : eprops.getToEmails()) {
             message.addRecipients(Message.RecipientType.TO, InternetAddress.parse(email));
+            log.info("Email to: " + email);
         }
         // Set Subject: header field
         message.setSubject(eprops.getSubject());
@@ -52,7 +55,7 @@ public class EmailUtil {
 
         // Send message
         Transport.send(message);
-
+        log.info("Email sent successfully");
     }
 
     private static void setMessageContent(EmailProps eprops, Message message) throws javax.mail.MessagingException {

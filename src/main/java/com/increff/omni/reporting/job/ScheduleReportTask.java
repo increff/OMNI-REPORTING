@@ -189,9 +189,9 @@ public class ScheduleReportTask extends AbstractTask {
             throw apiException;
         } catch (SQLException sqlException) {
             throw new ApiException(ApiStatus.BAD_DATA,
-                    "Error while processing request : " + sqlException.getMessage());
+                    "Error while processing request : " + sqlException.getMessage(), sqlException);
         } catch (Throwable e) {
-            throw new ApiException(ApiStatus.BAD_DATA, e.getMessage());
+            throw new ApiException(ApiStatus.BAD_DATA, e.getMessage(), e);
         } finally {
             try {
                 if (Objects.nonNull(connection)) {
@@ -301,6 +301,7 @@ public class ScheduleReportTask extends AbstractTask {
             throws IOException, ApiException, javax.mail.MessagingException {
         File out = csvFile;
         boolean isZip = false;
+        log.info("Email File size : " + fileSize + " MB");
         if (fileSize > 50.0) {
             throw new ApiException(ApiStatus.BAD_DATA, "File size has crossed 50 MB limit. Mail can't be sent");
         }
