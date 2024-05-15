@@ -277,7 +277,7 @@ public class ScheduleReportTask extends AbstractTask {
         if (fileSize > 50.0) {
             throw new ApiException(ApiStatus.BAD_DATA, "File size has crossed 50 MB limit. Mail can't be sent");
         }
-        if (fileSize > 15.0) {
+        if (fileSize > 5.0) {
             String outFileName = csvFile.getName().split(".csv")[0] + ".7z";
             File zipFile = folderApi.getFile(outFileName);
             try {
