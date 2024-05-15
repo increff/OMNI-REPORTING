@@ -30,6 +30,7 @@ import static com.increff.omni.reporting.dto.CommonDtoHelper.getDirectoryPath;
 import static com.increff.omni.reporting.dto.CommonDtoHelper.getIdToPojoMap;
 import static com.increff.omni.reporting.util.ChartUtil.getChartData;
 import static com.increff.omni.reporting.util.ConvertUtil.convertChartLegendsPojoToChartLegendsData;
+import static com.increff.omni.reporting.util.MongoUtil.COLLECTION_NAME;
 import static com.increff.omni.reporting.util.ValidateUtil.validateReportForm;
 
 @Service
@@ -154,8 +155,16 @@ public class ReportDto extends AbstractDto {
         Map<String, String> paramsMap = UserPrincipalUtil.getMapWithoutAccessControl(form.getParamMap());
         paramsMap.put("timezone", "'" + form.getTimezone() + "'");
         ReportQueryData data = new ReportQueryData();
-        data.setQuery(SqlCmd.getFinalQuery(paramsMap, form.getQuery(), true));
+
+        data.setQuery(SqlCmd.getFinalQuery(paramsMap, form.getQuery(), true, getDBType(form.getQuery())));
         return data;
+    }
+
+    private static DBType getDBType(String query) {
+        // if query contains collection name, it is mongo
+        if (query.contains(COLLECTION_NAME))
+            return DBType.MONGO;
+        return DBType.MYSQL;
     }
 
     public ReportQueryData getQuery(Integer reportId) throws ApiException {

@@ -88,9 +88,11 @@ public class InputControlFlowApi extends AbstractApi {
         Connection connection = null;
         try {
             HashMap<String, String> map = new HashMap<>();
-            map.put("filter.orgId.param", orgId.toString());  // Used in mongo filter query as we get client list based on orgId
 
-            String fQuery = SqlCmd.getFinalQuery(map, query, true);
+            // add quotes to orgId. Later decided when parsing filter to keep quotes or not. Strings work with quotes, integer doesn't
+            map.put("filter.orgId.param", "'" + orgId.toString() + "'");  // Used in mongo filter query as we get client list based on orgId
+
+            String fQuery = SqlCmd.getFinalQuery(map, query, true, connectionPojo.getDbType());
 
             if(connectionPojo.getDbType().equals(DBType.MYSQL)) {
                 connection = dbConnectionApi.getConnection(connectionPojo.getHost(), connectionPojo.getUsername(),

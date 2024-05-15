@@ -3,6 +3,7 @@ package com.increff.omni.reporting.job;
 import com.increff.commons.fileclient.AbstractFileProvider;
 import com.increff.commons.fileclient.AwsFileProvider;
 import com.increff.commons.fileclient.GcpFileProvider;
+import com.increff.commons.fileclient.SftpFileProvider;
 import com.increff.omni.reporting.api.*;
 import com.increff.omni.reporting.config.ApplicationProperties;
 import com.increff.omni.reporting.config.EmailProps;
@@ -12,6 +13,7 @@ import com.increff.omni.reporting.model.constants.PipelineType;
 import com.increff.omni.reporting.model.constants.ReportRequestStatus;
 import com.increff.omni.reporting.model.form.FileProviderFolder.AwsPipelineConfigForm;
 import com.increff.omni.reporting.model.form.FileProviderFolder.GcpPipelineConfigForm;
+import com.increff.omni.reporting.model.form.FileProviderFolder.SftpPipelineConfigForm;
 import com.increff.omni.reporting.pojo.*;
 import com.increff.omni.reporting.util.*;
 import com.increff.service.encryption.EncryptionClient;
@@ -109,7 +111,7 @@ public class ScheduleReportTask extends AbstractTask {
             // Creation of file
             Map<String, String> inputParamMap = getInputParamMapFromPojoList(reportInputParamsPojoList);
             timezone = getValueFromQuotes(inputParamMap.get("timezone"));
-            String fQuery = SqlCmd.getFinalQuery(inputParamMap, reportQueryPojo.getQuery(), false);
+            String fQuery = SqlCmd.getFinalQuery(inputParamMap, reportQueryPojo.getQuery(), false, connectionPojo.getDbType());
             // Execute query and save results
             prepareAndSendEmailOrPipelines(pojo, fQuery, connectionPojo, timezone, reportPojo);
             reportScheduleApi.addScheduleCount(pojo.getScheduleId(), 1, 0);
@@ -186,9 +188,9 @@ public class ScheduleReportTask extends AbstractTask {
             throw apiException;
         } catch (SQLException sqlException) {
             throw new ApiException(ApiStatus.BAD_DATA,
-                    "Error while processing request : " + sqlException.getMessage());
+                    "Error while processing request : " + sqlException.getMessage(), sqlException);
         } catch (Throwable e) {
-            throw new ApiException(ApiStatus.BAD_DATA, e.getMessage());
+            throw new ApiException(ApiStatus.BAD_DATA, e.getMessage(), e);
         } finally {
             try {
                 if (Objects.nonNull(connection)) {
@@ -217,9 +219,13 @@ public class ScheduleReportTask extends AbstractTask {
     public void uploadScheduleFiles(PipelineType type, String configs, File file, String folderName, String filename) throws ApiException {
         try {
             AbstractFileProvider fileProvider = getFileProvider(type, configs);
-            fileProvider.create(getFilepathWithFolder(filename, folderName), Files.newInputStream(file.toPath()));
+            if (fileProvider instanceof SftpFileProvider)
+                fileProvider.create(file.toPath().toString(), getFilepathWithFolder(filename, folderName));
+            else
+                fileProvider.create(getFilepathWithFolder(filename, folderName), Files.newInputStream(file.toPath()));
         } catch (Exception e) {
-            throw new ApiException(ApiStatus.BAD_DATA, "Error while uploadScheduleFiles : " + e.getMessage());
+            log.error("Error while uploading file : " + e + " " + Arrays.toString(e.getStackTrace()));
+            throw new ApiException(ApiStatus.BAD_DATA, "Error while uploading file : " + e.getMessage());
         }
     }
 
@@ -231,7 +237,7 @@ public class ScheduleReportTask extends AbstractTask {
         return filePath;
     }
 
-    private AbstractFileProvider getFileProvider(PipelineType type, String configs) throws ApiException {
+    public static AbstractFileProvider getFileProvider(PipelineType type, String configs) throws ApiException {
         try {
             switch (type) {
                 case AWS:
@@ -240,16 +246,17 @@ public class ScheduleReportTask extends AbstractTask {
                 case GCP:
                     GcpPipelineConfigForm gcpForm = getJavaObjectFromJson(configs, GcpPipelineConfigForm.class);
                     return new GcpFileProvider(gcpForm.getBucketUrl(), gcpForm.getBucketName(), new ByteArrayInputStream(gcpForm.getCredentialsJson().toString().getBytes()));
+                case SFTP:
+                    SftpPipelineConfigForm sftpForm = getJavaObjectFromJson(configs, SftpPipelineConfigForm.class);
+                    return new SftpFileProvider(sftpForm.getHost(), sftpForm.getUsername(), sftpForm.getPassword());
                 default:
                     throw new ApiException(ApiStatus.BAD_DATA, "Unsupported File Provider Type " + type);
             }
         } catch (Exception e) {
             log.error("Error while getting file provider : " + e + " " + Arrays.toString(e.getStackTrace()));
-            throw new ApiException(ApiStatus.BAD_DATA, "Error while getting file provider : " + e);
+            throw new ApiException(ApiStatus.BAD_DATA, "Error while getting file provider : " + e.getMessage(), e);
         }
     }
-
-
 
     private String getDecryptedPassword(String password) throws ApiException {
         try {
@@ -266,6 +273,7 @@ public class ScheduleReportTask extends AbstractTask {
             throws IOException, ApiException, javax.mail.MessagingException {
         File out = csvFile;
         boolean isZip = false;
+        log.info("(Before Zip) Email File size : " + fileSize + " MB");
         if (fileSize > 50.0) {
             throw new ApiException(ApiStatus.BAD_DATA, "File size has crossed 50 MB limit. Mail can't be sent");
         }
@@ -291,6 +299,8 @@ public class ScheduleReportTask extends AbstractTask {
             out = zipFile;
             isZip = true;
         }
+        log.info("(After Zip) Email File size : " + FileUtil.getSizeInMb(out.length()) + " MB");
+
         ReportSchedulePojo schedulePojo = reportScheduleApi.getCheck(pojo.getScheduleId());
         List<String> toEmails = reportScheduleApi.getByScheduleId(schedulePojo.getId()).stream()
                 .map(ReportScheduleEmailsPojo::getSendTo).collect(

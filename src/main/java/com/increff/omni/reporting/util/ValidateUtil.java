@@ -17,7 +17,7 @@ import static com.nextscm.commons.spring.server.DtoHelper.checkValid;
 public class ValidateUtil {
 
     public static int MAX_DASHBOARD_CHARTS = 6;
-    private static String UNIFY_QUERY_STRING = "unify";
+    public static String UNIFY_QUERY_STRING;
 
     public static void validateReportForm(ReportForm form) throws ApiException {
         checkValid(form);
@@ -35,12 +35,15 @@ public class ValidateUtil {
 
     public static void validateReportQueryForm(ReportQueryForm form, AppName appName) throws ApiException {
         checkValid(form);
-//        if(appName.equals(AppName.UNIFY)) { // todo : uncomment after real UNIFY DB is added
-//            if(!form.getQuery().contains(UNIFY_QUERY_STRING)) {
-//                throw new ApiException(ApiStatus.BAD_DATA, "Query should contain " + UNIFY_QUERY_STRING + " for App " + appName
-//                        + " Query : " + form.getQuery());
-//            }
-//        }
+        if (appName.equals(AppName.ICC)) {
+            // remove white spaces and check if query contains UNIFY_QUERY_STRING
+            String cleanedQuery = form.getQuery().replaceAll("\\s", "");
+            String cleanedUnifyQueryString = UNIFY_QUERY_STRING.replaceAll("\\s", "");
+            if (!cleanedQuery.contains(cleanedUnifyQueryString)) {
+                throw new ApiException(ApiStatus.BAD_DATA, "Query should contain " + UNIFY_QUERY_STRING + " for App " + appName
+                        + " Query : " + form.getQuery());
+            }
+        }
     }
 
     public static void validateDashboardChartForms(List<DashboardChartForm> forms) throws ApiException {

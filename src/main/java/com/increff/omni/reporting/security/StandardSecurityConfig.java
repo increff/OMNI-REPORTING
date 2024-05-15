@@ -37,7 +37,7 @@ public class StandardSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/standard/**").and().authorizeRequests()//
                 .antMatchers("/standard/schedules/**").hasAnyAuthority(Roles.APP_ADMIN.getRole())//
                 .antMatchers("/standard/pipelines/**").hasAnyAuthority(Roles.APP_ADMIN.getRole())//
-                .antMatchers(HttpMethod.POST, "/standard/dashboards/{dashboardId}/view").access("@roleUtil.hasAdminOrStandardOrCustom(authentication)")//
+                .antMatchers(HttpMethod.POST, "/standard/dashboards/{dashboardId}/view").access("@roleUtil.hasAdminOrStandardOrCustom(authentication)")// todo : test hasAdminOrStandardOrCustom after springboot merge
                 .antMatchers(HttpMethod.GET, "/standard/dashboards/**").access("@roleUtil.hasAdminOrStandardOrCustom(authentication)")//
                 .antMatchers("/standard/dashboards/**").hasAnyAuthority(Roles.APP_ADMIN.getRole())//
                 .antMatchers("/standard/**").access("@roleUtil.hasAdminOrStandardOrCustom(authentication)")//
