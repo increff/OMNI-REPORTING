@@ -1,5 +1,7 @@
 package com.increff.omni.reporting.flow;
 
+import com.increff.commons.springboot.common.ApiException;
+import com.increff.commons.springboot.common.ApiStatus;
 import com.increff.omni.reporting.api.*;
 import com.increff.omni.reporting.config.ApplicationProperties;
 import com.increff.omni.reporting.model.constants.*;
@@ -13,8 +15,6 @@ import com.increff.omni.reporting.validators.DateValidator;
 import com.increff.omni.reporting.validators.MandatoryValidator;
 import com.increff.omni.reporting.validators.SingleMandatoryValidator;
 import com.nextscm.commons.lang.StringUtil;
-import com.increff.commons.springboot.common.ApiException;
-import com.increff.commons.springboot.common.ApiStatus;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 import org.bson.Document;
@@ -111,7 +111,7 @@ public class ReportFlowApi extends FlowApi {
         Connection connection = null;
         try {
             Map<String, String> inputParamMap = getInputParamMapFromPojoList(reportInputParamsPojoList);
-            String fQuery = SqlCmd.getFinalQuery(inputParamMap, query, true);
+            String fQuery = SqlCmd.getFinalQuery(inputParamMap, query, true, connectionPojo.getDbType());
             int noOfRows = 0;
             if(connectionPojo.getDbType().equals(DBType.MYSQL)) {
                 connection = dbConnectionApi.getConnection(connectionPojo.getHost(), connectionPojo.getUsername(),

@@ -277,6 +277,19 @@
     </build>
 
     <repositories>
+
+        <!-- For Building File Client Dependency (in Local) from Sonatype -->
+        <repository>
+            <id>sonatype-snapshot</id>
+            <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+        </repository>
+
         <!-- For NextSCM -->
         <repository>
             <id>increff-release</id>

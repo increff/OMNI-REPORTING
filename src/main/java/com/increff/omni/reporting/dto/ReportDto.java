@@ -1,5 +1,8 @@
 package com.increff.omni.reporting.dto;
 
+import com.increff.commons.springboot.common.ApiException;
+import com.increff.commons.springboot.common.ApiStatus;
+import com.increff.commons.springboot.common.ConvertUtil;
 import com.increff.omni.reporting.api.*;
 import com.increff.omni.reporting.config.ApplicationProperties;
 import com.increff.omni.reporting.flow.ReportFlowApi;
@@ -12,9 +15,6 @@ import com.increff.omni.reporting.pojo.*;
 import com.increff.omni.reporting.util.SqlCmd;
 import com.increff.omni.reporting.util.UserPrincipalUtil;
 import com.increff.omni.reporting.util.ValidateUtil;
-import com.increff.commons.springboot.common.ApiException;
-import com.increff.commons.springboot.common.ApiStatus;
-import com.increff.commons.springboot.common.ConvertUtil;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +30,7 @@ import static com.increff.omni.reporting.dto.CommonDtoHelper.getDirectoryPath;
 import static com.increff.omni.reporting.dto.CommonDtoHelper.getIdToPojoMap;
 import static com.increff.omni.reporting.util.ChartUtil.getChartData;
 import static com.increff.omni.reporting.util.ConvertUtil.convertChartLegendsPojoToChartLegendsData;
+import static com.increff.omni.reporting.util.MongoUtil.COLLECTION_NAME;
 import static com.increff.omni.reporting.util.ValidateUtil.validateReportForm;
 
 @Service
@@ -154,8 +155,16 @@ public class ReportDto extends AbstractDto {
         Map<String, String> paramsMap = UserPrincipalUtil.getMapWithoutAccessControl(form.getParamMap());
         paramsMap.put("timezone", "'" + form.getTimezone() + "'");
         ReportQueryData data = new ReportQueryData();
-        data.setQuery(SqlCmd.getFinalQuery(paramsMap, form.getQuery(), true));
+
+        data.setQuery(SqlCmd.getFinalQuery(paramsMap, form.getQuery(), true, getDBType(form.getQuery())));
         return data;
+    }
+
+    private static DBType getDBType(String query) {
+        // if query contains collection name, it is mongo
+        if (query.contains(COLLECTION_NAME))
+            return DBType.MONGO;
+        return DBType.MYSQL;
     }
 
     public ReportQueryData getQuery(Integer reportId) throws ApiException {

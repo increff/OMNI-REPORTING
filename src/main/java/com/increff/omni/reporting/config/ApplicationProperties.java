@@ -7,8 +7,10 @@ import lombok.Setter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.util.Map;
 import javax.annotation.PostConstruct;
+import java.util.Map;
+
+import static com.increff.omni.reporting.util.ValidateUtil.UNIFY_QUERY_STRING;
 
 @Getter
 @Setter
@@ -156,13 +158,24 @@ public class ApplicationProperties {
     @Value("${max.retry.count:3}")
     private Integer maxRetryCount;
 
+    @Value("${unify.query.string:mongoFilter(param}")
+    private String unifyQueryString;
+
+    @Value("${mongo.client.filter}")
+    private String mongoClientFilter;
+
     @PostConstruct
     public void init() {
+        UNIFY_QUERY_STRING = unifyQueryString;
+
         MongoUtil.MONGO_READ_TIMEOUT_SEC = mongoReadTimeoutSec;
         MongoUtil.MONGO_CONNECT_TIMEOUT_SEC = mongoConnectTimeoutSec;
         MongoUtil.MONGO_SERVER_SELECT_TIMEOUT_SEC = mongoConnectTimeoutSec;
 
+        MongoUtil.MONGO_CLIENT_FILTER = mongoClientFilter;
+
         ConstantsUtil.MAX_RETRY_COUNT = maxRetryCount;
+
     }
 
 }

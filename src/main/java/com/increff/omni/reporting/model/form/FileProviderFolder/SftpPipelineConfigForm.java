@@ -5,9 +5,8 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class AbstractPipelineConfigForm {
-    private String bucketUrl;
-    private String bucketName;
+public class SftpPipelineConfigForm extends AbstractPipelineConfigForm {
     private String host;
     private String username;
+    private String password;
 }

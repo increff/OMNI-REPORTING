@@ -1,11 +1,10 @@
 package com.increff.omni.reporting.util;
 
+import com.increff.commons.springboot.common.ApiException;
+import com.increff.commons.springboot.common.ApiStatus;
 import com.mongodb.ConnectionString;
 import com.mongodb.MongoClientSettings;
 import com.mongodb.client.*;
-import com.increff.commons.springboot.common.ApiException;
-import com.increff.commons.springboot.common.ApiStatus;
-import lombok.extern.log4j.Log4j;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.BsonArray;
@@ -13,13 +12,18 @@ import org.bson.BsonDocument;
 import org.bson.BsonValue;
 import org.bson.Document;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @Log4j2
 public class MongoUtil {
 
-    private static final String MONGO_VAR_NAME_SEPARATOR = "##";
+    public static final String MONGO_VAR_NAME_SEPARATOR = "##";
+    public static final String MONGO_IGNORE_CLIENT_FILTER = "IGNORE_CLIENT_FILTER";
+    public static final String COLLECTION_NAME = "collectionName";
+
+    public static String MONGO_CLIENT_FILTER;
 
     public static Integer MONGO_READ_TIMEOUT_SEC; // loaded from application.properties post construct
     public static Integer MONGO_CONNECT_TIMEOUT_SEC;
@@ -38,6 +42,7 @@ public class MongoUtil {
                 throw new ApiException(ApiStatus.BAD_DATA, "Bson Value is not a document\n" + bsonValue);
             }
         }
+
         log.debug("parseMongoPipeline.Parsed pipeline: " + documents);
         log.debug("parseMongoPipeline.Stage size : " + documents.size());
         return documents;

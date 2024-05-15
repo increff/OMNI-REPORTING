@@ -1,22 +1,26 @@
 package com.increff.omni.reporting.dto;
 
+import com.increff.commons.fileclient.AbstractFileProvider;
+import com.increff.commons.springboot.common.ApiException;
+import com.increff.commons.springboot.common.ApiStatus;
+import com.increff.commons.springboot.common.ConvertUtil;
 import com.increff.omni.reporting.api.PipelineApi;
 import com.increff.omni.reporting.job.ScheduleReportTask;
+import com.increff.omni.reporting.model.constants.PipelineType;
 import com.increff.omni.reporting.model.data.PipelineData;
 import com.increff.omni.reporting.model.form.PipelineForm;
 import com.increff.omni.reporting.pojo.PipelinePojo;
 import com.increff.omni.reporting.util.FileUtil;
-import com.increff.commons.springboot.common.ApiException;
-import com.increff.commons.springboot.common.ApiStatus;
-import com.increff.commons.springboot.common.ConvertUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import java.io.File;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
 import java.util.List;
 
+import static com.increff.omni.reporting.job.ScheduleReportTask.getFileProvider;
 import static com.increff.omni.reporting.util.ConvertUtil.convertToPipelineData;
 
 @Service
@@ -61,12 +65,19 @@ public class PipelineDto extends AbstractDto {
         File file = new File("dummy_" + ZonedDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH:mm:ss")) + ".txt");
 
         try {
+            if (form.getType().equals(PipelineType.SFTP)) {
+                // Cannot upload file to sftp as user may not have access to that directory
+                // Just construct a SFTP object to test the connection
+                AbstractFileProvider fileProvider = getFileProvider(form.getType(), form.getConfigs().toString());
+                return;
+            }
+
             FileUtil.writeDummyContentToFile(file);
             scheduleReportTask.uploadScheduleFiles(form.getType(), form.getConfigs().toString(), file, "increff-pipeline-test", file.getName());
         } catch (Exception e) {
             if (file.exists()) // If an exception occurs, delete the file if it exists
                 FileUtil.delete(file);
-            throw new ApiException(ApiStatus.BAD_DATA, "Error while testing connection: " + e.getMessage());
+            throw new ApiException(ApiStatus.BAD_DATA, "Error while testing connection: " + e.getMessage(), e);
         } finally {
             FileUtil.delete(file);
         }

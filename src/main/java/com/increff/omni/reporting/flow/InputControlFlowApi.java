@@ -1,5 +1,8 @@
 package com.increff.omni.reporting.flow;
 
+import com.increff.commons.springboot.common.ApiException;
+import com.increff.commons.springboot.common.ApiStatus;
+import com.increff.commons.springboot.server.AbstractApi;
 import com.increff.omni.reporting.api.*;
 import com.increff.omni.reporting.config.ApplicationProperties;
 import com.increff.omni.reporting.model.constants.DBType;
@@ -9,9 +12,6 @@ import com.increff.omni.reporting.util.FileUtil;
 import com.increff.omni.reporting.util.MongoUtil;
 import com.increff.omni.reporting.util.SqlCmd;
 import com.nextscm.commons.lang.StringUtil;
-import com.increff.commons.springboot.common.ApiException;
-import com.increff.commons.springboot.common.ApiStatus;
-import com.increff.commons.springboot.server.AbstractApi;
 import lombok.extern.log4j.Log4j2;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -88,9 +88,11 @@ public class InputControlFlowApi extends AbstractApi {
         Connection connection = null;
         try {
             HashMap<String, String> map = new HashMap<>();
-            map.put("filter.orgId.param", orgId.toString());  // Used in mongo filter query as we get client list based on orgId
 
-            String fQuery = SqlCmd.getFinalQuery(map, query, true);
+            // add quotes to orgId. Later decided when parsing filter to keep quotes or not. Strings work with quotes, integer doesn't
+            map.put("filter.orgId.param", "'" + orgId.toString() + "'");  // Used in mongo filter query as we get client list based on orgId
+
+            String fQuery = SqlCmd.getFinalQuery(map, query, true, connectionPojo.getDbType());
 
             if(connectionPojo.getDbType().equals(DBType.MYSQL)) {
                 connection = dbConnectionApi.getConnection(connectionPojo.getHost(), connectionPojo.getUsername(),
