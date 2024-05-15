@@ -301,7 +301,7 @@ public class ScheduleReportTask extends AbstractTask {
             throws IOException, ApiException, javax.mail.MessagingException {
         File out = csvFile;
         boolean isZip = false;
-        log.info("Email File size : " + fileSize + " MB");
+        log.info("(Before Zip) Email File size : " + fileSize + " MB");
         if (fileSize > 50.0) {
             throw new ApiException(ApiStatus.BAD_DATA, "File size has crossed 50 MB limit. Mail can't be sent");
         }
@@ -327,6 +327,8 @@ public class ScheduleReportTask extends AbstractTask {
             out = zipFile;
             isZip = true;
         }
+        log.info("(After Zip) Email File size : " + FileUtil.getSizeInMb(out.length()) + " MB");
+
         ReportSchedulePojo schedulePojo = reportScheduleApi.getCheck(pojo.getScheduleId());
         List<String> toEmails = reportScheduleApi.getByScheduleId(schedulePojo.getId()).stream()
                 .map(ReportScheduleEmailsPojo::getSendTo).collect(
