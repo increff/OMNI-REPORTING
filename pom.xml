@@ -4,7 +4,7 @@
 
     <groupId>com.increff.omni</groupId>
     <artifactId>omni-reporting</artifactId>
-    <version>2.0.8</version>
+    <version>2.0.9-SNAPSHOT</version>
 
     <parent>
         <!-- version for all the spring boot starters -->
@@ -333,7 +333,7 @@
         <url>https://bitbucket.org/increff/omni-reporting/src</url>
         <connection>scm:git:https://nextscm_jenkins@bitbucket.org/increff/omni-reporting.git</connection>
         <developerConnection>scm:git:https://nextscm_jenkins@bitbucket.org/increff/omni-reporting.git</developerConnection>
-        <tag>omni-reporting-2.0.8</tag>
+        <tag>omni-reporting-2.0.5</tag>
     </scm>
 
 
