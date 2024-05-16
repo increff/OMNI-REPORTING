@@ -21,7 +21,6 @@ import com.increff.omni.reporting.pojo.*;
 import com.increff.omni.reporting.util.*;
 import com.increff.service.encryption.EncryptionClient;
 import com.increff.service.encryption.form.CryptoDecodeFormWithoutKey;
-import com.jcraft.jsch.*;
 import jakarta.mail.MessagingException;
 import jakarta.persistence.OptimisticLockException;
 import lombok.extern.log4j.Log4j2;
@@ -52,6 +51,7 @@ import java.util.zip.ZipOutputStream;
 import static com.increff.omni.reporting.dto.CommonDtoHelper.getInputParamMapFromPojoList;
 import static com.increff.omni.reporting.dto.CommonDtoHelper.getValueFromQuotes;
 import static com.increff.omni.reporting.util.ConstantsUtil.MAX_RETRY_COUNT;
+import static com.increff.omni.reporting.util.ConstantsUtil.SCHEDULE_FILE_SIZE_ZIP_AFTER;
 import static com.increff.omni.reporting.util.ConvertUtil.getJavaObjectFromJson;
 
 @Component
@@ -190,9 +190,9 @@ public class ScheduleReportTask extends AbstractTask {
             throw apiException;
         } catch (SQLException sqlException) {
             throw new ApiException(ApiStatus.BAD_DATA,
-                    "Error while processing request : " + sqlException.getMessage());
+                    "Error while processing request : " + sqlException.getMessage(), sqlException);
         } catch (Throwable e) {
-            throw new ApiException(ApiStatus.BAD_DATA, e.getMessage());
+            throw new ApiException(ApiStatus.BAD_DATA, e.getMessage(), e);
         } finally {
             try {
                 if (Objects.nonNull(connection)) {
@@ -260,33 +260,6 @@ public class ScheduleReportTask extends AbstractTask {
         }
     }
 
-    public ChannelSftp setupJsch(String remoteHost, String username, String password) throws JSchException {
-        JSch jsch = new JSch();
-
-        // input stream for remoteHost ftp.increff.com
-        JSch.setConfig("StrictHostKeyChecking", "no");
-
-
-        Session jschSession = jsch.getSession(username, remoteHost);
-        jschSession.setPassword(password);
-        jschSession.connect();
-        return (ChannelSftp) jschSession.openChannel("sftp");
-    }
-
-    public void put(ChannelSftp channelSftp, String localFile, String remoteDir) throws JSchException, SftpException {
-        //ChannelSftp channelSftp = setupJsch();
-        channelSftp.connect();
-
-//        String localFile = "src/main/resources/sample.txt";
-//        String remoteDir = "remote_sftp_test/";
-
-        channelSftp.put(localFile, remoteDir);
-
-        channelSftp.exit();
-    }
-
-
-
     private String getDecryptedPassword(String password) throws ApiException {
         try {
             CryptoDecodeFormWithoutKey form = CommonDtoHelper.convertToCryptoForm(password);
@@ -302,10 +275,11 @@ public class ScheduleReportTask extends AbstractTask {
             throws IOException, ApiException, MessagingException {
         File out = csvFile;
         boolean isZip = false;
+        log.info("(Before Zip) Email File size : " + fileSize + " MB");
         if (fileSize > 50.0) {
             throw new ApiException(ApiStatus.BAD_DATA, "File size has crossed 50 MB limit. Mail can't be sent");
         }
-        if (fileSize > 15.0) {
+        if (fileSize > SCHEDULE_FILE_SIZE_ZIP_AFTER) { // Mailjet has a limit of 15 mb - https://documentation.mailjet.com/hc/en-us/articles/360043179773-What-is-the-size-limit-for-attachments-files-sent-via-Mailjet
             String outFileName = csvFile.getName().split(".csv")[0] + ".7z";
             File zipFile = folderApi.getFile(outFileName);
             try {
@@ -327,6 +301,8 @@ public class ScheduleReportTask extends AbstractTask {
             out = zipFile;
             isZip = true;
         }
+        log.info("(After Zip) Email File size : " + FileUtil.getSizeInMb(out.length()) + " MB");
+
         ReportSchedulePojo schedulePojo = reportScheduleApi.getCheck(pojo.getScheduleId());
         List<String> toEmails = reportScheduleApi.getByScheduleId(schedulePojo.getId()).stream()
                 .map(ReportScheduleEmailsPojo::getSendTo).collect(

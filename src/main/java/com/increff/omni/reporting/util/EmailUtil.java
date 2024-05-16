@@ -1,19 +1,22 @@
 package com.increff.omni.reporting.util;
 
 import com.increff.omni.reporting.config.EmailProps;
+import jakarta.activation.DataHandler;
+import jakarta.activation.DataSource;
+import jakarta.activation.FileDataSource;
 import jakarta.mail.*;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeBodyPart;
 import jakarta.mail.internet.MimeMessage;
 import jakarta.mail.internet.MimeMultipart;
-import jakarta.activation.DataHandler;
-import jakarta.activation.DataSource;
-import jakarta.activation.FileDataSource;
+import lombok.extern.log4j.Log4j2;
+
 import java.util.Properties;
 
 /**
  * Utility to send emails
  */
+@Log4j2
 public class EmailUtil {
 
     public static void sendMail(EmailProps eprops) throws MessagingException {
@@ -42,6 +45,7 @@ public class EmailUtil {
         // Set To: header field of the header.
         for (String email : eprops.getToEmails()) {
             message.addRecipients(Message.RecipientType.TO, InternetAddress.parse(email));
+            log.info("Email to: " + email);
         }
         // Set Subject: header field
         message.setSubject(eprops.getSubject());
@@ -51,7 +55,7 @@ public class EmailUtil {
 
         // Send message
         Transport.send(message);
-
+        log.info("Email sent successfully");
     }
 
     private static void setMessageContent(EmailProps eprops, Message message) throws MessagingException {

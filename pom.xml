@@ -23,7 +23,8 @@
         <start-class>com.increff.omni.reporting.OmniReportingApplication</start-class>
 
         <!--    Versions    -->
-        <increff-commons-fileclient.version>2.0.0</increff-commons-fileclient.version>
+        <increff-commons-fileclient.version>2.0.0-SNAPSHOT
+        </increff-commons-fileclient.version> <!-- todo : set version after release Increff Commons File Client -->
         <bucket4j-core.version>8.7.0</bucket4j-core.version>
         <commons-springboot-server.version>0.0.1</commons-springboot-server.version>
         <commons-springboot-db-mysql.version>0.0.1</commons-springboot-db-mysql.version>
@@ -277,18 +278,6 @@
     </build>
 
     <repositories>
-
-        <!-- For Building File Client Dependency (in Local) from Sonatype -->
-        <repository>
-            <id>sonatype-snapshot</id>
-            <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-        </repository>
 
         <!-- For NextSCM -->
         <repository>
