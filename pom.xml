@@ -23,8 +23,7 @@
         <start-class>com.increff.omni.reporting.OmniReportingApplication</start-class>
 
         <!--    Versions    -->
-        <increff-commons-fileclient.version>2.0.0-SNAPSHOT
-        </increff-commons-fileclient.version> <!-- todo : set version after release Increff Commons File Client -->
+        <increff-commons-fileclient.version>2.4.0</increff-commons-fileclient.version>
         <bucket4j-core.version>8.7.0</bucket4j-core.version>
         <commons-springboot-server.version>0.0.1</commons-springboot-server.version>
         <commons-springboot-db-mysql.version>0.0.1</commons-springboot-db-mysql.version>
