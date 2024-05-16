@@ -184,6 +184,9 @@ public class ApplicationProperties {
     @Value("${mongo.client.filter}")
     private String mongoClientFilter;
 
+    @Value("${schedule.file.size.zip.after:5}")
+    private Integer scheduleFileSizeZipAfter;
+
     @PostConstruct
     public void init() {
         UNIFY_QUERY_STRING = unifyQueryString;
@@ -195,6 +198,8 @@ public class ApplicationProperties {
         MongoUtil.MONGO_CLIENT_FILTER = mongoClientFilter;
 
         ConstantsUtil.MAX_RETRY_COUNT = maxRetryCount;
+
+        ConstantsUtil.SCHEDULE_FILE_SIZE_ZIP_AFTER = scheduleFileSizeZipAfter;
 
     }
 

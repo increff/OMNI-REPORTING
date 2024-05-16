@@ -50,6 +50,7 @@ import java.util.zip.ZipOutputStream;
 import static com.increff.omni.reporting.dto.CommonDtoHelper.getInputParamMapFromPojoList;
 import static com.increff.omni.reporting.dto.CommonDtoHelper.getValueFromQuotes;
 import static com.increff.omni.reporting.util.ConstantsUtil.MAX_RETRY_COUNT;
+import static com.increff.omni.reporting.util.ConstantsUtil.SCHEDULE_FILE_SIZE_ZIP_AFTER;
 import static com.increff.omni.reporting.util.ConvertUtil.getJavaObjectFromJson;
 
 @Component
@@ -277,7 +278,7 @@ public class ScheduleReportTask extends AbstractTask {
         if (fileSize > 50.0) {
             throw new ApiException(ApiStatus.BAD_DATA, "File size has crossed 50 MB limit. Mail can't be sent");
         }
-        if (fileSize > 15.0) {
+        if (fileSize > SCHEDULE_FILE_SIZE_ZIP_AFTER) { // Mailjet has a limit of 15 mb - https://documentation.mailjet.com/hc/en-us/articles/360043179773-What-is-the-size-limit-for-attachments-files-sent-via-Mailjet
             String outFileName = csvFile.getName().split(".csv")[0] + ".7z";
             File zipFile = folderApi.getFile(outFileName);
             try {
