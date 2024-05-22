@@ -14,4 +14,6 @@ public class InputControlFilterData {
     private String displayName;
     private InputControlType type;
     private List<String> values;
+
+    private List<String> displayValues; // used for displaying values in UI
 }
