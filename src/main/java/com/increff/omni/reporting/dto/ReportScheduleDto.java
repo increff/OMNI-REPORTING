@@ -6,8 +6,7 @@ import com.increff.commons.springboot.common.ConvertUtil;
 import com.increff.omni.reporting.api.*;
 import com.increff.omni.reporting.config.ApplicationProperties;
 import com.increff.omni.reporting.flow.ReportScheduleFlowApi;
-import com.increff.omni.reporting.model.constants.AuditActions;
-import com.increff.omni.reporting.model.constants.ReportRequestType;
+import com.increff.omni.reporting.model.constants.*;
 import com.increff.omni.reporting.model.data.InputControlFilterData;
 import com.increff.omni.reporting.model.data.PipelineFlowData;
 import com.increff.omni.reporting.model.data.ReportRequestData;
@@ -24,8 +23,10 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.increff.omni.reporting.dto.CommonDtoHelper.*;
-import static com.increff.omni.reporting.util.NormalizeUtil.normalizeReportScheduleForm;
+import static com.increff.omni.reporting.util.ConstantsUtil.ADD_TIME;
+import static com.increff.omni.reporting.util.ConstantsUtil.USER_TIMEZONE;
 import static com.increff.omni.reporting.util.ValidateUtil.validateReportScheduleForm;
+
 @Component
 public class ReportScheduleDto extends AbstractDto {
 
@@ -267,5 +268,33 @@ public class ReportScheduleDto extends AbstractDto {
         Map<String, List<String>> inputParams = new HashMap<>();
         paramMap.forEach(p -> inputParams.put(p.getKey(), p.getValue()));
         return inputParams;
+    }
+
+
+    private void normalizeReportScheduleForm(ReportScheduleForm form) throws ApiException {
+        if (Objects.isNull(form.getParamMap()))
+            return;
+
+        for (ReportScheduleForm.InputParamMap param : form.getParamMap()) {
+            if (!(param.getType().equals(InputControlType.DATE)
+                    || param.getType().equals(InputControlType.DATE_TIME)))
+                continue;
+            if (param.getValue().isEmpty())
+                continue;
+
+            String value = param.getValue().get(0);
+            value = DynamicDate.enumToQuery(value);
+            value = value.replace(USER_TIMEZONE, "\"" + form.getTimezone() + "\"");
+
+            // add 23:59:59 if date type is end date
+            List<InputControlPojo> controls = controlApi.getCheckByParamName(param.getKey());
+            Set<DateType> dateTypes = controls.stream().map(InputControlPojo::getDateType).collect(Collectors.toSet());
+            if (dateTypes.size() > 1)
+                throw new ApiException(ApiStatus.BAD_DATA, "Multiple date types found for param : " + param.getKey() + " Date Types : " + dateTypes);
+            value = value.replace(ADD_TIME, dateTypes.contains(DateType.END_DATE) ? "\"23:59:59\"" : "\"00:00:00\"");
+
+            param.setValue(Arrays.asList(value));
+        }
+
     }
 }

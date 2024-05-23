@@ -3,20 +3,34 @@ package com.increff.omni.reporting.model.constants;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 
+import static com.increff.omni.reporting.util.ConstantsUtil.ADD_TIME;
 import static com.increff.omni.reporting.util.ConstantsUtil.USER_TIMEZONE;
 
 @Log4j2
 @Getter
 public enum DynamicDate {
-
     // todo : rem display name if not required as it exists in UI
-    NOW("convert_tz(now(), " + USER_TIMEZONE + ", \"UTC\")", "Now"),
-    TODAY("convert_tz(timestamp(curdate()), " + USER_TIMEZONE + ", \"UTC\")", "Today"),
-    YESTERDAY("convert_tz(timestamp(date_sub(curdate(), interval 1 day)), " + USER_TIMEZONE + ", \"UTC\")", "Yesterday"),
-    ONE_WEEK("convert_tz(timestamp(date_sub(curdate(), interval 7 day)), " + USER_TIMEZONE + ", \"UTC\")", "1 Week"),
-    FIFTEEN_DAYS("convert_tz(timestamp(date_sub(curdate(), interval 15 day)), " + USER_TIMEZONE + ", \"UTC\")", "15 Days"),
-    CURRENT_MONTH("convert_tz(timestamp(DATE_FORMAT(curdate(),'%Y-%m-01')), " + USER_TIMEZONE + ", \"UTC\")", "1st of Current Month"),
-    LAST_MONTH_1ST("convert_tz(timestamp(DATE_FORMAT(date_sub(curdate(), INTERVAL 1 MONTH),'%Y-%m-01')), " + USER_TIMEZONE + ", \"UTC\")", "1st of Last Month");
+    //NOW("convert_tz(now(), " + USER_TIMEZONE + ", \"UTC\")", "Now"),
+    //// select addtime(convert_tz(timestamp(curdate()), "Asia/Riyadh", "UTC"),  "23:59:59" );
+//    NOW("addtime(convert_tz(timestamp(curdate()), " + USER_TIMEZONE + ", \"UTC\"), " + ADD_TIME + ")", "Now"),
+//    TODAY("addtime(convert_tz(timestamp(curdate()), " + USER_TIMEZONE + ", \"UTC\"), " + ADD_TIME + ")", "Today"),
+//
+
+    //TODAY("convert_tz(timestamp(curdate()), " + USER_TIMEZONE + ", \"UTC\")", "Today"),
+
+//    YESTERDAY("convert_tz(timestamp(date_sub(curdate(), interval 1 day)), " + USER_TIMEZONE + ", \"UTC\")", "Yesterday"),
+//    ONE_WEEK("convert_tz(timestamp(date_sub(curdate(), interval 7 day)), " + USER_TIMEZONE + ", \"UTC\")", "1 Week"),
+//    FIFTEEN_DAYS("convert_tz(timestamp(date_sub(curdate(), interval 15 day)), " + USER_TIMEZONE + ", \"UTC\")", "15 Days"),
+//    CURRENT_MONTH("convert_tz(timestamp(DATE_FORMAT(curdate(),'%Y-%m-01')), " + USER_TIMEZONE + ", \"UTC\")", "1st of Current Month"),
+//    LAST_MONTH_1ST("convert_tz(timestamp(DATE_FORMAT(date_sub(curdate(), INTERVAL 1 MONTH),'%Y-%m-01')), " + USER_TIMEZONE + ", \"UTC\")", "1st of Last Month");
+
+    NOW("addtime(convert_tz(timestamp(curdate()), " + USER_TIMEZONE + ", \"UTC\"), " + ADD_TIME + ")", "Now"),
+    TODAY("addtime(convert_tz(timestamp(curdate()), " + USER_TIMEZONE + ", \"UTC\"), " + ADD_TIME + ")", "Today"),
+    YESTERDAY("addtime(convert_tz(timestamp(date_sub(curdate(), interval 1 day)), " + USER_TIMEZONE + ", \"UTC\"), " + ADD_TIME + ")", "Yesterday"),
+    ONE_WEEK("addtime(convert_tz(timestamp(date_sub(curdate(), interval 7 day)), " + USER_TIMEZONE + ", \"UTC\"), " + ADD_TIME + ")", "1 Week"),
+    FIFTEEN_DAYS("addtime(convert_tz(timestamp(date_sub(curdate(), interval 15 day)), " + USER_TIMEZONE + ", \"UTC\"), " + ADD_TIME + ")", "15 Days"),
+    CURRENT_MONTH("addtime(convert_tz(timestamp(DATE_FORMAT(curdate(),'%Y-%m-01')), " + USER_TIMEZONE + ", \"UTC\"), " + ADD_TIME + ")", "1st of Current Month"),
+    LAST_MONTH_1ST("addtime(convert_tz(timestamp(DATE_FORMAT(date_sub(curdate(), INTERVAL 1 MONTH),'%Y-%m-01')), " + USER_TIMEZONE + ", \"UTC\"), " + ADD_TIME + ")", "1st of Last Month");
 
     private final String query;
     private final String displayName;
