@@ -10,13 +10,13 @@ import static com.increff.omni.reporting.util.ConstantsUtil.USER_TIMEZONE;
 public enum DynamicDate {
 
     // todo : rem display name if not required as it exists in UI
-    NOW("convert_tz(now(), \"UTC\", " + USER_TIMEZONE + ")", "Now"),
-    TODAY("convert_tz(timestamp(curdate()), \"UTC\", " + USER_TIMEZONE + ")", "Today"),
-    YESTERDAY("convert_tz(timestamp(date_sub(curdate(), interval 1 day)), \"UTC\", " + USER_TIMEZONE + ")", "Yesterday"),
-    ONE_WEEK("convert_tz(timestamp(date_sub(curdate(), interval 7 day)), \"UTC\", " + USER_TIMEZONE + ")", "1 Week"),
-    FIFTEEN_DAYS("convert_tz(timestamp(date_sub(curdate(), interval 15 day)), \"UTC\", " + USER_TIMEZONE + ")", "15 Days"),
-    CURRENT_MONTH("convert_tz(timestamp(DATE_FORMAT(curdate(),'%Y-%m-01')), \"UTC\", " + USER_TIMEZONE + ")", "1st of Current Month"),
-    LAST_MONTH_1ST("convert_tz(timestamp(DATE_FORMAT(date_sub(curdate(), INTERVAL 1 MONTH),'%Y-%m-01')), \"UTC\", " + USER_TIMEZONE + ")", "1st of Last Month");
+    NOW("convert_tz(now(), " + USER_TIMEZONE + ", \"UTC\")", "Now"),
+    TODAY("convert_tz(timestamp(curdate()), " + USER_TIMEZONE + ", \"UTC\")", "Today"),
+    YESTERDAY("convert_tz(timestamp(date_sub(curdate(), interval 1 day)), " + USER_TIMEZONE + ", \"UTC\")", "Yesterday"),
+    ONE_WEEK("convert_tz(timestamp(date_sub(curdate(), interval 7 day)), " + USER_TIMEZONE + ", \"UTC\")", "1 Week"),
+    FIFTEEN_DAYS("convert_tz(timestamp(date_sub(curdate(), interval 15 day)), " + USER_TIMEZONE + ", \"UTC\")", "15 Days"),
+    CURRENT_MONTH("convert_tz(timestamp(DATE_FORMAT(curdate(),'%Y-%m-01')), " + USER_TIMEZONE + ", \"UTC\")", "1st of Current Month"),
+    LAST_MONTH_1ST("convert_tz(timestamp(DATE_FORMAT(date_sub(curdate(), INTERVAL 1 MONTH),'%Y-%m-01')), " + USER_TIMEZONE + ", \"UTC\")", "1st of Last Month");
 
     private final String query;
     private final String displayName;
@@ -26,12 +26,12 @@ public enum DynamicDate {
         this.displayName = displayName;
     }
 
-    public static String queryToEnum(String query) {
+    public static DynamicDate queryToEnum(String query) {
         for (DynamicDate dynamicDate : DynamicDate.values()) {
             String queryBeforeUserTimezone = dynamicDate.getQuery().substring(0, dynamicDate.getQuery().indexOf(USER_TIMEZONE));
             log.trace("queryBeforeUserTimezone : " + queryBeforeUserTimezone + " query : " + query);
-            if (dynamicDate.query.startsWith(queryBeforeUserTimezone)) {
-                return dynamicDate.name();
+            if (query.startsWith(queryBeforeUserTimezone)) {
+                return dynamicDate;
             }
         }
         // todo : ques : why not return actual exception instead of throwing ApiException?

@@ -55,7 +55,7 @@ public class CommonDtoHelper {
                 // convert sql query to enum for date and date_time type for UI
                 if ((controlPojo.get().getType().equals(InputControlType.DATE) || controlPojo.get().getType().equals(InputControlType.DATE_TIME))
                         && values.size() == 1) {
-                    values = Collections.singletonList(DynamicDate.queryToEnum(values.getFirst()));
+                    values = Collections.singletonList(DynamicDate.queryToEnum(values.getFirst()).name());
                     displayValues = Collections.singletonList(DynamicDate.valueOf(values.get(0)).getDisplayName());
                 }
 
