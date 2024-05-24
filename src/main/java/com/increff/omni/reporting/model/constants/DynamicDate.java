@@ -9,7 +9,7 @@ import static com.increff.omni.reporting.util.ConstantsUtil.*;
 @Getter
 public enum DynamicDate {
 
-    NOW("addtime(convert_tz(now(), " + USER_TIMEZONE + ", \"UTC\"), " + ADD_TIME + ")", TIME_START_STRING),
+    NOW("addtime(convert_tz(now()), " + USER_TIMEZONE + ", \"UTC\"), " + ADD_TIME + ")", TIME_START_STRING),
     TODAY("addtime(convert_tz(timestamp(curdate()), " + USER_TIMEZONE + ", \"UTC\"), " + ADD_TIME + ")", TIME_START_STRING),
     YESTERDAY("addtime(convert_tz(timestamp(date_sub(curdate(), interval 1 day)), " + USER_TIMEZONE + ", \"UTC\"), " + ADD_TIME + ")", TIME_START_STRING),
     ONE_WEEK("addtime(convert_tz(timestamp(date_sub(curdate(), interval 7 day)), " + USER_TIMEZONE + ", \"UTC\"), " + ADD_TIME + ")", TIME_START_STRING),
