@@ -60,7 +60,7 @@ public class ReportScheduleDto extends AbstractDto {
 
     public void scheduleReport(ReportScheduleForm form) throws ApiException {
         validateReportScheduleForm(form);
-        normalizeReportScheduleForm(form);
+        setDynamicDates(form);
         checkLimitForOrg();
         OrganizationPojo organizationPojo = organizationApi.getCheck(getOrgId());
         ReportPojo reportPojo = checkValidReport(form.getReportAlias());
@@ -76,7 +76,7 @@ public class ReportScheduleDto extends AbstractDto {
 
     public void editScheduleReport(Integer id, ReportScheduleForm form) throws ApiException {
         validateReportScheduleForm(form);
-        normalizeReportScheduleForm(form);
+        setDynamicDates(form);
         checkLimitForOrg();
         ReportSchedulePojo ex = api.getCheck(id);
         if (!ex.getOrgId().equals(getOrgId()))
@@ -271,7 +271,7 @@ public class ReportScheduleDto extends AbstractDto {
     }
 
 
-    private void normalizeReportScheduleForm(ReportScheduleForm form) throws ApiException {
+    private void setDynamicDates(ReportScheduleForm form) throws ApiException {
         if (Objects.isNull(form.getParamMap()))
             return;
 
@@ -282,16 +282,18 @@ public class ReportScheduleDto extends AbstractDto {
             if (param.getValue().isEmpty())
                 continue;
 
-            String value = param.getValue().get(0);
-            value = DynamicDate.enumToQuery(value);
+            DynamicDate dynamicDate = DynamicDate.valueOf(param.getValue().get(0));
+            String value = dynamicDate.getQuery();
+
+            // set user timezone
             value = value.replace(USER_TIMEZONE, "\"" + form.getTimezone() + "\"");
 
-            // add 23:59:59 if date type is end date
+            // add 23:59:59 or 00:00:00 if date type is end date
             List<InputControlPojo> controls = controlApi.getCheckByParamName(param.getKey());
             Set<DateType> dateTypes = controls.stream().map(InputControlPojo::getDateType).collect(Collectors.toSet());
             if (dateTypes.size() > 1)
                 throw new ApiException(ApiStatus.BAD_DATA, "Multiple date types found for param : " + param.getKey() + " Date Types : " + dateTypes);
-            value = value.replace(ADD_TIME, dateTypes.contains(DateType.END_DATE) ? "\"23:59:59\"" : "\"00:00:00\"");
+            value = value.replace(ADD_TIME, dynamicDate.getEndTimeString());
 
             param.setValue(Arrays.asList(value));
         }

@@ -9,11 +9,8 @@ import java.util.List;
 @Getter
 @Setter
 public class InputControlFilterData {
-
     private String paramName;
     private String displayName;
     private InputControlType type;
     private List<String> values;
-
-    private List<String> displayValues; // used for displaying values in UI
 }

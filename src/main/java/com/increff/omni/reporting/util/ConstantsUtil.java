@@ -10,5 +10,8 @@ public class ConstantsUtil {
 
     public static String USER_TIMEZONE = "#user_timezone"; // Replaced by user timezone in add/edit schedules
     public static String ADD_TIME = "#add_time";
+    public static final String TIME_START_STRING = "\"00:00:00\"";
+    public static final String TIME_END_STRING = "\"23:59:59\"";
+
 }
 

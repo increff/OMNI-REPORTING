@@ -50,17 +50,14 @@ public class CommonDtoHelper {
                         Arrays.stream(p.getParamValue().split(
                                         ","))
                                 .map(CommonDtoHelper::getValueFromQuotes).collect(Collectors.toList()));
-                List<String> displayValues = new ArrayList<>();
 
                 // convert sql query to enum for date and date_time type for UI
                 if ((controlPojo.get().getType().equals(InputControlType.DATE) || controlPojo.get().getType().equals(InputControlType.DATE_TIME))
                         && values.size() == 1) {
                     values = Collections.singletonList(DynamicDate.queryToEnum(values.getFirst()).name());
-                    displayValues = Collections.singletonList(DynamicDate.valueOf(values.get(0)).getDisplayName());
                 }
 
                 filterData.setValues(values);
-                filterData.setDisplayValues(displayValues);
                 filterData.setType(controlPojo.get().getType());
                 inputControlFilterData.add(filterData);
             }
