@@ -8,8 +8,9 @@ import static com.increff.omni.reporting.util.ConstantsUtil.*;
 @Log4j2
 @Getter
 public enum DynamicDate {
+    // todo : validate to and from date - we cannot validate date range validation groups as we have sql string not exact dates. We will need to write our own sql parser if we want to validate date range
 
-    NOW("addtime(convert_tz(now()), " + USER_TIMEZONE + ", \"UTC\"), " + ADD_TIME + ")", TIME_START_STRING),
+    NOW("addtime(convert_tz(now(), " + USER_TIMEZONE + ", \"UTC\"), " + ADD_TIME + ")", TIME_START_STRING),
     TODAY("addtime(convert_tz(timestamp(curdate()), " + USER_TIMEZONE + ", \"UTC\"), " + ADD_TIME + ")", TIME_START_STRING),
     YESTERDAY("addtime(convert_tz(timestamp(date_sub(curdate(), interval 1 day)), " + USER_TIMEZONE + ", \"UTC\"), " + ADD_TIME + ")", TIME_START_STRING),
     ONE_WEEK("addtime(convert_tz(timestamp(date_sub(curdate(), interval 7 day)), " + USER_TIMEZONE + ", \"UTC\"), " + ADD_TIME + ")", TIME_START_STRING),
@@ -26,7 +27,7 @@ public enum DynamicDate {
     }
 
     public static DynamicDate queryToEnum(String query) {
-        for (DynamicDate dynamicDate : DynamicDate.values()) {
+        for (DynamicDate dynamicDate : DynamicDate.values()) { // Parse the query to get the enum based on prefix of query
             String queryBeforeUserTimezone = dynamicDate.getQuery().substring(0, dynamicDate.getQuery().indexOf(USER_TIMEZONE));
             log.trace("queryBeforeUserTimezone : " + queryBeforeUserTimezone + " query : " + query);
             if (query.startsWith(queryBeforeUserTimezone)) {
