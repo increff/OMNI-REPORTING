@@ -10,13 +10,13 @@ import static com.increff.omni.reporting.util.ConstantsUtil.*;
 public enum DynamicDate {
     // todo : validate to and from date - we cannot validate date range validation groups as we have sql string not exact dates. We will need to write our own sql parser if we want to validate date range
 
-    NOW("addtime(convert_tz(now(), " + USER_TIMEZONE + ", \"UTC\"), " + ADD_TIME + ")", TIME_START_STRING),
-    TODAY("addtime(convert_tz(timestamp(curdate()), " + USER_TIMEZONE + ", \"UTC\"), " + ADD_TIME + ")", TIME_START_STRING),
-    YESTERDAY("addtime(convert_tz(timestamp(date_sub(curdate(), interval 1 day)), " + USER_TIMEZONE + ", \"UTC\"), " + ADD_TIME + ")", TIME_START_STRING),
-    ONE_WEEK("addtime(convert_tz(timestamp(date_sub(curdate(), interval 7 day)), " + USER_TIMEZONE + ", \"UTC\"), " + ADD_TIME + ")", TIME_START_STRING),
-    FIFTEEN_DAYS("addtime(convert_tz(timestamp(date_sub(curdate(), interval 15 day)), " + USER_TIMEZONE + ", \"UTC\"), " + ADD_TIME + ")", TIME_START_STRING),
-    CURRENT_MONTH("addtime(convert_tz(timestamp(DATE_FORMAT(curdate(),'%Y-%m-01')), " + USER_TIMEZONE + ", \"UTC\"), " + ADD_TIME + ")", TIME_END_STRING),
-    LAST_MONTH_1ST("addtime(convert_tz(timestamp(DATE_FORMAT(date_sub(curdate(), INTERVAL 1 MONTH),'%Y-%m-01')), " + USER_TIMEZONE + ", \"UTC\"), " + ADD_TIME + ")", TIME_START_STRING);
+    NOW("addtime(convert_tz(now(), " + USER_TIMEZONE + ", \"UTC\"), " + ADD_TIME + ")", TIME_END_STRING),
+    TODAY("addtime(convert_tz(timestamp(curdate()), " + USER_TIMEZONE + ", \"UTC\"), " + ADD_TIME + ")", TIME_END_STRING),
+    YESTERDAY("addtime(convert_tz(timestamp(date_sub(curdate(), interval 1 day)), " + USER_TIMEZONE + ", \"UTC\"), " + ADD_TIME + ")", TIME_END_STRING),
+    ONE_WEEK("addtime(convert_tz(timestamp(date_sub(curdate(), interval 7 day)), " + USER_TIMEZONE + ", \"UTC\"), " + ADD_TIME + ")", TIME_END_STRING),
+    FIFTEEN_DAYS("addtime(convert_tz(timestamp(date_sub(curdate(), interval 15 day)), " + USER_TIMEZONE + ", \"UTC\"), " + ADD_TIME + ")", TIME_END_STRING),
+    CURRENT_MONTH("addtime(convert_tz(timestamp(DATE_FORMAT(curdate(),'%Y-%m-01')), " + USER_TIMEZONE + ", \"UTC\"), " + ADD_TIME + ")", TIME_START_STRING),
+    LAST_MONTH_1ST("addtime(convert_tz(timestamp(DATE_FORMAT(date_sub(curdate(), INTERVAL 1 MONTH),'%Y-%m-01')), " + USER_TIMEZONE + ", \"UTC\"), " + ADD_TIME + ")", TIME_END_STRING);
 
     private final String query;
     private final String endTimeString; // Add 23:59:59 sometimes in end date for schedulers to include/exclude end date
