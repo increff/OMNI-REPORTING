@@ -23,8 +23,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.increff.omni.reporting.dto.CommonDtoHelper.*;
-import static com.increff.omni.reporting.util.ConstantsUtil.ADD_TIME;
-import static com.increff.omni.reporting.util.ConstantsUtil.USER_TIMEZONE;
+import static com.increff.omni.reporting.util.ConstantsUtil.*;
 import static com.increff.omni.reporting.util.ValidateUtil.validateReportScheduleForm;
 
 @Component
@@ -293,7 +292,10 @@ public class ReportScheduleDto extends AbstractDto {
             Set<DateType> dateTypes = controls.stream().map(InputControlPojo::getDateType).collect(Collectors.toSet());
             if (dateTypes.size() > 1)
                 throw new ApiException(ApiStatus.BAD_DATA, "Multiple date types found for param : " + param.getKey() + " Date Types : " + dateTypes);
-            value = value.replace(ADD_TIME, dynamicDate.getEndTimeString());
+            if (dateTypes.contains(DateType.END_DATE))
+                value = value.replace(ADD_TIME, dynamicDate.getEndTimeString());
+            else if (dateTypes.contains(DateType.START_DATE))
+                value = value.replace(ADD_TIME, TIME_START_STRING);
 
             param.setValue(Arrays.asList(value));
         }
