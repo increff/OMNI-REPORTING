@@ -98,6 +98,7 @@ public class FileUtil {
         List<String> headers = new ArrayList<>();
         for (Document document : documents) {
             headers.addAll(document.keySet());
+            break; // Only first document is enough to get all headers
         }
         csvPrinter.printRecord(headers);
         for (Document document : documents) {
