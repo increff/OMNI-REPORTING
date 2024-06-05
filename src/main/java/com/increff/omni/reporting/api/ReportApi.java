@@ -1,11 +1,12 @@
 package com.increff.omni.reporting.api;
 
+import com.increff.commons.springboot.common.ApiException;
+import com.increff.commons.springboot.common.ApiStatus;
 import com.increff.omni.reporting.dao.ReportDao;
 import com.increff.omni.reporting.model.constants.AppName;
 import com.increff.omni.reporting.model.constants.ReportType;
 import com.increff.omni.reporting.model.constants.VisualizationType;
 import com.increff.omni.reporting.pojo.ReportPojo;
-import com.increff.commons.springboot.common.ApiException;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -96,6 +97,13 @@ public class ReportApi extends AbstractAuditApi {
 
     public List<ReportPojo> getByAlias(String alias){
         return dao.selectMultiple("alias", alias);
+    }
+
+    public List<ReportPojo> getCheckByAlias(String alias) throws ApiException {
+        List<ReportPojo> pojo = getByAlias(alias);
+        if (pojo.isEmpty())
+            throw new ApiException(ApiStatus.BAD_DATA, "No report present with alias : " + alias);
+        return pojo;
     }
 
     public ReportPojo getByIdAndAppNameIn(Integer id, Set<AppName> appNames) {
