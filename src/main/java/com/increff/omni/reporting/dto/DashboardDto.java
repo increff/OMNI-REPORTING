@@ -1,5 +1,6 @@
 package com.increff.omni.reporting.dto;
 
+import com.increff.commons.springboot.audit.api.AuditApi;
 import com.increff.commons.springboot.common.ApiException;
 import com.increff.commons.springboot.common.ApiStatus;
 import com.increff.commons.springboot.common.ConvertUtil;
@@ -35,6 +36,8 @@ import static com.increff.omni.reporting.util.ValidateUtil.validateDefaultValueF
 @Log4j2
 @Setter
 public class DashboardDto extends AbstractDto {
+    @Autowired
+    private AuditApi auditApi;
     @Autowired
     private ReportApi reportApi;
     @Autowired
@@ -169,9 +172,13 @@ public class DashboardDto extends AbstractDto {
 
     @Transactional(rollbackFor = ApiException.class)
     public void deleteDashboard(Integer dashboardId) throws ApiException {
+        String dashboardName = api.getCheck(dashboardId, getOrgId()).getName();
         dashboardChartApi.deleteByDashboardId(dashboardId);
         defaultValueApi.deleteByDashboardId(dashboardId);
         api.delete(dashboardId);
+
+        auditApi.save(dashboardId.toString(), AuditActions.DELETE_DASHBOARD.toString(), "Delete DashboardId: " + dashboardId + " Name: " + dashboardName
+                , "Delete DashboardId " + dashboardId + " Name: " + dashboardName, getUserName());
     }
 
     @Transactional(rollbackFor = ApiException.class)
