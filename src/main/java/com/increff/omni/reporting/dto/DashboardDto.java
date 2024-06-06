@@ -1,5 +1,8 @@
 package com.increff.omni.reporting.dto;
 
+import com.increff.commons.springboot.common.ApiException;
+import com.increff.commons.springboot.common.ApiStatus;
+import com.increff.commons.springboot.common.ConvertUtil;
 import com.increff.omni.reporting.api.*;
 import com.increff.omni.reporting.config.ApplicationProperties;
 import com.increff.omni.reporting.flow.FlowApi;
@@ -9,12 +12,10 @@ import com.increff.omni.reporting.model.data.Charts.ChartInterface;
 import com.increff.omni.reporting.model.form.*;
 import com.increff.omni.reporting.pojo.*;
 import com.increff.omni.reporting.util.ChartUtil;
+import com.increff.omni.reporting.util.ConstantsUtil;
 import com.increff.omni.reporting.util.UserPrincipalUtil;
 import com.increff.omni.reporting.util.ValidateUtil;
 import com.nextscm.commons.lang.StringUtil;
-import com.increff.commons.springboot.common.ApiException;
-import com.increff.commons.springboot.common.ApiStatus;
-import com.increff.commons.springboot.common.ConvertUtil;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -441,7 +442,7 @@ public class DashboardDto extends AbstractDto {
         // Copies all dashboards created in Increff org (Admin org set in properties file) to new orgs
         List<DashboardPojo> dashboards = api.getByOrgId(properties.getIncreffOrgId());
         for(DashboardPojo dashboard : dashboards) {
-            if (dashboard.getName().toLowerCase().startsWith("test"))
+            if (dashboard.getName().toLowerCase().startsWith(ConstantsUtil.DASHBOARD_COPY_IGNORE_PREFIX))
                 if(!copyTestDashboards) continue; // Skip if dashboard name starts with test
 
             copyDashboardToSomeOrgs(dashboard.getId(), dashboard.getOrgId(), orgIds);
