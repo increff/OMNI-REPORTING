@@ -158,7 +158,8 @@ public class DashboardDto extends AbstractDto {
         dashboardPojo.setOrgId(getOrgId());
         api.add(dashboardPojo);
         dashboardChartDto.addDashboardChart(form.getCharts(), dashboardPojo.getId());
-
+        api.saveAudit(dashboardPojo.getId().toString(), "Add Dashboard", AuditActions.ADD_DASHBOARD.name(),
+                "Add Dashboard Id: " + dashboardPojo.getId() + " Name: " + dashboardPojo.getName(), getUserName());
         return getDashboard(dashboardPojo.getId());
     }
 
@@ -167,6 +168,8 @@ public class DashboardDto extends AbstractDto {
         validateDashboardForm(form);
         api.getCheck(dashboardId, getOrgId());
         DashboardPojo dashboard = api.update(dashboardId, ConvertUtil.convert(form, DashboardPojo.class));
+        api.saveAudit(dashboard.getId().toString(), "Update Dashboard", AuditActions.EDIT_DASHBOARD.name(),
+                "Update Dashboard Id: " + dashboard.getId() + " Name: " + dashboard.getName(), getUserName());
         return getDashboard(dashboard.getId());
     }
 
