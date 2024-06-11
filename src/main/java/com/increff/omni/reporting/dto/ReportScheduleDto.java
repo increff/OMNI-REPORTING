@@ -6,7 +6,8 @@ import com.increff.commons.springboot.common.ConvertUtil;
 import com.increff.omni.reporting.api.*;
 import com.increff.omni.reporting.config.ApplicationProperties;
 import com.increff.omni.reporting.flow.ReportScheduleFlowApi;
-import com.increff.omni.reporting.model.constants.*;
+import com.increff.omni.reporting.model.constants.AuditActions;
+import com.increff.omni.reporting.model.constants.ReportRequestType;
 import com.increff.omni.reporting.model.data.InputControlFilterData;
 import com.increff.omni.reporting.model.data.PipelineFlowData;
 import com.increff.omni.reporting.model.data.ReportRequestData;
@@ -23,7 +24,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.increff.omni.reporting.dto.CommonDtoHelper.*;
-import static com.increff.omni.reporting.util.ConstantsUtil.*;
 import static com.increff.omni.reporting.util.ValidateUtil.validateReportScheduleForm;
 
 @Component
@@ -59,8 +59,8 @@ public class ReportScheduleDto extends AbstractDto {
 
     public void scheduleReport(ReportScheduleForm form) throws ApiException {
         validateReportScheduleForm(form);
-        setDynamicDates(form);
         checkLimitForOrg();
+
         OrganizationPojo organizationPojo = organizationApi.getCheck(getOrgId());
         ReportPojo reportPojo = checkValidReport(form.getReportAlias());
         ReportSchedulePojo pojo = convertFormToReportSchedulePojo(form, getOrgId(), getUserId());
@@ -75,7 +75,6 @@ public class ReportScheduleDto extends AbstractDto {
 
     public void editScheduleReport(Integer id, ReportScheduleForm form) throws ApiException {
         validateReportScheduleForm(form);
-        setDynamicDates(form);
         checkLimitForOrg();
         ReportSchedulePojo ex = api.getCheck(id);
         if (!ex.getOrgId().equals(getOrgId()))
@@ -267,38 +266,5 @@ public class ReportScheduleDto extends AbstractDto {
         Map<String, List<String>> inputParams = new HashMap<>();
         paramMap.forEach(p -> inputParams.put(p.getKey(), p.getValue()));
         return inputParams;
-    }
-
-
-    private void setDynamicDates(ReportScheduleForm form) throws ApiException {
-        if (Objects.isNull(form.getParamMap()))
-            return;
-
-        for (ReportScheduleForm.InputParamMap param : form.getParamMap()) {
-            if (!(param.getType().equals(InputControlType.DATE)
-                    || param.getType().equals(InputControlType.DATE_TIME)))
-                continue;
-            if (param.getValue().isEmpty())
-                continue;
-
-            DynamicDate dynamicDate = DynamicDate.valueOf(param.getValue().get(0));
-            String value = dynamicDate.getQuery();
-
-            // set user timezone
-            value = value.replace(USER_TIMEZONE, "\"" + form.getTimezone() + "\"");
-
-            // add 23:59:59 or 00:00:00 if date type is end date
-            List<InputControlPojo> controls = controlApi.getCheckByParamName(param.getKey());
-            Set<DateType> dateTypes = controls.stream().map(InputControlPojo::getDateType).collect(Collectors.toSet());
-            if (dateTypes.size() > 1)
-                throw new ApiException(ApiStatus.BAD_DATA, "Multiple date types found for param : " + param.getKey() + " Date Types : " + dateTypes);
-            if (dateTypes.contains(DateType.END_DATE))
-                value = value.replace(ADD_TIME, dynamicDate.getEndTimeString());
-            else if (dateTypes.contains(DateType.START_DATE))
-                value = value.replace(ADD_TIME, TIME_START_STRING);
-
-            param.setValue(Arrays.asList(value));
-        }
-
     }
 }

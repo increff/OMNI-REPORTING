@@ -3,41 +3,47 @@ package com.increff.omni.reporting.model.constants;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 
-import static com.increff.omni.reporting.util.ConstantsUtil.*;
+import java.time.ZonedDateTime;
 
 @Log4j2
 @Getter
 public enum DynamicDate {
-    // todo : validate to and from date - we cannot validate date range validation groups as we have sql string not exact dates. We will need to write our own sql parser if we want to validate date range
 
-    NOW("addtime(convert_tz(now(), " + USER_TIMEZONE + ", \"UTC\"), " + ADD_TIME + ")", TIME_END_STRING),
-    TODAY("addtime(convert_tz(timestamp(curdate()), " + USER_TIMEZONE + ", \"UTC\"), " + ADD_TIME + ")", TIME_END_STRING),
-    YESTERDAY("addtime(convert_tz(timestamp(date_sub(curdate(), interval 1 day)), " + USER_TIMEZONE + ", \"UTC\"), " + ADD_TIME + ")", TIME_END_STRING),
-    ONE_WEEK("addtime(convert_tz(timestamp(date_sub(curdate(), interval 7 day)), " + USER_TIMEZONE + ", \"UTC\"), " + ADD_TIME + ")", TIME_END_STRING),
-    FIFTEEN_DAYS("addtime(convert_tz(timestamp(date_sub(curdate(), interval 15 day)), " + USER_TIMEZONE + ", \"UTC\"), " + ADD_TIME + ")", TIME_END_STRING),
-    CURRENT_MONTH("addtime(convert_tz(timestamp(DATE_FORMAT(curdate(),'%Y-%m-01')), " + USER_TIMEZONE + ", \"UTC\"), " + ADD_TIME + ")", TIME_START_STRING),
-    LAST_MONTH_1ST("addtime(convert_tz(timestamp(DATE_FORMAT(date_sub(curdate(), INTERVAL 1 MONTH),'%Y-%m-01')), " + USER_TIMEZONE + ", \"UTC\"), " + ADD_TIME + ")", TIME_END_STRING);
+    NOW(),
+    TODAY(),
+    YESTERDAY(),
+    ONE_WEEK(),
+    FIFTEEN_DAYS(),
+    CURRENT_MONTH(false),
+    LAST_MONTH_1ST();
 
-    private final String query;
-    private final String endTimeString; // Add 23:59:59 sometimes in end date for schedulers to include/exclude end date
+    private Boolean addTimeEndDate = true; // add 23:59 if date type is END_DATE to include end date
 
-    DynamicDate(String query, String endTimeString) {
-        this.query = query;
-        this.endTimeString = endTimeString;
+    DynamicDate() {
     }
 
-    public static DynamicDate queryToEnum(String query) {
-        for (DynamicDate dynamicDate : DynamicDate.values()) { // Parse the query to get the enum based on prefix of query
-            String queryBeforeUserTimezone = dynamicDate.getQuery().substring(0, dynamicDate.getQuery().indexOf(USER_TIMEZONE));
-            log.trace("queryBeforeUserTimezone : " + queryBeforeUserTimezone + " query : " + query);
-            if (query.startsWith(queryBeforeUserTimezone)) {
-                return dynamicDate;
-            }
-        }
-        // todo : ques : why not return actual exception instead of throwing ApiException?
-        // We should throw relevant exceptions instead of combining everything.
-        // Moreover, this exception wont be seen be the user as enum values are hardcoded in UI
-        throw new IllegalArgumentException("Query to Dynamic Date conversion failed for " + query);
+    DynamicDate(Boolean addTimeEndDate) {
+        this.addTimeEndDate = addTimeEndDate;
+    }
+
+
+    public static ZonedDateTime parse(DynamicDate dynamicDate, ZonedDateTime zdt) {
+        ZonedDateTime dynamicZdtUtc = getDynamicZdt(dynamicDate, zdt);
+        return dynamicZdtUtc;
+    }
+
+    public static ZonedDateTime getDynamicZdt(DynamicDate dynamicDate, ZonedDateTime zdt) {
+        return switch (dynamicDate) {
+            case NOW -> zdt;
+            case TODAY -> zdt.withHour(0).withMinute(0).withSecond(0).withNano(0);
+            case YESTERDAY -> zdt.minusDays(1).withHour(0).withMinute(0).withSecond(0).withNano(0);
+            case ONE_WEEK -> zdt.minusWeeks(1).withHour(0).withMinute(0).withSecond(0).withNano(0);
+            case FIFTEEN_DAYS -> zdt.minusDays(15).withHour(0).withMinute(0).withSecond(0).withNano(0);
+            case CURRENT_MONTH -> zdt.withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0).withNano(0);
+            case LAST_MONTH_1ST ->
+                    zdt.minusMonths(1).withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0).withNano(0);
+            default -> throw new IllegalArgumentException("Dynamic Date unsupported value: " + dynamicDate);
+        };
     }
 
 }

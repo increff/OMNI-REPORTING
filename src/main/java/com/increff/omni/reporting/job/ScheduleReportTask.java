@@ -11,9 +11,7 @@ import com.increff.omni.reporting.api.*;
 import com.increff.omni.reporting.config.ApplicationProperties;
 import com.increff.omni.reporting.config.EmailProps;
 import com.increff.omni.reporting.dto.CommonDtoHelper;
-import com.increff.omni.reporting.model.constants.DBType;
-import com.increff.omni.reporting.model.constants.PipelineType;
-import com.increff.omni.reporting.model.constants.ReportRequestStatus;
+import com.increff.omni.reporting.model.constants.*;
 import com.increff.omni.reporting.model.form.FileProviderFolder.AwsPipelineConfigForm;
 import com.increff.omni.reporting.model.form.FileProviderFolder.GcpPipelineConfigForm;
 import com.increff.omni.reporting.model.form.FileProviderFolder.SftpPipelineConfigForm;
@@ -53,11 +51,15 @@ import static com.increff.omni.reporting.dto.CommonDtoHelper.getValueFromQuotes;
 import static com.increff.omni.reporting.util.ConstantsUtil.MAX_RETRY_COUNT;
 import static com.increff.omni.reporting.util.ConstantsUtil.SCHEDULE_FILE_SIZE_ZIP_AFTER;
 import static com.increff.omni.reporting.util.ConvertUtil.getJavaObjectFromJson;
+import static com.increff.omni.reporting.util.TimeUtil.getISO8601;
+import static com.increff.omni.reporting.util.TimeUtil.getTimeInTz;
 
 @Component
 @Log4j2
 public class ScheduleReportTask extends AbstractTask {
 
+    @Autowired
+    private InputControlApi inputControlApi;
     @Autowired
     private ReportRequestApi api;
     @Autowired
@@ -110,6 +112,8 @@ public class ScheduleReportTask extends AbstractTask {
                     reportPojo.getSchemaVersionId());
             ConnectionPojo connectionPojo = connectionApi.getCheck(orgMappingPojo.getConnectionId());
 
+            setDynamicDates(reportInputParamsPojoList, timezone);
+
             // Creation of file
             Map<String, String> inputParamMap = getInputParamMapFromPojoList(reportInputParamsPojoList);
             timezone = getValueFromQuotes(inputParamMap.get("timezone"));
@@ -141,6 +145,21 @@ public class ScheduleReportTask extends AbstractTask {
             }
         }
 
+    }
+
+    private void setDynamicDates(List<ReportInputParamsPojo> reportInputParamsPojoList, String timezone) throws ApiException {
+        for (ReportInputParamsPojo pojo : reportInputParamsPojoList) {
+            if (pojo.getParamKey().equals("timezone") || pojo.getParamKey().equals("orgId"))
+                continue; // skip hardcoded injected params as they wont exist in InputControlPojo
+            InputControlPojo inputControlPojo = inputControlApi.getCheckByParamName(pojo.getParamKey()).getFirst();
+            if (inputControlPojo.getType().equals(InputControlType.DATE) || inputControlPojo.getType().equals(InputControlType.DATE_TIME)) {
+                DynamicDate dynamicDate = DynamicDate.valueOf(pojo.getParamValue());
+                ZonedDateTime zdt = DynamicDate.parse(dynamicDate, getTimeInTz(ZonedDateTime.now(), timezone));
+                if (inputControlPojo.getDateType().equals(DateType.END_DATE) && dynamicDate.getAddTimeEndDate())
+                    zdt = zdt.withHour(23).withMinute(59).withSecond(59).withNano(999999999);
+                pojo.setParamValue("'" + getISO8601(getTimeInTz(zdt, "UTC")) + "'");
+            }
+        }
     }
 
     private void prepareAndSendEmailOrPipelines(ReportRequestPojo pojo, String fQuery, ConnectionPojo connectionPojo,

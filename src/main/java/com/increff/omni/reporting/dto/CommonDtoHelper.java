@@ -4,7 +4,10 @@ import com.increff.commons.queryexecutor.constants.FileFormat;
 import com.increff.commons.queryexecutor.constants.RequestStatus;
 import com.increff.commons.springboot.common.ApiException;
 import com.increff.commons.springboot.common.ApiStatus;
-import com.increff.omni.reporting.model.constants.*;
+import com.increff.omni.reporting.model.constants.InputControlType;
+import com.increff.omni.reporting.model.constants.ReportRequestStatus;
+import com.increff.omni.reporting.model.constants.ReportRequestType;
+import com.increff.omni.reporting.model.constants.ValidationType;
 import com.increff.omni.reporting.model.data.*;
 import com.increff.omni.reporting.model.form.ReportRequestForm;
 import com.increff.omni.reporting.model.form.ReportScheduleForm;
@@ -50,12 +53,6 @@ public class CommonDtoHelper {
                         Arrays.stream(p.getParamValue().split(
                                         ","))
                                 .map(CommonDtoHelper::getValueFromQuotes).collect(Collectors.toList()));
-
-                // convert sql query to enum for date and date_time type for UI
-                if ((controlPojo.get().getType().equals(InputControlType.DATE) || controlPojo.get().getType().equals(InputControlType.DATE_TIME))
-                        && values.size() == 1) {
-                    values = Collections.singletonList(DynamicDate.queryToEnum(values.getFirst()).name());
-                }
 
                 filterData.setValues(values);
                 filterData.setType(controlPojo.get().getType());
