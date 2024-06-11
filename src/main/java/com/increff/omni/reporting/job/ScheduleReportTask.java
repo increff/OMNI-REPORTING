@@ -111,12 +111,12 @@ public class ScheduleReportTask extends AbstractTask {
             OrgMappingPojo orgMappingPojo = orgMappingApi.getCheckByOrgIdSchemaVersionId(reportRequestPojo.getOrgId(),
                     reportPojo.getSchemaVersionId());
             ConnectionPojo connectionPojo = connectionApi.getCheck(orgMappingPojo.getConnectionId());
-
-            setDynamicDates(reportInputParamsPojoList, timezone);
-
             // Creation of file
             Map<String, String> inputParamMap = getInputParamMapFromPojoList(reportInputParamsPojoList);
             timezone = getValueFromQuotes(inputParamMap.get("timezone"));
+
+            setDynamicDates(reportInputParamsPojoList, timezone);
+
             String fQuery = SqlCmd.getFinalQuery(inputParamMap, reportQueryPojo.getQuery(), false, connectionPojo.getDbType());
             // Execute query and save results
             prepareAndSendEmailOrPipelines(pojo, fQuery, connectionPojo, timezone, reportPojo);
