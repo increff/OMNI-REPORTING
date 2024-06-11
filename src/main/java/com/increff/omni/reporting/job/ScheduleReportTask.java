@@ -38,10 +38,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.ZonedDateTime;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -112,10 +109,18 @@ public class ScheduleReportTask extends AbstractTask {
                     reportPojo.getSchemaVersionId());
             ConnectionPojo connectionPojo = connectionApi.getCheck(orgMappingPojo.getConnectionId());
             // Creation of file
-            Map<String, String> inputParamMap = getInputParamMapFromPojoList(reportInputParamsPojoList);
-            timezone = getValueFromQuotes(inputParamMap.get("timezone"));
+
+            Optional<String> userTimezone = reportInputParamsPojoList.stream()
+                    .filter(x -> x.getParamKey().equals("timezone"))
+                    .map(ReportInputParamsPojo::getParamValue)
+                    .findFirst();
+            if (userTimezone.isEmpty())
+                throw new ApiException(ApiStatus.BAD_DATA, "Timezone not found in input params");
+            timezone = getValueFromQuotes(userTimezone.get());
 
             setDynamicDates(reportInputParamsPojoList, timezone);
+
+            Map<String, String> inputParamMap = getInputParamMapFromPojoList(reportInputParamsPojoList);
 
             String fQuery = SqlCmd.getFinalQuery(inputParamMap, reportQueryPojo.getQuery(), false, connectionPojo.getDbType());
             // Execute query and save results
