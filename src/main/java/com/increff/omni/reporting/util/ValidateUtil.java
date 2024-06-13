@@ -84,8 +84,12 @@ public class ValidateUtil {
                     continue;
                 if (inputParamMap.getValue().size() > 1)
                     throw new ApiException(ApiStatus.BAD_DATA, "Date filter cannot have multiple values");
-                // Date should be parse-able by DynamicDate enum
-                DynamicDate.valueOf(inputParamMap.getValue().getFirst());
+
+                try { // Date should be parse-able by DynamicDate enum
+                    DynamicDate.valueOf(inputParamMap.getValue().getFirst());
+                } catch (IllegalArgumentException e) {
+                    throw new ApiException(ApiStatus.BAD_DATA, "Invalid date filter value: " + inputParamMap.getValue().getFirst());
+                }
             }
         }
     }
