@@ -110,13 +110,7 @@ public class ScheduleReportTask extends AbstractTask {
             ConnectionPojo connectionPojo = connectionApi.getCheck(orgMappingPojo.getConnectionId());
             // Creation of file
 
-            Optional<String> userTimezone = reportInputParamsPojoList.stream()
-                    .filter(x -> x.getParamKey().equals("timezone"))
-                    .map(ReportInputParamsPojo::getParamValue)
-                    .findFirst();
-            if (userTimezone.isEmpty())
-                throw new ApiException(ApiStatus.BAD_DATA, "Timezone not found in input params");
-            timezone = getValueFromQuotes(userTimezone.get());
+            timezone = getValueFromQuotes(getParamValue(reportInputParamsPojoList, "timezone"));
 
             setDynamicDates(reportInputParamsPojoList, timezone);
 
@@ -150,6 +144,16 @@ public class ScheduleReportTask extends AbstractTask {
             }
         }
 
+    }
+
+    private static String getParamValue(List<ReportInputParamsPojo> reportInputParamsPojoList, String key) throws ApiException {
+        Optional<String> value = reportInputParamsPojoList.stream()
+                .filter(x -> x.getParamKey().equals(key))
+                .map(ReportInputParamsPojo::getParamValue)
+                .findFirst();
+        if (value.isEmpty())
+            throw new ApiException(ApiStatus.BAD_DATA, "Value for key : " + key + " not found in input params");
+        return value.get();
     }
 
     private void setDynamicDates(List<ReportInputParamsPojo> reportInputParamsPojoList, String timezone) throws ApiException {
