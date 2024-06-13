@@ -122,28 +122,37 @@ public class ScheduleReportTask extends AbstractTask {
             reportScheduleApi.addScheduleCount(pojo.getScheduleId(), 1, 0);
         } catch (Exception e) {
             log.error("Report Request ID : " + pojo.getId() + " failed", e);
-            api.markFailed(pojo.getId(), ReportRequestStatus.FAILED, e.getMessage(), 0, 0.0);
-            reportScheduleApi.addScheduleCount(pojo.getScheduleId(), 0, 1);
-            try {
-                reportRequestPojo = api.getCheck(pojo.getId());
-                if (reportRequestPojo.getRetryCount() >= MAX_RETRY_COUNT) {
-                    ReportSchedulePojo schedulePojo = reportScheduleApi.getCheck(pojo.getScheduleId());
-                    List<String> toEmails = reportScheduleApi.getByScheduleId(schedulePojo.getId()).stream()
-                            .map(ReportScheduleEmailsPojo::getSendTo).collect(
-                                    Collectors.toList());
-                    if (!toEmails.isEmpty()) {
-                        EmailProps props = createEmailProps(null, false, toEmails, "Hi,<br>Please " +
-                                        "check failure reason in the latest scheduled requests. Re-submit the schedule in the " +
-                                        "reporting application, which might solve the issue.", false, timezone, reportPojo.getName(),
-                                false, schedulePojo.getEmailSubject(), true);
-                        EmailUtil.sendMail(props);
-                    }
-                }
-            } catch (Exception ex) {
-                log.error("Report Request ID : " + pojo.getId() + ". Failed to send email. ", ex);
-            }
+            processFailure(pojo, e, timezone, reportPojo);
         }
 
+    }
+
+    private void processFailure(ReportRequestPojo pojo, Exception e, String timezone, ReportPojo reportPojo) throws ApiException {
+        ReportRequestPojo reportRequestPojo;
+        api.markFailedOrRetry(pojo.getId(), ReportRequestStatus.FAILED, e.getMessage(), 0, 0.0);
+        reportScheduleApi.addScheduleCount(pojo.getScheduleId(), 0, 1);
+
+        try {
+            reportRequestPojo = api.getCheck(pojo.getId());
+            if (reportRequestPojo.getRetryCount() >= MAX_RETRY_COUNT)
+                sendFailureMail(pojo, timezone, reportPojo);
+        } catch (Exception ex) {
+            log.error("Report Request ID : " + pojo.getId() + ". Failed to send email. ", ex);
+        }
+    }
+
+    private void sendFailureMail(ReportRequestPojo pojo, String timezone, ReportPojo reportPojo) throws ApiException, MessagingException {
+        ReportSchedulePojo schedulePojo = reportScheduleApi.getCheck(pojo.getScheduleId());
+        List<String> toEmails = reportScheduleApi.getByScheduleId(schedulePojo.getId()).stream()
+                .map(ReportScheduleEmailsPojo::getSendTo).collect(
+                        Collectors.toList());
+        if (!toEmails.isEmpty()) {
+            EmailProps props = createEmailProps(null, false, toEmails, "Hi,<br>Please " +
+                            "check failure reason in the latest scheduled requests. Re-submit the schedule in the " +
+                            "reporting application, which might solve the issue.", false, timezone, reportPojo.getName(),
+                    false, schedulePojo.getEmailSubject(), true);
+            EmailUtil.sendMail(props);
+        }
     }
 
     private static String getParamValue(List<ReportInputParamsPojo> reportInputParamsPojoList, String key) throws ApiException {
