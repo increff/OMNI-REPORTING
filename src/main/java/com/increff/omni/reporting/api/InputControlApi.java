@@ -1,6 +1,9 @@
 package com.increff.omni.reporting.api;
 
+import com.increff.commons.springboot.common.ApiException;
+import com.increff.commons.springboot.common.ApiStatus;
 import com.increff.commons.springboot.common.JsonUtil;
+import com.increff.commons.springboot.server.AbstractApi;
 import com.increff.omni.reporting.dao.InputControlDao;
 import com.increff.omni.reporting.dao.InputControlQueryDao;
 import com.increff.omni.reporting.dao.InputControlValuesDao;
@@ -10,9 +13,6 @@ import com.increff.omni.reporting.model.constants.InputControlType;
 import com.increff.omni.reporting.pojo.InputControlPojo;
 import com.increff.omni.reporting.pojo.InputControlQueryPojo;
 import com.increff.omni.reporting.pojo.InputControlValuesPojo;
-import com.increff.commons.springboot.common.ApiException;
-import com.increff.commons.springboot.common.ApiStatus;
-import com.increff.commons.springboot.server.AbstractApi;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -101,6 +101,17 @@ public class InputControlApi extends AbstractApi {
 
     public InputControlPojo getByScopeAndParamName(InputControlScope scope, String paramName, Integer schemaVersionId) {
         return dao.selectByScopeAndParamName(scope, paramName, schemaVersionId);
+    }
+
+    public List<InputControlPojo> getByParamName(String paramName) {
+        return dao.selectMultiple("paramName", paramName);
+    }
+
+    public List<InputControlPojo> getCheckByParamName(String paramName) throws ApiException {
+        List<InputControlPojo> pojos = getByParamName(paramName);
+        if (pojos.isEmpty())
+            throw new ApiException(ApiStatus.BAD_DATA, "No control present for param name : " + paramName);
+        return pojos;
     }
 
     public List<InputControlPojo> getBySchemaVersion(Integer oldSchemaVersionId) {

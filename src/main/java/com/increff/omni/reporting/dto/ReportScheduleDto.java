@@ -1,5 +1,8 @@
 package com.increff.omni.reporting.dto;
 
+import com.increff.commons.springboot.common.ApiException;
+import com.increff.commons.springboot.common.ApiStatus;
+import com.increff.commons.springboot.common.ConvertUtil;
 import com.increff.omni.reporting.api.*;
 import com.increff.omni.reporting.config.ApplicationProperties;
 import com.increff.omni.reporting.flow.ReportScheduleFlowApi;
@@ -14,9 +17,6 @@ import com.increff.omni.reporting.model.form.EmailParams;
 import com.increff.omni.reporting.model.form.ReportScheduleForm;
 import com.increff.omni.reporting.pojo.*;
 import com.increff.omni.reporting.util.UserPrincipalUtil;
-import com.increff.commons.springboot.common.ApiException;
-import com.increff.commons.springboot.common.ApiStatus;
-import com.increff.commons.springboot.common.ConvertUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -60,6 +60,7 @@ public class ReportScheduleDto extends AbstractDto {
     public void scheduleReport(ReportScheduleForm form) throws ApiException {
         validateReportScheduleForm(form);
         checkLimitForOrg();
+
         OrganizationPojo organizationPojo = organizationApi.getCheck(getOrgId());
         ReportPojo reportPojo = checkValidReport(form.getReportAlias());
         ReportSchedulePojo pojo = convertFormToReportSchedulePojo(form, getOrgId(), getUserId());
@@ -187,7 +188,7 @@ public class ReportScheduleDto extends AbstractDto {
             List<ReportScheduleInputParamsPojo> paramsPojos = api.getScheduleParams(pojo.getId());
             String timezone = paramsPojos.stream().filter(p -> p.getParamKey().equalsIgnoreCase("timezone")).collect(
                     Collectors.toList()).get(0).getParamValue();
-            List<InputControlFilterData> filterData = prepareFilters(paramsPojos, controlPojos);
+            List<InputControlFilterData> filterData = prepareScheduleFilterData(paramsPojos, controlPojos);
             ReportScheduleData data = ConvertUtil.convert(pojo, ReportScheduleData.class);
 
             EmailParams emailParams = new EmailParams();

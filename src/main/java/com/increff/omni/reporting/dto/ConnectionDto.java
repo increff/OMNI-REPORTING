@@ -1,8 +1,11 @@
 package com.increff.omni.reporting.dto;
 
+import com.increff.commons.springboot.client.AppClientException;
+import com.increff.commons.springboot.common.ApiException;
+import com.increff.commons.springboot.common.ApiStatus;
+import com.increff.commons.springboot.common.ConvertUtil;
 import com.increff.omni.reporting.api.ConnectionApi;
 import com.increff.omni.reporting.api.DBConnectionApi;
-import com.increff.omni.reporting.api.FolderApi;
 import com.increff.omni.reporting.config.ApplicationProperties;
 import com.increff.omni.reporting.model.constants.AuditActions;
 import com.increff.omni.reporting.model.constants.DBType;
@@ -12,11 +15,6 @@ import com.increff.omni.reporting.pojo.ConnectionPojo;
 import com.increff.omni.reporting.util.MongoUtil;
 import com.increff.service.encryption.EncryptionClient;
 import com.increff.service.encryption.form.CryptoFormWithoutKey;
-import com.nextscm.commons.lang.StringUtil;
-import com.increff.commons.springboot.client.AppClientException;
-import com.increff.commons.springboot.common.ApiException;
-import com.increff.commons.springboot.common.ApiStatus;
-import com.increff.commons.springboot.common.ConvertUtil;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,6 +49,8 @@ public class ConnectionDto extends AbstractDto {
         ConnectionPojo pojo = ConvertUtil.convert(form, ConnectionPojo.class);
         pojo.setPassword(password);
         pojo = api.add(pojo);
+        api.saveAudit(pojo.getId().toString(), AuditActions.ADD_CONNECTION.toString(), "Add Connection"
+                , "Add Connection " + form.getName(), getUserName());
         return ConvertUtil.convert(pojo, ConnectionData.class);
     }
 
@@ -61,7 +61,7 @@ public class ConnectionDto extends AbstractDto {
         pojo.setId(id);
         pojo.setPassword(password);
         api.saveAudit(id.toString(), AuditActions.EDIT_CONNECTION.toString(), "Edit Connection"
-                , "Edit Connection", getUserName());
+                , "Edit Connection " + form.getName(), getUserName());
         pojo = api.update(pojo);
         return ConvertUtil.convert(pojo, ConnectionData.class);
     }

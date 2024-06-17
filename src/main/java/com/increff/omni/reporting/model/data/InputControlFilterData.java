@@ -9,7 +9,6 @@ import java.util.List;
 @Getter
 @Setter
 public class InputControlFilterData {
-
     private String paramName;
     private String displayName;
     private InputControlType type;

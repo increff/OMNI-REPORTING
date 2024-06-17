@@ -2,6 +2,8 @@ package com.increff.omni.reporting.dto;
 
 import com.increff.commons.queryexecutor.constants.FileFormat;
 import com.increff.commons.queryexecutor.constants.RequestStatus;
+import com.increff.commons.springboot.common.ApiException;
+import com.increff.commons.springboot.common.ApiStatus;
 import com.increff.omni.reporting.model.constants.InputControlType;
 import com.increff.omni.reporting.model.constants.ReportRequestStatus;
 import com.increff.omni.reporting.model.constants.ReportRequestType;
@@ -13,8 +15,6 @@ import com.increff.omni.reporting.pojo.*;
 import com.increff.service.encryption.form.CryptoDecodeFormWithoutKey;
 import com.increff.service.encryption.form.CryptoFormWithoutKey;
 import com.nextscm.commons.lang.StringUtil;
-import com.increff.commons.springboot.common.ApiException;
-import com.increff.commons.springboot.common.ApiStatus;
 import org.springframework.scheduling.support.CronExpression;
 
 import java.time.Instant;
@@ -36,8 +36,8 @@ public class CommonDtoHelper {
         return inputParamMap;
     }
 
-    public static List<InputControlFilterData> prepareFilters(List<ReportScheduleInputParamsPojo> paramsPojos,
-                                                              List<InputControlPojo> controlPojos) {
+    public static List<InputControlFilterData> prepareScheduleFilterData(List<ReportScheduleInputParamsPojo> paramsPojos,
+                                                                         List<InputControlPojo> controlPojos) {
         List<InputControlFilterData> inputControlFilterData = new ArrayList<>();
         paramsPojos.forEach(p -> {
             Optional<InputControlPojo>
@@ -47,11 +47,13 @@ public class CommonDtoHelper {
                 InputControlFilterData filterData = new InputControlFilterData();
                 filterData.setParamName(controlPojo.get().getParamName());
                 filterData.setDisplayName(controlPojo.get().getDisplayName());
+
                 List<String> values = Objects.isNull(p.getParamValue()) ? new ArrayList<>() :
                         ((controlPojo.get().getType().equals(InputControlType.DATE) || controlPojo.get().getType().equals(InputControlType.DATE_TIME)) ? Collections.singletonList(p.getParamValue()) :
                         Arrays.stream(p.getParamValue().split(
                                         ","))
                                 .map(CommonDtoHelper::getValueFromQuotes).collect(Collectors.toList()));
+
                 filterData.setValues(values);
                 filterData.setType(controlPojo.get().getType());
                 inputControlFilterData.add(filterData);

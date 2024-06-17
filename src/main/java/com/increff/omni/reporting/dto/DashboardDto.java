@@ -1,5 +1,9 @@
 package com.increff.omni.reporting.dto;
 
+import com.increff.commons.springboot.audit.api.AuditApi;
+import com.increff.commons.springboot.common.ApiException;
+import com.increff.commons.springboot.common.ApiStatus;
+import com.increff.commons.springboot.common.ConvertUtil;
 import com.increff.omni.reporting.api.*;
 import com.increff.omni.reporting.config.ApplicationProperties;
 import com.increff.omni.reporting.flow.FlowApi;
@@ -9,12 +13,10 @@ import com.increff.omni.reporting.model.data.Charts.ChartInterface;
 import com.increff.omni.reporting.model.form.*;
 import com.increff.omni.reporting.pojo.*;
 import com.increff.omni.reporting.util.ChartUtil;
+import com.increff.omni.reporting.util.ConstantsUtil;
 import com.increff.omni.reporting.util.UserPrincipalUtil;
 import com.increff.omni.reporting.util.ValidateUtil;
 import com.nextscm.commons.lang.StringUtil;
-import com.increff.commons.springboot.common.ApiException;
-import com.increff.commons.springboot.common.ApiStatus;
-import com.increff.commons.springboot.common.ConvertUtil;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +36,8 @@ import static com.increff.omni.reporting.util.ValidateUtil.validateDefaultValueF
 @Log4j2
 @Setter
 public class DashboardDto extends AbstractDto {
+    @Autowired
+    private AuditApi auditApi;
     @Autowired
     private ReportApi reportApi;
     @Autowired
@@ -154,7 +158,8 @@ public class DashboardDto extends AbstractDto {
         dashboardPojo.setOrgId(getOrgId());
         api.add(dashboardPojo);
         dashboardChartDto.addDashboardChart(form.getCharts(), dashboardPojo.getId());
-
+        api.saveAudit(dashboardPojo.getId().toString(), "Add Dashboard", AuditActions.ADD_DASHBOARD.name(),
+                "Add Dashboard Id: " + dashboardPojo.getId() + " Name: " + dashboardPojo.getName(), getUserName());
         return getDashboard(dashboardPojo.getId());
     }
 
@@ -163,14 +168,20 @@ public class DashboardDto extends AbstractDto {
         validateDashboardForm(form);
         api.getCheck(dashboardId, getOrgId());
         DashboardPojo dashboard = api.update(dashboardId, ConvertUtil.convert(form, DashboardPojo.class));
+        api.saveAudit(dashboard.getId().toString(), "Update Dashboard", AuditActions.EDIT_DASHBOARD.name(),
+                "Update Dashboard Id: " + dashboard.getId() + " Name: " + dashboard.getName(), getUserName());
         return getDashboard(dashboard.getId());
     }
 
     @Transactional(rollbackFor = ApiException.class)
     public void deleteDashboard(Integer dashboardId) throws ApiException {
+        String dashboardName = api.getCheck(dashboardId, getOrgId()).getName();
         dashboardChartApi.deleteByDashboardId(dashboardId);
         defaultValueApi.deleteByDashboardId(dashboardId);
         api.delete(dashboardId);
+
+        auditApi.save(dashboardId.toString(), AuditActions.DELETE_DASHBOARD.toString(), "Delete DashboardId: " + dashboardId + " Name: " + dashboardName
+                , "Delete DashboardId " + dashboardId + " Name: " + dashboardName, getUserName());
     }
 
     @Transactional(rollbackFor = ApiException.class)
@@ -441,7 +452,7 @@ public class DashboardDto extends AbstractDto {
         // Copies all dashboards created in Increff org (Admin org set in properties file) to new orgs
         List<DashboardPojo> dashboards = api.getByOrgId(properties.getIncreffOrgId());
         for(DashboardPojo dashboard : dashboards) {
-            if (dashboard.getName().toLowerCase().startsWith("test"))
+            if (dashboard.getName().toLowerCase().startsWith(ConstantsUtil.DASHBOARD_COPY_IGNORE_PREFIX))
                 if(!copyTestDashboards) continue; // Skip if dashboard name starts with test
 
             copyDashboardToSomeOrgs(dashboard.getId(), dashboard.getOrgId(), orgIds);

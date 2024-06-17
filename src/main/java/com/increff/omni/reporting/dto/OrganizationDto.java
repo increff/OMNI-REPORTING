@@ -1,20 +1,24 @@
 package com.increff.omni.reporting.dto;
 
+import com.increff.commons.springboot.common.ApiException;
+import com.increff.commons.springboot.common.ApiStatus;
+import com.increff.commons.springboot.common.ConvertUtil;
+import com.increff.commons.springboot.common.JsonUtil;
 import com.increff.omni.reporting.api.ConnectionApi;
 import com.increff.omni.reporting.api.OrgMappingApi;
 import com.increff.omni.reporting.api.OrganizationApi;
 import com.increff.omni.reporting.api.SchemaVersionApi;
 import com.increff.omni.reporting.model.constants.AppName;
+import com.increff.omni.reporting.model.constants.AuditActions;
 import com.increff.omni.reporting.model.data.OrgMappingsData;
 import com.increff.omni.reporting.model.data.OrgMappingsGroupedData;
 import com.increff.omni.reporting.model.data.OrgSchemaData;
 import com.increff.omni.reporting.model.data.OrganizationData;
 import com.increff.omni.reporting.model.form.OrgMappingsForm;
 import com.increff.omni.reporting.model.form.OrganizationForm;
-import com.increff.omni.reporting.pojo.*;
-import com.increff.commons.springboot.common.ApiException;
-import com.increff.commons.springboot.common.ApiStatus;
-import com.increff.commons.springboot.common.ConvertUtil;
+import com.increff.omni.reporting.pojo.OrgMappingPojo;
+import com.increff.omni.reporting.pojo.OrganizationPojo;
+import com.increff.omni.reporting.pojo.SchemaVersionPojo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,6 +47,7 @@ public class OrganizationDto extends AbstractDto {
         checkValid(form);
         OrganizationPojo pojo = ConvertUtil.convert(form, OrganizationPojo.class);
         pojo = api.add(pojo);
+        api.saveAudit(pojo.getId().toString(), "Organization", AuditActions.ADD_ORGANIZATION.name(), "Added org " + form.getName(), getUserName());
         return ConvertUtil.convert(pojo, OrganizationData.class);
     }
 
@@ -50,6 +55,7 @@ public class OrganizationDto extends AbstractDto {
         checkValid(form);
         OrganizationPojo pojo = ConvertUtil.convert(form, OrganizationPojo.class);
         pojo = api.update(pojo);
+        api.saveAudit(pojo.getId().toString(), "Organization", AuditActions.EDIT_ORGANIZATION.name(), "Edited org " + form.getName(), getUserName());
         return ConvertUtil.convert(pojo, OrganizationData.class);
     }
 
@@ -71,6 +77,8 @@ public class OrganizationDto extends AbstractDto {
 
         OrgMappingPojo orgMappingPojo = ConvertUtil.convert(form, OrgMappingPojo.class);
         orgMappingPojo = orgMappingApi.add(orgMappingPojo);
+        api.saveAudit(orgMappingPojo.getId().toString(), "OrgMapping", AuditActions.ADD_ORGANIZATION_MAPPING.name(),
+                "Added org mapping " + JsonUtil.serialize(orgMappingPojo), getUserName());
         return ConvertUtil.convert(orgMappingPojo, OrgMappingsData.class);
     }
 
@@ -81,6 +89,8 @@ public class OrganizationDto extends AbstractDto {
 
         OrgMappingPojo orgMappingPojo = ConvertUtil.convert(form, OrgMappingPojo.class);
         orgMappingPojo = orgMappingApi.update(orgMappingId, orgMappingPojo);
+        api.saveAudit(orgMappingPojo.getId().toString(), "OrgMapping", AuditActions.EDIT_ORGANIZATION_MAPPING.name(),
+                "Edited org mapping " + JsonUtil.serialize(orgMappingPojo), getUserName());
         return ConvertUtil.convert(orgMappingPojo, OrgMappingsData.class);
     }
 
