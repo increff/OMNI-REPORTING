@@ -4,6 +4,8 @@ import com.increff.commons.springboot.common.ApiException;
 import com.increff.commons.springboot.common.ApiStatus;
 import com.increff.omni.reporting.model.constants.AppName;
 import com.increff.omni.reporting.model.constants.ChartType;
+import com.increff.omni.reporting.model.constants.DynamicDate;
+import com.increff.omni.reporting.model.constants.InputControlType;
 import com.increff.omni.reporting.model.form.*;
 
 import java.util.HashSet;
@@ -70,10 +72,26 @@ public class ValidateUtil {
 
     public static void validateReportScheduleForm(ReportScheduleForm form) throws ApiException {
         checkValid(form);
-        if(form.getSendTo().isEmpty() && form.getPipelineDetails().isEmpty())
+        if (form.getSendTo().isEmpty() && form.getPipelineDetails().isEmpty())
             throw new ApiException(ApiStatus.BAD_DATA, "Atleast one email or pipeline is required");
-        if(form.getSendTo().size() > 0 && form.getPipelineDetails().size() > 0)
+        if (!form.getSendTo().isEmpty() && !form.getPipelineDetails().isEmpty())
             throw new ApiException(ApiStatus.BAD_DATA, "Only one of email or pipeline should be given, not both");
+        // check if date filters value are parseable by dyanmicdate enum
+        for (ReportScheduleForm.InputParamMap inputParamMap : form.getParamMap()) {
+            if (inputParamMap.getType().equals(InputControlType.DATE)
+                    || inputParamMap.getType().equals(InputControlType.DATE_TIME)) {
+                if (inputParamMap.getValue().isEmpty())
+                    continue;
+                if (inputParamMap.getValue().size() > 1)
+                    throw new ApiException(ApiStatus.BAD_DATA, "Date filter cannot have multiple values");
+
+                try { // Date should be parse-able by DynamicDate enum
+                    DynamicDate.valueOf(inputParamMap.getValue().getFirst());
+                } catch (IllegalArgumentException e) {
+                    throw new ApiException(ApiStatus.BAD_DATA, "Invalid date filter value: " + inputParamMap.getValue().getFirst());
+                }
+            }
+        }
     }
 
     public static void validateDefaultValueForm(List<DefaultValueForm> forms, Integer dashboardId) throws ApiException {

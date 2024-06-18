@@ -113,8 +113,8 @@ public class ReportDto extends AbstractDto {
             flowApi.saveAudit(reportPojo.getId().toString(), AuditActions.LIVE_REPORT.toString(),
                     "Live Report",
                     "Live Report request submitted for organization : " + organizationPojo.getName()
-                     + " , duration : " + (int) ChronoUnit.MILLIS.between(startTime, ZonedDateTime.now()) ,
-                    getUserName());
+                            + " , duration : " + (int) ChronoUnit.MILLIS.between(startTime, ZonedDateTime.now())
+                            + " , reportId : " + form.getReportId(), getUserName());
         }
     }
 

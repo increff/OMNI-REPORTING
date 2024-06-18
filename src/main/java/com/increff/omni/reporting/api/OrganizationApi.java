@@ -1,9 +1,8 @@
 package com.increff.omni.reporting.api;
 
+import com.increff.commons.springboot.common.ApiException;
 import com.increff.omni.reporting.dao.OrganizationDao;
 import com.increff.omni.reporting.pojo.OrganizationPojo;
-import com.increff.commons.springboot.common.ApiException;
-import com.increff.commons.springboot.server.AbstractApi;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,7 +11,7 @@ import java.util.List;
 
 @Service
 @Transactional(rollbackFor = ApiException.class)
-public class OrganizationApi extends AbstractApi {
+public class OrganizationApi extends AbstractAuditApi {
 
     @Autowired
     private OrganizationDao dao;

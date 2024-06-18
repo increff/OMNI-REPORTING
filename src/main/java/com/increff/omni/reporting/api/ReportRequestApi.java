@@ -1,12 +1,12 @@
 package com.increff.omni.reporting.api;
 
+import com.increff.commons.springboot.common.ApiException;
+import com.increff.commons.springboot.common.ApiStatus;
+import com.increff.commons.springboot.server.AbstractApi;
 import com.increff.omni.reporting.dao.ReportRequestDao;
 import com.increff.omni.reporting.model.constants.ReportRequestStatus;
 import com.increff.omni.reporting.model.constants.ReportRequestType;
 import com.increff.omni.reporting.pojo.ReportRequestPojo;
-import com.increff.commons.springboot.common.ApiException;
-import com.increff.commons.springboot.common.ApiStatus;
-import com.increff.commons.springboot.server.AbstractApi;
 import com.increff.omni.reporting.util.ConvertUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -83,7 +83,7 @@ public class ReportRequestApi extends AbstractApi {
         return dao.selectByUserId(userId, ReportRequestType.USER, limit);
     }
 
-    public void markFailed(Integer id, ReportRequestStatus status, String message, int noOfRows, double fileSize)
+    public void markFailedOrRetry(Integer id, ReportRequestStatus status, String message, int noOfRows, double fileSize)
             throws ApiException {
         ReportRequestPojo reportRequestPojo = getCheck(id);
 

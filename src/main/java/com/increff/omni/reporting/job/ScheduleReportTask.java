@@ -11,9 +11,7 @@ import com.increff.omni.reporting.api.*;
 import com.increff.omni.reporting.config.ApplicationProperties;
 import com.increff.omni.reporting.config.EmailProps;
 import com.increff.omni.reporting.dto.CommonDtoHelper;
-import com.increff.omni.reporting.model.constants.DBType;
-import com.increff.omni.reporting.model.constants.PipelineType;
-import com.increff.omni.reporting.model.constants.ReportRequestStatus;
+import com.increff.omni.reporting.model.constants.*;
 import com.increff.omni.reporting.model.form.FileProviderFolder.AwsPipelineConfigForm;
 import com.increff.omni.reporting.model.form.FileProviderFolder.GcpPipelineConfigForm;
 import com.increff.omni.reporting.model.form.FileProviderFolder.SftpPipelineConfigForm;
@@ -40,10 +38,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.ZonedDateTime;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -53,11 +48,15 @@ import static com.increff.omni.reporting.dto.CommonDtoHelper.getValueFromQuotes;
 import static com.increff.omni.reporting.util.ConstantsUtil.MAX_RETRY_COUNT;
 import static com.increff.omni.reporting.util.ConstantsUtil.SCHEDULE_FILE_SIZE_ZIP_AFTER;
 import static com.increff.omni.reporting.util.ConvertUtil.getJavaObjectFromJson;
+import static com.increff.omni.reporting.util.TimeUtil.getISO8601;
+import static com.increff.omni.reporting.util.TimeUtil.getTimeInTz;
 
 @Component
 @Log4j2
 public class ScheduleReportTask extends AbstractTask {
 
+    @Autowired
+    private InputControlApi inputControlApi;
     @Autowired
     private ReportRequestApi api;
     @Autowired
@@ -109,38 +108,76 @@ public class ScheduleReportTask extends AbstractTask {
             OrgMappingPojo orgMappingPojo = orgMappingApi.getCheckByOrgIdSchemaVersionId(reportRequestPojo.getOrgId(),
                     reportPojo.getSchemaVersionId());
             ConnectionPojo connectionPojo = connectionApi.getCheck(orgMappingPojo.getConnectionId());
-
             // Creation of file
+
+            timezone = getValueFromQuotes(getParamValue(reportInputParamsPojoList, "timezone"));
+
+            setDynamicDates(reportInputParamsPojoList, timezone);
+
             Map<String, String> inputParamMap = getInputParamMapFromPojoList(reportInputParamsPojoList);
-            timezone = getValueFromQuotes(inputParamMap.get("timezone"));
+
             String fQuery = SqlCmd.getFinalQuery(inputParamMap, reportQueryPojo.getQuery(), false, connectionPojo.getDbType());
             // Execute query and save results
             prepareAndSendEmailOrPipelines(pojo, fQuery, connectionPojo, timezone, reportPojo);
             reportScheduleApi.addScheduleCount(pojo.getScheduleId(), 1, 0);
         } catch (Exception e) {
             log.error("Report Request ID : " + pojo.getId() + " failed", e);
-            api.markFailed(pojo.getId(), ReportRequestStatus.FAILED, e.getMessage(), 0, 0.0);
-            reportScheduleApi.addScheduleCount(pojo.getScheduleId(), 0, 1);
-            try {
-                reportRequestPojo = api.getCheck(pojo.getId());
-                if (reportRequestPojo.getRetryCount() >= MAX_RETRY_COUNT) {
-                    ReportSchedulePojo schedulePojo = reportScheduleApi.getCheck(pojo.getScheduleId());
-                    List<String> toEmails = reportScheduleApi.getByScheduleId(schedulePojo.getId()).stream()
-                            .map(ReportScheduleEmailsPojo::getSendTo).collect(
-                                    Collectors.toList());
-                    if (!toEmails.isEmpty()) {
-                        EmailProps props = createEmailProps(null, false, toEmails, "Hi,<br>Please " +
-                                        "check failure reason in the latest scheduled requests. Re-submit the schedule in the " +
-                                        "reporting application, which might solve the issue.", false, timezone, reportPojo.getName(),
-                                false, schedulePojo.getEmailSubject(), true);
-                        EmailUtil.sendMail(props);
-                    }
-                }
-            } catch (Exception ex) {
-                log.error("Report Request ID : " + pojo.getId() + ". Failed to send email. ", ex);
-            }
+            processFailure(pojo, e, timezone, reportPojo);
         }
 
+    }
+
+    private void processFailure(ReportRequestPojo pojo, Exception e, String timezone, ReportPojo reportPojo) throws ApiException {
+        ReportRequestPojo reportRequestPojo;
+        api.markFailedOrRetry(pojo.getId(), ReportRequestStatus.FAILED, e.getMessage(), 0, 0.0);
+        reportScheduleApi.addScheduleCount(pojo.getScheduleId(), 0, 1);
+
+        try {
+            reportRequestPojo = api.getCheck(pojo.getId());
+            if (reportRequestPojo.getRetryCount() >= MAX_RETRY_COUNT)
+                sendFailureMail(pojo, timezone, reportPojo);
+        } catch (Exception ex) {
+            log.error("Report Request ID : " + pojo.getId() + ". Failed to send email. ", ex);
+        }
+    }
+
+    private void sendFailureMail(ReportRequestPojo pojo, String timezone, ReportPojo reportPojo) throws ApiException, MessagingException {
+        ReportSchedulePojo schedulePojo = reportScheduleApi.getCheck(pojo.getScheduleId());
+        List<String> toEmails = reportScheduleApi.getByScheduleId(schedulePojo.getId()).stream()
+                .map(ReportScheduleEmailsPojo::getSendTo).collect(
+                        Collectors.toList());
+        if (!toEmails.isEmpty()) {
+            EmailProps props = createEmailProps(null, false, toEmails, "Hi,<br>Please " +
+                            "check failure reason in the latest scheduled requests. Re-submit the schedule in the " +
+                            "reporting application, which might solve the issue.", false, timezone, reportPojo.getName(),
+                    false, schedulePojo.getEmailSubject(), true);
+            EmailUtil.sendMail(props);
+        }
+    }
+
+    private static String getParamValue(List<ReportInputParamsPojo> reportInputParamsPojoList, String key) throws ApiException {
+        Optional<String> value = reportInputParamsPojoList.stream()
+                .filter(x -> x.getParamKey().equals(key))
+                .map(ReportInputParamsPojo::getParamValue)
+                .findFirst();
+        if (value.isEmpty())
+            throw new ApiException(ApiStatus.BAD_DATA, "Value for key : " + key + " not found in input params");
+        return value.get();
+    }
+
+    private void setDynamicDates(List<ReportInputParamsPojo> reportInputParamsPojoList, String timezone) throws ApiException {
+        for (ReportInputParamsPojo pojo : reportInputParamsPojoList) {
+            if (pojo.getParamKey().equals("timezone") || pojo.getParamKey().equals("orgId"))
+                continue; // skip hardcoded injected params as they wont exist in InputControlPojo
+            InputControlPojo inputControlPojo = inputControlApi.getCheckByParamName(pojo.getParamKey()).getFirst();
+            if (inputControlPojo.getType().equals(InputControlType.DATE) || inputControlPojo.getType().equals(InputControlType.DATE_TIME)) {
+                DynamicDate dynamicDate = DynamicDate.valueOf(pojo.getParamValue());
+                ZonedDateTime zdt = DynamicDate.parse(dynamicDate, getTimeInTz(ZonedDateTime.now(), timezone));
+                if (inputControlPojo.getDateType().equals(DateType.END_DATE) && dynamicDate.getAddTimeEndDate())
+                    zdt = zdt.withHour(23).withMinute(59).withSecond(59).withNano(999999999);
+                pojo.setParamValue("'" + getISO8601(getTimeInTz(zdt, "UTC")) + "'");
+            }
+        }
     }
 
     private void prepareAndSendEmailOrPipelines(ReportRequestPojo pojo, String fQuery, ConnectionPojo connectionPojo,

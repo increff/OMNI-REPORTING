@@ -86,7 +86,8 @@ public class MongoUtil {
             MongoDatabase database;
             database = mongoClient.getDatabase(databaseName);
             MongoCollection<Document> collection = database.getCollection(collectionName);
-            AggregateIterable<Document> result = collection.aggregate(stages).allowDiskUse(true);
+            AggregateIterable<Document> result = collection.aggregate(stages).allowDiskUse(true).maxTime(MONGO_READ_TIMEOUT_SEC, TimeUnit.SECONDS);
+            ;
             List<Document> results = new ArrayList<>();
             result.into(results);
             return results;

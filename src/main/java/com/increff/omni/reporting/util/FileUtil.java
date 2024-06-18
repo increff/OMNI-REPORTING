@@ -66,6 +66,7 @@ public class FileUtil {
         List<String> headers = new ArrayList<>();
         for (int i = 1; i <= columnCount; i++) {
             headers.add(metaData.getColumnLabel(i));
+            break; // Only first document is enough to get all headers
         }
         csvPrinter.printRecord(headers);
         noOfRows++;
@@ -98,6 +99,7 @@ public class FileUtil {
         List<String> headers = new ArrayList<>();
         for (Document document : documents) {
             headers.addAll(document.keySet());
+            break; // Only first document is enough to get all headers
         }
         csvPrinter.printRecord(headers);
         for (Document document : documents) {
