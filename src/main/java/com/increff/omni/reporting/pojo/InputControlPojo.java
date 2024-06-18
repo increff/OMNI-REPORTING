@@ -4,10 +4,9 @@ import com.increff.commons.springboot.db.pojo.AbstractVersionedPojo;
 import com.increff.omni.reporting.model.constants.DateType;
 import com.increff.omni.reporting.model.constants.InputControlScope;
 import com.increff.omni.reporting.model.constants.InputControlType;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-
-import jakarta.persistence.*;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
@@ -16,7 +15,7 @@ import org.hibernate.type.SqlTypes;
 @Getter
 @Table(name = "input_control", indexes = {@Index(name = "idx_scope_displayName", columnList = "scope,displayName"),
         @Index(name = "idx_scope_paramName", columnList = "scope,paramName"), @Index(name = "idx_schemaVersionId",
-        columnList = "schemaVersionId")})
+        columnList = "schemaVersionId"), @Index(name = "idx_paramName", columnList = "paramName")})
 public class InputControlPojo extends AbstractVersionedPojo{
 
     @Id

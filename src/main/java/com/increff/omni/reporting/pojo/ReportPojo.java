@@ -3,10 +3,9 @@ package com.increff.omni.reporting.pojo;
 import com.increff.commons.springboot.db.pojo.AbstractVersionedPojo;
 import com.increff.omni.reporting.model.constants.ChartType;
 import com.increff.omni.reporting.model.constants.ReportType;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-
-import jakarta.persistence.*;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
@@ -17,7 +16,8 @@ import org.hibernate.type.SqlTypes;
         @Index(name = "idx_schemaVersionId_name_isChart", columnList = "schemaVersionId, name, isChart",
                 unique = true),
         @Index(name = "idx_schemaVersionId_type", columnList = "schemaVersionId, type"),
-        @Index(name = "idx_id_schemaVersionId", columnList = "id, schemaVersionId")
+        @Index(name = "idx_id_schemaVersionId", columnList = "id, schemaVersionId"),
+        @Index(name = "idx_alias", columnList = "alias"),
 }, uniqueConstraints = {@UniqueConstraint(name = "uk_schemaVersionId_alias_isChart", columnNames = {
         "schemaVersionId", "alias", "isChart"})})
 public class ReportPojo extends AbstractVersionedPojo{
