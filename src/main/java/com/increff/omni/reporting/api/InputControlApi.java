@@ -1,5 +1,6 @@
 package com.increff.omni.reporting.api;
 
+import com.increff.commons.springboot.common.JsonUtil;
 import com.increff.omni.reporting.dao.InputControlDao;
 import com.increff.omni.reporting.dao.InputControlQueryDao;
 import com.increff.omni.reporting.dao.InputControlValuesDao;
@@ -9,11 +10,10 @@ import com.increff.omni.reporting.model.constants.InputControlType;
 import com.increff.omni.reporting.pojo.InputControlPojo;
 import com.increff.omni.reporting.pojo.InputControlQueryPojo;
 import com.increff.omni.reporting.pojo.InputControlValuesPojo;
-import com.nextscm.commons.spring.common.ApiException;
-import com.nextscm.commons.spring.common.ApiStatus;
-import com.nextscm.commons.spring.common.JsonUtil;
-import com.nextscm.commons.spring.server.AbstractApi;
-import lombok.extern.log4j.Log4j;
+import com.increff.commons.springboot.common.ApiException;
+import com.increff.commons.springboot.common.ApiStatus;
+import com.increff.commons.springboot.server.AbstractApi;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,7 +24,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
-@Log4j
+@Log4j2
 @Service
 @Transactional(rollbackFor = ApiException.class)
 public class InputControlApi extends AbstractApi {

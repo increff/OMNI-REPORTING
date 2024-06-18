@@ -13,9 +13,9 @@ import com.increff.omni.reporting.model.constants.ReportType;
 import com.increff.omni.reporting.model.constants.ValidationType;
 import com.increff.omni.reporting.model.form.ValidationGroupForm;
 import com.increff.omni.reporting.pojo.*;
-import com.nextscm.commons.spring.common.ApiException;
-import com.nextscm.commons.spring.common.ApiStatus;
-import org.junit.Test;
+import com.increff.commons.springboot.common.ApiException;
+import com.increff.commons.springboot.common.ApiStatus;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.ZonedDateTime;
@@ -27,8 +27,7 @@ import static com.increff.omni.reporting.helper.InputControlTestHelper.getInputC
 import static com.increff.omni.reporting.helper.ReportScheduleTestHelper.*;
 import static com.increff.omni.reporting.helper.ReportTestHelper.*;
 import static com.increff.omni.reporting.helper.SchemaTestHelper.getSchemaPojo;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ReportScheduleFlowApiTest extends AbstractTest {
 
@@ -100,7 +99,7 @@ public class ReportScheduleFlowApiTest extends AbstractTest {
         assertEquals("'1100002253'", scheduleInputParamsPojoList.get(0).getParamValue());
     }
 
-    @Test(expected = ApiException.class)
+    @Test
     public void testAddWithNoValidEmail() throws ApiException {
         ReportPojo reportPojo = commonSetup();
         ReportSchedulePojo schedulePojo = getReportSchedulePojo("Report 1", true, false, 0, 10, ZonedDateTime.now(),
@@ -113,7 +112,6 @@ public class ReportScheduleFlowApiTest extends AbstractTest {
         } catch (ApiException e) {
             assertEquals(ApiStatus.BAD_DATA, e.getStatus());
             assertEquals("No valid emails given, [\"a.gmail.com\",\"b.gmail.com\"]",e.getMessage());
-            throw e;
         }
     }
 

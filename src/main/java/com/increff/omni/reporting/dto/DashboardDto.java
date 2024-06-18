@@ -12,11 +12,11 @@ import com.increff.omni.reporting.util.ChartUtil;
 import com.increff.omni.reporting.util.UserPrincipalUtil;
 import com.increff.omni.reporting.util.ValidateUtil;
 import com.nextscm.commons.lang.StringUtil;
-import com.nextscm.commons.spring.common.ApiException;
-import com.nextscm.commons.spring.common.ApiStatus;
-import com.nextscm.commons.spring.common.ConvertUtil;
+import com.increff.commons.springboot.common.ApiException;
+import com.increff.commons.springboot.common.ApiStatus;
+import com.increff.commons.springboot.common.ConvertUtil;
 import lombok.Setter;
-import lombok.extern.log4j.Log4j;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,13 +31,11 @@ import static com.increff.omni.reporting.util.ConvertUtil.convertChartLegendsPoj
 import static com.increff.omni.reporting.util.ValidateUtil.validateDefaultValueForm;
 
 @Service
-@Log4j
+@Log4j2
 @Setter
 public class DashboardDto extends AbstractDto {
     @Autowired
     private ReportApi reportApi;
-    @Autowired
-    private InputControlApi inputControlApi;
     @Autowired
     private DashboardApi api;
     @Autowired

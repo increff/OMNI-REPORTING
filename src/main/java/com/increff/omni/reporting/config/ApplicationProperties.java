@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import java.util.Map;
 
 import static com.increff.omni.reporting.util.ValidateUtil.UNIFY_QUERY_STRING;
 
@@ -16,35 +17,14 @@ import static com.increff.omni.reporting.util.ValidateUtil.UNIFY_QUERY_STRING;
 @Component
 public class ApplicationProperties {
 
-    @Value("${jdbc.driverClassName:com.mysql.jdbc.Driver}")
-	private String jdbcDriver;
-	@Value("${jdbc.url}")
-	private String jdbcUrl;
-	@Value("${jdbc.username}")
-	private String jdbcUsername;
-	@Value("${jdbc.password}")
-	private String jdbcPassword;
-	@Value("${hibernate.dialect:org.hibernate.dialect.MySQLDialect}")
-	private String hibernateDialect;
-	@Value("${hibernate.show_sql:false}")
-	private String hibernateShowSql;
-	@Value("${hibernate.jdbc.batch_size:50}")
-	private String hibernateJdbcBatchSize;
-	@Value("${hibernate.hbm2ddl.auto}")
-	private String hibernateHbm2ddl;
-	@Value("${hibernate.jdbc.time_zone}")
-	private String hibernateTimezone;
-	@Value("${hibernate.min.connection:50}")
-	private Integer minConnection;
-	@Value("${hibernate.max.connection:100}")
-	private Integer maxConnection;
+    @Value("${spring.datasource.url}")
+    private String dbUrl;
 
-	@Value("${hibernate.id.generator.stored_last_used}")
-	private Boolean hibernateIdGeneratorStoredLastUsed;
-	@Value("${hibernate.model.generator_name_as_sequence_name}")
-	private Boolean hibernateModelGeneratorNameAsSequenceName;
+    @Value("${spring.datasource.username}")
+    private String dbUsername;
 
-
+    @Value("${spring.datasource.password}")
+    private String dbPassword;
 
     @Value("${user.report.request.corePoolSize:100}")
     private Integer userReportRequestCorePool;
@@ -110,8 +90,8 @@ public class ApplicationProperties {
     @Value("${gcp.bucketName}")
     private String gcpBucketName;
 
-    @Value("${gcp.filePath}")
-    private String gcpFilePath;
+    @Value("#{${gcp.credentials}}")
+    private Map<String, String> gcpCredentials;
 
     @Value("${root.directory:root}")
     private String rootDirectory;
@@ -122,7 +102,7 @@ public class ApplicationProperties {
     @Value("${query.outDir:omni-reporting-files}")
     private String outDir;
 
-    @Value("${reporting.version}")
+    @Value("${project.version}")
     private String version;
 
     @Value("${from.email}")

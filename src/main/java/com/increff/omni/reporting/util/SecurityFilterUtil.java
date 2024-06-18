@@ -2,19 +2,19 @@ package com.increff.omni.reporting.util;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.nextscm.commons.spring.common.ApiException;
-import com.nextscm.commons.spring.common.ApiStatus;
-import lombok.extern.log4j.Log4j;
+import com.increff.commons.springboot.common.ApiException;
+import com.increff.commons.springboot.common.ApiStatus;
+import lombok.extern.log4j.Log4j2;
 import org.apache.commons.io.IOUtils;
 import org.springframework.web.util.ContentCachingRequestWrapper;
 
-import javax.servlet.http.*;
+import jakarta.servlet.http.*;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 
-@Log4j
+@Log4j2
 public class SecurityFilterUtil {
 
     private static final String REPORT_ID_STRING = "reportId";

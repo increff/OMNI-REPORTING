@@ -13,9 +13,9 @@ import com.increff.omni.reporting.pojo.*;
 import com.increff.service.encryption.form.CryptoDecodeFormWithoutKey;
 import com.increff.service.encryption.form.CryptoFormWithoutKey;
 import com.nextscm.commons.lang.StringUtil;
-import com.nextscm.commons.spring.common.ApiException;
-import com.nextscm.commons.spring.common.ApiStatus;
-import org.springframework.scheduling.support.CronSequenceGenerator;
+import com.increff.commons.springboot.common.ApiException;
+import com.increff.commons.springboot.common.ApiStatus;
+import org.springframework.scheduling.support.CronExpression;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -426,10 +426,11 @@ public class CommonDtoHelper {
     }
 
     public static ZonedDateTime getNextRunTime(String cron, String timezone) {
-        CronSequenceGenerator generator = new CronSequenceGenerator(cron,
-                TimeZone.getTimeZone(ZoneId.of(timezone)));
-        Instant instant = generator.next(new Date()).toInstant();
-        return ZonedDateTime.ofInstant(instant, ZoneId.of("UTC"));
+        CronExpression expression = CronExpression.parse(cron);
+        ZoneId zoneId = ZoneId.of(timezone);
+        ZonedDateTime nowInDesiredZone = ZonedDateTime.now(zoneId);
+        ZonedDateTime nextRuntimeInDesiredZone = expression.next(nowInDesiredZone);
+        return nextRuntimeInDesiredZone;
     }
 
     public static String getValueFromQuotes(String value) {
@@ -468,16 +469,16 @@ public class CommonDtoHelper {
             throw new ApiException(ApiStatus.BAD_DATA,"Please change existing schedules cron frequency before updating report min frequency.\n" + error.toString());
     }
 
-    public static long getCronFrequencyInSeconds(String cronExpression) throws ApiException {
-        CronSequenceGenerator generator = new CronSequenceGenerator(cronExpression);
+    public static long getCronFrequencyInSeconds(String cronExpression) {
+        CronExpression generator = CronExpression.parse(cronExpression);
         long freqIntervalSecondsMin = 1000000000;
 
-        Instant instant = generator.next(new Date()).toInstant();
+        Instant instant = Objects.requireNonNull(generator.next(ZonedDateTime.now())).toInstant();
         ZonedDateTime nextFireTime = ZonedDateTime.ofInstant(instant, ZoneId.of("UTC"));
 
         ZonedDateTime nextToNextFireTime;
-        for(int i=0;i<100;i++){ // loop over multiple consecutive fire times to get the minimum frequency as cron expression can be non-periodic
-            instant = generator.next(Date.from(nextFireTime.toInstant())).toInstant();
+        for(int i=0;i<100;i++) { // loop over multiple consecutive fire times to get the minimum frequency as cron expression can be non-periodic
+            instant = Objects.requireNonNull(generator.next(nextFireTime)).toInstant();
             nextToNextFireTime = ZonedDateTime.ofInstant(instant, ZoneId.of("UTC"));
             freqIntervalSecondsMin = Math.min(freqIntervalSecondsMin, (nextToNextFireTime.toEpochSecond() - nextFireTime.toEpochSecond()) );
             nextFireTime = nextToNextFireTime;

@@ -6,15 +6,15 @@ import com.increff.omni.reporting.model.data.DashboardData;
 import com.increff.omni.reporting.model.data.DashboardGridData;
 import com.increff.omni.reporting.model.data.InputControlData;
 import com.increff.omni.reporting.model.form.DashboardForm;
-import com.nextscm.commons.spring.common.ApiException;
-import com.nextscm.commons.spring.common.ApiStatus;
-import lombok.extern.log4j.Log4j;
+import com.increff.commons.springboot.common.ApiException;
+import com.increff.commons.springboot.common.ApiStatus;
+import lombok.extern.log4j.Log4j2;
 
 import java.util.*;
 
 import static com.increff.omni.reporting.util.SqlCmd.getValueSum;
 
-@Log4j
+@Log4j2
 public class ChartUtil {
 
     public static final String DEFAULT_VALUE_COMMON_KEY = "common";

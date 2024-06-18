@@ -1,53 +1,52 @@
 package com.increff.omni.reporting.security;
 
+import com.increff.account.client.AuthClient;
 import com.increff.account.client.AuthTokenFilter;
+import com.increff.omni.reporting.config.ApplicationProperties;
 import com.increff.omni.reporting.model.constants.Roles;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
 @Order(1)
-public class AdminSecurityConfig extends WebSecurityConfigurerAdapter {
+public class AdminSecurityConfig {
 
     @Autowired
-    private AuthTokenFilter authTokenFilter;
+    private AuthClient authClient;
 
     @Autowired
-    private AdminFilter adminFilter;
-    
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
+    private ApplicationProperties applicationProperties;
 
-        http// Match only these URLs
-                .requestMatchers()//
-                .antMatchers("/admin/**")
-                .and().authorizeRequests()//
-                .antMatchers(HttpMethod.GET,"/admin/orgs").hasAnyAuthority(Roles.APP_ADMIN.getRole(), Roles.REPORT_ADMIN.getRole())
-                .antMatchers(HttpMethod.POST, "/admin/request-report/orgs/**").hasAnyAuthority(Roles.APP_ADMIN.getRole(),
-                        Roles.REPORT_ADMIN.getRole())
-                .antMatchers(HttpMethod.GET,"/admin/reports/orgs/**").hasAnyAuthority(Roles.APP_ADMIN.getRole(), Roles.REPORT_ADMIN.getRole())
-                .antMatchers(HttpMethod.GET,"/admin/orgs/*/reports/*/controls").hasAnyAuthority(Roles.APP_ADMIN.getRole(), Roles.REPORT_ADMIN.getRole())
-                .antMatchers(HttpMethod.GET,"/admin/orgs/*/reports/live").hasAnyAuthority(Roles.APP_ADMIN.getRole(), Roles.REPORT_ADMIN.getRole())
-                .antMatchers("/admin/**").hasAnyAuthority(Roles.APP_ADMIN.getRole())//
-                .and().cors().and().csrf().disable()
-                .addFilterBefore(authTokenFilter, BasicAuthenticationFilter.class)
-                .addFilterBefore(adminFilter, BasicAuthenticationFilter.class)
-                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-        http.cors();
+    @Bean
+    public SecurityFilterChain adminSecurityFilterChain(HttpSecurity http) throws Exception {
+
+        http    //match only these URLs
+                .securityMatcher("/admin/**")
+                .authorizeHttpRequests(auth -> {
+                    auth
+                            .requestMatchers(HttpMethod.GET,"/admin/orgs").hasAnyAuthority(Roles.APP_ADMIN.getRole(), Roles.REPORT_ADMIN.getRole())
+                            .requestMatchers(HttpMethod.POST, "/admin/request-report/orgs/**").hasAnyAuthority(Roles.APP_ADMIN.getRole(), Roles.REPORT_ADMIN.getRole())
+                            .requestMatchers(HttpMethod.GET,"/admin/reports/orgs/**").hasAnyAuthority(Roles.APP_ADMIN.getRole(), Roles.REPORT_ADMIN.getRole())
+                            .requestMatchers(HttpMethod.GET,"/admin/orgs/*/reports/*/controls").hasAnyAuthority(Roles.APP_ADMIN.getRole(), Roles.REPORT_ADMIN.getRole())
+                            .requestMatchers(HttpMethod.GET,"/admin/orgs/*/reports/live").hasAnyAuthority(Roles.APP_ADMIN.getRole(), Roles.REPORT_ADMIN.getRole())
+                            .requestMatchers("/admin/**").hasAnyAuthority(Roles.APP_ADMIN.getRole());
+                })
+                .cors(AbstractHttpConfigurer::disable)
+                .csrf(AbstractHttpConfigurer::disable)
+                .addFilterBefore(new AuthTokenFilter(authClient), BasicAuthenticationFilter.class)
+                .addFilterBefore(new AdminFilter(applicationProperties), BasicAuthenticationFilter.class)
+                .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+        return http.build();
     }
 
-    @Override
-    public void configure(WebSecurity web) throws Exception {
-        web.ignoring().antMatchers("/v2/api-docs", "/configuration/ui", "/swagger-resources", "/configuration/security",
-                "/swagger-ui.html", "/webjars/**", "/ui/**", "/session/**");
-    }
 }

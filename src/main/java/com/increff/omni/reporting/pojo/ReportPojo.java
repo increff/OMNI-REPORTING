@@ -1,11 +1,14 @@
 package com.increff.omni.reporting.pojo;
 
+import com.increff.commons.springboot.db.pojo.AbstractVersionedPojo;
 import com.increff.omni.reporting.model.constants.ChartType;
 import com.increff.omni.reporting.model.constants.ReportType;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 @Entity
 @Setter
@@ -32,6 +35,7 @@ public class ReportPojo extends AbstractVersionedPojo{
 
     @Column(nullable = false)
     @Enumerated(value = EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.VARCHAR)
     private ReportType type;
 
     @Column(nullable = false)
@@ -53,6 +57,7 @@ public class ReportPojo extends AbstractVersionedPojo{
 
     @Column(nullable = false)
     @Enumerated(value = EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.VARCHAR)
     private ChartType chartType = ChartType.REPORT;
 
     @Override

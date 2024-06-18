@@ -4,8 +4,8 @@ import com.increff.commons.queryexecutor.data.QueryRequestData;
 import com.increff.commons.queryexecutor.form.GetRequestForm;
 import com.increff.omni.reporting.api.*;
 import com.increff.omni.reporting.pojo.*;
-import com.nextscm.commons.spring.common.ApiException;
-import com.nextscm.commons.spring.common.ApiStatus;
+import com.increff.commons.springboot.common.ApiException;
+import com.increff.commons.springboot.common.ApiStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,10 +26,6 @@ public class ReportRequestFlowApi extends FlowApi {
     private ReportRequestApi api;
     @Autowired
     private ReportApi reportApi;
-    @Autowired
-    private InputControlApi controlApi;
-    @Autowired
-    private ReportControlsApi reportControlsApi;
     @Autowired
     private ReportInputParamsApi reportInputParamsApi;
     @Autowired

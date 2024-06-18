@@ -2,9 +2,9 @@ package com.increff.omni.reporting.api;
 
 import com.increff.omni.reporting.config.ApplicationProperties;
 import com.increff.omni.reporting.util.FileUtil;
-import com.nextscm.commons.spring.common.ApiException;
-import com.nextscm.commons.spring.common.ApiStatus;
-import lombok.extern.log4j.Log4j;
+import com.increff.commons.springboot.common.ApiException;
+import com.increff.commons.springboot.common.ApiStatus;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,7 +14,7 @@ import java.util.Objects;
 import java.util.UUID;
 
 @Service
-@Log4j
+@Log4j2
 public class FolderApi {
 
     @Autowired

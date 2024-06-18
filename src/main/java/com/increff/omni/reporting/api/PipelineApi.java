@@ -2,10 +2,10 @@ package com.increff.omni.reporting.api;
 
 import com.increff.omni.reporting.dao.PipelineDao;
 import com.increff.omni.reporting.pojo.PipelinePojo;
-import com.nextscm.commons.spring.common.ApiException;
-import com.nextscm.commons.spring.common.ApiStatus;
-import com.nextscm.commons.spring.server.AbstractApi;
-import lombok.extern.log4j.Log4j;
+import com.increff.commons.springboot.common.ApiException;
+import com.increff.commons.springboot.common.ApiStatus;
+import com.increff.commons.springboot.server.AbstractApi;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,7 +15,7 @@ import java.util.Objects;
 
 import static com.increff.omni.reporting.dto.AbstractDto.getOrgId;
 
-@Log4j
+@Log4j2
 @Service
 @Transactional(rollbackFor = ApiException.class)
 public class PipelineApi extends AbstractApi {

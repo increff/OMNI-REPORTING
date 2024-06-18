@@ -5,10 +5,10 @@ import com.increff.omni.reporting.model.data.OrgMappingsData;
 import com.increff.omni.reporting.model.data.SchemaVersionData;
 import com.increff.omni.reporting.model.form.IntegrationOrgForm;
 import com.increff.omni.reporting.model.form.OrgMappingsForm;
-import com.nextscm.commons.spring.common.ApiException;
-import com.nextscm.commons.spring.common.ApiStatus;
-import com.nextscm.commons.spring.server.AbstractDtoApi;
-import lombok.extern.log4j.Log4j;
+import com.increff.commons.springboot.common.ApiException;
+import com.increff.commons.springboot.common.ApiStatus;
+import com.increff.commons.springboot.server.AbstractDtoApi;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Collections;
 import java.util.Objects;
 
-@Log4j
+@Log4j2
 @Service
 public class IntegrationDto extends AbstractDtoApi {
 

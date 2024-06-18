@@ -4,9 +4,9 @@ import com.increff.omni.reporting.api.SchemaVersionApi;
 import com.increff.omni.reporting.model.data.SchemaVersionData;
 import com.increff.omni.reporting.model.form.SchemaVersionForm;
 import com.increff.omni.reporting.pojo.SchemaVersionPojo;
-import com.nextscm.commons.spring.common.ApiException;
-import com.nextscm.commons.spring.common.ConvertUtil;
-import com.nextscm.commons.spring.server.AbstractDtoApi;
+import com.increff.commons.springboot.common.ApiException;
+import com.increff.commons.springboot.common.ConvertUtil;
+import com.increff.commons.springboot.server.AbstractDtoApi;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

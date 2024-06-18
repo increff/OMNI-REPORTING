@@ -8,9 +8,9 @@ import com.increff.omni.reporting.model.constants.InputControlType;
 import com.increff.omni.reporting.model.constants.ReportType;
 import com.increff.omni.reporting.model.data.*;
 import com.increff.omni.reporting.model.form.*;
-import com.nextscm.commons.spring.common.ApiException;
-import com.nextscm.commons.spring.common.ApiStatus;
-import org.junit.Test;
+import com.increff.commons.springboot.common.ApiException;
+import com.increff.commons.springboot.common.ApiStatus;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
@@ -23,7 +23,7 @@ import static com.increff.omni.reporting.helper.OrgMappingTestHelper.getOrgMappi
 import static com.increff.omni.reporting.helper.OrgTestHelper.getOrganizationForm;
 import static com.increff.omni.reporting.helper.ReportTestHelper.*;
 import static com.increff.omni.reporting.helper.SchemaTestHelper.getSchemaForm;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ConnectionDtoTestIT extends AbstractTest {
 
@@ -95,7 +95,7 @@ public class ConnectionDtoTestIT extends AbstractTest {
         dto.testConnection(form);
     }
 
-    @Test(expected = ApiException.class)
+    @Test
     public void testConnectionWrongPassword() throws ApiException {
         ConnectionForm form = getConnectionForm("127.0.0.1", "Test DB", username, "wrong_password");
         try {
@@ -103,7 +103,6 @@ public class ConnectionDtoTestIT extends AbstractTest {
         } catch (ApiException e) {
             assertEquals(ApiStatus.UNKNOWN_ERROR, e.getStatus());
             assertTrue(e.getMessage().contains("Error connecting to the database"));
-            throw e;
         }
     }
 

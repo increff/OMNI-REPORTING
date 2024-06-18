@@ -1,13 +1,13 @@
 package com.increff.omni.reporting.dto;
 
+import com.increff.commons.springboot.common.ApiException;
+import com.increff.commons.springboot.common.ApiStatus;
 import com.increff.omni.reporting.config.AbstractTest;
 import com.increff.omni.reporting.helper.OrgMappingTestHelper;
 import com.increff.omni.reporting.model.constants.*;
 import com.increff.omni.reporting.model.data.*;
 import com.increff.omni.reporting.model.form.*;
-import com.nextscm.commons.spring.common.ApiException;
-import com.nextscm.commons.spring.common.ApiStatus;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.*;
@@ -18,7 +18,7 @@ import static com.increff.omni.reporting.helper.InputControlTestHelper.getInputC
 import static com.increff.omni.reporting.helper.OrgTestHelper.getOrganizationForm;
 import static com.increff.omni.reporting.helper.ReportTestHelper.*;
 import static com.increff.omni.reporting.helper.SchemaTestHelper.getSchemaForm;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ReportDtoTest extends AbstractTest {
 
@@ -239,7 +239,7 @@ public class ReportDtoTest extends AbstractTest {
         assertEquals(1, reportDataList.size());
     }
 
-    @Test(expected = ApiException.class)
+    @Test
     public void testAddValidationGroupErrorCase1() throws ApiException {
         ReportForm form = commonSetup("Report 2", ReportType.CUSTOM);
         ReportData data = dto.add(form);
@@ -254,11 +254,10 @@ public class ReportDtoTest extends AbstractTest {
         } catch (ApiException e) {
             assertEquals(ApiStatus.BAD_DATA, e.getStatus());
             assertEquals("Report id cannot be null", e.getMessage());
-            throw e;
         }
     }
 
-    @Test(expected = ApiException.class)
+    @Test
     public void testAddValidationGroupErrorCase2() throws ApiException {
         ReportForm form = commonSetup("Report 2", ReportType.CUSTOM);
         ReportData data = dto.add(form);
@@ -273,11 +272,10 @@ public class ReportDtoTest extends AbstractTest {
         } catch (ApiException e) {
             assertEquals(ApiStatus.BAD_DATA, e.getStatus());
             assertEquals("Validation group contains duplicate control ids", e.getMessage());
-            throw e;
         }
     }
 
-    @Test(expected = ApiException.class)
+    @Test
     public void testAddValidationGroupErrorCase3() throws ApiException {
         ReportForm form = commonSetup("Report 2", ReportType.CUSTOM);
         ReportData data = dto.add(form);
@@ -292,7 +290,6 @@ public class ReportDtoTest extends AbstractTest {
         } catch (ApiException e) {
             assertEquals(ApiStatus.BAD_DATA, e.getStatus());
             assertEquals("Date range validation should have positive validation value", e.getMessage());
-            throw e;
         }
     }
 
@@ -318,20 +315,28 @@ public class ReportDtoTest extends AbstractTest {
         dto.add(form);
     }
 
-    @Test(expected = ApiException.class)
+    @Test
     public void testAddChartWithIsChartFalse() throws ApiException {
         ReportForm form = commonSetup("Report 1", ReportType.STANDARD);
         form.setIsChart(false);
         form.setChartType(ChartType.TABLE);
-        dto.add(form);
+        ApiException exception = assertThrows(ApiException.class, () -> {
+            dto.add(form);
+        });
+        assertEquals(ApiStatus.BAD_DATA, exception.getStatus());
+        assertEquals("isChart should be true for Chart Type: TABLE", exception.getMessage());
     }
 
-    @Test(expected = ApiException.class)
+    @Test
     public void testAddBarChartWithoutLegends() throws ApiException {
         ReportForm form = commonSetup("Report 1", ReportType.STANDARD);
         form.setIsChart(true);
         form.setChartType(ChartType.BAR);
-        dto.add(form);
+        ApiException exception = assertThrows(ApiException.class, () -> {
+            dto.add(form);
+        });
+        assertEquals(ApiStatus.BAD_DATA, exception.getStatus());
+        assertEquals("Invalid legend count. Expected: 2 Actual: 0", exception.getMessage());
     }
 
     @Test

@@ -6,9 +6,9 @@ import com.increff.omni.reporting.model.data.*;
 import com.increff.omni.reporting.model.form.ConnectionForm;
 import com.increff.omni.reporting.model.form.OrganizationForm;
 import com.increff.omni.reporting.model.form.SchemaVersionForm;
-import com.nextscm.commons.spring.common.ApiException;
-import com.nextscm.commons.spring.common.ApiStatus;
-import org.junit.Test;
+import com.increff.commons.springboot.common.ApiException;
+import com.increff.commons.springboot.common.ApiStatus;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
@@ -16,7 +16,7 @@ import java.util.List;
 import static com.increff.omni.reporting.helper.ConnectionTestHelper.getConnectionForm;
 import static com.increff.omni.reporting.helper.OrgTestHelper.getOrganizationForm;
 import static com.increff.omni.reporting.helper.SchemaTestHelper.getSchemaForm;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class OrgDtoTest extends AbstractTest {
 
@@ -37,7 +37,7 @@ public class OrgDtoTest extends AbstractTest {
         assertEquals("increff", data.getName());
     }
 
-    @Test(expected = ApiException.class)
+    @Test
     public void testOrgCreateValidationFail() throws ApiException {
         OrganizationForm form = getOrganizationForm(1, null);
         try {
@@ -45,7 +45,6 @@ public class OrgDtoTest extends AbstractTest {
         } catch (ApiException e) {
             assertEquals(ApiStatus.BAD_DATA, e.getStatus());
             assertEquals("Input validation failed", e.getMessage());
-            throw e;
         }
     }
 

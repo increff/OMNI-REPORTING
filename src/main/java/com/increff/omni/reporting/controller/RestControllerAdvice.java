@@ -1,22 +1,25 @@
 package com.increff.omni.reporting.controller;
 
-import com.nextscm.commons.spring.common.ApiStatus;
-import com.nextscm.commons.spring.common.ErrorData;
-import com.nextscm.commons.spring.server.AbstractRestappControllerAdvice;
-import lombok.extern.log4j.Log4j;
+import com.increff.commons.springboot.common.ApiStatus;
+import com.increff.commons.springboot.common.ErrorData;
+import com.increff.commons.springboot.server.RestAppControllerAdvice;
+import lombok.extern.log4j.Log4j2;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
 @ControllerAdvice
-@Log4j
-public class RestControllerAdvice extends AbstractRestappControllerAdvice {
+@Log4j2
+@Order(Ordered.HIGHEST_PRECEDENCE)
+public class RestControllerAdvice extends RestAppControllerAdvice {
 
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ExceptionHandler({Throwable.class})

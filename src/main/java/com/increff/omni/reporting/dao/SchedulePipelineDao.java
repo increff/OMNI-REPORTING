@@ -1,13 +1,10 @@
 package com.increff.omni.reporting.dao;
 
-import com.increff.omni.reporting.pojo.PipelinePojo;
+import com.increff.commons.springboot.db.dao.AbstractDao;
 import com.increff.omni.reporting.pojo.SchedulePipelinePojo;
-import com.nextscm.commons.spring.db.AbstractDao;
+import jakarta.persistence.TypedQuery;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
-
-import javax.persistence.TypedQuery;
-import java.util.List;
 
 
 @Repository

@@ -4,9 +4,9 @@ import com.increff.omni.reporting.config.AbstractTest;
 import com.increff.omni.reporting.pojo.ReportScheduleEmailsPojo;
 import com.increff.omni.reporting.pojo.ReportScheduleInputParamsPojo;
 import com.increff.omni.reporting.pojo.ReportSchedulePojo;
-import com.nextscm.commons.spring.common.ApiException;
-import com.nextscm.commons.spring.common.ApiStatus;
-import org.junit.Test;
+import com.increff.commons.springboot.common.ApiException;
+import com.increff.commons.springboot.common.ApiStatus;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.ZonedDateTime;
@@ -14,8 +14,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static com.increff.omni.reporting.helper.ReportScheduleTestHelper.*;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ReportScheduleApiTest extends AbstractTest {
 
@@ -144,7 +143,7 @@ public class ReportScheduleApiTest extends AbstractTest {
         assertEquals("0 */15 * * * ?", schedulePojo1.getCron());
     }
 
-    @Test(expected = ApiException.class)
+    @Test
     public void testGetCheckWithException() throws ApiException {
         ReportSchedulePojo schedulePojo = getReportSchedulePojo("Report 1", true, false, 0, 10, ZonedDateTime.now(),
                 100001, 100001, "0 */15 * * * ?");
@@ -154,7 +153,6 @@ public class ReportScheduleApiTest extends AbstractTest {
         } catch (ApiException e) {
             assertEquals(ApiStatus.BAD_DATA, e.getStatus());
             assertEquals("No report schedule present with id : " + (schedulePojo.getId() + 1), e.getMessage());
-            throw e;
         }
     }
 

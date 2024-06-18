@@ -1,5 +1,8 @@
 package com.increff.omni.reporting.dto;
 
+import com.increff.commons.springboot.common.ApiException;
+import com.increff.commons.springboot.common.ApiStatus;
+import com.increff.commons.springboot.common.ConvertUtil;
 import com.increff.omni.reporting.api.*;
 import com.increff.omni.reporting.config.ApplicationProperties;
 import com.increff.omni.reporting.flow.ReportFlowApi;
@@ -12,11 +15,8 @@ import com.increff.omni.reporting.pojo.*;
 import com.increff.omni.reporting.util.SqlCmd;
 import com.increff.omni.reporting.util.UserPrincipalUtil;
 import com.increff.omni.reporting.util.ValidateUtil;
-import com.nextscm.commons.spring.common.ApiException;
-import com.nextscm.commons.spring.common.ApiStatus;
-import com.nextscm.commons.spring.common.ConvertUtil;
 import lombok.Setter;
-import lombok.extern.log4j.Log4j;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -35,7 +35,7 @@ import static com.increff.omni.reporting.util.ValidateUtil.validateReportForm;
 
 @Service
 @Setter
-@Log4j
+@Log4j2
 public class ReportDto extends AbstractDto {
 
     @Autowired

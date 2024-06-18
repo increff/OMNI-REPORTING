@@ -1,14 +1,14 @@
 package com.increff.omni.reporting.security;
 
 import com.increff.omni.reporting.model.constants.Roles;
-import lombok.extern.log4j.Log4j;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
 
-@Log4j
+@Log4j2
 @Service
 public class RoleUtil {
     // intellij shows unused but is used in securityConfig.access method

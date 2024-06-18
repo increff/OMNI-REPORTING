@@ -4,15 +4,16 @@ import com.increff.omni.reporting.config.AbstractTest;
 import com.increff.omni.reporting.config.ApplicationProperties;
 import com.increff.omni.reporting.dao.DirectoryDao;
 import com.increff.omni.reporting.pojo.DirectoryPojo;
-import com.nextscm.commons.spring.common.ApiException;
-import com.nextscm.commons.spring.common.ApiStatus;
-import org.junit.Test;
+import com.increff.commons.springboot.common.ApiException;
+import com.increff.commons.springboot.common.ApiStatus;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
 import static com.increff.omni.reporting.helper.DirectoryTestHelper.getDirectoryPojo;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 
 public class DirectoryApiTest extends AbstractTest {
 
@@ -36,7 +37,7 @@ public class DirectoryApiTest extends AbstractTest {
         assertEquals(rootPojo.getId(), directoryPojoList.get(1).getParentId());
     }
 
-    @Test(expected = ApiException.class)
+    @Test
     public void testAddDirectoryMissingParentDirectory() throws ApiException {
         DirectoryPojo rootPojo = dao.select("directoryName", properties.getRootDirectory());
         DirectoryPojo pojo = getDirectoryPojo("Standard Reports", rootPojo.getId() + 1);
@@ -49,11 +50,10 @@ public class DirectoryApiTest extends AbstractTest {
             assertEquals(0, directoryPojoList.get(0).getParentId().intValue());
             assertEquals(ApiStatus.BAD_DATA, e.getStatus());
             assertEquals("No directory with id : " + (rootPojo.getId() + 1), e.getMessage());
-            throw e;
         }
     }
 
-    @Test(expected = ApiException.class)
+    @Test
     public void testAddDirectoryWithDuplicateName() throws ApiException {
         DirectoryPojo rootPojo = dao.select("directoryName", properties.getRootDirectory());
         DirectoryPojo pojo = getDirectoryPojo(rootPojo.getDirectoryName(), rootPojo.getId());
@@ -66,7 +66,6 @@ public class DirectoryApiTest extends AbstractTest {
             assertEquals(0, directoryPojoList.get(0).getParentId().intValue());
             assertEquals(ApiStatus.BAD_DATA, e.getStatus());
             assertEquals("Directory already present with same name", e.getMessage());
-            throw e;
         }
     }
 
@@ -128,7 +127,7 @@ public class DirectoryApiTest extends AbstractTest {
         assertEquals(rootPojo.getId(), directoryPojoList.get(2).getParentId());
     }
 
-    @Test(expected = ApiException.class)
+    @Test
     public void testUpdateDirectoryInvalidId() throws ApiException {
         DirectoryPojo rootPojo = dao.select("directoryName", properties.getRootDirectory());
         DirectoryPojo pojo = getDirectoryPojo("Standard Reports", rootPojo.getId());
@@ -159,11 +158,10 @@ public class DirectoryApiTest extends AbstractTest {
             assertEquals(pojo.getId(), directoryPojoList.get(2).getParentId());
             assertEquals(ApiStatus.BAD_DATA, e.getStatus());
             assertEquals("No directory with id : " + (pojo2.getId()+10), e.getMessage());
-            throw e;
         }
     }
 
-    @Test(expected = ApiException.class)
+    @Test
     public void testUpdateDirectoryInvalidParentId() throws ApiException {
         DirectoryPojo rootPojo = dao.select("directoryName", properties.getRootDirectory());
         DirectoryPojo pojo = getDirectoryPojo("Standard Reports", rootPojo.getId());
@@ -194,11 +192,10 @@ public class DirectoryApiTest extends AbstractTest {
             assertEquals(pojo.getId(), directoryPojoList.get(2).getParentId());
             assertEquals(ApiStatus.BAD_DATA, e.getStatus());
             assertEquals("No directory with id : " + (rootPojo.getId() + 10), e.getMessage());
-            throw e;
         }
     }
 
-    @Test(expected = ApiException.class)
+    @Test
     public void testUpdateDirectoryDuplicateName() throws ApiException {
         DirectoryPojo rootPojo = dao.select("directoryName", properties.getRootDirectory());
         DirectoryPojo pojo = getDirectoryPojo("Standard Reports", rootPojo.getId());
@@ -229,7 +226,6 @@ public class DirectoryApiTest extends AbstractTest {
             assertEquals(pojo.getId(), directoryPojoList.get(2).getParentId());
             assertEquals(ApiStatus.BAD_DATA, e.getStatus());
             assertEquals("Directory already present with same name", e.getMessage());
-            throw e;
         }
     }
 

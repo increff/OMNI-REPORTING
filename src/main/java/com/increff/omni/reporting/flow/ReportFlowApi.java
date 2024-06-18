@@ -1,5 +1,7 @@
 package com.increff.omni.reporting.flow;
 
+import com.increff.commons.springboot.common.ApiException;
+import com.increff.commons.springboot.common.ApiStatus;
 import com.increff.omni.reporting.api.*;
 import com.increff.omni.reporting.config.ApplicationProperties;
 import com.increff.omni.reporting.model.constants.*;
@@ -13,10 +15,8 @@ import com.increff.omni.reporting.validators.DateValidator;
 import com.increff.omni.reporting.validators.MandatoryValidator;
 import com.increff.omni.reporting.validators.SingleMandatoryValidator;
 import com.nextscm.commons.lang.StringUtil;
-import com.nextscm.commons.spring.common.ApiException;
-import com.nextscm.commons.spring.common.ApiStatus;
 import lombok.Setter;
-import lombok.extern.log4j.Log4j;
+import lombok.extern.log4j.Log4j2;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -36,7 +36,7 @@ import static com.increff.omni.reporting.dto.CommonDtoHelper.*;
 
 @Service
 @Setter
-@Log4j
+@Log4j2
 public class ReportFlowApi extends FlowApi {
 
     @Autowired

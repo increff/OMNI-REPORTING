@@ -11,10 +11,10 @@ import com.increff.omni.reporting.pojo.DashboardChartPojo;
 import com.increff.omni.reporting.pojo.DefaultValuePojo;
 import com.increff.omni.reporting.pojo.ReportPojo;
 import com.increff.omni.reporting.util.ValidateUtil;
-import com.nextscm.commons.spring.common.ApiException;
-import com.nextscm.commons.spring.common.ConvertUtil;
+import com.increff.commons.springboot.common.ApiException;
+import com.increff.commons.springboot.common.ConvertUtil;
 import lombok.Setter;
-import lombok.extern.log4j.Log4j;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 import static com.increff.omni.reporting.util.ChartUtil.DEFAULT_VALUE_COMMON_KEY;
 
 @Service
-@Log4j
+@Log4j2
 @Setter
 public class DashboardChartDto extends AbstractDto {
     @Autowired

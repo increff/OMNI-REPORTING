@@ -1,10 +1,13 @@
 package com.increff.omni.reporting.pojo;
 
 import com.increff.omni.reporting.model.constants.DBType;
+import com.increff.commons.springboot.db.pojo.AbstractVersionedPojo;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 @Entity
 @Setter
@@ -28,5 +31,6 @@ public class ConnectionPojo extends AbstractVersionedPojo{
     private String password;
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
+    @JdbcTypeCode(SqlTypes.VARCHAR)
     private DBType dbType;
 }

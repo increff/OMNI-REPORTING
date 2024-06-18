@@ -1,12 +1,11 @@
 package com.increff.omni.reporting.dao;
 
-import com.increff.omni.reporting.pojo.DashboardChartPojo;
 import com.increff.omni.reporting.pojo.DashboardPojo;
-import com.nextscm.commons.spring.db.AbstractDao;
+import com.increff.commons.springboot.db.dao.AbstractDao;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.TypedQuery;
+import jakarta.persistence.TypedQuery;
 import java.util.List;
 
 

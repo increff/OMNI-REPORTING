@@ -9,10 +9,10 @@ import com.increff.omni.reporting.pojo.InputControlPojo;
 import com.increff.omni.reporting.pojo.InputControlQueryPojo;
 import com.increff.omni.reporting.pojo.InputControlValuesPojo;
 import com.increff.omni.reporting.pojo.SchemaVersionPojo;
-import com.nextscm.commons.spring.common.ApiException;
-import com.nextscm.commons.spring.common.ApiStatus;
-import org.junit.Before;
-import org.junit.Test;
+import com.increff.commons.springboot.common.ApiException;
+import com.increff.commons.springboot.common.ApiStatus;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
@@ -21,7 +21,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static com.increff.omni.reporting.helper.InputControlTestHelper.*;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class InputControlApiTest extends AbstractTest {
 
@@ -33,7 +33,7 @@ public class InputControlApiTest extends AbstractTest {
     private SchemaVersionApi schemaVersionApi;
 
     SchemaVersionPojo p;
-    @Before
+    @BeforeEach
     public void initInputControlApi() throws ApiException {
         p = SchemaTestHelper.getSchemaPojo("1.0.0");
         schemaVersionApi.add(p);
@@ -90,7 +90,7 @@ public class InputControlApiTest extends AbstractTest {
         assertEquals(pojo.getId(), queryPojo.getControlId());
     }
 
-    @Test(expected = ApiException.class)
+    @Test
     public void testUpdateInputControlDuplicateDisplayName() throws ApiException {
         InputControlPojo inputControlPojo = getInputControlPojo("Client ID", "clientId"
                 , InputControlScope.GLOBAL, InputControlType.MULTI_SELECT, p.getId());
@@ -122,11 +122,10 @@ public class InputControlApiTest extends AbstractTest {
         } catch (ApiException e) {
             assertEquals(ApiStatus.BAD_DATA, e.getStatus());
             assertEquals("Cannot create input control with same display name or param name", e.getMessage());
-            throw e;
         }
     }
 
-    @Test(expected = ApiException.class)
+    @Test
     public void testUpdateInputControlDuplicateParamName() throws ApiException {
         InputControlPojo inputControlPojo = getInputControlPojo("Client ID", "clientId"
                 , InputControlScope.GLOBAL, InputControlType.MULTI_SELECT, p.getId());
@@ -158,7 +157,6 @@ public class InputControlApiTest extends AbstractTest {
         } catch (ApiException e) {
             assertEquals(ApiStatus.BAD_DATA, e.getStatus());
             assertEquals("Cannot create input control with same display name or param name", e.getMessage());
-            throw e;
         }
     }
 

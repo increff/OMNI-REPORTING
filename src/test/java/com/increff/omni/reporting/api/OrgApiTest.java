@@ -2,15 +2,15 @@ package com.increff.omni.reporting.api;
 
 import com.increff.omni.reporting.config.AbstractTest;
 import com.increff.omni.reporting.pojo.OrganizationPojo;
-import com.nextscm.commons.spring.common.ApiException;
-import com.nextscm.commons.spring.common.ApiStatus;
-import org.junit.Test;
+import com.increff.commons.springboot.common.ApiException;
+import com.increff.commons.springboot.common.ApiStatus;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
 import static com.increff.omni.reporting.helper.OrgTestHelper.getOrgPojo;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class OrgApiTest extends AbstractTest {
 
@@ -26,7 +26,7 @@ public class OrgApiTest extends AbstractTest {
         assertEquals("increff", pojo.getName());
     }
 
-    @Test(expected = ApiException.class)
+    @Test
     public void testAddOrgDuplicateID() throws ApiException {
         OrganizationPojo pojo = getOrgPojo(1, "increff");
         orgApi.add(pojo);
@@ -36,11 +36,10 @@ public class OrgApiTest extends AbstractTest {
         } catch (ApiException e) {
             assertEquals(ApiStatus.BAD_DATA, e.getStatus());
             assertEquals("Organization already present with requested id", e.getMessage());
-            throw e;
         }
     }
 
-    @Test(expected = ApiException.class)
+    @Test
     public void testAddOrgDuplicateName() throws ApiException {
         OrganizationPojo pojo = getOrgPojo(1, "increff");
         orgApi.add(pojo);
@@ -50,7 +49,6 @@ public class OrgApiTest extends AbstractTest {
         } catch (ApiException e) {
             assertEquals(ApiStatus.BAD_DATA, e.getStatus());
             assertEquals("Organization already present with requested name", e.getMessage());
-            throw e;
         }
     }
 
@@ -79,7 +77,7 @@ public class OrgApiTest extends AbstractTest {
         assertEquals("increff2", organizationPojoList.get(0).getName());
     }
 
-    @Test(expected = ApiException.class)
+    @Test
     public void testUpdateOrgWithDuplicateName() throws ApiException {
         OrganizationPojo pojo = getOrgPojo(1, "increff");
         orgApi.add(pojo);
@@ -96,11 +94,10 @@ public class OrgApiTest extends AbstractTest {
             assertEquals("increff2", organizationPojoList.get(1).getName());
             assertEquals(ApiStatus.BAD_DATA, e.getStatus());
             assertEquals("Organization already present with requested name", e.getMessage());
-            throw e;
         }
     }
 
-    @Test(expected = ApiException.class)
+    @Test
     public void testUpdateOrgWithOrgDoesNotExist() throws ApiException {
         OrganizationPojo pojo = getOrgPojo(1, "increff");
         orgApi.add(pojo);
@@ -117,7 +114,6 @@ public class OrgApiTest extends AbstractTest {
             assertEquals("increff2", organizationPojoList.get(1).getName());
             assertEquals(ApiStatus.BAD_DATA, e.getStatus());
             assertEquals("No org present with id : 3", e.getMessage());
-            throw e;
         }
     }
 }

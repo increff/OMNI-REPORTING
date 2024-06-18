@@ -1,12 +1,16 @@
 package com.increff.omni.reporting.pojo;
 
+import com.increff.commons.springboot.db.pojo.AbstractVersionedPojo;
 import com.increff.commons.queryexecutor.constants.FileFormat;
 import com.increff.omni.reporting.model.constants.ReportRequestStatus;
 import com.increff.omni.reporting.model.constants.ReportRequestType;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
 import java.time.ZonedDateTime;
 
 @Entity
@@ -37,10 +41,12 @@ public class ReportRequestPojo extends AbstractVersionedPojo {
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.VARCHAR)
     private ReportRequestStatus status;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.VARCHAR)
     private ReportRequestType type;
 
     private Integer noOfRows;
@@ -49,6 +55,7 @@ public class ReportRequestPojo extends AbstractVersionedPojo {
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.VARCHAR)
     private FileFormat fileFormat = FileFormat.CSV;
 
     private String url;

@@ -12,9 +12,9 @@ import com.increff.omni.reporting.pojo.*;
 import com.increff.omni.reporting.util.FileDownloadUtil;
 import com.increff.omni.reporting.util.FileUtil;
 import com.increff.omni.reporting.util.UserPrincipalUtil;
-import com.nextscm.commons.spring.common.ApiException;
-import com.nextscm.commons.spring.common.ApiStatus;
-import lombok.extern.log4j.Log4j;
+import com.increff.commons.springboot.common.ApiException;
+import com.increff.commons.springboot.common.ApiStatus;
+import lombok.extern.log4j.Log4j2;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 import static com.increff.omni.reporting.dto.CommonDtoHelper.*;
 
 @Service
-@Log4j
+@Log4j2
 public class ReportRequestDto extends AbstractDto {
 
     @Autowired

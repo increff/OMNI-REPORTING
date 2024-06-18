@@ -5,19 +5,19 @@ import com.increff.omni.reporting.model.constants.ChartType;
 import com.increff.omni.reporting.model.constants.ReportType;
 import com.increff.omni.reporting.model.constants.VisualizationType;
 import com.increff.omni.reporting.pojo.ReportPojo;
-import com.nextscm.commons.spring.db.AbstractDao;
-import lombok.extern.log4j.Log4j;
+import com.increff.commons.springboot.db.dao.AbstractDao;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@Log4j
+@Log4j2
 @Repository
 @Transactional
 public class ReportDao extends AbstractDao<ReportPojo> {

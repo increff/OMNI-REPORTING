@@ -5,9 +5,8 @@ import com.increff.omni.reporting.dto.*;
 import com.increff.omni.reporting.model.data.ViewDashboardData;
 import com.increff.omni.reporting.model.form.ReportRequestForm;
 import com.increff.omni.reporting.util.ConvertUtil;
-import com.nextscm.commons.spring.common.ApiException;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import com.increff.commons.springboot.common.ApiException;
+import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.ContentCachingRequestWrapper;
@@ -16,7 +15,6 @@ import java.io.IOException;
 import java.util.List;
 
 @CrossOrigin
-@Api
 @RestController
 @RequestMapping(value = "/standard/app-access")
 public class AppAccessController {
@@ -29,8 +27,8 @@ public class AppAccessController {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @ApiOperation(value = "Request Report")
-    @RequestMapping(value = "/request-report", method = RequestMethod.POST)
+    @Operation(summary = "Request Report")
+    @PostMapping(value = "/request-report")
     public void requestReport(ContentCachingRequestWrapper wrappedRequest) throws ApiException {
         String requestBody = new String(wrappedRequest.getContentAsByteArray());
         ReportRequestForm form = ConvertUtil.getJavaObjectFromJson(requestBody, ReportRequestForm.class, objectMapper);
@@ -39,8 +37,8 @@ public class AppAccessController {
     }
 
     // Change rate limiter filter URL when changing endpoint URL
-    @ApiOperation(value = "View Dashboard")
-    @RequestMapping(value = "/dashboards/{dashboardId}/view", method = RequestMethod.POST)
+    @Operation(summary = "View Dashboard")
+    @PostMapping(value = "/dashboards/{dashboardId}/view")
     public List<ViewDashboardData> viewDashboard(@PathVariable Integer dashboardId, ContentCachingRequestWrapper wrappedRequest) throws ApiException, IOException {
         String requestBody = new String(wrappedRequest.getContentAsByteArray());
         ReportRequestForm form = ConvertUtil.getJavaObjectFromJson(requestBody, ReportRequestForm.class, objectMapper);

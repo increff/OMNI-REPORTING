@@ -6,16 +6,17 @@ import com.increff.omni.reporting.model.data.PipelineConfigData;
 import com.increff.omni.reporting.model.data.PipelineData;
 import com.increff.omni.reporting.pojo.ChartLegendsPojo;
 import com.increff.omni.reporting.pojo.PipelinePojo;
-import com.nextscm.commons.spring.common.ApiException;
-import com.nextscm.commons.spring.common.ApiStatus;
-import lombok.extern.log4j.Log4j;
+import com.increff.commons.springboot.common.ApiException;
+import com.increff.commons.springboot.common.ApiStatus;
+import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
+
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-@Log4j
+@Log4j2
 public class ConvertUtil {
 
     public static ChartLegendsData convertChartLegendsPojoToChartLegendsData(List<ChartLegendsPojo> pojos) {
@@ -27,7 +28,7 @@ public class ConvertUtil {
     }
 
     public static PipelineData convertToPipelineData(PipelinePojo pojo) throws ApiException {
-        PipelineData data = com.nextscm.commons.spring.common.ConvertUtil.convert(pojo, PipelineData.class);
+        PipelineData data = com.increff.commons.springboot.common.ConvertUtil.convert(pojo, PipelineData.class);
 
         data.setConfigs(getJavaObjectFromJson(pojo.getConfigs(), PipelineConfigData.class));
 

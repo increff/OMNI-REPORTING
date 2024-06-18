@@ -1,10 +1,10 @@
 package com.increff.omni.reporting.util;
 
+import com.increff.commons.springboot.common.ApiException;
+import com.increff.commons.springboot.common.ApiStatus;
 import com.increff.omni.reporting.model.constants.AppName;
 import com.increff.omni.reporting.model.constants.ChartType;
 import com.increff.omni.reporting.model.form.*;
-import com.nextscm.commons.spring.common.ApiException;
-import com.nextscm.commons.spring.common.ApiStatus;
 
 import java.util.HashSet;
 import java.util.List;
@@ -12,7 +12,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.nextscm.commons.spring.server.DtoHelper.checkValid;
+import static com.increff.commons.springboot.server.DtoHelper.checkValid;
 
 public class ValidateUtil {
 
@@ -25,7 +25,6 @@ public class ValidateUtil {
             throw new ApiException(ApiStatus.BAD_DATA, "Dashboard Reports can't be scheduled");
         if(!form.getCanSchedule() && Objects.nonNull(form.getMinFrequencyAllowedSeconds()))
             throw new ApiException(ApiStatus.BAD_DATA, "Min Frequency Allowed Seconds " + form.getMinFrequencyAllowedSeconds() + " should be null for non-scheduled reports");
-
         if(Objects.nonNull(form.getChartType().getLEGENDS_COUNT_VALIDATION()) && form.getLegends().size() != form.getChartType().getLEGENDS_COUNT_VALIDATION())
             throw new ApiException(ApiStatus.BAD_DATA, "Invalid legend count. Expected: " + form.getChartType().getLEGENDS_COUNT_VALIDATION() + " Actual: " + form.getLegends().size());
         if(form.getChartType() != ChartType.REPORT && !form.getIsChart())

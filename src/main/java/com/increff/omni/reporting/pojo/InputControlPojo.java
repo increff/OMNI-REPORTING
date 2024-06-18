@@ -1,12 +1,15 @@
 package com.increff.omni.reporting.pojo;
 
+import com.increff.commons.springboot.db.pojo.AbstractVersionedPojo;
 import com.increff.omni.reporting.model.constants.DateType;
 import com.increff.omni.reporting.model.constants.InputControlScope;
 import com.increff.omni.reporting.model.constants.InputControlType;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 @Entity
 @Setter
@@ -29,13 +32,16 @@ public class InputControlPojo extends AbstractVersionedPojo{
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.VARCHAR)
     private InputControlScope scope;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.VARCHAR)
     private InputControlType type;
 
     @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.VARCHAR)
     private DateType dateType;
 
     @Column(nullable = false)

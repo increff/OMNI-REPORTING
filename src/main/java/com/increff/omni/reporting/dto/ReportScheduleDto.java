@@ -14,9 +14,9 @@ import com.increff.omni.reporting.model.form.EmailParams;
 import com.increff.omni.reporting.model.form.ReportScheduleForm;
 import com.increff.omni.reporting.pojo.*;
 import com.increff.omni.reporting.util.UserPrincipalUtil;
-import com.nextscm.commons.spring.common.ApiException;
-import com.nextscm.commons.spring.common.ApiStatus;
-import com.nextscm.commons.spring.common.ConvertUtil;
+import com.increff.commons.springboot.common.ApiException;
+import com.increff.commons.springboot.common.ApiStatus;
+import com.increff.commons.springboot.common.ConvertUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

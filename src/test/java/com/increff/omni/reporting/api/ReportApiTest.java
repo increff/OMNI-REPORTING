@@ -7,8 +7,8 @@ import com.increff.omni.reporting.model.constants.ReportType;
 import com.increff.omni.reporting.pojo.DirectoryPojo;
 import com.increff.omni.reporting.pojo.ReportPojo;
 import com.increff.omni.reporting.pojo.SchemaVersionPojo;
-import com.nextscm.commons.spring.common.ApiException;
-import org.junit.Test;
+import com.increff.commons.springboot.common.ApiException;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Collections;
@@ -17,7 +17,7 @@ import java.util.List;
 import static com.increff.omni.reporting.helper.DirectoryTestHelper.getDirectoryPojo;
 import static com.increff.omni.reporting.helper.ReportTestHelper.getReportPojo;
 import static com.increff.omni.reporting.helper.SchemaTestHelper.getSchemaPojo;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ReportApiTest extends AbstractTest {
 

@@ -2,9 +2,9 @@ package com.increff.omni.reporting.api;
 
 import com.increff.omni.reporting.dao.OrgMappingDao;
 import com.increff.omni.reporting.pojo.OrgMappingPojo;
-import com.nextscm.commons.spring.common.ApiException;
-import com.nextscm.commons.spring.common.ApiStatus;
-import lombok.extern.log4j.Log4j;
+import com.increff.commons.springboot.common.ApiException;
+import com.increff.commons.springboot.common.ApiStatus;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,7 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Objects;
 
-@Log4j
+@Log4j2
 @Service
 @Transactional(rollbackFor = ApiException.class)
 public class OrgMappingApi extends AbstractAuditApi {

@@ -1,8 +1,8 @@
 package com.increff.omni.reporting.model.data.Charts;
 
 import com.increff.omni.reporting.model.constants.ChartType;
-import com.nextscm.commons.spring.common.ApiException;
-import com.nextscm.commons.spring.common.ApiStatus;
+import com.increff.commons.springboot.common.ApiException;
+import com.increff.commons.springboot.common.ApiStatus;
 
 import java.util.List;
 import java.util.Map;

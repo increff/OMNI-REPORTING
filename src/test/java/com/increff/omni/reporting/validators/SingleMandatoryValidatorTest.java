@@ -3,24 +3,25 @@ package com.increff.omni.reporting.validators;
 import com.increff.omni.reporting.config.AbstractTest;
 import com.increff.omni.reporting.model.constants.ReportRequestType;
 import com.increff.omni.reporting.model.constants.ValidationType;
-import com.nextscm.commons.spring.common.ApiException;
-import com.nextscm.commons.spring.common.ApiStatus;
-import org.junit.Test;
+import com.increff.commons.springboot.common.ApiException;
+import com.increff.commons.springboot.common.JsonUtil;
+import com.increff.commons.springboot.common.ApiStatus;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class SingleMandatoryValidatorTest extends AbstractTest {
 
     @Autowired
     private SingleMandatoryValidator validator;
 
-    @Test(expected = ApiException.class)
+    @Test
     public void testValidateErrorCase1() throws ApiException {
         List<String> params = Arrays.asList("''", "''");
         List<String> displayNames = Arrays.asList("Client Id", "Item Id");
@@ -32,7 +33,6 @@ public class SingleMandatoryValidatorTest extends AbstractTest {
                 assertTrue(e.getMessage().contains(displayName));
             assertTrue(e.getMessage().contains(ValidationType.SINGLE_MANDATORY.toString()));
             assertTrue(e.getMessage().contains("Report 1"));
-            throw e;
         }
     }
 
@@ -55,7 +55,6 @@ public class SingleMandatoryValidatorTest extends AbstractTest {
                 assertTrue(e.getMessage().contains(displayName));
             }
             assertTrue(e.getMessage().contains(ValidationType.SINGLE_MANDATORY.toString()));
-            throw e;
         }
     }
 

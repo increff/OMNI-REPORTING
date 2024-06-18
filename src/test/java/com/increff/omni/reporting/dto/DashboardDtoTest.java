@@ -2,6 +2,7 @@ package com.increff.omni.reporting.dto;
 
 import com.increff.account.client.SecurityUtil;
 import com.increff.account.client.UserPrincipal;
+import com.increff.commons.springboot.common.ApiStatus;
 import com.increff.omni.reporting.api.DashboardApi;
 import com.increff.omni.reporting.api.DashboardChartApi;
 import com.increff.omni.reporting.api.DefaultValueApi;
@@ -15,9 +16,9 @@ import com.increff.omni.reporting.model.data.*;
 import com.increff.omni.reporting.model.form.*;
 import com.increff.omni.reporting.pojo.DashboardPojo;
 import com.increff.omni.reporting.pojo.DefaultValuePojo;
+import com.increff.commons.springboot.common.ApiException;
+import org.junit.jupiter.api.Test;
 import com.increff.omni.reporting.pojo.ReportControlsPojo;
-import com.nextscm.commons.spring.common.ApiException;
-import org.junit.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -33,13 +34,12 @@ import static com.increff.omni.reporting.helper.InputControlTestHelper.getInputC
 import static com.increff.omni.reporting.helper.OrgTestHelper.getOrganizationForm;
 import static com.increff.omni.reporting.helper.ReportTestHelper.*;
 import static com.increff.omni.reporting.helper.SchemaTestHelper.getSchemaForm;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+
+import static org.junit.jupiter.api.Assertions.*;
+
 
 public class DashboardDtoTest extends AbstractTest {
 
-    @Autowired
-    private CustomReportAccessDto customReportAccessDto;
     @Autowired
     private ReportDto reportDto;
     @Autowired
@@ -117,11 +117,21 @@ public class DashboardDtoTest extends AbstractTest {
         assertEquals(data.getId(), dashboardDto.getDashboard(data.getId()).getId());
     }
 
-    @Test(expected = ApiException.class)
+    @Test
     public void testExceedDashboardsPerOrgMaxLimit() throws ApiException {
         List<ReportData> chartDatas = commonSetup(ReportType.STANDARD);
-        for (int i = 0; i < properties.getMaxDashboardsPerOrg() + 1; i++) {
-            DashboardData data = dashboardDto.addDashboard(getDashboardAddForm("Dashboard_" + i,
+        for(int i = 0; i<properties.getMaxDashboardsPerOrg() + 1; i++) {
+            if(i == properties.getMaxDashboardsPerOrg()) {
+                int finalI = i;
+                ApiException exception = assertThrows(ApiException.class, () -> {
+                    dashboardDto.addDashboard(getDashboardAddForm("Dashboard_"+ finalI,
+                            Arrays.asList(getDashboardChartForm(chartDatas.get(0).getAlias(), 0, 0, 0, RowHeight.HALF))));
+                });
+                assertEquals(ApiStatus.BAD_DATA, exception.getStatus());
+                assertTrue(exception.getMessage().contains("Max limit of dashboards reached: " + properties.getMaxDashboardsPerOrg()));
+                break;
+            }
+            DashboardData data = dashboardDto.addDashboard(getDashboardAddForm("Dashboard_"+i,
                     Arrays.asList(getDashboardChartForm(chartDatas.get(0).getAlias(), 0, 0, 0, RowHeight.HALF))));
         }
     }
@@ -135,13 +145,16 @@ public class DashboardDtoTest extends AbstractTest {
         assertEquals(dashboardDto.getDashboardsByOrgId().get(0).getName(), "Dashboard_2");
     }
 
-    @Test(expected = ApiException.class)
+    @Test
     public void testSameChartTwiceInDashboardError() throws ApiException {
         List<ReportData> chartDatas = commonSetup(ReportType.STANDARD);
-        dashboardDto.addDashboard(getDashboardAddForm("Dashboard_1",
-                Arrays.asList(getDashboardChartForm(chartDatas.get(0).getAlias(), 0, 0, 0, RowHeight.HALF),
-                        getDashboardChartForm(chartDatas.get(0).getAlias(), 1, 0, 0, RowHeight.HALF))));
-
+        ApiException exception = assertThrows(ApiException.class, () -> {
+          dashboardDto.addDashboard(getDashboardAddForm("Dashboard_1",
+            Arrays.asList(getDashboardChartForm(chartDatas.get(0).getAlias(), 0, 0, 0, RowHeight.HALF),
+               getDashboardChartForm(chartDatas.get(0).getAlias(), 1, 0, 0, RowHeight.HALF))));
+        });
+        assertEquals(ApiStatus.BAD_DATA, exception.getStatus());
+        assertEquals("Same chart cannot be added twice. Duplicate chart alias: chart_1", exception.getMessage());
     }
 
     @Test
@@ -152,7 +165,7 @@ public class DashboardDtoTest extends AbstractTest {
         assertEquals(data.getId(), dashboardDto.getDashboard(data.getId()).getId());
     }
 
-    @Test(expected = ApiException.class)
+    @Test
     public void testGetDashboardWithDifferentOrg() throws ApiException {
         List<ReportData> chartDatas = commonSetup(ReportType.STANDARD);
         DashboardData data = dashboardDto.addDashboard(getDashboardAddForm("Dashboard_1",
@@ -165,7 +178,11 @@ public class DashboardDtoTest extends AbstractTest {
         principal.setDomainId(100002);
         Mockito.when(securityContext.getAuthentication().getPrincipal()).thenReturn(principal);
         SecurityContextHolder.setContext(securityContext);
-        dashboardDto.getDashboard(data.getId());
+        ApiException exception = assertThrows(ApiException.class, () -> {
+            dashboardDto.getDashboard(data.getId());
+        });
+        assertEquals(ApiStatus.BAD_DATA, exception.getStatus());
+        assertEquals("Dashboard does not belong to orgId: 100002", exception.getMessage());
     }
 
     @Test
@@ -213,14 +230,17 @@ public class DashboardDtoTest extends AbstractTest {
     }
 
 
-    @Test(expected = ApiException.class)
+    @Test
     public void testDefaultValueForNonExistingParamName() throws ApiException {
         List<ReportData> chartDatas = commonSetup(ReportType.STANDARD);
         DashboardData data = dashboardDto.addDashboard(getDashboardAddForm("Dashboard_1",
                 Arrays.asList(getDashboardChartForm(chartDatas.get(0).getAlias(), 0, 0, 0, RowHeight.HALF))));
 
         UpsertDefaultValueForm upsertDefaultValueForm = getUpsertDefaultValueForm(data.getId(), "nonExisting", Arrays.asList("1", "2", "3"));
-        List<DefaultValueData> defaultValueData = dashboardDto.upsertDefaultValues(upsertDefaultValueForm, data.getId());
+        ApiException apiException = assertThrows(ApiException.class, () -> {
+                    dashboardDto.upsertDefaultValues(upsertDefaultValueForm, data.getId());
+                });
+        assertEquals("Param Name nonExisting does not exist for dashboard", apiException.getMessage());
     }
 
     @Test

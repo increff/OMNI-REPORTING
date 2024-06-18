@@ -23,6 +23,13 @@ public class FileDownloadUtil {
         storage = StorageOptions.newBuilder().setCredentials(credentials).build().getService();
     }
 
+    public FileDownloadUtil(String bucketName, InputStream inputStream)
+            throws IOException {
+        this.bucketName = bucketName;
+        GoogleCredentials credentials = ServiceAccountCredentials.fromStream(inputStream);
+        storage = StorageOptions.newBuilder().setCredentials(credentials).build().getService();
+    }
+
     public URL getSignedUri(String filePath) {
         BlobId blobId = BlobId.of(bucketName, filePath);
         BlobInfo blobInfo = BlobInfo.newBuilder(blobId).build();

@@ -3,10 +3,10 @@ package com.increff.omni.reporting.api;
 import com.increff.omni.reporting.config.AbstractTest;
 import com.increff.omni.reporting.config.ApplicationProperties;
 import com.increff.omni.reporting.util.FileUtil;
-import com.nextscm.commons.spring.common.ApiException;
-import lombok.extern.log4j.Log4j;
-import org.junit.Before;
-import org.junit.Test;
+import com.increff.commons.springboot.common.ApiException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.File;
@@ -14,9 +14,9 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Objects;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
-@Log4j
+@Log4j2
 public class FolderApiTest extends AbstractTest {
 
     @Autowired
@@ -24,7 +24,7 @@ public class FolderApiTest extends AbstractTest {
     @Autowired
     private ApplicationProperties properties;
 
-    @Before
+    @BeforeEach
     public void createDir(){
         File dir = new File(properties.getOutDir());
         if(!dir.exists()){

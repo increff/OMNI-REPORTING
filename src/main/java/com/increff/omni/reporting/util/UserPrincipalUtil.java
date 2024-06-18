@@ -2,20 +2,19 @@ package com.increff.omni.reporting.util;
 
 import com.increff.account.client.SecurityUtil;
 import com.increff.account.client.UserPrincipal;
-import com.increff.omni.reporting.model.constants.AppName;
-import com.increff.omni.reporting.model.constants.InputControlType;
-import com.increff.omni.reporting.model.constants.Roles;
+import com.increff.omni.reporting.model.constants.*;
 import com.increff.omni.reporting.model.form.ReportScheduleForm;
-import com.nextscm.commons.spring.common.JsonUtil;
-import lombok.extern.log4j.Log4j;
+import com.increff.commons.springboot.common.JsonUtil;
+import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
+
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.increff.omni.reporting.model.constants.Roles.USER_ACCESS_ADMIN_AUTHORITIES;
 
-@Log4j
+@Log4j2
 public class UserPrincipalUtil {
 
     private static final String USER_ACCESS_QUERY_PARAM_PREFIX = "user.access.";

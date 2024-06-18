@@ -5,8 +5,8 @@ import com.increff.omni.reporting.model.constants.AppName;
 import com.increff.omni.reporting.model.constants.ReportType;
 import com.increff.omni.reporting.model.constants.VisualizationType;
 import com.increff.omni.reporting.pojo.ReportPojo;
-import com.nextscm.commons.spring.common.ApiException;
-import lombok.extern.log4j.Log4j;
+import com.increff.commons.springboot.common.ApiException;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-@Log4j
+@Log4j2
 @Service
 @Transactional(rollbackFor = ApiException.class)
 public class ReportApi extends AbstractAuditApi {

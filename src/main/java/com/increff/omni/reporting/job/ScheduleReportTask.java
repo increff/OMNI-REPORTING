@@ -4,6 +4,9 @@ import com.increff.commons.fileclient.AbstractFileProvider;
 import com.increff.commons.fileclient.AwsFileProvider;
 import com.increff.commons.fileclient.GcpFileProvider;
 import com.increff.commons.fileclient.SftpFileProvider;
+import com.increff.commons.springboot.client.AppClientException;
+import com.increff.commons.springboot.common.ApiException;
+import com.increff.commons.springboot.common.ApiStatus;
 import com.increff.omni.reporting.api.*;
 import com.increff.omni.reporting.config.ApplicationProperties;
 import com.increff.omni.reporting.config.EmailProps;
@@ -18,17 +21,15 @@ import com.increff.omni.reporting.pojo.*;
 import com.increff.omni.reporting.util.*;
 import com.increff.service.encryption.EncryptionClient;
 import com.increff.service.encryption.form.CryptoDecodeFormWithoutKey;
-import com.nextscm.commons.spring.client.AppClientException;
-import com.nextscm.commons.spring.common.ApiException;
-import com.nextscm.commons.spring.common.ApiStatus;
-import lombok.extern.log4j.Log4j;
+import jakarta.mail.MessagingException;
+import jakarta.persistence.OptimisticLockException;
+import lombok.extern.log4j.Log4j2;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
-import javax.persistence.OptimisticLockException;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -54,7 +55,7 @@ import static com.increff.omni.reporting.util.ConstantsUtil.SCHEDULE_FILE_SIZE_Z
 import static com.increff.omni.reporting.util.ConvertUtil.getJavaObjectFromJson;
 
 @Component
-@Log4j
+@Log4j2
 public class ScheduleReportTask extends AbstractTask {
 
     @Autowired
@@ -271,7 +272,7 @@ public class ScheduleReportTask extends AbstractTask {
 
     private void sendEmail(double fileSize, File csvFile, ReportRequestPojo pojo, String timezone,
                            String name, Boolean zeroRows)
-            throws IOException, ApiException, javax.mail.MessagingException {
+            throws IOException, ApiException, MessagingException {
         File out = csvFile;
         boolean isZip = false;
         log.info("(Before Zip) Email File size : " + fileSize + " MB");

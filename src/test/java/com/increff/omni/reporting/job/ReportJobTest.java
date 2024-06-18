@@ -14,8 +14,8 @@ import com.increff.omni.reporting.model.constants.ScheduleStatus;
 import com.increff.omni.reporting.model.data.*;
 import com.increff.omni.reporting.model.form.*;
 import com.increff.omni.reporting.pojo.ReportSchedulePojo;
-import com.nextscm.commons.spring.common.ApiException;
-import org.junit.Test;
+import com.increff.commons.springboot.common.ApiException;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
@@ -31,9 +31,7 @@ import static com.increff.omni.reporting.helper.ReportScheduleTestHelper.getInpu
 import static com.increff.omni.reporting.helper.ReportScheduleTestHelper.getReportScheduleForm;
 import static com.increff.omni.reporting.helper.ReportTestHelper.*;
 import static com.increff.omni.reporting.helper.SchemaTestHelper.getSchemaForm;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
+import static org.junit.jupiter.api.Assertions.*;
 public class ReportJobTest extends AbstractTest {
 
     @Autowired

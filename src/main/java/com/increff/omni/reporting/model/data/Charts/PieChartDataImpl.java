@@ -1,7 +1,7 @@
 package com.increff.omni.reporting.model.data.Charts;
 
 
-import com.nextscm.commons.spring.common.ApiException;
+import com.increff.commons.springboot.common.ApiException;
 
 import java.util.List;
 import java.util.Map;

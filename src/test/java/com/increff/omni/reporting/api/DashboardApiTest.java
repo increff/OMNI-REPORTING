@@ -10,8 +10,8 @@ import com.increff.omni.reporting.model.constants.RowHeight;
 import com.increff.omni.reporting.model.data.*;
 import com.increff.omni.reporting.model.form.*;
 import com.increff.omni.reporting.pojo.DashboardPojo;
-import com.nextscm.commons.spring.common.ApiException;
-import org.junit.Test;
+import com.increff.commons.springboot.common.ApiException;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
@@ -26,7 +26,7 @@ import static com.increff.omni.reporting.helper.DirectoryTestHelper.getDirectory
 import static com.increff.omni.reporting.helper.OrgTestHelper.getOrganizationForm;
 import static com.increff.omni.reporting.helper.ReportTestHelper.getChartForm;
 import static com.increff.omni.reporting.helper.SchemaTestHelper.getSchemaForm;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class DashboardApiTest extends AbstractTest {
 

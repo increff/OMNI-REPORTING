@@ -1,30 +1,27 @@
 package com.increff.omni.reporting.config;
 
 import com.increff.account.client.UserPrincipal;
+import com.increff.commons.springboot.client.AppClientException;
+import com.increff.omni.reporting.util.FileDownloadUtil;
 import com.increff.service.encryption.EncryptionClient;
 import com.increff.service.encryption.data.CryptoDataWithoutKey;
 import com.increff.service.encryption.form.CryptoFormWithoutKey;
-import com.nextscm.commons.spring.client.AppClientException;
-import org.junit.Before;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
+import org.junit.jupiter.api.BeforeEach;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
-@ContextConfiguration(classes = {TestConfig.class})
-@RunWith(SpringJUnit4ClassRunner.class)
-@WebAppConfiguration
 @Transactional
+@SpringBootTest(properties = "spring.config.location=classpath:application-test.properties")
 public abstract class AbstractTest {
 
     public Integer orgId = 100001;
@@ -36,15 +33,19 @@ public abstract class AbstractTest {
     @Value("${testdb.password}")
     protected String password;
 
-    @Mock
+    @MockBean
     protected EncryptionClient encryptionClient;
 
-    @Before
+    @MockBean
+    protected FileDownloadUtil fileDownloadUtil;
+
+    @BeforeEach
     public void setUp() throws AppClientException {
         MockitoAnnotations.initMocks(this);
         setSecurityContext();
         Mockito.when(encryptionClient.encode(Mockito.any(CryptoFormWithoutKey.class))).thenReturn(getCryptoData());
         Mockito.when(encryptionClient.decode(Mockito.any())).thenReturn(getDecryptedCryptoData());
+        verifyNoMoreInteractions(encryptionClient);
     }
 
     private CryptoDataWithoutKey getCryptoData() {

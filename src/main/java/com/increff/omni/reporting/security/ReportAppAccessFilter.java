@@ -5,18 +5,24 @@ import com.increff.omni.reporting.api.ReportApi;
 import com.increff.omni.reporting.controller.AppAccessController;
 import com.increff.omni.reporting.pojo.ReportPojo;
 import com.increff.omni.reporting.util.UserPrincipalUtil;
-import com.nextscm.commons.spring.common.ApiException;
-import com.nextscm.commons.spring.common.ApiStatus;
-import lombok.extern.log4j.Log4j;
+import com.increff.commons.springboot.common.ApiException;
+import com.increff.commons.springboot.common.ApiStatus;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.GenericFilterBean;
 
-import javax.servlet.FilterChain;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -28,7 +34,7 @@ import org.springframework.web.util.ContentCachingRequestWrapper;
 
 import static com.increff.omni.reporting.util.SecurityFilterUtil.*;
 
-@Log4j
+@Log4j2
 @Component
 public class ReportAppAccessFilter extends GenericFilterBean {
 
@@ -40,6 +46,13 @@ public class ReportAppAccessFilter extends GenericFilterBean {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @Bean
+    public FilterRegistrationBean<ReportAppAccessFilter> reportAppAccessFilterRegistrationBean(ReportAppAccessFilter filter) {
+        FilterRegistrationBean<ReportAppAccessFilter> registration = new FilterRegistrationBean<>(filter);
+        registration.setEnabled(false);
+        return registration;
+    }
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException {
@@ -90,7 +103,7 @@ public class ReportAppAccessFilter extends GenericFilterBean {
         return null;
     }
 
-    private String extractReportId(ContentCachingRequestWrapper request) throws ApiException{
+    private String extractReportId(ContentCachingRequestWrapper request) throws ApiException {
         String reportId = null;
 
         reportId = getFromJsonPayload(request, objectMapper); // Check if the request contains a JSON body

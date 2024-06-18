@@ -3,22 +3,31 @@ package com.increff.omni.reporting.security;
 import com.increff.account.client.SecurityUtil;
 import com.increff.account.client.UserPrincipal;
 import com.increff.omni.reporting.model.constants.Roles;
-import lombok.extern.log4j.Log4j;
+import lombok.extern.log4j.Log4j2;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.GenericFilterBean;
 
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
 import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 
 @Component
-@Log4j
+@Log4j2
 public class RoleOverrideFilter extends GenericFilterBean {
+
+    @Bean
+    public FilterRegistrationBean<RoleOverrideFilter> roleOverrideFilterRegistrationBean(RoleOverrideFilter filter) {
+        FilterRegistrationBean<RoleOverrideFilter> registration = new FilterRegistrationBean<>(filter);
+        registration.setEnabled(false);
+        return registration;
+    }
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)

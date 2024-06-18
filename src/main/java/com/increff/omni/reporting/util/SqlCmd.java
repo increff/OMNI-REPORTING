@@ -1,11 +1,11 @@
 package com.increff.omni.reporting.util;
 
+import com.increff.commons.springboot.common.ApiException;
+import com.increff.commons.springboot.common.ApiStatus;
+import com.increff.commons.springboot.common.JsonUtil;
 import com.increff.omni.reporting.dto.QueryExecutionDto;
 import com.increff.omni.reporting.model.constants.DBType;
-import com.nextscm.commons.spring.common.ApiException;
-import com.nextscm.commons.spring.common.ApiStatus;
-import com.nextscm.commons.spring.common.JsonUtil;
-import lombok.extern.log4j.Log4j;
+import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.HashMap;
@@ -15,7 +15,8 @@ import java.util.Objects;
 
 import static com.increff.omni.reporting.util.MongoUtil.*;
 
-@Log4j
+
+@Log4j2
 public class SqlCmd {
 
     private static final String KEEP_QUOTES_TRUE = "keepQuotesTrue";
