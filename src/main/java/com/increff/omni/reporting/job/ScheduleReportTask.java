@@ -169,6 +169,8 @@ public class ScheduleReportTask extends AbstractTask {
         for (ReportInputParamsPojo pojo : reportInputParamsPojoList) {
             if (pojo.getParamKey().equals("timezone") || pojo.getParamKey().equals("orgId"))
                 continue; // skip hardcoded injected params as they wont exist in InputControlPojo
+            if (Objects.isNull(pojo.getParamValue()))
+                continue; // skip null values
             InputControlPojo inputControlPojo = inputControlApi.getCheckByParamName(pojo.getParamKey()).getFirst();
             if (inputControlPojo.getType().equals(InputControlType.DATE) || inputControlPojo.getType().equals(InputControlType.DATE_TIME)) {
                 DynamicDate dynamicDate = DynamicDate.valueOf(pojo.getParamValue());
