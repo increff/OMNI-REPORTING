@@ -1,9 +1,9 @@
 package com.increff.omni.reporting.api;
 
-import com.increff.omni.reporting.dao.ReportControlsDao;
-import com.increff.omni.reporting.pojo.ReportControlsPojo;
 import com.increff.commons.springboot.common.ApiException;
 import com.increff.commons.springboot.server.AbstractApi;
+import com.increff.omni.reporting.dao.ReportControlsDao;
+import com.increff.omni.reporting.pojo.ReportControlsPojo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,6 +39,17 @@ public class ReportControlsApi extends AbstractApi {
 
     public ReportControlsPojo getByReportAndControlId(Integer reportId, Integer controlId) {
         return dao.select(reportId, controlId);
+    }
+
+    public ReportControlsPojo getCheckByReportAndControlId(Integer reportId, Integer controlId) throws ApiException {
+        ReportControlsPojo pojo = getByReportAndControlId(reportId, controlId);
+        checkNotNull(pojo, "Report control does not exist for report id : " + reportId + " and control id : " + controlId);
+        return pojo;
+    }
+
+    public void updateSortOrder(Integer reportId, Integer controlId, Integer sortOrder) throws ApiException {
+        ReportControlsPojo pojo = getCheckByReportAndControlId(reportId, controlId);
+        pojo.setSortOrder(sortOrder);
     }
 
     public void delete(Integer id) {

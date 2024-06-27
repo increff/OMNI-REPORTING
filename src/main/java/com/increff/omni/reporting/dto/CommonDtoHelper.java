@@ -176,7 +176,7 @@ public class CommonDtoHelper {
                     .collect(Collectors.toList()).get(0);
             ReportControlsPojo p2 = reportControlsPojos.stream().filter(r -> r.getControlId().equals(o2.getId()))
                     .collect(Collectors.toList()).get(0);
-            return Objects.equals(p1.getId(), p2.getId()) ? 0 : (p1.getId() > p2.getId() ? 1 : -1);
+            return Objects.equals(p1.getSortOrder(), p2.getSortOrder()) ? 0 : (p1.getSortOrder() > p2.getSortOrder() ? 1 : -1);
         });
     }
 
@@ -200,10 +200,11 @@ public class CommonDtoHelper {
         return timeZoneData;
     }
 
-    public static ReportControlsPojo getReportControlPojo(Integer reportId, Integer controlId) {
+    public static ReportControlsPojo getReportControlPojo(Integer reportId, Integer controlId, Integer sortOrder) {
         ReportControlsPojo pojo = new ReportControlsPojo();
         pojo.setReportId(reportId);
         pojo.setControlId(controlId);
+        pojo.setSortOrder(sortOrder);
         return pojo;
     }
 

@@ -160,6 +160,14 @@ public class ReportFlowApi extends FlowApi {
         checkAndAddValidationGroup(pojo);
     }
 
+    @Transactional(rollbackFor = ApiException.class)
+    public void updateReportControlMappingSortOrder(Integer reportId, List<Integer> controlIds) throws ApiException {
+        int sortOrder = 1;
+        for (int controlId : controlIds) {
+            reportControlsApi.updateSortOrder(reportId, controlId, sortOrder++);
+        }
+    }
+
     @Transactional(readOnly = true)
     public List<ReportPojo> getAllBySchemaVersionId(Integer schemaVersionId, VisualizationType visualization) {
         return api.getBySchemaVersion(schemaVersionId, visualization);

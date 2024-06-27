@@ -1,19 +1,21 @@
 package com.increff.omni.reporting.flow;
 
+import com.increff.commons.springboot.common.ApiException;
+import com.increff.commons.springboot.common.ApiStatus;
 import com.increff.omni.reporting.api.*;
 import com.increff.omni.reporting.config.AbstractTest;
 import com.increff.omni.reporting.config.ApplicationProperties;
 import com.increff.omni.reporting.dao.DirectoryDao;
+import com.increff.omni.reporting.dto.InputControlDto;
 import com.increff.omni.reporting.helper.OrgMappingTestHelper;
 import com.increff.omni.reporting.helper.SchemaTestHelper;
 import com.increff.omni.reporting.model.constants.InputControlScope;
 import com.increff.omni.reporting.model.constants.InputControlType;
 import com.increff.omni.reporting.model.constants.ReportType;
 import com.increff.omni.reporting.model.constants.ValidationType;
+import com.increff.omni.reporting.model.data.InputControlData;
 import com.increff.omni.reporting.model.form.ValidationGroupForm;
 import com.increff.omni.reporting.pojo.*;
-import com.increff.commons.springboot.common.ApiException;
-import com.increff.commons.springboot.common.ApiStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +27,8 @@ import static com.increff.omni.reporting.helper.InputControlTestHelper.getInputC
 import static com.increff.omni.reporting.helper.InputControlTestHelper.getInputControlQueryPojo;
 import static com.increff.omni.reporting.helper.ReportTestHelper.*;
 import static com.increff.omni.reporting.helper.SchemaTestHelper.getSchemaPojo;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 
 public class ReportFlowApiTest extends AbstractTest {
@@ -46,6 +49,8 @@ public class ReportFlowApiTest extends AbstractTest {
     private ReportApi reportApi;
     @Autowired
     private InputControlApi inputControlApi;
+    @Autowired
+    private InputControlDto inputControlDto;
 
     SchemaVersionPojo p;
     @BeforeEach
@@ -195,6 +200,41 @@ public class ReportFlowApiTest extends AbstractTest {
             assertEquals(ApiStatus.BAD_DATA, e.getStatus());
             assertEquals("Only Global Control can be mapped to a report", e.getMessage());
         }
+    }
+
+    @Test
+    public void testMapReportToControlSortOrder() throws ApiException {
+        InputControlPojo inputControlPojo =
+                getInputControlPojo("Client ID", "clientId", InputControlScope.GLOBAL, InputControlType.MULTI_SELECT,
+                        p.getId());
+        InputControlQueryPojo inputControlQueryPojo = getInputControlQueryPojo("select * from oms.oms_orders;", null);
+        inputControlApi.add(inputControlPojo, inputControlQueryPojo, new ArrayList<>());
+        InputControlPojo inputControlPojo2 =
+                getInputControlPojo("Client ID 2", "clientId 2", InputControlScope.GLOBAL, InputControlType.MULTI_SELECT,
+                        p.getId());
+        InputControlQueryPojo inputControlQueryPojo2 = getInputControlQueryPojo("select * from oms.oms_orders;", null);
+        inputControlApi.add(inputControlPojo2, inputControlQueryPojo2, new ArrayList<>());
+
+        ReportPojo reportPojo = getReportPojo("Report 1", ReportType.STANDARD
+                , 100001, p.getId());
+        reportApi.add(reportPojo);
+
+        ReportControlsPojo controlsPojo = getReportControlsPojo(reportPojo.getId(), inputControlPojo.getId());
+        controlsPojo.setSortOrder(1);
+        flowApi.mapControlToReport(controlsPojo);
+
+        ReportControlsPojo controlsPojo2 = getReportControlsPojo(reportPojo.getId(), inputControlPojo2.getId());
+        controlsPojo2.setSortOrder(2);
+        flowApi.mapControlToReport(controlsPojo2);
+
+        List<InputControlData> inputControls = inputControlDto.selectForReport(reportPojo.getId());
+        assertEquals(2, inputControls.size());
+        assertEquals(inputControlPojo.getId(), inputControls.get(0).getId());
+        assertEquals(inputControlPojo2.getId(), inputControls.get(1).getId());
+
+        //update sortOrder
+
+
     }
 
     @Test
