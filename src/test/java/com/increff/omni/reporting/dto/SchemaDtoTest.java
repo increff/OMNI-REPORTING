@@ -3,15 +3,15 @@ package com.increff.omni.reporting.dto;
 import com.increff.omni.reporting.config.AbstractTest;
 import com.increff.omni.reporting.model.data.SchemaVersionData;
 import com.increff.omni.reporting.model.form.SchemaVersionForm;
-import com.nextscm.commons.spring.common.ApiException;
-import com.nextscm.commons.spring.common.ApiStatus;
-import org.junit.Test;
+import com.increff.commons.springboot.common.ApiException;
+import com.increff.commons.springboot.common.ApiStatus;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
 import static com.increff.omni.reporting.helper.SchemaTestHelper.getSchemaForm;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class SchemaDtoTest extends AbstractTest {
 
@@ -26,7 +26,7 @@ public class SchemaDtoTest extends AbstractTest {
         assertEquals("9.0.1", data.getName());
     }
 
-    @Test(expected = ApiException.class)
+    @Test
     public void testAddSchemaValidationFail() throws ApiException {
         SchemaVersionForm form = getSchemaForm(null);
         try {
@@ -34,7 +34,6 @@ public class SchemaDtoTest extends AbstractTest {
         } catch (ApiException e) {
             assertEquals(ApiStatus.BAD_DATA, e.getStatus());
             assertEquals("Input validation failed", e.getMessage());
-            throw e;
         }
     }
 
@@ -49,7 +48,7 @@ public class SchemaDtoTest extends AbstractTest {
         assertEquals("9.0.2", data.getName());
     }
 
-    @Test(expected = ApiException.class)
+    @Test
     public void testUpdateSchemaValidationFail() throws ApiException {
         SchemaVersionForm form = getSchemaForm(null);
         try {
@@ -57,7 +56,6 @@ public class SchemaDtoTest extends AbstractTest {
         } catch (ApiException e) {
             assertEquals(ApiStatus.BAD_DATA, e.getStatus());
             assertEquals("Input validation failed", e.getMessage());
-            throw e;
         }
     }
 

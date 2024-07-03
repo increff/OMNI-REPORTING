@@ -5,9 +5,9 @@ import com.increff.omni.reporting.model.constants.InputControlType;
 import com.increff.omni.reporting.model.constants.ReportRequestType;
 import com.increff.omni.reporting.model.constants.ValidationType;
 import com.nextscm.commons.lang.StringUtil;
-import com.nextscm.commons.spring.common.ApiException;
-import com.nextscm.commons.spring.common.ApiStatus;
-import com.nextscm.commons.spring.common.JsonUtil;
+import com.increff.commons.springboot.common.ApiException;
+import com.increff.commons.springboot.common.ApiStatus;
+import com.increff.commons.springboot.common.JsonUtil;
 import org.springframework.stereotype.Component;
 
 import java.time.ZonedDateTime;
@@ -47,7 +47,7 @@ public class DateValidator extends AbstractValidator {
             return;
         if (nonEmptyValues.size() != 2)
             throw new ApiException(ApiStatus.BAD_DATA,
-                    "Both from and to date should be selected for filters : " + JsonUtil.serialize(displayName));
+                    "Both from and to date should be selected for filters : " + getDisplayNamesErrorString(displayName));
         try {
             // We can't define which one is exactly the start date
             ZonedDateTime date1 = ZonedDateTime.parse(getValueFromQuotes(paramValue.get(0))

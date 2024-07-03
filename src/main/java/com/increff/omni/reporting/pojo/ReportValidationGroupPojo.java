@@ -1,10 +1,13 @@
 package com.increff.omni.reporting.pojo;
 
+import com.increff.commons.springboot.db.pojo.AbstractVersionedPojo;
 import com.increff.omni.reporting.model.constants.ValidationType;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 @Entity
 @Getter
@@ -24,6 +27,7 @@ public class ReportValidationGroupPojo extends AbstractVersionedPojo {
 
     @Column(nullable = false)
     @Enumerated(value = EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.VARCHAR)
     private ValidationType type;
 
     // for now, validation value is used for DATE range, in future it can be a key value pair
@@ -37,4 +41,17 @@ public class ReportValidationGroupPojo extends AbstractVersionedPojo {
 
     @Column(nullable = false)
     private Integer reportControlId;
+
+    @Override
+    public String toString() {
+        return "ReportValidationGroupPojo{" +
+                "id=" + id +
+                ", groupName='" + groupName + '\'' +
+                ", type=" + type +
+                ", validationValue=" + validationValue +
+                ", reportId=" + reportId +
+                ", isSystemValidation=" + isSystemValidation +
+                ", reportControlId=" + reportControlId +
+                '}';
+    }
 }

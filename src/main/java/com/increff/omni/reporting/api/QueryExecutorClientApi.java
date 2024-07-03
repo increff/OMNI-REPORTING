@@ -4,17 +4,17 @@ import com.increff.commons.queryexecutor.QueryExecutorClient;
 import com.increff.commons.queryexecutor.data.QueryRequestData;
 import com.increff.commons.queryexecutor.form.GetRequestForm;
 import com.increff.commons.queryexecutor.form.QueryExecutorForm;
-import com.nextscm.commons.spring.client.AppClientException;
-import com.nextscm.commons.spring.common.ApiException;
-import com.nextscm.commons.spring.common.ApiStatus;
-import lombok.extern.log4j.Log4j;
+import com.increff.commons.springboot.client.AppClientException;
+import com.increff.commons.springboot.common.ApiException;
+import com.increff.commons.springboot.common.ApiStatus;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 
 @Component
-@Log4j
+@Log4j2
 public class QueryExecutorClientApi {
 
     @Autowired

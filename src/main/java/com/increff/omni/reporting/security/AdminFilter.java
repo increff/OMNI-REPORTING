@@ -3,27 +3,27 @@ package com.increff.omni.reporting.security;
 import com.increff.account.client.SecurityUtil;
 import com.increff.account.client.UserPrincipal;
 import com.increff.omni.reporting.config.ApplicationProperties;
-import com.nextscm.commons.spring.common.FieldErrorData;
-import com.nextscm.commons.spring.common.JsonUtil;
-import lombok.extern.log4j.Log4j;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.increff.commons.springboot.common.JsonUtil;
+import com.increff.commons.springboot.common.FieldErrorData;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Component;
 import org.springframework.web.filter.GenericFilterBean;
 
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-@Component
-@Log4j
+@Log4j2
 public class AdminFilter extends GenericFilterBean {
 
-    @Autowired
     private ApplicationProperties properties;
+
+    public AdminFilter(ApplicationProperties properties) {
+        this.properties = properties;
+    }
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)

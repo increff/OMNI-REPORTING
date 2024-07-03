@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="info" name="omniReporting">
+    <Properties>
+        <Property name="baseDir">logs</Property>
+        <Property name="catalinaBaseDir">tomcat/logs/catalina</Property>
+    </Properties>
+
+    <Appenders>
+
+        <RollingFile name="Application" fileName="${baseDir}/omniReporting.log"
+                     filePattern="${baseDir}/omniReporting.log-%d{yyyy-MM-dd-HH-mm-ss}.log">
+
+            <PatternLayout>
+                <Pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n</Pattern>
+            </PatternLayout>
+
+            <Policies>
+                <OnStartupTriggeringPolicy/>
+                <TimeBasedTriggeringPolicy interval="86400" modulate="true"/>
+                <SizeBasedTriggeringPolicy size="10MB" />
+            </Policies>
+
+            <DefaultRolloverStrategy>
+                <Delete basePath="${baseDir}/" maxDepth="2">
+                    <IfFileName glob="*.log">
+                        <IfAny>
+                            <IfAccumulatedFileSize exceeds="10 GB" />
+                            <IfLastModified age="30d" />
+                        </IfAny>
+                    </IfFileName>
+                </Delete>
+            </DefaultRolloverStrategy>
+
+        </RollingFile>
+
+        <RollingFile name="Catalina" fileName="${catalinaBaseDir}/catalina.log"
+                     filePattern="${catalinaBaseDir}/catalina-%d{yyyy-MM-dd-HH-mm-ss}.log">
+
+            <PatternLayout>
+                <Pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n</Pattern>
+            </PatternLayout>
+
+            <Policies>
+                <OnStartupTriggeringPolicy/>
+                <TimeBasedTriggeringPolicy interval="86400" modulate="true"/>
+                <SizeBasedTriggeringPolicy size="10MB"/>
+            </Policies>
+
+            <DefaultRolloverStrategy>
+                <Delete basePath="${baseDir}/" maxDepth="2">
+                    <IfFileName glob="*.log">
+                        <IfAny>
+                            <IfAccumulatedFileSize exceeds="10 GB"/>
+                            <IfLastModified age="30d"/>
+                        </IfAny>
+                    </IfFileName>
+                </Delete>
+            </DefaultRolloverStrategy>
+
+        </RollingFile>
+
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
+        </Console>
+
+    </Appenders>
+
+    <Loggers>
+        <Root level="INFO">
+            <Appender-ref ref="Application"/>
+            <Appender-ref ref="Console"/>
+        </Root>
+
+        <Logger name="org.apache.catalina" additivity="false">
+            <Appender-ref ref="Catalina"/>
+        </Logger>
+
+        <Logger name="org.apache.tomcat" additivity="false">
+            <Appender-ref ref="Catalina"/>
+        </Logger>
+    </Loggers>
+
+</Configuration>

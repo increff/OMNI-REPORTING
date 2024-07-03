@@ -3,10 +3,10 @@ package com.increff.omni.reporting.api;
 import com.increff.omni.reporting.dao.SchedulePipelineDao;
 import com.increff.omni.reporting.model.data.PipelineFlowData;
 import com.increff.omni.reporting.pojo.SchedulePipelinePojo;
-import com.nextscm.commons.spring.common.ApiException;
-import com.nextscm.commons.spring.common.ApiStatus;
-import com.nextscm.commons.spring.server.AbstractApi;
-import lombok.extern.log4j.Log4j;
+import com.increff.commons.springboot.common.ApiException;
+import com.increff.commons.springboot.common.ApiStatus;
+import com.increff.commons.springboot.server.AbstractApi;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Objects;
 
 @Service
-@Log4j
+@Log4j2
 @Transactional(rollbackFor = ApiException.class)
 public class SchedulePipelineApi extends AbstractApi {
 

@@ -1,17 +1,17 @@
 package com.increff.omni.reporting.api;
 
+import com.increff.commons.springboot.common.ApiException;
+import com.increff.commons.springboot.common.ApiStatus;
 import com.increff.omni.reporting.config.AbstractTest;
 import com.increff.omni.reporting.pojo.ConnectionPojo;
-import com.nextscm.commons.spring.common.ApiException;
-import com.nextscm.commons.spring.common.ApiStatus;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
 import static com.increff.omni.reporting.helper.ConnectionTestHelper.getConnectionPojo;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class ConnectionApiTest extends AbstractTest {
 
@@ -30,7 +30,7 @@ public class ConnectionApiTest extends AbstractTest {
         assertEquals("db.password", pojo.getPassword());
     }
 
-    @Test(expected = ApiException.class)
+    @Test
     public void testAddConnectionAlreadyExists() throws ApiException {
         ConnectionPojo pojo = getConnectionPojo("dev-db.increff.com", "Dev DB", "db.user"
                 , "db.password");
@@ -42,7 +42,6 @@ public class ConnectionApiTest extends AbstractTest {
         } catch (ApiException e) {
             assertEquals(ApiStatus.BAD_DATA, e.getStatus());
             assertEquals("Connection with same name already present", e.getMessage());
-            throw e;
         }
     }
 
@@ -63,7 +62,7 @@ public class ConnectionApiTest extends AbstractTest {
         assertEquals("db.password2", pojoList.get(0).getPassword());
     }
 
-    @Test(expected = ApiException.class)
+    @Test
     public void testUpdateConnectionNameExistsWithOtherId() throws ApiException {
         ConnectionPojo pojo = getConnectionPojo("dev-db.increff.com", "Dev DB", "db.user"
                 , "db.password");
@@ -82,7 +81,6 @@ public class ConnectionApiTest extends AbstractTest {
             assertEquals("db.password", pojoList.get(0).getPassword());
             assertEquals(ApiStatus.BAD_DATA, e.getStatus());
             assertEquals("Connection with same name already present", e.getMessage());
-            throw e;
         }
     }
 

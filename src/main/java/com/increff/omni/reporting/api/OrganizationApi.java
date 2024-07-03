@@ -1,9 +1,8 @@
 package com.increff.omni.reporting.api;
 
+import com.increff.commons.springboot.common.ApiException;
 import com.increff.omni.reporting.dao.OrganizationDao;
 import com.increff.omni.reporting.pojo.OrganizationPojo;
-import com.nextscm.commons.spring.common.ApiException;
-import com.nextscm.commons.spring.server.AbstractApi;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,7 +11,7 @@ import java.util.List;
 
 @Service
 @Transactional(rollbackFor = ApiException.class)
-public class OrganizationApi extends AbstractApi {
+public class OrganizationApi extends AbstractAuditApi {
 
     @Autowired
     private OrganizationDao dao;
@@ -27,6 +26,10 @@ public class OrganizationApi extends AbstractApi {
         OrganizationPojo pojo = dao.select(id);
         checkNotNull(pojo, "No org present with id : " + id);
         return pojo;
+    }
+
+    public OrganizationPojo get(Integer id) throws ApiException {
+        return dao.select(id);
     }
 
     public List<OrganizationPojo> getCheck(List<Integer> ids) throws ApiException {

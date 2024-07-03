@@ -9,11 +9,11 @@ import com.increff.omni.reporting.model.form.InputControlForm;
 import com.increff.omni.reporting.model.form.InputControlUpdateForm;
 import com.increff.omni.reporting.pojo.*;
 import com.nextscm.commons.lang.StringUtil;
-import com.nextscm.commons.spring.common.ApiException;
-import com.nextscm.commons.spring.common.ApiStatus;
-import com.nextscm.commons.spring.common.ConvertUtil;
+import com.increff.commons.springboot.common.ApiException;
+import com.increff.commons.springboot.common.ApiStatus;
+import com.increff.commons.springboot.common.ConvertUtil;
 import lombok.Setter;
-import lombok.extern.log4j.Log4j;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -25,7 +25,7 @@ import static com.increff.omni.reporting.dto.CommonDtoHelper.sortBasedOnReportCo
 import static com.increff.omni.reporting.dto.CommonDtoHelper.updateValidationTypes;
 
 @Service
-@Log4j
+@Log4j2
 @Setter
 public class InputControlDto extends AbstractDto {
 
@@ -33,7 +33,7 @@ public class InputControlDto extends AbstractDto {
     private InputControlApi api;
 
     @Autowired
-    private FolderApi folderApi;
+    private OrgMappingApi orgMappingApi;
 
     @Autowired
     private InputControlFlowApi flowApi;
@@ -43,9 +43,6 @@ public class InputControlDto extends AbstractDto {
 
     @Autowired
     private ReportValidationGroupApi reportValidationGroupApi;
-
-    @Autowired
-    private OrgConnectionApi orgConnectionApi;
 
     @Autowired
     private ConnectionApi connectionApi;
@@ -66,6 +63,11 @@ public class InputControlDto extends AbstractDto {
         pojo.setId(id);
         pojo = flowApi.update(pojo, form.getQuery(), form.getValues());
         return getInputControlDatas(Collections.singletonList(pojo), getOrgId()).get(0);
+    }
+
+    public List<InputControlData> selectAll(InputControlScope scope) throws ApiException {
+        List<InputControlPojo> pojos = api.getByScope(scope);
+        return getInputControlDatas(pojos, null); // Send orgId null as control can be for many schema versions but org is connected to only one schema version per application.
     }
 
     public InputControlData getById(Integer id) throws ApiException {
@@ -104,9 +106,6 @@ public class InputControlDto extends AbstractDto {
         List<Integer> controlIds = pojos.stream()
                 .map(InputControlPojo::getId).collect(Collectors.toList());
 
-        OrgConnectionPojo orgConnectionPojo = orgConnectionApi.getCheckByOrgId(orgId);
-        ConnectionPojo connectionPojo = connectionApi.getCheck(orgConnectionPojo.getConnectionId());
-        String password = getDecryptedPassword(connectionPojo.getPassword());
         //We need queries
         List<InputControlQueryPojo> queryPojos = api.selectControlQueries(controlIds);
         Map<Integer, String> controlToQueryMapping;
@@ -128,22 +127,36 @@ public class InputControlDto extends AbstractDto {
                             Collectors.mapping(InputControlValuesPojo::getValue, Collectors.toList())));
         List<InputControlData> dataList = new ArrayList<>();
         for(InputControlPojo p : pojos) {
+            ConnectionPojo connectionPojo = null;
+            String password = null;
+
+            if(Objects.nonNull(orgId)) { // If orgId is null, then we can't get connection details
+                OrgMappingPojo orgMappingPojo = orgMappingApi.getByOrgIdSchemaVersionId(orgId, p.getSchemaVersionId());
+                if(Objects.nonNull(orgMappingPojo)) { // If orgIdExists but org is mapped to different schema version, then we can't get connection details for input control of different schema version
+                    connectionPojo = connectionApi.getCheck(orgMappingPojo.getConnectionId());
+                    password = getDecryptedPassword(connectionPojo.getPassword());
+                } else
+                    log.debug("Cannot get filter options. OrgMapping does not exist. org : " + orgId + " schema version id : " + p.getSchemaVersionId());
+            } else
+                log.debug("Cannot get filter options. OrgId is null. control : " + p.getId() + " schema version id : " + p.getSchemaVersionId());
+
             SchemaVersionPojo schemaVersionPojo = schemaVersionApi.getCheck(p.getSchemaVersionId());
             dataList.add(getDataFromPojo(p, controlToValuesMapping, controlToQueryMapping, connectionPojo,
-                    schemaVersionPojo, password));
+                    schemaVersionPojo, password, orgId));
         }
         return dataList;
     }
 
     private InputControlData getDataFromPojo(InputControlPojo p, Map<Integer, List<String>> controlToValuesMapping
             , Map<Integer, String> controlToQueryMapping, ConnectionPojo connectionPojo,
-                                             SchemaVersionPojo schemaVersionPojo, String password) throws ApiException {
+                                             SchemaVersionPojo schemaVersionPojo, String password, Integer orgId) throws ApiException {
         InputControlData data = ConvertUtil.convert(p, InputControlData.class);
         data.setSchemaVersionName(schemaVersionPojo.getName());
         data.setQuery(controlToQueryMapping.getOrDefault(p.getId(), null));
         data.setValues(controlToValuesMapping.getOrDefault(p.getId(), null));
         if (!StringUtil.isEmpty(data.getQuery())) {
-            setInputControlOptions(data, flowApi.getValuesFromQuery(data.getQuery(), connectionPojo, password));
+            if(Objects.nonNull(connectionPojo))
+                setInputControlOptions(data, flowApi.getValuesFromQuery(data.getQuery(), connectionPojo, password, orgId));
         } else {
             List<String> values = controlToValuesMapping.getOrDefault(p.getId(), null);
             if (!CollectionUtils.isEmpty(values)) {

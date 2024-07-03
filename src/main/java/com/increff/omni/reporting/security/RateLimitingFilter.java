@@ -5,31 +5,35 @@ import com.increff.omni.reporting.config.ApplicationProperties;
 import io.github.bucket4j.Bandwidth;
 import io.github.bucket4j.Bucket;
 import io.github.bucket4j.Refill;
-import lombok.extern.log4j.Log4j;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.log4j.Log4j2;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.GenericFilterBean;
 
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
-@Log4j
-@Component
+@Log4j2
 @Order(0)
+@Component
 public class RateLimitingFilter extends GenericFilterBean {
 
-    @Autowired
     private ApplicationProperties properties;
+
+    public RateLimitingFilter(ApplicationProperties properties) {
+        this.properties = properties;
+    }
 
     private ZonedDateTime nextLogTime = ZonedDateTime.now().minusMinutes(1);
     // Can cause heap space issues if the number of users is large!
@@ -39,6 +43,13 @@ public class RateLimitingFilter extends GenericFilterBean {
         return Bucket.builder()
                 .addLimit(Bandwidth.classic(properties.getTokens(), Refill.intervally(properties.getTokens(), Duration.ofSeconds(properties.getTokensRefillRateSeconds()))))
                 .build();
+    }
+
+    @Bean
+    public FilterRegistrationBean<RateLimitingFilter> rateLimitingFilterRegistrationBean(RateLimitingFilter filter) {
+        FilterRegistrationBean<RateLimitingFilter> registration = new FilterRegistrationBean<>(filter);
+        registration.setEnabled(false);
+        return registration;
     }
 
     @Override
@@ -92,7 +103,8 @@ public class RateLimitingFilter extends GenericFilterBean {
     }
 
     public void clearUserRateLimiterMap() {
-        log.debug("RateLimitingFilter.clearUserRateLimiterMap: " + " userRateLimitersMap.size " + userRateLimiters.size() + " RateLimiting" + properties.getTokens() + " tokens per " + properties.getTokensRefillRateSeconds() + " seconds");
+        log.debug("RateLimitingFilter.clearUserRateLimiterMap: " + " userRateLimitersMap.size " + userRateLimiters.size()
+                + " RateLimiting" + properties.getTokens() + " tokens per " + properties.getTokensRefillRateSeconds() + " seconds");
         userRateLimiters.entrySet().removeIf(entry -> entry.getValue().getAvailableTokens() == properties.getTokens());
     }
 

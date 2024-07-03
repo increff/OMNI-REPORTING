@@ -2,7 +2,7 @@ package com.increff.omni.reporting.api;
 
 import com.increff.omni.reporting.dao.ReportInputParamsDao;
 import com.increff.omni.reporting.pojo.ReportInputParamsPojo;
-import com.nextscm.commons.spring.server.AbstractApi;
+import com.increff.commons.springboot.server.AbstractApi;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

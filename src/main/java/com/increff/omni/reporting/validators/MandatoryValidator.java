@@ -3,8 +3,8 @@ package com.increff.omni.reporting.validators;
 import com.increff.omni.reporting.model.constants.ReportRequestType;
 import com.increff.omni.reporting.model.constants.ValidationType;
 import com.nextscm.commons.lang.StringUtil;
-import com.nextscm.commons.spring.common.ApiException;
-import com.nextscm.commons.spring.common.ApiStatus;
+import com.increff.commons.springboot.common.ApiException;
+import com.increff.commons.springboot.common.ApiStatus;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -19,7 +19,7 @@ public class MandatoryValidator extends AbstractValidator {
         for(String p : paramValues){
             if(StringUtil.isEmpty(getValueFromQuotes(p)))
                 throw new ApiException(ApiStatus.BAD_DATA, getValidationMessage(reportName, displayNames
-                        , ValidationType.MANDATORY, ""));
+                        , ValidationType.MANDATORY, "Value should be present for this filter"));
         }
     }
 }

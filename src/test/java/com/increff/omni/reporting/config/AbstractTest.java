@@ -1,37 +1,31 @@
 package com.increff.omni.reporting.config;
 
 import com.increff.account.client.UserPrincipal;
-import com.increff.omni.reporting.model.constants.AppResourceKeys;
-import com.increff.omni.reporting.model.constants.ChartType;
-import com.increff.omni.reporting.model.constants.PipelineType;
-import com.increff.omni.reporting.model.form.PipelineForm;
+import com.increff.commons.springboot.client.AppClientException;
+import com.increff.omni.reporting.util.FileDownloadUtil;
 import com.increff.service.encryption.EncryptionClient;
-import com.increff.service.encryption.data.CryptoData;
-import com.increff.service.encryption.form.CryptoForm;
-import com.nextscm.commons.spring.client.AppClientException;
-import org.junit.Before;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
+import com.increff.service.encryption.data.CryptoDataWithoutKey;
+import com.increff.service.encryption.form.CryptoFormWithoutKey;
+import org.junit.jupiter.api.BeforeEach;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
-@ContextConfiguration(classes = {TestConfig.class})
-@RunWith(SpringJUnit4ClassRunner.class)
-@WebAppConfiguration
 @Transactional
+@SpringBootTest(properties = "spring.config.location=classpath:application-test.properties")
 public abstract class AbstractTest {
 
     public Integer orgId = 100001;
+    public String orgName = "increff";
 
     @Value("${testdb.username}")
     protected String username;
@@ -39,25 +33,29 @@ public abstract class AbstractTest {
     @Value("${testdb.password}")
     protected String password;
 
-    @Mock
+    @MockBean
     protected EncryptionClient encryptionClient;
 
-    @Before
+    @MockBean
+    protected FileDownloadUtil fileDownloadUtil;
+
+    @BeforeEach
     public void setUp() throws AppClientException {
         MockitoAnnotations.initMocks(this);
         setSecurityContext();
-        Mockito.when(encryptionClient.encode(Mockito.any(CryptoForm.class))).thenReturn(getCryptoData());
+        Mockito.when(encryptionClient.encode(Mockito.any(CryptoFormWithoutKey.class))).thenReturn(getCryptoData());
         Mockito.when(encryptionClient.decode(Mockito.any())).thenReturn(getDecryptedCryptoData());
+        verifyNoMoreInteractions(encryptionClient);
     }
 
-    private CryptoData getCryptoData() {
-        CryptoData cryptoData = new CryptoData();
+    private CryptoDataWithoutKey getCryptoData() {
+        CryptoDataWithoutKey cryptoData = new CryptoDataWithoutKey();
         cryptoData.setValue("UUID");
         return cryptoData;
     }
 
-    private CryptoData getDecryptedCryptoData() {
-        CryptoData cryptoData = new CryptoData();
+    private CryptoDataWithoutKey getDecryptedCryptoData() {
+        CryptoDataWithoutKey cryptoData = new CryptoDataWithoutKey();
         cryptoData.setValue("nextscm@fashion");
         return cryptoData;
     }
@@ -66,7 +64,7 @@ public abstract class AbstractTest {
         Authentication authentication = Mockito.mock(Authentication.class);
         UserPrincipal principal = new UserPrincipal();
         principal.setDomainId(orgId);
-        principal.setDomainName("increff");
+        principal.setDomainName(orgName);
         principal.setId(100001);
         principal.setUsername("test_user");
         principal.setAppName("saas");
@@ -77,9 +75,9 @@ public abstract class AbstractTest {
         Map<String, List<String>> fulfillmentLocationResourceMap = new HashMap<>();
         fulfillmentLocationResourceMap.put("w1", new ArrayList<>());
         fulfillmentLocationResourceMap.put("w2", new ArrayList<>());
-        resourceRoles.put(AppResourceKeys.fulfillmentLocationKey, fulfillmentLocationResourceMap);
-        resourceRoles.put(AppResourceKeys.clientKey, fulfillmentLocationResourceMap);
-        resourceRoles.put(AppResourceKeys.restrictedResourceKey, fulfillmentLocationResourceMap);
+        resourceRoles.put("fulfillment-locations", fulfillmentLocationResourceMap);
+        resourceRoles.put("clients", fulfillmentLocationResourceMap);
+        resourceRoles.put("restricted-resource", fulfillmentLocationResourceMap);
         principal.setResourceRoles(resourceRoles);
         principal.setRoles(Arrays.asList("app.admin", "report.admin"));
         SecurityContext securityContext = Mockito.mock(SecurityContext.class, Mockito.withSettings().serializable());

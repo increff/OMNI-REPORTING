@@ -4,7 +4,7 @@ import com.increff.omni.reporting.model.constants.InputControlType;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,6 +18,9 @@ public class ReportScheduleForm {
     private String reportAlias;
     private List<InputParamMap> paramMap;
     private CronScheduleForm cronSchedule;
+
+    private EmailParams emailParams;
+
     private List<String> sendTo = new ArrayList<>();
     private List<PipelineDetailsForm> pipelineDetails = new ArrayList<>();
 

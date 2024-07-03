@@ -1,5 +1,9 @@
 package com.increff.omni.reporting.api;
 
+import com.increff.commons.springboot.common.ApiException;
+import com.increff.commons.springboot.common.ApiStatus;
+import com.increff.commons.springboot.common.JsonUtil;
+import com.increff.commons.springboot.server.AbstractApi;
 import com.increff.omni.reporting.dao.InputControlDao;
 import com.increff.omni.reporting.dao.InputControlQueryDao;
 import com.increff.omni.reporting.dao.InputControlValuesDao;
@@ -9,9 +13,7 @@ import com.increff.omni.reporting.model.constants.InputControlType;
 import com.increff.omni.reporting.pojo.InputControlPojo;
 import com.increff.omni.reporting.pojo.InputControlQueryPojo;
 import com.increff.omni.reporting.pojo.InputControlValuesPojo;
-import com.nextscm.commons.spring.common.ApiException;
-import com.nextscm.commons.spring.common.ApiStatus;
-import com.nextscm.commons.spring.server.AbstractApi;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +24,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
+@Log4j2
 @Service
 @Transactional(rollbackFor = ApiException.class)
 public class InputControlApi extends AbstractApi {
@@ -67,6 +70,20 @@ public class InputControlApi extends AbstractApi {
         return ex;
     }
 
+    public void delete(Integer id) throws ApiException {
+        InputControlPojo pojo = getCheck(id);
+        dao.remove(pojo);
+        InputControlQueryPojo queryPojo = selectControlQuery(id);
+        if (Objects.nonNull(queryPojo))
+            queryDao.remove(queryPojo.getId());
+        List<InputControlValuesPojo> valuesPojoList = valuesDao.selectMultiple("controlId", id);
+        valuesPojoList.forEach(v -> valuesDao.remove(v.getId()));
+    }
+
+    public List<InputControlPojo> getByScope(InputControlScope scope) {
+        return dao.selectMultiple("scope", scope);
+    }
+
     public List<InputControlPojo> selectByIds(List<Integer> ids) {
         if (CollectionUtils.isEmpty(ids))
             return new ArrayList<>();
@@ -84,6 +101,17 @@ public class InputControlApi extends AbstractApi {
 
     public InputControlPojo getByScopeAndParamName(InputControlScope scope, String paramName, Integer schemaVersionId) {
         return dao.selectByScopeAndParamName(scope, paramName, schemaVersionId);
+    }
+
+    public List<InputControlPojo> getByParamName(String paramName) {
+        return dao.selectMultiple("paramName", paramName);
+    }
+
+    public List<InputControlPojo> getCheckByParamName(String paramName) throws ApiException {
+        List<InputControlPojo> pojos = getByParamName(paramName);
+        if (pojos.isEmpty())
+            throw new ApiException(ApiStatus.BAD_DATA, "No control present for param name : " + paramName);
+        return pojos;
     }
 
     public List<InputControlPojo> getBySchemaVersion(Integer oldSchemaVersionId) {
@@ -113,15 +141,22 @@ public class InputControlApi extends AbstractApi {
     }
 
     private void validateControlAddition(InputControlPojo pojo) throws ApiException {
+        if (pojo.getScope().equals(InputControlScope.LOCAL)) {
+            return; // Skip checking existing controls for same param name as it does not matter if local and global filters have same param name
+        }
+
+        // 2 global filters with same param name not allowed
         InputControlPojo existingByName = getByScopeAndDisplayName(InputControlScope.GLOBAL, pojo.getDisplayName(),
                 pojo.getSchemaVersionId());
 
         InputControlPojo existingByParam = getByScopeAndParamName(InputControlScope.GLOBAL, pojo.getParamName(),
                 pojo.getSchemaVersionId());
 
-        if (existingByName != null || existingByParam != null)
+        if (existingByName != null || existingByParam != null) {
+            log.error("InputControlPojo\n" + JsonUtil.serialize(pojo));
             throw new ApiException(ApiStatus.BAD_DATA,
-                    "Cannot create input control with same" + " display name or param name");
+                    "Cannot create input control with same display name " + pojo.getDisplayName() + " or param name " + pojo.getParamName());
+        }
     }
 
     private void addQueryOrValues(InputControlQueryPojo queryPojo, InputControlPojo pojo,

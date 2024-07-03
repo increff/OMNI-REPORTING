@@ -8,8 +8,8 @@ import com.increff.omni.reporting.model.constants.ReportRequestType;
 import com.increff.omni.reporting.model.constants.ScheduleStatus;
 import com.increff.omni.reporting.pojo.*;
 import com.increff.omni.reporting.security.RateLimitingFilter;
-import com.nextscm.commons.spring.common.ApiException;
-import lombok.extern.log4j.Log4j;
+import com.increff.commons.springboot.common.ApiException;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
@@ -17,14 +17,14 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 
-import javax.persistence.OptimisticLockException;
+import jakarta.persistence.OptimisticLockException;
 import java.util.*;
 import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
 
 import static com.increff.omni.reporting.dto.CommonDtoHelper.*;
 
-@Log4j
+@Log4j2
 @Component
 public class ScheduledJobs {
 
@@ -43,7 +43,7 @@ public class ScheduledJobs {
     @Autowired
     private ReportApi reportApi;
     @Autowired
-    private OrgSchemaApi orgSchemaApi;
+    private OrgMappingApi orgMappingApi;
     @Autowired
     private JobFactory jobFactory;
     @Autowired
@@ -100,9 +100,11 @@ public class ScheduledJobs {
 
         log.debug("Eligible schedules : " + schedulePojos.size());
         for(ReportSchedulePojo s : schedulePojos) {
-            OrgSchemaVersionPojo orgSchemaVersionPojo = orgSchemaApi.getCheckByOrgId(s.getOrgId());
+            List<OrgMappingPojo> orgMappingPojo = orgMappingApi.getCheckByOrgId(s.getOrgId());
+            List<Integer> orgSchemaVersionIds = orgMappingPojo.stream().map(OrgMappingPojo::getSchemaVersionId).collect(Collectors.toList());
             ReportPojo reportPojo = reportApi.getByAliasAndSchema(s.getReportAlias(),
-                    orgSchemaVersionPojo.getSchemaVersionId(), false);
+                    orgSchemaVersionIds, false);
+
             Integer reportId = Objects.isNull(reportPojo) ? null : reportPojo.getId();
             ReportRequestPojo reportRequestPojo = convertToReportRequestPojo(s, reportId);
             List<ReportInputParamsPojo> reportInputParamsPojoList = new ArrayList<>();
@@ -209,4 +211,5 @@ public class ScheduledJobs {
     public void clearUserRateLimiterMap() {
         rateLimitingFilter.clearUserRateLimiterMap();
     }
+
 }

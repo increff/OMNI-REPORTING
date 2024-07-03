@@ -1,26 +1,17 @@
 package com.increff.omni.reporting.controller;
 
-import com.increff.omni.reporting.dto.ConnectionDto;
-import com.increff.omni.reporting.dto.DashboardDto;
-import com.increff.omni.reporting.dto.OrganizationDto;
-import com.increff.omni.reporting.model.data.ConnectionData;
-import com.increff.omni.reporting.model.data.OrgConnectionData;
-import com.increff.omni.reporting.model.data.OrgSchemaData;
-import com.increff.omni.reporting.model.data.OrganizationData;
-import com.increff.omni.reporting.model.form.ConnectionForm;
-import com.increff.omni.reporting.model.form.IntegrationOrgConnectionForm;
-import com.increff.omni.reporting.model.form.IntegrationOrgSchemaForm;
-import com.increff.omni.reporting.model.form.OrganizationForm;
-import com.nextscm.commons.spring.common.ApiException;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import com.increff.omni.reporting.dto.*;
+import com.increff.omni.reporting.model.data.*;
+import com.increff.omni.reporting.model.form.*;
+import com.increff.commons.springboot.common.ApiException;
+import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Objects;
 
 @CrossOrigin
-@Api
 @RestController
 @RequestMapping(value = "/integration")
 public class IntegrationController {
@@ -31,41 +22,40 @@ public class IntegrationController {
     private OrganizationDto organizationDto;
     @Autowired
     private DashboardDto dashboardDto;
+    @Autowired
+    private SchemaDto schemaDto;
+    @Autowired
+    private IntegrationDto integrationDto;
 
-    @ApiOperation(value = "Add Connection")
-    @RequestMapping(value = "/connections", method = RequestMethod.POST)
-    public ConnectionData add(@RequestBody ConnectionForm form) throws ApiException {
-        return connectionDto.add(form);
+
+    @Operation(summary = "Integrate New Organization")
+    @PostMapping(value = "/integrate-new-org")
+    public OrgMappingsData add(@RequestBody IntegrationOrgForm form, @RequestParam Boolean createNewConnection) throws ApiException {
+        return integrationDto.integrateNewOrg(form, createNewConnection);
     }
 
-    @ApiOperation(value = "Add Organization")
-    @RequestMapping(value = "/orgs", method = RequestMethod.POST)
-    public OrganizationData add(@RequestBody OrganizationForm form) throws ApiException {
-        return organizationDto.add(form);
+    @Operation(summary = "Edit Existing Organization")
+    @PostMapping(value = "/edit-existing-org")
+    public OrgMappingsData editExistingOrg(@RequestBody IntegrationOrgForm form, @RequestParam String oldSchemaVersionName) throws ApiException {
+        return integrationDto.editExistingOrg(form, oldSchemaVersionName);
     }
 
-    @ApiOperation(value = "Map organization to a connection")
-    @RequestMapping(value = "/map-connection", method = RequestMethod.POST)
-    public OrgConnectionData addConnectionMapping(@RequestBody IntegrationOrgConnectionForm form) throws ApiException {
-        return organizationDto.mapToConnection(form);
+    @Operation(summary = "Copy Dashboard to new organizations. This copies charts only! NOT default values!")
+    @PostMapping(value = "/copy-dashboard-new-orgs")
+    public void copyDashboardToNewOrgs(@RequestParam List<Integer> orgIds, @RequestParam(required = false) Boolean copyTestDashboards) throws ApiException {
+        dashboardDto.copyDashboardToNewOrgs(orgIds, Objects.isNull(copyTestDashboards) ? false : copyTestDashboards);
     }
 
-    @ApiOperation(value = "Map organization to a schema")
-    @RequestMapping(value = "/map-schema-version", method = RequestMethod.POST)
-    public OrgSchemaData addSchemaMapping(@RequestBody IntegrationOrgSchemaForm form) throws ApiException {
-        return organizationDto.mapToSchema(form);
+    @Operation(summary = "Get All Schema")
+    @GetMapping(value = "/schema")
+    public List<SchemaVersionData> selectAllSchema() {
+        return schemaDto.selectAll();
     }
 
-    @ApiOperation(value = "Get All Organizations")
-    @RequestMapping(value = "/orgs", method = RequestMethod.GET)
-    public List<OrganizationData> selectAllOrgs() {
-        return organizationDto.selectAll();
-    }
-
-    @ApiOperation(value = "Copy Dashboard to new organizations. This copies charts only! NOT default values!")
-    @RequestMapping(value = "/copy-dashboard-new-orgs", method = RequestMethod.POST)
-    public void copyDashboardToNewOrgs(@RequestParam List<Integer> orgIds) throws ApiException {
-        dashboardDto.copyDashboardToNewOrgs(orgIds);
+    @Operation(summary = "Get all org mappings grouped by orgId")
+    @GetMapping(value = "/orgs/mappings/grouped")
+    public List<OrgMappingsGroupedData> selectOrgMappingGroupedDetails() {
+        return organizationDto.getOrgMappingGroupedDetails();
     }
 
 }

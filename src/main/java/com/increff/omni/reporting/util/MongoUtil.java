@@ -1,0 +1,125 @@
+package com.increff.omni.reporting.util;
+
+import com.increff.commons.springboot.common.ApiException;
+import com.increff.commons.springboot.common.ApiStatus;
+import com.mongodb.ConnectionString;
+import com.mongodb.MongoClientSettings;
+import com.mongodb.client.*;
+import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.StringUtils;
+import org.bson.BsonArray;
+import org.bson.BsonDocument;
+import org.bson.BsonValue;
+import org.bson.Document;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+@Log4j2
+public class MongoUtil {
+
+    public static final String MONGO_VAR_NAME_SEPARATOR = "##";
+    public static final String MONGO_IGNORE_CLIENT_FILTER = "IGNORE_CLIENT_FILTER";
+    public static final String COLLECTION_NAME = "collectionName";
+
+    public static String MONGO_CLIENT_FILTER;
+
+    public static Integer MONGO_READ_TIMEOUT_SEC; // loaded from application.properties post construct
+    public static Integer MONGO_CONNECT_TIMEOUT_SEC;
+    public static Integer MONGO_SERVER_SELECT_TIMEOUT_SEC;
+
+
+    public static List<BsonDocument> parseMongoPipeline(String pipeline) throws ApiException {
+        log.debug("parseMongoPipeline.pipeline : " + pipeline);
+        BsonArray bsonDocuments = BsonArray.parse(pipeline);
+        List<BsonDocument> documents = new ArrayList<>();
+        for (BsonValue bsonValue : bsonDocuments) {
+            if (bsonValue.isDocument()) {
+                log.debug("parseMongoPipeline.Stage:\n" + bsonValue.asDocument());
+                documents.add(bsonValue.asDocument());
+            } else {
+                throw new ApiException(ApiStatus.BAD_DATA, "Bson Value is not a document\n" + bsonValue);
+            }
+        }
+
+        log.debug("parseMongoPipeline.Parsed pipeline: " + documents);
+        log.debug("parseMongoPipeline.Stage size : " + documents.size());
+        return documents;
+    }
+
+    public static String getValueAfterEquals(String str, String delimiter) {
+        return str.split(delimiter)[0].split("=")[1].trim();
+    }
+
+    public static String deleteFirstLine(String str, String delimiter) {
+        return str.substring(str.indexOf(delimiter) + delimiter.length());
+    }
+
+    public static List<Document> executeMongoPipeline(String host, String username, String password, String query) throws ApiException {
+        String collectionName = getValueAfterEquals(query, MONGO_VAR_NAME_SEPARATOR);
+        query = deleteFirstLine(query, MONGO_VAR_NAME_SEPARATOR);
+        String databaseName = getValueAfterEquals(query, MONGO_VAR_NAME_SEPARATOR);
+        query = deleteFirstLine(query, MONGO_VAR_NAME_SEPARATOR);
+        return executeMongoPipeline(host, username, password, databaseName, collectionName, parseMongoPipeline(query));
+    }
+
+
+    public static List<Document> executeMongoPipeline(String host, String username, String password, String databaseName, String collectionName, List<BsonDocument> stages) throws ApiException {
+        log.debug("executeMongoPipeline.username : " + username + " databaseName : " + databaseName + " collectionName : " + collectionName + "\n"
+                + "stages.size : " + stages.size() + " stages : " + stages);
+
+        ConnectionString connString = getConnectionString(host, username, password);
+
+        MongoClientSettings settings = MongoClientSettings.builder()
+                .applyConnectionString(connString)
+                .applyToSocketSettings(builder -> {
+                    builder.connectTimeout(MONGO_CONNECT_TIMEOUT_SEC, TimeUnit.SECONDS);
+                    builder.readTimeout(MONGO_READ_TIMEOUT_SEC, TimeUnit.SECONDS);
+                })
+                .applyToClusterSettings(builder -> {
+                    builder.serverSelectionTimeout(MONGO_SERVER_SELECT_TIMEOUT_SEC, TimeUnit.SECONDS);
+                })
+                .build();
+
+        try (MongoClient mongoClient = MongoClients.create(settings)) {
+            MongoDatabase database;
+            database = mongoClient.getDatabase(databaseName);
+            MongoCollection<Document> collection = database.getCollection(collectionName);
+            AggregateIterable<Document> result = collection.aggregate(stages).allowDiskUse(true).maxTime(MONGO_READ_TIMEOUT_SEC, TimeUnit.SECONDS);
+            ;
+            List<Document> results = new ArrayList<>();
+            result.into(results);
+            return results;
+        } catch (Exception e) {
+            log.error("Error in executing mongo query : " + e.getMessage());
+            throw new ApiException(ApiStatus.BAD_DATA, "Error in executing mongo query : " + e.getMessage());
+        }
+    }
+
+    private static ConnectionString getConnectionString(String host, String username, String password) {
+        String connectionString = "mongodb+srv://";
+        if(!StringUtils.isEmpty(username) && !StringUtils.isEmpty(password)) {
+            connectionString += username + ":" + password + "@" + host;
+        } else {
+            connectionString += host;
+        }
+        log.debug("getConnectionString username : " + username);
+        return new ConnectionString(connectionString);
+    }
+
+    public static void testConnection(String host, String username, String password) throws ApiException {
+        try (MongoClient mongoClient = MongoClients.create(getConnectionString(host, username, password))) {
+            MongoDatabase database = mongoClient.getDatabase("admin");
+            MongoIterable<String> collections = database.listCollectionNames();
+            for (String collection : collections) {
+                log.debug("Collection: " + collection);
+            }
+        } catch (Exception e) {
+            log.error("Error in testing mongo connection : " + e.getMessage());
+            throw new ApiException(ApiStatus.BAD_DATA, "Error in testing mongo connection : " + e.getMessage());
+        }
+    }
+
+
+}

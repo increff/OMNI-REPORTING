@@ -2,12 +2,11 @@ package com.increff.omni.reporting.api;
 
 import com.increff.omni.reporting.config.AbstractTest;
 import com.increff.omni.reporting.pojo.ReportQueryPojo;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import static com.increff.omni.reporting.helper.ReportTestHelper.getReportQueryPojo;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ReportQueryApiTest extends AbstractTest {
 

@@ -4,8 +4,8 @@ import com.increff.omni.reporting.config.AbstractTest;
 import com.increff.omni.reporting.model.constants.*;
 import com.increff.omni.reporting.model.data.*;
 import com.increff.omni.reporting.model.form.*;
-import com.nextscm.commons.spring.common.ApiException;
-import org.junit.Test;
+import com.increff.commons.springboot.common.ApiException;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.*;
@@ -13,7 +13,8 @@ import java.util.*;
 import static com.increff.omni.reporting.helper.PipelineTestHelper.getGCPPipelineConfig;
 import static com.increff.omni.reporting.helper.PipelineTestHelper.getPipelineForm;
 import static com.increff.omni.reporting.util.ConvertUtil.getJavaObjectFromJson;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 
 public class PipelineDtoTest extends AbstractTest {
     

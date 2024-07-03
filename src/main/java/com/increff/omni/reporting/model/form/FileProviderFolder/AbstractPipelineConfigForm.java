@@ -8,4 +8,6 @@ import lombok.Setter;
 public class AbstractPipelineConfigForm {
     private String bucketUrl;
     private String bucketName;
+    private String host;
+    private String username;
 }

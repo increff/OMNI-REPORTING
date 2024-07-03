@@ -6,14 +6,17 @@ import com.increff.omni.reporting.model.data.PipelineConfigData;
 import com.increff.omni.reporting.model.data.PipelineData;
 import com.increff.omni.reporting.pojo.ChartLegendsPojo;
 import com.increff.omni.reporting.pojo.PipelinePojo;
-import com.nextscm.commons.spring.common.ApiException;
-import com.nextscm.commons.spring.common.ApiStatus;
-import lombok.extern.log4j.Log4j;
+import com.increff.commons.springboot.common.ApiException;
+import com.increff.commons.springboot.common.ApiStatus;
+import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.StringUtils;
+
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
-@Log4j
+@Log4j2
 public class ConvertUtil {
 
     public static ChartLegendsData convertChartLegendsPojoToChartLegendsData(List<ChartLegendsPojo> pojos) {
@@ -25,7 +28,7 @@ public class ConvertUtil {
     }
 
     public static PipelineData convertToPipelineData(PipelinePojo pojo) throws ApiException {
-        PipelineData data = com.nextscm.commons.spring.common.ConvertUtil.convert(pojo, PipelineData.class);
+        PipelineData data = com.increff.commons.springboot.common.ConvertUtil.convert(pojo, PipelineData.class);
 
         data.setConfigs(getJavaObjectFromJson(pojo.getConfigs(), PipelineConfigData.class));
 
@@ -47,6 +50,30 @@ public class ConvertUtil {
         } catch (Exception e) {
             throw new ApiException(ApiStatus.BAD_DATA, "Error while parsing credentials : " + e.getMessage());
         }
+    }
+
+    public static <T> T getJavaObjectFromJson(String requestBody, Class<T> formClass, ObjectMapper objectMapper) throws ApiException {
+        try {
+            return objectMapper.readValue(requestBody, formClass);
+        } catch (Exception e) {
+            log.error("Error while parsing request body : " + requestBody + "\nError : " + e.getMessage() + "\n" + Arrays.toString(e.getStackTrace()));
+            throw new ApiException(ApiStatus.BAD_DATA, "Error while parsing request body : " + requestBody + "\nError : " + e.getMessage());
+
+        }
+    }
+
+    public static String getDisplayFailureReason(String failureReason) {
+        if (StringUtils.isEmpty(failureReason))
+            return "";
+
+        if (failureReason.contains("File size")
+                || failureReason.contains("Error connecting to the database"))
+            return failureReason;
+
+        if (failureReason.contains("Statement cancelled due to timeout"))
+            return "Report timeout exceeded";
+
+        return "Report execution failed. Please reach out to support team.";
     }
 
 

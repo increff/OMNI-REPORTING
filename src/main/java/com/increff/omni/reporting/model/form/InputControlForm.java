@@ -6,7 +6,7 @@ import com.increff.omni.reporting.model.constants.InputControlType;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 

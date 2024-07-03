@@ -1,25 +1,23 @@
 package com.increff.omni.reporting.controller;
 
+import com.increff.commons.springboot.common.StringData;
 import com.increff.omni.reporting.dto.*;
+import com.increff.omni.reporting.model.constants.InputControlScope;
 import com.increff.omni.reporting.model.constants.VisualizationType;
 import com.increff.omni.reporting.model.data.*;
 import com.increff.omni.reporting.model.form.*;
-import com.nextscm.commons.spring.common.ApiException;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import org.apache.log4j.Level;
-import org.apache.log4j.LogManager;
+import com.increff.commons.springboot.common.ApiException;
+import io.swagger.v3.oas.annotations.Operation;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.core.config.Configurator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
-// Todo internationalization
 @CrossOrigin
-@Api
 @RestController
 @RequestMapping(value = "/admin")
 public class AdminController {
@@ -47,277 +45,292 @@ public class AdminController {
 
     // App admin APIs
 
-    @ApiOperation(value = "Add Connection")
-    @RequestMapping(value = "/connections", method = RequestMethod.POST)
+    @Operation(summary = "Add Connection")
+    @PostMapping(value = "/connections")
     public ConnectionData add(@RequestBody ConnectionForm form) throws ApiException {
         return connectionDto.add(form);
     }
 
-    @ApiOperation(value = "Test DB Connection")
-    @RequestMapping(value = "/connections/test", method = RequestMethod.POST)
+    @Operation(summary = "Test DB Connection")
+    @PostMapping(value = "/connections/test")
     public void testConnection(@RequestBody ConnectionForm form) throws ApiException {
         connectionDto.testConnection(form);
     }
 
-    @ApiOperation(value = "Update Connection")
-    @RequestMapping(value = "/connections/{id}", method = RequestMethod.PUT)
+    @Operation(summary = "Update Connection")
+    @PutMapping(value = "/connections/{id}")
     public ConnectionData update(@PathVariable Integer id, @RequestBody ConnectionForm form) throws ApiException {
         return connectionDto.update(id, form);
     }
 
-    @ApiOperation(value = "Get All Connections")
-    @RequestMapping(value = "/connections", method = RequestMethod.GET)
+    @Operation(summary = "Get All Connections")
+    @GetMapping(value = "/connections")
     public List<ConnectionData> selectAll() {
         return connectionDto.selectAll();
     }
 
-    @ApiOperation(value = "Add Input Control")
-    @RequestMapping(value = "/controls", method = RequestMethod.POST)
+    @Operation(summary = "Add Input Control")
+    @PostMapping(value = "/controls")
     public InputControlData addInputControl(@RequestBody InputControlForm form) throws ApiException {
         return inputControlDto.add(form);
     }
 
-    @ApiOperation(value = "Edit Input Control")
-    @RequestMapping(value = "/controls/{id}", method = RequestMethod.PUT)
-    public InputControlData updateInputControl(@PathVariable Integer id, @RequestBody InputControlUpdateForm form) throws ApiException {
+    @Operation(summary = "Edit Input Control")
+    @PutMapping(value = "/controls/{id}")
+    public InputControlData updateInputControl(@PathVariable Integer id, @RequestBody InputControlUpdateForm form)
+            throws ApiException {
         return inputControlDto.update(id, form);
     }
 
-    @ApiOperation(value = "Get Input Control")
-    @RequestMapping(value = "/controls/{id}", method = RequestMethod.GET)
+    @Operation(summary = "Get Input Control")
+    @GetMapping(value = "/controls/{id}")
     public InputControlData getInputControl(@PathVariable Integer id) throws ApiException {
         return inputControlDto.getById(id);
     }
 
-    @ApiOperation(value = "Select all global controls")
-    @RequestMapping(value = "/schemas/{schemaVersionId}/controls/global", method = RequestMethod.GET)
+    @Operation(summary = "Select all global controls")
+    @GetMapping(value = "/schemas/{schemaVersionId}/controls/global")
     public List<InputControlData> selectAllGlobal(@PathVariable Integer schemaVersionId) throws ApiException {
         return inputControlDto.selectAllGlobal(schemaVersionId);
     }
 
-    @ApiOperation(value = "Add Schema")
-    @RequestMapping(value = "/schema", method = RequestMethod.POST)
+    @Operation(summary = "Select controls by scope")
+    @RequestMapping(value = "/controls", method = RequestMethod.GET)
+    public List<InputControlData> selectAllControls(@RequestParam InputControlScope scope) throws ApiException {
+        return inputControlDto.selectAll(scope);
+    }
+
+    @Operation(summary = "Add Schema")
+    @PostMapping(value = "/schema")
     public SchemaVersionData add(@RequestBody SchemaVersionForm form) throws ApiException {
         return schemaDto.add(form);
     }
 
-    @ApiOperation(value = "Update Schema")
-    @RequestMapping(value = "/schema/{schemaVersionId}", method = RequestMethod.PUT)
-    public SchemaVersionData updateSchema(@PathVariable Integer schemaVersionId, @RequestBody SchemaVersionForm form) throws ApiException {
+    @Operation(summary = "Update Schema")
+    @PutMapping(value = "/schema/{schemaVersionId}")
+    public SchemaVersionData updateSchema(@PathVariable Integer schemaVersionId, @RequestBody SchemaVersionForm form)
+            throws ApiException {
         return schemaDto.update(schemaVersionId, form);
     }
 
-    @ApiOperation(value = "Get All Schema")
-    @RequestMapping(value = "/schema", method = RequestMethod.GET)
+    @Operation(summary = "Get All Schema")
+    @GetMapping(value = "/schema")
     public List<SchemaVersionData> selectAllSchema() {
         return schemaDto.selectAll();
     }
 
-    @ApiOperation(value = "Add Report")
-    @RequestMapping(value = "/reports", method = RequestMethod.POST)
+    @Operation(summary = "Add Report")
+    @PostMapping(value = "/reports")
     public ReportData add(@RequestBody ReportForm form) throws ApiException {
         return reportDto.add(form);
     }
 
-    @ApiOperation(value = "Edit Report")
-    @RequestMapping(value = "/reports/{reportId}", method = RequestMethod.PUT)
+    @Operation(summary = "Edit Report")
+    @PutMapping(value = "/reports/{reportId}")
     public ReportData edit(@PathVariable Integer reportId, @RequestBody ReportForm form) throws ApiException {
         return reportDto.edit(reportId, form);
     }
 
-    @ApiOperation(value = "Enable / Disable Report")
-    @RequestMapping(value = "/reports/{reportId}/status", method = RequestMethod.PUT)
+    @Operation(summary = "Enable / Disable Report")
+    @PutMapping(value = "/reports/{reportId}/status")
     public void editStatus(@PathVariable Integer reportId, @RequestParam Boolean isEnabled) throws ApiException {
          reportDto.updateStatus(reportId, isEnabled);
     }
 
-    @ApiOperation(value = "Get Report")
-    @RequestMapping(value = "/reports/{reportId}", method = RequestMethod.GET)
+    @Operation(summary = "Get Report")
+    @GetMapping(value = "/reports/{reportId}")
     public ReportData get(@PathVariable Integer reportId) throws ApiException {
         return reportDto.get(reportId);
     }
 
-    @ApiOperation(value = "Get All Report")
-    @RequestMapping(value = "/reports/schema-versions/{schemaVersionId}", method = RequestMethod.GET)
-    public List<ReportData> getAll(@PathVariable Integer schemaVersionId, @RequestParam Optional<VisualizationType> visualization) throws ApiException {
+    @Operation(summary = "Get All Report")
+    @GetMapping(value = "/reports/schema-versions/{schemaVersionId}")
+    public List<ReportData> getAll(@PathVariable Integer schemaVersionId, @RequestParam Optional<VisualizationType>
+            visualization) throws ApiException {
         return reportDto.selectAllBySchemaVersion(schemaVersionId, visualization.orElse(null));
     }
 
-    @ApiOperation(value = "Copy Schema Reports")
-    @RequestMapping(value = "/copy-reports", method = RequestMethod.POST)
+    @Operation(summary = "Copy Schema Reports")
+    @PostMapping(value = "/copy-reports")
     public void copyReports(@RequestBody CopyReportsForm form) throws ApiException {
         reportDto.copyReports(form);
     }
 
-    @ApiOperation(value = "Add/Edit Report Query")
-    @RequestMapping(value = "/reports/{reportId}/query", method = RequestMethod.POST)
-    public ReportQueryData addQuery(@PathVariable Integer reportId, @RequestBody ReportQueryForm form) throws ApiException {
+    @Operation(summary = "Add/Edit Report Query")
+    @PostMapping(value = "/reports/{reportId}/query")
+    public ReportQueryData addQuery(@PathVariable("reportId") Integer reportId, @RequestBody ReportQueryForm form)
+            throws ApiException {
         return reportDto.upsertQuery(reportId, form);
     }
 
-    @ApiOperation(value = "Get transformed report query")
-    @RequestMapping(value = "/reports/query/try", method = RequestMethod.POST)
-    public ReportQueryData getTransformedQuery(@RequestBody ReportQueryTestForm form) {
+    @Operation(summary = "Get transformed report query")
+    @PostMapping(value = "/reports/query/try")
+    public ReportQueryData getTransformedQuery(@RequestBody ReportQueryTestForm form) throws ApiException {
         return reportDto.getTransformedQuery(form);
     }
 
-    @ApiOperation(value = "Test Query Live")
-    @RequestMapping(value = "/reports/query/try-live", method = RequestMethod.POST)
-    public List<ViewDashboardData> testQueryLive(@RequestBody ReportRequestForm form) throws ApiException, IOException {
-        return reportDto.testQueryLive(form);
+    @Operation(summary = "Test Query Live")
+    @PostMapping(value = "/reports/query/try-live")
+    public TestQueryLiveData testQueryLive(@RequestBody ReportRequestForm form, @RequestParam Integer orgId) throws ApiException, IOException {
+        return reportDto.testQueryLive(form, orgId);
     }
 
-    @ApiOperation(value = "Get Report Query")
-    @RequestMapping(value = "/reports/{reportId}/query", method = RequestMethod.GET)
+    @Operation(summary = "Get Report Query")
+    @GetMapping(value = "/reports/{reportId}/query")
     public ReportQueryData getQuery(@PathVariable Integer reportId) throws ApiException {
         return reportDto.getQuery(reportId);
     }
 
-    @ApiOperation(value = "Map control to a report")
-    @RequestMapping(value = "/reports/{reportId}/controls/{controlId}", method = RequestMethod.POST)
+    @Operation(summary = "Map control to a report")
+    @PostMapping(value = "/reports/{reportId}/controls/{controlId}")
     public void mapReportToControl(@PathVariable Integer reportId, @PathVariable Integer controlId) throws ApiException {
         reportDto.mapToControl(reportId, controlId);
     }
 
-    @ApiOperation(value = "Delete report control")
-    @RequestMapping(value = "/reports/{reportId}/controls/{controlId}", method = RequestMethod.DELETE)
+    @Operation(summary = "Delete report control")
+    @DeleteMapping(value = "/reports/{reportId}/controls/{controlId}")
     public void deleteReportToControl(@PathVariable Integer reportId, @PathVariable Integer controlId) throws ApiException {
         reportDto.deleteReportControl(reportId, controlId);
     }
 
-    @ApiOperation(value = "Add validation group")
-    @RequestMapping(value = "/reports/{reportId}/controls/validations", method = RequestMethod.POST)
-    public void addValidationGroup(@PathVariable Integer reportId, @RequestBody ValidationGroupForm groupForm) throws ApiException {
+    @Operation(summary = "Add validation group")
+    @PostMapping(value = "/reports/{reportId}/controls/validations")
+    public void addValidationGroup(@PathVariable Integer reportId, @RequestBody ValidationGroupForm groupForm)
+            throws ApiException {
         reportDto.addValidationGroup(reportId, groupForm);
     }
 
-    @ApiOperation(value = "Delete validation group")
-    @RequestMapping(value = "/reports/{reportId}/controls/validations", method = RequestMethod.DELETE)
-    public void deleteValidationGroup(@PathVariable Integer reportId, @RequestParam String groupName) throws ApiException {
+    @Operation(summary = "Delete validation group")
+    @DeleteMapping(value = "/reports/{reportId}/controls/validations")
+    public void deleteValidationGroup(@PathVariable Integer reportId, @RequestParam String groupName)
+            throws ApiException {
         reportDto.deleteValidationGroup(reportId, groupName);
     }
 
-    @ApiOperation(value = "Add Organization")
-    @RequestMapping(value = "/orgs", method = RequestMethod.POST)
+    @Operation(summary = "Add Organization")
+    @PostMapping(value = "/orgs")
     public OrganizationData add(@RequestBody OrganizationForm form) throws ApiException {
         return organizationDto.add(form);
     }
 
-    @ApiOperation(value = "Update Organization")
-    @RequestMapping(value = "/orgs", method = RequestMethod.PUT)
+    @Operation(summary = "Update Organization")
+    @PutMapping(value = "/orgs")
     public OrganizationData update(@RequestBody OrganizationForm form) throws ApiException {
         return organizationDto.update(form);
     }
 
-    @ApiOperation(value = "Map organization to a schema")
-    @RequestMapping(value = "/orgs/{orgId}/schema/{schemaVersionId}", method = RequestMethod.POST)
-    public OrgSchemaData addSchemaMapping(@PathVariable Integer orgId, @PathVariable Integer schemaVersionId) throws ApiException {
-        return organizationDto.mapToSchema(orgId, schemaVersionId);
+    @Operation(summary = "Map organization to a schema and connection")
+    @PostMapping(value = "/orgs/mappings")
+    public OrgMappingsData addOrgMappings(@RequestBody OrgMappingsForm form) throws ApiException {
+        return organizationDto.addOrgMapping(form);
     }
 
-    @ApiOperation(value = "Map organization to a connection")
-    @RequestMapping(value = "/orgs/{orgId}/connections/{connectionId}", method = RequestMethod.POST)
-    public OrgConnectionData addConnectionMapping(@PathVariable Integer orgId, @PathVariable Integer connectionId) throws ApiException {
-        return organizationDto.mapToConnection(orgId, connectionId);
+    @Operation(summary = "Edit Org Mapping")
+    @PutMapping(value = "/orgs/mappings/{id}")
+    public OrgMappingsData editOrgMappings(@PathVariable Integer id, @RequestBody OrgMappingsForm form) throws ApiException {
+        return organizationDto.editOrgMappings(id, form);
     }
 
-    @ApiOperation(value = "Get all org schema mapping")
-    @RequestMapping(value = "/orgs/schema/", method = RequestMethod.GET)
+    @Operation(summary = "Get all org mappings")
+    @GetMapping(value = "/orgs/mappings")
+    public List<OrgMappingsData> selectOrgMappingDetails() {
+        return organizationDto.getOrgMappingDetails();
+    }
+
+    @Operation(summary = "Get all org mappings grouped by orgId")
+    @GetMapping(value = "/orgs/mappings/grouped")
+    public List<OrgMappingsGroupedData> selectOrgMappingGroupedDetails() {
+        return organizationDto.getOrgMappingGroupedDetails();
+    }
+
+    @Operation(summary = "Get all org schema mapping")
+    @GetMapping(value = "/orgs/schema/")
     public List<OrgSchemaData> selectAllSchemaMapping() {
-        return organizationDto.selectAllOrgSchema();
+        return organizationDto.getAllOrgSchema();
     }
 
-    @ApiOperation(value = "Get all org connection mapping")
-    @RequestMapping(value = "/orgs/connections/", method = RequestMethod.GET)
-    public List<OrgConnectionData> selectAllConnectionMapping() {
-        return organizationDto.selectAllOrgConnections();
-    }
-
-    @ApiOperation(value = "Add Directory")
-    @RequestMapping(value = "/directories", method = RequestMethod.POST)
+    @Operation(summary = "Add Directory")
+    @PostMapping(value = "/directories")
     public DirectoryData add(@RequestBody DirectoryForm form) throws ApiException {
         return directoryDto.add(form);
     }
 
-    @ApiOperation(value = "Update Directory")
-    @RequestMapping(value = "/directories/{directoryId}", method = RequestMethod.PUT)
+    @Operation(summary = "Update Directory")
+    @PutMapping(value = "/directories/{directoryId}")
     public DirectoryData update(@PathVariable Integer directoryId, @RequestBody DirectoryForm form) throws ApiException {
         return directoryDto.update(directoryId, form);
     }
 
-    @ApiOperation(value = "Add Custom Report Access")
-    @RequestMapping(value = "/reports/custom-access", method = RequestMethod.POST)
+    @Operation(summary = "Add Custom Report Access")
+    @PostMapping(value = "/reports/custom-access")
     public void addCustomAccess(@RequestBody CustomReportAccessForm form) throws ApiException {
         customReportAccessDto.addCustomReportAccess(form);
     }
 
-    @ApiOperation(value = "Delete Custom Report Access")
-    @RequestMapping(value = "/reports/custom-access/{id}", method = RequestMethod.DELETE)
+    @Operation(summary = "Delete Custom Report Access")
+    @DeleteMapping(value = "/reports/custom-access/{id}")
     public void deleteCustomAccess(@PathVariable Integer id) {
         customReportAccessDto.deleteCustomReportAccess(id);
     }
 
-    @ApiOperation(value = "Get all Custom Report Access")
-    @RequestMapping(value = "/reports/{reportId}/custom-access", method = RequestMethod.GET)
+    @Operation(summary = "Get all Custom Report Access")
+    @GetMapping(value = "/reports/{reportId}/custom-access")
     public List<CustomReportAccessData> getAllCustomAccess(@PathVariable Integer reportId) throws ApiException {
         return customReportAccessDto.getAllDataByReport(reportId);
     }
 
-    @ApiOperation(value = "Change Log Level")
-    @RequestMapping(value = "/log", method = RequestMethod.PUT)
-    public void changeLogLevel(@RequestParam Level level) {
-        LogManager.getRootLogger().setLevel(level);
+    @Operation(description = "Change log level")
+    @PutMapping(value = "/log")
+    public StringData changeLogLevel(@RequestParam String level) {
+        Level ll = Level.valueOf(level);
+        Configurator.setLevel("com.increff.omni.reporting", ll);
+        return new StringData(String.format("Log level changed successfully to %s", ll.toString()));
     }
-
 
     // Report admin APIs
 
-    @ApiOperation(value = "Get All Organizations")
-    @RequestMapping(value = "/orgs", method = RequestMethod.GET)
+    @Operation(summary = "Get All Organizations")
+    @GetMapping(value = "/orgs")
     public List<OrganizationData> selectAllOrgs() {
         return organizationDto.selectAll();
     }
 
-    @ApiOperation(value = "Request Report")
-    @RequestMapping(value = "/request-report/orgs/{orgId}", method = RequestMethod.POST)
+    @Operation(summary = "Request Report")
+    @PostMapping(value = "/request-report/orgs/{orgId}")
     public void requestReport(@RequestBody ReportRequestForm form, @PathVariable Integer orgId) throws ApiException {
         reportRequestDto.requestReportForAnyOrg(form, orgId);
     }
 
-    @ApiOperation(value = "Get Reports")
-    @RequestMapping(value = "/reports/orgs/{orgId}", method = RequestMethod.GET)
-    public List<ReportData> selectByOrgId(@PathVariable Integer orgId, @RequestParam Boolean isChart, @RequestParam Optional<VisualizationType> visualization) throws ApiException {
+    @Operation(summary = "Get Reports")
+    @GetMapping(value = "/reports/orgs/{orgId}")
+    public List<ReportData> selectByOrgId(@PathVariable Integer orgId, @RequestParam Boolean isChart,
+                                          @RequestParam Optional<VisualizationType> visualization) throws ApiException {
         return reportDto.selectByOrg(orgId, isChart, visualization.orElse(null));
     }
 
-    @ApiOperation(value = "Get Live Data For Any Organization")
-    @RequestMapping(value = "/orgs/{orgId}/reports/live", method = RequestMethod.POST)
-    public List<Map<String, String>> requestReport(@PathVariable Integer orgId, @RequestBody ReportRequestForm form)
-            throws ApiException, IOException {
-        return reportDto.getLiveDataForAnyOrganization(form, orgId);
-    }
-
-    @ApiOperation(value = "Select controls for a report for given organization")
-    @RequestMapping(value = "/orgs/{orgId}/reports/{reportId}/controls", method = RequestMethod.GET)
+    @Operation(summary = "Select controls for a report for given organization")
+    @GetMapping(value = "/orgs/{orgId}/reports/{reportId}/controls")
     public List<InputControlData> selectByReportId(@PathVariable Integer reportId, @PathVariable Integer orgId) throws ApiException {
         return inputControlDto.selectForReport(reportId, orgId);
     }
 
-    @ApiOperation(value = "Get Schedules for all organizations")
-    @RequestMapping(value = "/schedules", method = RequestMethod.GET)
-    public List<ReportScheduleData> getScheduleReports(@RequestParam Integer pageNo, @RequestParam Integer pageSize) throws ApiException {
+    @Operation(summary = "Get Schedules for all organizations")
+    @GetMapping(value = "/schedules")
+    public List<ReportScheduleData> getScheduleReports(@RequestParam Integer pageNo, @RequestParam Integer pageSize)
+            throws ApiException {
         return reportScheduleDto.getScheduleReportsForAllOrgs(pageNo, pageSize);
     }
 
-    @ApiOperation(value = "Copy Dashboard to all organizations. This copies charts only! NOT default values!")
-    @RequestMapping(value = "/copy-dashboard-all-orgs", method = RequestMethod.POST)
+    @Operation(summary = "Copy Dashboard to all organizations. This copies charts only! NOT default values!")
+    @PostMapping(value = "/copy-dashboard-all-orgs")
     public void copyDashboardToAllOrgs(@RequestParam Integer dashboardId, @RequestParam Integer orgId) throws ApiException {
         dashboardDto.copyDashboardToAllOrgs(dashboardId, orgId);
     }
 
-    @ApiOperation(value = "Copy Dashboard to some organizations. This copies charts only! NOT default values!")
-    @RequestMapping(value = "/copy-dashboard-some-orgs", method = RequestMethod.POST)
-    public void copyDashboardToSomeOrgs(@RequestParam Integer dashboardId, @RequestParam Integer sourceOrgId, @RequestParam List<Integer> destinationOrgIds) throws ApiException {
+    @Operation(summary = "Copy Dashboard to some organizations. This copies charts only! NOT default values!")
+    @PostMapping(value = "/copy-dashboard-some-orgs")
+    public void copyDashboardToSomeOrgs(@RequestParam Integer dashboardId, @RequestParam Integer sourceOrgId,
+                                        @RequestParam List<Integer> destinationOrgIds) throws ApiException {
         dashboardDto.copyDashboardToSomeOrgs(dashboardId, sourceOrgId, destinationOrgIds);
     }
 }

@@ -1,22 +1,18 @@
 package com.increff.omni.reporting.api;
 
+import com.increff.commons.springboot.common.ApiException;
 import com.increff.omni.reporting.config.AbstractTest;
-import com.increff.omni.reporting.model.constants.PipelineType;
 import com.increff.omni.reporting.model.data.PipelineFlowData;
-import com.increff.omni.reporting.pojo.PipelinePojo;
 import com.increff.omni.reporting.pojo.SchedulePipelinePojo;
-import com.nextscm.commons.spring.common.ApiException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static com.increff.omni.reporting.helper.PipelineTestHelper.*;
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static com.increff.omni.reporting.helper.PipelineTestHelper.getPipelineFlowData;
+import static com.increff.omni.reporting.helper.PipelineTestHelper.getSchedulePipelinePojo;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SchedulePipelineApiTest extends AbstractTest {
 

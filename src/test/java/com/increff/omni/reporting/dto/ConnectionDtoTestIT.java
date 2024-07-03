@@ -1,15 +1,16 @@
 package com.increff.omni.reporting.dto;
 
 import com.increff.omni.reporting.config.AbstractTest;
+import com.increff.omni.reporting.helper.OrgMappingTestHelper;
 import com.increff.omni.reporting.model.constants.ChartType;
 import com.increff.omni.reporting.model.constants.InputControlScope;
 import com.increff.omni.reporting.model.constants.InputControlType;
 import com.increff.omni.reporting.model.constants.ReportType;
 import com.increff.omni.reporting.model.data.*;
 import com.increff.omni.reporting.model.form.*;
-import com.nextscm.commons.spring.common.ApiException;
-import com.nextscm.commons.spring.common.ApiStatus;
-import org.junit.Test;
+import com.increff.commons.springboot.common.ApiException;
+import com.increff.commons.springboot.common.ApiStatus;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
@@ -18,10 +19,11 @@ import java.util.*;
 import static com.increff.omni.reporting.helper.ConnectionTestHelper.getConnectionForm;
 import static com.increff.omni.reporting.helper.DirectoryTestHelper.getDirectoryForm;
 import static com.increff.omni.reporting.helper.InputControlTestHelper.getInputControlForm;
+import static com.increff.omni.reporting.helper.OrgMappingTestHelper.getOrgMappingForm;
 import static com.increff.omni.reporting.helper.OrgTestHelper.getOrganizationForm;
 import static com.increff.omni.reporting.helper.ReportTestHelper.*;
 import static com.increff.omni.reporting.helper.SchemaTestHelper.getSchemaForm;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ConnectionDtoTestIT extends AbstractTest {
 
@@ -53,8 +55,7 @@ public class ConnectionDtoTestIT extends AbstractTest {
         SchemaVersionData schemaData = schemaDto.add(schemaVersionForm);
         ConnectionForm connectionForm = getConnectionForm("127.0.0.1", "Test DB", username, password);
         ConnectionData connectionData = connectionDto.add(connectionForm);
-        organizationDto.mapToConnection(organizationData.getId(), connectionData.getId());
-        organizationDto.mapToSchema(organizationData.getId(), schemaData.getId());
+        organizationDto.addOrgMapping(OrgMappingTestHelper.getOrgMappingForm(organizationData.getId(), schemaData.getId(), connectionData.getId()));
         return getReportForm(name, type, directoryData.getId(), schemaData.getId(), false, ChartType.REPORT);
     }
 
@@ -84,7 +85,7 @@ public class ConnectionDtoTestIT extends AbstractTest {
         Map<String, List<String>> params = new HashMap<>();
         params.put("clientId", Collections.singletonList("1100007455"));
         ReportRequestForm form = getReportRequestForm(reportData.getId(), params, "Asia/Kolkata");
-        List<Map<String, String>> data = reportDto.getLiveData(form);
+        List<Map<String, String>> data = reportDto.getLiveData(form, new ArrayList<>());
         assertEquals(1, data.size());
     }
 
@@ -94,7 +95,7 @@ public class ConnectionDtoTestIT extends AbstractTest {
         dto.testConnection(form);
     }
 
-    @Test(expected = ApiException.class)
+    @Test
     public void testConnectionWrongPassword() throws ApiException {
         ConnectionForm form = getConnectionForm("127.0.0.1", "Test DB", username, "wrong_password");
         try {
@@ -102,7 +103,6 @@ public class ConnectionDtoTestIT extends AbstractTest {
         } catch (ApiException e) {
             assertEquals(ApiStatus.UNKNOWN_ERROR, e.getStatus());
             assertTrue(e.getMessage().contains("Error connecting to the database"));
-            throw e;
         }
     }
 

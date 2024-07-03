@@ -1,11 +1,13 @@
 package com.increff.omni.reporting.pojo;
 
+import com.increff.commons.springboot.db.pojo.AbstractVersionedPojo;
 import com.increff.omni.reporting.model.constants.ChartType;
 import com.increff.omni.reporting.model.constants.ReportType;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-
-import javax.persistence.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 @Entity
 @Setter
@@ -14,11 +16,10 @@ import javax.persistence.*;
         @Index(name = "idx_schemaVersionId_name_isChart", columnList = "schemaVersionId, name, isChart",
                 unique = true),
         @Index(name = "idx_schemaVersionId_type", columnList = "schemaVersionId, type"),
-        @Index(name = "idx_id_schemaVersionId", columnList = "id, schemaVersionId")
+        @Index(name = "idx_id_schemaVersionId", columnList = "id, schemaVersionId"),
+        @Index(name = "idx_alias", columnList = "alias"),
 }, uniqueConstraints = {@UniqueConstraint(name = "uk_schemaVersionId_alias_isChart", columnNames = {
         "schemaVersionId", "alias", "isChart"})})
-
-//todo change the name of this pojo later
 public class ReportPojo extends AbstractVersionedPojo{
 
     @Id
@@ -34,6 +35,7 @@ public class ReportPojo extends AbstractVersionedPojo{
 
     @Column(nullable = false)
     @Enumerated(value = EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.VARCHAR)
     private ReportType type;
 
     @Column(nullable = false)
@@ -55,6 +57,24 @@ public class ReportPojo extends AbstractVersionedPojo{
 
     @Column(nullable = false)
     @Enumerated(value = EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.VARCHAR)
     private ChartType chartType = ChartType.REPORT;
+
+    @Override
+    public String toString() {
+        return "ReportPojo{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", alias='" + alias + '\'' +
+                ", type=" + type +
+                ", directoryId=" + directoryId +
+                ", schemaVersionId=" + schemaVersionId +
+                ", isEnabled=" + isEnabled +
+                ", canSchedule=" + canSchedule +
+                ", minFrequencyAllowedSeconds=" + minFrequencyAllowedSeconds +
+                ", isChart=" + isChart +
+                ", chartType=" + chartType +
+                '}';
+    }
 
 }

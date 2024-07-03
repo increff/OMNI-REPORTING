@@ -2,6 +2,8 @@ package com.increff.omni.reporting.dto;
 
 import com.increff.commons.queryexecutor.constants.FileFormat;
 import com.increff.commons.queryexecutor.constants.RequestStatus;
+import com.increff.commons.springboot.common.ApiException;
+import com.increff.commons.springboot.common.ApiStatus;
 import com.increff.omni.reporting.model.constants.InputControlType;
 import com.increff.omni.reporting.model.constants.ReportRequestStatus;
 import com.increff.omni.reporting.model.constants.ReportRequestType;
@@ -10,12 +12,10 @@ import com.increff.omni.reporting.model.data.*;
 import com.increff.omni.reporting.model.form.ReportRequestForm;
 import com.increff.omni.reporting.model.form.ReportScheduleForm;
 import com.increff.omni.reporting.pojo.*;
-import com.increff.service.encryption.common.CryptoCommon;
-import com.increff.service.encryption.form.CryptoForm;
+import com.increff.service.encryption.form.CryptoDecodeFormWithoutKey;
+import com.increff.service.encryption.form.CryptoFormWithoutKey;
 import com.nextscm.commons.lang.StringUtil;
-import com.nextscm.commons.spring.common.ApiException;
-import com.nextscm.commons.spring.common.ApiStatus;
-import org.springframework.scheduling.support.CronSequenceGenerator;
+import org.springframework.scheduling.support.CronExpression;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -24,8 +24,6 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
-
-import static com.increff.omni.reporting.dto.ReportRequestDto.accessControlledKeys;
 
 public class CommonDtoHelper {
 
@@ -38,8 +36,8 @@ public class CommonDtoHelper {
         return inputParamMap;
     }
 
-    public static List<InputControlFilterData> prepareFilters(List<ReportScheduleInputParamsPojo> paramsPojos,
-                                                              List<InputControlPojo> controlPojos) {
+    public static List<InputControlFilterData> prepareScheduleFilterData(List<ReportScheduleInputParamsPojo> paramsPojos,
+                                                                         List<InputControlPojo> controlPojos) {
         List<InputControlFilterData> inputControlFilterData = new ArrayList<>();
         paramsPojos.forEach(p -> {
             Optional<InputControlPojo>
@@ -49,11 +47,13 @@ public class CommonDtoHelper {
                 InputControlFilterData filterData = new InputControlFilterData();
                 filterData.setParamName(controlPojo.get().getParamName());
                 filterData.setDisplayName(controlPojo.get().getDisplayName());
+
                 List<String> values = Objects.isNull(p.getParamValue()) ? new ArrayList<>() :
                         ((controlPojo.get().getType().equals(InputControlType.DATE) || controlPojo.get().getType().equals(InputControlType.DATE_TIME)) ? Collections.singletonList(p.getParamValue()) :
                         Arrays.stream(p.getParamValue().split(
                                         ","))
                                 .map(CommonDtoHelper::getValueFromQuotes).collect(Collectors.toList()));
+
                 filterData.setValues(values);
                 filterData.setType(controlPojo.get().getType());
                 inputControlFilterData.add(filterData);
@@ -92,6 +92,7 @@ public class CommonDtoHelper {
         data.setNoOfRows(pojo.getNoOfRows());
         data.setSequenceNumber(sequenceNumber);
         data.setFailureReason(pojo.getFailureReason());
+        data.setDisplayFailureReason(pojo.getDisplayFailureReason());
         data.setFileFormat(pojo.getFileFormat());
         setFiltersApplied(paramsPojoList, data, controlPojos);
         return data;
@@ -121,8 +122,7 @@ public class CommonDtoHelper {
                                          List<InputControlPojo> controlPojos) {
         List<InputControlFilterData> filterData = new ArrayList<>();
         for (ReportInputParamsPojo reportInputParamsPojo : paramsPojoList) {
-            if (accessControlledKeys.contains(reportInputParamsPojo.getParamKey())
-                    || reportInputParamsPojo.getParamKey().equals("orgId"))
+            if (reportInputParamsPojo.getParamKey().equals("orgId"))
                 continue;
             if (reportInputParamsPojo.getParamKey().equals("timezone")) {
                 data.setTimezone(getValueFromQuotes(reportInputParamsPojo.getParamValue()));
@@ -207,7 +207,7 @@ public class CommonDtoHelper {
         return pojo;
     }
 
-    public static List<OrgSchemaData> getOrgSchemaDataList(List<OrgSchemaVersionPojo> pojos,
+    public static List<OrgSchemaData> getOrgSchemaDataList(List<OrgMappingPojo> pojos,
                                                            List<SchemaVersionPojo> allPojos) {
         Map<Integer, SchemaVersionPojo> idToPojoMap = new HashMap<>();
         allPojos.forEach(a -> idToPojoMap.put(a.getId(), a));
@@ -217,29 +217,12 @@ public class CommonDtoHelper {
         }).collect(Collectors.toList());
     }
 
-    public static List<OrgConnectionData> getOrgConnectionDataList(List<OrgConnectionPojo> pojos,
-                                                                   List<ConnectionPojo> allPojos) {
-        Map<Integer, ConnectionPojo> idToPojoMap = new HashMap<>();
-        allPojos.forEach(a -> idToPojoMap.put(a.getId(), a));
-        return pojos.stream().map(p -> {
-            ConnectionPojo pojo = idToPojoMap.get(p.getConnectionId());
-            return getOrgConnectionData(p, pojo);
-        }).collect(Collectors.toList());
-    }
 
-    public static OrgSchemaData getOrgSchemaData(OrgSchemaVersionPojo pojo, SchemaVersionPojo schemaVersionPojo) {
+    public static OrgSchemaData getOrgSchemaData(OrgMappingPojo pojo, SchemaVersionPojo schemaVersionPojo) {
         OrgSchemaData data = new OrgSchemaData();
         data.setOrgId(pojo.getOrgId());
         data.setSchemaVersionId(pojo.getSchemaVersionId());
         data.setSchemaName(schemaVersionPojo.getName());
-        return data;
-    }
-
-    public static OrgConnectionData getOrgConnectionData(OrgConnectionPojo pojo, ConnectionPojo connectionPojo) {
-        OrgConnectionData data = new OrgConnectionData();
-        data.setOrgId(pojo.getOrgId());
-        data.setConnectionId(pojo.getConnectionId());
-        data.setConnectionName(connectionPojo.getName());
         return data;
     }
 
@@ -299,14 +282,17 @@ public class CommonDtoHelper {
             reportInputParamsPojo.setDisplayValue(inputDisplayStringMap.getOrDefault(k, v));
             reportInputParamsPojoList.add(reportInputParamsPojo);
         });
+
         ReportInputParamsPojo timeZoneParam = new ReportInputParamsPojo();
         timeZoneParam.setParamKey("timezone");
         timeZoneParam.setParamValue("'" + timeZone + "'");
         reportInputParamsPojoList.add(timeZoneParam);
+
         ReportInputParamsPojo orgIdParam = new ReportInputParamsPojo();
         orgIdParam.setParamKey("orgId");
         orgIdParam.setParamValue("'" + orgId.toString() + "'");
         reportInputParamsPojoList.add(orgIdParam);
+
         return reportInputParamsPojoList;
     }
 
@@ -369,18 +355,16 @@ public class CommonDtoHelper {
         return reportPojo;
     }
 
-    public static CryptoForm getCryptoForm(String password, Integer userId) {
-        CryptoForm cryptoForm = new CryptoForm();
-        cryptoForm.setKey("key");
+    public static CryptoFormWithoutKey getCryptoForm(String password, Integer userId) {
+        CryptoFormWithoutKey cryptoForm = new CryptoFormWithoutKey();
         cryptoForm.setValue(password);
         cryptoForm.setAppName("omni-reporting");
         cryptoForm.setOrgId(userId.toString());
         return cryptoForm;
     }
 
-    public static CryptoCommon convertToCryptoForm(String value) {
-        CryptoCommon form = new CryptoCommon();
-        form.setKey("key");
+    public static CryptoDecodeFormWithoutKey convertToCryptoForm(String value) {
+        CryptoDecodeFormWithoutKey form = new CryptoDecodeFormWithoutKey();
         form.setValue(value);
         return form;
     }
@@ -438,14 +422,17 @@ public class CommonDtoHelper {
         schedulePojo.setNextRuntime(getNextRunTime(cron, form.getTimezone()));
         // New / updated schedule is created with deleted flag false
         schedulePojo.setIsDeleted(false);
+        if (Objects.nonNull(form.getEmailParams()))
+            schedulePojo.setEmailSubject(form.getEmailParams().getSubject());
         return schedulePojo;
     }
 
     public static ZonedDateTime getNextRunTime(String cron, String timezone) {
-        CronSequenceGenerator generator = new CronSequenceGenerator(cron,
-                TimeZone.getTimeZone(ZoneId.of(timezone)));
-        Instant instant = generator.next(new Date()).toInstant();
-        return ZonedDateTime.ofInstant(instant, ZoneId.of("UTC"));
+        CronExpression expression = CronExpression.parse(cron);
+        ZoneId zoneId = ZoneId.of(timezone);
+        ZonedDateTime nowInDesiredZone = ZonedDateTime.now(zoneId);
+        ZonedDateTime nextRuntimeInDesiredZone = expression.next(nowInDesiredZone);
+        return nextRuntimeInDesiredZone;
     }
 
     public static String getValueFromQuotes(String value) {
@@ -484,16 +471,16 @@ public class CommonDtoHelper {
             throw new ApiException(ApiStatus.BAD_DATA,"Please change existing schedules cron frequency before updating report min frequency.\n" + error.toString());
     }
 
-    public static long getCronFrequencyInSeconds(String cronExpression) throws ApiException {
-        CronSequenceGenerator generator = new CronSequenceGenerator(cronExpression);
+    public static long getCronFrequencyInSeconds(String cronExpression) {
+        CronExpression generator = CronExpression.parse(cronExpression);
         long freqIntervalSecondsMin = 1000000000;
 
-        Instant instant = generator.next(new Date()).toInstant();
+        Instant instant = Objects.requireNonNull(generator.next(ZonedDateTime.now())).toInstant();
         ZonedDateTime nextFireTime = ZonedDateTime.ofInstant(instant, ZoneId.of("UTC"));
 
         ZonedDateTime nextToNextFireTime;
-        for(int i=0;i<100;i++){ // loop over multiple consecutive fire times to get the minimum frequency as cron expression can be non-periodic
-            instant = generator.next(Date.from(nextFireTime.toInstant())).toInstant();
+        for(int i=0;i<100;i++) { // loop over multiple consecutive fire times to get the minimum frequency as cron expression can be non-periodic
+            instant = Objects.requireNonNull(generator.next(nextFireTime)).toInstant();
             nextToNextFireTime = ZonedDateTime.ofInstant(instant, ZoneId.of("UTC"));
             freqIntervalSecondsMin = Math.min(freqIntervalSecondsMin, (nextToNextFireTime.toEpochSecond() - nextFireTime.toEpochSecond()) );
             nextFireTime = nextToNextFireTime;

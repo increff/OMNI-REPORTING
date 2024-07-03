@@ -1,12 +1,13 @@
 package com.increff.omni.reporting.dto;
 
+import com.increff.commons.springboot.common.ApiException;
+import com.increff.commons.springboot.common.ApiStatus;
 import com.increff.omni.reporting.config.AbstractTest;
+import com.increff.omni.reporting.helper.OrgMappingTestHelper;
 import com.increff.omni.reporting.model.constants.*;
 import com.increff.omni.reporting.model.data.*;
 import com.increff.omni.reporting.model.form.*;
-import com.nextscm.commons.spring.common.ApiException;
-import com.nextscm.commons.spring.common.ApiStatus;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.*;
@@ -17,7 +18,7 @@ import static com.increff.omni.reporting.helper.InputControlTestHelper.getInputC
 import static com.increff.omni.reporting.helper.OrgTestHelper.getOrganizationForm;
 import static com.increff.omni.reporting.helper.ReportTestHelper.*;
 import static com.increff.omni.reporting.helper.SchemaTestHelper.getSchemaForm;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ReportDtoTest extends AbstractTest {
 
@@ -47,8 +48,7 @@ public class ReportDtoTest extends AbstractTest {
         SchemaVersionData schemaData = schemaDto.add(schemaVersionForm);
         ConnectionForm connectionForm = getConnectionForm("127.0.0.1", "Test DB", username, password);
         ConnectionData connectionData = connectionDto.add(connectionForm);
-        organizationDto.mapToConnection(organizationData.getId(), connectionData.getId());
-        organizationDto.mapToSchema(organizationData.getId(), schemaData.getId());
+        organizationDto.addOrgMapping(OrgMappingTestHelper.getOrgMappingForm(organizationData.getId(), schemaData.getId(), connectionData.getId()));
         return getReportForm(name, type, directoryData.getId(), schemaData.getId(), false, ChartType.REPORT);
     }
 
@@ -100,34 +100,82 @@ public class ReportDtoTest extends AbstractTest {
     }
 
     @Test
-    public void testTransformedQuery() {
+    public void testTransformedQuery() throws ApiException {
         ReportQueryTestForm testForm = getQueryTestForm();
         ReportQueryData queryData = dto.getTransformedQuery(testForm);
         assertEquals("select * from table where id = '1';", queryData.getQuery());
     }
 
     @Test
-    public void testTransformedQueryWithWrongParam() {
+    public void testTransformedQueryWithWrongParam() throws ApiException {
         ReportQueryTestForm testForm = getQueryTestForm();
         testForm.setParamMap(new HashMap<>());
         ReportQueryData queryData = dto.getTransformedQuery(testForm);
-        assertEquals("select * from table where id = {{replace(id)}};", queryData.getQuery());
+        assertEquals("select * from table where id = <<replace(^id^)>>;", queryData.getQuery());
     }
 
     @Test
-    public void testTransformedQueryWithWrongParamCase2() {
+    public void testTransformedQueryWithWrongParamCase2() throws ApiException {
         ReportQueryTestForm testForm = getQueryTestForm();
         testForm.setParamMap(new HashMap<>());
         ReportQueryData queryData = dto.getTransformedQuery(testForm);
-        assertEquals("select * from table where id = {{replace(id)}};", queryData.getQuery());
+        assertEquals("select * from table where id = <<replace(^id^)>>;", queryData.getQuery());
     }
 
     @Test
-    public void testTransformedQueryCase2() {
+    public void testTransformedQueryCase2() throws ApiException {
         ReportQueryTestForm testForm = getQueryTestForm();
-        testForm.setQuery("select * from table where {{filter(id,id,<=)}};");
+        testForm.setQuery("select * from table where <<filter(^id,id,<= ^)>>;");
         ReportQueryData queryData = dto.getTransformedQuery(testForm);
         assertEquals("select * from table where id <= '1';", queryData.getQuery());
+    }
+
+    @Test
+    public void testMongoFilterKeepQuotesFalse() throws ApiException {
+        ReportQueryTestForm testForm = getQueryTestForm();
+        testForm.setQuery("<<mongoFilter(^id, { id_column : #id }, keepQuotesFalse^)>>");
+        ReportQueryData queryData = dto.getTransformedQuery(testForm);
+        assertEquals("{ id_column : 1 }", queryData.getQuery());
+    }
+
+    @Test
+    public void testMongoFilterKeepQuotesTrue() throws ApiException {
+        ReportQueryTestForm testForm = getQueryTestForm();
+        testForm.setQuery("<<mongoFilter(^id, { id_column : #id }, keepQuotesTrue^)>>");
+        ReportQueryData queryData = dto.getTransformedQuery(testForm);
+        assertEquals("{ id_column : '1' }", queryData.getQuery());
+    }
+
+    @Test
+    public void testMongoFilterNoValue() throws ApiException {
+        ReportQueryTestForm testForm = getQueryTestForm();
+        testForm.setQuery("<<mongoFilter(^key_wout_val, { id_column : #key_wout_val }, keepQuotesTrue^)>>");
+        ReportQueryData queryData = dto.getTransformedQuery(testForm);
+        assertEquals("{}", queryData.getQuery());
+    }
+
+    @Test
+    public void testMongoReplaceKeepQuotesFalse() throws ApiException {
+        ReportQueryTestForm testForm = getQueryTestForm();
+        testForm.setQuery("<<mongoReplace(^id, keepQuotesFalse^)>>");
+        ReportQueryData queryData = dto.getTransformedQuery(testForm);
+        assertEquals("1", queryData.getQuery());
+    }
+
+    @Test
+    public void testMongoReplaceKeepQuotesTrue() throws ApiException {
+        ReportQueryTestForm testForm = getQueryTestForm();
+        testForm.setQuery("<<mongoReplace(^id, keepQuotesTrue^)>>");
+        ReportQueryData queryData = dto.getTransformedQuery(testForm);
+        assertEquals("'1'", queryData.getQuery());
+    }
+
+    @Test
+    public void testMongoReplaceNoValue() throws ApiException {
+        ReportQueryTestForm testForm = getQueryTestForm();
+        testForm.setQuery("<<mongoReplace(^id, keepQuotesTrue^)>>");
+        ReportQueryData queryData = dto.getTransformedQuery(testForm);
+        assertEquals("'1'", queryData.getQuery());
     }
 
     @Test
@@ -191,7 +239,7 @@ public class ReportDtoTest extends AbstractTest {
         assertEquals(1, reportDataList.size());
     }
 
-    @Test(expected = ApiException.class)
+    @Test
     public void testAddValidationGroupErrorCase1() throws ApiException {
         ReportForm form = commonSetup("Report 2", ReportType.CUSTOM);
         ReportData data = dto.add(form);
@@ -206,11 +254,10 @@ public class ReportDtoTest extends AbstractTest {
         } catch (ApiException e) {
             assertEquals(ApiStatus.BAD_DATA, e.getStatus());
             assertEquals("Report id cannot be null", e.getMessage());
-            throw e;
         }
     }
 
-    @Test(expected = ApiException.class)
+    @Test
     public void testAddValidationGroupErrorCase2() throws ApiException {
         ReportForm form = commonSetup("Report 2", ReportType.CUSTOM);
         ReportData data = dto.add(form);
@@ -225,11 +272,10 @@ public class ReportDtoTest extends AbstractTest {
         } catch (ApiException e) {
             assertEquals(ApiStatus.BAD_DATA, e.getStatus());
             assertEquals("Validation group contains duplicate control ids", e.getMessage());
-            throw e;
         }
     }
 
-    @Test(expected = ApiException.class)
+    @Test
     public void testAddValidationGroupErrorCase3() throws ApiException {
         ReportForm form = commonSetup("Report 2", ReportType.CUSTOM);
         ReportData data = dto.add(form);
@@ -244,7 +290,6 @@ public class ReportDtoTest extends AbstractTest {
         } catch (ApiException e) {
             assertEquals(ApiStatus.BAD_DATA, e.getStatus());
             assertEquals("Date range validation should have positive validation value", e.getMessage());
-            throw e;
         }
     }
 
@@ -270,20 +315,28 @@ public class ReportDtoTest extends AbstractTest {
         dto.add(form);
     }
 
-    @Test(expected = ApiException.class)
+    @Test
     public void testAddChartWithIsChartFalse() throws ApiException {
         ReportForm form = commonSetup("Report 1", ReportType.STANDARD);
         form.setIsChart(false);
         form.setChartType(ChartType.TABLE);
-        dto.add(form);
+        ApiException exception = assertThrows(ApiException.class, () -> {
+            dto.add(form);
+        });
+        assertEquals(ApiStatus.BAD_DATA, exception.getStatus());
+        assertEquals("isChart should be true for Chart Type: TABLE", exception.getMessage());
     }
 
-    @Test(expected = ApiException.class)
+    @Test
     public void testAddBarChartWithoutLegends() throws ApiException {
         ReportForm form = commonSetup("Report 1", ReportType.STANDARD);
         form.setIsChart(true);
         form.setChartType(ChartType.BAR);
-        dto.add(form);
+        ApiException exception = assertThrows(ApiException.class, () -> {
+            dto.add(form);
+        });
+        assertEquals(ApiStatus.BAD_DATA, exception.getStatus());
+        assertEquals("Invalid legend count. Expected: 2 Actual: 0", exception.getMessage());
     }
 
     @Test

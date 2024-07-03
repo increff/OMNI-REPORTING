@@ -4,172 +4,280 @@
 
     <groupId>com.increff.omni</groupId>
     <artifactId>omni-reporting</artifactId>
-    <version>1.53-SNAPSHOT</version>
-    <packaging>war</packaging>
+    <version>2.1.4-SNAPSHOT</version>
+
+    <parent>
+        <!-- version for all the spring boot starters -->
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.2.0</version>
+    </parent>
+
     <properties>
         <!-- Maven Properties -->
-        <java.version>1.8</java.version>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
+        <java.version>21</java.version>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
+        <project.version>${project.version}</project.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <start-class>com.increff.omni.reporting.OmniReportingApplication</start-class>
 
-        <!-- Jetty -->
-        <jetty.version>9.4.51.v20230217</jetty.version>
-        <jetty.http.port>9001</jetty.http.port>
-        <jetty.http.host>0.0.0.0</jetty.http.host>
-        <jetty.context>/omni-reporting/api/</jetty.context>
-        <failOnMissingWebXml>false</failOnMissingWebXml>
-
-        <!-- Increff Dependencies -->
-        <fileclient.version>1.1.4</fileclient.version>
-        <nextscm-commons-spring.version>2.10</nextscm-commons-spring.version>
-        <crypto-client.version>RELEASE</crypto-client.version>
-        <increff-commons-logging.version>1.5</increff-commons-logging.version>
-        <increff-account.version>3.27</increff-account.version>
-        <lombok.version>1.18.22</lombok.version>
-        <swagger.version>2.7.0</swagger.version>
-        <log4j.version>1.2.17</log4j.version>
-        <increff-commons-sheet.version>1.3</increff-commons-sheet.version>
-        <nextscm-common-file-client.version>1.1.5</nextscm-common-file-client.version>
-
-        <!-- Runtime/Test Dependencies -->
-        <javax.servlet.version>3.1.0</javax.servlet.version>
-        <mockito.version>1.9.5</mockito.version>
-
-        <!-- External Dependencies -->
-        <apache-commons-csv.version>1.9.0</apache-commons-csv.version>
-        <apache-commons-compress.version>1.22</apache-commons-compress.version>
-        <javax.mail.version>1.4.7</javax.mail.version>
-
+        <!--    Versions    -->
+        <increff-commons-fileclient.version>2.4.0</increff-commons-fileclient.version>
+        <bucket4j-core.version>8.7.0</bucket4j-core.version>
+        <commons-springboot-server.version>0.0.1</commons-springboot-server.version>
+        <commons-springboot-db-mysql.version>0.0.1</commons-springboot-db-mysql.version>
+        <commons-springboot-audit-mysql.version>0.0.1</commons-springboot-audit-mysql.version>
+        <commons-springboot-test.version>0.0.1</commons-springboot-test.version>
+        <google-cloud-storage.version>2.20.0</google-cloud-storage.version>
+        <commons-io.version>2.7</commons-io.version>
+        <commons-csv.version>1.9.0</commons-csv.version>
+        <encryption-client.version>4.0</encryption-client.version>
+        <query-executor-client.version>2.0</query-executor-client.version>
+        <account-springboot-client.version>0.0.6</account-springboot-client.version>
+        <nextscm-commons-lang.version>1.3</nextscm-commons-lang.version>
     </properties>
+
 
     <dependencies>
 
         <dependency>
+            <groupId>org.mongodb</groupId>
+            <artifactId>mongodb-driver-sync</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>com.increff.commons</groupId>
             <artifactId>increff-commons-fileclient</artifactId>
-            <version>${nextscm-common-file-client.version}</version>
+            <version>${increff-commons-fileclient.version}</version>
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/com.github.vladimir-bukhtoyarov/bucket4j-core -->
         <dependency>
             <groupId>com.bucket4j</groupId>
-            <artifactId>bucket4j_jdk8-core</artifactId>
-            <version>8.7.0</version>
+            <artifactId>bucket4j-core</artifactId>
+            <version>${bucket4j-core.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.increff.commons</groupId>
+            <artifactId>commons-springboot-server</artifactId>
+            <version>${commons-springboot-server.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.increff.commons</groupId>
+            <artifactId>commons-springboot-db-mysql</artifactId>
+            <version>${commons-springboot-db-mysql.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.increff.commons</groupId>
+            <artifactId>commons-springboot-audit-mysql</artifactId>
+            <version>${commons-springboot-audit-mysql.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.increff.commons</groupId>
+            <artifactId>commons-springboot-test</artifactId>
+            <version>${commons-springboot-test.version}</version>
+            <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <artifactId>android-json</artifactId>
+                    <groupId>com.vaadin.external.google</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>org.eclipse.angus</groupId>
+            <artifactId>angus-mail</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.cloud</groupId>
+            <artifactId>google-cloud-storage</artifactId>
+            <version>${google-cloud-storage.version}</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>jackson-core</artifactId>
+                    <groupId>com.fasterxml.jackson.core</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-csv</artifactId>
-            <version>${apache-commons-csv.version}</version>
+            <version>${commons-csv.version}</version>
         </dependency>
+
+        <!-- https://mvnrepository.com/artifact/commons-io/commons-io -->
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>${commons-io.version}</version>
+        </dependency>
+
+
+        <!-- Increff Dependencies -->
         <dependency>
             <groupId>com.nextscm.commons</groupId>
-            <artifactId>commons-spring-server</artifactId>
-            <version>${nextscm-commons-spring.version}</version>
+            <artifactId>nextscm-commons-lang</artifactId>
+            <version>${nextscm-commons-lang.version}</version>
+            <type>jar</type>
         </dependency>
-        <dependency>
-            <groupId>com.nextscm.commons</groupId>
-            <artifactId>commons-spring-audit</artifactId>
-            <version>${nextscm-commons-spring.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.increff.account</groupId>
-            <artifactId>account-client</artifactId>
-            <version>${increff-account.version}</version>
-        </dependency>
+
         <dependency>
             <groupId>com.increff.service</groupId>
             <artifactId>encryption-client</artifactId>
-            <version>${crypto-client.version}</version>
+            <version>${encryption-client.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>com.increff.account</groupId>
+            <artifactId>account-springboot-client</artifactId>
+            <version>${account-springboot-client.version}</version>
+        </dependency>
+
         <dependency>
             <groupId>com.increff.commons</groupId>
             <artifactId>query-executor-client</artifactId>
-            <version>1.0.1</version>
-        </dependency>
-        <dependency>
-            <groupId>com.increff.commons</groupId>
-            <artifactId>commons-logging</artifactId>
-            <version>${increff-commons-logging.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.increff.commons</groupId>
-            <artifactId>increff-commons-sheet</artifactId>
-            <version>${increff-commons-sheet.version}</version>
+            <version>${query-executor-client.version}</version>
         </dependency>
 
-        <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>javax.servlet-api</artifactId>
-            <version>${javax.servlet.version}</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-            <version>8.0.33</version>
-        </dependency>
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <version>${lombok.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>javax.mail</groupId>
-            <artifactId>mail</artifactId>
-            <version>${javax.mail.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.nextscm.commons</groupId>
-            <artifactId>commons-spring-test</artifactId>
-            <version>${nextscm-commons-spring.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-all</artifactId>
-            <version>${mockito.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-compress</artifactId>
-            <version>${apache-commons-compress.version}</version>
-        </dependency>
     </dependencies>
 
     <build>
-        <plugins>
-            <!-- Jetty plugin, for web application testing -->
-            <plugin>
-                <groupId>org.eclipse.jetty</groupId>
-                <artifactId>jetty-maven-plugin</artifactId>
-                <version>${jetty.version}</version>
-                <configuration>
-                    <scanIntervalSeconds>5</scanIntervalSeconds>
-                    <useTestClasspath>false</useTestClasspath>
-                    <httpConnector>
-                        <port>${jetty.http.port}</port>
-                    </httpConnector>
-                    <webApp>
-                        <contextPath>${jetty.context}</contextPath>
-                    </webApp>
-                </configuration>
-            </plugin>
-        </plugins>
+        <finalName>app</finalName>
         <resources>
             <resource>
                 <directory>src/main/resources</directory>
                 <filtering>true</filtering>
+                <includes>
+                    <include>**/*.properties</include>
+                    <include>**/*.xml</include>
+                </includes>
             </resource>
         </resources>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.11.0</version>
+                <configuration>
+                    <compilerArgs>
+                        <arg>-parameters</arg>
+                    </compilerArgs>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>3.2.0</version>
+                <configuration>
+                    <mainClass>com.increff.omni.reporting.OmniReportingApplication</mainClass>
+                    <layout>JAR</layout>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>3.2.0</version>
+                <executions>
+                    <execution>
+                        <id>download-elastic-apm-agent</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>co.elastic.apm</groupId>
+                                    <artifactId>elastic-apm-agent</artifactId>
+                                    <version>1.38.0</version>
+                                    <type>jar</type>
+                                    <overWrite>true</overWrite>
+                                    <outputDirectory>${project.build.directory}/</outputDirectory>
+                                </artifactItem>
+                            </artifactItems>
+                            <outputDirectory>${project.build.directory}/</outputDirectory>
+                            <overWriteReleases>false</overWriteReleases>
+                            <overWriteSnapshots>true</overWriteSnapshots>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>com.google.cloud.tools</groupId>
+                <artifactId>jib-maven-plugin</artifactId>
+                <version>3.4.0</version>
+                <configuration>
+                    <from>
+                        <image>eclipse-temurin:21-jre</image>
+                        <platforms>
+                            <platform>
+                                <os>linux</os>
+                                <architecture>amd64</architecture>
+                            </platform>
+                        </platforms>
+                    </from>
+                    <to>
+                        <image>asia-south1-docker.pkg.dev/saas-dev-314407/internal-services/omni-reporting</image>
+                        <tags>
+                            <tag>${project.version}</tag>
+                        </tags>
+                    </to>
+                    <extraDirectories>
+                        <paths>
+                            <path>
+                                <from>target/</from>
+                                <into>/usr/local/</into>
+                                <includes>*.jar</includes>
+                            </path>
+                            <path>
+                                <from>src/main/resources/</from>
+                                <into>/usr/local/</into>
+                                <includes>*.xml</includes>
+                            </path>
+                            <path>
+                                <from>src/main/resources/</from>
+                                <into>/usr/local/</into>
+                                <includes>*.properties</includes>
+                            </path>
+                        </paths>
+                    </extraDirectories>
+                    <container>
+                        <entrypoint>
+                            <arg>/bin/sh</arg>
+                            <arg>-c</arg>
+                            <arg>java -Xms1500m -Xmx1500m -javaagent:/usr/local/elastic-apm-agent-1.38.0.jar -Dlogging.config=/usr/local/log4j2.xml -Delastic.apm.service_name=${ELK_SERVICE_NAME} -Delastic.apm.application_packages=* -Delastic.apm.server_url=${ELK_SERVER_URL} -Delastic.apm.secret_token=${ELK_SERVER_TOKEN} -Delastic.apm.environment=elk -Dspring.cloud.vault.scheme=${VAULT_SCHEME} -Dspring.cloud.vault.host=${VAULT_HOST} -Dspring.cloud.vault.application-name=omniReporting -Dspring.cloud.vault.port=${VAULT_PORT} -Dspring.cloud.vault.token=${VAULT_TOKEN} -Dspring.config.import=vault:// -Dspring.profiles.active=${ACTIVE_PROFILE} -jar /usr/local/app.jar</arg>
+                        </entrypoint>
+                        <ports>
+                            <port>8080</port>
+                        </ports>
+                    </container>
+                </configuration>
+            </plugin>
+
+        </plugins>
     </build>
 
     <repositories>
+
         <!-- For NextSCM -->
         <repository>
             <id>increff-release</id>
@@ -184,6 +292,17 @@
         <repository>
             <id>increff-snapshot</id>
             <url>https://one.increff.com/artifactory/libs-snapshot-local</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+        </repository>
+
+        <repository>
+            <id>sonatype-snapshot</id>
+            <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
             <snapshots>
                 <enabled>true</enabled>
             </snapshots>
@@ -214,7 +333,7 @@
         <url>https://bitbucket.org/increff/omni-reporting/src</url>
         <connection>scm:git:https://nextscm_jenkins@bitbucket.org/increff/omni-reporting.git</connection>
         <developerConnection>scm:git:https://nextscm_jenkins@bitbucket.org/increff/omni-reporting.git</developerConnection>
-        <tag>HEAD</tag>
+        <tag>omni-reporting-2.0.5</tag>
     </scm>
 
 

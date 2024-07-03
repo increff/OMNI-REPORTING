@@ -4,13 +4,14 @@ import com.increff.commons.queryexecutor.data.QueryRequestData;
 import com.increff.commons.queryexecutor.form.GetRequestForm;
 import com.increff.omni.reporting.api.*;
 import com.increff.omni.reporting.pojo.*;
-import com.nextscm.commons.spring.common.ApiException;
-import com.nextscm.commons.spring.common.ApiStatus;
+import com.increff.commons.springboot.common.ApiException;
+import com.increff.commons.springboot.common.ApiStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -19,22 +20,17 @@ import java.util.stream.Collectors;
 import static com.increff.omni.reporting.dto.CommonDtoHelper.getStatusMapping;
 
 @Service
-public class ReportRequestFlowApi extends AbstractFlowApi {
+public class ReportRequestFlowApi extends FlowApi {
 
     @Autowired
     private ReportRequestApi api;
     @Autowired
     private ReportApi reportApi;
     @Autowired
-    private InputControlApi controlApi;
-    @Autowired
-    private ReportControlsApi reportControlsApi;
-    @Autowired
     private ReportInputParamsApi reportInputParamsApi;
     @Autowired
     private ConnectionApi connectionApi;
-    @Autowired
-    private OrgConnectionApi orgConnectionApi;
+
     @Autowired
     private ReportValidationGroupApi reportValidationGroupApi;
     @Autowired
@@ -49,7 +45,7 @@ public class ReportRequestFlowApi extends AbstractFlowApi {
         if (!CollectionUtils.isEmpty(pendingReports) && pendingReports.size() >= MAX_OPEN_REPORT_REQUESTS)
             throw new ApiException(ApiStatus.BAD_DATA, "Wait for existing reports to get executed");
         ReportPojo reportPojo = reportApi.getCheck(pojo.getReportId());
-        validate(reportPojo, reportInputParamsPojoList);
+        validate(reportPojo, reportInputParamsPojoList, null);
         requestReportWithoutValidation(pojo, reportInputParamsPojoList);
     }
 

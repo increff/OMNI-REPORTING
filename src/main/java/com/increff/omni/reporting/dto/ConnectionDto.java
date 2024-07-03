@@ -1,22 +1,22 @@
 package com.increff.omni.reporting.dto;
 
+import com.increff.commons.springboot.client.AppClientException;
+import com.increff.commons.springboot.common.ApiException;
+import com.increff.commons.springboot.common.ApiStatus;
+import com.increff.commons.springboot.common.ConvertUtil;
 import com.increff.omni.reporting.api.ConnectionApi;
 import com.increff.omni.reporting.api.DBConnectionApi;
-import com.increff.omni.reporting.api.FolderApi;
 import com.increff.omni.reporting.config.ApplicationProperties;
 import com.increff.omni.reporting.model.constants.AuditActions;
+import com.increff.omni.reporting.model.constants.DBType;
 import com.increff.omni.reporting.model.data.ConnectionData;
 import com.increff.omni.reporting.model.form.ConnectionForm;
 import com.increff.omni.reporting.pojo.ConnectionPojo;
+import com.increff.omni.reporting.util.MongoUtil;
 import com.increff.service.encryption.EncryptionClient;
-import com.increff.service.encryption.form.CryptoForm;
-import com.nextscm.commons.lang.StringUtil;
-import com.nextscm.commons.spring.client.AppClientException;
-import com.nextscm.commons.spring.common.ApiException;
-import com.nextscm.commons.spring.common.ApiStatus;
-import com.nextscm.commons.spring.common.ConvertUtil;
+import com.increff.service.encryption.form.CryptoFormWithoutKey;
 import lombok.Setter;
-import lombok.extern.log4j.Log4j;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -30,14 +30,12 @@ import java.util.Objects;
 import static com.increff.omni.reporting.dto.CommonDtoHelper.getCryptoForm;
 
 @Service
-@Log4j
+@Log4j2
 @Setter
 public class ConnectionDto extends AbstractDto {
 
     @Autowired
     private ConnectionApi api;
-    @Autowired
-    private FolderApi folderApi;
     @Autowired
     private ApplicationProperties properties;
     @Autowired
@@ -51,6 +49,8 @@ public class ConnectionDto extends AbstractDto {
         ConnectionPojo pojo = ConvertUtil.convert(form, ConnectionPojo.class);
         pojo.setPassword(password);
         pojo = api.add(pojo);
+        api.saveAudit(pojo.getId().toString(), AuditActions.ADD_CONNECTION.toString(), "Add Connection"
+                , "Add Connection " + form.getName(), getUserName());
         return ConvertUtil.convert(pojo, ConnectionData.class);
     }
 
@@ -61,7 +61,7 @@ public class ConnectionDto extends AbstractDto {
         pojo.setId(id);
         pojo.setPassword(password);
         api.saveAudit(id.toString(), AuditActions.EDIT_CONNECTION.toString(), "Edit Connection"
-                , "Edit Connection", getUserName());
+                , "Edit Connection " + form.getName(), getUserName());
         pojo = api.update(pojo);
         return ConvertUtil.convert(pojo, ConnectionData.class);
     }
@@ -74,14 +74,19 @@ public class ConnectionDto extends AbstractDto {
     public void testConnection(ConnectionForm form) throws ApiException {
         Connection connection = null;
         try {
-            ConnectionPojo pojo = ConvertUtil.convert(form, ConnectionPojo.class);
-            connection = dbConnectionApi.getConnection(pojo.getHost(), pojo.getUsername(),
-                    pojo.getPassword(), properties.getMaxConnectionTime());
-            PreparedStatement statement = dbConnectionApi.getStatement(connection,
-                    properties.getLiveReportMaxExecutionTime(), "select version();",
-                    properties.getResultSetFetchSize());
-            ResultSet resultSet = statement.executeQuery();
-            resultSet.close();
+            ConnectionPojo connectionPojo = ConvertUtil.convert(form, ConnectionPojo.class);
+            if(connectionPojo.getDbType().equals(DBType.MYSQL)) {
+                connection = dbConnectionApi.getConnection(connectionPojo.getHost(), connectionPojo.getUsername(),
+                        connectionPojo.getPassword(), properties.getMaxConnectionTime());
+                PreparedStatement statement = dbConnectionApi.getStatement(connection,
+                        properties.getLiveReportMaxExecutionTime(), "select version()", properties.getResultSetFetchSize());
+                ResultSet resultSet = statement.executeQuery();
+                resultSet.close();
+            } else if (connectionPojo.getDbType().equals(DBType.MONGO)) {
+                MongoUtil.testConnection(connectionPojo.getHost(), connectionPojo.getUsername(),
+                        connectionPojo.getPassword());
+            }
+
         } catch (SQLException e) {
             throw new ApiException(ApiStatus.UNKNOWN_ERROR, "Error connecting to database : " + e.getMessage());
         } finally {
@@ -97,7 +102,7 @@ public class ConnectionDto extends AbstractDto {
 
     private String encryptPassword(ConnectionForm connectionForm, Integer userId) throws ApiException {
         try {
-            CryptoForm form = getCryptoForm(connectionForm.getPassword(), userId);
+            CryptoFormWithoutKey form = getCryptoForm(connectionForm.getPassword(), userId);
             return encryptionClient.encode(form).getValue();
         } catch (AppClientException e) {
             throw new ApiException(ApiStatus.BAD_DATA, "Failed to encrypt password : " + e.getMessage());

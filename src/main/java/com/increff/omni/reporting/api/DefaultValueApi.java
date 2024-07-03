@@ -2,8 +2,8 @@ package com.increff.omni.reporting.api;
 
 import com.increff.omni.reporting.dao.DefaultValueDao;
 import com.increff.omni.reporting.pojo.DefaultValuePojo;
-import com.nextscm.commons.spring.common.ApiException;
-import com.nextscm.commons.spring.server.AbstractApi;
+import com.increff.commons.springboot.common.ApiException;
+import com.increff.commons.springboot.server.AbstractApi;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,7 +19,7 @@ public class DefaultValueApi extends AbstractApi {
     private DefaultValueDao dao;
 
     public DefaultValuePojo upsert(DefaultValuePojo pojo) {
-        DefaultValuePojo existing = getByDashboardControlChartAlias(pojo.getDashboardId(), pojo.getControlId(), pojo.getChartAlias());
+        DefaultValuePojo existing = getByDashboardIdAndControlParamName(pojo.getDashboardId(), pojo.getParamName());
         if (Objects.nonNull(existing)) {
             if(pojo.getDefaultValue().isEmpty()){
                 dao.remove(existing);
@@ -34,13 +34,12 @@ public class DefaultValueApi extends AbstractApi {
         return pojo;
     }
 
-    public DefaultValuePojo getByDashboardControlChartAlias(Integer dashboardId, Integer controlId, String chartAlias) {
-        return dao.getByDashboardControlChartAlias(dashboardId, controlId, chartAlias);
+    public DefaultValuePojo getByDashboardIdAndControlParamName(Integer dashboardId, String controlParamName) {
+        return dao.getByDashboardIdAndControlParamName(dashboardId, controlParamName);
     }
 
     public List<DefaultValuePojo> getByDashboardId(Integer dashboardId) {
         return dao.selectMultiple("dashboardId", dashboardId);
-
     }
 
     public void deleteByDashboardId(Integer dashboardId) {
@@ -50,18 +49,8 @@ public class DefaultValueApi extends AbstractApi {
         }
     }
 
-    public void deleteByDashboardIdAndControlIdNotIn(Integer dashboardId, List<Integer> controlId) throws ApiException {
-        dao.deleteByDashboardIdAndControlIdNotIn(dashboardId, controlId);
+    public void deleteByDashboardIdAndControlParamNameNotIn(Integer dashboardId, List<String> paramName) throws ApiException {
+        dao.deleteByDashboardIdAndControlParamNameNotIn(dashboardId, paramName);
     }
 
-    public void deleteByDashboardControlChartAlias(Integer dashboardId, Integer controlId, String chartAlias) {
-        DefaultValuePojo pojo = getByDashboardControlChartAlias(dashboardId, controlId, chartAlias);
-        if (Objects.nonNull(pojo)) {
-            dao.remove(pojo);
-        }
-    }
-
-    public void deleteByDashboardControlChartAliasNotIn(Integer dashboardId, Integer controlId, List<String> chartAlias) {
-        dao.deleteByDashboardControlChartAliasNotIn(dashboardId, controlId, chartAlias);
-    }
 }

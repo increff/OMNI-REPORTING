@@ -6,15 +6,15 @@ import com.increff.omni.reporting.model.data.DashboardData;
 import com.increff.omni.reporting.model.data.DashboardGridData;
 import com.increff.omni.reporting.model.data.InputControlData;
 import com.increff.omni.reporting.model.form.DashboardForm;
-import com.nextscm.commons.spring.common.ApiException;
-import com.nextscm.commons.spring.common.ApiStatus;
-import lombok.extern.log4j.Log4j;
+import com.increff.commons.springboot.common.ApiException;
+import com.increff.commons.springboot.common.ApiStatus;
+import lombok.extern.log4j.Log4j2;
 
 import java.util.*;
 
 import static com.increff.omni.reporting.util.SqlCmd.getValueSum;
 
-@Log4j
+@Log4j2
 public class ChartUtil {
 
     public static final String DEFAULT_VALUE_COMMON_KEY = "common";
@@ -53,7 +53,7 @@ public class ChartUtil {
             log.debug("difference: " + difference);
             if (difference != 0) { // As the final sum can be between(99.xx to 100.xx) due to precision, add the offset to first value
                 columnNameRowRemoved.get(0).put(PCT_VAL_COL, String.format("%.2f", Double.parseDouble(columnNameRowRemoved.get(0).get(PCT_VAL_COL)) + difference));
-            } // TODO: Make pct sum 100 by calculating final row pct after  from sum of the rest instead of doing above BS
+            }
         }
     }
 

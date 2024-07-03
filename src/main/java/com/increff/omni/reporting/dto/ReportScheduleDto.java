@@ -1,5 +1,8 @@
 package com.increff.omni.reporting.dto;
 
+import com.increff.commons.springboot.common.ApiException;
+import com.increff.commons.springboot.common.ApiStatus;
+import com.increff.commons.springboot.common.ConvertUtil;
 import com.increff.omni.reporting.api.*;
 import com.increff.omni.reporting.config.ApplicationProperties;
 import com.increff.omni.reporting.flow.ReportScheduleFlowApi;
@@ -10,12 +13,10 @@ import com.increff.omni.reporting.model.data.PipelineFlowData;
 import com.increff.omni.reporting.model.data.ReportRequestData;
 import com.increff.omni.reporting.model.data.ReportScheduleData;
 import com.increff.omni.reporting.model.form.CronScheduleForm;
+import com.increff.omni.reporting.model.form.EmailParams;
 import com.increff.omni.reporting.model.form.ReportScheduleForm;
 import com.increff.omni.reporting.pojo.*;
 import com.increff.omni.reporting.util.UserPrincipalUtil;
-import com.nextscm.commons.spring.common.ApiException;
-import com.nextscm.commons.spring.common.ApiStatus;
-import com.nextscm.commons.spring.common.ConvertUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -41,7 +42,7 @@ public class ReportScheduleDto extends AbstractDto {
     @Autowired
     private ReportRequestApi reportRequestApi;
     @Autowired
-    private OrgSchemaApi orgSchemaApi;
+    private OrgMappingApi orgMappingApi;
     @Autowired
     private ReportScheduleFlowApi flowApi;
     @Autowired
@@ -50,8 +51,7 @@ public class ReportScheduleDto extends AbstractDto {
     private ApplicationProperties properties;
     @Autowired
     private ReportInputParamsApi reportInputParamsApi;
-    @Autowired
-    private OrgConnectionApi orgConnectionApi;
+
     @Autowired
     private ConnectionApi connectionApi;
     @Autowired
@@ -60,6 +60,7 @@ public class ReportScheduleDto extends AbstractDto {
     public void scheduleReport(ReportScheduleForm form) throws ApiException {
         validateReportScheduleForm(form);
         checkLimitForOrg();
+
         OrganizationPojo organizationPojo = organizationApi.getCheck(getOrgId());
         ReportPojo reportPojo = checkValidReport(form.getReportAlias());
         ReportSchedulePojo pojo = convertFormToReportSchedulePojo(form, getOrgId(), getUserId());
@@ -171,9 +172,12 @@ public class ReportScheduleDto extends AbstractDto {
             throws ApiException {
         List<ReportScheduleData> dataList = new ArrayList<>();
         for (ReportSchedulePojo pojo : reportSchedulePojoList) {
-            OrgSchemaVersionPojo orgSchemaVersionPojo = orgSchemaApi.getCheckByOrgId(pojo.getOrgId());
+            List<OrgMappingPojo> orgMappingPojo = orgMappingApi.getCheckByOrgId(pojo.getOrgId());
+            List<Integer> orgSchemaVersionIds = orgMappingPojo.stream().map(OrgMappingPojo::getSchemaVersionId)
+                    .collect(Collectors.toList());
             ReportPojo reportPojo = reportApi.getCheckByAliasAndSchema(pojo.getReportAlias(),
-                    orgSchemaVersionPojo.getSchemaVersionId(), false);
+                    orgSchemaVersionIds, false);
+
             List<ReportControlsPojo> reportControlsPojos = Objects.isNull(reportPojo) ?
                     new ArrayList<>() : reportControlsApi.getByReportId(reportPojo.getId());
             List<Integer> controlIds = reportControlsPojos.stream()
@@ -184,8 +188,13 @@ public class ReportScheduleDto extends AbstractDto {
             List<ReportScheduleInputParamsPojo> paramsPojos = api.getScheduleParams(pojo.getId());
             String timezone = paramsPojos.stream().filter(p -> p.getParamKey().equalsIgnoreCase("timezone")).collect(
                     Collectors.toList()).get(0).getParamValue();
-            List<InputControlFilterData> filterData = prepareFilters(paramsPojos, controlPojos);
+            List<InputControlFilterData> filterData = prepareScheduleFilterData(paramsPojos, controlPojos);
             ReportScheduleData data = ConvertUtil.convert(pojo, ReportScheduleData.class);
+
+            EmailParams emailParams = new EmailParams();
+            emailParams.setSubject(pojo.getEmailSubject());
+            data.setEmailParams(emailParams);
+
             data.setReportName(reportPojo.getName());
             data.setReportId(reportPojo.getId());
             data.setFilters(filterData);
@@ -208,9 +217,11 @@ public class ReportScheduleDto extends AbstractDto {
     }
 
     private ReportPojo checkValidReport(String reportAlias) throws ApiException {
-        OrgSchemaVersionPojo orgSchemaVersionPojo = orgSchemaApi.getCheckByOrgId(getOrgId());
+        List<OrgMappingPojo> orgMappingPojo = orgMappingApi.getCheckByOrgId(getOrgId());
+        List<Integer> orgSchemaVersionIds = orgMappingPojo.stream().map(OrgMappingPojo::getSchemaVersionId)
+                .collect(Collectors.toList());
         ReportPojo reportPojo =
-                reportApi.getByAliasAndSchema(reportAlias, orgSchemaVersionPojo.getSchemaVersionId(), false);
+                reportApi.getByAliasAndSchema(reportAlias, orgSchemaVersionIds, false);
         if (Objects.isNull(reportPojo) || !reportPojo.getCanSchedule())
             throw new ApiException(ApiStatus.BAD_DATA, "Report : " + reportAlias + " is not allowed to " +
                     "schedule");
@@ -233,13 +244,15 @@ public class ReportScheduleDto extends AbstractDto {
                                                                               ReportPojo reportPojo)
             throws ApiException {
         List<ReportControlsPojo> reportControlsPojoList = reportControlsApi.getByReportId(reportPojo.getId());
-        OrgConnectionPojo orgConnectionPojo = orgConnectionApi.getCheckByOrgId(getOrgId());
-        ConnectionPojo connectionPojo = connectionApi.getCheck(orgConnectionPojo.getConnectionId());
+        OrgMappingPojo orgMappingPojo = orgMappingApi.getCheckByOrgIdSchemaVersionId(getOrgId(),
+                reportPojo.getSchemaVersionId());
+
+        ConnectionPojo connectionPojo = connectionApi.getCheck(orgMappingPojo.getConnectionId());
         String password = getDecryptedPassword(connectionPojo.getPassword());
         List<InputControlPojo> inputControlPojoList = controlApi.selectByIds(reportControlsPojoList.stream()
                 .map(ReportControlsPojo::getControlId).collect(Collectors.toList()));
         Map<String, List<String>> userInputParams = getUserInputParams(form.getParamMap());
-        Map<String, String> inputParamsMap = UserPrincipalUtil.getCompleteMapWithAccessControl(form.getParamMap());
+        Map<String, String> inputParamsMap = UserPrincipalUtil.getMapWithoutAccessControl(form.getParamMap());
         Map<String, List<String>> inputDisplayMap = new HashMap<>();
         validateCustomReportAccess(reportPojo, getOrgId());
         validateInputParamValues(userInputParams, inputParamsMap, getOrgId(), inputDisplayMap, inputControlPojoList,

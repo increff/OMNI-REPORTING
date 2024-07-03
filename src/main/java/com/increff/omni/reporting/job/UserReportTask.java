@@ -4,19 +4,19 @@ import com.increff.commons.queryexecutor.QueryExecutorClient;
 import com.increff.commons.queryexecutor.form.FileUploadDetailsForm;
 import com.increff.commons.queryexecutor.form.QueryDetailsForm;
 import com.increff.commons.queryexecutor.form.QueryExecutorForm;
+import com.increff.commons.springboot.common.ApiException;
 import com.increff.omni.reporting.api.*;
 import com.increff.omni.reporting.config.ApplicationProperties;
 import com.increff.omni.reporting.model.constants.ReportRequestStatus;
 import com.increff.omni.reporting.pojo.*;
 import com.increff.omni.reporting.util.SqlCmd;
-import com.nextscm.commons.spring.common.ApiException;
-import lombok.extern.log4j.Log4j;
+import jakarta.persistence.OptimisticLockException;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
-import javax.persistence.OptimisticLockException;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -25,7 +25,7 @@ import static com.increff.omni.reporting.dto.CommonDtoHelper.getInputParamMapFro
 import static com.increff.omni.reporting.dto.CommonDtoHelper.getValueFromQuotes;
 
 @Component
-@Log4j
+@Log4j2
 public class UserReportTask extends AbstractTask{
 
     @Autowired
@@ -37,7 +37,7 @@ public class UserReportTask extends AbstractTask{
     @Autowired
     private ReportInputParamsApi reportInputParamsApi;
     @Autowired
-    private OrgConnectionApi orgConnectionApi;
+    private OrgMappingApi orgMappingApi;
     @Autowired
     private ConnectionApi connectionApi;
     @Autowired
@@ -63,14 +63,15 @@ public class UserReportTask extends AbstractTask{
                     .getInputParamsForReportRequest(reportRequestPojo.getId());
             ReportPojo reportPojo = reportApi.getCheck(reportRequestPojo.getReportId());
             ReportQueryPojo reportQueryPojo = reportQueryApi.getByReportId(reportPojo.getId());
-            OrgConnectionPojo orgConnectionPojo = orgConnectionApi.getCheckByOrgId(reportRequestPojo.getOrgId());
-            ConnectionPojo connectionPojo = connectionApi.getCheck(orgConnectionPojo.getConnectionId());
+            OrgMappingPojo orgMappingPojo = orgMappingApi.getCheckByOrgIdSchemaVersionId(reportRequestPojo.getOrgId(),
+                    reportPojo.getSchemaVersionId());
+            ConnectionPojo connectionPojo = connectionApi.getCheck(orgMappingPojo.getConnectionId());
 
             // Creation of file
             Map<String, String> inputParamMap = getInputParamMapFromPojoList(reportInputParamsPojoList);
             String timezone = getValueFromQuotes(inputParamMap.get("timezone"));
             String fQuery = SqlCmd.getFinalQuery(inputParamMap, reportQueryPojo.getQuery(),
-                    false);
+                    false, connectionPojo.getDbType());
             QueryExecutorForm queryExecutorForm = getQueryExecutorForm(fQuery, timezone, connectionPojo,
                     reportRequestPojo, reportPojo);
             executorClient.postRequest(queryExecutorForm);
@@ -78,7 +79,7 @@ public class UserReportTask extends AbstractTask{
                     0, 0.0, "", null);
         } catch (Exception e) {
             log.error("Report Request ID : " + pojo.getId() + " failed", e);
-            api.markFailed(pojo.getId(), ReportRequestStatus.FAILED, e.getMessage(), 0, 0.0);
+            api.markFailedOrRetry(pojo.getId(), ReportRequestStatus.FAILED, e.getMessage(), 0, 0.0);
         }
     }
 
@@ -102,6 +103,8 @@ public class UserReportTask extends AbstractTask{
         queryDetailsForm.setUsername(connectionPojo.getUsername());
         queryDetailsForm.setReadTimeout(properties.getMaxExecutionTime());
         queryDetailsForm.setHost(connectionPojo.getHost());
+        queryDetailsForm.setDbType(
+                com.increff.commons.queryexecutor.constants.DBType.valueOf(connectionPojo.getDbType().toString()));
         form.setFileUploadDetails(uploadDetailsForm);
         form.setQueryDetails(queryDetailsForm);
         return form;

@@ -5,7 +5,6 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class IntegrationOrgConnectionForm {
-    private String orgName;
-    private String connectionName;
+public class EmailParams {
+    private String subject;
 }

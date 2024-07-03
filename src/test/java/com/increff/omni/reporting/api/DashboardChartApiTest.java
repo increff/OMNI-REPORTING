@@ -1,15 +1,19 @@
 package com.increff.omni.reporting.api;
 
+import com.increff.commons.springboot.common.ApiStatus;
+import com.increff.commons.springboot.server.DtoHelper;
 import com.increff.omni.reporting.config.AbstractTest;
 import com.increff.omni.reporting.dto.*;
+import com.increff.omni.reporting.helper.OrgMappingTestHelper;
 import com.increff.omni.reporting.model.constants.ChartType;
 import com.increff.omni.reporting.model.constants.ReportType;
 import com.increff.omni.reporting.model.constants.RowHeight;
 import com.increff.omni.reporting.model.data.*;
 import com.increff.omni.reporting.model.form.*;
 import com.increff.omni.reporting.pojo.DashboardChartPojo;
-import com.nextscm.commons.spring.common.ApiException;
-import org.junit.Test;
+import com.increff.commons.springboot.common.ApiException;
+
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.*;
@@ -21,7 +25,9 @@ import static com.increff.omni.reporting.helper.DirectoryTestHelper.getDirectory
 import static com.increff.omni.reporting.helper.OrgTestHelper.getOrganizationForm;
 import static com.increff.omni.reporting.helper.ReportTestHelper.getChartForm;
 import static com.increff.omni.reporting.helper.SchemaTestHelper.getSchemaForm;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 
 public class DashboardChartApiTest extends AbstractTest {
 
@@ -57,8 +63,7 @@ public class DashboardChartApiTest extends AbstractTest {
         SchemaVersionData schemaData = schemaDto.add(schemaVersionForm);
         ConnectionForm connectionForm = getConnectionForm("127.0.0.1", "Test DB", username, password);
         ConnectionData connectionData = connectionDto.add(connectionForm);
-        organizationDto.mapToConnection(organizationData.getId(), connectionData.getId());
-        organizationDto.mapToSchema(organizationData.getId(), schemaData.getId());
+        organizationDto.addOrgMapping(OrgMappingTestHelper.getOrgMappingForm(organizationData.getId(), schemaData.getId(), connectionData.getId()));
         List<ReportForm> forms = new ArrayList<>();
         List<ReportData> datas = new ArrayList<>();
         HashMap<String, String> legends = new HashMap<>();
@@ -95,7 +100,7 @@ public class DashboardChartApiTest extends AbstractTest {
         assertEquals(pojo.getChartAlias(), chartDatas.get(2).getAlias());
     }
 
-    @Test(expected = ApiException.class)
+    @Test
     public void testGetCheckByDashboardAndChartIncorrectAlias() throws ApiException {
         List<ReportData> chartDatas = commonSetup(ReportType.STANDARD);
         DashboardData data = dashboardDto.addDashboard(getDashboardAddForm("Dashboard_1",
@@ -113,7 +118,11 @@ public class DashboardChartApiTest extends AbstractTest {
         pojo = dashboardChartApi.getCheckByDashboardAndChartAlias(data.getId(), chartDatas.get(2).getAlias());
         assertEquals(pojo.getDashboardId(), data.getId());
         assertEquals(pojo.getChartAlias(), chartDatas.get(2).getAlias());
-        dashboardChartApi.getCheckByDashboardAndChartAlias(data.getId(), "Incorrect");
+        ApiException exception = assertThrows(ApiException.class, () -> {
+            dashboardChartApi.getCheckByDashboardAndChartAlias(data.getId(), "Incorrect");
+        });
+        assertEquals(ApiStatus.BAD_DATA, exception.getStatus());
+        assertEquals("DashboardChart does not exist dashboardId: " + data.getId() +" chartAlias: Incorrect", exception.getMessage());
     }
 
     @Test

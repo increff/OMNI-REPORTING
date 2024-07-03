@@ -1,12 +1,14 @@
 package com.increff.omni.reporting.api;
 
-import com.nextscm.commons.spring.audit.api.AuditApi;
-import com.nextscm.commons.spring.server.AbstractApi;
-import lombok.extern.log4j.Log4j;
+import com.increff.commons.springboot.audit.api.AuditApi;
+import com.increff.commons.springboot.server.AbstractApi;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-@Log4j
+import java.util.Arrays;
+
+@Log4j2
 @Service
 public class AbstractAuditApi extends AbstractApi {
 
@@ -17,7 +19,7 @@ public class AbstractAuditApi extends AbstractApi {
         try {
             auditApi.save(objectId, objectType, action, description, actor);
         } catch (Exception e) {
-            log.error("Error in adding audit log with object ID : " + objectId + ", action : " + action +
+            log.error("Error in adding audit log. Error : " + e.getMessage() + "\n" + Arrays.asList(e.getStackTrace()) +"\n object ID : " + objectId + ", action : " + action +
                     ", description : " + description + ", actor : " + actor);
         }
     }

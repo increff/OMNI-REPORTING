@@ -5,6 +5,7 @@ import com.increff.omni.reporting.config.AbstractTest;
 import com.increff.omni.reporting.config.ApplicationProperties;
 import com.increff.omni.reporting.dao.ReportScheduleDao;
 import com.increff.omni.reporting.dto.*;
+import com.increff.omni.reporting.helper.OrgMappingTestHelper;
 import com.increff.omni.reporting.model.constants.ChartType;
 import com.increff.omni.reporting.model.constants.InputControlScope;
 import com.increff.omni.reporting.model.constants.InputControlType;
@@ -13,8 +14,8 @@ import com.increff.omni.reporting.model.constants.ScheduleStatus;
 import com.increff.omni.reporting.model.data.*;
 import com.increff.omni.reporting.model.form.*;
 import com.increff.omni.reporting.pojo.ReportSchedulePojo;
-import com.nextscm.commons.spring.common.ApiException;
-import org.junit.Test;
+import com.increff.commons.springboot.common.ApiException;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
@@ -30,9 +31,7 @@ import static com.increff.omni.reporting.helper.ReportScheduleTestHelper.getInpu
 import static com.increff.omni.reporting.helper.ReportScheduleTestHelper.getReportScheduleForm;
 import static com.increff.omni.reporting.helper.ReportTestHelper.*;
 import static com.increff.omni.reporting.helper.SchemaTestHelper.getSchemaForm;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
+import static org.junit.jupiter.api.Assertions.*;
 public class ReportJobTest extends AbstractTest {
 
     @Autowired
@@ -68,8 +67,7 @@ public class ReportJobTest extends AbstractTest {
         SchemaVersionData schemaData = schemaDto.add(schemaVersionForm);
         ConnectionForm connectionForm = getConnectionForm("127.0.0.1", "Test DB", username, password);
         ConnectionData connectionData = connectionDto.add(connectionForm);
-        organizationDto.mapToConnection(organizationData.getId(), connectionData.getId());
-        organizationDto.mapToSchema(organizationData.getId(), schemaData.getId());
+        organizationDto.addOrgMapping(OrgMappingTestHelper.getOrgMappingForm(organizationData.getId(), schemaData.getId(), connectionData.getId()));
         return getReportForm("Report 2", ReportType.STANDARD, directoryData.getId(), schemaData.getId(), false, ChartType.REPORT);
     }
 
