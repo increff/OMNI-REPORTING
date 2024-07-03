@@ -66,7 +66,6 @@ public class FileUtil {
         List<String> headers = new ArrayList<>();
         for (int i = 1; i <= columnCount; i++) {
             headers.add(metaData.getColumnLabel(i));
-            break; // Only first document is enough to get all headers
         }
         csvPrinter.printRecord(headers);
         noOfRows++;
