@@ -181,7 +181,7 @@ public class AdminController {
         return reportDto.getQuery(reportId);
     }
 
-    @Operation(summary = "Map control to a report") // todo : remove sort Order from here
+    @Operation(summary = "Map control to a report")
     @PostMapping(value = "/reports/{reportId}/controls/{controlId}")
     public void mapReportToControl(@PathVariable Integer reportId, @PathVariable Integer controlId) throws ApiException {
         reportDto.mapToControl(reportId, controlId);
