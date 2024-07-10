@@ -232,9 +232,6 @@ public class ReportFlowApiTest extends AbstractTest {
         assertEquals(inputControlPojo.getId(), inputControls.get(0).getId());
         assertEquals(inputControlPojo2.getId(), inputControls.get(1).getId());
 
-        //update sortOrder
-
-
     }
 
     @Test
