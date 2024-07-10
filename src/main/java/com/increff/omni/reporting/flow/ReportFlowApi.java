@@ -287,6 +287,7 @@ public class ReportFlowApi extends FlowApi {
                 ReportControlsPojo p = new ReportControlsPojo();
                 p.setControlId(oldToNewControlIds.get(c.getControlId()));
                 p.setReportId(pojo.getId());
+                p.setSortOrder(c.getSortOrder());
                 reportControlsApi.add(p);
                 reportControlIdMap.put(c.getId(), p.getId());
             }
