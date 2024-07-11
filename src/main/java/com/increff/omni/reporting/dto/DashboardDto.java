@@ -129,7 +129,7 @@ public class DashboardDto extends AbstractDto {
             validateControlIdExistsForDashboard(form.getDashboardId(), form.getParamName());
 
             DefaultValuePojo pojo = ConvertUtil.convert(form, DefaultValuePojo.class);
-            // todo : add userId in pojo
+            pojo.setUserId(userId);
             pojo.setDefaultValue(String.join(",", form.getDefaultValue()));
             pojos.add(defaultValueApi.upsert(pojo));
         }
