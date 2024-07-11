@@ -2,6 +2,7 @@ package com.increff.omni.reporting.dto;
 
 import com.increff.account.client.SecurityUtil;
 import com.increff.account.client.UserPrincipal;
+import com.increff.commons.springboot.common.ApiException;
 import com.increff.commons.springboot.common.ApiStatus;
 import com.increff.omni.reporting.api.DashboardApi;
 import com.increff.omni.reporting.api.DashboardChartApi;
@@ -16,9 +17,8 @@ import com.increff.omni.reporting.model.data.*;
 import com.increff.omni.reporting.model.form.*;
 import com.increff.omni.reporting.pojo.DashboardPojo;
 import com.increff.omni.reporting.pojo.DefaultValuePojo;
-import com.increff.commons.springboot.common.ApiException;
-import org.junit.jupiter.api.Test;
 import com.increff.omni.reporting.pojo.ReportControlsPojo;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -34,7 +34,6 @@ import static com.increff.omni.reporting.helper.InputControlTestHelper.getInputC
 import static com.increff.omni.reporting.helper.OrgTestHelper.getOrganizationForm;
 import static com.increff.omni.reporting.helper.ReportTestHelper.*;
 import static com.increff.omni.reporting.helper.SchemaTestHelper.getSchemaForm;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 
@@ -224,7 +223,7 @@ public class DashboardDtoTest extends AbstractTest {
         reportDto.mapToControl(chartDatas.get(0).getId(), inputControlData.getId());
 
         UpsertDefaultValueForm upsertDefaultValueForm = getUpsertDefaultValueForm(data.getId(), inputControlData.getParamName(), Arrays.asList("1", "2", "3"));
-        List<DefaultValueData> defaultValueData = dashboardDto.upsertDefaultValues(upsertDefaultValueForm, data.getId());
+        List<DefaultValueData> defaultValueData = dashboardDto.upsertDefaultValues(upsertDefaultValueForm, data.getId(), null);
         assertEquals(1, defaultValueData.size());
         assertEquals(String.join(",", upsertDefaultValueForm.getDefaultValueForms().get(0).getDefaultValue()), defaultValueData.get(0).getDefaultValue());
     }
@@ -238,7 +237,7 @@ public class DashboardDtoTest extends AbstractTest {
 
         UpsertDefaultValueForm upsertDefaultValueForm = getUpsertDefaultValueForm(data.getId(), "nonExisting", Arrays.asList("1", "2", "3"));
         ApiException apiException = assertThrows(ApiException.class, () -> {
-                    dashboardDto.upsertDefaultValues(upsertDefaultValueForm, data.getId());
+            dashboardDto.upsertDefaultValues(upsertDefaultValueForm, data.getId(), null);
                 });
         assertEquals("Param Name nonExisting does not exist for dashboard", apiException.getMessage());
     }
@@ -255,13 +254,46 @@ public class DashboardDtoTest extends AbstractTest {
         reportDto.mapToControl(chartDatas.get(0).getId(), inputControlData.getId());
 
         UpsertDefaultValueForm upsertDefaultValueForm = getUpsertDefaultValueForm(data.getId(), inputControlData.getParamName(), Arrays.asList("1", "2", "3"));
-        List<DefaultValueData> defaultValueData = dashboardDto.upsertDefaultValues(upsertDefaultValueForm, data.getId());
+        List<DefaultValueData> defaultValueData = dashboardDto.upsertDefaultValues(upsertDefaultValueForm, data.getId(), null);
         assertEquals(1, defaultValueData.size());
         assertEquals(String.join(",", upsertDefaultValueForm.getDefaultValueForms().get(0).getDefaultValue()), defaultValueData.get(0).getDefaultValue());
-        List<DefaultValuePojo> defaultValuePojoList = defaultValueApi.getByDashboardId(data.getId());
+        List<DefaultValuePojo> defaultValuePojoList = defaultValueApi.getByDashboardIdUserId(data.getId(), null);
         assertEquals(1, defaultValuePojoList.size());
         assertEquals(String.join(",", upsertDefaultValueForm.getDefaultValueForms().get(0).getDefaultValue()), defaultValuePojoList.get(0).getDefaultValue());
     }
+
+    //testUpdateUserDefaults
+    @Test
+    public void testUpdateUserDefaults() throws ApiException {
+        List<ReportData> chartDatas = commonSetup(ReportType.STANDARD);
+        DashboardData data = dashboardDto.addDashboard(getDashboardAddForm("Dashboard_1",
+                Arrays.asList(getDashboardChartForm(chartDatas.get(0).getAlias(), 0, 0, 0, RowHeight.HALF))));
+
+        InputControlForm form = getInputControlForm("Client Id", "clientId", InputControlScope.GLOBAL
+                , InputControlType.TEXT, new ArrayList<>(), null, null, schemaVersionId);
+        InputControlData inputControlData = inputControlDto.add(form);
+        reportDto.mapToControl(chartDatas.get(0).getId(), inputControlData.getId());
+
+        UpsertDefaultValueForm upsertDefaultValueForm = getUpsertDefaultValueForm(data.getId(), inputControlData.getParamName(), Arrays.asList("1", "2", "3"));
+        List<DefaultValueData> defaultValueData = dashboardDto.upsertUserDefaultValues(upsertDefaultValueForm, data.getId());
+        dashboardDto.upsertDefaultValues(upsertDefaultValueForm, data.getId(), null);
+        List<DefaultValuePojo> defaultValuePojoList = defaultValueApi.getByDashboardIdUserId(data.getId(), null);
+        assertEquals(1, defaultValuePojoList.size());
+        defaultValuePojoList = defaultValueApi.getByDashboardIdUserId(data.getId(), AbstractDto.getUserId());
+        assertEquals(1, defaultValuePojoList.size());
+        assertEquals(String.join(",", upsertDefaultValueForm.getDefaultValueForms().get(0).getDefaultValue()), defaultValuePojoList.get(0).getDefaultValue());
+
+        upsertDefaultValueForm = getUpsertDefaultValueForm(data.getId(), inputControlData.getParamName(), Arrays.asList("4", "5", "6"));
+        defaultValueData = dashboardDto.upsertUserDefaultValues(upsertDefaultValueForm, data.getId());
+        assertEquals(1, defaultValueData.size());
+        assertEquals(String.join(",", upsertDefaultValueForm.getDefaultValueForms().get(0).getDefaultValue()), defaultValueData.get(0).getDefaultValue());
+        defaultValuePojoList = defaultValueApi.getByDashboardIdUserId(data.getId(), null);
+        assertEquals(0, defaultValuePojoList.size());
+        defaultValuePojoList = defaultValueApi.getByDashboardIdUserId(data.getId(), AbstractDto.getUserId());
+        assertEquals(1, defaultValuePojoList.size());
+        assertEquals(String.join(",", upsertDefaultValueForm.getDefaultValueForms().get(0).getDefaultValue()), defaultValuePojoList.get(0).getDefaultValue());
+    }
+
 
     @Test
     public void testUpdateDefaultValue() throws ApiException {
@@ -275,18 +307,18 @@ public class DashboardDtoTest extends AbstractTest {
         reportDto.mapToControl(chartDatas.get(0).getId(), inputControlData.getId());
 
         UpsertDefaultValueForm upsertDefaultValueForm = getUpsertDefaultValueForm(data.getId(), inputControlData.getParamName(), Arrays.asList("1", "2", "3"));
-        List<DefaultValueData> defaultValueData = dashboardDto.upsertDefaultValues(upsertDefaultValueForm, data.getId());
+        List<DefaultValueData> defaultValueData = dashboardDto.upsertDefaultValues(upsertDefaultValueForm, data.getId(), null);
         assertEquals(1, defaultValueData.size());
         assertEquals(String.join(",", upsertDefaultValueForm.getDefaultValueForms().get(0).getDefaultValue()), defaultValueData.get(0).getDefaultValue());
-        List<DefaultValuePojo> defaultValuePojoList = defaultValueApi.getByDashboardId(data.getId());
+        List<DefaultValuePojo> defaultValuePojoList = defaultValueApi.getByDashboardIdUserId(data.getId(), null);
         assertEquals(1, defaultValuePojoList.size());
         assertEquals(String.join(",", upsertDefaultValueForm.getDefaultValueForms().get(0).getDefaultValue()), defaultValuePojoList.get(0).getDefaultValue());
 
         upsertDefaultValueForm = getUpsertDefaultValueForm(data.getId(), inputControlData.getParamName(), Arrays.asList("4", "5", "6"));
-        defaultValueData = dashboardDto.upsertDefaultValues(upsertDefaultValueForm, data.getId());
+        defaultValueData = dashboardDto.upsertDefaultValues(upsertDefaultValueForm, data.getId(), null);
         assertEquals(1, defaultValueData.size());
         assertEquals(String.join(",", upsertDefaultValueForm.getDefaultValueForms().get(0).getDefaultValue()), defaultValueData.get(0).getDefaultValue());
-        defaultValuePojoList = defaultValueApi.getByDashboardId(data.getId());
+        defaultValuePojoList = defaultValueApi.getByDashboardIdUserId(data.getId(), null);
         assertEquals(1, defaultValuePojoList.size());
         assertEquals(String.join(",", upsertDefaultValueForm.getDefaultValueForms().get(0).getDefaultValue()), defaultValuePojoList.get(0).getDefaultValue());
     }
@@ -305,15 +337,15 @@ public class DashboardDtoTest extends AbstractTest {
         UpsertDefaultValueForm upsertDefaultValueForm = getUpsertDefaultValueForm(data.getId(), inputControlData.getParamName(), Arrays.asList("1", "2", "3"));
 
 
-        List<DefaultValueData> defaultValueData = dashboardDto.upsertDefaultValues(upsertDefaultValueForm, data.getId());
+        List<DefaultValueData> defaultValueData = dashboardDto.upsertDefaultValues(upsertDefaultValueForm, data.getId(), null);
         assertEquals(1, defaultValueData.size());
         assertEquals(String.join(",", upsertDefaultValueForm.getDefaultValueForms().get(0).getDefaultValue()), defaultValueData.get(0).getDefaultValue());
-        List<DefaultValuePojo> defaultValuePojoList = defaultValueApi.getByDashboardId(data.getId());
+        List<DefaultValuePojo> defaultValuePojoList = defaultValueApi.getByDashboardIdUserId(data.getId(), null);
         assertEquals(1, defaultValuePojoList.size());
         assertEquals(String.join(",", upsertDefaultValueForm.getDefaultValueForms().get(0).getDefaultValue()), defaultValuePojoList.get(0).getDefaultValue());
 
         upsertDefaultValueForm = getUpsertDefaultValueForm(data.getId(), inputControlData.getParamName(), new ArrayList<>());
-        defaultValueData = dashboardDto.upsertDefaultValues(upsertDefaultValueForm, data.getId());
+        defaultValueData = dashboardDto.upsertDefaultValues(upsertDefaultValueForm, data.getId(), null);
         assertEquals(1, defaultValueData.size());
 
         assertNull(defaultValueData.get(0).getDefaultValue());
@@ -333,10 +365,10 @@ public class DashboardDtoTest extends AbstractTest {
         reportDto.mapToControl(chartDatas.get(0).getId(), inputControlData.getId());
 
         UpsertDefaultValueForm upsertDefaultValueForm = getUpsertDefaultValueForm(data.getId(), inputControlData.getParamName(), Arrays.asList("1", "2", "3"));
-        List<DefaultValueData> defaultValueData = dashboardDto.upsertDefaultValues(upsertDefaultValueForm, data.getId());
+        List<DefaultValueData> defaultValueData = dashboardDto.upsertDefaultValues(upsertDefaultValueForm, data.getId(), null);
         assertEquals(1, defaultValueData.size());
         assertEquals(String.join(",", upsertDefaultValueForm.getDefaultValueForms().get(0).getDefaultValue()), defaultValueData.get(0).getDefaultValue());
-        List<DefaultValuePojo> defaultValuePojoList = defaultValueApi.getByDashboardId(data.getId());
+        List<DefaultValuePojo> defaultValuePojoList = defaultValueApi.getByDashboardIdUserId(data.getId(), null);
         assertEquals(1, defaultValuePojoList.size());
 
         List<DashboardChartData> dashboardChartData = dashboardChartDto.getDashboardCharts(data.getId());
@@ -344,7 +376,7 @@ public class DashboardDtoTest extends AbstractTest {
 
         dashboardDto.deleteDashboard(data.getId());
         assertEquals(0, dashboardDto.getDashboardsByOrgId().size());
-        assertEquals(0, defaultValueApi.getByDashboardId(data.getId()).size());
+        assertEquals(0, defaultValueApi.getByDashboardIdUserId(data.getId(), null).size());
         assertEquals(0, dashboardChartApi.getByDashboardId(data.getId()).size());
     }
 
