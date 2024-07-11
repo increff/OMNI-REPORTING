@@ -218,7 +218,7 @@ public class StandardController {
     }
 
     @Operation(summary = "Update Defaults in Dashboard for user. Also deletes all existing defaults for that dashboard")
-    @PutMapping(value = "/dashboards/defaults/user") // todo : add in securirty context for standard users
+    @PutMapping(value = "/dashboards/defaults/user")
     public List<DefaultValueData> addUserDefaults(@RequestBody UpsertDefaultValueForm form,
                                                   @RequestParam Integer dashboardId) throws ApiException {
         return dashboardDto.upsertUserDefaultValues(form, dashboardId);

@@ -106,7 +106,7 @@ public class DashboardDto extends AbstractDto {
     @Transactional(rollbackFor = ApiException.class)
     public List<DefaultValueData> upsertUserDefaultValues(UpsertDefaultValueForm upsertDefaultValueform, Integer dashboardId) throws ApiException {
         upsertDefaultValueform.getDefaultValueForms().forEach(f -> f.setUserId(getUserId()));
-        return upsertDefaultValues(upsertDefaultValueform, dashboardId, getUserId()); // todo : change resp to {paramName1:value, paramName2: value } map
+        return upsertDefaultValues(upsertDefaultValueform, dashboardId, getUserId());
     }
 
 
