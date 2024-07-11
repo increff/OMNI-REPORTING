@@ -275,20 +275,27 @@ public class DashboardDtoTest extends AbstractTest {
         reportDto.mapToControl(chartDatas.get(0).getId(), inputControlData.getId());
 
         UpsertDefaultValueForm upsertDefaultValueForm = getUpsertDefaultValueForm(data.getId(), inputControlData.getParamName(), Arrays.asList("1", "2", "3"));
-        List<DefaultValueData> defaultValueData = dashboardDto.upsertUserDefaultValues(upsertDefaultValueForm, data.getId());
+        dashboardDto.upsertUserDefaultValues(upsertDefaultValueForm, data.getId());
         dashboardDto.upsertDefaultValues(upsertDefaultValueForm, data.getId(), null);
         List<DefaultValuePojo> defaultValuePojoList = defaultValueApi.getByDashboardIdUserId(data.getId(), null);
         assertEquals(1, defaultValuePojoList.size());
+        assertEquals(String.join(",", upsertDefaultValueForm.getDefaultValueForms().get(0).getDefaultValue()), defaultValuePojoList.get(0).getDefaultValue());
         defaultValuePojoList = defaultValueApi.getByDashboardIdUserId(data.getId(), AbstractDto.getUserId());
         assertEquals(1, defaultValuePojoList.size());
         assertEquals(String.join(",", upsertDefaultValueForm.getDefaultValueForms().get(0).getDefaultValue()), defaultValuePojoList.get(0).getDefaultValue());
 
+        UpsertDefaultValueForm globalDefaultValueForm = upsertDefaultValueForm;
         upsertDefaultValueForm = getUpsertDefaultValueForm(data.getId(), inputControlData.getParamName(), Arrays.asList("4", "5", "6"));
-        defaultValueData = dashboardDto.upsertUserDefaultValues(upsertDefaultValueForm, data.getId());
+        List<DefaultValueData> defaultValueData = dashboardDto.upsertUserDefaultValues(upsertDefaultValueForm, data.getId());
         assertEquals(1, defaultValueData.size());
         assertEquals(String.join(",", upsertDefaultValueForm.getDefaultValueForms().get(0).getDefaultValue()), defaultValueData.get(0).getDefaultValue());
+
+        // dashboard defaults should not change
         defaultValuePojoList = defaultValueApi.getByDashboardIdUserId(data.getId(), null);
         assertEquals(0, defaultValuePojoList.size());
+        assertEquals(1, defaultValuePojoList.size());
+        assertEquals(String.join(",", globalDefaultValueForm.getDefaultValueForms().get(0).getDefaultValue()), defaultValuePojoList.get(0).getDefaultValue());
+        // user defaults should change
         defaultValuePojoList = defaultValueApi.getByDashboardIdUserId(data.getId(), AbstractDto.getUserId());
         assertEquals(1, defaultValuePojoList.size());
         assertEquals(String.join(",", upsertDefaultValueForm.getDefaultValueForms().get(0).getDefaultValue()), defaultValuePojoList.get(0).getDefaultValue());
