@@ -188,7 +188,7 @@ public class AdminController {
     }
 
     @Operation(summary = "Sorts report control mapping by order of control ids in input")
-    @PatchMapping(value = "/update-report-controls-mapping-sort-order")
+    @PatchMapping(value = "/report-controls/sort-order/update")
     public void updateReportToControl(@RequestParam List<Integer> controlIds, @RequestParam Integer reportId) throws ApiException {
         reportDto.updateReportControlMappingSortOrder(reportId, controlIds);
     }
