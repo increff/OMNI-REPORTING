@@ -1,32 +1,36 @@
 package com.increff.omni.reporting.dao;
 
-import com.increff.omni.reporting.pojo.DefaultValuePojo;
 import com.increff.commons.springboot.db.dao.AbstractDao;
+import com.increff.omni.reporting.pojo.DefaultValuePojo;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 
 
 @Repository
 @Transactional
 public class DefaultValueDao extends AbstractDao<DefaultValuePojo> {
 
-    private static final String SELECT_BY_DASHBOARD_CONTROL_CHART_ALIAS = "select p from DefaultValuePojo p where p.dashboardId=:dashboardId and p.controlId=:controlId and p.chartAlias=:chartAlias";
-    private static final String SELECT_BY_DASHBOARD_ID_AND_CONTROL_PARAM_NAME = "select p from DefaultValuePojo p where p.dashboardId=:dashboardId and p.paramName=:paramName";
+    private static final String SELECT_BY_DASHBOARD_ID_AND_CONTROL_PARAM_NAME_AND_USER = "select p from DefaultValuePojo p where p.dashboardId=:dashboardId and p.paramName=:paramName and p.userId=:userId";
+    private static final String SELECT_BY_DASHBOARD_ID_AND_CONTROL_PARAM_NAME_AND_USER_NULL = "select p from DefaultValuePojo p where p.dashboardId=:dashboardId and p.paramName=:paramName and p.userId is null";
     private static final String DELETE_BY_DASHBOARD_ID_AND_CONTROL_PARAM_NAME_NOT_IN = "delete from DefaultValuePojo p where p.dashboardId=:dashboardId and p.paramName not in (:paramName)";
-    private static final String DELETE_BY_DASHBOARD_CONTROL_CHART_ALIAS_NOT_IN = "delete from DefaultValuePojo p where p.dashboardId=:dashboardId and p.controlId=:controlId and p.chartAlias not in (:chartAlias)";
+    private static final String SELECT_BY_DASHBOARD_ID_USER_ID = "select p from DefaultValuePojo p where p.dashboardId=:dashboardId and p.userId=:userId";
+    private static final String SELECT_BY_DASHBOARD_ID_USER_ID_NULL = "select p from DefaultValuePojo p where p.dashboardId=:dashboardId and p.userId is null";
 
+    public DefaultValuePojo getByDashboardIdAndControlParamNameAndUser(Integer dashboardId, String paramName, Integer userId) {
+        if (Objects.isNull(userId))
+            return getByDashboardIdAndControlParamNameAndUserNull(dashboardId, paramName);
 
-    public DefaultValuePojo getByDashboardControlChartAlias(Integer dashboardId, Integer controlId, String chartAlias) {
-        return selectSingleOrNull(createJpqlQuery(SELECT_BY_DASHBOARD_CONTROL_CHART_ALIAS)
+        return selectSingleOrNull(createJpqlQuery(SELECT_BY_DASHBOARD_ID_AND_CONTROL_PARAM_NAME_AND_USER)
                 .setParameter("dashboardId", dashboardId)
-                .setParameter("controlId", controlId)
-                .setParameter("chartAlias", chartAlias));
+                .setParameter("paramName", paramName)
+                .setParameter("userId", userId));
     }
 
-    public DefaultValuePojo getByDashboardIdAndControlParamName(Integer dashboardId, String paramName) {
-        return selectSingleOrNull(createJpqlQuery(SELECT_BY_DASHBOARD_ID_AND_CONTROL_PARAM_NAME)
+    private DefaultValuePojo getByDashboardIdAndControlParamNameAndUserNull(Integer dashboardId, String paramName) {
+        return selectSingleOrNull(createJpqlQuery(SELECT_BY_DASHBOARD_ID_AND_CONTROL_PARAM_NAME_AND_USER_NULL)
                 .setParameter("dashboardId", dashboardId)
                 .setParameter("paramName", paramName));
     }
@@ -39,13 +43,19 @@ public class DefaultValueDao extends AbstractDao<DefaultValuePojo> {
                 .executeUpdate();
     }
 
-    public void deleteByDashboardControlChartAliasNotIn(Integer dashboardId, Integer controlId, List<String> chartAlias) {
-        if (chartAlias.isEmpty()) return;
-        createQuery(DELETE_BY_DASHBOARD_CONTROL_CHART_ALIAS_NOT_IN)
+    public List<DefaultValuePojo> getByDashboardIdUserId(Integer dashboardId, Integer userId) {
+        if (Objects.isNull(userId))
+            return getByDashboardIdUserIdNull(dashboardId);
+
+        return selectMultiple(createJpqlQuery(SELECT_BY_DASHBOARD_ID_USER_ID)
                 .setParameter("dashboardId", dashboardId)
-                .setParameter("controlId", controlId)
-                .setParameter("chartAlias", chartAlias)
-                .executeUpdate();
+                .setParameter("userId", userId));
     }
+
+    private List<DefaultValuePojo> getByDashboardIdUserIdNull(Integer dashboardId) {
+        return selectMultiple(createJpqlQuery(SELECT_BY_DASHBOARD_ID_USER_ID_NULL)
+                .setParameter("dashboardId", dashboardId));
+    }
+
 
 }

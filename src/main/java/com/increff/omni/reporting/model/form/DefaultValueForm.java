@@ -1,9 +1,9 @@
 package com.increff.omni.reporting.model.form;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
-import jakarta.validation.constraints.NotNull;
 import java.util.List;
 
 @Setter
@@ -15,4 +15,6 @@ public class DefaultValueForm {
     private String paramName;
     @NotNull
     private List<String> defaultValue;
+
+    private Integer userId;
 }

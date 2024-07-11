@@ -104,11 +104,19 @@ public class DashboardDto extends AbstractDto {
 
 
     @Transactional(rollbackFor = ApiException.class)
-    public List<DefaultValueData> upsertDefaultValues(UpsertDefaultValueForm upsertDefaultValueform, Integer dashboardId) throws ApiException {
+    public List<DefaultValueData> upsertUserDefaultValues(UpsertDefaultValueForm upsertDefaultValueform, Integer dashboardId) throws ApiException {
+        upsertDefaultValueform.getDefaultValueForms().forEach(f -> f.setUserId(getUserId()));
+        return upsertDefaultValues(upsertDefaultValueform, dashboardId, getUserId()); // todo : change resp to {paramName1:value, paramName2: value } map
+    }
+
+
+    @Transactional(rollbackFor = ApiException.class)
+    public List<DefaultValueData> upsertDefaultValues(UpsertDefaultValueForm upsertDefaultValueform, Integer dashboardId, Integer userId) throws ApiException {
         List<DefaultValueForm> forms = upsertDefaultValueform.getDefaultValueForms();
         List<DefaultValuePojo> pojos = new ArrayList<>();
 
-        defaultValueApi.deleteByDashboardId(dashboardId); // Delete all existing default values for dashboard
+        // Do not move this delete after form.isEmpty() check as we need to delete all defaults if input map is empty
+        defaultValueApi.deleteByDashboardIdUserId(dashboardId, userId); // Delete all existing default values for dashboard
 
         if(forms.isEmpty()) return new ArrayList<>();
         validateDefaultValueForm(forms, dashboardId);
@@ -121,6 +129,7 @@ public class DashboardDto extends AbstractDto {
             validateControlIdExistsForDashboard(form.getDashboardId(), form.getParamName());
 
             DefaultValuePojo pojo = ConvertUtil.convert(form, DefaultValuePojo.class);
+            // todo : add userId in pojo
             pojo.setDefaultValue(String.join(",", form.getDefaultValue()));
             pojos.add(defaultValueApi.upsert(pojo));
         }
@@ -236,7 +245,11 @@ public class DashboardDto extends AbstractDto {
     private void setFilterDefaults(DashboardPojo dashboard, List<DashboardChartPojo> charts, Map<String, List<InputControlData>> filterDetails) throws ApiException {
         List<Integer> orgSchemaVersionIds = orgMappingApi.getCheckByOrgId(dashboard.getOrgId()).stream().map(OrgMappingPojo::getSchemaVersionId).collect(Collectors.toList());
 
-        Map<String, String> paramNameDefaultValueMap = defaultValueApi.getByDashboardId(dashboard.getId())
+
+        // Try to get user defaults. Get dashboard defaults if user defaults are not present
+        List<DefaultValuePojo> defaultValues = defaultValueApi.getByDashboardIdUserId(dashboard.getId(), getUserId());
+        if (defaultValues.isEmpty()) defaultValues = defaultValueApi.getByDashboardIdUserId(dashboard.getId(), null);
+        Map<String, String> paramNameDefaultValueMap = defaultValues
                 .stream().collect(Collectors.toMap(DefaultValuePojo::getParamName, DefaultValuePojo::getDefaultValue));
 
         for(DashboardChartPojo chart: charts){
@@ -281,6 +294,7 @@ public class DashboardDto extends AbstractDto {
             }
         }
         filterDetails.put("common", new ArrayList<>(commonFilters.values()));
+
         sortFiltersForDashboards(filterDetails.get("common"));
 
     }

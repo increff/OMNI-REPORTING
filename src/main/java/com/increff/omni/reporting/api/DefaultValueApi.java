@@ -1,9 +1,9 @@
 package com.increff.omni.reporting.api;
 
-import com.increff.omni.reporting.dao.DefaultValueDao;
-import com.increff.omni.reporting.pojo.DefaultValuePojo;
 import com.increff.commons.springboot.common.ApiException;
 import com.increff.commons.springboot.server.AbstractApi;
+import com.increff.omni.reporting.dao.DefaultValueDao;
+import com.increff.omni.reporting.pojo.DefaultValuePojo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,7 +19,7 @@ public class DefaultValueApi extends AbstractApi {
     private DefaultValueDao dao;
 
     public DefaultValuePojo upsert(DefaultValuePojo pojo) {
-        DefaultValuePojo existing = getByDashboardIdAndControlParamName(pojo.getDashboardId(), pojo.getParamName());
+        DefaultValuePojo existing = getByDashboardIdAndControlParamNameAndUser(pojo.getDashboardId(), pojo.getParamName(), pojo.getUserId());
         if (Objects.nonNull(existing)) {
             if(pojo.getDefaultValue().isEmpty()){
                 dao.remove(existing);
@@ -34,16 +34,23 @@ public class DefaultValueApi extends AbstractApi {
         return pojo;
     }
 
-    public DefaultValuePojo getByDashboardIdAndControlParamName(Integer dashboardId, String controlParamName) {
-        return dao.getByDashboardIdAndControlParamName(dashboardId, controlParamName);
+    public DefaultValuePojo getByDashboardIdAndControlParamNameAndUser(Integer dashboardId, String controlParamName, Integer userId) {
+        return dao.getByDashboardIdAndControlParamNameAndUser(dashboardId, controlParamName, userId);
     }
 
-    public List<DefaultValuePojo> getByDashboardId(Integer dashboardId) {
-        return dao.selectMultiple("dashboardId", dashboardId);
+    public List<DefaultValuePojo> getByDashboardIdUserId(Integer dashboardId, Integer userId) {
+        return dao.getByDashboardIdUserId(dashboardId, userId);
     }
 
     public void deleteByDashboardId(Integer dashboardId) {
         List<DefaultValuePojo> pojos = dao.selectMultiple("dashboardId", dashboardId);
+        for (DefaultValuePojo pojo : pojos) {
+            dao.remove(pojo);
+        }
+    }
+
+    public void deleteByDashboardIdUserId(Integer dashboardId, Integer userId) {
+        List<DefaultValuePojo> pojos = getByDashboardIdUserId(dashboardId, userId);
         for (DefaultValuePojo pojo : pojos) {
             dao.remove(pojo);
         }

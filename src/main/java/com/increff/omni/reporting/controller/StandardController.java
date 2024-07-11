@@ -1,13 +1,13 @@
 package com.increff.omni.reporting.controller;
 
 
+import com.increff.commons.springboot.common.ApiException;
 import com.increff.omni.reporting.config.ApplicationProperties;
 import com.increff.omni.reporting.dto.*;
 import com.increff.omni.reporting.model.constants.AppName;
 import com.increff.omni.reporting.model.constants.VisualizationType;
 import com.increff.omni.reporting.model.data.*;
 import com.increff.omni.reporting.model.form.*;
-import com.increff.commons.springboot.common.ApiException;
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -210,11 +210,18 @@ public class StandardController {
         return dashboardChartDto.getDashboardCharts(dashboardId);
     }
 
-    @Operation(summary = "Update Defaults in Dashboard. Also deletes all existing defaults for that dashboard")
+    @Operation(summary = "Update Defaults in Dashboard globally. Also deletes all existing defaults for that dashboard")
     @PutMapping(value = "/dashboards/defaults")
     public List<DefaultValueData> addDefaults(@RequestBody UpsertDefaultValueForm form,
                                               @RequestParam Integer dashboardId) throws ApiException {
-        return dashboardDto.upsertDefaultValues(form, dashboardId);
+        return dashboardDto.upsertDefaultValues(form, dashboardId, null);
+    }
+
+    @Operation(summary = "Update Defaults in Dashboard for user. Also deletes all existing defaults for that dashboard")
+    @PutMapping(value = "/dashboards/defaults/user") // todo : add in securirty context for standard users
+    public List<DefaultValueData> addUserDefaults(@RequestBody UpsertDefaultValueForm form,
+                                                  @RequestParam Integer dashboardId) throws ApiException {
+        return dashboardDto.upsertUserDefaultValues(form, dashboardId);
     }
 
     @Operation(summary = "Get Dashboard")

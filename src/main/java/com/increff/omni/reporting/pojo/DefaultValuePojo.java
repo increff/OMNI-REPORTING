@@ -1,10 +1,9 @@
 package com.increff.omni.reporting.pojo;
 
 import com.increff.commons.springboot.db.pojo.AbstractVersionedPojo;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-
-import jakarta.persistence.*;
 
 @Entity
 @Getter
@@ -21,6 +20,8 @@ public class DefaultValuePojo extends AbstractVersionedPojo{
     private String paramName;
     @Column(nullable = false, columnDefinition = "LONGTEXT")
     private String defaultValue;
+
+    private Integer userId;
 
     public DefaultValuePojo() {
     }
