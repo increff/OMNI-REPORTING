@@ -206,7 +206,12 @@ public class FileUtil {
                 ".csv");
     }
 
+    public static String getCustomizedPipelineFileNameWithDashes(boolean isZip, String timezone, String name) {
+        String originalFileName = getCustomizedFileName(isZip, timezone, name);
+        return originalFileName.replace(":", "-");
+    }
+
     public static String getPipelineFilename(Integer reportId, String name, String timezone) {
-        return "reportId_" + reportId + "_" + getCustomizedFileName(false, timezone, name);
+        return "reportId_" + reportId + "_" + getCustomizedPipelineFileNameWithDashes(false, timezone, name);
     }
 }
