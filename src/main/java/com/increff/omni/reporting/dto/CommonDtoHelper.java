@@ -15,6 +15,7 @@ import com.increff.omni.reporting.pojo.*;
 import com.increff.service.encryption.form.CryptoDecodeFormWithoutKey;
 import com.increff.service.encryption.form.CryptoFormWithoutKey;
 import com.nextscm.commons.lang.StringUtil;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.scheduling.support.CronExpression;
 
 import java.time.Instant;
@@ -25,6 +26,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Log4j2
 public class CommonDtoHelper {
 
     public final static String TIME_ZONE_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX";
@@ -168,16 +170,32 @@ public class CommonDtoHelper {
         return orgToPojo;
     }
 
-    public static void
+    public static List<InputControlData>
     sortBasedOnReportControlMappedTime(List<InputControlData> inputControlDataList,
                                                           List<ReportControlsPojo> reportControlsPojos) {
         inputControlDataList.sort((o1, o2) -> {
+            // Sort controls based on sort order
             ReportControlsPojo p1 = reportControlsPojos.stream().filter(r -> r.getControlId().equals(o1.getId()))
                     .collect(Collectors.toList()).get(0);
             ReportControlsPojo p2 = reportControlsPojos.stream().filter(r -> r.getControlId().equals(o2.getId()))
                     .collect(Collectors.toList()).get(0);
             return Objects.equals(p1.getSortOrder(), p2.getSortOrder()) ? 0 : (p1.getSortOrder() > p2.getSortOrder() ? 1 : -1);
         });
+
+
+        // get all MANDATORY controls
+        List<InputControlData> mandatoryControls = inputControlDataList.stream().filter(c -> c.getValidationTypes().contains(ValidationType.MANDATORY)).toList();
+        inputControlDataList.removeAll(mandatoryControls);
+        // get all SINGLE_MANDATORY controls
+        List<InputControlData> singleMandatoryControls = inputControlDataList.stream().filter(c -> c.getValidationTypes().contains(ValidationType.SINGLE_MANDATORY)).toList();
+        inputControlDataList.removeAll(singleMandatoryControls);
+
+        // combine all controls
+        List<InputControlData> sortedInputControlDataList = new ArrayList<>();
+        sortedInputControlDataList.addAll(mandatoryControls);
+        sortedInputControlDataList.addAll(singleMandatoryControls);
+        sortedInputControlDataList.addAll(inputControlDataList);
+        return sortedInputControlDataList;
     }
 
     // Zone Offset/Abbreviation will be populated based on DST(DayLight Saving Time) in case it is applicable for a Zone

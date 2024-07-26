@@ -1,5 +1,8 @@
 package com.increff.omni.reporting.dto;
 
+import com.increff.commons.springboot.common.ApiException;
+import com.increff.commons.springboot.common.ApiStatus;
+import com.increff.commons.springboot.common.ConvertUtil;
 import com.increff.omni.reporting.api.*;
 import com.increff.omni.reporting.flow.InputControlFlowApi;
 import com.increff.omni.reporting.model.constants.InputControlScope;
@@ -9,9 +12,6 @@ import com.increff.omni.reporting.model.form.InputControlForm;
 import com.increff.omni.reporting.model.form.InputControlUpdateForm;
 import com.increff.omni.reporting.pojo.*;
 import com.nextscm.commons.lang.StringUtil;
-import com.increff.commons.springboot.common.ApiException;
-import com.increff.commons.springboot.common.ApiStatus;
-import com.increff.commons.springboot.common.ConvertUtil;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -94,8 +94,10 @@ public class InputControlDto extends AbstractDto {
         List<InputControlPojo> pojos = api.selectByIds(controlIds);
 
         List<InputControlData> inputControlDataList = getInputControlDatas(pojos, orgId);
-        sortBasedOnReportControlMappedTime(inputControlDataList, reportControlsPojos);
         updateValidationTypes(inputControlDataList, validationGroupPojoList, reportControlsPojos);
+
+        inputControlDataList = sortBasedOnReportControlMappedTime(inputControlDataList, reportControlsPojos);
+
         return inputControlDataList;
     }
 

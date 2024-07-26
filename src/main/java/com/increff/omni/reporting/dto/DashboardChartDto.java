@@ -1,5 +1,7 @@
 package com.increff.omni.reporting.dto;
 
+import com.increff.commons.springboot.common.ApiException;
+import com.increff.commons.springboot.common.ConvertUtil;
 import com.increff.omni.reporting.api.DashboardApi;
 import com.increff.omni.reporting.api.DashboardChartApi;
 import com.increff.omni.reporting.api.DefaultValueApi;
@@ -8,11 +10,8 @@ import com.increff.omni.reporting.model.data.DashboardChartData;
 import com.increff.omni.reporting.model.data.InputControlData;
 import com.increff.omni.reporting.model.form.DashboardChartForm;
 import com.increff.omni.reporting.pojo.DashboardChartPojo;
-import com.increff.omni.reporting.pojo.DefaultValuePojo;
 import com.increff.omni.reporting.pojo.ReportPojo;
 import com.increff.omni.reporting.util.ValidateUtil;
-import com.increff.commons.springboot.common.ApiException;
-import com.increff.commons.springboot.common.ConvertUtil;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,8 +20,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
-
-import static com.increff.omni.reporting.util.ChartUtil.DEFAULT_VALUE_COMMON_KEY;
 
 @Service
 @Log4j2

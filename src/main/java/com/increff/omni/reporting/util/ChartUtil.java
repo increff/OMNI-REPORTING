@@ -1,23 +1,25 @@
 package com.increff.omni.reporting.util;
 
+import com.increff.commons.springboot.common.ApiException;
+import com.increff.commons.springboot.common.ApiStatus;
 import com.increff.omni.reporting.model.constants.ChartType;
 import com.increff.omni.reporting.model.data.Charts.*;
 import com.increff.omni.reporting.model.data.DashboardData;
 import com.increff.omni.reporting.model.data.DashboardGridData;
 import com.increff.omni.reporting.model.data.InputControlData;
 import com.increff.omni.reporting.model.form.DashboardForm;
-import com.increff.commons.springboot.common.ApiException;
-import com.increff.commons.springboot.common.ApiStatus;
 import lombok.extern.log4j.Log4j2;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static com.increff.omni.reporting.util.SqlCmd.getValueSum;
 
 @Log4j2
 public class ChartUtil {
 
-    public static final String DEFAULT_VALUE_COMMON_KEY = "common";
     private static final String PCT_VAL_COL = "percentageVal";
 
     public static MapSingleValueChartData getMapSingleValueChartData(List<Map<String, String>> result) {
