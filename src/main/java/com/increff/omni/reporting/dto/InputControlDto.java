@@ -96,7 +96,7 @@ public class InputControlDto extends AbstractDto {
         List<InputControlData> inputControlDataList = getInputControlDatas(pojos, orgId);
         updateValidationTypes(inputControlDataList, validationGroupPojoList, reportControlsPojos);
 
-        inputControlDataList = sortBasedOnReportControlMappedTime(inputControlDataList, reportControlsPojos);
+        sortBasedOnReportControlMappedTime(inputControlDataList, reportControlsPojos);
 
         return inputControlDataList;
     }

@@ -170,7 +170,7 @@ public class CommonDtoHelper {
         return orgToPojo;
     }
 
-    public static List<InputControlData>
+    public static void
     sortBasedOnReportControlMappedTime(List<InputControlData> inputControlDataList,
                                                           List<ReportControlsPojo> reportControlsPojos) {
         inputControlDataList.sort((o1, o2) -> {
@@ -181,21 +181,6 @@ public class CommonDtoHelper {
                     .collect(Collectors.toList()).get(0);
             return Objects.equals(p1.getSortOrder(), p2.getSortOrder()) ? 0 : (p1.getSortOrder() > p2.getSortOrder() ? 1 : -1);
         });
-
-
-        // get all MANDATORY controls
-        List<InputControlData> mandatoryControls = inputControlDataList.stream().filter(c -> c.getValidationTypes().contains(ValidationType.MANDATORY)).toList();
-        inputControlDataList.removeAll(mandatoryControls);
-        // get all SINGLE_MANDATORY controls
-        List<InputControlData> singleMandatoryControls = inputControlDataList.stream().filter(c -> c.getValidationTypes().contains(ValidationType.SINGLE_MANDATORY)).toList();
-        inputControlDataList.removeAll(singleMandatoryControls);
-
-        // combine all controls
-        List<InputControlData> sortedInputControlDataList = new ArrayList<>();
-        sortedInputControlDataList.addAll(mandatoryControls);
-        sortedInputControlDataList.addAll(singleMandatoryControls);
-        sortedInputControlDataList.addAll(inputControlDataList);
-        return sortedInputControlDataList;
     }
 
     // Zone Offset/Abbreviation will be populated based on DST(DayLight Saving Time) in case it is applicable for a Zone
