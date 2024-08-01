@@ -105,10 +105,11 @@ public class SqlCmd {
                 }
                 break;
             case "replaceWithComma":
-                paramKey = f.split(OPEN_SEP)[1].split(CLOSE_SEP)[0].trim();
+                paramKey = f.split(OPEN_SEP)[1].split(",")[0].trim();
                 paramValue = inputParamMap.get(paramKey);
+                keepQuotes = isKeepQuotes(f.split(OPEN_SEP)[1].split(",")[1].split(CLOSE_SEP)[0].trim());
                 if (Objects.nonNull(paramValue)) {
-                    finalString = ", " + paramValue;
+                    finalString = ", " + QueryExecutionDto.mongoReplace(paramValue, keepQuotes);
                 } else finalString = "";
                 break;
 
