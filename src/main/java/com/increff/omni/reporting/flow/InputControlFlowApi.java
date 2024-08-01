@@ -67,11 +67,20 @@ public class InputControlFlowApi extends AbstractApi {
         pojo = api.add(pojo, queryPojo, valuesList);
 
         if (pojo.getScope().equals(InputControlScope.LOCAL)) {
-            ReportControlsPojo reportControlsPojo = getReportControlPojo(reportId, pojo.getId());
+            Integer sortOrder = getMaxSortOrder(reportId) + 1; // new filter should be added at the end
+            ReportControlsPojo reportControlsPojo = getReportControlPojo(reportId, pojo.getId(), sortOrder);
             reportControlsApi.add(reportControlsPojo);
             reportFlowApi.checkAndAddValidationGroup(reportControlsPojo);
         }
         return pojo;
+    }
+
+
+    public Integer getMaxSortOrder(Integer reportId) {
+        List<ReportControlsPojo> reportControlsPojos = reportControlsApi.getByReportId(reportId);
+        if (CollectionUtils.isEmpty(reportControlsPojos))
+            return 0;
+        return reportControlsPojos.stream().map(ReportControlsPojo::getSortOrder).max(Integer::compareTo).get();
     }
 
     @Transactional(rollbackFor = ApiException.class)

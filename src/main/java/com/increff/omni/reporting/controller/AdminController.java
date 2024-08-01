@@ -1,12 +1,12 @@
 package com.increff.omni.reporting.controller;
 
+import com.increff.commons.springboot.common.ApiException;
 import com.increff.commons.springboot.common.StringData;
 import com.increff.omni.reporting.dto.*;
 import com.increff.omni.reporting.model.constants.InputControlScope;
 import com.increff.omni.reporting.model.constants.VisualizationType;
 import com.increff.omni.reporting.model.data.*;
 import com.increff.omni.reporting.model.form.*;
-import com.increff.commons.springboot.common.ApiException;
 import io.swagger.v3.oas.annotations.Operation;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.config.Configurator;
@@ -185,6 +185,12 @@ public class AdminController {
     @PostMapping(value = "/reports/{reportId}/controls/{controlId}")
     public void mapReportToControl(@PathVariable Integer reportId, @PathVariable Integer controlId) throws ApiException {
         reportDto.mapToControl(reportId, controlId);
+    }
+
+    @Operation(summary = "Sorts report control mapping by order of control ids in input")
+    @PatchMapping(value = "/report-controls/sort-order/update")
+    public void updateReportToControl(@RequestParam List<Integer> controlIds, @RequestParam Integer reportId) throws ApiException {
+        reportDto.updateReportControlMappingSortOrder(reportId, controlIds);
     }
 
     @Operation(summary = "Delete report control")

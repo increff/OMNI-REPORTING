@@ -1,10 +1,9 @@
 package com.increff.omni.reporting.pojo;
 
 import com.increff.commons.springboot.db.pojo.AbstractVersionedPojo;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-
-import jakarta.persistence.*;
 
 @Entity
 @Setter
@@ -22,4 +21,7 @@ public class ReportControlsPojo extends AbstractVersionedPojo{
 
     @Column(nullable = false)
     private Integer controlId;
+
+    @Column(nullable = false)
+    private Integer sortOrder = 0;
 }

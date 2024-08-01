@@ -15,6 +15,7 @@ import com.increff.omni.reporting.pojo.*;
 import com.increff.service.encryption.form.CryptoDecodeFormWithoutKey;
 import com.increff.service.encryption.form.CryptoFormWithoutKey;
 import com.nextscm.commons.lang.StringUtil;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.scheduling.support.CronExpression;
 
 import java.time.Instant;
@@ -25,6 +26,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Log4j2
 public class CommonDtoHelper {
 
     public final static String TIME_ZONE_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX";
@@ -172,11 +174,12 @@ public class CommonDtoHelper {
     sortBasedOnReportControlMappedTime(List<InputControlData> inputControlDataList,
                                                           List<ReportControlsPojo> reportControlsPojos) {
         inputControlDataList.sort((o1, o2) -> {
+            // Sort controls based on sort order
             ReportControlsPojo p1 = reportControlsPojos.stream().filter(r -> r.getControlId().equals(o1.getId()))
                     .collect(Collectors.toList()).get(0);
             ReportControlsPojo p2 = reportControlsPojos.stream().filter(r -> r.getControlId().equals(o2.getId()))
                     .collect(Collectors.toList()).get(0);
-            return Objects.equals(p1.getId(), p2.getId()) ? 0 : (p1.getId() > p2.getId() ? 1 : -1);
+            return Objects.equals(p1.getSortOrder(), p2.getSortOrder()) ? 0 : (p1.getSortOrder() > p2.getSortOrder() ? 1 : -1);
         });
     }
 
@@ -200,10 +203,11 @@ public class CommonDtoHelper {
         return timeZoneData;
     }
 
-    public static ReportControlsPojo getReportControlPojo(Integer reportId, Integer controlId) {
+    public static ReportControlsPojo getReportControlPojo(Integer reportId, Integer controlId, Integer sortOrder) {
         ReportControlsPojo pojo = new ReportControlsPojo();
         pojo.setReportId(reportId);
         pojo.setControlId(controlId);
+        pojo.setSortOrder(sortOrder);
         return pojo;
     }
 

@@ -29,6 +29,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.increff.omni.reporting.util.ChartUtil.getChartData;
+import static com.increff.omni.reporting.util.ConstantsUtil.DEFAULT_VALUE_COMMON_KEY;
 import static com.increff.omni.reporting.util.ConvertUtil.convertChartLegendsPojoToChartLegendsData;
 import static com.increff.omni.reporting.util.ValidateUtil.validateDefaultValueForm;
 
@@ -229,6 +230,7 @@ public class DashboardDto extends AbstractDto {
 
         extractCommonFilters(charts, filterDetails);
 
+        sortFiltersForDashboards(filterDetails.get(DEFAULT_VALUE_COMMON_KEY));
 
         return filterDetails;
     }
@@ -280,8 +282,8 @@ public class DashboardDto extends AbstractDto {
                 combineValidationGroupForFilter(commonFilters.get(filter.getParamName()), filter);
             }
         }
-        filterDetails.put("common", new ArrayList<>(commonFilters.values()));
-        sortFiltersForDashboards(filterDetails.get("common"));
+        filterDetails.put(DEFAULT_VALUE_COMMON_KEY, new ArrayList<>(commonFilters.values()));
+
 
     }
 

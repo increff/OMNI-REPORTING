@@ -5,6 +5,7 @@ import com.increff.commons.springboot.common.ApiStatus;
 import com.increff.commons.springboot.common.ConvertUtil;
 import com.increff.omni.reporting.api.*;
 import com.increff.omni.reporting.config.ApplicationProperties;
+import com.increff.omni.reporting.flow.InputControlFlowApi;
 import com.increff.omni.reporting.flow.ReportFlowApi;
 import com.increff.omni.reporting.flow.ReportRequestFlowApi;
 import com.increff.omni.reporting.model.constants.*;
@@ -67,6 +68,8 @@ public class ReportDto extends AbstractDto {
     private ConnectionApi connectionApi;
     @Autowired
     private ChartLegendsApi chartLegendsApi;
+    @Autowired
+    private InputControlFlowApi inputControlFlowApi;
 
     public ReportData add(ReportForm form) throws ApiException {
         validateReportForm(form);
@@ -239,8 +242,12 @@ public class ReportDto extends AbstractDto {
     public void mapToControl(Integer reportId, Integer controlId) throws ApiException {
         if (reportId == null || controlId == null)
             throw new ApiException(ApiStatus.BAD_DATA, "Report id or control id cannot be null");
-        ReportControlsPojo pojo = CommonDtoHelper.getReportControlPojo(reportId, controlId);
+        ReportControlsPojo pojo = CommonDtoHelper.getReportControlPojo(reportId, controlId, inputControlFlowApi.getMaxSortOrder(reportId) + 1);
         flowApi.mapControlToReport(pojo);
+    }
+
+    public void updateReportControlMappingSortOrder(Integer reportId, List<Integer> controlIds) throws ApiException {
+        flowApi.updateReportControlMappingSortOrder(reportId, controlIds);
     }
 
     public void deleteReportControl(Integer reportId, Integer controlId) throws ApiException {

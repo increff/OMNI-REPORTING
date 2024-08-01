@@ -190,6 +190,37 @@ public class ReportDtoTest extends AbstractTest {
     }
 
     @Test
+    public void testMapReportToControlSortOrder() throws ApiException {
+        ReportForm form = commonSetup("Report 2", ReportType.CUSTOM);
+        ReportData data = dto.add(form);
+        InputControlForm inputControlForm1 = getInputControlForm("Client Id", "clientId", InputControlScope.GLOBAL
+                , InputControlType.TEXT, new ArrayList<>(), null, null, form.getSchemaVersionId());
+        InputControlData inputControlData1 = inputControlDto.add(inputControlForm1);
+        dto.mapToControl(data.getId(), inputControlData1.getId());
+        InputControlForm inputControlForm2 = getInputControlForm("Client Name", "clientName", InputControlScope.GLOBAL
+                , InputControlType.TEXT, new ArrayList<>(), null, null, form.getSchemaVersionId());
+        InputControlData inputControlData2 = inputControlDto.add(inputControlForm2);
+        dto.mapToControl(data.getId(), inputControlData2.getId());
+
+        List<InputControlData> controls = inputControlDto.selectForReport(data.getId());
+        assertEquals(2, controls.size());
+        assertEquals(inputControlData1.getId(), controls.get(0).getId());
+        assertEquals(inputControlData2.getId(), controls.get(1).getId());
+
+        // Update Sort Order
+        List<Integer> sortedIds = new ArrayList<>();
+        sortedIds.add(inputControlData2.getId());
+        sortedIds.add(inputControlData1.getId());
+        dto.updateReportControlMappingSortOrder(data.getId(), sortedIds);
+
+        controls = inputControlDto.selectForReport(data.getId());
+        assertEquals(2, controls.size());
+        assertEquals(inputControlData2.getId(), controls.get(0).getId());
+        assertEquals(inputControlData1.getId(), controls.get(1).getId());
+    }
+
+
+    @Test
     public void testValidationGroups() throws ApiException {
         ReportForm form = commonSetup("Report 2", ReportType.CUSTOM);
         ReportData data = dto.add(form);
