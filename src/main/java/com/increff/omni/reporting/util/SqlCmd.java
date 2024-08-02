@@ -90,14 +90,15 @@ public class SqlCmd {
         String finalString = "<<" + f + ">>";
 
         switch (methodName) {
-            case "filter": // filter(  )>>  ) >>
+            case "filter":
+                // Filter for replacing sql syntax. Substitutes with - sql_col_name operator param_value
                 paramKey = f.split(OPEN_SEP)[1].split(",")[0].trim();
                 paramValue = inputParamMap.get(paramKey);
                 filterJson = f.split(OPEN_SEP)[1].split(",")[1].trim();
                 operator = f.split(OPEN_SEP)[1].split(",")[2].split(CLOSE_SEP)[0].trim();
                 finalString = QueryExecutionDto.filter(filterJson, operator, paramValue);
                 break;
-            case "replace":
+            case "replace": // substitutes param value
                 paramKey = f.split(OPEN_SEP)[1].split(CLOSE_SEP)[0].trim();
                 paramValue = inputParamMap.get(paramKey);
                 if (Objects.nonNull(paramValue)) {
@@ -105,6 +106,7 @@ public class SqlCmd {
                 }
                 break;
             case "replaceWithComma":
+                // Adds a comma before substituting values ( used for dynamic columns select statement )
                 paramKey = f.split(OPEN_SEP)[1].split(",")[0].trim();
                 paramValue = inputParamMap.get(paramKey);
                 keepQuotes = isKeepQuotes(f.split(OPEN_SEP)[1].split(",")[1].split(CLOSE_SEP)[0].trim());
@@ -114,6 +116,7 @@ public class SqlCmd {
                 break;
 
             case "filterAppend":
+                // Same as filter but appends given string after param value
                 paramKey = f.split(OPEN_SEP)[1].split(",")[0].trim();
                 paramValue = inputParamMap.get(paramKey);
                 filterJson = f.split(OPEN_SEP)[1].split(",")[1].trim();
@@ -122,6 +125,7 @@ public class SqlCmd {
                 finalString = QueryExecutionDto.filterAppend(filterJson, operator, paramValue, condition);
                 break;
             case "mongoFilter":
+                // Filter for parsing mongo syntax
                 paramKey = f.split(OPEN_SEP)[1].split(",")[0].trim();
                 paramValue = inputParamMap.get(paramKey);
                 filterJson = f.split(OPEN_SEP)[1].split(",")[1].trim();
@@ -130,6 +134,8 @@ public class SqlCmd {
                 finalString = QueryExecutionDto.mongoFilter(filterJson, paramKey, paramValue, keepQuotes);
                 break;
             case "mongoReplace":
+                // Similar to replace but with keepQuotes param
+                // keepQuotes set to false in places where integers need to be substituted
                 paramKey = f.split(OPEN_SEP)[1].split(",")[0].trim();
                 paramValue = inputParamMap.get(paramKey);
                 keepQuotes = isKeepQuotes(f.split(OPEN_SEP)[1].split(",")[1].split(CLOSE_SEP)[0].trim());
@@ -139,6 +145,7 @@ public class SqlCmd {
                 break;
 
             case "conditionReplace":
+                // replaces only if specified conditions satisfy ( Eg. some string is contained in value of another param, value of other param is non null)
                 finalString = "";
 
                 String json = f.split(OPEN_SEP)[1].split(CLOSE_SEP)[0].trim();
@@ -191,7 +198,7 @@ public class SqlCmd {
                 List<String> valueList = List.of(paramValue.split(",")); // separate value by comma
                 for (String val : valueList) {
                     String tableAlias = val.split("\\.")[0];
-                    if (tableAlias.startsWith("\'")) { // remove first character if it is \'
+                    if (tableAlias.startsWith("'")) { // remove first character if it is single quote '
                         tableAlias = tableAlias.substring(1);
                     }
                     tableAliases.add(tableAlias); // extract string before '.' in valueList
