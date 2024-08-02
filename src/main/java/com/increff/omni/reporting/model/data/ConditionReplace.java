@@ -9,4 +9,5 @@ import java.util.List;
 @Setter
 public class ConditionReplace {
     private List<Constraint> constraints;
+    int version = 1; // kept for future use in case syntax/object structure changes
 }
