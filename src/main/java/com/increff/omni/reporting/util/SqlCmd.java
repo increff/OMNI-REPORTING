@@ -1,17 +1,19 @@
 package com.increff.omni.reporting.util;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.increff.commons.springboot.common.ApiException;
 import com.increff.commons.springboot.common.ApiStatus;
 import com.increff.commons.springboot.common.JsonUtil;
 import com.increff.omni.reporting.dto.QueryExecutionDto;
+import com.increff.omni.reporting.model.constants.ConditionType;
 import com.increff.omni.reporting.model.constants.DBType;
+import com.increff.omni.reporting.model.data.Condition;
+import com.increff.omni.reporting.model.data.ConditionReplace;
+import com.increff.omni.reporting.model.data.Constraint;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 import static com.increff.omni.reporting.util.MongoUtil.*;
 
@@ -88,21 +90,33 @@ public class SqlCmd {
         String finalString = "<<" + f + ">>";
 
         switch (methodName) {
-            case "filter": // filter(  )>>  ) >>
+            case "filter":
+                // Filter for replacing sql syntax. Substitutes with - sql_col_name operator param_value
                 paramKey = f.split(OPEN_SEP)[1].split(",")[0].trim();
                 paramValue = inputParamMap.get(paramKey);
                 filterJson = f.split(OPEN_SEP)[1].split(",")[1].trim();
                 operator = f.split(OPEN_SEP)[1].split(",")[2].split(CLOSE_SEP)[0].trim();
                 finalString = QueryExecutionDto.filter(filterJson, operator, paramValue);
                 break;
-            case "replace":
+            case "replace": // substitutes param value
                 paramKey = f.split(OPEN_SEP)[1].split(CLOSE_SEP)[0].trim();
                 paramValue = inputParamMap.get(paramKey);
                 if (Objects.nonNull(paramValue)) {
                     finalString = paramValue;
                 }
                 break;
+            case "replaceWithComma":
+                // Adds a comma before substituting values ( used for dynamic columns select statement )
+                paramKey = f.split(OPEN_SEP)[1].split(",")[0].trim();
+                paramValue = inputParamMap.get(paramKey);
+                keepQuotes = isKeepQuotes(f.split(OPEN_SEP)[1].split(",")[1].split(CLOSE_SEP)[0].trim());
+                if (Objects.nonNull(paramValue)) {
+                    finalString = ", " + QueryExecutionDto.mongoReplace(paramValue, keepQuotes);
+                } else finalString = "";
+                break;
+
             case "filterAppend":
+                // Same as filter but appends given string after param value
                 paramKey = f.split(OPEN_SEP)[1].split(",")[0].trim();
                 paramValue = inputParamMap.get(paramKey);
                 filterJson = f.split(OPEN_SEP)[1].split(",")[1].trim();
@@ -111,6 +125,7 @@ public class SqlCmd {
                 finalString = QueryExecutionDto.filterAppend(filterJson, operator, paramValue, condition);
                 break;
             case "mongoFilter":
+                // Filter for parsing mongo syntax
                 paramKey = f.split(OPEN_SEP)[1].split(",")[0].trim();
                 paramValue = inputParamMap.get(paramKey);
                 filterJson = f.split(OPEN_SEP)[1].split(",")[1].trim();
@@ -119,6 +134,8 @@ public class SqlCmd {
                 finalString = QueryExecutionDto.mongoFilter(filterJson, paramKey, paramValue, keepQuotes);
                 break;
             case "mongoReplace":
+                // Similar to replace but with keepQuotes param
+                // keepQuotes set to false in places where integers need to be substituted
                 paramKey = f.split(OPEN_SEP)[1].split(",")[0].trim();
                 paramValue = inputParamMap.get(paramKey);
                 keepQuotes = isKeepQuotes(f.split(OPEN_SEP)[1].split(",")[1].split(CLOSE_SEP)[0].trim());
@@ -126,9 +143,71 @@ public class SqlCmd {
                     finalString = QueryExecutionDto.mongoReplace(paramValue, keepQuotes);
                 }
                 break;
+
+            case "conditionReplace":
+                // replaces only if specified conditions satisfy ( Eg. some string is contained in value of another param, value of other param is non null)
+                finalString = "";
+
+                String json = f.split(OPEN_SEP)[1].split(CLOSE_SEP)[0].trim();
+                ConditionReplace conditionReplace;
+                try {
+                    ObjectMapper mapper = new ObjectMapper();
+                    conditionReplace = mapper.readValue(json, ConditionReplace.class);
+                } catch (Exception e) {
+                    throw new ApiException(ApiStatus.BAD_DATA, "Failed to parse json to ConditionReplace. " + e.getMessage() + ". Json: " + json);
+                }
+
+                for (Constraint constraint : conditionReplace.getConstraints()) {
+                    boolean join = false;
+                    for (Condition cond : constraint.getConditions()) {
+                        if (cond.getType().equals(ConditionType.TABLE_ALIAS)) {
+
+                            Set<String> tableAliases = getTableAliases(inputParamMap, cond);
+                            for (String alias : cond.getValues()) { // check if any string in cond.getConditions is in tableAliases
+                                if (tableAliases.contains(alias)) {
+                                    join = true;
+                                    break;
+                                }
+                            }
+                        } else if (cond.getType().equals(ConditionType.PARAM_NON_NULL)) {
+                            for (String key : cond.getValues()) {
+                                if (Objects.nonNull(inputParamMap.get(key))) {
+                                    join = true;
+                                    break;
+                                }
+                            }
+                        } else {
+                            throw new ApiException(ApiStatus.BAD_DATA, "Invalid condition type. Type: " + cond.getType());
+                        }
+                    }
+                    if (join)
+                        finalString += " " + constraint.getQuery() + " ";
+                }
+
+                break;
         }
         return finalString;
     }
+
+    private static Set<String> getTableAliases(Map<String, String> inputParamMap, Condition cond) {
+        Set<String> tableAliases = new HashSet<>();
+        String paramValue;
+        for (String key : cond.getForeignKeys()) {
+            if (Objects.nonNull(inputParamMap.get(key))) {
+                paramValue = inputParamMap.get(key);
+                List<String> valueList = List.of(paramValue.split(",")); // separate value by comma
+                for (String val : valueList) {
+                    String tableAlias = val.split("\\.")[0];
+                    if (tableAlias.startsWith("'")) { // remove first character if it is single quote '
+                        tableAlias = tableAlias.substring(1);
+                    }
+                    tableAliases.add(tableAlias); // extract string before '.' in valueList
+                }
+            }
+        }
+        return tableAliases;
+    }
+
 
     private static boolean isKeepQuotes(String f) throws ApiException {
         if(f.equalsIgnoreCase(KEEP_QUOTES_TRUE))
