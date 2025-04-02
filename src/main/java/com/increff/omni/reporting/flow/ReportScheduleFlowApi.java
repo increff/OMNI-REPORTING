@@ -53,10 +53,11 @@ public class ReportScheduleFlowApi extends FlowApi {
                                     List<PipelineFlowData> pipelineFlowData) throws ApiException {
         if(!sendTo.isEmpty())
             addEmails(pojo, sendTo);
-        else if (!failureSendTo.isEmpty())
-            addFailureEmails(pojo, failureSendTo);
         else if(!pipelineFlowData.isEmpty())
             upsertSchedulePipelines(pojo.getId(), pipelineFlowData);
+
+        if (!failureSendTo.isEmpty())
+            addFailureEmails(pojo, failureSendTo);
     }
 
     public void edit(ReportSchedulePojo pojo, List<String> sendTo, List<String> failureSendTo,
