@@ -185,6 +185,7 @@ public class ReportScheduleDto extends AbstractDto {
             List<InputControlPojo> controlPojos = controlIds.isEmpty() ? new ArrayList<>() :
                     controlApi.selectByIds(controlIds);
             List<ReportScheduleEmailsPojo> emailsPojos = api.getByScheduleId(pojo.getId());
+            List<ReportScheduleFailureEmailPojo> failureEmailPojos = api.getFailureEmailsByScheduleId(pojo.getId());
             List<ReportScheduleInputParamsPojo> paramsPojos = api.getScheduleParams(pojo.getId());
             String timezone = paramsPojos.stream().filter(p -> p.getParamKey().equalsIgnoreCase("timezone")).collect(
                     Collectors.toList()).get(0).getParamValue();
@@ -207,7 +208,8 @@ public class ReportScheduleDto extends AbstractDto {
             cronData.setMinute(pojo.getCron().split(" ")[1]);
             data.setCronSchedule(cronData);
             data.setTimezone(getValueFromQuotes(timezone));
-            data.setSendTo(emailsPojos.stream().map(ReportScheduleEmailsPojo::getSendTo).collect(Collectors.toList()));
+            data.setSendTo(emailsPojos.stream().map(ReportScheduleEmailsPojo::getSendTo).toList());
+            data.setFailureSendTo(failureEmailPojos.stream().map(ReportScheduleFailureEmailPojo::getSendTo).toList());
             data.setPipelineDetails(schedulePipelineApi.getByScheduleId(pojo.getId()).stream()
                     .map(p -> new PipelineFlowData(p.getPipelineId(), p.getFolderName())).collect(Collectors.toList()));
             data.setMinFrequencyAllowedSeconds(reportPojo.getMinFrequencyAllowedSeconds());
