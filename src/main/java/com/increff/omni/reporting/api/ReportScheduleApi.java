@@ -2,9 +2,11 @@ package com.increff.omni.reporting.api;
 
 import com.increff.omni.reporting.dao.ReportScheduleDao;
 import com.increff.omni.reporting.dao.ReportScheduleEmailsDao;
+import com.increff.omni.reporting.dao.ReportScheduleFailureEmailsDao;
 import com.increff.omni.reporting.dao.ReportScheduleInputParamsDao;
 import com.increff.omni.reporting.model.constants.ScheduleStatus;
 import com.increff.omni.reporting.pojo.ReportScheduleEmailsPojo;
+import com.increff.omni.reporting.pojo.ReportScheduleFailureEmailPojo;
 import com.increff.omni.reporting.pojo.ReportScheduleInputParamsPojo;
 import com.increff.omni.reporting.pojo.ReportSchedulePojo;
 import com.increff.commons.springboot.common.ApiException;
@@ -25,6 +27,8 @@ public class ReportScheduleApi extends AbstractAuditApi {
     private ReportScheduleDao dao;
     @Autowired
     private ReportScheduleEmailsDao emailsDao;
+    @Autowired
+    private ReportScheduleFailureEmailsDao failureEmailsDao;
     @Autowired
     private ReportScheduleInputParamsDao scheduleInputParamsDao;
 
@@ -131,15 +135,28 @@ public class ReportScheduleApi extends AbstractAuditApi {
     public void addEmails(List<ReportScheduleEmailsPojo> emailsPojos) {
         emailsPojos.forEach(e -> emailsDao.persist(e));
     }
+    public void addFailureEmails(List<ReportScheduleFailureEmailPojo> failureEmailPojos) {
+        failureEmailPojos.forEach(e -> failureEmailsDao.persist(e));
+    }
 
     public List<ReportScheduleEmailsPojo> getByScheduleId(Integer scheduleId) {
         return emailsDao.selectMultiple("scheduleId", scheduleId);
+    }
+
+    public List<ReportScheduleFailureEmailPojo> getFailureEmailsByScheduleId(Integer scheduleId) {
+        return failureEmailsDao.selectMultiple("scheduleId", scheduleId);
     }
 
     public void removeExistingEmails(Integer scheduleId) {
         List<ReportScheduleEmailsPojo> existingEmails = getByScheduleId(scheduleId);
         existingEmails.forEach(e -> emailsDao.remove(e.getId()));
         emailsDao.flush();
+    }
+
+    public void removeExistingFailureEmails(Integer scheduleId) {
+        List<ReportScheduleFailureEmailPojo> existingEmails = getFailureEmailsByScheduleId(scheduleId);
+        existingEmails.forEach(e -> failureEmailsDao.remove(e.getId()));
+        failureEmailsDao.flush();
     }
 
     public void addScheduleCount(Integer scheduleId, Integer successCount, Integer failureCount) {

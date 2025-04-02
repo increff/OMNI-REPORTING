@@ -143,8 +143,8 @@ public class ScheduleReportTask extends AbstractTask {
 
     private void sendFailureMail(ReportRequestPojo pojo, String timezone, ReportPojo reportPojo) throws ApiException, MessagingException {
         ReportSchedulePojo schedulePojo = reportScheduleApi.getCheck(pojo.getScheduleId());
-        List<String> toEmails = reportScheduleApi.getByScheduleId(schedulePojo.getId()).stream()
-                .map(ReportScheduleEmailsPojo::getSendTo).collect(
+        List<String> toEmails = reportScheduleApi.getFailureEmailsByScheduleId(schedulePojo.getId()).stream()
+                .map(ReportScheduleFailureEmailPojo::getSendTo).collect(
                         Collectors.toList());
         if (!toEmails.isEmpty()) {
             EmailProps props = createEmailProps(null, false, toEmails, "Hi,<br>Please " +

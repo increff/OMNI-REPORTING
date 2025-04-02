@@ -22,6 +22,7 @@ public class ReportScheduleForm {
     private EmailParams emailParams;
 
     private List<String> sendTo = new ArrayList<>();
+    private List<String> failureSendTo = new ArrayList<>();
     private List<PipelineDetailsForm> pipelineDetails = new ArrayList<>();
 
     @NotNull

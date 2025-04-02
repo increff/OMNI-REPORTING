@@ -80,7 +80,7 @@ public class ReportScheduleFlowApiTest extends AbstractTest {
                 100001, 100001, "0 */15 * * * ?");
         ReportScheduleInputParamsPojo paramsPojo = getReportScheduleInputParamsPojo(schedulePojo.getId(), "clientId",
                 "'1100002253'", "Client ID");
-        flowApi.add(schedulePojo, Arrays.asList("a@gmail.com", "b@gmail.com"), Collections.singletonList(paramsPojo),
+        flowApi.add(schedulePojo, Arrays.asList("a@gmail.com", "b@gmail.com"), Arrays.asList("a@gmail.com", "b@gmail.com"), Collections.singletonList(paramsPojo),
                 reportPojo, new ArrayList<>());
         ReportSchedulePojo schedulePojo1 = reportScheduleApi.getCheck(schedulePojo.getId());
         assertNotNull(schedulePojo1);
@@ -107,7 +107,7 @@ public class ReportScheduleFlowApiTest extends AbstractTest {
         ReportScheduleInputParamsPojo paramsPojo = getReportScheduleInputParamsPojo(schedulePojo.getId(), "clientId",
                 "'1100002253'", "Client ID");
         try {
-            flowApi.add(schedulePojo, Arrays.asList("a.gmail.com", "b.gmail.com"), Collections.singletonList(paramsPojo),
+            flowApi.add(schedulePojo, Arrays.asList("a.gmail.com", "b.gmail.com"), Arrays.asList("a@gmail.com", "b@gmail.com"), Collections.singletonList(paramsPojo),
                     reportPojo, new ArrayList<>());
         } catch (ApiException e) {
             assertEquals(ApiStatus.BAD_DATA, e.getStatus());
@@ -122,7 +122,7 @@ public class ReportScheduleFlowApiTest extends AbstractTest {
                 100001, 100001, "0 */15 * * * ?");
         ReportScheduleInputParamsPojo paramsPojo = getReportScheduleInputParamsPojo(schedulePojo.getId(), "clientId",
                 "'1100002253'", "Client ID");
-        flowApi.add(schedulePojo, Arrays.asList("a@gmail.com", "b@gmail.com"), Collections.singletonList(paramsPojo),
+        flowApi.add(schedulePojo, Arrays.asList("a@gmail.com", "b@gmail.com"), Arrays.asList("a@gmail.com", "b@gmail.com"), Collections.singletonList(paramsPojo),
                 reportPojo, new ArrayList<>());
         Integer id = schedulePojo.getId();
         schedulePojo = getReportSchedulePojo("Report 1", true, false, 0, 10, ZonedDateTime.now(),
@@ -130,7 +130,7 @@ public class ReportScheduleFlowApiTest extends AbstractTest {
         schedulePojo.setId(id);
         paramsPojo = getReportScheduleInputParamsPojo(schedulePojo.getId(), "clientId",
                 "'1100002254'", "Wh ID");
-        flowApi.edit(schedulePojo, Arrays.asList("a@gmail.com", "b.gmail.com"), Collections.singletonList(paramsPojo),
+        flowApi.edit(schedulePojo, Arrays.asList("a@gmail.com", "b.gmail.com"), Arrays.asList("a@gmail.com", "b@gmail.com"), Collections.singletonList(paramsPojo),
                 reportPojo, new ArrayList<>());
         ReportSchedulePojo schedulePojo1 = reportScheduleApi.getCheck(schedulePojo.getId());
         assertNotNull(schedulePojo1);
@@ -148,4 +148,143 @@ public class ReportScheduleFlowApiTest extends AbstractTest {
         assertEquals("'1100002254'", scheduleInputParamsPojoList.get(0).getParamValue());
     }
 
+    @Test
+    public void testAddWithFailureEmails() throws ApiException {
+        ReportPojo reportPojo = commonSetup();
+        ReportSchedulePojo schedulePojo = getReportSchedulePojo("Report 1", true, false, 0, 10, ZonedDateTime.now(),
+                100001, 100001, "0 */15 * * * ?");
+        ReportScheduleInputParamsPojo paramsPojo = getReportScheduleInputParamsPojo(schedulePojo.getId(), "clientId",
+                "'1100002253'", "Client ID");
+        
+        // Empty regular emails, but with failure emails
+        flowApi.add(schedulePojo, new ArrayList<>(), Arrays.asList("failure1@gmail.com", "failure2@gmail.com"), 
+                Collections.singletonList(paramsPojo), reportPojo, new ArrayList<>());
+        
+        ReportSchedulePojo schedulePojo1 = reportScheduleApi.getCheck(schedulePojo.getId());
+        assertNotNull(schedulePojo1);
+        assertEquals(true, schedulePojo1.getIsEnabled());
+        assertEquals(false, schedulePojo1.getIsDeleted());
+        assertEquals("0 */15 * * * ?", schedulePojo1.getCron());
+        
+        // Check regular emails (should be empty)
+        List<ReportScheduleEmailsPojo> emailsPojoList = reportScheduleApi.getByScheduleId(schedulePojo.getId());
+        assertEquals(0, emailsPojoList.size());
+        
+        // Check failure emails
+        List<ReportScheduleFailureEmailPojo> failureEmailsList = reportScheduleApi.getFailureEmailsByScheduleId(schedulePojo.getId());
+        assertEquals(2, failureEmailsList.size());
+        assertEquals("failure1@gmail.com", failureEmailsList.get(0).getSendTo());
+        assertEquals("failure2@gmail.com", failureEmailsList.get(1).getSendTo());
+        
+        // Check input params
+        List<ReportScheduleInputParamsPojo> scheduleInputParamsPojoList =
+                reportScheduleApi.getScheduleParams(schedulePojo.getId());
+        assertEquals(1, scheduleInputParamsPojoList.size());
+        assertEquals("clientId", scheduleInputParamsPojoList.get(0).getParamKey());
+        assertEquals("Client ID", scheduleInputParamsPojoList.get(0).getDisplayValue());
+        assertEquals("'1100002253'", scheduleInputParamsPojoList.get(0).getParamValue());
+    }
+
+    @Test
+    public void testAddWithInvalidFailureEmails() throws ApiException {
+        ReportPojo reportPojo = commonSetup();
+        ReportSchedulePojo schedulePojo = getReportSchedulePojo("Report 1", true, false, 0, 10, ZonedDateTime.now(),
+                100001, 100001, "0 */15 * * * ?");
+        ReportScheduleInputParamsPojo paramsPojo = getReportScheduleInputParamsPojo(schedulePojo.getId(), "clientId",
+                "'1100002253'", "Client ID");
+        
+        // Test with invalid failure emails
+        flowApi.add(schedulePojo, new ArrayList<>(), Arrays.asList("failure1.gmail.com", "failure2.gmail.com"), 
+                Collections.singletonList(paramsPojo), reportPojo, new ArrayList<>());
+        
+        // Check that no failure emails were added (since they were invalid)
+        List<ReportScheduleFailureEmailPojo> failureEmailsList = reportScheduleApi.getFailureEmailsByScheduleId(schedulePojo.getId());
+        assertEquals(0, failureEmailsList.size());
+    }
+
+    @Test
+    public void testEditWithFailureEmails() throws ApiException {
+        ReportPojo reportPojo = commonSetup();
+        ReportSchedulePojo schedulePojo = getReportSchedulePojo("Report 1", true, false, 0, 10, ZonedDateTime.now(),
+                100001, 100001, "0 */15 * * * ?");
+        ReportScheduleInputParamsPojo paramsPojo = getReportScheduleInputParamsPojo(schedulePojo.getId(), "clientId",
+                "'1100002253'", "Client ID");
+        
+        // First add with regular emails
+        flowApi.add(schedulePojo, Arrays.asList("a@gmail.com", "b@gmail.com"), new ArrayList<>(), 
+                Collections.singletonList(paramsPojo), reportPojo, new ArrayList<>());
+        
+        Integer id = schedulePojo.getId();
+        schedulePojo = getReportSchedulePojo("Report 1", true, false, 0, 10, ZonedDateTime.now(),
+                100001, 100001, "0 */20 * * * ?");
+        schedulePojo.setId(id);
+        paramsPojo = getReportScheduleInputParamsPojo(schedulePojo.getId(), "clientId",
+                "'1100002254'", "Wh ID");
+        
+        // Now edit with failure emails instead of regular emails
+        flowApi.edit(schedulePojo, new ArrayList<>(), Arrays.asList("failure1@gmail.com", "failure2@gmail.com"), 
+                Collections.singletonList(paramsPojo), reportPojo, new ArrayList<>());
+        
+        ReportSchedulePojo schedulePojo1 = reportScheduleApi.getCheck(schedulePojo.getId());
+        assertNotNull(schedulePojo1);
+        assertEquals(true, schedulePojo1.getIsEnabled());
+        assertEquals(false, schedulePojo1.getIsDeleted());
+        assertEquals("0 */20 * * * ?", schedulePojo1.getCron());
+        
+        // Check regular emails (should be empty)
+        List<ReportScheduleEmailsPojo> emailsPojoList = reportScheduleApi.getByScheduleId(schedulePojo.getId());
+        assertEquals(0, emailsPojoList.size());
+        
+        // Check failure emails
+        List<ReportScheduleFailureEmailPojo> failureEmailsList = reportScheduleApi.getFailureEmailsByScheduleId(schedulePojo.getId());
+        assertEquals(2, failureEmailsList.size());
+        assertEquals("failure1@gmail.com", failureEmailsList.get(0).getSendTo());
+        assertEquals("failure2@gmail.com", failureEmailsList.get(1).getSendTo());
+        
+        // Check updated input params
+        List<ReportScheduleInputParamsPojo> scheduleInputParamsPojoList =
+                reportScheduleApi.getScheduleParams(schedulePojo.getId());
+        assertEquals(1, scheduleInputParamsPojoList.size());
+        assertEquals("clientId", scheduleInputParamsPojoList.get(0).getParamKey());
+        assertEquals("Wh ID", scheduleInputParamsPojoList.get(0).getDisplayValue());
+        assertEquals("'1100002254'", scheduleInputParamsPojoList.get(0).getParamValue());
+    }
+
+    @Test
+    public void testEditFromFailureToRegularEmails() throws ApiException {
+        ReportPojo reportPojo = commonSetup();
+        ReportSchedulePojo schedulePojo = getReportSchedulePojo("Report 1", true, false, 0, 10, ZonedDateTime.now(),
+                100001, 100001, "0 */15 * * * ?");
+        ReportScheduleInputParamsPojo paramsPojo = getReportScheduleInputParamsPojo(schedulePojo.getId(), "clientId",
+                "'1100002253'", "Client ID");
+        
+        // First add with failure emails
+        flowApi.add(schedulePojo, new ArrayList<>(), Arrays.asList("failure1@gmail.com", "failure2@gmail.com"), 
+                Collections.singletonList(paramsPojo), reportPojo, new ArrayList<>());
+        
+        // Verify failure emails were added
+        List<ReportScheduleFailureEmailPojo> failureEmailsList = reportScheduleApi.getFailureEmailsByScheduleId(schedulePojo.getId());
+        assertEquals(2, failureEmailsList.size());
+        
+        Integer id = schedulePojo.getId();
+        schedulePojo = getReportSchedulePojo("Report 1", true, false, 0, 10, ZonedDateTime.now(),
+                100001, 100001, "0 */20 * * * ?");
+        schedulePojo.setId(id);
+        paramsPojo = getReportScheduleInputParamsPojo(schedulePojo.getId(), "clientId",
+                "'1100002254'", "Wh ID");
+        
+        // Now edit with regular emails instead of failure emails
+        flowApi.edit(schedulePojo, Arrays.asList("a@gmail.com", "b@gmail.com"), new ArrayList<>(),
+                Collections.singletonList(paramsPojo), reportPojo, new ArrayList<>());
+        
+        // Check regular emails (should be populated)
+        List<ReportScheduleEmailsPojo> emailsPojoList = reportScheduleApi.getByScheduleId(schedulePojo.getId());
+        assertEquals(2, emailsPojoList.size());
+        assertEquals("a@gmail.com", emailsPojoList.get(0).getSendTo());
+        assertEquals("b@gmail.com", emailsPojoList.get(1).getSendTo());
+        
+        // Check failure emails (should be empty)
+        failureEmailsList = reportScheduleApi.getFailureEmailsByScheduleId(schedulePojo.getId());
+        assertEquals(0, failureEmailsList.size());
+    }
 }

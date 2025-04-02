@@ -66,7 +66,7 @@ public class ReportScheduleDto extends AbstractDto {
         ReportSchedulePojo pojo = convertFormToReportSchedulePojo(form, getOrgId(), getUserId());
         List<ReportScheduleInputParamsPojo> reportScheduleInputParamsPojos =
                 validateAndPrepareInputParams(form, reportPojo);
-        flowApi.add(pojo, form.getSendTo(), reportScheduleInputParamsPojos, reportPojo,
+        flowApi.add(pojo, form.getSendTo(), form.getFailureSendTo(), reportScheduleInputParamsPojos, reportPojo,
                 ConvertUtil.convert(form.getPipelineDetails(), PipelineFlowData.class));
         flowApi.saveAudit(pojo.getId().toString(), AuditActions.CREATE_REPORT_SCHEDULE.toString(),
                 "Create Report Schedule",
@@ -86,7 +86,7 @@ public class ReportScheduleDto extends AbstractDto {
         pojo.setId(id);
         List<ReportScheduleInputParamsPojo> reportScheduleInputParamsPojos =
                 validateAndPrepareInputParams(form, reportPojo);
-        flowApi.edit(pojo, form.getSendTo(), reportScheduleInputParamsPojos, reportPojo,
+        flowApi.edit(pojo, form.getSendTo(), form.getFailureSendTo(), reportScheduleInputParamsPojos, reportPojo,
                 ConvertUtil.convert(form.getPipelineDetails(), PipelineFlowData.class));
         flowApi.saveAudit(pojo.getId().toString(), AuditActions.EDIT_REPORT_SCHEDULE.toString(), "Edit Report Schedule",
                 "Report schedule updated for organization : " + organizationPojo.getName() +

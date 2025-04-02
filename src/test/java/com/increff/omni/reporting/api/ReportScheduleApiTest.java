@@ -2,6 +2,7 @@ package com.increff.omni.reporting.api;
 
 import com.increff.omni.reporting.config.AbstractTest;
 import com.increff.omni.reporting.pojo.ReportScheduleEmailsPojo;
+import com.increff.omni.reporting.pojo.ReportScheduleFailureEmailPojo;
 import com.increff.omni.reporting.pojo.ReportScheduleInputParamsPojo;
 import com.increff.omni.reporting.pojo.ReportSchedulePojo;
 import com.increff.commons.springboot.common.ApiException;
@@ -212,4 +213,82 @@ public class ReportScheduleApiTest extends AbstractTest {
         assertEquals(0, schedulePojo1.getFailureCount().intValue());
     }
 
+    @Test
+    public void testAddFailureEmails() {
+        // Create a report schedule
+        ReportSchedulePojo schedulePojo = getReportSchedulePojo("Report 1", true, false, 0, 0, ZonedDateTime.now(),
+                100001, 100001, "0 */15 * * * ?");
+        reportScheduleApi.add(schedulePojo);
+        
+        // Create and add failure emails
+        List<ReportScheduleFailureEmailPojo> failureEmailPojos = getFailureEmailsPojos(schedulePojo.getId());
+        reportScheduleApi.addFailureEmails(failureEmailPojos);
+        
+        // Verify emails were added correctly
+        List<ReportScheduleFailureEmailPojo> retrievedEmails = reportScheduleApi.getFailureEmailsByScheduleId(schedulePojo.getId());
+        assertEquals(1, retrievedEmails.size());
+        assertEquals("failure@gmail.com", retrievedEmails.get(0).getSendTo());
+    }
+
+    @Test
+    public void testGetFailureEmailsByScheduleId() {
+        // Create a report schedule
+        ReportSchedulePojo schedulePojo = getReportSchedulePojo("Report 2", true, false, 0, 0, ZonedDateTime.now(),
+                100002, 100002, "0 */15 * * * ?");
+        reportScheduleApi.add(schedulePojo);
+        
+        // Initial check - should have no emails
+        List<ReportScheduleFailureEmailPojo> initialEmails = reportScheduleApi.getFailureEmailsByScheduleId(schedulePojo.getId());
+        assertEquals(0, initialEmails.size());
+        
+        // Add failure emails
+        List<ReportScheduleFailureEmailPojo> failureEmailPojos = getFailureEmailsPojos(schedulePojo.getId());
+        reportScheduleApi.addFailureEmails(failureEmailPojos);
+        
+        // Verify retrieval works correctly
+        List<ReportScheduleFailureEmailPojo> retrievedEmails = reportScheduleApi.getFailureEmailsByScheduleId(schedulePojo.getId());
+        assertEquals(1, retrievedEmails.size());
+        assertEquals("failure@gmail.com", retrievedEmails.get(0).getSendTo());
+        
+        // Add another email and verify both are retrieved
+        ReportScheduleFailureEmailPojo secondEmail = new ReportScheduleFailureEmailPojo();
+        secondEmail.setScheduleId(schedulePojo.getId());
+        secondEmail.setSendTo("another-failure@gmail.com");
+        reportScheduleApi.addFailureEmails(List.of(secondEmail));
+        
+        List<ReportScheduleFailureEmailPojo> updatedEmails = reportScheduleApi.getFailureEmailsByScheduleId(schedulePojo.getId());
+        assertEquals(2, updatedEmails.size());
+    }
+
+    @Test
+    public void testRemoveExistingFailureEmails() {
+        // Create a report schedule
+        ReportSchedulePojo schedulePojo = getReportSchedulePojo("Report 3", true, false, 0, 0, ZonedDateTime.now(),
+                100003, 100003, "0 */15 * * * ?");
+        reportScheduleApi.add(schedulePojo);
+        
+        // Add failure emails
+        List<ReportScheduleFailureEmailPojo> failureEmailPojos = getFailureEmailsPojos(schedulePojo.getId());
+        reportScheduleApi.addFailureEmails(failureEmailPojos);
+        
+        // Verify emails were added
+        List<ReportScheduleFailureEmailPojo> retrievedEmails = reportScheduleApi.getFailureEmailsByScheduleId(schedulePojo.getId());
+        assertEquals(1, retrievedEmails.size());
+        assertEquals("failure@gmail.com", retrievedEmails.get(0).getSendTo());
+        
+        // Remove the emails
+        reportScheduleApi.removeExistingFailureEmails(schedulePojo.getId());
+        
+        // Verify emails were removed
+        List<ReportScheduleFailureEmailPojo> emptyEmails = reportScheduleApi.getFailureEmailsByScheduleId(schedulePojo.getId());
+        assertEquals(0, emptyEmails.size());
+    }
+
+    // Helper method to create test failure email objects
+    private List<ReportScheduleFailureEmailPojo> getFailureEmailsPojos(Integer scheduleId) {
+        ReportScheduleFailureEmailPojo emailPojo = new ReportScheduleFailureEmailPojo();
+        emailPojo.setScheduleId(scheduleId);
+        emailPojo.setSendTo("failure@gmail.com");
+        return List.of(emailPojo);
+    }
 }
