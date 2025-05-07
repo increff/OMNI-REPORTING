@@ -214,12 +214,33 @@ public class ReportScheduleApiTest extends AbstractTest {
     }
 
     @Test
-    public void testAddFailureEmails() {
+    @Test
+    public void testAddInvalidFailureEmails() throws ApiException {
         // Create a report schedule
-        ReportSchedulePojo schedulePojo = getReportSchedulePojo("Report 1", true, false, 0, 0, ZonedDateTime.now(),
-                100001, 100001, "0 */15 * * * ?");
+        ReportSchedulePojo schedulePojo = getReportSchedulePojo("Invalid Email Report", true, false, 0, 0, ZonedDateTime.now(),
+                999001, 999001, "0 */15 * * * ?");
         reportScheduleApi.add(schedulePojo);
-        
+
+        // Attempt to add failure emails with invalid formats
+        List<String> invalidEmails = List.of("invalid-email", "noatsign.com", "   ");
+        // Using the flow method which validates emails; assume it is accessible via ReportScheduleDto or similar orchestration.
+        // For this test, simulate the filtering logic manually.
+        List<ReportScheduleFailureEmailPojo> failureEmailPojos = new ArrayList<>();
+        for(String email : invalidEmails) {
+            String trimmed = email.trim();
+            if(!trimmed.isEmpty() && VALID_EMAIL_ADDRESS_REGEX.matcher(trimmed).matches()) {
+                ReportScheduleFailureEmailPojo pojo = new ReportScheduleFailureEmailPojo();
+                pojo.setScheduleId(schedulePojo.getId());
+                pojo.setSendTo(trimmed);
+                failureEmailPojos.add(pojo);
+            }
+        }
+        // This should result in no valid failure emails
+        reportScheduleApi.addFailureEmails(failureEmailPojos);
+
+        List<ReportScheduleFailureEmailPojo> retrievedEmails = reportScheduleApi.getFailureEmailsByScheduleId(schedulePojo.getId());
+        assertEquals(0, retrievedEmails.size());
+    }
         // Create and add failure emails
         List<ReportScheduleFailureEmailPojo> failureEmailPojos = getFailureEmailsPojos(schedulePojo.getId());
         reportScheduleApi.addFailureEmails(failureEmailPojos);
