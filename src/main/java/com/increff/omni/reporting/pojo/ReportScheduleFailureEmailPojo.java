@@ -1,5 +1,6 @@
 package com.increff.omni.reporting.pojo;
 
+import com.increff.commons.springboot.db.pojo.AbstractVersionedPojo;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -9,7 +10,7 @@ import lombok.Setter;
 @Getter
 @Table(name = "report_schedule_failure_emails", indexes = {
         @Index(name = "idx_scheduleId", columnList = "scheduleId")})
-public class ReportScheduleFailureEmailPojo {
+public class ReportScheduleFailureEmailPojo extends AbstractVersionedPojo {
     @Id
     @TableGenerator(name = "report_schedule_failure_emails", pkColumnValue = "report_schedule_failure_emails",
             initialValue = 100000)
