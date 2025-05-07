@@ -312,51 +312,66 @@ public class ScheduleReportTask extends AbstractTask {
     private void sendEmail(double fileSize, File csvFile, ReportRequestPojo pojo, String timezone,
                            String name, Boolean zeroRows)
             throws IOException, ApiException, MessagingException {
-        File out = csvFile;
-        boolean isZip = false;
-        log.info("(Before Zip) Email File size : " + fileSize + " MB");
+        log.info("(Before Processing) Email File size: " + fileSize + " MB");
         
-        // First try to zip large files
-        if (fileSize > SCHEDULE_FILE_SIZE_ZIP_AFTER) { 
-            String outFileName = csvFile.getName().split(".csv")[0] + ".7z";
-            File zipFile = folderApi.getFile(outFileName);
-            try {
-                // Create a 7z output stream
-                FileOutputStream fos = new FileOutputStream(zipFile);
-                ZipOutputStream zos = new ZipOutputStream(fos);
-                ZipEntry ze = new ZipEntry(csvFile.getName());
-                zos.putNextEntry(ze);
-
-                // Add the input file to the archive
-                zos.write(Files.readAllBytes(csvFile.toPath()));
-                zos.finish();
-                zos.close();
-                fos.close();
-                
-                out = zipFile;
-                isZip = true;
-                fileSize = FileUtil.getSizeInMb(out.length());
-                log.info("(After Zip) Email File size : " + fileSize + " MB");
-            } catch (Exception e) {
-                log.error("Error while zipping : ", e);
-                throw new ApiException(ApiStatus.BAD_DATA, "Error while zipping the file");
-            }
+        // Process the file (zip if needed)
+        File processedFile = csvFile;
+        boolean isZipped = false;
+        
+        if (fileSize > SCHEDULE_FILE_SIZE_ZIP_AFTER) {
+            processedFile = zipFile(csvFile);
+            isZipped = true;
+            fileSize = FileUtil.getSizeInMb(processedFile.length());
+            log.info("(After Zip) Email File size: " + fileSize + " MB");
         }
         
-        // Then check if the file (possibly zipped) is still too large
-        // Using 14MB limit to leave buffer for email body, subject, and other metadata
-        // Mailjet has a limit of 15 mb - https://documentation.mailjet.com/hc/en-us/articles/360043179773-What-is-the-size-limit-for-attachments-files-sent-via-Mailjet
-        if (fileSize > 14.0) {
-            throw new ApiException(ApiStatus.BAD_DATA, "File size has crossed 14 MB limit. Mail can't be sent");
-        }
+        // Check if the file is still too large after processing
+        validateAttachmentSize(fileSize);
 
         ReportSchedulePojo schedulePojo = reportScheduleApi.getCheck(pojo.getScheduleId());
         List<String> toEmails = reportScheduleApi.getByScheduleId(schedulePojo.getId()).stream()
                 .map(ReportScheduleEmailsPojo::getSendTo).collect(
                         Collectors.toList());
-        EmailProps props = createEmailProps(out, true, toEmails, "", isZip, timezone,
-                name, zeroRows, schedulePojo.getEmailSubject(), false);
+        EmailProps props = createEmailProps(processedFile, true, toEmails, "", 
+                isZipped, timezone, name, zeroRows, schedulePojo.getEmailSubject(), false);
         EmailUtil.sendMail(props);
+    }
+    
+    /**
+     * Zip a file using ZIP compression
+     * @param fileToZip The file to be zipped
+     * @return The zipped file
+     */
+    private File zipFile(File fileToZip) throws ApiException, IOException {
+        String outFileName = fileToZip.getName().split(".csv")[0] + ".7z";
+        File zipFile = folderApi.getFile(outFileName);
+        
+        try (FileOutputStream fos = new FileOutputStream(zipFile);
+             ZipOutputStream zos = new ZipOutputStream(fos)) {
+            
+            ZipEntry ze = new ZipEntry(fileToZip.getName());
+            zos.putNextEntry(ze);
+            
+            // Add the input file to the archive
+            zos.write(Files.readAllBytes(fileToZip.toPath()));
+            zos.finish();
+            
+            return zipFile;
+        } catch (Exception e) {
+            log.error("Error while zipping: ", e);
+            throw new ApiException(ApiStatus.BAD_DATA, "Error while zipping the file");
+        }
+    }
+    
+    /**
+     * Validate that the attachment size is within email service limits
+     * @param fileSize The size of the file in MB
+     */
+    private void validateAttachmentSize(double fileSize) throws ApiException {
+        // Using 14MB limit to leave buffer for email body, subject, and other metadata
+        if (fileSize > 14.0) {
+            throw new ApiException(ApiStatus.BAD_DATA, "File size has crossed 14 MB limit. Mail can't be sent");
+        }
     }
 
     private EmailProps createEmailProps(File out, Boolean isAttachment,
