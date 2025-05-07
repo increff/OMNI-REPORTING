@@ -315,10 +315,9 @@ public class ScheduleReportTask extends AbstractTask {
         File out = csvFile;
         boolean isZip = false;
         log.info("(Before Zip) Email File size : " + fileSize + " MB");
-        if (fileSize > 50.0) {
-            throw new ApiException(ApiStatus.BAD_DATA, "File size has crossed 50 MB limit. Mail can't be sent");
-        }
-        if (fileSize > SCHEDULE_FILE_SIZE_ZIP_AFTER) { // Mailjet has a limit of 15 mb - https://documentation.mailjet.com/hc/en-us/articles/360043179773-What-is-the-size-limit-for-attachments-files-sent-via-Mailjet
+        
+        // First try to zip large files
+        if (fileSize > SCHEDULE_FILE_SIZE_ZIP_AFTER) { 
             String outFileName = csvFile.getName().split(".csv")[0] + ".7z";
             File zipFile = folderApi.getFile(outFileName);
             try {
@@ -333,14 +332,23 @@ public class ScheduleReportTask extends AbstractTask {
                 zos.finish();
                 zos.close();
                 fos.close();
+                
+                out = zipFile;
+                isZip = true;
+                fileSize = FileUtil.getSizeInMb(out.length());
+                log.info("(After Zip) Email File size : " + fileSize + " MB");
             } catch (Exception e) {
                 log.error("Error while zipping : ", e);
                 throw new ApiException(ApiStatus.BAD_DATA, "Error while zipping the file");
             }
-            out = zipFile;
-            isZip = true;
         }
-        log.info("(After Zip) Email File size : " + FileUtil.getSizeInMb(out.length()) + " MB");
+        
+        // Then check if the file (possibly zipped) is still too large
+        // Using 14MB limit to leave buffer for email body, subject, and other metadata
+        // Mailjet has a limit of 15 mb - https://documentation.mailjet.com/hc/en-us/articles/360043179773-What-is-the-size-limit-for-attachments-files-sent-via-Mailjet
+        if (fileSize > 14.0) {
+            throw new ApiException(ApiStatus.BAD_DATA, "File size has crossed 14 MB limit. Mail can't be sent");
+        }
 
         ReportSchedulePojo schedulePojo = reportScheduleApi.getCheck(pojo.getScheduleId());
         List<String> toEmails = reportScheduleApi.getByScheduleId(schedulePojo.getId()).stream()
