@@ -173,8 +173,9 @@ public class ReportScheduleFlowApiTest extends AbstractTest {
         // Check failure emails
         List<ReportScheduleFailureEmailPojo> failureEmailsList = reportScheduleApi.getFailureEmailsByScheduleId(schedulePojo.getId());
         assertEquals(2, failureEmailsList.size());
-        assertEquals("failure1@gmail.com", failureEmailsList.get(0).getSendTo());
-        assertEquals("failure2@gmail.com", failureEmailsList.get(1).getSendTo());
+        Set<String> expectedFailureEmails = new HashSet<>(Arrays.asList("failure1@gmail.com", "failure2@gmail.com"));
+        Set<String> actualFailureEmails = failureEmailsList.stream().map(ReportScheduleFailureEmailPojo::getSendTo).collect(Collectors.toSet());
+        assertEquals(expectedFailureEmails, actualFailureEmails);
         
         // Check input params
         List<ReportScheduleInputParamsPojo> scheduleInputParamsPojoList =
