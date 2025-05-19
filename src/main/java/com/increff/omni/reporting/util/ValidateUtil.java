@@ -18,7 +18,7 @@ import static com.increff.commons.springboot.server.DtoHelper.checkValid;
 
 public class ValidateUtil {
 
-    public static int MAX_DASHBOARD_CHARTS = 6;
+    public static int MAX_DASHBOARD_CHARTS = 8;
     public static String UNIFY_QUERY_STRING;
 
     public static void validateReportForm(ReportForm form) throws ApiException {
