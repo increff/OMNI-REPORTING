@@ -6,6 +6,7 @@ import com.increff.omni.reporting.api.DashboardApi;
 import com.increff.omni.reporting.api.DashboardChartApi;
 import com.increff.omni.reporting.api.DefaultValueApi;
 import com.increff.omni.reporting.api.ReportApi;
+import com.increff.omni.reporting.config.ApplicationProperties;
 import com.increff.omni.reporting.model.data.DashboardChartData;
 import com.increff.omni.reporting.model.data.InputControlData;
 import com.increff.omni.reporting.model.form.DashboardChartForm;
@@ -35,11 +36,13 @@ public class DashboardChartDto extends AbstractDto {
     private DefaultValueApi defaultValueApi;
     @Autowired
     private InputControlDto inputControlDto;
+    @Autowired
+    private ApplicationProperties properties;
 
 
     @Transactional(rollbackFor = ApiException.class)
     public List<DashboardChartData> addDashboardChart(List<DashboardChartForm> forms, Integer dashboardId) throws ApiException {
-        ValidateUtil.validateDashboardChartForms(forms);
+        ValidateUtil.validateDashboardChartForms(forms, properties.getMaxDashboardCharts());
         dashboardApi.getCheck(dashboardId, getOrgId());
         List<DashboardChartPojo> pojos = new ArrayList<>();
 

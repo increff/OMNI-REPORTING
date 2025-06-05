@@ -70,7 +70,7 @@ public class DashboardDto extends AbstractDto {
     public ApplicationPropertiesData getProperties() {
         ApplicationPropertiesData data = new ApplicationPropertiesData();
         data.setMaxDashboardsPerOrg(properties.getMaxDashboardsPerOrg());
-        data.setMaxChartsPerDashboard(ValidateUtil.MAX_DASHBOARD_CHARTS);
+        data.setMaxChartsPerDashboard(properties.getMaxDashboardCharts());
         return data;
     }
 
@@ -409,7 +409,7 @@ public class DashboardDto extends AbstractDto {
     }
 
     private void validateDashboardAddForm(DashboardAddForm form) throws ApiException {
-        ValidateUtil.validateDashboardAddForm(form);
+        ValidateUtil.validateDashboardAddForm(form, properties.getMaxDashboardCharts());
         if(Objects.nonNull(api.getByOrgIdName(getOrgId(), form.getName())))
             throw new ApiException(ApiStatus.BAD_DATA, "Dashboard name already exists: " + form.getName() + " OrgId: " + getOrgId());
         if(api.getByOrgId(getOrgId()).size() >= properties.getMaxDashboardsPerOrg())

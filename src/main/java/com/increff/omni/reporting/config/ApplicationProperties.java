@@ -135,6 +135,9 @@ public class ApplicationProperties {
     @Value("${max.dashboards.per.org:100}")
     private Integer maxDashboardsPerOrg;
 
+    @Value("${max.dashboard.charts:8}")
+    private Integer maxDashboardCharts;
+
     @Value("${rate.limit.tokens.refill.amount:20}")
     private Integer tokens;
     @Value("${rate.limit.tokens.refill.rate.seconds:60}")
