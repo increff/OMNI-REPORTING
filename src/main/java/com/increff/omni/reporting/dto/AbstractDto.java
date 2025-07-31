@@ -71,6 +71,10 @@ public class AbstractDto extends AbstractDtoApi {
         return getPrincipal().getUsername();
     }
 
+    protected static String getFullName() {
+        return getPrincipal().getFullName();
+    }
+
     protected List<Integer> getSchemaVersionIds() throws ApiException{
         return orgMappingApi.getCheckByOrgId(getOrgId()).stream().map(OrgMappingPojo::getSchemaVersionId).collect(Collectors.toList());
     }

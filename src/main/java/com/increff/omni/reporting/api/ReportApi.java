@@ -4,6 +4,7 @@ import com.increff.commons.springboot.common.ApiException;
 import com.increff.commons.springboot.common.ApiStatus;
 import com.increff.omni.reporting.dao.ReportDao;
 import com.increff.omni.reporting.model.constants.AppName;
+import com.increff.omni.reporting.model.constants.BenchmarkDirection;
 import com.increff.omni.reporting.model.constants.ReportType;
 import com.increff.omni.reporting.model.constants.VisualizationType;
 import com.increff.omni.reporting.pojo.ReportPojo;
@@ -15,6 +16,7 @@ import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 @Log4j2
@@ -108,5 +110,19 @@ public class ReportApi extends AbstractAuditApi {
 
     public ReportPojo getByIdAndAppNameIn(Integer id, Set<AppName> appNames) {
         return dao.getByIdAndAppNameIn(id, appNames);
+    }
+
+    public ReportPojo updateDefaultBenchmark(String benchmarkDesc, BenchmarkDirection benchmarkDirection, Double defaultBenchmark, Integer reportId) throws ApiException {
+        ReportPojo pojo = getCheck(reportId);
+        if(!pojo.getChartType().getCAN_BENCHMARK())
+            throw new ApiException(ApiStatus.BAD_DATA, "Chart type does not support benchmark");
+        if(Objects.nonNull(defaultBenchmark))
+            pojo.setDefaultBenchmark(defaultBenchmark);
+        if(Objects.nonNull(benchmarkDirection))
+            pojo.setBenchmarkDirection(benchmarkDirection);
+        if(Objects.nonNull(benchmarkDesc))
+            pojo.setBenchmarkDesc(benchmarkDesc);
+        dao.update(pojo);
+        return pojo;
     }
 }

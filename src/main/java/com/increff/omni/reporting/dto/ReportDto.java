@@ -290,6 +290,13 @@ public class ReportDto extends AbstractDto {
         return validationGroupDataList;
     }
 
+    public DefaultBenchmarkData updateDefaultBenchmark(DefaultBenchmarkForm form) throws ApiException {
+        checkValid(form);
+        ReportPojo pojo = flowApi.updateDefaultBenchmark(form.getBenchmarkDesc(), form.getBenchmarkDirection(), form.getDefaultBenchmark(), form.getReportId());
+        DefaultBenchmarkData data = ConvertUtil.convert(pojo, DefaultBenchmarkData.class);
+        data.setReportId(pojo.getId());
+        return data;
+    }
     private boolean hasAccessControlledMultiSelect(List<InputControlPojo> pojos) {
         return pojos.stream().anyMatch(pojo -> pojo.getType().equals(InputControlType.ACCESS_CONTROLLED_MULTI_SELECT));
     }

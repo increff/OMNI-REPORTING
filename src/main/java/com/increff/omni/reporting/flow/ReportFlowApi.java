@@ -442,4 +442,8 @@ public class ReportFlowApi extends FlowApi {
         }
         return oldToNewControls;
     }
+
+    public ReportPojo updateDefaultBenchmark(String benchmarkDesc, BenchmarkDirection benchmarkDirection, Double defaultBenchmark, Integer reportId) throws ApiException {
+        return api.updateDefaultBenchmark(benchmarkDesc, benchmarkDirection, defaultBenchmark, reportId);
+    }
 }

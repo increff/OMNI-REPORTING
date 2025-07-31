@@ -31,7 +31,10 @@ public class ValidateUtil {
             throw new ApiException(ApiStatus.BAD_DATA, "Invalid legend count. Expected: " + form.getChartType().getLEGENDS_COUNT_VALIDATION() + " Actual: " + form.getLegends().size());
         if(form.getChartType() != ChartType.REPORT && !form.getIsChart())
             throw new ApiException(ApiStatus.BAD_DATA, "isChart should be true for Chart Type: " + form.getChartType());
-
+        if(Objects.nonNull(form.getDefaultBenchmark()) && !form.getChartType().getCAN_BENCHMARK())
+            throw new ApiException(ApiStatus.BAD_DATA, "Benchmark is not supported for Chart Type: " + form.getChartType());
+        if(Objects.nonNull(form.getDefaultBenchmark()) && (Objects.isNull(form.getBenchmarkDirection()) || Objects.isNull(form.getBenchmarkDesc())))
+            throw new ApiException(ApiStatus.BAD_DATA, "Benchmark Direction and Description are required when Benchmark Default is provided.");
     }
 
     public static void validateReportQueryForm(ReportQueryForm form, AppName appName) throws ApiException {

@@ -167,6 +167,12 @@ public class ApplicationProperties {
     @Value("${schedule.file.size.zip.after:5}")
     private Integer scheduleFileSizeZipAfter;
 
+    @Value("${email.max.recipients:10}")
+    private Integer dashboardEmailMaxRecipients;
+
+    @Value("${email.max.file.size.mb:10}")
+    private Integer dashboardEmailMaxFileSize;
+
     @PostConstruct
     public void init() {
         UNIFY_QUERY_STRING = unifyQueryString;
