@@ -36,10 +36,11 @@ public class ReportForm {
     private Boolean isChart = false;
     @NotNull
     private ChartType chartType;
-    @NotNull
+
     private Double defaultBenchmark;
-    @NotNull
+
     private BenchmarkDirection benchmarkDirection;
+    
     @Size(max = 255)
     private String benchmarkDesc;
     @NotNull
