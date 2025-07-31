@@ -7,6 +7,7 @@ import com.increff.commons.fileclient.SftpFileProvider;
 import com.increff.commons.springboot.client.AppClientException;
 import com.increff.commons.springboot.common.ApiException;
 import com.increff.commons.springboot.common.ApiStatus;
+import com.increff.commons.springboot.common.JsonUtil;
 import com.increff.omni.reporting.api.*;
 import com.increff.omni.reporting.config.ApplicationProperties;
 import com.increff.omni.reporting.config.EmailProps;
@@ -99,8 +100,11 @@ public class ScheduleReportTask extends AbstractTask {
         }
         // process
         String timezone = "Asia/Kolkata";
+        System.out.println("pojo.getId() : " + pojo.getId());
         ReportRequestPojo reportRequestPojo = api.getCheck(pojo.getId());
+        System.out.println("reportRequestPojo : " + JsonUtil.serialize(reportRequestPojo));
         ReportPojo reportPojo = reportApi.getCheck(reportRequestPojo.getReportId());
+        System.out.println("reportPojo : " + JsonUtil.serialize(reportPojo));
         try {
             List<ReportInputParamsPojo> reportInputParamsPojoList = reportInputParamsApi
                     .getInputParamsForReportRequest(reportRequestPojo.getId());
