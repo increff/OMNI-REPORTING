@@ -257,7 +257,7 @@ public class StandardController {
     }
 
     @Operation(summary = "Send report as an email")
-    @PostMapping(value = "dashboards/send-dashboard", consumes = "multipart/form-data")
+    @PostMapping(value = "/dashboards/send-dashboard", consumes = "multipart/form-data")
     public void sendDashboardEmail(@RequestPart("form") String formJson, @RequestPart("file") MultipartFile file) throws ApiException, MessagingException, IOException {
         SendReportForm form = ConvertUtil.getJavaObjectFromJson(formJson, SendReportForm.class, objectMapper);
         dashboardDto.sendReportEmail(form, file);

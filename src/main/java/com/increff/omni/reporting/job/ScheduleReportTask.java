@@ -100,11 +100,8 @@ public class ScheduleReportTask extends AbstractTask {
         }
         // process
         String timezone = "Asia/Kolkata";
-        System.out.println("pojo.getId() : " + pojo.getId());
         ReportRequestPojo reportRequestPojo = api.getCheck(pojo.getId());
-        System.out.println("reportRequestPojo : " + JsonUtil.serialize(reportRequestPojo));
         ReportPojo reportPojo = reportApi.getCheck(reportRequestPojo.getReportId());
-        System.out.println("reportPojo : " + JsonUtil.serialize(reportPojo));
         try {
             List<ReportInputParamsPojo> reportInputParamsPojoList = reportInputParamsApi
                     .getInputParamsForReportRequest(reportRequestPojo.getId());
