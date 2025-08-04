@@ -5,6 +5,7 @@ import com.increff.omni.reporting.dao.FavouriteDao;
 import com.increff.omni.reporting.pojo.DashboardPojo;
 import com.increff.commons.springboot.common.ApiException;
 import com.increff.commons.springboot.common.ApiStatus;
+import com.increff.commons.springboot.common.JsonUtil;
 import com.increff.commons.springboot.server.AbstractApi;
 import com.increff.omni.reporting.pojo.FavouritePojo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,7 +52,12 @@ public class DashboardApi extends AbstractAuditApi {
     }
 
     public List<DashboardPojo> getByOrgId(Integer orgId) {
-        return dao.getByOrgId(orgId);
+        List<DashboardPojo> pojos = dao.getByOrgId(orgId);
+        pojos.forEach(pojo -> {
+           System.out.println(pojo.getUpdatedAt().toString());
+           System.out.println(pojo.getCreatedAt().toString());
+        });
+        return pojos;
     }
     public DashboardPojo getByOrgIdName(Integer orgId, String name) {
         return dao.getByOrgIdName(orgId, name);
