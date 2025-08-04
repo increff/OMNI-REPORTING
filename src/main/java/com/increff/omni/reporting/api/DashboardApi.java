@@ -15,6 +15,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Objects;
 
+import lombok.extern.log4j.Log4j2;
+
+@Log4j2
 @Service
 @Transactional(rollbackFor = ApiException.class)
 public class DashboardApi extends AbstractAuditApi {
@@ -54,8 +57,8 @@ public class DashboardApi extends AbstractAuditApi {
     public List<DashboardPojo> getByOrgId(Integer orgId) {
         List<DashboardPojo> pojos = dao.getByOrgId(orgId);
         pojos.forEach(pojo -> {
-           System.out.println(pojo.getUpdatedAt().toString());
-           System.out.println(pojo.getCreatedAt().toString());
+           log.info(pojo.getUpdatedAt().toString());
+           log.info(pojo.getCreatedAt().toString());
         });
         return pojos;
     }
