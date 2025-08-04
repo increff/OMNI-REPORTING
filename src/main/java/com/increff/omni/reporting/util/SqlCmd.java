@@ -103,7 +103,7 @@ public class SqlCmd {
                 paramValue = inputParamMap.get(paramKey);
                 if (Objects.nonNull(paramValue)) {
                     finalString = paramValue;
-                }
+                } else finalString = "null";
                 break;
             case "replaceWithComma":
                 // Adds a comma before substituting values ( used for dynamic columns select statement )
