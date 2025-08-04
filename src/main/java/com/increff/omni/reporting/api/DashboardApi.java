@@ -55,12 +55,7 @@ public class DashboardApi extends AbstractAuditApi {
     }
 
     public List<DashboardPojo> getByOrgId(Integer orgId) {
-        List<DashboardPojo> pojos = dao.getByOrgId(orgId);
-        pojos.forEach(pojo -> {
-           log.info(pojo.getUpdatedAt().toString());
-           log.info(pojo.getCreatedAt().toString());
-        });
-        return pojos;
+        return dao.getByOrgId(orgId);
     }
     public DashboardPojo getByOrgIdName(Integer orgId, String name) {
         return dao.getByOrgIdName(orgId, name);
