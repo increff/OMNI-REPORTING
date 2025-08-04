@@ -41,13 +41,12 @@ public class StandardSecurityConfig {
                     auth
                             .requestMatchers("/standard/schedules/**").hasAnyAuthority(Roles.APP_ADMIN.getRole())//
                             .requestMatchers("/standard/pipelines/**").hasAnyAuthority(Roles.APP_ADMIN.getRole())//
-                            .requestMatchers("/standard/reports/default-benchmark").hasAnyAuthority(Roles.APP_ADMIN.getRole())//
-                            .requestMatchers( "/standard/dashboards/send-dashboard").hasAnyAuthority(Roles.APP_ADMIN.getRole(), Roles.REPORT_ADMIN.getRole(), Roles.OMNI_REPORT_STANDARD.getRole(), Roles.OMNI_REPORT_CUSTOM.getRole(), "icc.report.standard", "icc.report.custom"  )//                       
-                            .requestMatchers( "/standard/reports/benchmark").hasAnyAuthority(Roles.APP_ADMIN.getRole(), Roles.REPORT_ADMIN.getRole(), Roles.OMNI_REPORT_STANDARD.getRole(), Roles.OMNI_REPORT_CUSTOM.getRole(), "icc.report.standard", "icc.report.custom"  )//                       
-                            .requestMatchers(HttpMethod.POST, "/standard/dashboards/{dashboardId}/view").hasAnyAuthority(Roles.APP_ADMIN.getRole(), Roles.REPORT_ADMIN.getRole(), Roles.OMNI_REPORT_STANDARD.getRole(), Roles.OMNI_REPORT_CUSTOM.getRole(), "icc.report.standard", "icc.report.custom"  )
-                            .requestMatchers(HttpMethod.GET, "/standard/dashboards/**").hasAnyAuthority(Roles.APP_ADMIN.getRole(), Roles.REPORT_ADMIN.getRole(), Roles.OMNI_REPORT_STANDARD.getRole(), Roles.OMNI_REPORT_CUSTOM.getRole(), "icc.report.standard", "icc.report.custom"  )//
+                            .requestMatchers( "/standard/dashboards/send-dashboard").hasAnyAuthority(Roles.APP_ADMIN.getRole(), Roles.REPORT_ADMIN.getRole(), Roles.OMNI_REPORT_STANDARD.getRole(), Roles.OMNI_REPORT_CUSTOM.getRole(), Roles.ICC_REPORT_STANDARD.getRole(), Roles.ICC_REPORT_CUSTOM.getRole()  )//                       
+                            .requestMatchers( "/standard/reports/benchmark").hasAnyAuthority(Roles.APP_ADMIN.getRole(), Roles.REPORT_ADMIN.getRole(), Roles.OMNI_REPORT_STANDARD.getRole(), Roles.OMNI_REPORT_CUSTOM.getRole(), Roles.ICC_REPORT_STANDARD.getRole(), Roles.ICC_REPORT_CUSTOM.getRole()  )//                       
+                            .requestMatchers(HttpMethod.POST, "/standard/dashboards/{dashboardId}/view").hasAnyAuthority(Roles.APP_ADMIN.getRole(), Roles.REPORT_ADMIN.getRole(), Roles.OMNI_REPORT_STANDARD.getRole(), Roles.OMNI_REPORT_CUSTOM.getRole(), Roles.ICC_REPORT_STANDARD.getRole(), Roles.ICC_REPORT_CUSTOM.getRole()  )
+                            .requestMatchers(HttpMethod.GET, "/standard/dashboards/**").hasAnyAuthority(Roles.APP_ADMIN.getRole(), Roles.REPORT_ADMIN.getRole(), Roles.OMNI_REPORT_STANDARD.getRole(), Roles.OMNI_REPORT_CUSTOM.getRole(), Roles.ICC_REPORT_STANDARD.getRole(), Roles.ICC_REPORT_CUSTOM.getRole()  )//
                             .requestMatchers("/standard/dashboards/**").hasAnyAuthority(Roles.APP_ADMIN.getRole())//
-                            .requestMatchers("/standard/**").hasAnyAuthority(Roles.APP_ADMIN.getRole(), Roles.REPORT_ADMIN.getRole(), Roles.OMNI_REPORT_STANDARD.getRole(), Roles.OMNI_REPORT_CUSTOM.getRole(), "icc.report.standard", "icc.report.custom"  );
+                            .requestMatchers("/standard/**").hasAnyAuthority(Roles.APP_ADMIN.getRole(), Roles.REPORT_ADMIN.getRole(), Roles.OMNI_REPORT_STANDARD.getRole(), Roles.OMNI_REPORT_CUSTOM.getRole(), Roles.ICC_REPORT_STANDARD.getRole(), Roles.ICC_REPORT_CUSTOM.getRole()  );
                 })
                 .cors(AbstractHttpConfigurer::disable)
                 .csrf(AbstractHttpConfigurer::disable)

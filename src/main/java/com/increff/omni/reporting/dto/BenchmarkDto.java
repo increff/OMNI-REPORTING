@@ -47,11 +47,10 @@ public class BenchmarkDto extends AbstractDto {
 
     public List<BenchmarkData> getBenchmarksForReport(List<Integer> reportIds) throws ApiException {
         List<BenchmarkData> benchmarkDataList = new ArrayList<>();
-        for(Integer reportId : reportIds){
-            ReportPojo report = reportApi.getCheck(reportId);
+        List<ReportPojo> reports = reportApi.getByIds(reportIds);
+        for(ReportPojo report : reports){
             if(!report.getChartType().getCAN_BENCHMARK())
                 continue;
-            
             BenchmarkPojo pojo = benchmarkApi.getByReportId(report.getId());
             BenchmarkData data = getBenchmarkData(report, pojo);
             benchmarkDataList.add(data);

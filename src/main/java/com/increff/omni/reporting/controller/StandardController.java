@@ -47,7 +47,7 @@ public class StandardController {
     @Autowired
     private ApplicationProperties properties;
     @Autowired
-    private BenchmarkDto     benchmarkDto;
+    private BenchmarkDto benchmarkDto;
     @Autowired
     private ObjectMapper objectMapper;
 
@@ -94,12 +94,7 @@ public class StandardController {
         return benchmarkDto.getBenchmarksForReport(reportIds);
     }
 
-    @Operation(summary = "Update default benchmark for a report")
-    @PutMapping(value = "/reports/default-benchmark")
-    public DefaultBenchmarkData updateDefaultBenchmark(@RequestBody DefaultBenchmarkForm form) throws ApiException {
-        return reportDto.updateDefaultBenchmark(form);
-    }
-
+   
     @Operation(summary = "Get All Directories")
     @GetMapping(value = "/directories")
     public List<DirectoryData> selectAllDirectories() throws ApiException {

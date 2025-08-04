@@ -10,7 +10,10 @@ import jakarta.persistence.*;
 @Getter
 @Setter
 @Table(name = "benchmark", uniqueConstraints = {@UniqueConstraint(name = "uq_org_id_report_id", columnNames = {"orgId", "reportId"})},
-        indexes = @Index(name = "idx_org_id_report_id", columnList = "orgId, reportId"))
+        indexes = {
+            @Index(name = "idx_org_id_report_id", columnList = "orgId, reportId"),
+            @Index(name = "idx_report_id", columnList = "reportId")
+        })
 public class BenchmarkPojo extends AbstractVersionedPojo {
     @Id
     @TableGenerator(name = "benchmark", pkColumnValue = "benchmark")

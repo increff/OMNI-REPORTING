@@ -170,10 +170,10 @@ public class ApplicationProperties {
     @Value("${schedule.file.size.zip.after:5}")
     private Integer scheduleFileSizeZipAfter;
 
-    @Value("${email.max.recipients:10}")
+    @Value("${dashboard.email.max.recipients:10}")
     private Integer dashboardEmailMaxRecipients;
 
-    @Value("${email.max.file.size.mb:10}")
+    @Value("${dashboard.email.max.file.size.mb:10}")
     private Integer dashboardEmailMaxFileSize;
 
     @PostConstruct

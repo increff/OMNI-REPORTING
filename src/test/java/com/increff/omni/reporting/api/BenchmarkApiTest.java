@@ -19,7 +19,7 @@ public class BenchmarkApiTest extends AbstractTest {
     @Test
     public void testAdd() throws ApiException {
         BenchmarkPojo pojo = getBenchmarkPojo(1, orgId, "Test User (test_user)", 95.5);
-        api.add(pojo);
+        api.upsert(Arrays.asList(pojo));
         BenchmarkPojo fetched = api.getByReportId(1);
         assertNotNull(fetched);
         assertEquals(pojo.getReportId(), fetched.getReportId());
@@ -42,7 +42,7 @@ public class BenchmarkApiTest extends AbstractTest {
     public void testUpsertExisting() throws ApiException {
         // First add
         BenchmarkPojo pojo = getBenchmarkPojo(1, orgId, "Test User (test_user)", 95.5);
-        api.add(pojo);
+        api.upsert(Arrays.asList(pojo));
 
         // Then update via upsert
         BenchmarkPojo updatePojo = getBenchmarkPojo(1, orgId, "Another User (another_user)", 85.0);

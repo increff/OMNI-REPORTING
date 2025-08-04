@@ -382,5 +382,84 @@ public class ReportDtoTest extends AbstractTest {
         dto.add(form);
     }
 
+    @Test
+    public void testValidBenchmarkFields() throws ApiException {
+        ReportForm form = getValidReportForm();
+        dto.add(form);
+    }
 
+    @Test
+    public void testNoBenchmarkFields() throws ApiException {
+        ReportForm form = getValidReportForm();
+        form.setDefaultBenchmark(null);
+        form.setBenchmarkDirection(null);
+        form.setBenchmarkDesc(null);
+        // Should not throw any exception
+        dto.add(form);
+    }
+
+    @Test
+    public void testPartialBenchmarkFields_OnlyDefaultBenchmark() throws ApiException {
+        ReportForm form = getValidReportForm();
+        form.setDefaultBenchmark(95.0);
+        form.setBenchmarkDirection(null);
+        ApiException exception = assertThrows(ApiException.class, () -> {
+            dto.add(form);
+        });
+        
+        assertEquals(ApiStatus.BAD_DATA, exception.getStatus());
+        assertEquals("All three benchmark fields must be present if any one of them is present", exception.getMessage());
+    }
+
+    @Test
+    public void testPartialBenchmarkFields_OnlyDirection() throws ApiException  {
+        ReportForm form = getValidReportForm();
+        form.setDefaultBenchmark(null);
+        form.setBenchmarkDirection(BenchmarkDirection.POSITIVE);
+        ApiException exception = assertThrows(ApiException.class, () -> {
+            dto.add(form);
+        });
+        
+        assertEquals(ApiStatus.BAD_DATA, exception.getStatus());
+        assertEquals("All three benchmark fields must be present if any one of them is present", exception.getMessage());
+    }
+
+    @Test
+    public void testPartialBenchmarkFields_OnlyDescription() throws ApiException {
+        ReportForm form = getValidReportForm();
+        form.setDefaultBenchmark(null);
+        form.setBenchmarkDirection(null);
+        ApiException exception = assertThrows(ApiException.class, () -> {
+            dto.add(form);
+        });
+        
+        assertEquals(ApiStatus.BAD_DATA, exception.getStatus());
+        assertEquals("All three benchmark fields must be present if any one of them is present", exception.getMessage());
+    }
+
+    @Test
+    public void testBenchmarkWithUnsupportedChartType() throws ApiException {
+        ReportForm form = getValidReportForm();
+        form.setChartType(ChartType.TABLE);
+        ApiException exception = assertThrows(ApiException.class, () -> {
+                    dto.add(form);
+        });
+        
+        assertEquals(ApiStatus.BAD_DATA, exception.getStatus());
+        assertEquals("Chart Type: TABLE does not support benchmark", exception.getMessage());
+    }
+
+    private ReportForm getValidReportForm() throws ApiException{
+        ReportForm form = commonSetup("Report 1",ReportType.STANDARD);
+        form.setDefaultBenchmark(95.0);
+        form.setBenchmarkDirection(BenchmarkDirection.POSITIVE);
+        form.setBenchmarkDesc("Target Performance");
+        form.setChartType(ChartType.LINE); // LINE chart supports benchmarks
+        form.setIsChart(true);
+        HashMap<String, String> legends = new HashMap<>();
+        legends.put("Xkey", "Xvalue");
+        legends.put("Ykey", "Yvalue");
+        form.setLegends(legends);
+        return form;
+    }
 }

@@ -285,6 +285,12 @@ public class AdminController {
         return customReportAccessDto.getAllDataByReport(reportId);
     }
 
+    @Operation(summary = "Update default benchmark for a report")
+    @PutMapping(value = "/reports/default-benchmark")
+    public DefaultBenchmarkData updateDefaultBenchmark(@RequestBody DefaultBenchmarkForm form) throws ApiException {
+        return reportDto.updateDefaultBenchmark(form);
+    }
+
     @Operation(description = "Change log level")
     @PutMapping(value = "/log")
     public StringData changeLogLevel(@RequestParam String level) {

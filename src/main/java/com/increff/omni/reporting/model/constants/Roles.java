@@ -17,7 +17,10 @@ public enum Roles {
     REPORT_ADMIN("report.admin"),
 
     OMNI_REPORT_STANDARD("omni.report.standard"), // used to override report.standard role to omni.report.standard in filter
-    OMNI_REPORT_CUSTOM("omni.report.custom");
+    OMNI_REPORT_CUSTOM("omni.report.custom"),
+
+    ICC_REPORT_STANDARD("icc.report.standard"),
+    ICC_REPORT_CUSTOM("icc.report.custom");
 
     private final String role;
     public static final List<String> USER_ACCESS_ADMIN_AUTHORITIES = Arrays.asList(

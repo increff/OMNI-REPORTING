@@ -295,6 +295,7 @@ public class ReportDto extends AbstractDto {
         ReportPojo pojo = flowApi.updateDefaultBenchmark(form.getBenchmarkDesc(), form.getBenchmarkDirection(), form.getDefaultBenchmark(), form.getReportId());
         DefaultBenchmarkData data = ConvertUtil.convert(pojo, DefaultBenchmarkData.class);
         data.setReportId(pojo.getId());
+        data.setValue(pojo.getDefaultBenchmark());
         return data;
     }
     private boolean hasAccessControlledMultiSelect(List<InputControlPojo> pojos) {
