@@ -43,9 +43,6 @@ public class BenchmarkDto extends AbstractDto {
     private static List<BenchmarkPojo> getBenchmarkPojoList(BenchmarkForm form) throws ApiException {
         List<BenchmarkPojo> pojoList = new ArrayList<>();
         for(BenchmarkForm.Benchmark benchmark : form.getBenchmarks()){
-            if(benchmark.getBenchmark() <= 0){
-                throw new ApiException(ApiStatus.BAD_DATA, "Benchmark value must be greater than 0");
-            }
             BenchmarkPojo pojo = new BenchmarkPojo();
             pojo.setReportId(benchmark.getReportId());
             pojo.setOrgId(getOrgId());

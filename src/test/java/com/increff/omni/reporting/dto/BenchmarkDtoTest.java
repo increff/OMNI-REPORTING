@@ -107,24 +107,6 @@ public class BenchmarkDtoTest extends AbstractTest {
         assertEquals(2, result.size());
     }
 
-    @Test
-    public void testUpsertNegativeBenchmark() throws ApiException {
-        // Setup report with LINE chart (supports benchmarks)
-        ReportPojo report = setupBasicReport();
-        report.setChartType(ChartType.LINE);
-        report.setDefaultBenchmark(90.0);
-        report.setBenchmarkDirection(BenchmarkDirection.NEGATIVE);
-        report.setBenchmarkDesc("Target Cost (Lower is Better)");
-        reportApi.add(report);
-
-        // Test upsert with negative value
-        ApiException exception = assertThrows(ApiException.class, () -> {
-            benchmarkDto.upsertBenchmark(getBenchmarkForm(report.getId(), -95.0));
-        });
-        assertEquals(ApiStatus.BAD_DATA, exception.getStatus());
-        assertEquals("Benchmark value must be greater than 0", exception.getMessage());
-
-    }
 
     @Test
     public void testUpsertPositiveBenchmark() throws ApiException {
