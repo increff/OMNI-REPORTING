@@ -449,6 +449,127 @@ public class ReportDtoTest extends AbstractTest {
         assertEquals("Chart Type: TABLE does not support benchmark", exception.getMessage());
     }
 
+    @Test
+    public void testBenchmarkWithNegativeValue() throws ApiException {
+        ReportForm form = getValidReportForm();
+        form.setDefaultBenchmark(-95.0);
+        form.setBenchmarkDirection(BenchmarkDirection.NEGATIVE);
+        form.setBenchmarkDesc("Target Performance (Lower is Better)");
+        form.setChartType(ChartType.LINE);
+        
+        // Should not throw any exception for negative benchmark with NEGATIVE direction
+       ApiException exception = assertThrows(ApiException.class, () -> {
+            dto.add(form);
+       });
+       assertEquals(ApiStatus.BAD_DATA, exception.getStatus());
+       assertEquals("Default benchmark value must be greater than 0", exception.getMessage());
+    }
+
+    @Test
+    public void testUpdateDefaultBenchmarkSuccess() throws ApiException {
+        // Setup
+        ReportForm form = getValidReportForm();
+        ReportData reportData = dto.add(form);
+
+        // Create update form
+        DefaultBenchmarkForm updateForm = new DefaultBenchmarkForm();
+        updateForm.setReportId(reportData.getId());
+        updateForm.setDefaultBenchmark(85.0);
+        updateForm.setBenchmarkDirection(BenchmarkDirection.POSITIVE);
+        updateForm.setBenchmarkDesc("Updated Target");
+
+        // Update
+        DefaultBenchmarkData result = dto.updateDefaultBenchmark(updateForm);
+
+        // Verify
+        assertNotNull(result);
+        assertEquals(85.0, result.getValue());
+        assertEquals(reportData.getId(), result.getReportId());
+    }
+
+    @Test
+    public void testUpdateDefaultBenchmarkPartialUpdate() throws ApiException {
+        // Setup
+        ReportForm form = getValidReportForm();
+        ReportData reportData = dto.add(form);
+
+        // Create update form with only description
+        DefaultBenchmarkForm updateForm = new DefaultBenchmarkForm();
+        updateForm.setReportId(reportData.getId());
+        updateForm.setBenchmarkDesc("Updated Target");
+
+        // Update
+        DefaultBenchmarkData result = dto.updateDefaultBenchmark(updateForm);
+
+        // Verify
+        assertNotNull(result);
+        assertEquals(95.0, result.getValue()); // Original value preserved
+        assertEquals("Updated Target", result.getBenchmarkDesc());
+        assertEquals(reportData.getId(), result.getReportId());
+    }
+
+    @Test
+    public void testUpdateDefaultBenchmarkZeroValue() throws ApiException {
+        // Setup
+        ReportForm form = getValidReportForm();
+        ReportData reportData = dto.add(form);
+
+        // Create update form with zero value
+        DefaultBenchmarkForm updateForm = new DefaultBenchmarkForm();
+        updateForm.setReportId(reportData.getId());
+        updateForm.setDefaultBenchmark(0.0);
+
+        // Update should fail
+        ApiException exception = assertThrows(ApiException.class, () -> {
+            dto.updateDefaultBenchmark(updateForm);
+        });
+
+        assertEquals(ApiStatus.BAD_DATA, exception.getStatus());
+        assertEquals("Default benchmark value must be greater than 0", exception.getMessage());
+    }
+
+    @Test
+    public void testUpdateDefaultBenchmarkNegativeValue() throws ApiException {
+        // Setup
+        ReportForm form = getValidReportForm();
+        ReportData reportData = dto.add(form);
+
+        // Create update form with negative value
+        DefaultBenchmarkForm updateForm = new DefaultBenchmarkForm();
+        updateForm.setReportId(reportData.getId());
+        updateForm.setDefaultBenchmark(-85.0);
+
+        // Update should fail
+        ApiException exception = assertThrows(ApiException.class, () -> {
+            dto.updateDefaultBenchmark(updateForm);
+        });
+
+        assertEquals(ApiStatus.BAD_DATA, exception.getStatus());
+        assertEquals("Default benchmark value must be greater than 0", exception.getMessage());
+    }
+
+    @Test
+    public void testUpdateDefaultBenchmarkUnsupportedChart() throws ApiException {
+        // Setup report with TABLE chart type (doesn't support benchmarks)
+        ReportForm form = commonSetup("Report 1",ReportType.STANDARD);
+        form.setChartType(ChartType.TABLE);
+        form.setIsChart(true);
+        ReportData reportData = dto.add(form);
+
+        // Create update form
+        DefaultBenchmarkForm updateForm = new DefaultBenchmarkForm();
+        updateForm.setReportId(reportData.getId());
+        updateForm.setDefaultBenchmark(85.0);
+
+        // Update should fail
+        ApiException exception = assertThrows(ApiException.class, () -> {
+            dto.updateDefaultBenchmark(updateForm);
+        });
+
+        assertEquals(ApiStatus.BAD_DATA, exception.getStatus());
+        assertEquals("Chart type does not support benchmark", exception.getMessage());
+    }
+
     private ReportForm getValidReportForm() throws ApiException{
         ReportForm form = commonSetup("Report 1",ReportType.STANDARD);
         form.setDefaultBenchmark(95.0);

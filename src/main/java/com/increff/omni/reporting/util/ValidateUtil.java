@@ -34,6 +34,8 @@ public class ValidateUtil {
             if(Objects.isNull(form.getDefaultBenchmark()) || Objects.isNull(form.getBenchmarkDirection()) || Objects.isNull(form.getBenchmarkDesc()))   
                 throw new ApiException(ApiStatus.BAD_DATA, "All three benchmark fields must be present if any one of them is present");
             //All present so check chart can be benchmarked
+            if(form.getDefaultBenchmark() <= 0)
+                throw new ApiException(ApiStatus.BAD_DATA, "Default benchmark value must be greater than 0");
             if(!form.getChartType().getCAN_BENCHMARK()) 
                 throw new ApiException(ApiStatus.BAD_DATA, "Chart Type: " + form.getChartType() + " does not support benchmark");
         }
