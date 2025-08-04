@@ -13,6 +13,7 @@ public enum DynamicDate {
     TODAY(),
     YESTERDAY(),
     LAST_WEEK(),
+    LAST_30_DAYS(),
     FIFTEEN_DAYS_AGO(),
     CURRENT_MONTH(false),
     LAST_MONTH_1ST(),
@@ -47,6 +48,7 @@ public enum DynamicDate {
             case TODAY -> zdt.withHour(0).withMinute(0).withSecond(0).withNano(0);
             case YESTERDAY -> zdt.minusDays(1).withHour(0).withMinute(0).withSecond(0).withNano(0);
             case LAST_WEEK, ONE_WEEK -> zdt.minusWeeks(1).withHour(0).withMinute(0).withSecond(0).withNano(0);
+            case LAST_30_DAYS -> zdt.minusDays(30).withHour(0).withMinute(0).withSecond(0).withNano(0);
             case FIFTEEN_DAYS_AGO, FIFTEEN_DAYS -> zdt.minusDays(15).withHour(0).withMinute(0).withSecond(0).withNano(0);
             case CURRENT_MONTH -> zdt.withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0).withNano(0);
             case LAST_MONTH_1ST ->

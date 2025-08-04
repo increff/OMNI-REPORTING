@@ -5,6 +5,7 @@ import com.increff.omni.reporting.dao.FavouriteDao;
 import com.increff.omni.reporting.pojo.DashboardPojo;
 import com.increff.commons.springboot.common.ApiException;
 import com.increff.commons.springboot.common.ApiStatus;
+import com.increff.commons.springboot.common.JsonUtil;
 import com.increff.commons.springboot.server.AbstractApi;
 import com.increff.omni.reporting.pojo.FavouritePojo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Objects;
 
+import lombok.extern.log4j.Log4j2;
+
+@Log4j2
 @Service
 @Transactional(rollbackFor = ApiException.class)
 public class DashboardApi extends AbstractAuditApi {

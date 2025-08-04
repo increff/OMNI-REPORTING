@@ -356,6 +356,9 @@ public class CommonDtoHelper {
         reportPojo.setAlias(oldReport.getAlias());
         reportPojo.setChartType(oldReport.getChartType());
         reportPojo.setMinFrequencyAllowedSeconds(oldReport.getMinFrequencyAllowedSeconds());
+        reportPojo.setDefaultBenchmark(oldReport.getDefaultBenchmark());    
+        reportPojo.setBenchmarkDirection(oldReport.getBenchmarkDirection());
+        reportPojo.setBenchmarkDesc(oldReport.getBenchmarkDesc());
         return reportPojo;
     }
 

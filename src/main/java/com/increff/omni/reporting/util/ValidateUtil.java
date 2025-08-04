@@ -17,8 +17,6 @@ import java.util.stream.Collectors;
 import static com.increff.commons.springboot.server.DtoHelper.checkValid;
 
 public class ValidateUtil {
-
-    public static int MAX_DASHBOARD_CHARTS = 6;
     public static String UNIFY_QUERY_STRING;
 
     public static void validateReportForm(ReportForm form) throws ApiException {
@@ -31,7 +29,16 @@ public class ValidateUtil {
             throw new ApiException(ApiStatus.BAD_DATA, "Invalid legend count. Expected: " + form.getChartType().getLEGENDS_COUNT_VALIDATION() + " Actual: " + form.getLegends().size());
         if(form.getChartType() != ChartType.REPORT && !form.getIsChart())
             throw new ApiException(ApiStatus.BAD_DATA, "isChart should be true for Chart Type: " + form.getChartType());
-
+        //all three benchmark filed must be present if any one of them is present
+        if(Objects.nonNull(form.getDefaultBenchmark()) || Objects.nonNull(form.getBenchmarkDirection()) || Objects.nonNull(form.getBenchmarkDesc())) {
+            if(Objects.isNull(form.getDefaultBenchmark()) || Objects.isNull(form.getBenchmarkDirection()) || Objects.isNull(form.getBenchmarkDesc()))   
+                throw new ApiException(ApiStatus.BAD_DATA, "All three benchmark fields must be present if any one of them is present");
+            //All present so check chart can be benchmarked
+            if(form.getDefaultBenchmark() <= 0)
+                throw new ApiException(ApiStatus.BAD_DATA, "Default benchmark value must be greater than 0");
+            if(!form.getChartType().getCAN_BENCHMARK()) 
+                throw new ApiException(ApiStatus.BAD_DATA, "Chart Type: " + form.getChartType() + " does not support benchmark");
+        }
     }
 
     public static void validateReportQueryForm(ReportQueryForm form, AppName appName) throws ApiException {
@@ -47,9 +54,9 @@ public class ValidateUtil {
         }
     }
 
-    public static void validateDashboardChartForms(List<DashboardChartForm> forms) throws ApiException {
-        if(forms.size() > MAX_DASHBOARD_CHARTS)
-            throw new ApiException(ApiStatus.BAD_DATA, "Maximum " + MAX_DASHBOARD_CHARTS + " charts allowed in a dashboard");
+    public static void validateDashboardChartForms(List<DashboardChartForm> forms, Integer maxDashboardCharts) throws ApiException {
+        if(forms.size() > maxDashboardCharts)
+            throw new ApiException(ApiStatus.BAD_DATA, "Maximum " + maxDashboardCharts + " charts allowed in a dashboard");
         for(DashboardChartForm form : forms) {
             checkValid(form);
         }
@@ -63,11 +70,11 @@ public class ValidateUtil {
             throw new ApiException(ApiStatus.BAD_DATA, "Same chart cannot be added twice. Duplicate chart alias: " + duplicateAliases.get(0).getChartAlias());
     }
 
-    public static void validateDashboardAddForm(DashboardAddForm form) throws ApiException {
+    public static void validateDashboardAddForm(DashboardAddForm form, Integer maxDashboardCharts) throws ApiException {
         checkValid(form);
         if (form.getCharts().size() == 0)
             throw new ApiException(ApiStatus.BAD_DATA, "Atleast one chart is required in a dashboard");
-        validateDashboardChartForms(form.getCharts());
+        validateDashboardChartForms(form.getCharts(), maxDashboardCharts);
     }
 
     public static void validateReportScheduleForm(ReportScheduleForm form) throws ApiException {

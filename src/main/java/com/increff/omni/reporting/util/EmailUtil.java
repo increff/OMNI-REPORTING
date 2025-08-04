@@ -10,14 +10,40 @@ import jakarta.mail.internet.MimeBodyPart;
 import jakarta.mail.internet.MimeMessage;
 import jakarta.mail.internet.MimeMultipart;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.Properties;
+import com.increff.omni.reporting.model.form.SendReportForm;
 
 /**
  * Utility to send emails
  */
 @Log4j2
 public class EmailUtil {
+
+    public static void sendDashboardEmail(EmailProps props, SendReportForm form, MultipartFile multipartFile) throws MessagingException, IOException {
+        File file = new File(multipartFile.getOriginalFilename());
+        try (FileOutputStream fos = new FileOutputStream(file)) {
+            fos.write(multipartFile.getBytes());
+        }
+        String htmlContent = "<html><body style='font-family: Arial, sans-serif;'>"
+                + "<p>" + form.getComment() + "</p>"
+                + "</body></html>";
+
+        props.setToEmails(form.getEmails());
+        props.setContent(htmlContent);
+        props.setAttachment(file);
+        props.setIsAttachment(true);
+        props.setCustomizedFileName(multipartFile.getOriginalFilename());
+        props.setSubject("From the CXO Desk: Metrics That Require Your Attention");
+        props.setContentType("text/html; charset=utf-8");
+        props.setSetContentAsBody(true);
+        sendMail(props);
+        file.delete();
+    }
 
     public static void sendMail(EmailProps eprops) throws MessagingException {
         Properties props = new Properties();
@@ -65,7 +91,9 @@ public class EmailUtil {
 
             // Now set the actual message
             messageBodyPart.setText("PFA Report");
-
+            if(eprops.getSetContentAsBody()) {  
+                messageBodyPart.setContent(eprops.getContent(), eprops.getContentType());
+            }
             // Create a multipar message
             Multipart multipart = new MimeMultipart();
 

@@ -1,12 +1,15 @@
 package com.increff.omni.reporting.model.form;
 
+import com.increff.omni.reporting.model.constants.BenchmarkDirection;
 import com.increff.omni.reporting.model.constants.ChartType;
 import com.increff.omni.reporting.model.constants.ReportType;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.validator.constraints.NotEmpty;
 
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -33,6 +36,13 @@ public class ReportForm {
     private Boolean isChart = false;
     @NotNull
     private ChartType chartType;
+
+    private Double defaultBenchmark;
+
+    private BenchmarkDirection benchmarkDirection;
+    
+    @Size(max = 255)
+    private String benchmarkDesc;
     @NotNull
     private Map<String, String> legends = new HashMap<>();
 

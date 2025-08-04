@@ -135,6 +135,9 @@ public class ApplicationProperties {
     @Value("${max.dashboards.per.org:100}")
     private Integer maxDashboardsPerOrg;
 
+    @Value("${max.dashboard.charts:8}")
+    private Integer maxDashboardCharts;
+
     @Value("${rate.limit.tokens.refill.amount:20}")
     private Integer tokens;
     @Value("${rate.limit.tokens.refill.rate.seconds:60}")
@@ -166,6 +169,12 @@ public class ApplicationProperties {
 
     @Value("${schedule.file.size.zip.after:5}")
     private Integer scheduleFileSizeZipAfter;
+
+    @Value("${dashboard.email.max.recipients:10}")
+    private Integer dashboardEmailMaxRecipients;
+
+    @Value("${dashboard.email.max.file.size.mb:10}")
+    private Integer dashboardEmailMaxFileSize;
 
     @PostConstruct
     public void init() {

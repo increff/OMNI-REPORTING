@@ -20,6 +20,7 @@ public class EmailProps {
     private File attachment;
     private String customizedFileName;
     private Boolean isAttachment;
+    private Boolean setContentAsBody = false;
 
     private String subject = "Test email.";
     private String content = "<h1> Hello </h1> This is a <b>test</b> email";

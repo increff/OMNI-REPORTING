@@ -3,11 +3,14 @@ package com.increff.omni.reporting.api;
 import com.increff.omni.reporting.config.AbstractTest;
 import com.increff.omni.reporting.config.ApplicationProperties;
 import com.increff.omni.reporting.dao.DirectoryDao;
+import com.increff.omni.reporting.model.constants.BenchmarkDirection;
+import com.increff.omni.reporting.model.constants.ChartType;
 import com.increff.omni.reporting.model.constants.ReportType;
 import com.increff.omni.reporting.pojo.DirectoryPojo;
 import com.increff.omni.reporting.pojo.ReportPojo;
 import com.increff.omni.reporting.pojo.SchemaVersionPojo;
 import com.increff.commons.springboot.common.ApiException;
+import com.increff.commons.springboot.common.ApiStatus;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -148,5 +151,118 @@ public class ReportApiTest extends AbstractTest {
         assertEquals(ReportType.CUSTOM, r.getType());
         assertEquals(rootPojo.getId(), r.getDirectoryId());
         assertEquals(schemaVersionPojo.getId(), r.getSchemaVersionId());
+    }
+
+    @Test
+    public void testUpdateDefaultBenchmarkSuccess() throws ApiException {
+        DirectoryPojo rootPojo = directoryDao.select("directoryName", properties.getRootDirectory());
+        DirectoryPojo directoryPojo = getDirectoryPojo("Standard Reports", rootPojo.getId());
+        directoryApi.add(directoryPojo);
+        SchemaVersionPojo schemaVersionPojo = getSchemaPojo("9.0.1");
+        schemaVersionApi.add(schemaVersionPojo);
+        
+        // Create a report with LINE chart type (which supports benchmarks)
+        ReportPojo pojo = getReportPojo("Performance Report", ReportType.STANDARD, directoryPojo.getId(), schemaVersionPojo.getId());
+        pojo.setChartType(ChartType.LINE);
+        api.add(pojo);
+
+        // Update benchmark values
+        ReportPojo updated = api.updateDefaultBenchmark("Target Performance", BenchmarkDirection.POSITIVE, 95.0, pojo.getId());
+        
+        assertNotNull(updated);
+        assertEquals(95.0, updated.getDefaultBenchmark());
+        assertEquals(BenchmarkDirection.POSITIVE, updated.getBenchmarkDirection());
+        assertEquals("Target Performance", updated.getBenchmarkDesc());
+    }
+
+    @Test
+    public void testUpdateDefaultBenchmarkUnsupportedChart() throws ApiException {
+        DirectoryPojo rootPojo = directoryDao.select("directoryName", properties.getRootDirectory());
+        DirectoryPojo directoryPojo = getDirectoryPojo("Standard Reports", rootPojo.getId());
+        directoryApi.add(directoryPojo);
+        SchemaVersionPojo schemaVersionPojo = getSchemaPojo("9.0.1");
+        schemaVersionApi.add(schemaVersionPojo);
+        
+        // Create a report with TABLE chart type (which doesn't support benchmarks)
+        ReportPojo pojo = getReportPojo("Data Report", ReportType.STANDARD, directoryPojo.getId(), schemaVersionPojo.getId());
+        pojo.setChartType(ChartType.TABLE);
+        api.add(pojo);
+
+        // Try to update benchmark values
+        ApiException exception = assertThrows(ApiException.class, () -> {
+            api.updateDefaultBenchmark("Target Performance", BenchmarkDirection.POSITIVE, 95.0, pojo.getId());
+        });
+        
+        assertEquals(ApiStatus.BAD_DATA, exception.getStatus());
+        assertTrue(exception.getMessage().contains("Chart type does not support benchmark"));
+    }
+
+    @Test
+    public void testUpdateDefaultBenchmarkPartialUpdate() throws ApiException {
+        DirectoryPojo rootPojo = directoryDao.select("directoryName", properties.getRootDirectory());
+        DirectoryPojo directoryPojo = getDirectoryPojo("Standard Reports", rootPojo.getId());
+        directoryApi.add(directoryPojo);
+        SchemaVersionPojo schemaVersionPojo = getSchemaPojo("9.0.1");
+        schemaVersionApi.add(schemaVersionPojo);
+        
+        // Create a report with LINE chart type
+        ReportPojo pojo = getReportPojo("Performance Report", ReportType.STANDARD, directoryPojo.getId(), schemaVersionPojo.getId());
+        pojo.setChartType(ChartType.LINE);
+        pojo.setDefaultBenchmark(90.0);
+        pojo.setBenchmarkDirection(BenchmarkDirection.POSITIVE);
+        pojo.setBenchmarkDesc("Original Target");
+        api.add(pojo);
+
+        // Update only description
+        ReportPojo updated = api.updateDefaultBenchmark("New Target", null, null, pojo.getId());
+        
+        assertNotNull(updated);
+        assertEquals(90.0, updated.getDefaultBenchmark());
+        assertEquals(BenchmarkDirection.POSITIVE, updated.getBenchmarkDirection());
+        assertEquals("New Target", updated.getBenchmarkDesc());
+    }
+
+    @Test
+    public void testUpdateDefaultBenchmarkNegativeValue() throws ApiException {
+        DirectoryPojo rootPojo = directoryDao.select("directoryName", properties.getRootDirectory());
+        DirectoryPojo directoryPojo = getDirectoryPojo("Standard Reports", rootPojo.getId());
+        directoryApi.add(directoryPojo);
+        SchemaVersionPojo schemaVersionPojo = getSchemaPojo("9.0.1");
+        schemaVersionApi.add(schemaVersionPojo);
+        
+        // Create a report with LINE chart type
+        ReportPojo pojo = getReportPojo("Performance Report", ReportType.STANDARD, directoryPojo.getId(), schemaVersionPojo.getId());
+        pojo.setChartType(ChartType.LINE);
+        api.add(pojo);
+
+        // Update with negative value
+        ReportPojo updated = api.updateDefaultBenchmark("Target Cost", BenchmarkDirection.NEGATIVE, -95.0, pojo.getId());
+        
+        assertNotNull(updated);
+        assertEquals(-95.0, updated.getDefaultBenchmark());
+        assertEquals(BenchmarkDirection.NEGATIVE, updated.getBenchmarkDirection());
+        assertEquals("Target Cost", updated.getBenchmarkDesc());
+    }
+
+    @Test
+    public void testUpdateDefaultBenchmarkNegativeValueWithPositiveDirection() throws ApiException {
+        DirectoryPojo rootPojo = directoryDao.select("directoryName", properties.getRootDirectory());
+        DirectoryPojo directoryPojo = getDirectoryPojo("Standard Reports", rootPojo.getId());
+        directoryApi.add(directoryPojo);
+        SchemaVersionPojo schemaVersionPojo = getSchemaPojo("9.0.1");
+        schemaVersionApi.add(schemaVersionPojo);
+        
+        // Create a report with LINE chart type
+        ReportPojo pojo = getReportPojo("Performance Report", ReportType.STANDARD, directoryPojo.getId(), schemaVersionPojo.getId());
+        pojo.setChartType(ChartType.LINE);
+        api.add(pojo);
+
+        // Update with negative value but positive direction
+        ReportPojo updated = api.updateDefaultBenchmark("Target Performance", BenchmarkDirection.POSITIVE, -95.0, pojo.getId());
+        
+        assertNotNull(updated);
+        assertEquals(-95.0, updated.getDefaultBenchmark());
+        assertEquals(BenchmarkDirection.POSITIVE, updated.getBenchmarkDirection());
+        assertEquals("Target Performance", updated.getBenchmarkDesc());
     }
 }

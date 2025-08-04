@@ -1,6 +1,7 @@
 package com.increff.omni.reporting.pojo;
 
 import com.increff.commons.springboot.db.pojo.AbstractVersionedPojo;
+import com.increff.omni.reporting.model.constants.BenchmarkDirection;
 import com.increff.omni.reporting.model.constants.ChartType;
 import com.increff.omni.reporting.model.constants.ReportType;
 import jakarta.persistence.*;
@@ -60,6 +61,14 @@ public class ReportPojo extends AbstractVersionedPojo{
     @JdbcTypeCode(SqlTypes.VARCHAR)
     private ChartType chartType = ChartType.REPORT;
 
+    private Double defaultBenchmark;
+
+    @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.VARCHAR)
+    private BenchmarkDirection benchmarkDirection;
+
+    private String benchmarkDesc;
+
     @Override
     public String toString() {
         return "ReportPojo{" +
@@ -74,6 +83,9 @@ public class ReportPojo extends AbstractVersionedPojo{
                 ", minFrequencyAllowedSeconds=" + minFrequencyAllowedSeconds +
                 ", isChart=" + isChart +
                 ", chartType=" + chartType +
+                ", defaultBenchmark=" + defaultBenchmark +
+                ", benchmarkDirection=" + benchmarkDirection +
+                ", benchmarkDesc=" + benchmarkDesc +
                 '}';
     }
 

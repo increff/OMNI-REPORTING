@@ -7,11 +7,16 @@ import com.increff.omni.reporting.model.constants.AppName;
 import com.increff.omni.reporting.model.constants.VisualizationType;
 import com.increff.omni.reporting.model.data.*;
 import com.increff.omni.reporting.model.form.*;
+import com.increff.omni.reporting.util.ConvertUtil;
 import com.increff.commons.springboot.common.ApiException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import jakarta.mail.MessagingException;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
@@ -41,6 +46,10 @@ public class StandardController {
     private DashboardDto dashboardDto;
     @Autowired
     private ApplicationProperties properties;
+    @Autowired
+    private BenchmarkDto benchmarkDto;
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @Operation(summary = "Get all available timezones")
     @GetMapping(value = "/timeZones")
@@ -73,6 +82,19 @@ public class StandardController {
         return reportDto.getValidationGroups(reportId);
     }
 
+    @Operation(summary = "Add/Update Benchmark for Reports")
+    @PutMapping(value = "/reports/benchmark")
+    public List<BenchmarkData> upsertBenchmark(@RequestBody BenchmarkForm form) throws ApiException {
+        return benchmarkDto.upsertBenchmark(form);
+    }
+
+    @Operation(summary = "Get Benchmark for Reports")
+    @PostMapping(value = "/reports/benchmark")
+    public List<BenchmarkData> requestReportBenchmark(@RequestBody List<Integer> reportIds) throws ApiException {
+        return benchmarkDto.getBenchmarksForReport(reportIds);
+    }
+
+   
     @Operation(summary = "Get All Directories")
     @GetMapping(value = "/directories")
     public List<DirectoryData> selectAllDirectories() throws ApiException {
@@ -227,6 +249,13 @@ public class StandardController {
     @GetMapping(value = "/dashboards")
     public List<DashboardListData> getDashboards() throws ApiException {
         return dashboardDto.getDashboardsByOrgId();
+    }
+
+    @Operation(summary = "Send report as an email")
+    @PostMapping(value = "/dashboards/send-dashboard", consumes = "multipart/form-data")
+    public void sendDashboardEmail(@RequestPart("form") String formJson, @RequestPart("file") MultipartFile file) throws ApiException, MessagingException, IOException {
+        SendReportForm form = ConvertUtil.getJavaObjectFromJson(formJson, SendReportForm.class, objectMapper);
+        dashboardDto.sendReportEmail(form, file);
     }
 
     @Operation(summary = "Get Properties")

@@ -6,6 +6,7 @@ import com.increff.commons.springboot.common.ApiStatus;
 import com.increff.commons.springboot.common.ConvertUtil;
 import com.increff.omni.reporting.api.*;
 import com.increff.omni.reporting.config.ApplicationProperties;
+import com.increff.omni.reporting.config.EmailProps;
 import com.increff.omni.reporting.flow.FlowApi;
 import com.increff.omni.reporting.model.constants.*;
 import com.increff.omni.reporting.model.data.*;
@@ -14,14 +15,18 @@ import com.increff.omni.reporting.model.form.*;
 import com.increff.omni.reporting.pojo.*;
 import com.increff.omni.reporting.util.ChartUtil;
 import com.increff.omni.reporting.util.ConstantsUtil;
+import com.increff.omni.reporting.util.EmailUtil;
 import com.increff.omni.reporting.util.UserPrincipalUtil;
 import com.increff.omni.reporting.util.ValidateUtil;
 import com.nextscm.commons.lang.StringUtil;
+
+import jakarta.mail.MessagingException;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.ZonedDateTime;
@@ -63,14 +68,15 @@ public class DashboardDto extends AbstractDto {
     private ApplicationProperties properties;
     @Autowired
     private SchemaVersionApi schemaVersionApi;
-
+    @Autowired
+    private BenchmarkApi benchmarkApi;  
     @Autowired
     private FlowApi flowApi;
 
     public ApplicationPropertiesData getProperties() {
         ApplicationPropertiesData data = new ApplicationPropertiesData();
         data.setMaxDashboardsPerOrg(properties.getMaxDashboardsPerOrg());
-        data.setMaxChartsPerDashboard(ValidateUtil.MAX_DASHBOARD_CHARTS);
+        data.setMaxChartsPerDashboard(properties.getMaxDashboardCharts());
         return data;
     }
 
@@ -375,7 +381,10 @@ public class DashboardDto extends AbstractDto {
             throw new ApiException(ApiStatus.BAD_DATA, "Chart disabled: " + report.getName());
         DashboardChartPojo charts = dashboardChartApi.getCheckByDashboardAndChartAlias(dashboardId, report.getAlias());
         ChartType type = report.getChartType();
-
+        BenchmarkPojo benchmark = null;
+        if(type.getCAN_BENCHMARK()){
+            benchmark = benchmarkApi.getByReportId(report.getId());
+        }
         // Get all charts in dashboard. The following is used for merging validation groups. Thus, get all charts irrespective of user accessible charts
         List<ReportPojo> allCharts = reportApi.getByAliasAndSchema(dashboardChartApi.getByDashboardId(dashboardId).stream().map(DashboardChartPojo::getChartAlias).collect(Collectors.toList()),
                 orgMappingApi.getCheckByOrgId(dashboard.getOrgId()).stream().map(OrgMappingPojo::getSchemaVersionId).collect(Collectors.toList()), true);
@@ -384,12 +393,12 @@ public class DashboardDto extends AbstractDto {
         ChartInterface chartInterface = getChartData(type);
         chartInterface.validateNormalize(data, type);
 
-        ViewDashboardData viewData = getViewDashboardData(report, charts, data, chartInterface);
+        ViewDashboardData viewData = getViewDashboardData(report, charts, data, chartInterface, benchmark);
         return Collections.singletonList(viewData);
     }
 
     private ViewDashboardData getViewDashboardData(ReportPojo report, DashboardChartPojo charts,
-                                                   List<Map<String, String>> data, ChartInterface chartInterface) throws ApiException {
+                                                   List<Map<String, String>> data, ChartInterface chartInterface, BenchmarkPojo orgBenchmark) throws ApiException {
         ViewDashboardData viewData = new ViewDashboardData();
         viewData.setChartData(chartInterface.transform(data));
         viewData.setLegends(convertChartLegendsPojoToChartLegendsData(chartLegendsApi.getByChartId(report.getId()))
@@ -409,7 +418,7 @@ public class DashboardDto extends AbstractDto {
     }
 
     private void validateDashboardAddForm(DashboardAddForm form) throws ApiException {
-        ValidateUtil.validateDashboardAddForm(form);
+        ValidateUtil.validateDashboardAddForm(form, properties.getMaxDashboardCharts());
         if(Objects.nonNull(api.getByOrgIdName(getOrgId(), form.getName())))
             throw new ApiException(ApiStatus.BAD_DATA, "Dashboard name already exists: " + form.getName() + " OrgId: " + getOrgId());
         if(api.getByOrgId(getOrgId()).size() >= properties.getMaxDashboardsPerOrg())
@@ -450,6 +459,19 @@ public class DashboardDto extends AbstractDto {
     }
 
     @Transactional(rollbackFor = ApiException.class)
+    public void sendReportEmail(SendReportForm form, MultipartFile file) throws ApiException, MessagingException, IOException {
+        checkValid(form);
+        EmailProps props = createEmailProps(form, file);
+        if (form.getEmails().size() > properties.getDashboardEmailMaxRecipients()) {
+            throw new ApiException(ApiStatus.BAD_DATA, "Cannot send email to more than " + properties.getDashboardEmailMaxRecipients() + " recipients");
+        }
+        if (file.getSize() > properties.getDashboardEmailMaxFileSize() * 1024 * 1024) {
+            throw new ApiException(ApiStatus.BAD_DATA, "PDF file size cannot exceed " + properties.getDashboardEmailMaxFileSize() + "MB");
+        }
+        EmailUtil.sendDashboardEmail(props, form, file);
+    }
+
+    @Transactional(rollbackFor = ApiException.class)
     public void copyDashboardToNewOrgs(List<Integer> orgIds, Boolean copyTestDashboards) throws ApiException {
         // Copies all dashboards created in Increff org (Admin org set in properties file) to new orgs
         List<DashboardPojo> dashboards = api.getByOrgId(properties.getIncreffOrgId());
@@ -487,6 +509,15 @@ public class DashboardDto extends AbstractDto {
         return dashboardPojo;
     }
 
+    private EmailProps createEmailProps(SendReportForm form, MultipartFile file) {
+        EmailProps props = new EmailProps();
+        props.setFromEmail(properties.getFromEmail());
+        props.setUsername(properties.getUsername());
+        props.setPassword(properties.getPassword());
+        props.setSmtpHost(properties.getSmtpHost());
+        props.setSmtpPort(properties.getSmtpPort());
+        return props;
+    }
     /**
      * Returns dashboardIds which have at least one chart of type CUSTOM
      */
