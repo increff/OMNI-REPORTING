@@ -30,11 +30,7 @@ public class EmailUtil {
             fos.write(multipartFile.getBytes());
         }
         String htmlContent = "<html><body style='font-family: Arial, sans-serif;'>"
-                + "<h2>Report</h2>"
-                + "<p>Hi there,</p>"
                 + "<p>" + form.getComment() + "</p>"
-                + "<p>Please find the attached report.</p>"
-                + "<p>Regards,<br/>Your Reporting Team</p>"
                 + "</body></html>";
 
         props.setToEmails(form.getEmails());
@@ -42,8 +38,9 @@ public class EmailUtil {
         props.setAttachment(file);
         props.setIsAttachment(true);
         props.setCustomizedFileName(multipartFile.getOriginalFilename());
-        props.setSubject("CXO Has Shared a Dashboard with you");
+        props.setSubject("From the CXO Desk: Metrics That Require Your Attention");
         props.setContentType("text/html; charset=utf-8");
+        props.setSetContentAsBody(true);
         sendMail(props);
         file.delete();
     }
@@ -94,7 +91,9 @@ public class EmailUtil {
 
             // Now set the actual message
             messageBodyPart.setText("PFA Report");
-
+            if(eprops.getSetContentAsBody()) {  
+                messageBodyPart.setContent(eprops.getContent(), eprops.getContentType());
+            }
             // Create a multipar message
             Multipart multipart = new MimeMultipart();
 
