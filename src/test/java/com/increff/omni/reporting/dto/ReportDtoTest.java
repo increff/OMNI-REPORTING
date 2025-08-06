@@ -111,15 +111,17 @@ public class ReportDtoTest extends AbstractTest {
         ReportQueryTestForm testForm = getQueryTestForm();
         testForm.setParamMap(new HashMap<>());
         ReportQueryData queryData = dto.getTransformedQuery(testForm);
-        assertEquals("select * from table where id = <<replace(^id^)>>;", queryData.getQuery());
+        assertEquals("select * from table where id = null;", queryData.getQuery());
     }
 
     @Test
     public void testTransformedQueryWithWrongParamCase2() throws ApiException {
         ReportQueryTestForm testForm = getQueryTestForm();
-        testForm.setParamMap(new HashMap<>());
+        Map<String, List<String>> paramMap = new HashMap<>();
+        paramMap.put("wrong",Arrays.asList("12323"));
+        testForm.setParamMap(paramMap);
         ReportQueryData queryData = dto.getTransformedQuery(testForm);
-        assertEquals("select * from table where id = <<replace(^id^)>>;", queryData.getQuery());
+        assertEquals("select * from table where id = null;", queryData.getQuery());
     }
 
     @Test
