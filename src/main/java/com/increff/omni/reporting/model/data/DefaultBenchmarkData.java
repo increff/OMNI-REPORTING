@@ -7,7 +7,7 @@ import com.increff.omni.reporting.model.constants.BenchmarkDirection;
 @Getter
 @Setter
 public class DefaultBenchmarkData {
-    private Double defaultBenchmark;
+    private Double value;
     private BenchmarkDirection benchmarkDirection;
     private String benchmarkDesc;
     private Integer reportId;

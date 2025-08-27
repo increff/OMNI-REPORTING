@@ -28,12 +28,24 @@ public class BenchmarkDto extends AbstractDto {
     public List<BenchmarkData> upsertBenchmark(BenchmarkForm form) throws ApiException {
         checkValid(form);
         List<ReportPojo> reports = reportApi.getByIds(form.getBenchmarks().stream().map(BenchmarkForm.Benchmark::getReportId).collect(Collectors.toList()));
+        if(form.getBenchmarks().size() != reports.size()){
+            throw new ApiException(ApiStatus.BAD_DATA, "Some of the reports do not exist");
+        }
         for(ReportPojo report : reports){
             if(!report.getChartType().getCAN_BENCHMARK())
                 throw  new ApiException(ApiStatus.BAD_DATA, "Chart type does not support benchmark");
         }
+        List<BenchmarkPojo> pojoList = getBenchmarkPojoList(form);
+        benchmarkApi.upsert(pojoList);
+        return getBenchmarksForReport(form.getBenchmarks().stream().map(BenchmarkForm.Benchmark::getReportId).collect(Collectors.toList()));
+    }
+
+    private static List<BenchmarkPojo> getBenchmarkPojoList(BenchmarkForm form) throws ApiException {
         List<BenchmarkPojo> pojoList = new ArrayList<>();
         for(BenchmarkForm.Benchmark benchmark : form.getBenchmarks()){
+            if(benchmark.getBenchmark() <= 0){
+                throw new ApiException(ApiStatus.BAD_DATA, "Benchmark value must be greater than 0");
+            }
             BenchmarkPojo pojo = new BenchmarkPojo();
             pojo.setReportId(benchmark.getReportId());
             pojo.setOrgId(getOrgId());
@@ -41,17 +53,15 @@ public class BenchmarkDto extends AbstractDto {
             pojo.setValue(benchmark.getBenchmark());
             pojoList.add(pojo);
         }
-        benchmarkApi.upsert(pojoList);
-        return getBenchmarksForReport(form.getBenchmarks().stream().map(BenchmarkForm.Benchmark::getReportId).collect(Collectors.toList()));
+        return pojoList;
     }
 
     public List<BenchmarkData> getBenchmarksForReport(List<Integer> reportIds) throws ApiException {
         List<BenchmarkData> benchmarkDataList = new ArrayList<>();
-        for(Integer reportId : reportIds){
-            ReportPojo report = reportApi.getCheck(reportId);
+        List<ReportPojo> reports = reportApi.getByIds(reportIds);
+        for(ReportPojo report : reports){
             if(!report.getChartType().getCAN_BENCHMARK())
                 continue;
-            
             BenchmarkPojo pojo = benchmarkApi.getByReportId(report.getId());
             BenchmarkData data = getBenchmarkData(report, pojo);
             benchmarkDataList.add(data);

@@ -13,9 +13,4 @@ public class WebConfig implements WebMvcConfigurer {
     public StandardServletMultipartResolver multipartResolver() {
         return new StandardServletMultipartResolver();
     }
-
-    @Bean
-    public MappingJackson2HttpMessageConverter mappingJackson2HttpMessageConverter() {
-        return new MappingJackson2HttpMessageConverter();
-    }
 } 

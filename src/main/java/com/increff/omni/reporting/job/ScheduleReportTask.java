@@ -7,7 +7,6 @@ import com.increff.commons.fileclient.SftpFileProvider;
 import com.increff.commons.springboot.client.AppClientException;
 import com.increff.commons.springboot.common.ApiException;
 import com.increff.commons.springboot.common.ApiStatus;
-import com.increff.commons.springboot.common.JsonUtil;
 import com.increff.omni.reporting.api.*;
 import com.increff.omni.reporting.config.ApplicationProperties;
 import com.increff.omni.reporting.config.EmailProps;

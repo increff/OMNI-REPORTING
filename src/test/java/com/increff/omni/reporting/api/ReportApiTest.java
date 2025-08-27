@@ -221,4 +221,48 @@ public class ReportApiTest extends AbstractTest {
         assertEquals(BenchmarkDirection.POSITIVE, updated.getBenchmarkDirection());
         assertEquals("New Target", updated.getBenchmarkDesc());
     }
+
+    @Test
+    public void testUpdateDefaultBenchmarkNegativeValue() throws ApiException {
+        DirectoryPojo rootPojo = directoryDao.select("directoryName", properties.getRootDirectory());
+        DirectoryPojo directoryPojo = getDirectoryPojo("Standard Reports", rootPojo.getId());
+        directoryApi.add(directoryPojo);
+        SchemaVersionPojo schemaVersionPojo = getSchemaPojo("9.0.1");
+        schemaVersionApi.add(schemaVersionPojo);
+        
+        // Create a report with LINE chart type
+        ReportPojo pojo = getReportPojo("Performance Report", ReportType.STANDARD, directoryPojo.getId(), schemaVersionPojo.getId());
+        pojo.setChartType(ChartType.LINE);
+        api.add(pojo);
+
+        // Update with negative value
+        ReportPojo updated = api.updateDefaultBenchmark("Target Cost", BenchmarkDirection.NEGATIVE, -95.0, pojo.getId());
+        
+        assertNotNull(updated);
+        assertEquals(-95.0, updated.getDefaultBenchmark());
+        assertEquals(BenchmarkDirection.NEGATIVE, updated.getBenchmarkDirection());
+        assertEquals("Target Cost", updated.getBenchmarkDesc());
+    }
+
+    @Test
+    public void testUpdateDefaultBenchmarkNegativeValueWithPositiveDirection() throws ApiException {
+        DirectoryPojo rootPojo = directoryDao.select("directoryName", properties.getRootDirectory());
+        DirectoryPojo directoryPojo = getDirectoryPojo("Standard Reports", rootPojo.getId());
+        directoryApi.add(directoryPojo);
+        SchemaVersionPojo schemaVersionPojo = getSchemaPojo("9.0.1");
+        schemaVersionApi.add(schemaVersionPojo);
+        
+        // Create a report with LINE chart type
+        ReportPojo pojo = getReportPojo("Performance Report", ReportType.STANDARD, directoryPojo.getId(), schemaVersionPojo.getId());
+        pojo.setChartType(ChartType.LINE);
+        api.add(pojo);
+
+        // Update with negative value but positive direction
+        ReportPojo updated = api.updateDefaultBenchmark("Target Performance", BenchmarkDirection.POSITIVE, -95.0, pojo.getId());
+        
+        assertNotNull(updated);
+        assertEquals(-95.0, updated.getDefaultBenchmark());
+        assertEquals(BenchmarkDirection.POSITIVE, updated.getBenchmarkDirection());
+        assertEquals("Target Performance", updated.getBenchmarkDesc());
+    }
 }

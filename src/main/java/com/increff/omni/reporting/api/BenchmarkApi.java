@@ -35,9 +35,4 @@ public class BenchmarkApi extends AbstractAuditApi {
             }
         }
     }
-
-    public BenchmarkPojo add(BenchmarkPojo pojo) throws ApiException {
-        dao.add(pojo);
-        return pojo;
-    }
 }
