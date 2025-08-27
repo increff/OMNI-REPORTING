@@ -16,7 +16,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Properties;
-import com.increff.omni.reporting.model.form.SendReportForm;
+import com.increff.omni.reporting.model.form.SendDashboardForm;
 
 /**
  * Utility to send emails
@@ -24,7 +24,7 @@ import com.increff.omni.reporting.model.form.SendReportForm;
 @Log4j2
 public class EmailUtil {
 
-    public static void sendDashboardEmail(EmailProps props, SendReportForm form, MultipartFile multipartFile) throws MessagingException, IOException {
+    public static void sendDashboardEmail(EmailProps props, SendDashboardForm form, MultipartFile multipartFile) throws MessagingException, IOException {
         File file = new File(multipartFile.getOriginalFilename());
         try (FileOutputStream fos = new FileOutputStream(file)) {
             fos.write(multipartFile.getBytes());
