@@ -460,8 +460,7 @@ public class DashboardDto extends AbstractDto {
         }
     }
 
-    @Transactional(rollbackFor = ApiException.class)
-    public void sendReportEmail(SendDashboardForm form, MultipartFile file) throws ApiException, MessagingException, IOException {
+    public void sendDashboardEmail(SendDashboardForm form, MultipartFile file) throws ApiException, MessagingException, IOException {
         checkValid(form);
         EmailProps props = createEmailProps(form, file);
         if (form.getEmails().size() > properties.getDashboardEmailMaxRecipients()) {

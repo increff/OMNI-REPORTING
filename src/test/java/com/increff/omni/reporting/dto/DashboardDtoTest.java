@@ -9,22 +9,36 @@ import com.increff.omni.reporting.api.DefaultValueApi;
 import com.increff.omni.reporting.api.ReportControlsApi;
 import com.increff.omni.reporting.config.AbstractTest;
 import com.increff.omni.reporting.config.ApplicationProperties;
+import com.increff.omni.reporting.config.EmailProps;
 import com.increff.omni.reporting.flow.ReportFlowApi;
+import com.increff.omni.reporting.helper.EmailTestHelper;
 import com.increff.omni.reporting.helper.OrgMappingTestHelper;
 import com.increff.omni.reporting.model.constants.*;
 import com.increff.omni.reporting.model.data.*;
 import com.increff.omni.reporting.model.form.*;
 import com.increff.omni.reporting.pojo.DashboardPojo;
 import com.increff.omni.reporting.pojo.DefaultValuePojo;
+import com.increff.commons.springboot.client.AppClientException;
 import com.increff.commons.springboot.common.ApiException;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import com.increff.omni.reporting.pojo.ReportControlsPojo;
+import com.increff.omni.reporting.util.EmailUtil;
+
+import jakarta.mail.MessagingException;
+
+import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.*;
 
 import static com.increff.omni.reporting.helper.ConnectionTestHelper.getConnectionForm;
@@ -34,6 +48,7 @@ import static com.increff.omni.reporting.helper.InputControlTestHelper.getInputC
 import static com.increff.omni.reporting.helper.OrgTestHelper.getOrganizationForm;
 import static com.increff.omni.reporting.helper.ReportTestHelper.*;
 import static com.increff.omni.reporting.helper.SchemaTestHelper.getSchemaForm;
+import static org.mockito.ArgumentMatchers.any;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -69,11 +84,28 @@ public class DashboardDtoTest extends AbstractTest {
     @Autowired
     private ApplicationProperties properties;
 
+    private MockedStatic<EmailUtil> emailUtilMock;
+
     private final Integer orgId = 100001;
 
 
     Integer schemaVersionId;
     Integer connectionId;
+
+    @BeforeEach 
+    @Override
+    public void setUp() throws AppClientException {
+        super.setUp();
+        emailUtilMock = Mockito.mockStatic(EmailUtil.class);
+        emailUtilMock.when(() -> EmailUtil.sendDashboardEmail(any(), any(), any())).thenAnswer(invocation -> null);
+    }
+
+    @AfterEach
+    public void cleanUp() {
+        if (emailUtilMock != null) {
+            emailUtilMock.close();
+        }
+    }
 
     private List<ReportData> commonSetup(ReportType type) throws ApiException {
         reportDto.setEncryptionClient(encryptionClient);
@@ -533,5 +565,90 @@ public class DashboardDtoTest extends AbstractTest {
 
     }
 
+    @Test
+    public void testSendDashboardEmailSuccess() throws ApiException, MessagingException, IOException {
+        SendDashboardForm form = EmailTestHelper.createSendDashboardForm();
+        MultipartFile file = EmailTestHelper.createMockPdfFile();
+        
+        try {
+            dashboardDto.sendDashboardEmail(form, file);
+            emailUtilMock.verify(() -> EmailUtil.sendDashboardEmail(any(EmailProps.class), any(SendDashboardForm.class), any(MultipartFile.class)));
+        } catch (Exception e) {
+            Assertions.fail("Input validation failed: " + e.getMessage());
+        }
+    }
+
+    @Test
+    public void testSendDashboardEmailTooManyRecipients() {
+        SendDashboardForm form = new SendDashboardForm();
+        // Create list with more emails than allowed
+        int maxRecipients = properties.getDashboardEmailMaxRecipients();
+        String[] emails = new String[maxRecipients + 1];
+        Arrays.fill(emails, "test@example.com");
+        form.setEmails(Arrays.asList(emails));
+        form.setComment("Test comment");
+
+        MultipartFile file = EmailTestHelper.createMockPdfFile();
+        
+        Assertions.assertThrows(ApiException.class, () -> {
+            dashboardDto.sendDashboardEmail(form, file);
+        });
+    }
+
+    @Test
+    public void testSendDashboardEmailFileTooLarge() {
+        SendDashboardForm form = EmailTestHelper.createSendDashboardForm();
+        MultipartFile file = EmailTestHelper.createLargeMockPdfFile(properties.getDashboardEmailMaxFileSize() + 1);
+        
+        Assertions.assertThrows(ApiException.class, () -> {
+            dashboardDto.sendDashboardEmail(form, file);
+        });
+    }
+
+    @Test
+    public void testSendDashboardEmailEmptyRecipients() {
+        SendDashboardForm form = new SendDashboardForm();
+        form.setEmails(Collections.emptyList());
+        form.setComment("Test comment");
+
+        MultipartFile file = EmailTestHelper.createMockPdfFile();
+        
+        Assertions.assertThrows(ApiException.class, () -> {
+            dashboardDto.sendDashboardEmail(form, file);
+        });
+    }
+
+    @Test
+    public void testSendDashboardEmailLongComment() throws ApiException, MessagingException, IOException {
+        SendDashboardForm form = EmailTestHelper.createSendDashboardForm();
+        StringBuilder comment = new StringBuilder();
+        for (int i = 0; i < 255; i++) {
+            comment.append("a");
+        }
+        form.setComment(comment.toString());
+        MultipartFile file = EmailTestHelper.createMockPdfFile();
+
+        try {
+            dashboardDto.sendDashboardEmail(form, file);
+            emailUtilMock.verify(() -> EmailUtil.sendDashboardEmail(any(EmailProps.class), any(SendDashboardForm.class), any(MultipartFile.class)));
+        } catch (Exception e) {
+            Assertions.fail("Input validation failed: " + e.getMessage());
+        }
+    }
+
+    @Test
+    public void testSendDashboardEmailTooLongComment() {
+        SendDashboardForm form = EmailTestHelper.createSendDashboardForm();
+        StringBuilder comment = new StringBuilder();
+        for (int i = 0; i < 256; i++) {
+            comment.append("a");
+        }
+        form.setComment(comment.toString());
+        MultipartFile file = EmailTestHelper.createMockPdfFile();
+        
+        Assertions.assertThrows(ApiException.class, () -> {
+            dashboardDto.sendDashboardEmail(form, file);
+        });
+    }
 
 }
