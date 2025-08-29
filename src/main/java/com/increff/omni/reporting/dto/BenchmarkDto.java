@@ -2,6 +2,7 @@ package com.increff.omni.reporting.dto;
 
 import com.increff.commons.springboot.common.ApiException;
 import com.increff.commons.springboot.common.ApiStatus;
+import com.increff.omni.reporting.model.constants.AuditActions;
 import com.increff.omni.reporting.model.data.BenchmarkData;
 import com.increff.omni.reporting.model.form.BenchmarkForm;
 import com.increff.omni.reporting.pojo.BenchmarkPojo;
@@ -37,6 +38,7 @@ public class BenchmarkDto extends AbstractDto {
         }
         List<BenchmarkPojo> pojoList = getBenchmarkPojoList(form);
         benchmarkApi.upsert(pojoList);
+        form.getBenchmarks().forEach(benchmark -> benchmarkApi.saveAudit(benchmark.getReportId().toString(), AuditActions.UPSERT_BENCHMARK.toString(), "upsert benchmark", "value: " + benchmark.getBenchmark().toString(), getUserName()));
         return getBenchmarksForReport(form.getBenchmarks().stream().map(BenchmarkForm.Benchmark::getReportId).collect(Collectors.toList()));
     }
 

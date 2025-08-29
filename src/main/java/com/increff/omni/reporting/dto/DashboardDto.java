@@ -460,7 +460,7 @@ public class DashboardDto extends AbstractDto {
         }
     }
 
-    public void sendDashboardEmail(SendDashboardForm form, MultipartFile file) throws ApiException, MessagingException, IOException {
+    public void sendDashboardEmail(Integer dashboardId, SendDashboardForm form, MultipartFile file) throws ApiException, MessagingException, IOException {
         checkValid(form);
         EmailProps props = createEmailProps(form, file);
         if (form.getEmails().size() > properties.getDashboardEmailMaxRecipients()) {
@@ -469,6 +469,7 @@ public class DashboardDto extends AbstractDto {
         if (file.getSize() > properties.getDashboardEmailMaxFileSize() * 1024 * 1024) {
             throw new ApiException(ApiStatus.BAD_DATA, "PDF file size cannot exceed " + properties.getDashboardEmailMaxFileSize() + "MB");
         }
+        api.saveAudit(dashboardId.toString(), AuditActions.SEND_DASHBOARD_EMAIL.toString(), "shared dashboard email", "sent to: " + form.getEmails().toString() + " with comment: " + form.getComment(), getUserName());
         EmailUtil.sendDashboardEmail(props, form, file);
     }
 
