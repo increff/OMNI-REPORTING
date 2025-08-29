@@ -1,7 +1,10 @@
 package com.increff.omni.reporting.api;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,8 +26,13 @@ public class BenchmarkApi extends AbstractAuditApi {
     }
 
     public void upsert(List<BenchmarkPojo> pojos){
+        if(Objects.isNull(pojos) || pojos.isEmpty()){
+            return;
+        }
+        List<BenchmarkPojo> existingBenchmarks = getByReportIds(pojos.stream().map(BenchmarkPojo::getReportId).collect(Collectors.toList()));
+        Map<Integer, BenchmarkPojo> reportIdToBenchmarkMap = existingBenchmarks.stream().collect(Collectors.toMap(BenchmarkPojo::getReportId, Function.identity()));
         for(BenchmarkPojo pojo : pojos){
-            BenchmarkPojo existing = getByReportId(pojo.getReportId());
+            BenchmarkPojo existing = reportIdToBenchmarkMap.get(pojo.getReportId());
             if(Objects.nonNull(existing)){
                 existing.setValue(pojo.getValue());
                 existing.setLastUpdatedBy(pojo.getLastUpdatedBy());
@@ -34,5 +42,9 @@ public class BenchmarkApi extends AbstractAuditApi {
                 dao.add(pojo);
             }
         }
+    }
+
+    private List<BenchmarkPojo> getByReportIds(List<Integer> reportIds){
+        return dao.selectByReportIds(reportIds);
     }
 }
