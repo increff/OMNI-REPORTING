@@ -203,7 +203,7 @@ public class BenchmarkDtoTest extends AbstractTest {
             benchmarkDto.upsertBenchmark(form);
         });
         assertEquals(ApiStatus.BAD_DATA, exception.getStatus());
-        assertEquals("Duplicate reports found", exception.getMessage());
+        assertEquals("Duplicate reportIds found", exception.getMessage());
     }
 
     @Test
