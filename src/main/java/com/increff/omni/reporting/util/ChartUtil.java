@@ -11,7 +11,7 @@ import com.increff.omni.reporting.model.form.DashboardForm;
 import lombok.extern.log4j.Log4j2;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -71,7 +71,8 @@ public class ChartUtil {
         // first column values is treated as labels
         // each column is a dataset
         // each row has 1 value for each dataset and the label corresponding to that value
-        Map<String, List<String>> data = new HashMap<>();
+        // Use LinkedHashMap to preserve the order of data coming form the query execution [ order = insertion order]
+        Map<String, List<String>> data = new LinkedHashMap<>();
         List<String> columns = new ArrayList<>(result.get(0).keySet());
         String labelColumn = columns.get(0);
         List<String> valueColumns = columns.subList(1, columns.size());
