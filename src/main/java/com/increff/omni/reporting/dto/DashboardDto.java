@@ -77,6 +77,8 @@ public class DashboardDto extends AbstractDto {
         ApplicationPropertiesData data = new ApplicationPropertiesData();
         data.setMaxDashboardsPerOrg(properties.getMaxDashboardsPerOrg());
         data.setMaxChartsPerDashboard(properties.getMaxDashboardCharts());
+        data.setDashboardEmailMaxFileSize(properties.getDashboardEmailMaxFileSize());
+        data.setDashboardEmailMaxRecipients(properties.getDashboardEmailMaxRecipients());
         return data;
     }
 
@@ -458,8 +460,7 @@ public class DashboardDto extends AbstractDto {
         }
     }
 
-    @Transactional(rollbackFor = ApiException.class)
-    public void sendReportEmail(SendReportForm form, MultipartFile file) throws ApiException, MessagingException, IOException {
+    public void sendDashboardEmail(SendDashboardForm form, MultipartFile file) throws ApiException, MessagingException, IOException {
         checkValid(form);
         EmailProps props = createEmailProps(form, file);
         if (form.getEmails().size() > properties.getDashboardEmailMaxRecipients()) {
@@ -509,7 +510,7 @@ public class DashboardDto extends AbstractDto {
         return dashboardPojo;
     }
 
-    private EmailProps createEmailProps(SendReportForm form, MultipartFile file) {
+    private EmailProps createEmailProps(SendDashboardForm form, MultipartFile file) {
         EmailProps props = new EmailProps();
         props.setFromEmail(properties.getFromEmail());
         props.setUsername(properties.getUsername());

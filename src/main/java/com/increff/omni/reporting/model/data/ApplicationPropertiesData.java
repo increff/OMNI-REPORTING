@@ -9,4 +9,6 @@ import org.springframework.beans.factory.annotation.Value;
 public class ApplicationPropertiesData {
     public Integer maxDashboardsPerOrg;
     public Integer maxChartsPerDashboard;
+    public Integer dashboardEmailMaxRecipients;
+    public Integer dashboardEmailMaxFileSize;
 }

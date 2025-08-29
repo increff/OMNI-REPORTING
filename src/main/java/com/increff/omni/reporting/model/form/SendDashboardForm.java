@@ -9,7 +9,7 @@ import java.util.List;
 
 @Getter
 @Setter
-public class SendReportForm {
+public class SendDashboardForm {
 
     @NotEmpty
     private List<String> emails;
