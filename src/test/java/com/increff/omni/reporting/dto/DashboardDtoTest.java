@@ -569,9 +569,9 @@ public class DashboardDtoTest extends AbstractTest {
     public void testSendDashboardEmailSuccess() throws ApiException, MessagingException, IOException {
         SendDashboardForm form = EmailTestHelper.createSendDashboardForm();
         MultipartFile file = EmailTestHelper.createMockPdfFile();
-        
+        Integer dashboardId = 1;
         try {
-            dashboardDto.sendDashboardEmail(form, file);
+            dashboardDto.sendDashboardEmail(dashboardId, form, file);
             emailUtilMock.verify(() -> EmailUtil.sendDashboardEmail(any(EmailProps.class), any(SendDashboardForm.class), any(MultipartFile.class)));
         } catch (Exception e) {
             Assertions.fail("Input validation failed: " + e.getMessage());
@@ -589,9 +589,9 @@ public class DashboardDtoTest extends AbstractTest {
         form.setComment("Test comment");
 
         MultipartFile file = EmailTestHelper.createMockPdfFile();
-        
+        Integer dashboardId = 1;
         Assertions.assertThrows(ApiException.class, () -> {
-            dashboardDto.sendDashboardEmail(form, file);
+            dashboardDto.sendDashboardEmail(dashboardId, form, file);
         });
     }
 
@@ -599,9 +599,9 @@ public class DashboardDtoTest extends AbstractTest {
     public void testSendDashboardEmailFileTooLarge() {
         SendDashboardForm form = EmailTestHelper.createSendDashboardForm();
         MultipartFile file = EmailTestHelper.createLargeMockPdfFile(properties.getDashboardEmailMaxFileSize() + 1);
-        
+        Integer dashboardId = 1;
         Assertions.assertThrows(ApiException.class, () -> {
-            dashboardDto.sendDashboardEmail(form, file);
+            dashboardDto.sendDashboardEmail(dashboardId, form, file);
         });
     }
 
@@ -612,9 +612,9 @@ public class DashboardDtoTest extends AbstractTest {
         form.setComment("Test comment");
 
         MultipartFile file = EmailTestHelper.createMockPdfFile();
-        
+        Integer dashboardId = 1;
         Assertions.assertThrows(ApiException.class, () -> {
-            dashboardDto.sendDashboardEmail(form, file);
+            dashboardDto.sendDashboardEmail(dashboardId, form, file);
         });
     }
 
@@ -627,9 +627,9 @@ public class DashboardDtoTest extends AbstractTest {
         }
         form.setComment(comment.toString());
         MultipartFile file = EmailTestHelper.createMockPdfFile();
-
+        Integer dashboardId = 1;
         try {
-            dashboardDto.sendDashboardEmail(form, file);
+            dashboardDto.sendDashboardEmail(dashboardId, form, file);
             emailUtilMock.verify(() -> EmailUtil.sendDashboardEmail(any(EmailProps.class), any(SendDashboardForm.class), any(MultipartFile.class)));
         } catch (Exception e) {
             Assertions.fail("Input validation failed: " + e.getMessage());
@@ -645,9 +645,9 @@ public class DashboardDtoTest extends AbstractTest {
         }
         form.setComment(comment.toString());
         MultipartFile file = EmailTestHelper.createMockPdfFile();
-        
+        Integer dashboardId = 1;
         Assertions.assertThrows(ApiException.class, () -> {
-            dashboardDto.sendDashboardEmail(form, file);
+            dashboardDto.sendDashboardEmail(dashboardId, form, file);
         });
     }
 

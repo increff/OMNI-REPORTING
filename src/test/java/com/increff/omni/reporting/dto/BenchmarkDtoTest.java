@@ -10,6 +10,7 @@ import com.increff.omni.reporting.model.constants.BenchmarkDirection;
 import com.increff.omni.reporting.model.constants.ChartType;
 import com.increff.omni.reporting.model.constants.ReportType;
 import com.increff.omni.reporting.model.data.BenchmarkData;
+import com.increff.omni.reporting.model.form.BenchmarkForm;
 import com.increff.omni.reporting.pojo.DirectoryPojo;
 import com.increff.omni.reporting.pojo.ReportPojo;
 import com.increff.omni.reporting.pojo.SchemaVersionPojo;
@@ -18,6 +19,8 @@ import com.increff.commons.springboot.common.ApiStatus;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static com.increff.omni.reporting.helper.BenchmarkTestHelper.getBenchmarkForm;
@@ -164,7 +167,87 @@ public class BenchmarkDtoTest extends AbstractTest {
         });
         assertEquals(ApiStatus.BAD_DATA, exception.getStatus());
         assertEquals("Chart type does not support benchmark", exception.getMessage());
+    }
 
+    @Test
+    public void testGetBenchmarksForEmptyReportIds() throws ApiException {
+        List<BenchmarkData> result = benchmarkDto.getBenchmarksForReport(List.of());
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    public void testGetBenchmarksForNonExistentReports() throws ApiException {
+        List<BenchmarkData> result = benchmarkDto.getBenchmarksForReport(List.of(999, 1000));
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    public void testUpsertWithDuplicateReportIds() throws ApiException {
+        // Setup report with benchmark support
+        ReportPojo report = setupReportWithBenchmark();
+        
+        // Create form with duplicate report IDs
+        BenchmarkForm form = new BenchmarkForm();
+        BenchmarkForm.Benchmark benchmark1 = new BenchmarkForm.Benchmark();
+        benchmark1.setReportId(report.getId());
+        benchmark1.setBenchmark(90.0);
+        BenchmarkForm.Benchmark benchmark2 = new BenchmarkForm.Benchmark();
+        benchmark2.setReportId(report.getId());
+        benchmark2.setBenchmark(95.0);
+        form.setBenchmarks(Arrays.asList(benchmark1, benchmark2));
+
+        // Verify duplicate reports are caught
+        ApiException exception = assertThrows(ApiException.class, () -> {
+            benchmarkDto.upsertBenchmark(form);
+        });
+        assertEquals(ApiStatus.BAD_DATA, exception.getStatus());
+        assertEquals("Duplicate reportIds found", exception.getMessage());
+    }
+
+    @Test
+    public void testUpsertWithNonExistentReportIds(){
+        // Create form with non-existent report ID
+        BenchmarkForm form = new BenchmarkForm();
+        BenchmarkForm.Benchmark benchmark = new BenchmarkForm.Benchmark();
+        benchmark.setReportId(999);
+        benchmark.setBenchmark(90.0);
+        form.setBenchmarks(Collections.singletonList(benchmark));
+
+        // Verify non-existent reports are caught
+        ApiException exception = assertThrows(ApiException.class, () -> {
+            benchmarkDto.upsertBenchmark(form);
+        });
+        assertEquals(ApiStatus.BAD_DATA, exception.getStatus());
+        assertEquals("Some of the reports do not exist", exception.getMessage());
+    }
+
+    @Test
+    public void testUpsertWithNullReportIds(){
+        BenchmarkForm form = new BenchmarkForm();
+        form.setBenchmarks(null);
+        assertThrows(ApiException.class, () -> benchmarkDto.upsertBenchmark(form));
+    }
+
+    @Test
+    public void testUpsertWithNullReportId(){
+        BenchmarkForm form = new BenchmarkForm();
+        BenchmarkForm.Benchmark benchmark = new BenchmarkForm.Benchmark();
+        benchmark.setReportId(null);
+        benchmark.setBenchmark(90.0);
+        form.setBenchmarks(List.of(benchmark));
+        assertThrows(ApiException.class, () -> benchmarkDto.upsertBenchmark(form));
+    }
+
+    @Test
+    public void testUpsertWithNullBenchmarks(){
+        BenchmarkForm form = new BenchmarkForm();
+        BenchmarkForm.Benchmark benchmark = new BenchmarkForm.Benchmark();
+        benchmark.setReportId(1);
+        benchmark.setBenchmark(null);
+        form.setBenchmarks(List.of(benchmark));
+        assertThrows(ApiException.class, () -> benchmarkDto.upsertBenchmark(form));
     }
 
     private ReportPojo setupBasicReport() throws ApiException {

@@ -111,4 +111,15 @@ public class ValidateUtil {
             throw new ApiException(ApiStatus.BAD_DATA, "DashboardId in all default value forms should be same as dashboardId in url");
 
     }
+
+    public static void validateUpsertBenchmarkForm(BenchmarkForm form) throws ApiException {
+        for(BenchmarkForm.Benchmark benchmark : form.getBenchmarks()) {
+            checkValid(benchmark);
+            if(benchmark.getBenchmark() <= 0)
+                throw new ApiException(ApiStatus.BAD_DATA, "Benchmark value must be greater than 0");
+        }
+        Set<Integer> reportIds = form.getBenchmarks().stream().map(BenchmarkForm.Benchmark::getReportId).collect(Collectors.toSet());
+        if(reportIds.size() != form.getBenchmarks().size())
+            throw new ApiException(ApiStatus.BAD_DATA, "Duplicate reportIds found");
+    }
 }

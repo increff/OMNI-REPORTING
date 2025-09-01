@@ -2,10 +2,12 @@ package com.increff.omni.reporting.dto;
 
 import com.increff.commons.springboot.common.ApiException;
 import com.increff.commons.springboot.common.ApiStatus;
+import com.increff.omni.reporting.model.constants.AuditActions;
 import com.increff.omni.reporting.model.data.BenchmarkData;
 import com.increff.omni.reporting.model.form.BenchmarkForm;
 import com.increff.omni.reporting.pojo.BenchmarkPojo;
 import com.increff.omni.reporting.pojo.ReportPojo;
+import com.increff.omni.reporting.util.ValidateUtil;
 import com.increff.omni.reporting.api.BenchmarkApi;
 import com.increff.omni.reporting.api.ReportApi;
 
@@ -27,6 +29,7 @@ public class BenchmarkDto extends AbstractDto {
 
     public List<BenchmarkData> upsertBenchmark(BenchmarkForm form) throws ApiException {
         checkValid(form);
+        ValidateUtil.validateUpsertBenchmarkForm(form);
         List<ReportPojo> reports = reportApi.getByIds(form.getBenchmarks().stream().map(BenchmarkForm.Benchmark::getReportId).collect(Collectors.toList()));
         if(form.getBenchmarks().size() != reports.size()){
             throw new ApiException(ApiStatus.BAD_DATA, "Some of the reports do not exist");
@@ -37,15 +40,13 @@ public class BenchmarkDto extends AbstractDto {
         }
         List<BenchmarkPojo> pojoList = getBenchmarkPojoList(form);
         benchmarkApi.upsert(pojoList);
+        form.getBenchmarks().forEach(benchmark -> benchmarkApi.saveAudit(benchmark.getReportId().toString(), AuditActions.UPSERT_BENCHMARK.toString(), "upsert benchmark", "value: " + benchmark.getBenchmark().toString(), getUserName()));
         return getBenchmarksForReport(form.getBenchmarks().stream().map(BenchmarkForm.Benchmark::getReportId).collect(Collectors.toList()));
     }
 
     private static List<BenchmarkPojo> getBenchmarkPojoList(BenchmarkForm form) throws ApiException {
         List<BenchmarkPojo> pojoList = new ArrayList<>();
         for(BenchmarkForm.Benchmark benchmark : form.getBenchmarks()){
-            if(benchmark.getBenchmark() <= 0){
-                throw new ApiException(ApiStatus.BAD_DATA, "Benchmark value must be greater than 0");
-            }
             BenchmarkPojo pojo = new BenchmarkPojo();
             pojo.setReportId(benchmark.getReportId());
             pojo.setOrgId(getOrgId());
