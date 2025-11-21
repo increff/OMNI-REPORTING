@@ -30,8 +30,6 @@ public class AppAccessSecurityConfig {
     @Autowired
     private RoleOverrideFilter roleOverrideFilter;
 
-    private static final String APP_INTEGRATION = "app.integration";
-
     @Bean
     public SecurityFilterChain appAccessSecurityFilterChain(HttpSecurity http) throws Exception {
 
@@ -48,7 +46,7 @@ public class AppAccessSecurityConfig {
                                     Roles.ICC_REPORT_STANDARD.getRole(),
                                     Roles.ICC_REPORT_CUSTOM.getRole(),
                                     // Allow role from CredentialFilter (integration role)
-                                    APP_INTEGRATION
+                                    Roles.CXO_INTEGRATION.getRole()
                             );
                 })
                 .cors(AbstractHttpConfigurer::disable)
