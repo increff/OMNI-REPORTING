@@ -30,6 +30,9 @@ public class AppAccessSecurityConfig {
     @Autowired
     private RoleOverrideFilter roleOverrideFilter;
 
+    @Autowired
+    private ReportAppAccessFilter reportAppAccessFilter;
+
     @Bean
     public SecurityFilterChain appAccessSecurityFilterChain(HttpSecurity http) throws Exception {
 
@@ -46,19 +49,18 @@ public class AppAccessSecurityConfig {
                                     Roles.ICC_REPORT_STANDARD.getRole(),
                                     Roles.ICC_REPORT_CUSTOM.getRole(),
                                     // Allow role from CredentialFilter (integration role)
-                                    Roles.CXO_INTEGRATION.getRole()
+                                    Roles.APP_INTEGRATION.getRole()
                             );
                 })
                 .cors(AbstractHttpConfigurer::disable)
                 .csrf(AbstractHttpConfigurer::disable)
-                // Add CredentialFilter first (for integration access with app.integration role)
-                .addFilterBefore(new CredentialFilter(authClient), BasicAuthenticationFilter.class)
-                // Add AuthTokenFilter second (for standard user access with report roles)
                 .addFilterBefore(new AuthTokenFilter(authClient), BasicAuthenticationFilter.class)
+                .addFilterBefore(new CredentialFilter(authClient), BasicAuthenticationFilter.class)
                 // Add RoleOverrideFilter to handle role overrides for AuthTokenFilter users
                 .addFilterBefore(roleOverrideFilter, BasicAuthenticationFilter.class)
                 // Add RateLimitingFilter after authentication (matches StandardSecurityConfig pattern)
                 .addFilterAfter(rateLimitingFilter, AuthTokenFilter.class)
+                .addFilterAfter(reportAppAccessFilter, RateLimitingFilter.class)
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
         return http.build();
     }

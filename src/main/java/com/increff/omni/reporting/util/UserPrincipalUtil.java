@@ -127,9 +127,8 @@ public class UserPrincipalUtil {
     public static Set<AppName> getAccessibleApps() {
         Set<AppName> accessibleApps = new HashSet<>();
         List<String> userRoles = getPrincipal().getRoles();
-        log.debug("User roles: " + userRoles);
 
-        if(userRoles.contains(Roles.APP_ADMIN.getRole()) || userRoles.contains(Roles.REPORT_ADMIN.getRole())) {
+        if(userRoles.contains(Roles.APP_ADMIN.getRole()) || userRoles.contains(Roles.REPORT_ADMIN.getRole()) || userRoles.contains(Roles.APP_INTEGRATION.getRole())) {
             return new HashSet<>(Arrays.asList(AppName.values()));
         }
 
