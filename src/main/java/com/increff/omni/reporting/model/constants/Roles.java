@@ -20,7 +20,9 @@ public enum Roles {
     OMNI_REPORT_CUSTOM("omni.report.custom"),
 
     ICC_REPORT_STANDARD("icc.report.standard"),
-    ICC_REPORT_CUSTOM("icc.report.custom");
+    ICC_REPORT_CUSTOM("icc.report.custom"),
+
+    CXO_INTEGRATION("cxo.integration");
 
     private final String role;
     public static final List<String> USER_ACCESS_ADMIN_AUTHORITIES = Arrays.asList(
