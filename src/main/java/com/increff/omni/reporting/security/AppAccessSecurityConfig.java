@@ -35,6 +35,10 @@ public class AppAccessSecurityConfig {
 
     @Bean
     public SecurityFilterChain appAccessSecurityFilterChain(HttpSecurity http) throws Exception {
+        
+        AuthTokenFilter authTokenFilter = new AuthTokenFilter(authClient);
+        
+        CredentialFilter credentialFilter = new CredentialFilter(authClient);
 
         http    //match only this specific URL
                 .securityMatcher("/standard/app-access/dashboards/{dashboardId}/view")
@@ -54,12 +58,11 @@ public class AppAccessSecurityConfig {
                 })
                 .cors(AbstractHttpConfigurer::disable)
                 .csrf(AbstractHttpConfigurer::disable)
-                .addFilterBefore(new AuthTokenFilter(authClient), BasicAuthenticationFilter.class)
-                .addFilterBefore(new CredentialFilter(authClient), BasicAuthenticationFilter.class)
-                // Add RoleOverrideFilter to handle role overrides for AuthTokenFilter users
+                // Adding them in this order ensures: authTokenFilter executes first, then credentialFilter, then RoleOverrideFilter
+                .addFilterBefore(authTokenFilter, BasicAuthenticationFilter.class)
+                .addFilterBefore(credentialFilter, BasicAuthenticationFilter.class)
                 .addFilterBefore(roleOverrideFilter, BasicAuthenticationFilter.class)
-                // Add RateLimitingFilter after authentication (matches StandardSecurityConfig pattern)
-                .addFilterAfter(rateLimitingFilter, AuthTokenFilter.class)
+                .addFilterAfter(rateLimitingFilter, CredentialFilter.class)
                 .addFilterAfter(reportAppAccessFilter, RateLimitingFilter.class)
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
         return http.build();
