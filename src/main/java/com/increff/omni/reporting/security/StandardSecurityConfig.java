@@ -2,7 +2,6 @@ package com.increff.omni.reporting.security;
 
 import com.increff.account.client.AuthClient;
 import com.increff.account.client.AuthTokenFilter;
-import com.increff.omni.reporting.config.ApplicationProperties;
 import com.increff.omni.reporting.model.constants.Roles;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -35,15 +34,17 @@ public class StandardSecurityConfig {
     @Bean
     public SecurityFilterChain standardSecurityFilterChain(HttpSecurity http) throws Exception {
 
-        http    //match only these URLs
-                .securityMatcher("/standard/**")
+        http    //match only these URLs (but exclude the specific /view endpoint which is handled by AppAccessSecurityConfig)
+                .securityMatcher(request -> 
+                    request.getServletPath().startsWith("/standard/") && 
+                    !request.getServletPath().matches(".*/standard/app-access/dashboards/\\d+/view")
+                )
                 .authorizeHttpRequests(auth -> {
                     auth
                             .requestMatchers("/standard/schedules/**").hasAnyAuthority(Roles.APP_ADMIN.getRole())//
                             .requestMatchers("/standard/pipelines/**").hasAnyAuthority(Roles.APP_ADMIN.getRole())//
                             .requestMatchers( "/standard/dashboards/send-dashboard").hasAnyAuthority(Roles.APP_ADMIN.getRole(), Roles.REPORT_ADMIN.getRole(), Roles.OMNI_REPORT_STANDARD.getRole(), Roles.OMNI_REPORT_CUSTOM.getRole(), Roles.ICC_REPORT_STANDARD.getRole(), Roles.ICC_REPORT_CUSTOM.getRole()  )//                       
                             .requestMatchers( "/standard/reports/benchmark").hasAnyAuthority(Roles.APP_ADMIN.getRole(), Roles.REPORT_ADMIN.getRole(), Roles.OMNI_REPORT_STANDARD.getRole(), Roles.OMNI_REPORT_CUSTOM.getRole(), Roles.ICC_REPORT_STANDARD.getRole(), Roles.ICC_REPORT_CUSTOM.getRole()  )//                       
-                            .requestMatchers(HttpMethod.POST, "/standard/dashboards/{dashboardId}/view").hasAnyAuthority(Roles.APP_ADMIN.getRole(), Roles.REPORT_ADMIN.getRole(), Roles.OMNI_REPORT_STANDARD.getRole(), Roles.OMNI_REPORT_CUSTOM.getRole(), Roles.ICC_REPORT_STANDARD.getRole(), Roles.ICC_REPORT_CUSTOM.getRole()  )
                             .requestMatchers(HttpMethod.GET, "/standard/dashboards/**").hasAnyAuthority(Roles.APP_ADMIN.getRole(), Roles.REPORT_ADMIN.getRole(), Roles.OMNI_REPORT_STANDARD.getRole(), Roles.OMNI_REPORT_CUSTOM.getRole(), Roles.ICC_REPORT_STANDARD.getRole(), Roles.ICC_REPORT_CUSTOM.getRole()  )//
                             .requestMatchers("/standard/dashboards/**").hasAnyAuthority(Roles.APP_ADMIN.getRole())//
                             .requestMatchers("/standard/**").hasAnyAuthority(Roles.APP_ADMIN.getRole(), Roles.REPORT_ADMIN.getRole(), Roles.OMNI_REPORT_STANDARD.getRole(), Roles.OMNI_REPORT_CUSTOM.getRole(), Roles.ICC_REPORT_STANDARD.getRole(), Roles.ICC_REPORT_CUSTOM.getRole()  );
