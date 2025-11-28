@@ -34,11 +34,26 @@ public class StandardSecurityConfig {
     @Bean
     public SecurityFilterChain standardSecurityFilterChain(HttpSecurity http) throws Exception {
 
-        http    //match only these URLs (but exclude the specific /view endpoint which is handled by AppAccessSecurityConfig)
-                .securityMatcher(request -> 
-                    request.getServletPath().startsWith("/standard/") && 
-                    !request.getServletPath().matches(".*/standard/app-access/dashboards/\\d+/view")
-                )
+        http    //match only these URLs (but exclude the specific /view endpoint and GET dashboard endpoint which are handled by CredentialSecurityConfig)
+                .securityMatcher(request -> {
+                    String path = request.getServletPath();
+                    String method = request.getMethod();
+                    System.out.println(path
+                            +"----------"+method);
+                    // Match /standard/**
+                    if (!path.startsWith("/standard/")) {
+                        return false;
+                    }
+                    // Exclude /standard/app-access/dashboards/{dashboardId}/view
+                    if (path.matches("/standard/app-access/dashboards/\\d+/view")) {
+                        return false;
+                    }
+                    // Exclude GET /standard/dashboards/{dashboardId}
+                    if (HttpMethod.GET.matches(method) && path.matches("/standard/dashboards/\\d+")) {
+                        return false;
+                    }
+                    return true;
+                })
                 .authorizeHttpRequests(auth -> {
                     auth
                             .requestMatchers("/standard/schedules/**").hasAnyAuthority(Roles.APP_ADMIN.getRole())//
