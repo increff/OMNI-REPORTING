@@ -38,8 +38,6 @@ public class StandardSecurityConfig {
                 .securityMatcher(request -> {
                     String path = request.getServletPath();
                     String method = request.getMethod();
-                    System.out.println(path
-                            +"----------"+method);
                     // Match /standard/**
                     if (!path.startsWith("/standard/")) {
                         return false;
