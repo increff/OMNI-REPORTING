@@ -23,6 +23,8 @@
         <start-class>com.increff.omni.reporting.OmniReportingApplication</start-class>
 
         <!--    Versions    -->
+        <jib.plugin.version>3.4.2</jib.plugin.version>
+        <maven.release.plugin.version>3.0.1</maven.release.plugin.version>
         <increff-commons-fileclient.version>2.4.0</increff-commons-fileclient.version>
         <bucket4j-core.version>8.7.0</bucket4j-core.version>
         <commons-springboot-server.version>0.0.1</commons-springboot-server.version>
@@ -220,14 +222,13 @@
                     </execution>
                 </executions>
             </plugin>
-
             <plugin>
                 <groupId>com.google.cloud.tools</groupId>
                 <artifactId>jib-maven-plugin</artifactId>
-                <version>3.4.0</version>
+                <version>${jib.plugin.version}</version>
                 <configuration>
                     <from>
-                        <image>eclipse-temurin:21-jre</image>
+                        <image>asia-south1-docker.pkg.dev/assure-prod-3/baseimage/omnispringboot:1.0.1</image>
                         <platforms>
                             <platform>
                                 <os>linux</os>
@@ -236,8 +237,9 @@
                         </platforms>
                     </from>
                     <to>
-                        <image>asia-south1-docker.pkg.dev/saas-dev-314407/internal-services/omni-reporting</image>
+                        <image>asia-south1-docker.pkg.dev/${gcp.project.name}/internal-services/omni-reporting</image>
                         <tags>
+                            <tag>latest</tag>
                             <tag>${project.version}</tag>
                         </tags>
                     </to>
@@ -261,18 +263,24 @@
                         </paths>
                     </extraDirectories>
                     <container>
-                        <entrypoint>
-                            <arg>/bin/sh</arg>
-                            <arg>-c</arg>
-                            <arg>java -Xms1500m -Xmx1500m -javaagent:/usr/local/elastic-apm-agent-1.38.0.jar -Dlogging.config=/usr/local/log4j2.xml -Delastic.apm.service_name=${ELK_SERVICE_NAME} -Delastic.apm.application_packages=* -Delastic.apm.server_url=${ELK_SERVER_URL} -Delastic.apm.secret_token=${ELK_SERVER_TOKEN} -Delastic.apm.environment=elk -Dspring.cloud.vault.scheme=${VAULT_SCHEME} -Dspring.cloud.vault.host=${VAULT_HOST} -Dspring.cloud.vault.application-name=omniReporting -Dspring.cloud.vault.port=${VAULT_PORT} -Dspring.cloud.vault.token=${VAULT_TOKEN} -Dspring.config.import=vault:// -Dspring.profiles.active=${ACTIVE_PROFILE} -jar /usr/local/app.jar</arg>
-                        </entrypoint>
+                        <creationTime>${maven.build.timestamp}</creationTime>
+                        <entrypoint>INHERIT</entrypoint>
                         <ports>
                             <port>8080</port>
                         </ports>
+                        <appRoot>/usr/local/tomcat/webapps/omni-reporting</appRoot>
+                        <workingDirectory>/usr/local/tomcat/appdata</workingDirectory>
                     </container>
                 </configuration>
             </plugin>
-
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+                <version>${maven.release.plugin.version}</version>
+                <configuration>
+                    <preparationGoals>clean install jib:build -Dgcp.project.name=${gcp.project.name}</preparationGoals>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 
