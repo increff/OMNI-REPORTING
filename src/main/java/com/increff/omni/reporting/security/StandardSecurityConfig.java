@@ -14,11 +14,22 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
+import org.springframework.security.web.util.matcher.AndRequestMatcher;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.util.matcher.NegatedRequestMatcher;
+import org.springframework.security.web.util.matcher.OrRequestMatcher;
+import org.springframework.security.web.util.matcher.RegexRequestMatcher;
 
 @Configuration
 @EnableWebSecurity
 @Order(2)
 public class StandardSecurityConfig {
+
+    // Endpoints handled by CredentialSecurityConfig (Order 0) - excluded from this config
+    private static final OrRequestMatcher EXCLUDE_ENDPOINTS = new OrRequestMatcher(
+            new RegexRequestMatcher("/standard/app-access/dashboards/\\d+/view", null),
+            new RegexRequestMatcher("/standard/dashboards/\\d+", "GET")
+    );
 
     @Autowired
     private AuthClient authClient;
@@ -34,24 +45,11 @@ public class StandardSecurityConfig {
     @Bean
     public SecurityFilterChain standardSecurityFilterChain(HttpSecurity http) throws Exception {
 
-        http    //match only these URLs (but exclude the specific /view endpoint and GET dashboard endpoint which are handled by CredentialSecurityConfig)
-                .securityMatcher(request -> {
-                    String path = request.getServletPath();
-                    String method = request.getMethod();
-                    // Match /standard/**
-                    if (!path.startsWith("/standard/")) {
-                        return false;
-                    }
-                    // Exclude /standard/app-access/dashboards/{dashboardId}/view
-                    if (path.matches("/standard/app-access/dashboards/\\d+/view")) {
-                        return false;
-                    }
-                    // Exclude GET /standard/dashboards/{dashboardId}
-                    if (HttpMethod.GET.matches(method) && path.matches("/standard/dashboards/\\d+")) {
-                        return false;
-                    }
-                    return true;
-                })
+        http    // Match /standard/** but exclude endpoints handled by CredentialSecurityConfig
+                .securityMatcher(new AndRequestMatcher(
+                        new AntPathRequestMatcher("/standard/**"),
+                        new NegatedRequestMatcher(EXCLUDE_ENDPOINTS)
+                ))
                 .authorizeHttpRequests(auth -> {
                     auth
                             .requestMatchers("/standard/schedules/**").hasAnyAuthority(Roles.APP_ADMIN.getRole())//
