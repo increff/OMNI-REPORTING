@@ -3,6 +3,7 @@ package com.increff.omni.reporting.security;
 import com.increff.account.client.AuthClient;
 import com.increff.account.client.CredentialFilter;
 import com.increff.omni.reporting.config.ApplicationProperties;
+import com.increff.omni.reporting.model.constants.Roles;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -25,15 +26,13 @@ public class IntegrationSecurityConfig {
     @Autowired
     private ApplicationProperties applicationProperties;
 
-    private static final String APP_INTEGRATION = "app.integration";
-
     @Bean
     public SecurityFilterChain integrationSecurityFilterChain(HttpSecurity http) throws Exception {
 
         http    //match only these URLs
                 .securityMatcher("/integration/**")
                 .authorizeHttpRequests(auth -> {
-                    auth.requestMatchers("/integration/**").hasAnyAuthority(APP_INTEGRATION);
+                    auth.requestMatchers("/integration/**").hasAnyAuthority(Roles.APP_INTEGRATION.getRole());
                 })
                 .cors(AbstractHttpConfigurer::disable)
                 .csrf(AbstractHttpConfigurer::disable)
