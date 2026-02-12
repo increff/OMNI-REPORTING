@@ -39,6 +39,9 @@ public class InputControlFlowApi extends AbstractApi {
     private DBConnectionApi dbConnectionApi;
 
     @Autowired
+    private ClickHouseConnectionApi clickHouseConnectionApi;
+
+    @Autowired
     private ReportControlsApi reportControlsApi;
 
     @Autowired
@@ -114,6 +117,13 @@ public class InputControlFlowApi extends AbstractApi {
                 List<Document> docs = MongoUtil.executeMongoPipeline(connectionPojo.getHost(), connectionPojo.getUsername(),
                         password, fQuery);
                 return FileUtil.getMapFromMongoResultSet(docs);
+            } else if (connectionPojo.getDbType().equals(DBType.CLICKHOUSE)) {
+                connection = clickHouseConnectionApi.getConnection(connectionPojo.getHost(), connectionPojo.getUsername(),
+                        password, properties.getMaxConnectionTime());
+                PreparedStatement statement = clickHouseConnectionApi.getStatement(connection,
+                        properties.getLiveReportMaxExecutionTime(), fQuery, properties.getResultSetFetchSize());
+                ResultSet resultSet = statement.executeQuery();
+                return FileUtil.getMapFromResultSet(resultSet);
             }
 
         } catch (Exception e) {

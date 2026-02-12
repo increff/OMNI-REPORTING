@@ -4,6 +4,7 @@ import com.increff.commons.springboot.client.AppClientException;
 import com.increff.commons.springboot.common.ApiException;
 import com.increff.commons.springboot.common.ApiStatus;
 import com.increff.commons.springboot.common.ConvertUtil;
+import com.increff.omni.reporting.api.ClickHouseConnectionApi;
 import com.increff.omni.reporting.api.ConnectionApi;
 import com.increff.omni.reporting.api.DBConnectionApi;
 import com.increff.omni.reporting.config.ApplicationProperties;
@@ -40,6 +41,8 @@ public class ConnectionDto extends AbstractDto {
     private ApplicationProperties properties;
     @Autowired
     private DBConnectionApi dbConnectionApi;
+    @Autowired
+    private ClickHouseConnectionApi clickHouseConnectionApi;
     @Autowired
     private EncryptionClient encryptionClient;
 
@@ -85,6 +88,13 @@ public class ConnectionDto extends AbstractDto {
             } else if (connectionPojo.getDbType().equals(DBType.MONGO)) {
                 MongoUtil.testConnection(connectionPojo.getHost(), connectionPojo.getUsername(),
                         connectionPojo.getPassword());
+            } else if (connectionPojo.getDbType().equals(DBType.CLICKHOUSE)) {
+                connection = clickHouseConnectionApi.getConnection(connectionPojo.getHost(), connectionPojo.getUsername(),
+                        connectionPojo.getPassword(), properties.getMaxConnectionTime());
+                PreparedStatement statement = clickHouseConnectionApi.getStatement(connection,
+                        properties.getLiveReportMaxExecutionTime(), "SELECT version()", properties.getResultSetFetchSize());
+                ResultSet resultSet = statement.executeQuery();
+                resultSet.close();
             }
 
         } catch (SQLException e) {

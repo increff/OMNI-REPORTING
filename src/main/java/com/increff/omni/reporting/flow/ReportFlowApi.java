@@ -46,6 +46,8 @@ public class ReportFlowApi extends FlowApi {
     @Autowired
     private DBConnectionApi dbConnectionApi;
     @Autowired
+    private ClickHouseConnectionApi clickHouseConnectionApi;
+    @Autowired
     private OrgMappingApi orgMappingApi;
     @Autowired
     private DirectoryApi directoryApi;
@@ -124,6 +126,13 @@ public class ReportFlowApi extends FlowApi {
                 List<Document> docs = MongoUtil.executeMongoPipeline(connectionPojo.getHost(), connectionPojo.getUsername(),
                         password, fQuery);
                 noOfRows = FileUtil.writeCsvFromMongoDocuments(docs, file);
+            } else if (connectionPojo.getDbType().equals(DBType.CLICKHOUSE)) {
+                connection = clickHouseConnectionApi.getConnection(connectionPojo.getHost(), connectionPojo.getUsername(),
+                        password, properties.getMaxConnectionTime());
+                PreparedStatement statement = clickHouseConnectionApi.getStatement(connection,
+                        properties.getLiveReportMaxExecutionTime(), fQuery, properties.getResultSetFetchSize());
+                ResultSet resultSet = statement.executeQuery();
+                noOfRows = FileUtil.writeCsvFromResultSet(resultSet, file);
             }
 
 

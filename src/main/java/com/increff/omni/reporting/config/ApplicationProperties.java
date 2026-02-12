@@ -176,6 +176,15 @@ public class ApplicationProperties {
     @Value("${dashboard.email.max.file.size.mb:10}")
     private Integer dashboardEmailMaxFileSize;
 
+    @Value("${clickhouse.connect.timeout.seconds:60}")
+    private Integer clickHouseConnectTimeoutSec;
+
+    @Value("${clickhouse.socket.timeout.seconds:300}")
+    private Integer clickHouseSocketTimeoutSec;
+
+    @Value("${clickhouse.default.port:8123}")
+    private Integer clickHouseDefaultPort;
+
     @PostConstruct
     public void init() {
         UNIFY_QUERY_STRING = unifyQueryString;

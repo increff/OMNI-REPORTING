@@ -70,6 +70,8 @@ public class ScheduleReportTask extends AbstractTask {
     @Autowired
     private DBConnectionApi dbConnectionApi;
     @Autowired
+    private ClickHouseConnectionApi clickHouseConnectionApi;
+    @Autowired
     private ConnectionApi connectionApi;
     @Autowired
     private FolderApi folderApi;
@@ -203,6 +205,14 @@ public class ScheduleReportTask extends AbstractTask {
                 List<Document> docs = MongoUtil.executeMongoPipeline(connectionPojo.getHost(), connectionPojo.getUsername(),
                         password, fQuery);
                 noOfRows = FileUtil.writeCsvFromMongoDocuments(docs, file);
+            } else if (connectionPojo.getDbType().equals(DBType.CLICKHOUSE)) {
+                connection = clickHouseConnectionApi.getConnection(connectionPojo.getHost(), connectionPojo.getUsername(),
+                        password, properties.getMaxConnectionTime());
+                PreparedStatement statement =
+                        clickHouseConnectionApi.getStatement(connection, properties.getMaxExecutionTime(), fQuery,
+                                properties.getResultSetFetchSize());
+                resultSet = statement.executeQuery();
+                noOfRows = FileUtil.writeCsvFromResultSet(resultSet, file);
             }
 
             double fileSize = FileUtil.getSizeInMb(file.length());

@@ -55,7 +55,7 @@ public class SqlCmd {
     }
 
     private static String injectAccessControlFilter(String query, DBType dbType) throws ApiException {
-        if (dbType.equals(DBType.MYSQL))
+        if (dbType.equals(DBType.MYSQL) || dbType.equals(DBType.CLICKHOUSE))
             return query;
 
         String inpQuery = query;
