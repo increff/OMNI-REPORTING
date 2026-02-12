@@ -16,6 +16,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.io.IOException;
 import java.util.*;
 
+import com.increff.omni.reporting.model.constants.DBType;
+
 import static com.increff.omni.reporting.helper.ConnectionTestHelper.getConnectionForm;
 import static com.increff.omni.reporting.helper.DirectoryTestHelper.getDirectoryForm;
 import static com.increff.omni.reporting.helper.InputControlTestHelper.getInputControlForm;
@@ -116,6 +118,28 @@ public class ConnectionDtoTestIT extends AbstractTest {
         assertEquals("dev-db-2.increff.com", data.getHost());
         assertEquals("Dev DB 2", data.getName());
         assertEquals("db.user2", data.getUsername());
+    }
+
+    @Test
+    public void testAddClickHouseConnection() throws ApiException {
+        ConnectionForm form = getConnectionForm("clickhouse-host.increff.com", "ClickHouse DB", "ch.user", "ch.password", DBType.CLICKHOUSE);
+        ConnectionData data = dto.add(form);
+        assertNotNull(data);
+        assertEquals("clickhouse-host.increff.com", data.getHost());
+        assertEquals("ClickHouse DB", data.getName());
+        assertEquals("ch.user", data.getUsername());
+        assertEquals(DBType.CLICKHOUSE, data.getDbType());
+    }
+
+    @Test
+    public void testClickHouseConnectionInvalidHost() {
+        ConnectionForm form = getConnectionForm("invalid-host", "ClickHouse Test", "user", "pass", DBType.CLICKHOUSE);
+        try {
+            dto.testConnection(form);
+        } catch (ApiException e) {
+            assertEquals(ApiStatus.UNKNOWN_ERROR, e.getStatus());
+            assertTrue(e.getMessage().contains("Error connecting to ClickHouse"));
+        }
     }
 
     @Test
