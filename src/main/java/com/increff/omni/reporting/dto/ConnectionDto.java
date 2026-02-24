@@ -95,6 +95,9 @@ public class ConnectionDto extends AbstractDto {
                 MongoUtil.testConnection(connectionPojo.getHost(), connectionPojo.getUsername(),
                         connectionPojo.getPassword());
             } else if (connectionPojo.getDbType().equals(DBType.CLICKHOUSE)) {
+                if (form.getClickHouseDatabase() == null || form.getClickHouseDatabase().isBlank()) {
+                    throw new ApiException(ApiStatus.BAD_DATA, "ClickHouse database name is required");
+                }
                 connection = clickHouseConnectionApi.getConnection(connectionPojo.getHost(), connectionPojo.getUsername(),
                         connectionPojo.getPassword(), form.getClickHouseDatabase());
                 PreparedStatement statement = clickHouseConnectionApi.getStatement(connection,

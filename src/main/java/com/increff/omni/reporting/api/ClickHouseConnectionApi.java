@@ -23,10 +23,10 @@ public class ClickHouseConnectionApi {
     @Autowired
     private ClickHouseDatabaseMappingDao clickHouseDatabaseMappingDao;
 
-    public Connection getConnection(String dbHost, String dbUsername, String dbPassword, String database, Integer maxConnectionTime) throws ApiException {
+    public Connection getConnection(String dbHost, String dbUsername, String dbPassword, String database) throws ApiException {
         try {
             Class.forName("com.clickhouse.jdbc.ClickHouseDriver");
-            DriverManager.setLoginTimeout(maxConnectionTime);
+            DriverManager.setLoginTimeout(properties.getClickHouseConnectTimeoutSec());
             Connection connection = DriverManager.getConnection(
                 getDbUrl(dbHost, database), dbUsername, dbPassword);
             return connection;
@@ -39,6 +39,7 @@ public class ClickHouseConnectionApi {
         try {
             PreparedStatement statement = connection.prepareStatement(query);
             statement.setQueryTimeout(maxExecutionTime);
+            statement.setFetchSize(fetchSize);
             statement.closeOnCompletion();
             return statement;
         } catch (SQLException e) {
