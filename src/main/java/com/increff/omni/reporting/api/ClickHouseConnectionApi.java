@@ -47,20 +47,19 @@ public class ClickHouseConnectionApi {
         }
     }
 
-    public void addDatabaseMapping(Integer connectionId, String database) {
-        ClickHouseDatabaseMappingPojo pojo = new ClickHouseDatabaseMappingPojo();
-        pojo.setConnectionId(connectionId);
-        pojo.setDatabase(database);
+    public void addDatabaseMapping(ClickHouseDatabaseMappingPojo pojo) {
         clickHouseDatabaseMappingDao.persist(pojo);
     }
 
-    public void updateDatabaseMapping(Integer connectionId, String database) throws ApiException {
+    public ClickHouseDatabaseMappingPojo getDatabaseMapping(Integer connectionId) throws ApiException {
         List<ClickHouseDatabaseMappingPojo> mappings = clickHouseDatabaseMappingDao.selectByConnectionId(connectionId);
         if (mappings.isEmpty()) {
             throw new ApiException(ApiStatus.BAD_DATA, "No database mapping found for ClickHouse connectionId: " + connectionId);
         }
-        ClickHouseDatabaseMappingPojo pojo = mappings.get(0);
-        pojo.setDatabase(database);
+        return mappings.get(0);
+    }
+
+    public void updateDatabaseMapping(ClickHouseDatabaseMappingPojo pojo) {
         clickHouseDatabaseMappingDao.update(pojo);
     }
 

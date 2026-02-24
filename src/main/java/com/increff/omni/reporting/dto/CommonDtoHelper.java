@@ -9,9 +9,11 @@ import com.increff.omni.reporting.model.constants.ReportRequestStatus;
 import com.increff.omni.reporting.model.constants.ReportRequestType;
 import com.increff.omni.reporting.model.constants.ValidationType;
 import com.increff.omni.reporting.model.data.*;
+import com.increff.omni.reporting.model.form.ConnectionForm;
 import com.increff.omni.reporting.model.form.ReportRequestForm;
 import com.increff.omni.reporting.model.form.ReportScheduleForm;
 import com.increff.omni.reporting.pojo.*;
+import com.increff.omni.reporting.pojo.ClickHouseDatabaseMappingPojo;
 import com.increff.service.encryption.form.CryptoDecodeFormWithoutKey;
 import com.increff.service.encryption.form.CryptoFormWithoutKey;
 import com.nextscm.commons.lang.StringUtil;
@@ -493,5 +495,32 @@ public class CommonDtoHelper {
             nextFireTime = nextToNextFireTime;
         }
         return freqIntervalSecondsMin;
+    }
+
+    public static ClickHouseDatabaseMappingPojo getClickHouseDatabaseMappingPojo(Integer connectionId, String database) {
+        ClickHouseDatabaseMappingPojo pojo = new ClickHouseDatabaseMappingPojo();
+        pojo.setConnectionId(connectionId);
+        pojo.setDatabase(database);
+        return pojo;
+    }
+
+    public static ConnectionPojo getConnectionPojo(ConnectionForm form) {
+        ConnectionPojo pojo = new ConnectionPojo();
+        pojo.setName(form.getName());
+        pojo.setHost(form.getHost());
+        pojo.setUsername(form.getUsername());
+        pojo.setPassword(form.getPassword());
+        pojo.setDbType(form.getDbType());
+        return pojo;
+    }
+
+    public static ConnectionData getConnectionData(ConnectionPojo pojo) {
+        ConnectionData data = new ConnectionData();
+        data.setId(pojo.getId());
+        data.setName(pojo.getName());
+        data.setHost(pojo.getHost());
+        data.setUsername(pojo.getUsername());
+        data.setDbType(pojo.getDbType());
+        return data;
     }
 }
