@@ -52,6 +52,9 @@ public class ConnectionDto extends AbstractDto {
         ConnectionPojo pojo = ConvertUtil.convert(form, ConnectionPojo.class);
         pojo.setPassword(password);
         pojo = api.add(pojo);
+        if (DBType.CLICKHOUSE.equals(pojo.getDbType()) && form.getClickHouseDatabase() != null) {
+            clickHouseConnectionApi.addDatabaseMapping(pojo.getId(), form.getClickHouseDatabase());
+        }
         api.saveAudit(pojo.getId().toString(), AuditActions.ADD_CONNECTION.toString(), "Add Connection"
                 , "Add Connection " + form.getName(), getUserName());
         return ConvertUtil.convert(pojo, ConnectionData.class);
@@ -66,6 +69,9 @@ public class ConnectionDto extends AbstractDto {
         api.saveAudit(id.toString(), AuditActions.EDIT_CONNECTION.toString(), "Edit Connection"
                 , "Edit Connection " + form.getName(), getUserName());
         pojo = api.update(pojo);
+        if (DBType.CLICKHOUSE.equals(pojo.getDbType()) && form.getClickHouseDatabase() != null) {
+            clickHouseConnectionApi.updateDatabaseMapping(pojo.getId(), form.getClickHouseDatabase());
+        }
         return ConvertUtil.convert(pojo, ConnectionData.class);
     }
 
@@ -90,7 +96,7 @@ public class ConnectionDto extends AbstractDto {
                         connectionPojo.getPassword());
             } else if (connectionPojo.getDbType().equals(DBType.CLICKHOUSE)) {
                 connection = clickHouseConnectionApi.getConnection(connectionPojo.getHost(), connectionPojo.getUsername(),
-                        connectionPojo.getPassword(), properties.getMaxConnectionTime());
+                        connectionPojo.getPassword(), form.getClickHouseDatabase(), properties.getMaxConnectionTime());
                 PreparedStatement statement = clickHouseConnectionApi.getStatement(connection,
                         properties.getLiveReportMaxExecutionTime(), "SELECT version()", properties.getResultSetFetchSize());
                 ResultSet resultSet = statement.executeQuery();

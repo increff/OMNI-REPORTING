@@ -9,7 +9,7 @@ import jakarta.validation.constraints.NotNull;
 
 @Setter
 @Getter
-public class ConnectionForm {
+public class  ConnectionForm {
 
     @NotEmpty
     private String name;
@@ -21,5 +21,6 @@ public class ConnectionForm {
     private String password;
     @NotNull
     private DBType dbType;
+    private String clickHouseDatabase;
 
 }
