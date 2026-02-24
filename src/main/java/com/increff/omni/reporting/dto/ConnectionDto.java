@@ -96,7 +96,7 @@ public class ConnectionDto extends AbstractDto {
                         connectionPojo.getPassword());
             } else if (connectionPojo.getDbType().equals(DBType.CLICKHOUSE)) {
                 connection = clickHouseConnectionApi.getConnection(connectionPojo.getHost(), connectionPojo.getUsername(),
-                        connectionPojo.getPassword(), form.getClickHouseDatabase(), properties.getMaxConnectionTime());
+                        connectionPojo.getPassword(), form.getClickHouseDatabase());
                 PreparedStatement statement = clickHouseConnectionApi.getStatement(connection,
                         properties.getLiveReportMaxExecutionTime(), "SELECT version()", properties.getResultSetFetchSize());
                 ResultSet resultSet = statement.executeQuery();

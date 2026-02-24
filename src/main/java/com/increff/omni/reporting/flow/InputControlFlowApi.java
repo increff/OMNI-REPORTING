@@ -120,7 +120,7 @@ public class InputControlFlowApi extends AbstractApi {
             } else if (connectionPojo.getDbType().equals(DBType.CLICKHOUSE)) {
                 String database = clickHouseConnectionApi.getDatabaseByConnectionId(connectionPojo.getId());
                 connection = clickHouseConnectionApi.getConnection(connectionPojo.getHost(), connectionPojo.getUsername(),
-                        password, database, properties.getMaxConnectionTime());
+                        password, database);
                 PreparedStatement statement = clickHouseConnectionApi.getStatement(connection,
                         properties.getLiveReportMaxExecutionTime(), fQuery, properties.getResultSetFetchSize());
                 ResultSet resultSet = statement.executeQuery();
