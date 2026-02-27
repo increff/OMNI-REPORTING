@@ -3,7 +3,6 @@ package com.increff.omni.reporting.dto;
 import com.increff.commons.springboot.client.AppClientException;
 import com.increff.commons.springboot.common.ApiException;
 import com.increff.commons.springboot.common.ApiStatus;
-import com.increff.commons.springboot.common.ConvertUtil;
 import com.increff.omni.reporting.api.ClickHouseConnectionApi;
 import com.increff.omni.reporting.api.ConnectionApi;
 import com.increff.omni.reporting.api.DBConnectionApi;
@@ -12,6 +11,7 @@ import com.increff.omni.reporting.model.constants.AuditActions;
 import com.increff.omni.reporting.model.constants.DBType;
 import com.increff.omni.reporting.model.data.ConnectionData;
 import com.increff.omni.reporting.model.form.ConnectionForm;
+import com.increff.omni.reporting.pojo.ClickHouseDatabaseMappingPojo;
 import com.increff.omni.reporting.pojo.ConnectionPojo;
 import com.increff.omni.reporting.util.MongoUtil;
 import com.increff.service.encryption.EncryptionClient;
@@ -27,8 +27,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static com.increff.omni.reporting.dto.CommonDtoHelper.getCryptoForm;
+import static com.increff.omni.reporting.dto.CommonDtoHelper.getConnectionData;
+import static com.increff.omni.reporting.dto.CommonDtoHelper.getConnectionPojo;
 
 @Service
 @Log4j2
@@ -49,35 +52,42 @@ public class ConnectionDto extends AbstractDto {
     public ConnectionData add(ConnectionForm form) throws ApiException {
         checkValid(form);
         String password = encryptPassword(form, getUserId());
-        ConnectionPojo pojo = ConvertUtil.convert(form, ConnectionPojo.class);
+        ConnectionPojo pojo = getConnectionPojo(form);
         pojo.setPassword(password);
         pojo = api.add(pojo);
+        if (DBType.CLICKHOUSE.equals(pojo.getDbType()) && form.getClickHouseDatabase() != null) {
+            clickHouseConnectionApi.addDatabaseMapping(CommonDtoHelper.getClickHouseDatabaseMappingPojo(pojo.getId(), form.getClickHouseDatabase()));
+        }
         api.saveAudit(pojo.getId().toString(), AuditActions.ADD_CONNECTION.toString(), "Add Connection"
                 , "Add Connection " + form.getName(), getUserName());
-        return ConvertUtil.convert(pojo, ConnectionData.class);
+        return getConnectionData(pojo);
     }
 
     public ConnectionData update(Integer id, ConnectionForm form) throws ApiException {
         checkValid(form);
         String password = encryptPassword(form, getUserId());
-        ConnectionPojo pojo = ConvertUtil.convert(form, ConnectionPojo.class);
+        ConnectionPojo pojo = getConnectionPojo(form);
         pojo.setId(id);
         pojo.setPassword(password);
         api.saveAudit(id.toString(), AuditActions.EDIT_CONNECTION.toString(), "Edit Connection"
                 , "Edit Connection " + form.getName(), getUserName());
         pojo = api.update(pojo);
-        return ConvertUtil.convert(pojo, ConnectionData.class);
+        if (DBType.CLICKHOUSE.equals(pojo.getDbType()) && form.getClickHouseDatabase() != null) {
+            ClickHouseDatabaseMappingPojo mapping = clickHouseConnectionApi.getDatabaseMapping(pojo.getId());
+            mapping.setDatabaseName(form.getClickHouseDatabase());
+            clickHouseConnectionApi.updateDatabaseMapping(mapping);
+        }
+        return getConnectionData(pojo);
     }
 
     public List<ConnectionData> selectAll() {
-        List<ConnectionPojo> pojos = api.selectAll();
-        return ConvertUtil.convert(pojos, ConnectionData.class);
+        return api.selectAll().stream().map(CommonDtoHelper::getConnectionData).collect(Collectors.toList());
     }
 
     public void testConnection(ConnectionForm form) throws ApiException {
         Connection connection = null;
         try {
-            ConnectionPojo connectionPojo = ConvertUtil.convert(form, ConnectionPojo.class);
+            ConnectionPojo connectionPojo = getConnectionPojo(form);
             if(connectionPojo.getDbType().equals(DBType.MYSQL)) {
                 connection = dbConnectionApi.getConnection(connectionPojo.getHost(), connectionPojo.getUsername(),
                         connectionPojo.getPassword(), properties.getMaxConnectionTime());
@@ -89,8 +99,11 @@ public class ConnectionDto extends AbstractDto {
                 MongoUtil.testConnection(connectionPojo.getHost(), connectionPojo.getUsername(),
                         connectionPojo.getPassword());
             } else if (connectionPojo.getDbType().equals(DBType.CLICKHOUSE)) {
+                if (form.getClickHouseDatabase() == null || form.getClickHouseDatabase().isBlank()) {
+                    throw new ApiException(ApiStatus.BAD_DATA, "ClickHouse database name is required");
+                }
                 connection = clickHouseConnectionApi.getConnection(connectionPojo.getHost(), connectionPojo.getUsername(),
-                        connectionPojo.getPassword(), properties.getMaxConnectionTime());
+                        connectionPojo.getPassword(), form.getClickHouseDatabase());
                 PreparedStatement statement = clickHouseConnectionApi.getStatement(connection,
                         properties.getLiveReportMaxExecutionTime(), "SELECT version()", properties.getResultSetFetchSize());
                 ResultSet resultSet = statement.executeQuery();
