@@ -10,6 +10,7 @@ import com.increff.omni.reporting.model.constants.ReportRequestType;
 import com.increff.omni.reporting.model.constants.ValidationType;
 import com.increff.omni.reporting.model.data.*;
 import com.increff.omni.reporting.model.form.ConnectionForm;
+import com.increff.omni.reporting.model.form.EmbedTokenRequestForm;
 import com.increff.omni.reporting.model.form.ReportRequestForm;
 import com.increff.omni.reporting.model.form.ReportScheduleForm;
 import com.increff.omni.reporting.pojo.*;
@@ -500,7 +501,7 @@ public class CommonDtoHelper {
     public static ClickHouseDatabaseMappingPojo getClickHouseDatabaseMappingPojo(Integer connectionId, String database) {
         ClickHouseDatabaseMappingPojo pojo = new ClickHouseDatabaseMappingPojo();
         pojo.setConnectionId(connectionId);
-        pojo.setDatabase(database);
+        pojo.setDatabaseName(database);
         return pojo;
     }
 

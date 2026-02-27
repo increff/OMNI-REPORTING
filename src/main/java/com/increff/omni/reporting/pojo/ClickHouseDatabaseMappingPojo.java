@@ -20,7 +20,7 @@ public class ClickHouseDatabaseMappingPojo extends AbstractVersionedPojo {
     private Integer id;
     @Column(nullable = false)
     private Integer connectionId;
-    @Column(name = "databaseName", nullable = false)
-    private String database;
+    @Column(nullable = false)
+    private String databaseName;
 
 }

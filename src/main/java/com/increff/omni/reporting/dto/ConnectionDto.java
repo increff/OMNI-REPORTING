@@ -74,7 +74,7 @@ public class ConnectionDto extends AbstractDto {
         pojo = api.update(pojo);
         if (DBType.CLICKHOUSE.equals(pojo.getDbType()) && form.getClickHouseDatabase() != null) {
             ClickHouseDatabaseMappingPojo mapping = clickHouseConnectionApi.getDatabaseMapping(pojo.getId());
-            mapping.setDatabase(form.getClickHouseDatabase());
+            mapping.setDatabaseName(form.getClickHouseDatabase());
             clickHouseConnectionApi.updateDatabaseMapping(mapping);
         }
         return getConnectionData(pojo);

@@ -68,7 +68,7 @@ public class ClickHouseConnectionApi {
         if (mappings.isEmpty()) {
             throw new ApiException(ApiStatus.BAD_DATA, "No database mapping found for ClickHouse connectionId: " + connectionId);
         }
-        return mappings.get(0).getDatabase();
+        return mappings.get(0).getDatabaseName();
     }
 
     private String getDbUrl(String dbHost, String database) {
