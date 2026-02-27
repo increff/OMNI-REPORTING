@@ -347,9 +347,9 @@
     </distributionManagement>
 
     <scm>
-        <url>https://bitbucket.org/increff/omni-reporting/src</url>
-        <connection>scm:git:https://nextscm_jenkins@bitbucket.org/increff/omni-reporting.git</connection>
-        <developerConnection>scm:git:https://nextscm_jenkins@bitbucket.org/increff/omni-reporting.git</developerConnection>
+        <url>https://github.com/increff/omni-reporting/src</url>
+        <connection>scm:git:https://nextscm_jenkins@github.com/increff/omni-reporting.git</connection>
+        <developerConnection>scm:git:https://nextscm_jenkins@github.com/increff/omni-reporting.git</developerConnection>
         <tag>omni-reporting-2.0.5</tag>
     </scm>
 
