@@ -18,15 +18,27 @@ public class ClickHouseConnectionApi {
     @Autowired
     private ApplicationProperties properties;
 
-    public Connection getConnection(String connectionString, String dbUsername, String dbPassword) throws ApiException {
+    public Connection getConnection(String host, String dbUsername, String dbPassword) throws ApiException {
         try {
             Class.forName("com.clickhouse.jdbc.ClickHouseDriver");
             DriverManager.setLoginTimeout(properties.getClickHouseConnectTimeoutSec());
+            String connectionString = buildConnectionString(host);
             Connection connection = DriverManager.getConnection(connectionString, dbUsername, dbPassword);
             return connection;
         } catch (SQLException | ClassNotFoundException e) {
             throw new ApiException(ApiStatus.UNKNOWN_ERROR, "Error connecting to ClickHouse: " + e.getMessage());
         }
+    }
+
+    private String buildConnectionString(String host) {
+        if (host.startsWith("jdbc:clickhouse://")) {
+            if (!host.contains("compress=")) {
+                String separator = host.contains("?") ? "&" : "?";
+                return host + separator + "compress=false";
+            }
+            return host;
+        }
+        return "jdbc:clickhouse://" + host + "?compress=false";
     }
 
     public PreparedStatement getStatement(Connection connection, Integer maxExecutionTime, String query, Integer fetchSize) throws ApiException {
