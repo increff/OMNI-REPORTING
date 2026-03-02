@@ -21,6 +21,5 @@ public class  ConnectionForm {
     private String password;
     @NotNull
     private DBType dbType;
-    private String clickHouseDatabase;
 
 }

@@ -11,7 +11,6 @@ import com.increff.omni.reporting.model.constants.AuditActions;
 import com.increff.omni.reporting.model.constants.DBType;
 import com.increff.omni.reporting.model.data.ConnectionData;
 import com.increff.omni.reporting.model.form.ConnectionForm;
-import com.increff.omni.reporting.pojo.ClickHouseDatabaseMappingPojo;
 import com.increff.omni.reporting.pojo.ConnectionPojo;
 import com.increff.omni.reporting.util.MongoUtil;
 import com.increff.service.encryption.EncryptionClient;
@@ -55,9 +54,6 @@ public class ConnectionDto extends AbstractDto {
         ConnectionPojo pojo = getConnectionPojo(form);
         pojo.setPassword(password);
         pojo = api.add(pojo);
-        if (DBType.CLICKHOUSE.equals(pojo.getDbType()) && form.getClickHouseDatabase() != null) {
-            clickHouseConnectionApi.addDatabaseMapping(CommonDtoHelper.getClickHouseDatabaseMappingPojo(pojo.getId(), form.getClickHouseDatabase()));
-        }
         api.saveAudit(pojo.getId().toString(), AuditActions.ADD_CONNECTION.toString(), "Add Connection"
                 , "Add Connection " + form.getName(), getUserName());
         return getConnectionData(pojo);
@@ -72,11 +68,6 @@ public class ConnectionDto extends AbstractDto {
         api.saveAudit(id.toString(), AuditActions.EDIT_CONNECTION.toString(), "Edit Connection"
                 , "Edit Connection " + form.getName(), getUserName());
         pojo = api.update(pojo);
-        if (DBType.CLICKHOUSE.equals(pojo.getDbType()) && form.getClickHouseDatabase() != null) {
-            ClickHouseDatabaseMappingPojo mapping = clickHouseConnectionApi.getDatabaseMapping(pojo.getId());
-            mapping.setDatabaseName(form.getClickHouseDatabase());
-            clickHouseConnectionApi.updateDatabaseMapping(mapping);
-        }
         return getConnectionData(pojo);
     }
 
@@ -99,11 +90,8 @@ public class ConnectionDto extends AbstractDto {
                 MongoUtil.testConnection(connectionPojo.getHost(), connectionPojo.getUsername(),
                         connectionPojo.getPassword());
             } else if (connectionPojo.getDbType().equals(DBType.CLICKHOUSE)) {
-                if (form.getClickHouseDatabase() == null || form.getClickHouseDatabase().isBlank()) {
-                    throw new ApiException(ApiStatus.BAD_DATA, "ClickHouse database name is required");
-                }
                 connection = clickHouseConnectionApi.getConnection(connectionPojo.getHost(), connectionPojo.getUsername(),
-                        connectionPojo.getPassword(), form.getClickHouseDatabase());
+                        connectionPojo.getPassword());
                 PreparedStatement statement = clickHouseConnectionApi.getStatement(connection,
                         properties.getLiveReportMaxExecutionTime(), "SELECT version()", properties.getResultSetFetchSize());
                 ResultSet resultSet = statement.executeQuery();

@@ -13,7 +13,6 @@ import com.increff.omni.reporting.model.form.ConnectionForm;
 import com.increff.omni.reporting.model.form.ReportRequestForm;
 import com.increff.omni.reporting.model.form.ReportScheduleForm;
 import com.increff.omni.reporting.pojo.*;
-import com.increff.omni.reporting.pojo.ClickHouseDatabaseMappingPojo;
 import com.increff.service.encryption.form.CryptoDecodeFormWithoutKey;
 import com.increff.service.encryption.form.CryptoFormWithoutKey;
 import com.nextscm.commons.lang.StringUtil;
@@ -495,13 +494,6 @@ public class CommonDtoHelper {
             nextFireTime = nextToNextFireTime;
         }
         return freqIntervalSecondsMin;
-    }
-
-    public static ClickHouseDatabaseMappingPojo getClickHouseDatabaseMappingPojo(Integer connectionId, String database) {
-        ClickHouseDatabaseMappingPojo pojo = new ClickHouseDatabaseMappingPojo();
-        pojo.setConnectionId(connectionId);
-        pojo.setDatabaseName(database);
-        return pojo;
     }
 
     public static ConnectionPojo getConnectionPojo(ConnectionForm form) {
