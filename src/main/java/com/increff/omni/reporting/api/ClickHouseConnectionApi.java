@@ -1,8 +1,6 @@
 package com.increff.omni.reporting.api;
 
 import com.increff.omni.reporting.config.ApplicationProperties;
-import com.increff.omni.reporting.dao.ClickHouseDatabaseMappingDao;
-import com.increff.omni.reporting.pojo.ClickHouseDatabaseMappingPojo;
 import com.increff.commons.springboot.common.ApiException;
 import com.increff.commons.springboot.common.ApiStatus;
 import lombok.extern.log4j.Log4j2;
@@ -11,7 +9,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.*;
-import java.util.List;
 
 @Service
 @Log4j2
@@ -20,19 +17,28 @@ public class ClickHouseConnectionApi {
 
     @Autowired
     private ApplicationProperties properties;
-    @Autowired
-    private ClickHouseDatabaseMappingDao clickHouseDatabaseMappingDao;
 
-    public Connection getConnection(String dbHost, String dbUsername, String dbPassword, String database) throws ApiException {
+    public Connection getConnection(String host, String dbUsername, String dbPassword) throws ApiException {
         try {
             Class.forName("com.clickhouse.jdbc.ClickHouseDriver");
             DriverManager.setLoginTimeout(properties.getClickHouseConnectTimeoutSec());
-            Connection connection = DriverManager.getConnection(
-                getDbUrl(dbHost, database), dbUsername, dbPassword);
+            String connectionString = buildConnectionString(host);
+            Connection connection = DriverManager.getConnection(connectionString, dbUsername, dbPassword);
             return connection;
         } catch (SQLException | ClassNotFoundException e) {
             throw new ApiException(ApiStatus.UNKNOWN_ERROR, "Error connecting to ClickHouse: " + e.getMessage());
         }
+    }
+
+    private String buildConnectionString(String host) {
+        if (host.startsWith("jdbc:clickhouse://")) {
+            if (!host.contains("compress=")) {
+                String separator = host.contains("?") ? "&" : "?";
+                return host + separator + "compress=false";
+            }
+            return host;
+        }
+        return "jdbc:clickhouse://" + host + "?compress=false";
     }
 
     public PreparedStatement getStatement(Connection connection, Integer maxExecutionTime, String query, Integer fetchSize) throws ApiException {
@@ -47,31 +53,4 @@ public class ClickHouseConnectionApi {
         }
     }
 
-    public void addDatabaseMapping(ClickHouseDatabaseMappingPojo pojo) {
-        clickHouseDatabaseMappingDao.persist(pojo);
-    }
-
-    public ClickHouseDatabaseMappingPojo getDatabaseMapping(Integer connectionId) throws ApiException {
-        List<ClickHouseDatabaseMappingPojo> mappings = clickHouseDatabaseMappingDao.selectByConnectionId(connectionId);
-        if (mappings.isEmpty()) {
-            throw new ApiException(ApiStatus.BAD_DATA, "No database mapping found for ClickHouse connectionId: " + connectionId);
-        }
-        return mappings.get(0);
-    }
-
-    public void updateDatabaseMapping(ClickHouseDatabaseMappingPojo pojo) {
-        clickHouseDatabaseMappingDao.update(pojo);
-    }
-
-    public String getDatabaseByConnectionId(Integer connectionId) throws ApiException {
-        List<ClickHouseDatabaseMappingPojo> mappings = clickHouseDatabaseMappingDao.selectByConnectionId(connectionId);
-        if (mappings.isEmpty()) {
-            throw new ApiException(ApiStatus.BAD_DATA, "No database mapping found for ClickHouse connectionId: " + connectionId);
-        }
-        return mappings.get(0).getDatabaseName();
-    }
-
-    private String getDbUrl(String dbHost, String database) {
-        return "jdbc:clickhouse://" + dbHost + ":" + properties.getClickHouseDefaultPort() + "/" + database + "?compress=false";
-    }
 }
