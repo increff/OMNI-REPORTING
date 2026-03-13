@@ -25,6 +25,7 @@ public class EmbedSecurityConfig {
         http
                 .securityMatcher("/api/embed/**")
                 .authorizeHttpRequests(auth -> {
+                    auth.requestMatchers("/api/embed/tokens").permitAll();
                     auth.requestMatchers("/api/embed/**").authenticated();
                 })
                 .cors(cors -> {})
