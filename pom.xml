@@ -52,6 +52,12 @@
             <version>${increff-commons-fileclient.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.increff.commons</groupId>
+            <artifactId>commons-springboot-jwt</artifactId>
+            <version>1.3.5</version>
+        </dependency>
+
         <!-- https://mvnrepository.com/artifact/com.github.vladimir-bukhtoyarov/bucket4j-core -->
         <dependency>
             <groupId>com.bucket4j</groupId>
